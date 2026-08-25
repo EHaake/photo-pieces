@@ -307,16 +307,15 @@ h3 {
 
 h1 {
   margin-bottom: calc(var(--baseline) * 1.1);
-  font-size: clamp(3.25rem, 7vw, 6rem);
-  line-height: 0.94;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.1;
 }
 
 h2 {
   margin-bottom: var(--baseline);
-  font-size: clamp(2.25rem, 5vw, 4.65rem);
-  line-height: 0.98;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  line-height: 1.15;
 }
-
 h3 {
   margin-bottom: calc(var(--baseline) * 0.4);
   font-size: 1.3rem;
