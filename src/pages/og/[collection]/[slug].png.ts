@@ -112,7 +112,7 @@ export const GET: APIRoute<OgProps> = async ({ props }) => {
                       type: 'div',
                       props: {
                         style: {
-                          fontFamily: 'Fraunces',
+                          fontFamily: 'Spectral',
                           fontSize: 30,
                           color: COLOR.text,
                         },
@@ -136,7 +136,7 @@ export const GET: APIRoute<OgProps> = async ({ props }) => {
                           gap: 14,
                           marginBottom: 28,
                           color: COLOR.accent,
-                          fontFamily: 'Fraunces',
+                          fontFamily: 'Spectral',
                           fontSize: 24,
                           textTransform: 'uppercase',
                           letterSpacing: 4,
@@ -160,7 +160,7 @@ export const GET: APIRoute<OgProps> = async ({ props }) => {
                       type: 'div',
                       props: {
                         style: {
-                          fontFamily: 'Fraunces',
+                          fontFamily: 'Spectral',
                           fontSize: title.length > 55 ? 54 : 64,
                           lineHeight: 1.15,
                           color: COLOR.text,
@@ -191,7 +191,7 @@ export const GET: APIRoute<OgProps> = async ({ props }) => {
       width: 1200,
       height: 630,
       fonts: [
-        { name: 'Fraunces', data: fraunces, weight: 600, style: 'normal' },
+        { name: 'Spectral', data: fraunces, weight: 600, style: 'normal' },
         { name: 'Public Sans', data: publicSans, weight: 400, style: 'normal' },
       ],
     },
