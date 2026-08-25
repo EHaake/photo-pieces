@@ -37,13 +37,11 @@ strictly as a typographic treatment, never a rendered plaque).
 - **A display serif with more personality than the site wants**, for the
   same reason — the theme's default (Fraunces) was rejected as more
   characterful than intended, not just wrong at its current size.
-- <!-- First pass, not yet confirmed with the photographer — worth a
-  gut check rather than treating as settled: --> current over-used
-  AI-generated design defaults worth naming and ruling out explicitly —
-  glassmorphism/frosted-glass panels, gradient-mesh or "aurora blob"
-  backgrounds, fully-rounded corners on every element, purple-to-blue
-  gradient accents, generic bento-grid hero sections, and stock 3D-render
-  illustrations.
+- Current over-used AI-generated design defaults, ruled out
+  explicitly — glassmorphism/frosted-glass panels, gradient-mesh or
+  "aurora blob" backgrounds, fully-rounded corners on every element,
+  purple-to-blue gradient accents, generic bento-grid hero sections,
+  and stock 3D-render illustrations.
 
 ## Palette
 
@@ -67,16 +65,15 @@ Direction is otherwise undecided.
 
 ## Typography
 
-Inherited and not objected to:
-- **Body**: Public Sans
-- **Small labels / metadata / tags**: JetBrains Mono
-
-**Open**: the display/heading typeface. The theme's default, Fraunces
-(a variable serif with a deliberately "wonky," characterful optical
-personality), was explicitly rejected — not a sizing fix, a genuine
-search for a different typeface. Character to design toward: still
-clean, minimal, sophisticated — the same standard as the rest of the
-brief — rather than an editorial or lifestyle-blog personality.
+- **Display / headings**: Spectral, weight 600. Chosen over Newsreader
+  (too much serif contrast at display sizes — read as too close to
+  Fraunces) and a close second, Source Serif 4 (the safer pairing, at
+  the cost of the header having less independent presence — worth
+  revisiting if Spectral ever feels wrong once real pieces are set in
+  it). Installed as static weight files, not a variable font —
+  Fontsource doesn't ship a variable version of this family.
+- **Body**: Public Sans (unchanged, no objection raised)
+- **Small labels / metadata / tags**: JetBrains Mono (unchanged)
 
 ## Signature element
 
@@ -130,8 +127,7 @@ behalf.
 
 ## Open for the design process to refine
 
-- Accent color (explicitly reopened — see Palette)
-- Display/heading typeface (explicitly reopened — see Typography)
+- Accent color (see Palette)
 - Whether the signature element borrows the theme's hairline-rule
   language or reads as distinct
 - Homepage exact layout and behavior
