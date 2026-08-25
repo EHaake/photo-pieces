@@ -55,9 +55,12 @@ CMS or backend service for v1.
   custom-built, but must consume the theme's design tokens rather than
   redefining their own — this keeps the custom parts visually coherent
   with the rest of the site.
-- **Images**: not stored in git. Referenced from an external store
-  (specific choice TBD in `plan.md`) to keep the repo small and fast to
-  clone.
+- **Images**: local and co-located with each piece for initial
+  development (`src/content/pieces/<slug>/`), using Astro's built-in
+  image handling — no external store required to start. Not the final
+  architecture: migrate to an external store once repo size or clone
+  speed becomes a real, not hypothetical, problem. See `plan.md` for
+  the reasoning.
 
 ## Testing
 
