@@ -157,10 +157,8 @@ the photographer.
 - **No CMS for v1** — the Obsidian + `astro dev` live-preview loop
   already satisfies "see the final output while writing," without
   introducing a database-backed content layer. Revisit only if remote
-  authoring without the repo becomes a real need.
-- **EmDash-based themes ruled out** — EmDash's architecture is
-  database-backed (SQLite/D1), which conflicts with the file-based,
-  git-based model chosen above; also still in beta.
+  authoring without the repo becomes a real need. See `DECISIONS.md`
+  for the tooling comparison behind this.
 - **Galleries stay in scope, but as secondary** — explicitly not
   eliminated. They're hand-curated, organized by category, and link back
   to originating pieces where one exists.
