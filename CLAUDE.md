@@ -55,9 +55,12 @@ CMS or backend service for v1.
   custom-built, but must consume the theme's design tokens rather than
   redefining their own — this keeps the custom parts visually coherent
   with the rest of the site.
-- **Images**: not stored in git. Referenced from an external store
-  (specific choice TBD in `plan.md`) to keep the repo small and fast to
-  clone.
+- **Images**: local and co-located with each piece for initial
+  development (`src/content/pieces/<slug>/`), using Astro's built-in
+  image handling — no external store required to start. Not the final
+  architecture: migrate to an external store once repo size or clone
+  speed becomes a real, not hypothetical, problem. See `plan.md` for
+  the reasoning.
 
 ## Testing
 
@@ -102,6 +105,10 @@ review between each phase. Artifacts live in `specs/<NNN>-<slug>/`:
   explicit non-goals. No implementation detail.
 - `plan.md` — technical design: types, data flow, what changes where.
 - `tasks.md` — ordered, small, independently verifiable tasks.
+
+`DECISIONS.md` (repo root) carries business, product, and process
+context that doesn't fit the docs above — naming rationale, tooling
+choices, comparisons between options considered and passed on.
 
 Do not begin implementation on a feature without an approved spec and
 plan in that feature's directory. When resuming a session, check
