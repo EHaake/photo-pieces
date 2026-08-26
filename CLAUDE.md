@@ -106,6 +106,10 @@ review between each phase. Artifacts live in `specs/<NNN>-<slug>/`:
 - `plan.md` — technical design: types, data flow, what changes where.
 - `tasks.md` — ordered, small, independently verifiable tasks.
 
+`DECISIONS.md` (repo root) carries business, product, and process
+context that doesn't fit the docs above — naming rationale, tooling
+choices, comparisons between options considered and passed on.
+
 Do not begin implementation on a feature without an approved spec and
 plan in that feature's directory. When resuming a session, check
 `specs/<feature>/tasks.md` for current state before doing anything else.
