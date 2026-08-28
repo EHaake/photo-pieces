@@ -25,3 +25,14 @@ attached.
   presentation — carousel, step-through, before/after slider — needs a
   dedicated Claude Design exploration once real processing-themed pieces
   exist to test it against.
+- **Obsidian live rendering for photo blocks** — a custom Obsidian
+  plugin could render `fullbleed`/`diptych`/etc. directly in Obsidian
+  instead of needing the `astro dev` browser tab. Real and buildable
+  (`registerMarkdownPostProcessor` for Reading View, a separate
+  CodeMirror 6 extension for Live Preview specifically — two rendering
+  paths, not one), but a second implementation to keep from drifting
+  out of sync with the real site's styling, forever. Not pursued yet:
+  single images already render natively in Obsidian, so this only
+  helps the occasional special blocks. Revisit once real pieces reveal
+  how often that friction actually bites, rather than building it on
+  spec.
