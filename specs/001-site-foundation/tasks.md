@@ -63,7 +63,7 @@ per-task.
       categories, and body. *Verify: the T002 test piece, updated to
       include a `::fullbleed{...}` block, renders correctly at its own
       URL.*
-- [ ] **T007** — Confirm nothing existing broke — `/blog/`, `/works/`,
+- [x] **T007** — Confirm nothing existing broke — `/blog/`, `/works/`,
       and nav are untouched by this pass. *Verify: `astro build`
       succeeds; manual check of `/blog/` and `/works/` in the browser
       shows no change.*
