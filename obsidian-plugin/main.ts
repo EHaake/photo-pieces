@@ -1,19 +1,11 @@
-import { Plugin, TFile } from 'obsidian';
-import {
-  EditorView,
-  ViewPlugin,
-  ViewUpdate,
-  Decoration,
-  DecorationSet,
-  WidgetType,
-} from '@codemirror/view';
-import { RangeSetBuilder } from '@codemirror/state';
+import { Plugin, TFile, editorInfoField, editorLivePreviewField } from 'obsidian';
+import { EditorView, Decoration, DecorationSet, WidgetType } from '@codemirror/view';
+import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
 
 // Deliberately a plain regex, not a full remark-directive parser — this
 // only needs to recognize the one block type actually built so far
-// (fullbleed). Extend the pattern here as diptych/triptych get built on
-// the Astro side.
-const DIRECTIVE_RE = /::fullbleed\{([^}]*)\}/g;
+// (fullbleed). Extend as diptych/triptych get built on the Astro side.
+const DIRECTIVE_PATTERN = '::fullbleed\\{([^}]*)\\}';
 
 function parseAttrs(raw: string): Record<string, string> {
   const attrs: Record<string, string> = {};
@@ -44,7 +36,7 @@ class FullbleedWidget extends WidgetType {
     wrapper.addClass('photo-pieces-fullbleed-preview');
 
     const file = this.plugin.app.metadataCache.getFirstLinkpathDest(
-      this.src,
+      this.src.replace(/^\.\//, ''),
       this.sourcePath,
     );
 
@@ -76,69 +68,67 @@ class FullbleedWidget extends WidgetType {
   }
 }
 
-function buildDecorations(
-  view: EditorView,
-  plugin: Plugin,
-  sourcePath: string,
-): DecorationSet {
+function buildDecorations(state: EditorState, plugin: Plugin): DecorationSet {
+  // Only decorate in Live Preview — in strict Source mode, raw text is
+  // what the user asked for.
+  if (!state.field(editorLivePreviewField, false)) {
+    return Decoration.none;
+  }
+
+  const info = state.field(editorInfoField, false);
+  const sourcePath = info?.file?.path ?? '';
+
   const builder = new RangeSetBuilder<Decoration>();
-  const cursorRanges = view.state.selection.ranges.map((r) => [r.from, r.to]);
+  const text = state.doc.toString(); // whole doc — fine at piece scale
+  const re = new RegExp(DIRECTIVE_PATTERN, 'g');
+  const sel = state.selection.ranges;
 
-  for (const { from, to } of view.visibleRanges) {
-    const text = view.state.doc.sliceString(from, to);
-    DIRECTIVE_RE.lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = DIRECTIVE_RE.exec(text))) {
-      const start = from + match.index;
-      const end = start + match[0].length;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text))) {
+    const start = m.index;
+    const end = start + m[0].length;
 
-      // Leave the raw syntax visible and editable while the cursor is
-      // actually on this directive — same convention Obsidian's own
-      // live preview uses for bold/links/embeds.
-      const cursorInside = cursorRanges.some(([cf, ct]) => cf <= end && ct >= start);
-      if (cursorInside) continue;
+    // Leave raw syntax visible and editable while the cursor is on it —
+    // same convention Obsidian's own live preview uses for embeds.
+    const cursorInside = sel.some((r) => r.from <= end && r.to >= start);
+    if (cursorInside) continue;
 
-      const attrs = parseAttrs(match[1]);
-      if (!attrs.src) continue;
+    const attrs = parseAttrs(m[1]);
+    if (!attrs.src) continue;
 
-      builder.add(
-        start,
-        end,
-        Decoration.replace({
-          widget: new FullbleedWidget(attrs.src, attrs.alt ?? '', sourcePath, plugin),
-          block: true,
-        }),
-      );
-    }
+    builder.add(
+      start,
+      end,
+      Decoration.replace({
+        widget: new FullbleedWidget(attrs.src, attrs.alt ?? '', sourcePath, plugin),
+        block: true,
+      }),
+    );
   }
   return builder.finish();
 }
 
+// Block decorations must come from a StateField, not a ViewPlugin —
+// CodeMirror enforces this at runtime (view plugins run after layout,
+// and block decorations change layout). This was the cause of the
+// editor crash in 0.1.0.
+function directiveField(plugin: Plugin) {
+  return StateField.define<DecorationSet>({
+    create(state) {
+      return buildDecorations(state, plugin);
+    },
+    update(deco, tr) {
+      if (tr.docChanged || tr.selection) {
+        return buildDecorations(tr.state, plugin);
+      }
+      return deco.map(tr.changes);
+    },
+    provide: (field) => EditorView.decorations.from(field),
+  });
+}
+
 export default class PhotoPiecesBlocksPlugin extends Plugin {
   async onload() {
-    const plugin = this;
-
-    this.registerEditorExtension(
-      ViewPlugin.fromClass(
-        class {
-          decorations: DecorationSet;
-
-          constructor(view: EditorView) {
-            const sourcePath = plugin.app.workspace.getActiveFile()?.path ?? '';
-            this.decorations = buildDecorations(view, plugin, sourcePath);
-          }
-
-          update(update: ViewUpdate) {
-            if (update.docChanged || update.viewportChanged || update.selectionSet) {
-              const sourcePath = plugin.app.workspace.getActiveFile()?.path ?? '';
-              this.decorations = buildDecorations(update.view, plugin, sourcePath);
-            }
-          }
-        },
-        {
-          decorations: (v) => v.decorations,
-        },
-      ),
-    );
+    this.registerEditorExtension(directiveField(this));
   }
 }
