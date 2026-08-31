@@ -17,6 +17,8 @@ site build — but the walk was real enough.
 
 ![Dawn light over the jetty, long exposure smoothing the water](./jetty-dawn.jpg)
 
+::fullbleed{src="./jetty-dawn.jpg" alt="The full sweep of the jetty at dawn, edge to edge"}
+
 The light came up faster than expected. Ten minutes of that soft
 blue-hour gradient, then the sun cleared the horizon and flattened
 everything. The usual lesson: arrive earlier than feels reasonable.

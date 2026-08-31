@@ -61,10 +61,24 @@ plan — since the constitution previously ruled this out. The trigger
 for actually migrating to an external store is concrete: repo size or
 clone speed becoming a real problem, not a hypothetical one.
 
-Directive-rendered images render as plain `<img>` for now, not run
-through `astro:assets`' optimization pipeline. Calling `getImage()`
-from inside an async remark plugin is a real next step, just not
-required to prove pieces work end-to-end.
+Directive-rendered images go through `astro:assets` optimization —
+resolved in T004, differently than first guessed. `getImage()` cannot
+be called from a remark plugin (`astro:assets` is a Vite virtual
+module, and it requires ESM-imported image metadata, not a path
+string). Instead the transform emits real mdast `image` nodes as the
+directive's children; Astro's own `remarkCollectImages`/`rehypeImages`
+pair, which runs after user plugins, then optimizes them identically
+to plain `![alt](./photo.jpg)` images. Per-treatment `layout`/`sizes`
+hints ride each image node's `hProperties` into `getImage()`, so a
+fullbleed gets `full-width`/`100vw` responsive variants
+(diptych/triptych carry provisional values until T005's real column
+CSS).
+
+Still open, recorded deliberately: no global `image.layout` is set, so
+*plain-markdown* single images (the dominant case) are optimized but
+get no srcset — one full-resolution derivative. Setting a site-wide
+layout would change `/blog/` too; that's its own decision, not a T004
+side effect.
 
 ### `galleries` collection — deferred
 
@@ -82,8 +96,14 @@ separate work, once the piece-authoring loop itself is proven.
 - `remark-pieces-blocks.mjs` (repo root, alongside the theme's existing
   `remark-reading-time.mjs`) — the directive transform, registered
   after `remarkDirective` in `astro.config.mjs`.
-- `src/components/blocks/FullBleed.astro` — first real block component,
-  replacing the spike's placeholder output with an actual image render.
+- No per-block `.astro` components — amended in T004, with a matching
+  constitution amendment. A plain-`.md` pipeline cannot map rendered
+  elements to Astro components (MDX-only feature), so a block's
+  identity is its handler in the remark transform (the vocabulary's
+  source of truth) plus a CSS hook (`figure.piece-fullbleed`), styled
+  in T005 with the theme's tokens. Future interactive blocks
+  (`sequence`) will be page-level progressive enhancement over the
+  transform's HTML.
 - A piece reading page at `/pieces/[slug]/` — new route, parallel to
   the existing `/blog/[slug]/` rather than replacing it, so nothing
   currently working breaks mid-transition.
@@ -108,8 +128,9 @@ actually matter, not guessed at now:
 
 ## Known limitations
 
-- Images unoptimized (plain `<img>`, no responsive variants) until
-  `astro:assets` gets wired into the directive pipeline.
+- Plain-markdown single images get one optimized derivative, no srcset,
+  until the global `image.layout` decision is made (see Image handling).
+  Directive images are fully responsive as of T004.
 - `blog`/`works` remain, unused by the new workflow, until a deliberate
   cleanup pass.
 - Only `fullbleed` exists as a working directive; `diptych`/`triptych`
@@ -138,9 +159,6 @@ photo-pieces/
 │   │   │       └── *.jpg
 │   │   ├── blog/                  # unchanged, untouched for now
 │   │   └── works/                 # unchanged, untouched for now
-│   ├── components/
-│   │   └── blocks/
-│   │       └── FullBleed.astro    # new
 │   └── pages/
 │       └── pieces/
 │           └── [slug].astro       # new

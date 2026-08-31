@@ -102,3 +102,18 @@ solves.
 Source lives in `obsidian-plugin/` in this repo. Extending it to
 `diptych`/`triptych` once those exist on the Astro side follows the
 same pattern: a regex and a widget class per block type.
+
+## Markdown processor: legacy remark pipeline kept over Sätteri
+
+Astro 7's default Markdown processor is Sätteri, which implements
+directives natively but does not run remark/rehype plugins at all.
+This project's `astro.config.mjs` opts into the legacy unified
+pipeline (`markdown.processor: unified({...})`) — a deliberate
+commitment, recorded here after the T004 review flagged it as
+undocumented: the block vocabulary is built on `remark-directive`
+plus a custom remark transform, and the transform's whole mechanism
+(emitting mdast image nodes for Astro's collector to optimize)
+depends on the remark plugin hooks Sätteri removes. Revisit only if
+the unified path is ever deprecated outright; the ROADMAP item about
+rewriting internal vault links at build time is the natural moment to
+re-evaluate, since Sätteri handles wikilinks natively.

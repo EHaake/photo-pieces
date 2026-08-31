@@ -1,67 +1,106 @@
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { visit } from 'unist-util-visit';
 
 // Turns the closed set of piece image-treatment directives (parsed by
-// `remark-directive`) into HTML. The vocabulary is closed by design — see
-// CLAUDE.md — so an unrecognized `::name` / `:::name` fails the build with
-// the offending file and line rather than silently rendering as nothing.
-// Single-colon text directives are left alone: none of the vocabulary uses
-// them, and failing on them would make ordinary prose containing `:word`
-// patterns a build hazard.
+// `remark-directive`) into figure-wrapped images. The vocabulary is closed
+// by design — see CLAUDE.md — so an unrecognized `::name` / `:::name` fails
+// the build with the offending file and line rather than silently rendering
+// as nothing. Single-colon text directives are left alone: none of the
+// vocabulary uses them, and failing on them would make ordinary prose
+// containing `:word` patterns a build hazard.
 //
-// Images render as plain `<img>` for now. Routing them through
-// `astro:assets` optimization is the next step (plan.md, task T004), not
-// part of proving the directive pipeline itself works.
+// Each directive's images are emitted as real mdast `image` nodes (the
+// node's children), NOT prebuilt hast <img> elements. Astro's own
+// `remarkCollectImages` runs after user plugins and only collects mdast
+// image nodes; anything it collects is later resolved through the
+// `astro:assets` pipeline — hashed src, intrinsic dimensions, srcset,
+// lazy loading — identically to a plain `![alt](./photo.jpg)`. Prebuilt
+// hast children would skip optimization entirely.
+//
+// The `layout`/`sizes` entries below ride each image node's hProperties
+// into that same pipeline as per-image getImage() options, giving each
+// treatment responsive variants matched to how wide it actually renders.
+// diptych/triptych sizes are provisional until the real column CSS lands
+// (task T005).
 
 const BLOCKS = {
-  fullbleed(node, file) {
-    const { src, alt } = node.attributes ?? {};
-    if (!src) fail(file, node, 'fullbleed requires a src attribute');
-    if (alt === undefined)
+  fullbleed: {
+    sizing: { layout: 'full-width', sizes: '100vw' },
+    images(node, file) {
+      const { src, alt } = node.attributes ?? {};
+      if (!src) fail(file, node, 'fullbleed requires a src attribute');
+      if (alt === undefined)
+        fail(
+          file,
+          node,
+          'fullbleed requires an alt attribute (use alt="" only for a truly decorative image)',
+        );
+      return [{ src, alt }];
+    },
+  },
+
+  diptych: {
+    sizing: { layout: 'constrained', sizes: '50vw' },
+    images(node, file) {
+      const { left, right, leftAlt, rightAlt } = node.attributes ?? {};
+      if (!left || !right)
+        fail(file, node, 'diptych requires left and right attributes');
+      if (leftAlt === undefined || rightAlt === undefined)
+        fail(
+          file,
+          node,
+          'diptych requires leftAlt and rightAlt attributes (empty allowed for truly decorative images)',
+        );
+      return [
+        { src: left, alt: leftAlt },
+        { src: right, alt: rightAlt },
+      ];
+    },
+  },
+
+  triptych: {
+    sizing: { layout: 'constrained', sizes: '33vw' },
+    images(node, file) {
+      const { left, center, right, leftAlt, centerAlt, rightAlt } =
+        node.attributes ?? {};
+      if (!left || !center || !right)
+        fail(file, node, 'triptych requires left, center, and right attributes');
+      if (
+        leftAlt === undefined ||
+        centerAlt === undefined ||
+        rightAlt === undefined
+      )
+        fail(
+          file,
+          node,
+          'triptych requires leftAlt, centerAlt, and rightAlt attributes (empty allowed for truly decorative images)',
+        );
+      return [
+        { src: left, alt: leftAlt },
+        { src: center, alt: centerAlt },
+        { src: right, alt: rightAlt },
+      ];
+    },
+  },
+
+  sequence: {
+    // Reserved in the content model; presentation undecided (ROADMAP.md).
+    images(node, file) {
       fail(
         file,
         node,
-        'fullbleed requires an alt attribute (use alt="" only for a truly decorative image)',
+        'the sequence block is reserved but not implemented yet — see ROADMAP.md',
       );
-    return figure(node, 'piece-fullbleed', [img(src, alt)]);
-  },
-
-  diptych(node, file) {
-    const { left, right, leftAlt, rightAlt } = node.attributes ?? {};
-    if (!left || !right)
-      fail(file, node, 'diptych requires left and right attributes');
-    return figure(node, 'piece-diptych', [
-      img(left, leftAlt ?? ''),
-      img(right, rightAlt ?? ''),
-    ]);
-  },
-
-  triptych(node, file) {
-    const { left, center, right, leftAlt, centerAlt, rightAlt } =
-      node.attributes ?? {};
-    if (!left || !center || !right)
-      fail(file, node, 'triptych requires left, center, and right attributes');
-    return figure(node, 'piece-triptych', [
-      img(left, leftAlt ?? ''),
-      img(center, centerAlt ?? ''),
-      img(right, rightAlt ?? ''),
-    ]);
-  },
-
-  sequence(node, file) {
-    // Reserved in the content model; presentation undecided (ROADMAP.md).
-    fail(
-      file,
-      node,
-      'the sequence block is reserved but not implemented yet — see ROADMAP.md',
-    );
+    },
   },
 };
 
 export function remarkPiecesBlocks() {
   return (tree, file) => {
     visit(tree, ['leafDirective', 'containerDirective'], (node) => {
-      const render = BLOCKS[node.name];
-      if (!render) {
+      const block = BLOCKS[node.name];
+      if (!block) {
         fail(
           file,
           node,
@@ -69,12 +108,28 @@ export function remarkPiecesBlocks() {
             `known blocks: ${Object.keys(BLOCKS).join(', ')}`,
         );
       }
-      const element = render(node, file);
+      if (node.type === 'containerDirective') {
+        // The container body has no defined meaning for image blocks yet
+        // (a figcaption is a plausible future); failing beats silently
+        // discarding whatever the author wrote inside.
+        fail(
+          file,
+          node,
+          `the :::${node.name} container form is not supported — use ::${node.name}{...} on its own line`,
+        );
+      }
+      const images = block.images(node, file);
+      for (const image of images) checkSrcExists(file, node, image.src);
+      node.children = images.map(({ src, alt }) => ({
+        type: 'image',
+        url: src,
+        alt,
+        data: { hProperties: { ...block.sizing } },
+      }));
       node.data = {
         ...node.data,
-        hName: element.tagName,
-        hProperties: element.properties,
-        hChildren: element.children,
+        hName: 'figure',
+        hProperties: { className: ['piece-block', `piece-${node.name}`] },
       };
     });
   };
@@ -86,19 +141,13 @@ function fail(file, node, message) {
   file.fail(message, node);
 }
 
-function figure(node, blockClass, children) {
-  return {
-    tagName: 'figure',
-    properties: { className: ['piece-block', blockClass] },
-    children,
-  };
-}
-
-function img(src, alt) {
-  return {
-    type: 'element',
-    tagName: 'img',
-    properties: { src, alt },
-    children: [],
-  };
+function checkSrcExists(file, node, src) {
+  // A missing local image otherwise surfaces as an opaque Vite import
+  // error with no piece name or line. Remote URLs and root-absolute
+  // paths are out of scope here — Astro's collector handles those.
+  if (typeof file.path !== 'string') return;
+  if (URL.canParse(src) || src.startsWith('/')) return;
+  if (!existsSync(resolve(dirname(file.path), src))) {
+    fail(file, node, `image not found: ${src} (relative to the piece's folder)`);
+  }
 }

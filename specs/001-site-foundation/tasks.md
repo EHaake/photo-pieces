@@ -42,7 +42,7 @@ collaboration workflow's own triage — a good candidate for Plan Mode
 plus the skeptical-reviewer subagent before committing to an approach,
 not just proceeding on the first idea that compiles.
 
-- [ ] **T004** — Resolve and implement how a `::fullbleed{...}`
+- [x] **T004** — Resolve and implement how a `::fullbleed{...}`
       directive produces a real, optimized image — calling
       `astro:assets`'s `getImage()` from within the remark plugin, or
       an alternative if that turns out not to be the right mechanism.
@@ -67,6 +67,21 @@ per-task.
       and nav are untouched by this pass. *Verify: `astro build`
       succeeds; manual check of `/blog/` and `/works/` in the browser
       shows no change.*
+
+## Phase 3 — Debt made explicit
+
+Added during T004's review: CLAUDE.md's Testing section requires real
+unit tests for the remark-directive transform, which plan.md's blanket
+testing deferral contradicted. This task records the debt instead of
+leaving it silent.
+
+- [ ] **T008** — Confirm Vitest as the test framework (CLAUDE.md names
+      it as an unconfirmed default — confirm, don't assume), then add
+      unit tests for `remark-pieces-blocks.mjs`: each block's happy
+      path, every fail-loudly case (unknown directive, container form,
+      missing attributes, missing image file), and the mdast-image-
+      children output shape Astro's optimizer depends on. *Verify:
+      test suite runs green alongside `astro build`.*
 
 ---
 
