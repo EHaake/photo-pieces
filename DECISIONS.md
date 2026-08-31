@@ -120,3 +120,33 @@ depends on the remark plugin hooks Sätteri removes. Revisit only if
 the unified path is ever deprecated outright; the ROADMAP item about
 rewriting internal vault links at build time is the natural moment to
 re-evaluate, since Sätteri handles wikilinks natively.
+
+## Hosting: Cloudflare Workers static assets
+
+Chosen at spec 002 review against GitHub Pages and Netlify, on the
+photographer's criteria (stability, low ongoing hassle, free/cheap,
+push-to-deploy testing before anything is publicly live):
+
+- **Netlify** — ruled out: accounts created after Sept 2025 sit on a
+  300-credit/month pool shared across bandwidth, builds, and compute;
+  the most restrictive free tier of the three for an image-heavy site,
+  with expensive overages. Its built-in form handling (relevant to the
+  roadmapped contact form) has good free alternatives.
+- **GitHub Pages** — closest second: zero new accounts, the deploy
+  workflow already ships in the repo, and unmatched platform
+  stability. Passed on because a photography site is the genre most
+  likely to meet its soft ~1GB site / ~100GB-month limits, it has no
+  per-branch preview URLs, and its project-page base path makes test
+  and live URL structures differ.
+- **Cloudflare Workers (static assets)** — chosen: unlimited free
+  static-asset bandwidth (the criterion that compounds as a photo site
+  grows), git-connected deploys with per-branch preview URLs, a free
+  workers.dev subdomain for the whole pre-live phase, and identical
+  URL structure between test and live. Known trade-off, accepted:
+  Cloudflare's recommended path churned once recently (Pages →
+  Workers), so this is guidance-stable, not GitHub-Pages-stable.
+  Workers static assets, not the legacy-track Pages product.
+
+The domain (erikhaakephoto.com) stays registered at Squarespace with
+DNS pointed at Cloudflare when the flip happens — no registration
+transfer required or planned.
