@@ -26,7 +26,7 @@ catch now and expensive once later phases depend on them.
       `src/content/pieces/<slug>/index.md` — plain prose, a plain
       Markdown image (no directive yet), real frontmatter. *Verify: the
       entry appears in `getCollection('pieces')` output.*
-- [ ] **T003** — Install `remark-directive` and `unist-util-visit` as
+- [x] **T003** — Install `remark-directive` and `unist-util-visit` as
       real dependencies, and add `remark-pieces-blocks.mjs` at the repo
       root — the transform logic already verified in a spike, cleaned
       up (no `SPIKE-OK` marker), registered in `astro.config.mjs` after
