@@ -77,15 +77,20 @@ Everything else in the closed block vocabulary uses directive syntax:
 ::fullbleed{src="./photo-2.jpg" alt="The playa at dusk"}
 ```
 
-**Current status**: `fullbleed` is implemented and verified end-to-end.
-`diptych`, `triptych`, and `sequence` are specified (`spec.md`) but not
-yet built. Check `specs/001-site-foundation/tasks.md` for what's
-actually done versus still planned — don't assume this list is current
-by the time you're reading it.
+**Current status**: `fullbleed`, `diptych`, and `triptych` are all
+implemented — transform, styling, and unit tests — with images going
+through Astro's asset pipeline (hashed src, responsive srcset).
+`sequence` is reserved but deliberately fails the build until its
+presentation is designed (`ROADMAP.md`). Pieces render at
+`/pieces/<slug>/`, though nothing links there yet — no nav entry or
+index page until the homepage design pass. Check
+`specs/001-site-foundation/tasks.md` for what's actually done versus
+still planned — don't assume this list is current by the time you're
+reading it.
 
-Pieces render at `/pieces/<slug>/`. The original theme's `blog`/`works`
-collections and routes are still present and unused, kept temporarily
-rather than torn out mid-transition (see `plan.md`).
+The original theme's `blog`/`works` collections and routes are still
+present and unused, kept temporarily rather than torn out
+mid-transition (see `plan.md`).
 
 ## Configuration
 
@@ -141,8 +146,10 @@ cleanup pass, not yet done.
 
 Working, unmodified, worth not losing track of: static full-text
 search at `/search` (Pagefind, zero backend), an RSS feed at
-`/rss.xml`, auto-generated Open Graph images per page, category archive
-pages, and sitemap/JSON-LD SEO basics.
+`/rss.xml`, auto-generated Open Graph images for blog and works
+entries (pieces currently fall back to the site-wide `public/og.jpg` —
+extending the OG route to pieces is future work, noted in `plan.md`),
+category archive pages, and sitemap/JSON-LD SEO basics.
 
 ## Project structure
 
@@ -158,8 +165,7 @@ photo-pieces/
 │   ├── content/
 │   │   ├── pieces/                # the actual content model
 │   │   └── blog/, works/          # legacy, unused, not yet removed
-│   ├── components/blocks/         # FullBleed.astro, etc.
-│   ├── pages/pieces/[slug].astro
+│   ├── pages/pieces/[slug].astro  # the piece reading page
 │   └── styles/global.css
 ```
 
@@ -167,10 +173,13 @@ photo-pieces/
 
 Not yet decided, and nothing's live — `npm run dev` is the only thing
 currently running. A GitHub Pages workflow ships with the theme at
-`.github/workflows/deploy.yml` and would need `site` (and `base`, if
-serving from a project-site subpath) set in `astro.config.mjs`.
-Whether that's the real answer versus Netlify or Cloudflare Pages is
-still an open item in `plan.md`, not decided here.
+`.github/workflows/deploy.yml`. Note that `site` and `base` in
+`astro.config.mjs` (and the site title/author/social links in
+`src/consts.ts`) still carry the *upstream theme author's* values —
+every canonical URL and OG tag is wrong until the deploy decision sets
+them for real. That decision — GitHub Pages versus Netlify or
+Cloudflare Pages — is still an open item in `plan.md`, not decided
+here.
 
 ## License
 

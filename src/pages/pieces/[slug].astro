@@ -1,0 +1,53 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../i18n';
+
+export async function getStaticPaths() {
+  const pieces = (await getCollection('pieces', ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
+  );
+  return pieces.map((piece) => ({ params: { slug: piece.id }, props: { piece } }));
+}
+
+const { piece } = Astro.props;
+const { Content } = await render(piece);
+---
+
+<BaseLayout
+  title={piece.data.title}
+  description={piece.data.description}
+  ogType="article"
+>
+  <article data-pagefind-body>
+    <header class="page-head section">
+      <div class="piece-column">
+        <p class="eyebrow">{piece.data.categories.join(' / ')}</p>
+        <h1>{piece.data.title}</h1>
+        <p class="lead">{piece.data.description}</p>
+        <div class="entry-meta">
+          <time datetime={piece.data.publishDate.toISOString()}
+            >{formatDate(piece.data.publishDate)}</time
+          >
+        </div>
+      </div>
+    </header>
+
+    <div class="section">
+      <div class="prose piece-column">
+        <Content />
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  /* The reading column is viewport-centered — the layout contract
+     .piece-fullbleed's edge-to-edge breakout depends on (see the piece
+     blocks section of global.css). Unlike /blog/, there is no TOC
+     sidebar: images are the interface here, not navigation chrome. */
+  .piece-column {
+    max-width: var(--prose-width);
+    margin-inline: auto;
+  }
+</style>

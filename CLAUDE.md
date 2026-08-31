@@ -44,14 +44,23 @@ CMS or backend service for v1.
   references — never auto-generated from all site images — and each
   gallery entry may optionally reference the piece it came from.
 - **Closed block vocabulary**: image treatments inside a piece's body are
-  limited to a defined set of directive-backed components (single image,
+  limited to a defined set of directive-backed treatments (single image,
   diptych, triptych, full-bleed; a `sequence` type is reserved but its
   final presentation is undecided — see `ROADMAP.md`). Adding a new
-  treatment means deliberately adding a new directive + component pair,
-  not writing one-off markup inline.
+  treatment means deliberately adding a new directive + presentation
+  contract — a handler in the remark transform (the vocabulary's single
+  source of truth) plus the CSS that styles its output — not writing
+  one-off markup inline. There are deliberately no per-block `.astro`
+  components: mapping rendered elements to components is an MDX-only
+  feature, and pieces are plain `.md` by hard rule. For the same reason
+  a future *interactive* block (`sequence`'s carousel/slider candidates)
+  must be built as page-level progressive enhancement over the
+  transform's HTML — `.md` content cannot mount islands. The Obsidian
+  plugin and the site CSS mirror the transform's vocabulary by
+  convention (see `DECISIONS.md` on the accepted approximation).
 - **Theme boundary**: global chrome (nav, footer, base typography and
   color tokens, base list/tag pages) comes from a forked base Astro
-  theme. The piece-reading layout and its block components are
+  theme. The piece-reading layout and its block treatments are
   custom-built, but must consume the theme's design tokens rather than
   redefining their own — this keeps the custom parts visually coherent
   with the rest of the site.
@@ -69,7 +78,7 @@ CMS or backend service for v1.
   frontmatter. A malformed entry should fail the build loudly, not
   silently.
 - For logic that schema validation doesn't cover (the remark-directive
-  transform, block components, the image pipeline), add real unit tests.
+  transform, block styling, the image pipeline), add real unit tests.
   Vitest is the natural pairing with Astro's Vite-based tooling and is
   the reasonable default — confirm before scaffolding rather than
   treating it as settled.
@@ -78,6 +87,10 @@ CMS or backend service for v1.
   — not paraphrased or assumed from reading the code.
 - Don't weaken, skip, or delete a test to make it pass — if a test seems
   wrong, flag it and ask.
+- A test's assertions must be able to fail for the reason the test's
+  name gives. A test that passes on both the correct and the broken
+  behavior it's named for is worse than no test — it documents a
+  guarantee that doesn't exist.
 
 ## Dependencies
 

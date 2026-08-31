@@ -3,7 +3,9 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { unified } from '@astrojs/markdown-remark';
+import remarkDirective from 'remark-directive';
 import { remarkReadingTime } from './remark-reading-time.mjs';
+import { remarkPiecesBlocks } from './remark-pieces-blocks.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,7 +18,9 @@ export default defineConfig({
   integrations: [mdx(), sitemap()],
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkReadingTime],
+      // remarkDirective must run before remarkPiecesBlocks — it parses the
+      // ::block syntax into directive nodes the transform then renders.
+      remarkPlugins: [remarkReadingTime, remarkDirective, remarkPiecesBlocks],
     }),
     // Dual Shiki themes; `defaultColor: false` emits CSS variables
     // (--shiki-light / --shiki-dark) so global.css can switch with the theme.

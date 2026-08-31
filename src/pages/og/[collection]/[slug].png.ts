@@ -40,13 +40,16 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 // Satori has no oklch() support, so these are hex equivalents of the
-// light-theme tokens in global.css.
+// light-theme tokens in global.css. They do NOT update automatically —
+// after retuning any token, recompute these (standard OKLab math; the
+// pre-merge review of spec 001 caught the accent still terracotta after
+// the token had gone teal).
 const COLOR = {
   bg: '#fcfcfa',
-  text: '#252831',
-  muted: '#697080',
-  line: '#dbd8d0',
-  accent: '#a8492c',
+  text: '#1e2226',
+  muted: '#5e646a',
+  line: '#d2d1cb',
+  accent: '#004942',
 };
 
 const require = createRequire(import.meta.url);
@@ -58,8 +61,8 @@ const font = (pkgPath: string) => readFile(require.resolve(pkgPath));
 // render them as tofu in every share image. Post titles in a non-Latin script
 // hit the same limit: install a face that covers them (e.g.
 // `@fontsource/noto-sans-jp`) and point the paths below at it.
-const [fraunces, publicSans] = await Promise.all([
-  font('@fontsource/fraunces/files/fraunces-latin-600-normal.woff'),
+const [spectral, publicSans] = await Promise.all([
+  font('@fontsource/spectral/files/spectral-latin-600-normal.woff'),
   font('@fontsource/public-sans/files/public-sans-latin-400-normal.woff'),
 ]);
 
@@ -191,7 +194,7 @@ export const GET: APIRoute<OgProps> = async ({ props }) => {
       width: 1200,
       height: 630,
       fonts: [
-        { name: 'Spectral', data: fraunces, weight: 600, style: 'normal' },
+        { name: 'Spectral', data: spectral, weight: 600, style: 'normal' },
         { name: 'Public Sans', data: publicSans, weight: 400, style: 'normal' },
       ],
     },

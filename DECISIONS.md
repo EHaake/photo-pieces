@@ -92,8 +92,11 @@ Built rather than deferred, once the actual bar was clarified: not
 matching the real site's styling, just seeing an image instead of raw
 directive text while writing in Live Preview. That's a much smaller
 target than a Reading-View-and-Live-Preview, style-matched renderer —
-a single CodeMirror 6 `ViewPlugin`, using a plain regex rather than a
-full remark-directive parser, since it only needs to recognize the one
+a single CodeMirror 6 `StateField` supplying the decorations (it began
+as a `ViewPlugin`, but CodeMirror requires block decorations to come
+from a `StateField` — the cause of the 0.1.0 editor crash), using a
+plain regex rather than a full remark-directive parser, since it only
+needs to recognize the one
 block type actually built on the Astro side so far (`fullbleed`).
 Reading View is intentionally not handled — Live Preview is the mode
 actually used while writing, which is the specific problem this
@@ -102,3 +105,18 @@ solves.
 Source lives in `obsidian-plugin/` in this repo. Extending it to
 `diptych`/`triptych` once those exist on the Astro side follows the
 same pattern: a regex and a widget class per block type.
+
+## Markdown processor: legacy remark pipeline kept over Sätteri
+
+Astro 7's default Markdown processor is Sätteri, which implements
+directives natively but does not run remark/rehype plugins at all.
+This project's `astro.config.mjs` opts into the legacy unified
+pipeline (`markdown.processor: unified({...})`) — a deliberate
+commitment, recorded here after the T004 review flagged it as
+undocumented: the block vocabulary is built on `remark-directive`
+plus a custom remark transform, and the transform's whole mechanism
+(emitting mdast image nodes for Astro's collector to optimize)
+depends on the remark plugin hooks Sätteri removes. Revisit only if
+the unified path is ever deprecated outright; the ROADMAP item about
+rewriting internal vault links at build time is the natural moment to
+re-evaluate, since Sätteri handles wikilinks natively.
