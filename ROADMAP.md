@@ -31,14 +31,13 @@ attached.
   small build-time remark transform to become published route URLs
   (`/pieces/<slug>/`). Same pipeline as the block directives. Needed
   the day the first cross-piece link gets written, not before.
-- **Obsidian live rendering for photo blocks** — a custom Obsidian
-  plugin could render `fullbleed`/`diptych`/etc. directly in Obsidian
-  instead of needing the `astro dev` browser tab. Real and buildable
-  (`registerMarkdownPostProcessor` for Reading View, a separate
-  CodeMirror 6 extension for Live Preview specifically — two rendering
-  paths, not one), but a second implementation to keep from drifting
-  out of sync with the real site's styling, forever. Not pursued yet:
-  single images already render natively in Obsidian, so this only
-  helps the occasional special blocks. Revisit once real pieces reveal
-  how often that friction actually bites, rather than building it on
-  spec.
+- **Obsidian live rendering for photo blocks** — built, in a
+  deliberately minimal form: a custom plugin in `obsidian-plugin/`
+  renders `fullbleed` directives as images in Live Preview, the mode
+  actually used while writing. The bar was set at seeing the photo
+  instead of raw directive text, not matching the real site's styling —
+  see `DECISIONS.md` for that scoping. What remains on the roadmap is
+  the rest: Reading View is intentionally not handled, and
+  `diptych`/`triptych` support waits until those blocks exist on the
+  Astro side (each follows the same pattern — a regex and a widget
+  class per block type).

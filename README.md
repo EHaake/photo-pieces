@@ -77,15 +77,19 @@ Everything else in the closed block vocabulary uses directive syntax:
 ::fullbleed{src="./photo-2.jpg" alt="The playa at dusk"}
 ```
 
-**Current status**: `fullbleed` is implemented and verified end-to-end.
-`diptych`, `triptych`, and `sequence` are specified (`spec.md`) but not
-yet built. Check `specs/001-site-foundation/tasks.md` for what's
-actually done versus still planned — don't assume this list is current
-by the time you're reading it.
+**Current status**: the `fullbleed` transform is implemented and
+verified against built output — the directive becomes a real image that
+Astro's asset pipeline optimizes — but no page renders pieces yet, so
+nothing reaches a visitor. `diptych`, `triptych`, and `sequence` are
+specified (`spec.md`) but not yet built. Check
+`specs/001-site-foundation/tasks.md` for what's actually done versus
+still planned — don't assume this list is current by the time you're
+reading it.
 
-Pieces render at `/pieces/<slug>/`. The original theme's `blog`/`works`
-collections and routes are still present and unused, kept temporarily
-rather than torn out mid-transition (see `plan.md`).
+Pieces will render at `/pieces/<slug>/` once the reading page exists.
+The original theme's `blog`/`works` collections and routes are still
+present and unused, kept temporarily rather than torn out
+mid-transition (see `plan.md`).
 
 ## Configuration
 
@@ -158,8 +162,7 @@ photo-pieces/
 │   ├── content/
 │   │   ├── pieces/                # the actual content model
 │   │   └── blog/, works/          # legacy, unused, not yet removed
-│   ├── components/blocks/         # FullBleed.astro, etc.
-│   ├── pages/pieces/[slug].astro
+│   ├── pages/pieces/[slug].astro  # planned (T006), not built yet
 │   └── styles/global.css
 ```
 

@@ -92,8 +92,11 @@ Built rather than deferred, once the actual bar was clarified: not
 matching the real site's styling, just seeing an image instead of raw
 directive text while writing in Live Preview. That's a much smaller
 target than a Reading-View-and-Live-Preview, style-matched renderer —
-a single CodeMirror 6 `ViewPlugin`, using a plain regex rather than a
-full remark-directive parser, since it only needs to recognize the one
+a single CodeMirror 6 `StateField` supplying the decorations (it began
+as a `ViewPlugin`, but CodeMirror requires block decorations to come
+from a `StateField` — the cause of the 0.1.0 editor crash), using a
+plain regex rather than a full remark-directive parser, since it only
+needs to recognize the one
 block type actually built on the Astro side so far (`fullbleed`).
 Reading View is intentionally not handled — Live Preview is the mode
 actually used while writing, which is the specific problem this
