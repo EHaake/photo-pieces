@@ -11,17 +11,19 @@ The plan can be approved without these, but the identity/content tasks
 can't complete until they exist. Placeholder text never ships as if it
 were the photographer's voice (design brief rule).
 
-1. **Site title** as it should render (e.g. "Erik Haake Photography"
-   vs "Erik Haake") and a one-line site description for meta/OG/RSS.
-2. **Instagram URL** (and any other socials worth listing; the theme's
-   built-in icon set has no Instagram icon — one will be added).
-3. **Public contact email** for the Contact page (the address you want
-   scrapeable-in-principle, which may not be your personal one).
-4. **About page text**, in your words. Can arrive last; the page ships
-   only when it does.
-5. **Cloudflare account + workers.dev subdomain name** (created by
-   you; I can't hold accounts). The repo connection is a one-time
-   dashboard action.
+1. **Site title** — received: "Erik Haake Photography". The one-line
+   site description is still pending; an interim factual line ships
+   marked `TODO-AUTHOR` in `consts.ts` (meta/OG/RSS need *something*),
+   to be replaced with the photographer's wording.
+2. **Instagram** — received: `erik.haake`
+   (https://www.instagram.com/erik.haake/). An Instagram icon will be
+   added to the footer set.
+3. **Public contact email** — received: `erik@erikhaakephoto.com`.
+4. **About page text** — pending; the about task stays open with
+   visible `TODO-AUTHOR` placeholders until it arrives.
+5. **Cloudflare account + repo connection** — pending, photographer's
+   action with a written walkthrough provided; blocks only the deploy
+   phase.
 
 ## Dark-mode removal
 
@@ -88,10 +90,12 @@ Confirmed consumers, all removed or reshaped:
 
 - `src/consts.ts`: title, description, author, socials (add an
   Instagram SVG to the footer icon set).
-- `astro.config.mjs`: `base` removed (root site). `site` starts as the
-  workers.dev URL for the test phase and flips to
-  `https://erikhaakephoto.com` in the same commit as the DNS flip —
-  canonicals, sitemap, RSS, and OG URLs follow `site` automatically.
+- `astro.config.mjs`: `base` removed (root site). `site` is set to
+  `https://erikhaakephoto.com` immediately (amended at plan review
+  from a staged workers.dev value): canonicals on the test URL point
+  forward to the real domain — harmless pre-launch — and the domain
+  flip becomes pure DNS + dashboard with zero code change. Canonicals,
+  sitemap, RSS, and OG URLs all follow `site` automatically.
 - `public/og.jpg` (site-wide OG fallback) and favicon: replaced with
   the photographer's own image/mark — needs input #1/#4 era assets;
   interim: a neutral text-only card generated with the existing satori
