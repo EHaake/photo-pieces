@@ -75,7 +75,7 @@ unit tests for the remark-directive transform, which plan.md's blanket
 testing deferral contradicted. This task records the debt instead of
 leaving it silent.
 
-- [ ] **T008** — Confirm Vitest as the test framework (CLAUDE.md names
+- [x] **T008** — Confirm Vitest as the test framework (CLAUDE.md names
       it as an unconfirmed default — confirm, don't assume), then add
       unit tests for `remark-pieces-blocks.mjs`: each block's happy
       path, every fail-loudly case (unknown directive, container form,

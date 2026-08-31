@@ -122,8 +122,8 @@ actually matter, not guessed at now:
 - **Deploy target.** GitHub Pages is available for free via the theme's
   existing workflow; whether that's the real answer or just a way to
   see something live isn't decided.
-- **Testing framework.** CLAUDE.md names Vitest as a reasonable
-  default, unconfirmed. Not required to prove the dev loop works.
+- **Testing framework.** Vitest — confirmed at T008 (was CLAUDE.md's
+  unconfirmed default). Dev dependency; `npm test` runs `vitest run`.
 - **Galleries' technical shape.** Deferred alongside the collection.
 
 ## Known limitations
@@ -140,9 +140,15 @@ actually matter, not guessed at now:
 
 ## Testing strategy
 
-Deferred — see Cross-cutting decisions. The build succeeding
-(`astro build`) is the only verification this pass requires, per
-CLAUDE.md's existing verification rule.
+Resolved at T008 (the blanket deferral contradicted CLAUDE.md's
+Testing section, which requires real unit tests for the transform):
+`remark-pieces-blocks.test.mjs` runs the directive transform through
+the real Astro pipeline (`createMarkdownProcessor`), covering every
+block's happy path, every fail-loudly case, and the mdast-image-
+children → `__ASTRO_IMAGE_` handshake the optimization design rests
+on — so a future Astro upgrade that reorders user plugins after image
+collection fails tests, not production. `astro build` remains the
+other required verification per CLAUDE.md.
 
 ## File structure
 
