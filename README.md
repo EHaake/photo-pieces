@@ -43,7 +43,8 @@ The actual point of this project. Write in Obsidian, with the vault
 pointed at `src/content/pieces/`; `astro dev` running alongside gives
 live preview on save. Plain Markdown only, never MDX — that's a hard
 rule (see `CLAUDE.md`), since MDX breaks Obsidian's ability to render
-and edit the file.
+and edit the file. Vault layout, Obsidian settings, and usage
+conventions live in `AUTHORING.md`.
 
 ```
 src/content/pieces/<slug>/
