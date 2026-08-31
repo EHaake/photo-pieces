@@ -12,6 +12,11 @@ import { remarkPiecesBlocks } from './remark-pieces-blocks.mjs';
 // Astro upgrade ever reorders user plugins after image collection, these
 // tests fail even though the transform itself is unchanged. That is the
 // point of them.
+//
+// Known limit: the plugin list below is a copy of astro.config.mjs's, not
+// an import of it — drift in the config itself (dropping remarkDirective,
+// reordering it after the transform) breaks production with a green suite.
+// Config and tests must be kept in step by hand.
 
 // The fixture file doesn't exist; only its directory must, so relative image
 // paths in test content resolve against tests/fixtures/ (which holds
@@ -101,10 +106,19 @@ describe('happy paths', () => {
     expect(code).not.toContain('<figure');
   });
 
-  it('single-colon text directives in prose are left alone', async () => {
+  it('single-colon text directives in prose come back as the literal text typed', async () => {
+    // Without handling, remark-directive's textDirective node renders as an
+    // empty <div> that splits the paragraph — the sentence must survive
+    // verbatim in one piece.
     const { code } = await render('The spec defines :hover states for links.');
-    expect(code).toContain('<p>');
-    expect(code).not.toContain('<figure');
+    expect(code).toContain('<p>The spec defines :hover states for links.</p>');
+    expect(code).not.toContain('<div');
+  });
+
+  it('a labeled text directive round-trips brackets and label', async () => {
+    const { code } = await render('Press :kbd[Enter] to publish.');
+    expect(code).toContain('<p>Press :kbd[Enter] to publish.</p>');
+    expect(code).not.toContain('<div');
   });
 });
 

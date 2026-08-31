@@ -38,6 +38,15 @@ attached.
   instead of raw directive text, not matching the real site's styling —
   see `DECISIONS.md` for that scoping. What remains on the roadmap is
   the rest: Reading View is intentionally not handled, and
-  `diptych`/`triptych` support waits until those blocks exist on the
-  Astro side (each follows the same pattern — a regex and a widget
-  class per block type).
+  `diptych`/`triptych` — which now do exist on the Astro side
+  (transform, styling, and tests landed with spec 001) — still render
+  as raw directive text in Obsidian until the plugin gains a regex and
+  widget class per block, following the fullbleed pattern.
+- **Dark mode removal** — the site is deliberately light-only
+  (`spec.md`, `design/brief.md`), but the forked theme's dark palette,
+  toggle component, and `prefers-color-scheme` handling are still
+  present and active: a dark-preference visitor currently sees pieces
+  against a dark background, exactly what the brief rules out. Full
+  removal is a cleanup pass touching `BaseLayout.astro` and
+  `global.css`'s duplicated token blocks (which would also return the
+  accent color to being a single-line change).

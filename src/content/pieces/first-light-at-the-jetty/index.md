@@ -23,6 +23,11 @@ The light came up faster than expected. Ten minutes of that soft
 blue-hour gradient, then the sun cleared the horizon and flattened
 everything. The usual lesson: arrive earlier than feels reasonable.
 
-More treatments — full-bleed, diptych, triptych — will land in this
-piece as the block vocabulary comes online. For now, prose and a single
-plain-Markdown image are the whole test.
+Two frames from the same ten minutes, side by side — the pairing is
+the point, which is what the diptych treatment is for:
+
+::diptych{left="./jetty-dawn.jpg" right="./jetty-dawn.jpg" leftAlt="The jetty before sunrise, cool and blue" rightAlt="The same view minutes later, first warmth on the horizon"}
+
+This piece now exercises the full built vocabulary: prose, a plain
+single image, a full-bleed, and a diptych. Only `sequence` remains
+reserved for a future design pass.

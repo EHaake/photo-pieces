@@ -57,11 +57,14 @@ from the astro-keel fork and haven't raised any objection — warm-neutral
 off-whites and near-black charcoal text, all defined as CSS custom
 properties in `src/styles/global.css`.
 
-**Open**: the accent color. The theme's shipped default —
-`oklch(0.54 0.14 35)`, a warm terracotta/rust (`#B14A31`) — is
-explicitly not settled and was flagged as too generic. Retuning it is
-architecturally cheap: the token file has a single line to change.
-Direction is otherwise undecided.
+**Current, not final**: the accent is now a dark teal,
+`oklch(0.36 0.075 185)` — hand-picked to replace the theme's default
+warm terracotta, which was rejected as too generic (see "What to
+avoid"). Not yet pressure-tested against real photography. Retuning
+is cheap but currently *two* lines, not one, thanks to the theme's
+still-present dark-mode token blocks (see README's accent-color note;
+goes back to one line when dark mode is removed) — plus the manually
+synced hex values in the OG image route.
 
 ## Typography
 

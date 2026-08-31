@@ -1075,13 +1075,34 @@ pre code {
    the images themselves are the interface. */
 
 .piece-block {
+  /* margin-inline: 0 clears the UA's default 40px figure indent; the
+     fullbleed breakout below overrides it with its own calc. */
   margin-block: calc(var(--baseline) * 2);
+  margin-inline: 0;
 }
 
 .piece-block img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* Side-by-side treatments: thin token-derived gutters, flat, filling the
+   reading column. Differing aspect ratios keep their natural heights —
+   pairing images that sit well together is the author's curation call,
+   not something CSS should force with cropping. */
+.piece-diptych {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(var(--baseline) / 3);
+  align-items: start;
+}
+
+.piece-triptych {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--baseline) / 3);
+  align-items: start;
 }
 
 /* Edge-to-edge breakout. The 50% refers to the figure's containing block,

@@ -83,6 +83,30 @@ leaving it silent.
       children output shape Astro's optimizer depends on. *Verify:
       test suite runs green alongside `astro build`.*
 
+## Phase 4 — Work that landed outside the original task list
+
+Recorded at the pre-merge review so tasks.md reflects what the branch
+actually delivered, per the constitution's spec-discipline rule. These
+were decided deliberately (see `DECISIONS.md`) but never entered here.
+
+- [x] **T-obsidian** — `obsidian-plugin/` (Live Preview rendering of
+      `::fullbleed` while writing) and `AUTHORING.md` (vault layout and
+      Obsidian usage), built mid-flight before this session's tasks
+      began. *Verification: manual use in Obsidian by the author; no
+      automated tests. Includes crash fix `fccc4d4` (ViewPlugin →
+      StateField). Its dev-only dependencies are recorded in
+      `plan.md`.*
+- [x] **T009** — Pre-merge skeptical-review amendments: diptych/
+      triptych grid CSS (they shipped implemented but unstyled — a
+      green build would have produced stacked, indented images);
+      text-directive restoration in the transform (unhandled `:word`
+      in prose rendered as an empty `<div>` splitting the paragraph —
+      the test named for this case couldn't fail, see the matching
+      CLAUDE.md amendment); OG image hex values resynced to the real
+      tokens; README/plan/ROADMAP truth-sync. *Verify: full test suite
+      and `astro build` green; diptych geometry checked in the
+      browser.*
+
 ---
 
 ## Handoff note

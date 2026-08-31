@@ -6,9 +6,11 @@ import { visit } from 'unist-util-visit';
 // `remark-directive`) into figure-wrapped images. The vocabulary is closed
 // by design — see CLAUDE.md — so an unrecognized `::name` / `:::name` fails
 // the build with the offending file and line rather than silently rendering
-// as nothing. Single-colon text directives are left alone: none of the
-// vocabulary uses them, and failing on them would make ordinary prose
-// containing `:word` patterns a build hazard.
+// as nothing. Single-colon text directives (`:word` mid-prose) are
+// restored to the literal text the author typed: none of the vocabulary
+// uses them, failing on them would make ordinary prose a build hazard, and
+// leaving them *unhandled* is not safe either — an unhandled directive
+// node renders as an empty <div> that splits the paragraph.
 //
 // Each directive's images are emitted as real mdast `image` nodes (the
 // node's children), NOT prebuilt hast <img> elements. Astro's own
@@ -21,8 +23,9 @@ import { visit } from 'unist-util-visit';
 // The `layout`/`sizes` entries below ride each image node's hProperties
 // into that same pipeline as per-image getImage() options, giving each
 // treatment responsive variants matched to how wide it actually renders.
-// diptych/triptych sizes are provisional until the real column CSS lands
-// (task T005).
+// diptych/triptych sizes are conservative upper bounds for halves/thirds
+// of the reading column — never blurry, occasionally over-delivering;
+// tighten them if those treatments ever get a bespoke design pass.
 
 const BLOCKS = {
   fullbleed: {
@@ -98,6 +101,24 @@ const BLOCKS = {
 
 export function remarkPiecesBlocks() {
   return (tree, file) => {
+    // Restore text directives to the prose the author typed. `:hover` and
+    // `:word[label]` come back verbatim (label content as ordinary inline
+    // children between the brackets). Attributes (`{...}`) don't survive —
+    // no plausible prose contains them, and the block vocabulary never
+    // uses text directives at all.
+    visit(tree, 'textDirective', (node, index, parent) => {
+      const restored =
+        node.children.length > 0
+          ? [
+              { type: 'text', value: `:${node.name}[` },
+              ...node.children,
+              { type: 'text', value: ']' },
+            ]
+          : [{ type: 'text', value: `:${node.name}` }];
+      parent.children.splice(index, 1, ...restored);
+      return index + restored.length;
+    });
+
     visit(tree, ['leafDirective', 'containerDirective'], (node) => {
       const block = BLOCKS[node.name];
       if (!block) {

@@ -40,13 +40,16 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 // Satori has no oklch() support, so these are hex equivalents of the
-// light-theme tokens in global.css.
+// light-theme tokens in global.css. They do NOT update automatically —
+// after retuning any token, recompute these (standard OKLab math; the
+// pre-merge review of spec 001 caught the accent still terracotta after
+// the token had gone teal).
 const COLOR = {
   bg: '#fcfcfa',
-  text: '#252831',
-  muted: '#697080',
-  line: '#dbd8d0',
-  accent: '#a8492c',
+  text: '#1e2226',
+  muted: '#5e646a',
+  line: '#d2d1cb',
+  accent: '#004942',
 };
 
 const require = createRequire(import.meta.url);

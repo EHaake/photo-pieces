@@ -46,10 +46,20 @@ Markdown image syntax (`![alt](photo.jpg)`) already works and is the
 right choice for it, styled through the theme's existing prose rules.
 Directives are only for what plain Markdown can't express:
 
-- `::fullbleed{src="..." alt="..."}` — verified working
-- `::diptych{left="..." right="..."}` — same pattern, not yet built
-- `::triptych{...}` — same pattern, not yet built
-- `sequence` — reserved, no directive yet (see `ROADMAP.md`)
+- `::fullbleed{src="..." alt="..."}` — built, styled, tested
+- `::diptych{left="..." right="..." leftAlt="..." rightAlt="..."}` —
+  built alongside fullbleed at T004 (shared transform machinery), with
+  side-by-side grid styling added at the pre-merge review
+- `::triptych{...}` — same, three-up
+- `sequence` — reserved; the directive exists but fails the build
+  deliberately until its presentation is designed (see `ROADMAP.md`)
+
+The closed vocabulary is enforced *site-wide*, not just for pieces:
+the transform registers on the global markdown pipeline (which MDX
+inherits), so a stray `::name` in `blog`/`works` content also fails
+the build loudly. Intentional — the alternative (scoping to pieces)
+would leave directives in other collections silently rendering as
+broken markup.
 
 ### Image handling — a deliberate, scoped starting point
 
@@ -124,6 +134,12 @@ actually matter, not guessed at now:
   see something live isn't decided.
 - **Testing framework.** Vitest — confirmed at T008 (was CLAUDE.md's
   unconfirmed default). Dev dependency; `npm test` runs `vitest run`.
+- **Authoring-side tooling dependencies.** `obsidian-plugin/` (built
+  mid-flight; see `DECISIONS.md` and tasks.md Phase 4) carries its own
+  dev-only `package.json`: `obsidian`, `@codemirror/{state,view}`,
+  `@types/node`, `esbuild`, `typescript`. Editor tooling, never part of the site
+  build — recorded here per the dependency policy rather than in the
+  site's own `package.json`.
 - **Galleries' technical shape.** Deferred alongside the collection.
 
 ## Known limitations
@@ -131,6 +147,14 @@ actually matter, not guessed at now:
 - Plain-markdown single images get one optimized derivative, no srcset,
   until the global `image.layout` decision is made (see Image handling).
   Directive images are fully responsive as of T004.
+- Piece-page parity gaps versus `/blog/`, all deferred deliberately:
+  no per-piece OG image (pieces fall back to the site-wide `og.jpg`),
+  no JSON-LD structured data, no RSS inclusion, no `/pieces/` index or
+  nav entry (awaiting the homepage design pass), and the schema's
+  `cover` field is validated but not yet consumed by any page.
+- `site`/`base` in `astro.config.mjs` and the title/author/social
+  values in `src/consts.ts` still carry the upstream theme author's
+  values — fixing them is part of the deploy-target decision.
 - `blog`/`works` remain, unused by the new workflow, until a deliberate
   cleanup pass.
 - Only `fullbleed` exists as a working directive; `diptych`/`triptych`
