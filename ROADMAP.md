@@ -25,6 +25,12 @@ attached.
   presentation — carousel, step-through, before/after slider — needs a
   dedicated Claude Design exploration once real processing-themed pieces
   exist to test it against.
+- **Internal piece-to-piece link rewriting** — links between pieces
+  authored as vault-relative markdown links (which is what Obsidian's
+  `[[` autocomplete inserts, and what feeds its graph/backlinks) need a
+  small build-time remark transform to become published route URLs
+  (`/pieces/<slug>/`). Same pipeline as the block directives. Needed
+  the day the first cross-piece link gets written, not before.
 - **Obsidian live rendering for photo blocks** — a custom Obsidian
   plugin could render `fullbleed`/`diptych`/etc. directly in Obsidian
   instead of needing the `astro dev` browser tab. Real and buildable
