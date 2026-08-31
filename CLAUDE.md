@@ -87,6 +87,10 @@ CMS or backend service for v1.
   — not paraphrased or assumed from reading the code.
 - Don't weaken, skip, or delete a test to make it pass — if a test seems
   wrong, flag it and ask.
+- A test's assertions must be able to fail for the reason the test's
+  name gives. A test that passes on both the correct and the broken
+  behavior it's named for is worse than no test — it documents a
+  guarantee that doesn't exist.
 
 ## Dependencies
 
