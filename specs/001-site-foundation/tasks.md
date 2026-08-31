@@ -22,7 +22,7 @@ catch now and expensive once later phases depend on them.
       `publishDate`, `categories` enum array, `description`, optional
       `cover` image, `draft`). *Verify: `astro build` succeeds with the
       collection registered.*
-- [ ] **T002** — Add one real test piece at
+- [x] **T002** — Add one real test piece at
       `src/content/pieces/<slug>/index.md` — plain prose, a plain
       Markdown image (no directive yet), real frontmatter. *Verify: the
       entry appears in `getCollection('pieces')` output.*
