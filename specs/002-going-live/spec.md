@@ -57,23 +57,31 @@ parallel.
 
 ## Decisions this spec forces (resolved in plan.md, not here)
 
-- **Hosting target.** GitHub Pages (workflow already in the repo) vs
-  Netlify vs Cloudflare Pages. Criteria: zero cost at this scale,
-  static-only, no lock-in that complicates a later image-store
-  migration.
-- **Domain.** Custom domain vs host-provided subdomain. (The
-  photographer plausibly already holds one — to be confirmed at plan
-  review; this changes `site`/`base` and canonical URLs, so it must be
-  settled before deploy, and is cheap to change later only until URLs
-  are shared.)
-- **Contact mechanism.** A static site rules out a self-hosted form
-  backend. Direct email link vs a form service (a new dependency
-  needing justification) vs Instagram DM as primary with email
-  fallback. The photographer's preference decides; the page must not
-  expose the email to scrapers more than the photographer accepts.
+- **Hosting target.** Compared at spec review (see `DECISIONS.md` once
+  chosen): GitHub Pages, Cloudflare (Workers static assets — the
+  current recommended path; Pages is legacy-track), Netlify (new
+  accounts are on the 2025 credit-pool free tier, the stingiest of the
+  three). Criteria set by the photographer: stability and low
+  ongoing hassle first, free or cheap, and a push-to-deploy test URL
+  *before* anything is publicly "live". The final pick lands in
+  `plan.md`.
+- **Domain.** `erikhaakephoto.com` is owned, registered at
+  Squarespace. No transfer is required to use it — DNS records at
+  Squarespace can point at any host; transferring the registration is
+  a separate, optional, later step. Deployment is staged deliberately:
+  first to the host's own subdomain as the testing URL, with the
+  custom-domain flip as the final act of this spec (or trailing it),
+  so nothing is publicly "the site" until the photographer says so.
 - **What replaces the homepage's blog/works sections** in the interim
   — the minimal edit that keeps the homepage coherent after teardown,
   without pre-empting spec 003.
+
+Resolved at spec review, no longer open: **contact mechanism**. The
+photographer wants a real contact form eventually — deferred to its
+own future spec (`ROADMAP.md`), since form handling on a static site
+is a dependency decision worth its own pass. The 002 Contact page
+ships the interim mechanism: direct email plus Instagram, satisfying
+spec 001's "working way to get in touch" without pre-empting the form.
 
 ## Entities
 
@@ -123,11 +131,15 @@ currently-live site.
 - [ ] Sharing a piece URL yields a piece-specific OG card (verified
       with a real link-preview debugger, not just markup inspection)
 - [ ] The About page renders the photographer's own text
-- [ ] The Contact page provides the chosen mechanism and it works
-      end-to-end (a test message actually arrives)
-- [ ] The site is live at its stable URL; a push to `main` deploys;
-      the test piece reads correctly on the live site including the
-      full-bleed and diptych treatments
+- [ ] The Contact page provides the interim mechanism (email +
+      Instagram) and it works end-to-end (the email link opens a
+      correctly-addressed draft; the Instagram link resolves)
+- [ ] The site deploys to the host's test URL on every push to `main`;
+      the test piece reads correctly there including the full-bleed
+      and diptych treatments
+- [ ] The custom-domain flip is executed (or explicitly deferred by
+      the photographer with the test URL accepted as interim), with
+      canonical URLs correct for whichever is live
 - [ ] RSS contains pieces (and no blog/works remnants)
 
 ## Resolved decisions
