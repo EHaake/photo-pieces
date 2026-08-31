@@ -85,3 +85,20 @@ Considered and passed on:
 Landed on **`photo-pieces`** — keeps "pieces," the one word that's done
 real conceptual work throughout every document, without reintroducing
 the word the project deliberately moved away from.
+
+## Obsidian live-preview plugin: fullbleed only, approximation accepted
+
+Built rather than deferred, once the actual bar was clarified: not
+matching the real site's styling, just seeing an image instead of raw
+directive text while writing in Live Preview. That's a much smaller
+target than a Reading-View-and-Live-Preview, style-matched renderer —
+a single CodeMirror 6 `ViewPlugin`, using a plain regex rather than a
+full remark-directive parser, since it only needs to recognize the one
+block type actually built on the Astro side so far (`fullbleed`).
+Reading View is intentionally not handled — Live Preview is the mode
+actually used while writing, which is the specific problem this
+solves.
+
+Source lives in `obsidian-plugin/` in this repo. Extending it to
+`diptych`/`triptych` once those exist on the Astro side follows the
+same pattern: a regex and a widget class per block type.
