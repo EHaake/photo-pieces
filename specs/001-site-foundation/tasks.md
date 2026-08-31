@@ -58,7 +58,7 @@ not just proceeding on the first idea that compiles.
 Mechanical once Phase 0–1 land — review per-phase rather than
 per-task.
 
-- [ ] **T006** — Add `src/pages/pieces/[slug].astro`, parallel to the
+- [x] **T006** — Add `src/pages/pieces/[slug].astro`, parallel to the
       existing `blog/[slug].astro`, rendering a piece's title, date,
       categories, and body. *Verify: the T002 test piece, updated to
       include a `::fullbleed{...}` block, renders correctly at its own
