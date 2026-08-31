@@ -58,8 +58,8 @@ const font = (pkgPath: string) => readFile(require.resolve(pkgPath));
 // render them as tofu in every share image. Post titles in a non-Latin script
 // hit the same limit: install a face that covers them (e.g.
 // `@fontsource/noto-sans-jp`) and point the paths below at it.
-const [fraunces, publicSans] = await Promise.all([
-  font('@fontsource/fraunces/files/fraunces-latin-600-normal.woff'),
+const [spectral, publicSans] = await Promise.all([
+  font('@fontsource/spectral/files/spectral-latin-600-normal.woff'),
   font('@fontsource/public-sans/files/public-sans-latin-400-normal.woff'),
 ]);
 
@@ -191,7 +191,7 @@ export const GET: APIRoute<OgProps> = async ({ props }) => {
       width: 1200,
       height: 630,
       fonts: [
-        { name: 'Spectral', data: fraunces, weight: 600, style: 'normal' },
+        { name: 'Spectral', data: spectral, weight: 600, style: 'normal' },
         { name: 'Public Sans', data: publicSans, weight: 400, style: 'normal' },
       ],
     },

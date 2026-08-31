@@ -17,7 +17,7 @@ build reported, not summarized.
 Foundational — review after every task. Mistakes here are cheap to
 catch now and expensive once later phases depend on them.
 
-- [ ] **T001** — Add the `pieces` collection schema to
+- [x] **T001** — Add the `pieces` collection schema to
       `src/content.config.ts`, matching `plan.md` exactly (`title`,
       `publishDate`, `categories` enum array, `description`, optional
       `cover` image, `draft`). *Verify: `astro build` succeeds with the
