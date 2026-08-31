@@ -1,0 +1,18 @@
+.photo-pieces-fullbleed-preview {
+  margin: 0.5em 0;
+}
+
+.photo-pieces-fullbleed-caption {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  margin-top: 0.35em;
+}
+
+.photo-pieces-fullbleed-missing {
+  padding: 0.75em 1em;
+  border: 1px dashed var(--text-error);
+  color: var(--text-error);
+  font-family: var(--font-monospace);
+  font-size: 0.85em;
+  border-radius: 4px;
+}

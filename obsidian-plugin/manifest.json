@@ -1,0 +1,9 @@
+{
+  "id": "photo-pieces-blocks",
+  "name": "Photo Pieces Blocks",
+  "version": "0.1.1",
+  "minAppVersion": "1.4.0",
+  "description": "Renders fullbleed image directives inline while editing, in this vault's pieces.",
+  "author": "Erik Haake",
+  "isDesktopOnly": false
+}
