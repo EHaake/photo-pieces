@@ -48,7 +48,7 @@ not just proceeding on the first idea that compiles.
       an alternative if that turns out not to be the right mechanism.
       *Verify: a real photo referenced via the directive renders as an
       actual sized/optimized image in `astro dev`, not a placeholder.*
-- [ ] **T005** — Style the full-bleed treatment to match
+- [x] **T005** — Style the full-bleed treatment to match
       `design/brief.md`'s visual direction (edge-to-edge within the
       prose column). *Verify: visual match, checked in the browser
       against a real piece.*

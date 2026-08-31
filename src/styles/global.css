@@ -91,6 +91,11 @@ body {
   min-width: 320px;
   margin: 0;
   background: var(--color-bg);
+  /* 100vw includes the scrollbar on persistent-scrollbar platforms; clip
+     the few px of overshoot from .piece-fullbleed instead of showing a
+     horizontal scrollbar. `clip` (not `hidden`) avoids creating a new
+     scroll container. */
+  overflow-x: clip;
 }
 
 ::selection {
@@ -724,6 +729,15 @@ pre code {
   font-weight: 700;
 }
 
+/* The theme shipped no constraint for content-body images at all; a plain
+   markdown image (the dominant piece image case — see plan.md) rendered at
+   natural width and overflowed the column. Found during T005 verification. */
+.prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 .prose ul,
 .prose ol {
   padding-left: 1.2rem;
@@ -1052,4 +1066,30 @@ pre code {
   h3 {
     max-width: 100%;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Piece blocks — the directive-backed image treatments (see CLAUDE.md's
+   closed block vocabulary; class names mirror remark-pieces-blocks.mjs).
+   Flat per design/brief.md: no borders, shadows, or rounded corners —
+   the images themselves are the interface. */
+
+.piece-block {
+  margin-block: calc(var(--baseline) * 2);
+}
+
+.piece-block img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Edge-to-edge breakout. The 50% refers to the figure's containing block,
+   so this reaches both viewport edges only when the piece reading column
+   is viewport-centered — that is the piece layout's contract (unlike
+   /blog/'s off-center TOC grid). `overflow-x: clip` on body absorbs the
+   scrollbar-width overshoot of 100vw on persistent-scrollbar platforms. */
+.piece-fullbleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
 }
