@@ -45,7 +45,7 @@ trail; nothing else depends on them unless stated.
 
 - [x] **T106** — Delete `works`: pages, content, collection,
       nav entry. *Verify: build green; no `/works/` href in `dist/`.*
-- [ ] **T107** — Delete `blog`: pages (index, slug, tags), content,
+- [x] **T107** — Delete `blog`: pages (index, slug, tags), content,
       collection, nav entry, Giscus/Comments component + config.
       *Verify: build green; no `/blog/` href in `dist/`; unit suite
       still green (18 tests).*

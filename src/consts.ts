@@ -52,59 +52,6 @@ export const SOCIAL_LINKS: readonly SocialLink[] = [
   { label: 'RSS feed', href: '/rss.xml', icon: 'rss' },
 ];
 
-/** Giscus — GitHub Discussions-backed comments on blog posts.
- *  See `GISCUS` below; values come from https://giscus.app. */
-export interface GiscusConfig {
-  /** Master switch. While `false`, no Giscus markup, CSS, or script is emitted. */
-  enabled: boolean;
-  /** Target repository, `owner/name`. Needs public Discussions and the
-   *  giscus GitHub App installed. */
-  repo: string;
-  /** Repository ID from giscus.app (starts with `R_`). */
-  repoId: string;
-  /** Discussion category name, e.g. `Announcements`. */
-  category: string;
-  /** Category ID from giscus.app (starts with `DIC_`). */
-  categoryId: string;
-  /** How a post maps to its discussion. `pathname` is the safest default —
-   *  it survives retitling, unlike `title`. */
-  mapping: 'pathname' | 'url' | 'title' | 'og:title' | 'specific' | 'number';
-  /** Use a strict title match when looking up the discussion. */
-  strict: boolean;
-  /** Show the reaction bar above the comment list. */
-  reactionsEnabled: boolean;
-  /** Put the comment box above (`top`) or below (`bottom`) the thread. */
-  inputPosition: 'top' | 'bottom';
-  /** Giscus UI language, e.g. `en`, `ja`, `fr`. */
-  lang: string;
-  /** Giscus theme used while the site is in light mode. */
-  lightTheme: string;
-  /** Giscus theme used while the site is in dark mode. The widget is told to
-   *  switch live when the header toggle flips. */
-  darkTheme: string;
-}
-
-/** Comments are **off by default** — the theme ships no third-party JavaScript
- *  unless you ask for it. To turn them on: enable Discussions on your repo,
- *  install the giscus app (https://github.com/apps/giscus), fill in the IDs
- *  from https://giscus.app, and set `enabled: true`. */
-export const GISCUS: GiscusConfig = {
-  enabled: false,
-  repo: '',
-  repoId: '',
-  category: 'Announcements',
-  categoryId: '',
-  mapping: 'pathname',
-  strict: true,
-  reactionsEnabled: true,
-  inputPosition: 'bottom',
-  lang: 'en',
-  // Other options include `preferred_color_scheme`, `transparent_dark`,
-  // `noborder_light`, `cobalt`, or a URL to your own theme CSS.
-  lightTheme: 'light',
-  darkTheme: 'dark',
-};
-
 export type NavItem =
   | { href: string; label: string; labelKey?: never }
   | { href: string; labelKey: UIKey; label?: never };
@@ -116,6 +63,5 @@ export type NavItem =
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: '/', labelKey: 'nav.home' },
   { href: '/about/', labelKey: 'nav.about' },
-  { href: '/blog/', labelKey: 'nav.blog' },
   { href: '/search/', labelKey: 'nav.search' },
 ];
