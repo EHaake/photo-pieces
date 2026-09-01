@@ -20,7 +20,7 @@ trail; nothing else depends on them unless stated.
       `TODO-AUTHOR`, Instagram social link (add an Instagram SVG to
       the footer icon set), remove upstream author's socials/values.
       *Verify: build green; footer renders the Instagram link.*
-- [ ] **T102** — `astro.config.mjs`: `site: 'https://erikhaakephoto.com'`,
+- [x] **T102** — `astro.config.mjs`: `site: 'https://erikhaakephoto.com'`,
       remove `base`. *Verify: build green; canonical/sitemap URLs in
       `dist/` carry the new domain and no `/astro-keel` paths remain
       anywhere in built output.*

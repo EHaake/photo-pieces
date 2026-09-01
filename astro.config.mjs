@@ -9,12 +9,11 @@ import { remarkPiecesBlocks } from './remark-pieces-blocks.mjs';
 
 // https://astro.build/config
 export default defineConfig({
-  // Change to your deployed URL. Used for sitemap, canonical, and RSS links.
-  // For a GitHub Pages project site, `site` is the user/org domain and `base`
-  // is the repository name. Drop `base` (or set it to '/') for a custom domain
-  // or a `<user>.github.io` root site.
-  site: 'https://kpab.github.io',
-  base: '/astro-keel',
+  // Used for sitemap, canonical, and RSS links. Set to the real domain even
+  // while the site only serves from the workers.dev test URL — pre-launch
+  // canonicals pointing forward is harmless, and the domain flip then needs
+  // no code change (see specs/002-going-live/plan.md).
+  site: 'https://erikhaakephoto.com',
   integrations: [mdx(), sitemap()],
   markdown: {
     processor: unified({
