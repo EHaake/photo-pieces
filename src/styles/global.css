@@ -36,6 +36,10 @@
 
 html {
   min-width: 320px;
+  /* Reserve the scrollbar gutter even on pages too short to scroll —
+     otherwise the centered layout (header included) shifts sideways
+     when navigating between scrolling and non-scrolling pages. */
+  scrollbar-gutter: stable;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
