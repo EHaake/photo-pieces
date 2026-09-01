@@ -52,7 +52,7 @@ trail; nothing else depends on them unless stated.
 - [x] **T108** — Reshape `rss.xml.ts` to pieces. *Verify: build green;
       feed lists the test piece with a `/pieces/` URL; no blog/works
       items.*
-- [ ] **T109** — Reshape the OG route to `og/pieces/[slug].png.ts`
+- [x] **T109** — Reshape the OG route to `og/pieces/[slug].png.ts`
       over non-draft pieces, categories as the eyebrow. *Verify: build
       green; the test piece's OG PNG generates; piece page's `og:image`
       points at it.*
