@@ -23,8 +23,11 @@ strictly as a typographic treatment, never a rendered plaque).
 ## What to explicitly avoid
 
 - **Skeuomorphism.** No literal rendering of physical photographic
-  objects — no contact-sheet borders, sprocket holes, tape, film-grain
-  textures, or print-mat framing standing in for real UI.
+  objects — no contact-sheet borders, sprocket holes, tape, or
+  film-grain textures standing in for real UI. **Amended at spec 003
+  review**: the flat matte is explicitly _not_ on this list — see the
+  Skeuomorphism boundary below. Frames (rendered wood/metal borders,
+  shadows, bevels) remain out.
 - **Overly "design-y" or pretentious.** The explicit standard set is
   clean, minimal, sophisticated, and elegant — but approachable, not
   showy.
@@ -104,8 +107,19 @@ the site.
 
 Firmly flat and modern. Physical/photographic vocabulary (the gallery
 label, the general idea of curation) can inform structure and metaphor,
-but nothing renders as a literal object — no textures, borders, or
+but nothing renders as a literal object — no textures, or
 shadows standing in for a physical print, plaque, or contact sheet.
+
+**The matte carve-out (amended at spec 003 review).** The photographer
+mattes every image they present, on every channel — it is their
+presentation style, not decorative imitation of physicality. A flat,
+uniform matte field around images is therefore part of this site's
+visual language: no shadow, no texture, no bevel, no frame — a clean
+color field, token-driven (width and color in `global.css`), applied
+by the site's CSS rather than baked into image files (decision
+recorded in `DECISIONS.md`). Which treatments are matted by default
+(edge-to-edge treatments like fullbleed presumably are not) is a
+design/plan detail of spec 003.
 
 ## Screens to design
 
