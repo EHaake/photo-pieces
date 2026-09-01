@@ -25,7 +25,7 @@ weakening tests to pass.
       values checked) and textDirective attribute re-serialization.
       _Verify: existing 18 tests green unchanged; new validation
       tests; build green._
-- [ ] **T203** — Container/caption core: inline-level body partition,
+- [x] **T203** — Container/caption core: inline-level body partition,
       `<figcaption>` emission with inline markdown, directive-label
       fail-loudly (both forms), no-nesting body scan; `single`'s
       directive form (leaf + captioned container) as the proving

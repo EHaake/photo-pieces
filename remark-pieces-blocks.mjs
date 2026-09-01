@@ -32,9 +32,32 @@ import { visit } from 'unist-util-visit';
 // hazard, and leaving them *unhandled* is not safe either — an unhandled
 // directive node renders as an empty <div> that splits the paragraph.
 
+// Shared with the CSS media queries: below this width the multi-column
+// blocks collapse to stacked and render ~94vw. The same constant appears
+// in global.css's piece-block section — keep them in step by hand.
+const COLLAPSE = '(min-width: 720px)';
+
 const BLOCKS = {
+  single: {
+    // The directive form of the column-width image — exists so a single
+    // can carry a caption; plain ![alt](./img.jpg) stays the captionless
+    // shorthand. 680px is coupled to --prose-width (68ch) minus matte —
+    // see the coupling comment in global.css.
+    forms: 'both',
+    body: 'caption',
+    attrs: { required: ['src', 'alt'], optional: [], enums: {} },
+    images(attrs, fail) {
+      if (!attrs.src) fail('single requires a src attribute');
+      if (attrs.alt === undefined)
+        fail('single requires an alt attribute (use alt="" only for a truly decorative image)');
+      return [{ src: attrs.src, alt: attrs.alt }];
+    },
+    sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 680px, 94vw` }),
+    matted: true,
+  },
+
   fullbleed: {
-    forms: 'leaf', // container form (caption) lands with T203
+    forms: 'leaf', // container form (caption) flips on in T204
     attrs: { required: ['src', 'alt'], optional: [], enums: {} },
     images(attrs, fail) {
       if (!attrs.src) fail('fullbleed requires a src attribute');
@@ -133,12 +156,25 @@ export function remarkPiecesBlocks() {
         );
       }
       if (block.forms === 'reserved') failHere(block.reservedMessage);
+
+      let caption = null;
       if (node.type === 'containerDirective') {
-        // Container support (captions, body images, prose bodies) lands
-        // with T203; until then the container form of every block fails
-        // loudly rather than silently discarding its body.
+        if (block.forms === 'leaf') {
+          // Blocks not yet flipped to 'both' keep failing loudly rather
+          // than silently discarding their body (flips land in T204/T205).
+          failHere(
+            `the :::${node.name} container form is not supported — use ::${node.name}{...} on its own line`,
+          );
+        }
+        rejectLabel(node, failHere);
+        rejectNestedBlocks(node, failHere);
+        if (block.body === 'caption') caption = captionNode(node.children);
+      } else if (node.children.length > 0) {
+        // A leaf directive's children are its [label] — silently
+        // discarding it would eat authored text (the caption mistake
+        // this vocabulary makes likely).
         failHere(
-          `the :::${node.name} container form is not supported — use ::${node.name}{...} on its own line`,
+          `unexpected [label] on ::${node.name} — captions go in the body of the :::${node.name} container form`,
         );
       }
 
@@ -147,18 +183,52 @@ export function remarkPiecesBlocks() {
 
       const images = block.images(attrs, failHere);
       for (const image of images) checkSrcExists(file, node, image.src);
-      node.children = images.map(({ src, alt }, imageIndex) => ({
-        type: 'image',
-        url: src,
-        alt,
-        data: { hProperties: { ...block.sizing(attrs, imageIndex, null) } },
-      }));
+      node.children = [
+        ...images.map(({ src, alt }, imageIndex) => ({
+          type: 'image',
+          url: src,
+          alt,
+          data: { hProperties: { ...block.sizing(attrs, imageIndex, null) } },
+        })),
+        ...(caption ? [caption] : []),
+      ];
       node.data = {
         ...node.data,
         hName: 'figure',
         hProperties: { className: ['piece-block', `piece-${node.name}`] },
       };
     });
+  };
+}
+
+function rejectLabel(node, fail) {
+  // mdast-util-directive flags a container's [label] line as a paragraph
+  // with data.directiveLabel.
+  if (node.children[0]?.data?.directiveLabel) {
+    fail(`unexpected [label] on :::${node.name} — captions go in the body, not the [label]`);
+  }
+}
+
+function rejectNestedBlocks(node, fail) {
+  // The outer visit never traverses replacement children, so nesting is
+  // checked explicitly: block directives inside a body are not supported.
+  visit(node, ['leafDirective', 'containerDirective'], (inner) => {
+    if (inner !== node) {
+      fail(`a block directive (::${inner.name}) cannot be nested inside :::${node.name}`);
+    }
+  });
+}
+
+function captionNode(children) {
+  if (children.length === 0) return null;
+  // A one-paragraph caption unwraps to inline content (<figcaption>text)
+  // rather than <figcaption><p>text</p>; longer captions keep paragraphs.
+  const content =
+    children.length === 1 && children[0].type === 'paragraph' ? children[0].children : children;
+  return {
+    type: 'pieceCaption',
+    children: content,
+    data: { hName: 'figcaption' },
   };
 }
 

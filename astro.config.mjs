@@ -14,6 +14,11 @@ export default defineConfig({
   // canonicals pointing forward is harmless, and the domain flip then needs
   // no code change (see specs/002-going-live/plan.md).
   site: 'https://erikhaakephoto.com',
+  // Global responsive layout: markdown images (including the plain
+  // ![alt](...) single shorthand) get srcset/sizes, keeping the
+  // shorthand equivalent to ::single per spec 003. Set once its 001-era
+  // blocker (/blog/ also changing) died with the 002 teardown.
+  image: { layout: 'constrained' },
   integrations: [mdx(), sitemap()],
   markdown: {
     processor: unified({

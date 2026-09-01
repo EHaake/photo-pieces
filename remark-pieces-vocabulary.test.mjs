@@ -61,6 +61,85 @@ describe('closed attribute validation (T202)', () => {
   });
 });
 
+const imageMarkers = (code) =>
+  [...code.matchAll(/__ASTRO_IMAGE_="([^"]*)"/g)].map((m) =>
+    JSON.parse(m[1].replaceAll('&#x22;', '"')),
+  );
+
+describe('single directive form and captions (T203)', () => {
+  it('leaf single renders a classed figure with constrained responsive sizing', async () => {
+    const { code, metadata } = await render('::single{src="./photo.jpg" alt="dawn"}');
+    expect(code).toContain('<figure class="piece-block piece-single">');
+    expect(metadata.localImagePaths).toEqual(['./photo.jpg']);
+    const [marker] = imageMarkers(code);
+    expect(marker).toMatchObject({ src: './photo.jpg', alt: 'dawn', layout: 'constrained' });
+    expect(marker.sizes).toContain('680px');
+  });
+
+  it('container single renders the body as a figcaption with inline markdown', async () => {
+    const { code } = await render(
+      ':::single{src="./photo.jpg" alt="dawn"}\nShot at *first light*, tripod low.\n:::',
+    );
+    expect(code).toContain('<figure class="piece-block piece-single">');
+    expect(code).toMatch(/<figcaption>Shot at <em>first light<\/em>, tripod low\.<\/figcaption>/);
+  });
+
+  it('a one-paragraph caption unwraps (no <p> inside figcaption)', async () => {
+    const { code } = await render(':::single{src="./photo.jpg" alt="x"}\nCaption.\n:::');
+    expect(code).not.toMatch(/<figcaption><p>/);
+  });
+
+  it('a multi-paragraph caption keeps its paragraphs', async () => {
+    const { code } = await render(
+      ':::single{src="./photo.jpg" alt="x"}\nFirst line.\n\nSecond thought.\n:::',
+    );
+    expect(code).toMatch(
+      /<figcaption><p>First line\.<\/p>\s*<p>Second thought\.<\/p><\/figcaption>/,
+    );
+  });
+
+  it('an empty container body means no figcaption', async () => {
+    const { code } = await render(':::single{src="./photo.jpg" alt="x"}\n:::');
+    expect(code).toContain('<figure class="piece-block piece-single">');
+    expect(code).not.toContain('<figcaption');
+  });
+
+  it('the figcaption follows the image inside the figure', async () => {
+    const { code } = await render(':::single{src="./photo.jpg" alt="x"}\nBelow.\n:::');
+    const figure = code.match(/<figure[^>]*>([\s\S]*?)<\/figure>/)[1];
+    expect(figure.indexOf('__ASTRO_IMAGE_')).toBeLessThan(figure.indexOf('<figcaption'));
+  });
+
+  it('a [label] on the container form fails loudly', async () => {
+    await expect(
+      renderExpectingFailure(':::single[my caption]{src="./photo.jpg" alt="x"}\n:::'),
+    ).rejects.toThrow(/captions go in the body, not the \[label\]/);
+  });
+
+  it('a [label] on a leaf directive fails instead of being silently eaten', async () => {
+    await expect(
+      renderExpectingFailure('::single[my caption]{src="./photo.jpg" alt="x"}'),
+    ).rejects.toThrow(/unexpected \[label\] on ::single/);
+  });
+
+  it('a block directive nested in a body fails loudly', async () => {
+    await expect(
+      renderExpectingFailure(
+        ':::single{src="./photo.jpg" alt="x"}\n::fullbleed{src="./photo.jpg" alt="y"}\n:::',
+      ),
+    ).rejects.toThrow(/cannot be nested inside :::single/);
+  });
+
+  it('missing src and alt keep the family error contract', async () => {
+    await expect(renderExpectingFailure('::single{alt="x"}')).rejects.toThrow(
+      /single requires a src attribute/,
+    );
+    await expect(renderExpectingFailure('::single{src="./photo.jpg"}')).rejects.toThrow(
+      /single requires an alt attribute/,
+    );
+  });
+});
+
 describe('text directive restoration round-trips attributes (T202)', () => {
   it('a bare text directive with attributes comes back verbatim', async () => {
     const { code } = await render('Set the :hover{delay="80ms"} state carefully.');
