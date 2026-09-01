@@ -22,6 +22,13 @@
   --baseline: 1.5rem;
   --hairline: 1px solid var(--color-line);
   --focus-ring: 0 0 0 3px var(--color-accent-soft);
+  /* The matte (spec 003): a flat color field around images — the
+     photographer's presentation style on every channel, carved out of the
+     skeuomorphism ban (design/brief.md). Pure white against the warm page
+     reads as a matte with no rule needed. Both are one-line retunes;
+     never add shadow, bevel, or texture. */
+  --matte: clamp(0.5rem, 1.4vw, 1.05rem);
+  --color-matte: oklch(1 0 0);
 }
 
 /* Light-only by design: the photographer controls how the work is seen,
@@ -1237,4 +1244,40 @@ pre code {
   font-size: 0.78rem;
   letter-spacing: 0.02em;
   color: var(--color-muted);
+}
+
+/* ---- Mattes (spec 003 Phase 3) --------------------------------------
+   Application map — matted: single (both forms), inset, wide, diptych,
+   triptych, grid, and the figures inside aside/row; unmatted: fullbleed,
+   tall, strip (the bleed is the point), and half-bleed's bled edge.
+   Multi-image blocks share ONE matte: the figure's background shows
+   through the grid/flex gaps, so the gutters read as matte. Captions sit
+   inside the padded field — museum convention. */
+
+.piece-single,
+.piece-inset,
+.piece-wide,
+.piece-diptych,
+.piece-triptych,
+.piece-grid,
+.piece-aside,
+.piece-row figure {
+  background: var(--color-matte);
+  padding: var(--matte);
+}
+
+/* The plain-markdown shorthand single gets the same matte directly. */
+.prose > p > img {
+  background: var(--color-matte);
+  padding: var(--matte);
+}
+
+/* Half-bleed: the bled edge runs clean to the viewport; the matte holds
+   on the other three sides (fallback stance — a sampler-review knob). */
+.piece-wide.bleed-left {
+  padding-left: 0;
+}
+
+.piece-wide.bleed-right {
+  padding-right: 0;
 }

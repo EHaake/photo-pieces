@@ -68,7 +68,7 @@ weakening tests to pass.
 
 ## Phase 3 — Mattes
 
-- [ ] **T208** — `--matte` / `--color-matte` tokens; application map
+- [x] **T208** — `--matte` / `--color-matte` tokens; application map
       (matted: single both forms, inset, wide, diptych, triptych,
       grid, aside, row; unmatted: fullbleed, tall, strip; half-bleed
       column-side only); shorthand-single rule (`.prose > p > img`);
