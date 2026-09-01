@@ -43,7 +43,7 @@ trail; nothing else depends on them unless stated.
 
 ## Phase 2 — Teardown
 
-- [ ] **T106** — Delete `works`: pages, content, collection,
+- [x] **T106** — Delete `works`: pages, content, collection,
       nav entry. *Verify: build green; no `/works/` href in `dist/`.*
 - [ ] **T107** — Delete `blog`: pages (index, slug, tags), content,
       collection, nav entry, Giscus/Comments component + config.
