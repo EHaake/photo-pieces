@@ -1120,6 +1120,117 @@ pre code {
   margin-inline: auto;
 }
 
+/* Uniform 2-column cluster; rows share the pairs' midline centering. */
+.piece-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(var(--baseline) / 3);
+  align-items: center;
+}
+
+.piece-grid figcaption {
+  grid-column: 1 / -1;
+}
+
+/* Horizontally scrollable band, edge to edge like fullbleed. Band height
+   (--strip-h) is a sampler-review knob; its 420px ceiling is baked into
+   the transform's strip sizes math — keep them in step. */
+.piece-strip {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+.piece-strip-scroll {
+  display: flex;
+  gap: calc(var(--baseline) / 3);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  height: var(--strip-h, clamp(240px, 45vh, 420px));
+}
+
+.piece-strip img {
+  width: auto;
+  height: 100%;
+  flex: none;
+  scroll-snap-align: center;
+}
+
+.piece-strip figcaption {
+  width: min(var(--prose-width), 94vw);
+  margin-inline: auto;
+}
+
+/* Float-wrap aside: the figure floats inside the prose column; the body
+   prose was unwrapped to ordinary sibling paragraphs by the transform. */
+.piece-aside {
+  width: min(300px, 45%);
+  margin-block: calc(var(--baseline) / 4) var(--baseline);
+}
+
+.piece-aside.side-left {
+  float: left;
+  margin-right: var(--baseline);
+}
+
+.piece-aside.side-right {
+  float: right;
+  margin-left: var(--baseline);
+}
+
+/* Contain floats: an aside as the last block must not escape into the
+   footer. ::after clearfix, NOT display:flow-root — flow-root would stop
+   margin-collapsing and change the column's vertical rhythm site-wide. */
+.prose::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.prose h2,
+.prose h3,
+.piece-block {
+  clear: both;
+}
+
+/* Image-beside-prose row, no wrap. */
+.piece-row {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: var(--baseline);
+  align-items: start;
+}
+
+.piece-row.side-right {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+}
+
+.piece-row.side-right figure {
+  order: 2;
+}
+
+.piece-row figure {
+  margin: 0;
+}
+
+@media (max-width: 719.98px) {
+  .piece-aside,
+  .piece-aside.side-left,
+  .piece-aside.side-right {
+    float: none;
+    width: 100%;
+    margin-inline: 0;
+  }
+
+  .piece-row,
+  .piece-row.side-right {
+    grid-template-columns: 1fr;
+  }
+
+  .piece-row.side-right figure {
+    order: 0;
+  }
+}
+
 .piece-block figcaption {
   margin-top: calc(var(--baseline) / 3);
   font-family: var(--font-mono);

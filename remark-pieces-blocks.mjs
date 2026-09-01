@@ -215,6 +215,86 @@ const BLOCKS = {
     matted: true,
   },
 
+  grid: {
+    // Uniform multi-image cluster. Images live in the body as plain
+    // markdown images (the syntax authors already know); any trailing
+    // non-image paragraphs are the caption.
+    forms: 'container',
+    body: 'images+caption',
+    count: { min: 2, max: 6 },
+    attrs: { required: [], optional: [], enums: {} },
+    sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 340px, 94vw` }),
+    matted: true,
+  },
+
+  strip: {
+    // Fixed-height, horizontally scrollable band: one panorama or several
+    // uniform-height frames. Native scroll only. Per-image sizes derive
+    // from the probed ratio at the band's max height (420px — the
+    // --strip-h clamp ceiling), erring toward over-delivery.
+    forms: 'container',
+    body: 'images+caption',
+    count: { min: 1, max: 8 },
+    structure: 'scroll',
+    attrs: { required: [], optional: [], enums: {} },
+    needsRatios: () => true,
+    sizing: (attrs, i, ratios) => ({
+      layout: 'constrained',
+      sizes: `${Math.round(420 * (ratios?.[i] ?? 1.5))}px`,
+    }),
+    matted: false,
+  },
+
+  aside: {
+    // Image floated to one side with the body prose wrapping around it.
+    // The container UNWRAPS: figure + prose splice into the parent so the
+    // paragraphs stay ordinary column prose.
+    forms: 'container',
+    body: 'prose',
+    structure: 'unwrap',
+    attrs: {
+      required: ['src', 'alt', 'side'],
+      optional: [],
+      enums: { side: ['left', 'right'] },
+    },
+    validate(attrs, fail) {
+      if (!attrs.side) fail('aside requires side="left" or side="right"');
+    },
+    images(attrs, fail) {
+      if (!attrs.src) fail('aside requires a src attribute');
+      if (attrs.alt === undefined)
+        fail('aside requires an alt attribute (use alt="" only for a truly decorative image)');
+      return [{ src: attrs.src, alt: attrs.alt }];
+    },
+    classes: (attrs) => [`side-${attrs.side}`],
+    sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 300px, 94vw` }),
+    matted: true,
+  },
+
+  row: {
+    // Image and prose as two side-by-side columns, no wrap.
+    forms: 'container',
+    body: 'prose',
+    structure: 'split',
+    attrs: {
+      required: ['src', 'alt', 'side'],
+      optional: [],
+      enums: { side: ['left', 'right'] },
+    },
+    validate(attrs, fail) {
+      if (!attrs.side) fail('row requires side="left" or side="right"');
+    },
+    images(attrs, fail) {
+      if (!attrs.src) fail('row requires a src attribute');
+      if (attrs.alt === undefined)
+        fail('row requires an alt attribute (use alt="" only for a truly decorative image)');
+      return [{ src: attrs.src, alt: attrs.alt }];
+    },
+    classes: (attrs) => [`side-${attrs.side}`],
+    sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 340px, 94vw` }),
+    matted: true,
+  },
+
   sequence: {
     // Reserved in the content model; presentation undecided (ROADMAP.md).
     // Modeled explicitly so a refactor can't regress this to the generic
@@ -246,11 +326,11 @@ export function remarkPiecesBlocks() {
     });
 
     const directives = [];
-    visit(tree, ['leafDirective', 'containerDirective'], (node) => {
-      directives.push(node);
+    visit(tree, ['leafDirective', 'containerDirective'], (node, _index, parent) => {
+      directives.push({ node, parent });
     });
 
-    for (const node of directives) {
+    for (const { node, parent } of directives) {
       const failHere = (message) => fail(file, node, message);
       const block = BLOCKS[node.name];
       if (!block) {
@@ -262,10 +342,10 @@ export function remarkPiecesBlocks() {
       if (block.forms === 'reserved') failHere(block.reservedMessage);
 
       let caption = null;
+      let bodyProse = null;
+      let bodyImages = null;
       if (node.type === 'containerDirective') {
         if (block.forms === 'leaf') {
-          // Blocks not yet flipped to 'both' keep failing loudly rather
-          // than silently discarding their body (flips land in T204/T205).
           failHere(
             `the :::${node.name} container form is not supported — use ::${node.name}{...} on its own line`,
           );
@@ -273,20 +353,44 @@ export function remarkPiecesBlocks() {
         rejectLabel(node, failHere);
         rejectNestedBlocks(node, failHere);
         if (block.body === 'caption') caption = captionNode(node.children);
-      } else if (node.children.length > 0) {
-        // A leaf directive's children are its [label] — silently
-        // discarding it would eat authored text (the caption mistake
-        // this vocabulary makes likely).
-        failHere(
-          `unexpected [label] on ::${node.name} — captions go in the body of the :::${node.name} container form`,
-        );
+        if (block.body === 'prose') bodyProse = node.children;
+        if (block.body === 'images+caption') {
+          const partitioned = partitionBody(node.children, node.name, failHere);
+          bodyImages = partitioned.images;
+          caption = captionNode(partitioned.caption);
+        }
+      } else {
+        if (block.forms === 'container') {
+          failHere(
+            `::${node.name} is written as a container — :::${node.name}{...} … ::: with its content in the body`,
+          );
+        }
+        if (node.children.length > 0) {
+          // A leaf directive's children are its [label] — silently
+          // discarding it would eat authored text (the caption mistake
+          // this vocabulary makes likely).
+          failHere(
+            `unexpected [label] on ::${node.name} — captions go in the body of the :::${node.name} container form`,
+          );
+        }
       }
 
       const attrs = node.attributes ?? {};
       validateAttributes(block, node.name, attrs, failHere);
       block.validate?.(attrs, failHere);
 
-      const images = block.images(attrs, failHere);
+      let images;
+      if (block.body === 'images+caption') {
+        const { min, max } = block.count;
+        if (bodyImages.length < min || bodyImages.length > max) {
+          failHere(
+            `${node.name} takes ${min}–${max} images (one markdown image per line in the body); got ${bodyImages.length}`,
+          );
+        }
+        images = bodyImages;
+      } else {
+        images = block.images(attrs, failHere);
+      }
       for (const image of images) checkSrcExists(file, node, image.src);
 
       // match="height": probe each image's dimensions (orientation-aware —
@@ -302,29 +406,98 @@ export function remarkPiecesBlocks() {
         normalized = ratios.map((r) => r / min);
       }
 
-      node.children = [
-        ...images.map(({ src, alt }, imageIndex) => ({
-          type: 'image',
-          url: src,
-          alt,
-          data: {
-            hProperties: {
-              ...block.sizing(attrs, imageIndex, ratios),
-              ...(normalized ? { style: `--ar: ${trimNumber(normalized[imageIndex])}` } : {}),
-            },
+      const imageNodes = images.map(({ src, alt }, imageIndex) => ({
+        type: 'image',
+        url: src,
+        alt,
+        data: {
+          hProperties: {
+            ...block.sizing(attrs, imageIndex, ratios),
+            ...(normalized ? { style: `--ar: ${trimNumber(normalized[imageIndex])}` } : {}),
           },
-        })),
-        ...(caption ? [caption] : []),
-      ];
+        },
+      }));
+      const className = ['piece-block', `piece-${node.name}`, ...(block.classes?.(attrs) ?? [])];
+
+      if (block.structure === 'unwrap') {
+        // aside: the figure floats; the body prose must be SIBLINGS in the
+        // column for text to wrap around it — so the container unwraps.
+        const figure = wrapNode('figure', className, imageNodes);
+        const index = parent.children.indexOf(node);
+        parent.children.splice(index, 1, figure, ...bodyProse);
+        continue;
+      }
+
+      if (block.structure === 'split') {
+        // row: figure and prose as the two cells of the wrapper.
+        node.children = [
+          wrapNode('figure', [], imageNodes),
+          wrapNode('div', ['piece-row-prose'], bodyProse),
+        ];
+        node.data = {
+          ...node.data,
+          hName: 'div',
+          hProperties: { className },
+        };
+        continue;
+      }
+
+      if (block.structure === 'scroll') {
+        // strip: images live in a scrolling band inside the figure.
+        node.children = [
+          wrapNode('div', ['piece-strip-scroll'], imageNodes),
+          ...(caption ? [caption] : []),
+        ];
+        node.data = { ...node.data, hName: 'figure', hProperties: { className } };
+        continue;
+      }
+
+      node.children = [...imageNodes, ...(caption ? [caption] : [])];
       node.data = {
         ...node.data,
         hName: 'figure',
-        hProperties: {
-          className: ['piece-block', `piece-${node.name}`, ...(block.classes?.(attrs) ?? [])],
-        },
+        hProperties: { className },
       };
     }
   };
+}
+
+function wrapNode(hName, className, children) {
+  return {
+    type: 'pieceWrap',
+    children,
+    data: {
+      hName,
+      ...(className.length > 0 ? { hProperties: { className } } : {}),
+    },
+  };
+}
+
+function partitionBody(children, name, fail) {
+  // Inline-level partition (spec 003 plan B1): consecutive image lines
+  // parse as ONE paragraph with "\n" text nodes between the images, so
+  // the rule works per inline node — image nodes and whitespace-only text
+  // contribute images; the first paragraph containing anything else ends
+  // the image run and starts the caption. Mixing images and text in one
+  // paragraph fails: the caption needs a blank line before it.
+  const images = [];
+  let i = 0;
+  for (; i < children.length; i++) {
+    const para = children[i];
+    if (para.type !== 'paragraph') break;
+    const imageChildren = para.children.filter((c) => c.type === 'image');
+    if (imageChildren.length === 0) break;
+    const stray = para.children.find(
+      (c) => c.type !== 'image' && !(c.type === 'text' && c.value.trim() === ''),
+    );
+    if (stray) {
+      fail(
+        `a paragraph in :::${name} mixes images and text — separate the caption from the images with a blank line`,
+      );
+    }
+    images.push(...imageChildren.map((img) => ({ src: img.url, alt: img.alt ?? '' })));
+  }
+  return { images, caption: children.slice(i) };
 }
 
 async function probeRatios(images, file, fail) {

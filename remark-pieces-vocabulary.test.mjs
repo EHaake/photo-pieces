@@ -288,6 +288,125 @@ describe('diptych/triptych upgrades: match, weight, captions (T205)', () => {
   });
 });
 
+describe('grid and strip: body-sourced images (T206)', () => {
+  it('grid takes consecutive image lines (one mdast paragraph) in order', async () => {
+    const { code } = await render(
+      ':::grid\n![a](./photo.jpg)\n![b](./portrait.jpg)\n![c](./rotated.jpg)\n:::',
+    );
+    expect(code).toContain('<figure class="piece-block piece-grid">');
+    const markers = imageMarkers(code);
+    expect(markers.map((m) => m.alt)).toEqual(['a', 'b', 'c']);
+    expect(markers[0].sizes).toBe('(min-width: 720px) 340px, 94vw');
+  });
+
+  it('blank-line-separated images work identically', async () => {
+    const { code } = await render(':::grid\n![a](./photo.jpg)\n\n![b](./portrait.jpg)\n:::');
+    expect(imageMarkers(code)).toHaveLength(2);
+  });
+
+  it('two images on one line work', async () => {
+    const { code } = await render(':::grid\n![a](./photo.jpg) ![b](./portrait.jpg)\n:::');
+    expect(imageMarkers(code)).toHaveLength(2);
+  });
+
+  it('a trailing paragraph after a blank line is the caption', async () => {
+    const { code } = await render(
+      ':::grid\n![a](./photo.jpg)\n![b](./portrait.jpg)\n\nFour corners of the same morning.\n:::',
+    );
+    expect(code).toContain('<figcaption>Four corners of the same morning.</figcaption>');
+    expect(imageMarkers(code)).toHaveLength(2);
+  });
+
+  it('mixing images and text in one paragraph fails with the blank-line hint', async () => {
+    await expect(
+      renderExpectingFailure(':::grid\n![a](./photo.jpg)\nThe caption right here\n:::'),
+    ).rejects.toThrow(/mixes images and text — separate the caption .* blank line/);
+  });
+
+  it('grid count is validated (1 too few, 7 too many)', async () => {
+    await expect(renderExpectingFailure(':::grid\n![a](./photo.jpg)\n:::')).rejects.toThrow(
+      /grid takes 2–6 images .*got 1/,
+    );
+    const seven = Array(7).fill('![x](./photo.jpg)').join('\n');
+    await expect(renderExpectingFailure(`:::grid\n${seven}\n:::`)).rejects.toThrow(/got 7/);
+  });
+
+  it('leaf ::grid fails pointing at the container form', async () => {
+    await expect(renderExpectingFailure('::grid{}')).rejects.toThrow(
+      /::grid is written as a container/,
+    );
+  });
+
+  it('strip renders the scroll band with probe-derived per-image sizes', async () => {
+    const { code } = await render(':::strip\n![p](./photo.jpg)\n![q](./portrait.jpg)\n:::');
+    expect(code).toContain('<figure class="piece-block piece-strip">');
+    expect(code).toContain('<div class="piece-strip-scroll">');
+    const markers = imageMarkers(code);
+    // photo.jpg ar 1.6 → 420*1.6 = 672px; portrait 0.6667 → 280px
+    expect(markers[0].sizes).toBe('672px');
+    expect(markers[1].sizes).toBe('280px');
+  });
+
+  it('a single panorama is a valid strip and its caption lands after the band', async () => {
+    const { code } = await render(':::strip\n![pano](./photo.jpg)\n\nThe whole ridge.\n:::');
+    const figure = code.match(/<figure[^>]*piece-strip[^>]*>([\s\S]*?)<\/figure>/)[1];
+    expect(figure.indexOf('piece-strip-scroll')).toBeLessThan(figure.indexOf('<figcaption'));
+    expect(figure).toContain('<figcaption>The whole ridge.</figcaption>');
+  });
+
+  it('an empty strip fails count validation', async () => {
+    await expect(renderExpectingFailure(':::strip\n:::')).rejects.toThrow(/strip takes 1–8 images/);
+  });
+});
+
+describe('aside and row: prose-bearing blocks (T207)', () => {
+  it('aside unwraps: floated figure + sibling prose, no wrapper element', async () => {
+    const { code } = await render(
+      ':::aside{src="./portrait.jpg" alt="detail" side="left"}\nThe prose that wraps around the image, staying ordinary column text.\n\nA second paragraph too.\n:::',
+    );
+    expect(code).toContain('<figure class="piece-block piece-aside side-left">');
+    // The prose is NOT inside the figure and there is no extra wrapper div:
+    const afterFigure = code.split('</figure>')[1];
+    expect(afterFigure).toContain('<p>The prose that wraps around the image');
+    expect(afterFigure).toContain('<p>A second paragraph too.</p>');
+    expect(code).not.toContain('piece-aside-body');
+  });
+
+  it('row wraps: div grid with figure and prose cells', async () => {
+    const { code } = await render(
+      ':::row{src="./photo.jpg" alt="scene" side="right"}\nProse that sits *beside* the image.\n:::',
+    );
+    expect(code).toContain('<div class="piece-block piece-row side-right">');
+    expect(code).toMatch(/<figure>[\s\S]*__ASTRO_IMAGE_[\s\S]*<\/figure>/);
+    expect(code).toMatch(
+      /<div class="piece-row-prose"><p>Prose that sits <em>beside<\/em> the image\.<\/p><\/div>/,
+    );
+  });
+
+  it('side is required and enum-checked on both', async () => {
+    await expect(
+      renderExpectingFailure(':::aside{src="./photo.jpg" alt="x"}\nText.\n:::'),
+    ).rejects.toThrow(/aside requires side="left" or side="right"/);
+    await expect(
+      renderExpectingFailure(':::row{src="./photo.jpg" alt="x" side="top"}\nText.\n:::'),
+    ).rejects.toThrow(/invalid value "top" for side on row/);
+  });
+
+  it('leaf ::aside fails pointing at the container form', async () => {
+    await expect(
+      renderExpectingFailure('::aside{src="./photo.jpg" alt="x" side="left"}'),
+    ).rejects.toThrow(/::aside is written as a container/);
+  });
+
+  it('a nested block directive inside aside prose fails', async () => {
+    await expect(
+      renderExpectingFailure(
+        ':::aside{src="./photo.jpg" alt="x" side="left"}\nText.\n\n::single{src="./photo.jpg" alt="y"}\n:::',
+      ),
+    ).rejects.toThrow(/cannot be nested inside :::aside/);
+  });
+});
+
 describe('text directive restoration round-trips attributes (T202)', () => {
   it('a bare text directive with attributes comes back verbatim', async () => {
     const { code } = await render('Set the :hover{delay="80ms"} state carefully.');

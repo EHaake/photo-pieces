@@ -55,12 +55,12 @@ weakening tests to pass.
 
 ## Phase 2 — Multi-image and prose blocks
 
-- [ ] **T206** — `grid` (2–6 body images + trailing caption) and
+- [x] **T206** — `grid` (2–6 body images + trailing caption) and
       `strip` (band height, native scroll + snap CSS, probe-derived
       per-image sizes). _Verify: partition tests incl. count
       validation; built output optimized for body-sourced images;
       build green._
-- [ ] **T207** — `aside` (unwrap splice, float CSS, `.prose::after`
+- [x] **T207** — `aside` (unwrap splice, float CSS, `.prose::after`
       clearfix, mobile float-none) and `row` (wrapped grid, mobile
       stack). _Verify: unwrap structure asserted in tests;
       aside-as-last-block contained (browser check vs the footer);
