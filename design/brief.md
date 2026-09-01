@@ -45,7 +45,7 @@ strictly as a typographic treatment, never a rendered plaque).
 
 ## Palette
 
-Light-first, and light-*only* — no dark mode toggle. This is a
+Light-first, and light-_only_ — no dark mode toggle. This is a
 deliberate content decision, not a v1 corner cut: the photographer
 controls how the work is seen, the way an exhibition controls its own
 lighting rather than handing each viewer a dimmer switch. The same
@@ -61,10 +61,9 @@ properties in `src/styles/global.css`.
 `oklch(0.36 0.075 185)` — hand-picked to replace the theme's default
 warm terracotta, which was rejected as too generic (see "What to
 avoid"). Not yet pressure-tested against real photography. Retuning
-is cheap but currently *two* lines, not one, thanks to the theme's
-still-present dark-mode token blocks (see README's accent-color note;
-goes back to one line when dark mode is removed) — plus the manually
-synced hex values in the OG image route.
+is one line in `global.css` (dark mode was removed in spec 002), plus
+two manually synced hex copies: the OG image route's palette and
+`public/favicon.svg`.
 
 ## Typography
 
@@ -90,7 +89,7 @@ functional (it's how a visitor gets back to context, not decoration),
 and distinctive enough to be recognizable as this site's, which is the
 bar the signature element needs to clear.
 
-The gallery *listing* view itself stays deliberately plain — a clean,
+The gallery _listing_ view itself stays deliberately plain — a clean,
 conventional grid, not styled as a contact sheet or any other physical
 object. The distinctiveness lives entirely in the click-through, not the
 grid.

@@ -19,9 +19,7 @@ const pieces = defineCollection({
     z.object({
       title: z.string(),
       publishDate: z.coerce.date(),
-      categories: z
-        .array(z.enum(['landscape', 'street', 'portrait', 'event']))
-        .min(1),
+      categories: z.array(z.enum(['landscape', 'street', 'portrait', 'event'])).min(1),
       description: z.string(),
       cover: image().optional(),
       draft: z.boolean().default(false),
@@ -54,7 +52,7 @@ Directives are only for what plain Markdown can't express:
 - `sequence` — reserved; the directive exists but fails the build
   deliberately until its presentation is designed (see `ROADMAP.md`)
 
-The closed vocabulary is enforced *site-wide*, not just for pieces:
+The closed vocabulary is enforced _site-wide_, not just for pieces:
 the transform registers on the global markdown pipeline (which MDX
 inherits), so a stray `::name` in `blog`/`works` content also fails
 the build loudly. Intentional — the alternative (scoping to pieces)
@@ -85,7 +83,7 @@ fullbleed gets `full-width`/`100vw` responsive variants
 CSS).
 
 Still open, recorded deliberately: no global `image.layout` is set, so
-*plain-markdown* single images (the dominant case) are optimized but
+_plain-markdown_ single images (the dominant case) are optimized but
 get no srcset — one full-resolution derivative. Setting a site-wide
 layout would change `/blog/` too; that's its own decision, not a T004
 side effect.

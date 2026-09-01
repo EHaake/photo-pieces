@@ -28,9 +28,19 @@ DNS + dashboard only, zero code change.
       `main`; branch pushes produce preview URLs
 - [ ] The deployed test URL verifies end-to-end: pieces render
       correctly (all block treatments), search works against the built
-      index, RSS validates, a link-preview debugger shows the
-      piece-specific OG card, and a failed build does not replace the
-      live deployment
+      index (scope note: Pagefind indexes only piece bodies — the
+      pages carrying `data-pagefind-body` — so "works" means pieces
+      are findable, not About/Contact), RSS validates, and a failed
+      build does not replace the live deployment
+- [ ] The link-preview debugger check on OG cards runs **after the
+      domain flip** (ordering note from 002's review: `og:image` URLs
+      absolutize against `site` = erikhaakephoto.com, which doesn't
+      serve this site until T117 — a debugger pointed at the test URL
+      would fetch cards from whatever the domain serves meanwhile)
+- [ ] The `first-light-at-the-jetty` fixture piece (invented prose
+      from spec 001's T002, now featured on the homepage and index) is
+      replaced by real pieces or set `draft: true` before the site
+      faces the public
 - [ ] The custom-domain flip is executed: `erikhaakephoto.com` serves
       the site over HTTPS via Squarespace DNS records (registration
       stays at Squarespace), canonicals match

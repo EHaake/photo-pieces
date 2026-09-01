@@ -1,16 +1,12 @@
 ---
 // Interim pieces index (spec 002, T111): reachability for pieces ahead of
 // the spec-003 homepage design pass, which may absorb or replace this
-// page. Deliberately reuses the theme's note-row list — no new layout.
+// page.
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Image } from 'astro:assets';
-import { getCollection } from 'astro:content';
-import { withBase } from '../../lib/url';
-import { formatDate } from '../../i18n';
+import PieceList from '../../components/PieceList.astro';
+import { getPublishedPieces } from '../../lib/pieces';
 
-const pieces = (await getCollection('pieces', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime(),
-);
+const pieces = await getPublishedPieces();
 ---
 
 <BaseLayout title="Pieces" description="All pieces, newest first.">
@@ -20,32 +16,6 @@ const pieces = (await getCollection('pieces', ({ data }) => !data.draft)).sort(
   </section>
 
   <section class="section index-feed" aria-label="All pieces">
-    {
-      pieces.length > 0 ? (
-        <div class="note-list">
-          {pieces.map((piece) => (
-            <article class="note-row">
-              {piece.data.cover && (
-                <Image src={piece.data.cover} alt="" width={320} height={220} loading="lazy" />
-              )}
-              <div>
-                <p class="meta">
-                  {formatDate(piece.data.publishDate, 'short')} ·{' '}
-                  {piece.data.categories.join(' / ')}
-                </p>
-                <h3>
-                  <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
-                </h3>
-                <p>{piece.data.description}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <div class="empty-state compact">
-          <p>Nothing published yet.</p>
-        </div>
-      )
-    }
+    <PieceList pieces={pieces} />
   </section>
 </BaseLayout>

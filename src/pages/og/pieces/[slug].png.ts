@@ -1,5 +1,5 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { getCollection } from 'astro:content';
+import { getPublishedPieces } from '../../../lib/pieces';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import satori from 'satori';
@@ -17,7 +17,7 @@ interface OgProps {
 }
 
 export const getStaticPaths = (async () => {
-  const pieces = await getCollection('pieces', ({ data }) => !data.draft);
+  const pieces = await getPublishedPieces();
   return pieces.map((entry) => ({
     params: { slug: entry.id },
     props: {

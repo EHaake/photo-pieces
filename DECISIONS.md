@@ -30,7 +30,7 @@ forking one as the site's foundation:
 - **template-journal** — not chosen as a fork base at all: it's a
   commercial template (linked to a paid marketplace), not an
   open-source repo. Still the best reference seen for how a piece
-  should *feel* — large cover-led entries, generous whitespace,
+  should _feel_ — large cover-led entries, generous whitespace,
   essay-first framing.
 - **astro-keel** — chosen. Its own stated design philosophy ("readable
   first, decorative last") matches the target aesthetic almost
@@ -61,10 +61,10 @@ comparison behind that, kept for whenever it's revisited:
   D1 in production), which conflicts with the file-based, git-based
   content model chosen for this project — not a stylistic mismatch, an
   architectural one. Also still in beta (launched this year) — real
-  maturity risk for a project meant to last decades. *(Relocated here
+  maturity risk for a project meant to last decades. _(Relocated here
   from `spec.md`, where it was originally logged as a resolved
   decision — this is a tooling comparison, not a spec-level behavior
-  decision.)*
+  decision.)_
 
 ## Repository naming: `photo-pieces`
 
@@ -73,6 +73,7 @@ never needed to carry brand weight — just needed to be descriptive
 without undermining the project's own framing.
 
 Considered and passed on:
+
 - **"Photography Portfolio Site"** — too generic to mean anything, and
   not usable as-typed anyway (repo names are conventionally
   lowercase-with-hyphens).
@@ -150,6 +151,12 @@ push-to-deploy testing before anything is publicly live):
 The domain (erikhaakephoto.com) stays registered at Squarespace with
 DNS pointed at Cloudflare when the flip happens — no registration
 transfer required or planned.
+
+Post-decision cleanup (caught by 002's pre-merge review): the theme's
+GitHub Pages workflow (`.github/workflows/deploy.yml`) was still armed
+to publish on every push to `main` — removed, since Pages lost the
+comparison and the go-live pause forbids any auto-publish. CI
+(`ci.yml`) stays, and now runs the unit suite too.
 
 ## Go-live paused; repo private; images stay in git for now
 

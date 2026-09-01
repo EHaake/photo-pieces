@@ -11,9 +11,7 @@ const pieces = defineCollection({
     z.object({
       title: z.string(),
       publishDate: z.coerce.date(),
-      categories: z
-        .array(z.enum(['landscape', 'street', 'portrait', 'event']))
-        .min(1),
+      categories: z.array(z.enum(['landscape', 'street', 'portrait', 'event'])).min(1),
       description: z.string(),
       cover: image().optional(),
       draft: z.boolean().default(false),

@@ -1,6 +1,6 @@
 # Plan: Going Live
 
-**Status**: Draft — pending review
+**Status**: Complete (as amended) — Phases 4–5 moved to specs/005-going-live at the Phase 3 review
 **Implements**: spec.md in this directory
 **Hosting decision**: Cloudflare Workers static assets — see
 `DECISIONS.md` for the comparison and trade-offs.
@@ -13,7 +13,7 @@ were the photographer's voice (design brief rule).
 
 1. **Site title** — received: "Erik Haake Photography". The one-line
    site description is still pending; an interim factual line ships
-   marked `TODO-AUTHOR` in `consts.ts` (meta/OG/RSS need *something*),
+   marked `TODO-AUTHOR` in `consts.ts` (meta/OG/RSS need _something_),
    to be replaced with the photographer's wording.
 2. **Instagram** — received: `erik.haake`
    (https://www.instagram.com/erik.haake/). An Instagram icon will be
@@ -101,7 +101,7 @@ Confirmed consumers, all removed or reshaped:
   interim: a neutral text-only card generated with the existing satori
   setup so the theme's branding doesn't linger anywhere.
 
-## Deploy (Cloudflare Workers static assets)
+## Deploy (Cloudflare Workers static assets) — MOVED to spec 005 at the Phase 3 amendment; wrangler.jsonc landed here, the connection/flip did not
 
 - `wrangler.jsonc` at repo root: `name`, `compatibility_date`,
   `assets: { directory: "./dist" }` — static assets only, no Worker
@@ -138,7 +138,7 @@ Confirmed consumers, all removed or reshaped:
 
 - The homepage remains the theme's shell with an interim pieces list —
   by design, until spec 003.
-- Category *filtering* on the pieces index is not built (spec 001
+- Category _filtering_ on the pieces index is not built (spec 001
   deferred per-category browsing to the galleries/homepage work; the
   index shows categories as labels only).
 - Contact is email + Instagram until the roadmapped form spec.

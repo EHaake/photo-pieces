@@ -1,5 +1,11 @@
 // English UI dictionary — the reference translation.
 //
+// **Status note (spec 002):** the pieces-era pages hardcode English rather
+// than adding keys here, and the keys for torn-down features (blog, works,
+// the theme toggle) remain as unreferenced orphans — deliberately, see
+// plan.md. Whether this layer is retired or revived is deferred until
+// localization actually matters.
+//
 // **Scope: UI chrome only.** Navigation, pagination, section labels, button and
 // link labels, aria labels, generated strings, and the theme-owned 404 page.
 // Placeholder prose on the home and about pages is *not* here: it lives in the
@@ -116,9 +122,8 @@ export const en = {
   'notFound.title': 'Page not found',
   'notFound.description': 'The page you were looking for does not exist.',
   'notFound.eyebrow': '404 — Not found',
-  'notFound.heading': 'This page drifted off course.',
-  'notFound.lead':
-    'The address may have moved, or it never existed. The keel lines below lead back to steady water.',
+  'notFound.heading': 'Page not found.',
+  'notFound.lead': 'The address may have moved, or it never existed.',
   'notFound.linksLabel': 'Recovery links',
   'notFound.home': 'Back home',
   'notFound.blog': 'Read the blog',

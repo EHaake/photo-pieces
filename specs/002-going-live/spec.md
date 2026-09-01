@@ -12,7 +12,7 @@ loop, block vocabulary, and reading page all exist and are tested.
 
 ## Summary
 
-Turn the working-but-borrowed codebase into *this photographer's* site,
+Turn the working-but-borrowed codebase into _this photographer's_ site,
 live at a real URL. Everything here is either already decided and
 deferred (light-only appearance, `blog`/`works` teardown), wrong in a
 way that publishing would expose (the upstream theme author's identity
@@ -45,9 +45,9 @@ parallel.
 6. An About page introduces the photographer (spec 001 criterion).
 7. A Contact page gives visitors a working way to get in touch,
    suitable for arrivals from Instagram (spec 001 criterion).
-8. The site is deployed and publicly reachable at a stable URL, with
-   deploys triggered by `git push` (completing the authoring flow spec
-   001 described: write → preview → push → live).
+8. _(Moved to spec 005 at the Phase 3 amendment.)_ The site is
+   deployed and publicly reachable at a stable URL, with deploys
+   triggered by `git push`.
 
 ## Non-goals (explicitly deferred)
 
@@ -69,7 +69,7 @@ parallel.
   accounts are on the 2025 credit-pool free tier, the stingiest of the
   three). Criteria set by the photographer: stability and low
   ongoing hassle first, free or cheap, and a push-to-deploy test URL
-  *before* anything is publicly "live". The final pick lands in
+  _before_ anything is publicly "live". The final pick lands in
   `plan.md`.
 - **Domain.** `erikhaakephoto.com` is owned, registered at
   Squarespace. No transfer is required to use it — DNS records at
@@ -106,15 +106,18 @@ spec 001's "working way to get in touch" without pre-empting the form.
 ## Key user flows
 
 ### Arriving from a shared link
+
 A piece link shared in a chat or on social media shows a piece-specific
 preview card (title, description, image). Following it lands on the
 piece at its canonical URL.
 
 ### Arriving from Instagram
+
 A visitor taps the profile link, lands on the site, and can reach any
 piece (via the index) and the Contact page within two interactions.
 
-### Publishing
+### Publishing _(moved to spec 005)_
+
 The photographer pushes to `main`; the site rebuilds and deploys
 without further manual steps. A failed build never replaces the
 currently-live site.
@@ -122,7 +125,7 @@ currently-live site.
 ## Acceptance criteria
 
 - [x] No dark-mode code remains: no toggle renders, `prefers-color-
-      scheme` does not change the site's appearance, and the dark
+scheme` does not change the site's appearance, and the dark
       token blocks are gone from the stylesheet (accent retuning is a
       single-line change again)
 - [x] No `blog`/`works` collection, route, nav entry, or demo content

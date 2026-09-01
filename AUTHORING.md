@@ -1,7 +1,7 @@
 # Authoring Environment: Obsidian Setup & Usage
 
 Reference for how the writing environment is set up and why. The piece
-*format* (frontmatter fields, directive syntax) is documented in
+_format_ (frontmatter fields, directive syntax) is documented in
 `README.md`; this file covers the vault around it.
 
 ## Vault layout
@@ -97,7 +97,9 @@ Obsidian on one side, a browser tab running `npm run dev` on the
 other. Save in Obsidian, the tab hot-reloads. Single images are plain
 markdown (`![alt](./photo.jpg)`) and preview natively in Obsidian;
 special treatments use directives and render via the plugin. Publish
-is `git commit` + `git push` from the repo.
+is `git commit` + `git push` from the repo — though until spec 005
+executes, a push updates only the private repo; nothing deploys
+anywhere.
 
 ## Deliberately no methodology
 

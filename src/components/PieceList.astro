@@ -1,0 +1,42 @@
+---
+// The piece list-row treatment shared by the homepage feed and the
+// /pieces/ index — one copy, so the URL shape and meta line can't drift
+// between them (extracted at 002's pre-merge review).
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../lib/url';
+import { formatDate } from '../i18n';
+
+interface Props {
+  pieces: CollectionEntry<'pieces'>[];
+}
+
+const { pieces } = Astro.props;
+---
+
+{
+  pieces.length > 0 ? (
+    <div class="note-list">
+      {pieces.map((piece) => (
+        <article class="note-row">
+          {piece.data.cover && (
+            <Image src={piece.data.cover} alt="" width={320} height={220} loading="lazy" />
+          )}
+          <div>
+            <p class="meta">
+              {formatDate(piece.data.publishDate, 'short')} · {piece.data.categories.join(' / ')}
+            </p>
+            <h3>
+              <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
+            </h3>
+            <p>{piece.data.description}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  ) : (
+    <div class="empty-state compact">
+      <p>Nothing published yet.</p>
+    </div>
+  )
+}
