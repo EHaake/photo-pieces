@@ -185,3 +185,25 @@ Three decisions from spec 002's Phase 3 review (2026-08-31):
   single seam where relative paths would become store URLs, so pieces
   themselves won't change. Git LFS was considered and rejected: it
   complicates CI and its bandwidth pricing punishes exactly this use.
+
+## Mattes: site-applied, never baked into files
+
+Surfaced at spec 003 review: the photographer mattes every image they
+present, on every channel — so the site presents images matted, and
+the design brief's skeuomorphism ban was amended (its own commit) to
+carve out the flat matte specifically. Frames, shadows, bevels, and
+textures remain banned; the matte is a flat, token-driven color field.
+
+How to apply them was compared directly:
+
+- **Baked into uploaded files** — rejected: retuning means
+  re-exporting every image ever committed; files become unusable
+  elsewhere without double-matting; the matte shrinks with the image
+  on small viewports; srcset pixels are wasted on matte; and every
+  aspect ratio lies to the layout math (including diptych/triptych
+  centered alignment).
+- **Applied by site CSS** — chosen: one token retunes all mattes;
+  source files stay clean exports; responsive behavior is controlled;
+  the pipeline's dimensions stay honest; edge-to-edge treatments
+  (fullbleed, tall, strip) can stay unmatted since the bleed is the
+  point.

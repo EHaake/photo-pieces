@@ -91,6 +91,23 @@ New standalone treatments:
   images, one per line — reusing the image syntax authors already
   know rather than inventing `img1=…imgN=` attributes.
 
+Added at spec review (the "even esoteric" pass — all four chosen):
+
+- **tall** — the vertical counterpart to fullbleed: capped at viewport
+  height (~90–100vh, exact value a design detail), centered, width
+  follows. Closes a real gap — a portrait image in `fullbleed` renders
+  ~1.5 screens tall. The full-stop pause moment for vertical frames.
+- **weighted pair** — not a new block: an attribute on `diptych`
+  (`weight="left|right"`, 2:1 split) for one dominant frame and one
+  companion. Photobook asymmetric pairing.
+- **strip** — a fixed-height, horizontally scrollable band. One very
+  wide image (panorama — the other aspect-ratio casualty of
+  column layouts) or several uniform-height frames. Native scroll
+  only, pure CSS, no JS — consistent with the no-islands constraint.
+- **half-bleed** — an attribute on `wide` (`bleed="left|right"`): the
+  image runs to one viewport edge while the other side respects the
+  column. The most magazine-styled of the set, chosen with eyes open.
+
 New prose-bearing treatments:
 
 - **aside** — image floated left or right at partial column width,
@@ -108,6 +125,30 @@ form without a body stays valid — captions are opt-in.
 Reserved, still excluded: **sequence** (interactive; needs its own
 design pass — unchanged from ROADMAP).
 
+## Mattes
+
+Decided at spec review, with a matching design-brief amendment (the
+flat matte is the photographer's presentation style on every channel,
+carved out of the skeuomorphism ban — frames, shadows, textures stay
+banned): images on this site are presented **matted** — a flat,
+uniform color field around the frame.
+
+- **Applied by the site's CSS, never baked into image files.**
+  Compared directly and decided: site-applied means one token retunes
+  every matte (width, color in `global.css`); source files stay clean
+  unmatted exports; mattes hold sensible proportion responsively;
+  srcset pixels and aspect-ratio math stay honest (including the
+  centered-pair alignment); and per-treatment intelligence is
+  possible. Baked-in fails all five. AUTHORING.md gains the rule:
+  upload unmatted exports.
+- Which treatments matte by default is a plan/design detail — the
+  working assumption: column-flow treatments (single, inset, wide,
+  diptych, triptych, grid, aside, row) matted; edge-to-edge
+  treatments (fullbleed, tall, strip, the bled edge of half-bleed)
+  not, since the bleed is the point.
+- Matte color/width are theme tokens; no shadow, bevel, or texture
+  ever.
+
 ## Non-goals
 
 - **No interactivity.** Everything here is static HTML + CSS. The
@@ -116,6 +157,11 @@ design pass — unchanged from ROADMAP).
   spec 004.
 - **No pull quotes, callouts, or prose-only blocks.** Markdown already
   covers prose; this vocabulary is image treatments only.
+- **No text-over-image treatments** (chapter cards, type on
+  photographs) — contrast and accessibility landmines, and against
+  the images-as-interface principle. Considered at review, rejected.
+- **No frames** — the matte carve-out is exactly a flat color field;
+  rendered frames, shadows, bevels, and textures remain banned.
 - **No masonry/justified layouts.** The grid is uniform; editorial
   sequencing over algorithmic packing (brief: galleries are
   editorial). Revisit with 004 if real use demands it.
@@ -137,8 +183,9 @@ design pass — unchanged from ROADMAP).
 
 ## Acceptance criteria
 
-- [ ] Each new treatment (single's directive form, wide, inset, grid,
-      aside, row) renders
+- [ ] Each new treatment (single's directive form, wide, tall, inset,
+      grid, strip, aside, row, and the weighted-pair and half-bleed
+      attributes) renders
       correctly in `astro dev` and in built output, with optimized
       responsive images (hashed src, srcset/sizes appropriate to its
       rendered width)
@@ -158,6 +205,9 @@ design pass — unchanged from ROADMAP).
 - [ ] README's syntax reference and AUTHORING.md document the full
       vocabulary; the Obsidian plugin's behavior per block is stated
       honestly somewhere an author will look
+- [ ] Mattes render per the working assumption (column-flow matted,
+      edge-to-edge not), token-driven, flat — retuning width or color
+      is a one-token change
 - [ ] `astro build` green; no regression on existing pages
 
 ## Resolved decisions
