@@ -63,7 +63,7 @@ trail; nothing else depends on them unless stated.
 
 ## Phase 3 — New pages
 
-- [ ] **T111** — `src/pages/pieces/index.astro` (newest-first,
+- [x] **T111** — `src/pages/pieces/index.astro` (newest-first,
       non-draft, title/date/categories/description, cover thumb if
       present) + "Pieces" nav entry. *Verify: build green; index lists
       the test piece; draft pieces excluded (test with a temporary
