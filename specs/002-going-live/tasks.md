@@ -24,7 +24,7 @@ trail; nothing else depends on them unless stated.
       remove `base`. *Verify: build green; canonical/sitemap URLs in
       `dist/` carry the new domain and no `/astro-keel` paths remain
       anywhere in built output.*
-- [ ] **T103** — Add `wrangler.jsonc` (name, compatibility_date,
+- [x] **T103** — Add `wrangler.jsonc` (name, compatibility_date,
       `assets: { directory: "./dist" }`). *Verify: `npx wrangler deploy
       --dry-run` accepts the config (no account needed for a dry run);
       build unaffected.*

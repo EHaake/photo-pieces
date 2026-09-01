@@ -105,7 +105,10 @@ Confirmed consumers, all removed or reshaped:
 
 - `wrangler.jsonc` at repo root: `name`, `compatibility_date`,
   `assets: { directory: "./dist" }` — static assets only, no Worker
-  script, no adapter. The Astro build stays exactly as-is
+  script, no adapter. `wrangler` is a devDependency (dependency
+  policy note: it's the deploy CLI Workers Builds invokes; pinning it
+  locally makes CI deterministic and enables offline `--dry-run`
+  config validation). The Astro build stays exactly as-is
   (`npm run build`, with the `postbuild` Pagefind step running via the
   npm lifecycle).
 - Git integration (Workers Builds) connected to the GitHub repo from
