@@ -13,11 +13,11 @@ weakening tests to pass.
 
 ## Phase 0 — Foundations
 
-- [ ] **T201** — Amend CLAUDE.md's closed-vocabulary enumeration to
+- [x] **T201** — Amend CLAUDE.md's closed-vocabulary enumeration to
       the 003 set (constitution rule: own commit, before
       implementation). _Verify: the enumeration matches spec.md's
       vocabulary exactly._
-- [ ] **T202** — Refactor the transform to the block-descriptor model
+- [x] **T202** — Refactor the transform to the block-descriptor model
       with behavior identical for the existing vocabulary: same
       output, same errors (sequence keeps its bespoke reserved
       message), plus closed attribute validation (unknown attribute
