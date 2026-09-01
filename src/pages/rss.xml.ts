@@ -6,7 +6,7 @@ import { SITE } from '../consts';
 import { locale } from '../i18n';
 
 export async function GET(context: APIContext) {
-  const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  const pieces = (await getCollection('pieces', ({ data }) => !data.draft)).sort(
     (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
   );
 
@@ -16,12 +16,12 @@ export async function GET(context: APIContext) {
     site: context.site ?? 'https://example.com',
     // Feed readers use <language> to pick a reading direction and hyphenation.
     customData: `<language>${locale}</language>`,
-    items: posts.map((post) => ({
-      title: post.data.title,
-      description: post.data.description,
-      pubDate: post.data.publishDate,
-      link: withBase(`/blog/${post.id}/`),
-      categories: post.data.tags,
+    items: pieces.map((piece) => ({
+      title: piece.data.title,
+      description: piece.data.description,
+      pubDate: piece.data.publishDate,
+      link: withBase(`/pieces/${piece.id}/`),
+      categories: [...piece.data.categories],
     })),
   });
 }

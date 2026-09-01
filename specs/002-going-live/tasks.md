@@ -49,7 +49,7 @@ trail; nothing else depends on them unless stated.
       collection, nav entry, Giscus/Comments component + config.
       *Verify: build green; no `/blog/` href in `dist/`; unit suite
       still green (18 tests).*
-- [ ] **T108** — Reshape `rss.xml.ts` to pieces. *Verify: build green;
+- [x] **T108** — Reshape `rss.xml.ts` to pieces. *Verify: build green;
       feed lists the test piece with a `/pieces/` URL; no blog/works
       items.*
 - [ ] **T109** — Reshape the OG route to `og/pieces/[slug].png.ts`
