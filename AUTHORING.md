@@ -107,3 +107,12 @@ occurs, is the entire system — the graph is a byproduct of writing,
 not a thing to maintain. If using Obsidian starts feeling like a
 second project, that's the signal it's gone past what this setup
 needs.
+
+## Image exports, not masters
+
+Commit web-sized exports to the piece folder — roughly 2560px on the
+long edge, 1–3MB. Never RAW files or full-resolution masters: git
+history keeps every byte forever, and the build only needs enough
+pixels for its largest responsive variant. Masters live in the photo
+archive, not the repo. (Decision and numbers: `DECISIONS.md`, "Images
+stay committed to git".)

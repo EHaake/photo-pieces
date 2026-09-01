@@ -150,3 +150,31 @@ push-to-deploy testing before anything is publicly live):
 The domain (erikhaakephoto.com) stays registered at Squarespace with
 DNS pointed at Cloudflare when the flip happens — no registration
 transfer required or planned.
+
+## Go-live paused; repo private; images stay in git for now
+
+Three decisions from spec 002's Phase 3 review (2026-08-31):
+
+- **Public availability is paused.** Deploy, domain flip, and the
+  author-content tasks moved to `specs/005-going-live/` (deferred).
+  The order the photographer wants before anyone sees the site: block
+  vocabulary (003), sample pieces written against it, galleries (004).
+  Until then the site is `npm run dev` only.
+- **The GitHub repo went private** for the pre-launch period — a
+  public repo would have exposed pieces and photos before launch.
+  Cloudflare Workers Builds supports private repos, so the eventual
+  deploy is unaffected. Revisit visibility at launch (the
+  workflow-demonstration value of a public repo returns once the site
+  itself is public).
+- **Images stay committed to git, export-sized.** Asked directly
+  whether a separate asset store should come first, the answer stays
+  what the constitution says: not until repo size or clone speed is a
+  real problem. Visitors never receive committed originals — the build
+  generates optimized derivatives — so the only cost is repo growth.
+  Practice that keeps that cost low: commit web exports (~2560px long
+  edge, 1–3MB), never RAW or full-res masters; at that size, ~100
+  pieces ≈ 1GB. When the trigger fires, the likely destination is
+  Cloudflare R2 (same account as hosting); the remark transform is the
+  single seam where relative paths would become store URLs, so pieces
+  themselves won't change. Git LFS was considered and rejected: it
+  complicates CI and its bandwidth pricing punishes exactly this use.

@@ -71,33 +71,15 @@ trail; nothing else depends on them unless stated.
 - [x] **T112** — `src/pages/contact/index.astro`: email
       (erik@erikhaakephoto.com) + Instagram, footer link. *Verify:
       build green; mailto href correct; Instagram resolves.*
-- [ ] **T113 [author]** — About page with the photographer's text
-      (until then: structure in place, visible `TODO-AUTHOR` markers,
-      task stays open). *Verify: renders the real text, zero
-      `TODO-AUTHOR` markers remain on the page.*
-- [ ] **T114 [author]** — Replace the interim site description in
-      `consts.ts` with the photographer's wording. *Verify: no
-      `TODO-AUTHOR` remains in `consts.ts`.*
+## Phases 4–5 and author-content tasks — moved
 
-## Phase 4 — Deploy (needs the photographer's Cloudflare account)
-
-- [ ] **T115 [author]** — Create the Cloudflare account, pick the
-      workers.dev subdomain, connect the GitHub repo per the
-      walkthrough. *Verify: a push to this branch produces a preview
-      deployment.*
-- [ ] **T116** — Verify the deployed test URL end-to-end: the test
-      piece renders (fullbleed + diptych correct), search works, RSS
-      validates, a link-preview debugger shows the piece-specific OG
-      card, and a deliberately broken build does not replace the live
-      deployment. *Verify: each check reported with actual results.*
-
-## Phase 5 — Domain flip (deferrable by the photographer)
-
-- [ ] **T117 [author-gated]** — Attach `erikhaakephoto.com` as the
-      Worker's custom domain; add the DNS records at Squarespace;
-      confirm HTTPS. No code change (site already set). *Verify: the
-      domain serves the site; canonicals match; workers.dev still
-      works or redirects.*
+T113, T114 (author text), T115–T116 (deploy), and T117 (domain flip)
+moved to `specs/005-going-live/` at the Phase 3 review: the
+photographer paused public availability until the block vocabulary
+(003), sample pieces, and galleries (004) exist. The About page's
+structure landed here (with `TODO-AUTHOR` markers); its words land
+there. Groundwork that already shipped in this spec — wrangler.jsonc,
+site config, OG/RSS — stays.
 
 ---
 

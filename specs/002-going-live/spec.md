@@ -1,6 +1,12 @@
 # Spec: Going Live
 
-**Status**: Draft — pending review
+**Status**: Amended at Phase 3 review — deployment, the domain flip,
+and the author-content tasks moved to `specs/005-going-live/`
+(deferred). The photographer paused public availability until the
+block vocabulary (003), sample pieces, and galleries (004) exist; the
+site stays local-only and the repo went private. What remains in this
+spec (identity, dark-mode removal, teardown, pieces index, contact,
+About structure) is complete and merges now.
 **Depends on**: `001-site-foundation` (merged) — the piece-authoring
 loop, block vocabulary, and reading page all exist and are tested.
 
@@ -115,32 +121,33 @@ currently-live site.
 
 ## Acceptance criteria
 
-- [ ] No dark-mode code remains: no toggle renders, `prefers-color-
+- [x] No dark-mode code remains: no toggle renders, `prefers-color-
       scheme` does not change the site's appearance, and the dark
       token blocks are gone from the stylesheet (accent retuning is a
       single-line change again)
-- [ ] No `blog`/`works` collection, route, nav entry, or demo content
+- [x] No `blog`/`works` collection, route, nav entry, or demo content
       remains; `astro build` is green after the teardown and no
       internal link 404s
-- [ ] Site title, author, description, footer, and social links are
+- [x] Site title, author, description, footer, and social links are
       the photographer's; an Instagram link is present and correct
-- [ ] `site` (and `base` if any) produce correct canonical URLs,
-      sitemap entries, and RSS item links on the deployed site
-- [ ] A `/pieces/` index lists published pieces newest-first,
+      (description wording is interim `TODO-AUTHOR` — its replacement
+      moved to spec 005)
+- [x] `site` (and `base` if any) produce correct canonical URLs,
+      sitemap entries, and RSS item links in built output (live-URL
+      verification moved to spec 005 with the deployment)
+- [x] A `/pieces/` index lists published pieces newest-first,
       excluding drafts, and the nav links to it
-- [ ] Sharing a piece URL yields a piece-specific OG card (verified
-      with a real link-preview debugger, not just markup inspection)
-- [ ] The About page renders the photographer's own text
-- [ ] The Contact page provides the interim mechanism (email +
-      Instagram) and it works end-to-end (the email link opens a
-      correctly-addressed draft; the Instagram link resolves)
-- [ ] The site deploys to the host's test URL on every push to `main`;
-      the test piece reads correctly there including the full-bleed
-      and diptych treatments
-- [ ] The custom-domain flip is executed (or explicitly deferred by
-      the photographer with the test URL accepted as interim), with
-      canonical URLs correct for whichever is live
-- [ ] RSS contains pieces (and no blog/works remnants)
+- [x] Per-piece OG cards generate and each piece's `og:image` points
+      at its card (the link-preview-debugger check needs a public URL
+      — moved to spec 005)
+- [x] The Contact page provides the interim mechanism (email +
+      Instagram) with a correctly-addressed mailto and resolving
+      Instagram link
+- [x] RSS contains pieces (and no blog/works remnants)
+
+Moved to `specs/005-going-live/` at the Phase 3 amendment: the About
+page's real text, the description wording, deployment to the test
+URL, the live end-to-end verification, and the domain flip.
 
 ## Resolved decisions
 
