@@ -1,0 +1,21 @@
+---
+// Interim pieces index (spec 002, T111): reachability for pieces ahead of
+// the spec-003 homepage design pass, which may absorb or replace this
+// page.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PieceList from '../../components/PieceList.astro';
+import { getPublishedPieces } from '../../lib/pieces';
+
+const pieces = await getPublishedPieces();
+---
+
+<BaseLayout title="Pieces" description="All pieces, newest first.">
+  <section class="page-head section">
+    <p class="eyebrow">Index</p>
+    <h1>Pieces</h1>
+  </section>
+
+  <section class="section index-feed" aria-label="All pieces">
+    <PieceList pieces={pieces} />
+  </section>
+</BaseLayout>

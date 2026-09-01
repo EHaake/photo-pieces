@@ -3,35 +3,6 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 // Astro 7 Content Layer API: each collection declares a `loader`.
-// Authors add Markdown/MDX files under the `base` directories below.
-const works = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/works' }),
-  schema: ({ image }) =>
-    z.object({
-      title: z.string(),
-      description: z.string(),
-      tech: z.array(z.string()),
-      link: z.string().url().optional(),
-      repo: z.string().url().optional(),
-      thumbnail: image().optional(),
-      order: z.number().optional(),
-      publishDate: z.coerce.date(),
-    }),
-});
-
-const blog = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/blog' }),
-  schema: ({ image }) =>
-    z.object({
-      title: z.string(),
-      publishDate: z.coerce.date(),
-      tags: z.array(z.string()).default([]),
-      description: z.string(),
-      draft: z.boolean().default(false),
-      heroImage: image().optional(),
-    }),
-});
-
 // Pieces are plain Markdown only (no MDX) so the files stay renderable
 // and editable in Obsidian — enforced here by the loader pattern.
 const pieces = defineCollection({
@@ -40,13 +11,11 @@ const pieces = defineCollection({
     z.object({
       title: z.string(),
       publishDate: z.coerce.date(),
-      categories: z
-        .array(z.enum(['landscape', 'street', 'portrait', 'event']))
-        .min(1),
+      categories: z.array(z.enum(['landscape', 'street', 'portrait', 'event'])).min(1),
       description: z.string(),
       cover: image().optional(),
       draft: z.boolean().default(false),
     }),
 });
 
-export const collections = { works, blog, pieces };
+export const collections = { pieces };

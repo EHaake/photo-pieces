@@ -42,11 +42,22 @@ attached.
   (transform, styling, and tests landed with spec 001) — still render
   as raw directive text in Obsidian until the plugin gains a regex and
   widget class per block, following the fullbleed pattern.
-- **Dark mode removal** — the site is deliberately light-only
-  (`spec.md`, `design/brief.md`), but the forked theme's dark palette,
-  toggle component, and `prefers-color-scheme` handling are still
-  present and active: a dark-preference visitor currently sees pieces
-  against a dark background, exactly what the brief rules out. Full
-  removal is a cleanup pass touching `BaseLayout.astro` and
-  `global.css`'s duplicated token blocks (which would also return the
-  accent color to being a single-line change).
+- **Contact form** — wanted (decided at spec 002 review), deferred to
+  its own spec: form handling on a static site means either a form
+  service (new dependency to justify) or host-provided handling, and
+  the choice interacts with the hosting decision. Until then the
+  Contact page carries direct email + Instagram.
+- **Block vocabulary expansion** — treatments the photographer already
+  anticipates beyond the built set (single, fullbleed, diptych,
+  triptych): images floated left/right sharing a row with prose;
+  image-beside-text rows without wrap; a centered breakout wider than
+  the prose column but not full-bleed. To be specced from a concrete
+  list gathered by _writing real pieces_ and noting where the current
+  vocabulary pinches — not speculatively. Two structural notes for
+  that spec: prose-sharing blocks likely need the `:::container`
+  directive form (currently rejected deliberately), and every new
+  treatment carries an Obsidian-plugin live-preview cost alongside the
+  transform + CSS pair.
+- ~~**Dark mode removal**~~ — done in spec 002 (T104/T105): palette,
+  toggle, and `prefers-color-scheme` handling all removed; the accent
+  is a single-line change again.

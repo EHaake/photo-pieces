@@ -81,105 +81,88 @@ Everything else in the closed block vocabulary uses directive syntax:
 implemented — transform, styling, and unit tests — with images going
 through Astro's asset pipeline (hashed src, responsive srcset).
 `sequence` is reserved but deliberately fails the build until its
-presentation is designed (`ROADMAP.md`). Pieces render at
-`/pieces/<slug>/`, though nothing links there yet — no nav entry or
-index page until the homepage design pass. Check
-`specs/001-site-foundation/tasks.md` for what's actually done versus
-still planned — don't assume this list is current by the time you're
-reading it.
-
-The original theme's `blog`/`works` collections and routes are still
-present and unused, kept temporarily rather than torn out
-mid-transition (see `plan.md`).
+presentation is designed (`ROADMAP.md`). Pieces are the site's only
+long-form content: they render at `/pieces/<slug>/`, list at
+`/pieces/` (in the nav), and feed the homepage, RSS, and per-piece
+Open Graph images. The theme's original `blog`/`works` collections
+were fully torn out in spec 002. Check the newest
+`specs/*/tasks.md` for what's actually done versus still planned —
+don't assume this list is current by the time you're reading it.
 
 ## Configuration
 
-Site name, description, nav, and footer live in one file,
-`src/consts.ts`. Social links render as footer icons — built-in set is
-`github`, `x`, `linkedin`, `rss`, `email`; **no Instagram icon**, which
-is worth fixing given spec.md names Instagram as a primary way visitors
-arrive here.
+Site identity (title, author, description, nav, footer, contact email,
+Instagram) lives in one file, `src/consts.ts`. Social links render as
+footer icons — built-in set is `github`, `x`, `linkedin`, `rss`,
+`email`, `instagram`.
 
 ## Customization
 
 ### Accent color
 
-One value in `src/styles/global.css` — but genuinely *two* spots right
-now, not one, because of the theme's still-present light/dark toggle
-system:
-
-```css
-:root {
-  --color-accent: oklch(0.36 0.075 185);
-}
-:root[data-theme='light'] {
-  --color-accent: oklch(0.36 0.075 185);
-}
-```
-
-Both need to match. `:root[data-theme='light']` has higher specificity
-and wins once the toggle has set state, so editing only the first block
-silently does nothing — found that out the hard way. `--color-accent-hover`
-derives automatically via `color-mix()` in both. Once dark mode is
-actually removed (below), this goes back to being genuinely one line.
+One line in `src/styles/global.css` (`--color-accent` on `:root`) —
+plus two _derived_ copies that don't update automatically: the hex
+values in `src/pages/og/pieces/[slug].png.ts` (social-card palette;
+recompute on retune, see the comment there) and the fill in
+`public/favicon.svg`. `--color-accent-hover` derives automatically via
+`color-mix()`.
 
 ### Fonts
 
 CSS variables (`--font-display`, `--font-body`, `--font-mono`) in
 `src/styles/global.css`. Swap a face by installing another
 `@fontsource` package and updating the variable — **and check
-`src/pages/og/[collection]/[slug].png.ts`**, which loads font files
+`src/pages/og/pieces/[slug].png.ts`**, which loads font files
 directly for social preview images and won't pick up a CSS-only
 change. Easy to miss; already bit us once during the Fraunces → Spectral
 swap.
 
-### Dark mode — being removed, not maintained
+### Appearance
 
-This project uses one photographer-curated light appearance for every
-visitor; see `spec.md` for the reasoning. The original theme's dark
-palette, toggle component, and dual syntax-highlighting themes are
-still partially present in the code as of this writing — treat them as
-deprecated, not as a supported feature. Full removal is a tracked
-cleanup pass, not yet done.
+Light-only, by decision, and fully so since spec 002: no dark palette,
+no toggle, no `prefers-color-scheme` behavior. The reasoning is in
+`design/brief.md` — the photographer controls how the work is seen.
 
 ## Also inherited from the base theme
 
-Working, unmodified, worth not losing track of: static full-text
-search at `/search` (Pagefind, zero backend), an RSS feed at
-`/rss.xml`, auto-generated Open Graph images for blog and works
-entries (pieces currently fall back to the site-wide `public/og.jpg` —
-extending the OG route to pieces is future work, noted in `plan.md`),
-category archive pages, and sitemap/JSON-LD SEO basics.
+Working, worth not losing track of: static full-text search at
+`/search` (Pagefind, zero backend — note it only indexes piece bodies,
+via `data-pagefind-body`, and only works against a real build, not
+`astro dev`), the RSS feed at `/rss.xml` (pieces), and sitemap/JSON-LD
+SEO basics. Per-piece Open Graph cards generate at build time from
+`src/pages/og/pieces/[slug].png.ts`; `public/og.jpg` is the site-wide
+fallback for other pages.
 
 ## Project structure
 
 ```
 photo-pieces/
 ├── astro.config.mjs
+├── wrangler.jsonc                # Cloudflare Workers static assets
 ├── remark-pieces-blocks.mjs      # directive -> block transform
-├── CLAUDE.md, ROADMAP.md, DECISIONS.md
-├── specs/001-site-foundation/    # spec.md, plan.md, tasks.md
+├── remark-pieces-blocks.test.mjs # its unit suite (npm test)
+├── CLAUDE.md, ROADMAP.md, DECISIONS.md, AUTHORING.md
+├── specs/                        # spec.md, plan.md, tasks.md per spec
 ├── design/brief.md
 ├── src/
-│   ├── content.config.ts
-│   ├── content/
-│   │   ├── pieces/                # the actual content model
-│   │   └── blog/, works/          # legacy, unused, not yet removed
-│   ├── pages/pieces/[slug].astro  # the piece reading page
+│   ├── consts.ts                 # site identity
+│   ├── content.config.ts         # the pieces collection
+│   ├── content/pieces/           # one folder per piece + its images
+│   ├── lib/pieces.ts             # the one published-pieces query
+│   ├── components/PieceList.astro
+│   ├── pages/                    # index, pieces/, about, contact, search, 404
 │   └── styles/global.css
 ```
 
 ## Deployment
 
-Not yet decided, and nothing's live — `npm run dev` is the only thing
-currently running. A GitHub Pages workflow ships with the theme at
-`.github/workflows/deploy.yml`. Note that `site` and `base` in
-`astro.config.mjs` (and the site title/author/social links in
-`src/consts.ts`) still carry the *upstream theme author's* values —
-every canonical URL and OG tag is wrong until the deploy decision sets
-them for real. That decision — GitHub Pages versus Netlify or
-Cloudflare Pages — is still an open item in `plan.md`, not decided
-here.
+Decided — Cloudflare Workers static assets (`DECISIONS.md` has the
+comparison) — but deliberately **not yet connected**: going live is
+paused until the block vocabulary, sample pieces, and galleries exist
+(`specs/005-going-live/`). Nothing is publicly reachable; the repo is
+private for the pre-launch period; `npm run dev` is the workflow.
+`wrangler.jsonc` and the site config are already in place, so
+executing spec 005 is dashboard work plus content, no code.
 
 ## License
 

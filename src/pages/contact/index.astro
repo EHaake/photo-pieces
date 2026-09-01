@@ -1,0 +1,47 @@
+---
+// Interim contact page (spec 002, T112): direct email + Instagram until
+// the roadmapped contact-form spec. Copy stays factual — the
+// photographer's voice arrives with the spec-003 design pass.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { CONTACT_EMAIL, INSTAGRAM_URL } from '../../consts';
+
+const instagramHandle = `@${new URL(INSTAGRAM_URL).pathname.replaceAll('/', '')}`;
+---
+
+<BaseLayout title="Contact" description="How to reach Erik Haake.">
+  <section class="page-head section">
+    <p class="eyebrow">Contact</p>
+    <h1>Get in touch</h1>
+  </section>
+
+  <section class="section">
+    <ul class="contact-list">
+      <li>
+        <span class="meta">Email</span>
+        <a class="text-link" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      </li>
+      <li>
+        <span class="meta">Instagram</span>
+        <a class="text-link" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+          {instagramHandle}
+        </a>
+      </li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--baseline);
+    max-width: var(--prose-width);
+  }
+
+  .contact-list li {
+    display: grid;
+    gap: 0.35rem;
+  }
+</style>

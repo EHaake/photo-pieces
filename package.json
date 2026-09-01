@@ -1,5 +1,5 @@
 {
-  "name": "astro-keel",
+  "name": "photo-pieces",
   "type": "module",
   "version": "0.2.0",
   "engines": {
@@ -38,6 +38,7 @@
     "satori": "^0.29.0",
     "sharp": "^0.35.3",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "wrangler": "^4.127.1"
   }
 }

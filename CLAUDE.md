@@ -21,8 +21,9 @@ CMS or backend service for v1.
 ## Platform
 
 - **Target**: A fully static site for v1 — no server-rendered pages, no
-  database. Static output deployed to a CDN (specific host TBD in
-  `plan.md`).
+  database. Static output deploys to Cloudflare Workers static assets
+  (decided at spec 002 — comparison in `DECISIONS.md`; deployment
+  itself is paused until `specs/005-going-live/` executes).
 - **Framework**: Astro (latest stable at scaffold time — pin the exact
   version in `package.json` when the repo is created).
 - **Language**: TypeScript, Astro's default.
@@ -53,7 +54,7 @@ CMS or backend service for v1.
   one-off markup inline. There are deliberately no per-block `.astro`
   components: mapping rendered elements to components is an MDX-only
   feature, and pieces are plain `.md` by hard rule. For the same reason
-  a future *interactive* block (`sequence`'s carousel/slider candidates)
+  a future _interactive_ block (`sequence`'s carousel/slider candidates)
   must be built as page-level progressive enhancement over the
   transform's HTML — `.md` content cannot mount islands. The Obsidian
   plugin and the site CSS mirror the transform's vocabulary by

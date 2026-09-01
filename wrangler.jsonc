@@ -1,0 +1,14 @@
+// Cloudflare Workers static-assets deployment (spec 002; hosting
+// decision in DECISIONS.md). Static assets only — no Worker script, no
+// server code. Workers Builds (the dashboard git integration) reads
+// this file: build command `npm run build`, deploy `npx wrangler deploy`.
+{
+  "name": "photo-pieces",
+  "compatibility_date": "2026-08-31",
+  "assets": {
+    "directory": "./dist",
+    // Serve the site's own 404 page; the platform default ("none") would
+    // return an empty 404 and never use dist/404.html.
+    "not_found_handling": "404-page",
+  },
+}

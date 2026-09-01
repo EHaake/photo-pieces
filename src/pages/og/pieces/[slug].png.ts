@@ -1,12 +1,12 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { getCollection } from 'astro:content';
+import { getPublishedPieces } from '../../../lib/pieces';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import satori from 'satori';
 import sharp from 'sharp';
 import { SITE } from '../../../consts';
 
-// Build-time generated Open Graph images for every blog post and work entry,
+// Build-time generated Open Graph images for every published piece,
 // rendered in the theme's light palette (see global.css tokens). The static
 // `public/og.jpg` remains the site-wide fallback for all other pages.
 
@@ -17,26 +17,16 @@ interface OgProps {
 }
 
 export const getStaticPaths = (async () => {
-  const blog = await getCollection('blog', ({ data }) => !data.draft);
-  const works = await getCollection('works');
-  return [
-    ...blog.map((entry) => ({
-      params: { collection: 'blog', slug: entry.id },
-      props: {
-        title: entry.data.title,
-        description: entry.data.description,
-        kind: 'Blog',
-      } satisfies OgProps,
-    })),
-    ...works.map((entry) => ({
-      params: { collection: 'works', slug: entry.id },
-      props: {
-        title: entry.data.title,
-        description: entry.data.description,
-        kind: 'Work',
-      } satisfies OgProps,
-    })),
-  ];
+  const pieces = await getPublishedPieces();
+  return pieces.map((entry) => ({
+    params: { slug: entry.id },
+    props: {
+      title: entry.data.title,
+      description: entry.data.description,
+      // The eyebrow is data, not invented copy: the piece's categories.
+      kind: entry.data.categories.join(' / '),
+    } satisfies OgProps,
+  }));
 }) satisfies GetStaticPaths;
 
 // Satori has no oklch() support, so these are hex equivalents of the

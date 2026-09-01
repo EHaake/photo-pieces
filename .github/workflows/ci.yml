@@ -33,6 +33,9 @@ jobs:
         run: npm run format:check
       - name: Type-check
         run: npm run check
+      - name: Unit tests
+        # The remark transform suite (see CLAUDE.md's testing rules).
+        run: npm test
       - name: Build
         # Also exercises the postbuild Pagefind index step.
         run: npm run build

@@ -84,6 +84,7 @@ yet.
 ## Key user flows
 
 ### Authoring a piece
+
 The photographer writes in Obsidian, with the vault pointed at the
 site's content folder. An `astro dev` server runs alongside for live
 preview — saving in Obsidian reloads the browser. When satisfied, the
@@ -91,6 +92,7 @@ photographer commits and pushes, which triggers an automatic build and
 deploy.
 
 ### Arriving at the site
+
 A visitor — often from elsewhere, like Instagram — lands on the
 homepage, which combines the latest pieces with a "latest work" gallery.
 The detailed layout and behavior of this landing experience is
@@ -98,10 +100,12 @@ intentionally not fully specified yet; it needs its own
 design-exploration pass before `plan.md` is written.
 
 ### Reading a piece
+
 A visitor reads a blog-style entry combining prose and image blocks in
 the sequence the photographer authored them.
 
 ### Browsing a gallery
+
 A visitor browses a category-organized, hand-curated gallery. Selecting
 an image that originated from a piece navigates to that piece. What
 happens for a gallery image with no originating piece — presumably a
@@ -109,6 +113,7 @@ larger/detail view of the image itself — is left open for the design
 pass as well.
 
 ### Making contact
+
 A visitor reaches the Contact page and has a way to get in touch with
 the photographer.
 

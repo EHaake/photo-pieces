@@ -47,8 +47,7 @@ const BLOCKS = {
     sizing: { layout: 'constrained', sizes: '50vw' },
     images(node, file) {
       const { left, right, leftAlt, rightAlt } = node.attributes ?? {};
-      if (!left || !right)
-        fail(file, node, 'diptych requires left and right attributes');
+      if (!left || !right) fail(file, node, 'diptych requires left and right attributes');
       if (leftAlt === undefined || rightAlt === undefined)
         fail(
           file,
@@ -65,15 +64,10 @@ const BLOCKS = {
   triptych: {
     sizing: { layout: 'constrained', sizes: '33vw' },
     images(node, file) {
-      const { left, center, right, leftAlt, centerAlt, rightAlt } =
-        node.attributes ?? {};
+      const { left, center, right, leftAlt, centerAlt, rightAlt } = node.attributes ?? {};
       if (!left || !center || !right)
         fail(file, node, 'triptych requires left, center, and right attributes');
-      if (
-        leftAlt === undefined ||
-        centerAlt === undefined ||
-        rightAlt === undefined
-      )
+      if (leftAlt === undefined || centerAlt === undefined || rightAlt === undefined)
         fail(
           file,
           node,
@@ -90,11 +84,7 @@ const BLOCKS = {
   sequence: {
     // Reserved in the content model; presentation undecided (ROADMAP.md).
     images(node, file) {
-      fail(
-        file,
-        node,
-        'the sequence block is reserved but not implemented yet — see ROADMAP.md',
-      );
+      fail(file, node, 'the sequence block is reserved but not implemented yet — see ROADMAP.md');
     },
   },
 };

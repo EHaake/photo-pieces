@@ -1,12 +1,12 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublishedPieces } from '../../lib/pieces';
+import { withBase } from '../../lib/url';
 import { formatDate } from '../../i18n';
 
 export async function getStaticPaths() {
-  const pieces = (await getCollection('pieces', ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
-  );
+  const pieces = await getPublishedPieces();
   return pieces.map((piece) => ({ params: { slug: piece.id }, props: { piece } }));
 }
 
@@ -18,6 +18,7 @@ const { Content } = await render(piece);
   title={piece.data.title}
   description={piece.data.description}
   ogType="article"
+  image={withBase(`/og/pieces/${piece.id}.png`)}
 >
   <article data-pagefind-body>
     <header class="page-head section">
@@ -44,8 +45,8 @@ const { Content } = await render(piece);
 <style>
   /* The reading column is viewport-centered — the layout contract
      .piece-fullbleed's edge-to-edge breakout depends on (see the piece
-     blocks section of global.css). Unlike /blog/, there is no TOC
-     sidebar: images are the interface here, not navigation chrome. */
+     blocks section of global.css). Deliberately no TOC sidebar:
+     images are the interface here, not navigation chrome. */
   .piece-column {
     max-width: var(--prose-width);
     margin-inline: auto;

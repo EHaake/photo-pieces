@@ -1,7 +1,7 @@
 # Authoring Environment: Obsidian Setup & Usage
 
 Reference for how the writing environment is set up and why. The piece
-*format* (frontmatter fields, directive syntax) is documented in
+_format_ (frontmatter fields, directive syntax) is documented in
 `README.md`; this file covers the vault around it.
 
 ## Vault layout
@@ -97,7 +97,9 @@ Obsidian on one side, a browser tab running `npm run dev` on the
 other. Save in Obsidian, the tab hot-reloads. Single images are plain
 markdown (`![alt](./photo.jpg)`) and preview natively in Obsidian;
 special treatments use directives and render via the plugin. Publish
-is `git commit` + `git push` from the repo.
+is `git commit` + `git push` from the repo — though until spec 005
+executes, a push updates only the private repo; nothing deploys
+anywhere.
 
 ## Deliberately no methodology
 
@@ -107,3 +109,12 @@ occurs, is the entire system — the graph is a byproduct of writing,
 not a thing to maintain. If using Obsidian starts feeling like a
 second project, that's the signal it's gone past what this setup
 needs.
+
+## Image exports, not masters
+
+Commit web-sized exports to the piece folder — roughly 2560px on the
+long edge, 1–3MB. Never RAW files or full-resolution masters: git
+history keeps every byte forever, and the build only needs enough
+pixels for its largest responsive variant. Masters live in the photo
+archive, not the repo. (Decision and numbers: `DECISIONS.md`, "Images
+stay committed to git".)

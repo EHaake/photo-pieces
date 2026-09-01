@@ -53,9 +53,7 @@ const imageMarkers = (code) =>
 
 describe('happy paths', () => {
   it('fullbleed renders a classed figure with one collected, optimizable image', async () => {
-    const { code, metadata } = await render(
-      '::fullbleed{src="./photo.jpg" alt="dawn"}',
-    );
+    const { code, metadata } = await render('::fullbleed{src="./photo.jpg" alt="dawn"}');
     expect(code).toContain('<figure class="piece-block piece-fullbleed">');
     expect(metadata.localImagePaths).toEqual(['./photo.jpg']);
     const markers = imageMarkers(code);
@@ -166,8 +164,6 @@ describe('fail-loudly cases', () => {
 
   it('failures carry the file path for the author', async () => {
     const expectedPath = fileURLToPath(fileURL);
-    await expect(renderExpectingFailure('::mystery{}')).rejects.toThrow(
-      expectedPath,
-    );
+    await expect(renderExpectingFailure('::mystery{}')).rejects.toThrow(expectedPath);
   });
 });

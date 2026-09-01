@@ -24,55 +24,11 @@
   --focus-ring: 0 0 0 3px var(--color-accent-soft);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --color-accent: oklch(0.72 0.13 42);
-    --color-accent-hover: color-mix(in oklch, var(--color-accent), white 10%);
-    --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 78%);
-    /* The dark-scheme accent is light, so filled surfaces need dark text. */
-    --color-on-accent: oklch(0.18 0.009 250);
-    --color-bg: oklch(0.18 0.009 250);
-    --color-surface: oklch(0.22 0.01 250);
-    --color-text: oklch(0.93 0.006 95);
-    --color-muted: oklch(0.69 0.012 250);
-    --color-line: oklch(0.34 0.012 250);
-    --color-line-strong: oklch(0.44 0.016 230);
-    --color-soft: oklch(0.26 0.01 250);
-  }
-}
-
-:root[data-theme='light'] {
-  color-scheme: light;
-  --color-accent: oklch(0.36 0.075 185);
-  --color-accent-hover: color-mix(in oklch, var(--color-accent), black 12%);
-  --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 84%);
-  /* Text/icon color on top of a filled accent surface. */
-  --color-on-accent: oklch(0.99 0.003 100);
-  --color-bg: oklch(0.99 0.003 100);
-  --color-surface: oklch(0.965 0.004 100);
-  --color-text: oklch(0.25 0.01 250);
-  --color-muted: oklch(0.5 0.012 250);
-  --color-line: oklch(0.86 0.008 100);
-  --color-line-strong: oklch(0.72 0.012 120);
-  --color-soft: oklch(0.94 0.006 100);
-}
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --color-accent: oklch(0.72 0.13 42);
-  --color-accent-hover: color-mix(in oklch, var(--color-accent), white 10%);
-  --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 78%);
-  /* The dark-scheme accent is light, so filled surfaces need dark text. */
-  --color-on-accent: oklch(0.18 0.009 250);
-  --color-bg: oklch(0.18 0.009 250);
-  --color-surface: oklch(0.22 0.01 250);
-  --color-text: oklch(0.93 0.006 95);
-  --color-muted: oklch(0.69 0.012 250);
-  --color-line: oklch(0.34 0.012 250);
-  --color-line-strong: oklch(0.44 0.016 230);
-  --color-soft: oklch(0.26 0.01 250);
-}
+/* Light-only by design: the photographer controls how the work is seen,
+   the way an exhibition controls its own lighting (spec 001 / design
+   brief). The dark palette, toggle, and prefers-color-scheme handling
+   were removed in spec 002 — the tokens above are the single source of
+   truth. */
 
 * {
   box-sizing: border-box;
@@ -80,6 +36,10 @@
 
 html {
   min-width: 320px;
+  /* Reserve the scrollbar gutter even on pages too short to scroll —
+     otherwise the centered layout (header included) shifts sideways
+     when navigating between scrolling and non-scrolling pages. */
+  scrollbar-gutter: stable;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
@@ -188,34 +148,6 @@ a:not(.brand, .button):hover {
 .site-nav a[aria-current='page'] {
   color: var(--color-text);
   background-size: 100% 1px;
-}
-
-.theme-toggle {
-  display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
-  place-items: center;
-  border: var(--hairline);
-  border-radius: 50%;
-  background: var(--color-bg);
-  color: var(--color-text);
-  cursor: pointer;
-  transition:
-    border-color 180ms ease,
-    color 180ms ease;
-}
-
-.theme-toggle:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-.theme-toggle span {
-  width: 0.88rem;
-  height: 0.88rem;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
 }
 
 .hero {
@@ -747,22 +679,10 @@ pre code {
   margin-block: calc(var(--baseline) * 1.5);
 }
 
-/* Shiki dual themes: github-light by default, github-dark under data-theme. */
-.astro-code,
-.astro-code span {
-  color: var(--shiki-light);
-  background-color: transparent;
-  font-style: var(--shiki-light-font-style);
-  font-weight: var(--shiki-light-font-weight);
-  text-decoration: var(--shiki-light-text-decoration);
-}
-
-:root[data-theme='dark'] .astro-code,
-:root[data-theme='dark'] .astro-code span {
-  color: var(--shiki-dark);
-  font-style: var(--shiki-dark-font-style);
-  font-weight: var(--shiki-dark-font-weight);
-  text-decoration: var(--shiki-dark-text-decoration);
+/* Shiki: single light theme; colors are inlined by the highlighter, only
+   the background needs neutralizing to sit on the theme's code surface. */
+.astro-code {
+  background-color: transparent !important;
 }
 
 .section-heading {
@@ -1001,12 +921,6 @@ pre code {
 @media (max-width: 760px) {
   .site-header {
     grid-template-columns: 1fr auto;
-  }
-
-  .theme-toggle {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
   }
 
   .site-nav {
