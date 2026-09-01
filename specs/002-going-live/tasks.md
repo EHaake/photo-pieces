@@ -56,7 +56,7 @@ trail; nothing else depends on them unless stated.
       over non-draft pieces, categories as the eyebrow. *Verify: build
       green; the test piece's OG PNG generates; piece page's `og:image`
       points at it.*
-- [ ] **T110** — Interim homepage edit: replace works/blog sections
+- [x] **T110** — Interim homepage edit: replace works/blog sections
       with a "latest pieces" list (shared markup with T111). *Verify:
       build green; homepage renders with no dead sections; no
       upstream-theme demo content visible.*
