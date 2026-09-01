@@ -35,7 +35,7 @@ trail; nothing else depends on them unless stated.
       toggle wiring from `BaseLayout.astro` (and any separate toggle
       component file). *Verify: build green; no `data-theme` attribute
       appears in built HTML.*
-- [ ] **T105** — Remove the dark and `[data-theme]` token blocks from
+- [x] **T105** — Remove the dark and `[data-theme]` token blocks from
       `global.css`; collapse Shiki to single `github-light` theme in
       `astro.config.mjs` + drop the dual-theme CSS block. *Verify:
       build green; the accent is defined on exactly one line; a
