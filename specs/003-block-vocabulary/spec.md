@@ -53,10 +53,14 @@ Two structural changes come with the breadth:
 
 Existing, unchanged in meaning (captions added):
 
-- **single** — plain `![alt](./img.jpg)`, fills the prose column. The
-  dominant case; stays directive-free and captionless. When a single
-  image needs a caption, use `inset` or `wide` at column width — plan
-  decides whether that needs a distinct name or a width attribute.
+- **single** — fills the prose column, the dominant case. Two
+  equivalent forms (resolved at spec review): the plain-markdown
+  shorthand `![alt](./img.jpg)` — untouched, fastest to type, no
+  caption — and a directive form (`::single{...}` / caption-bearing
+  `:::single`) that follows the family pattern exactly. Same rendered
+  result at column width; the directive form exists so a column-width
+  image can carry a caption without borrowing another treatment's
+  name.
 - **fullbleed** — viewport edge to edge.
 - **diptych** — two up, side by side.
 - **triptych** — three up.
@@ -85,9 +89,9 @@ New prose-bearing treatments:
   on narrow viewports (as do diptych/triptych/grid — responsive
   behavior is plan detail, but collapsing is the expectation).
 
-Captions: optional on every named image block (fullbleed, wide, inset,
-diptych, triptych, grid) via the container body. Leaf form without a
-body stays valid — captions are opt-in.
+Captions: optional on every named image block (single, fullbleed,
+wide, inset, diptych, triptych, grid) via the container body. Leaf
+form without a body stays valid — captions are opt-in.
 
 Reserved, still excluded: **sequence** (interactive; needs its own
 design pass — unchanged from ROADMAP).
@@ -121,7 +125,8 @@ design pass — unchanged from ROADMAP).
 
 ## Acceptance criteria
 
-- [ ] Each new treatment (wide, inset, grid, aside, row) renders
+- [ ] Each new treatment (single's directive form, wide, inset, grid,
+      aside, row) renders
       correctly in `astro dev` and in built output, with optimized
       responsive images (hashed src, srcset/sizes appropriate to its
       rendered width)
@@ -155,5 +160,9 @@ design pass — unchanged from ROADMAP).
 - **Grid body = markdown images**, not numbered attributes — pending
   plan validation that the transform can consume image children from
   a container body cleanly.
+- **`single` gets a directive form** (photographer's call at spec
+  review): the family pattern applies to every treatment including
+  column width, so any image can carry a caption; plain markdown
+  remains the captionless shorthand and the docs present it that way.
 - **`sequence` stays reserved.** Nothing here forecloses its later
   design; `grid` is not a substitute for it.
