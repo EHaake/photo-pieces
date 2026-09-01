@@ -1009,14 +1009,63 @@ pre code {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: calc(var(--baseline) / 3);
-  align-items: start;
+  /* Mixed orientations share a midline: a portrait extends above and
+     below its landscape neighbor, deliberately (spec 003 review). */
+  align-items: center;
 }
 
 .piece-triptych {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: calc(var(--baseline) / 3);
-  align-items: start;
+  align-items: center;
+}
+
+/* Equal-heights mode: widths distribute proportionally to each image's
+   aspect ratio (--ar, emitted by the transform, normalized so the
+   smallest is 1), so heights equalize exactly — no cropping. */
+.piece-diptych.match-height,
+.piece-triptych.match-height {
+  display: flex;
+  gap: calc(var(--baseline) / 3);
+}
+
+.piece-diptych.match-height img,
+.piece-triptych.match-height img {
+  flex: var(--ar, 1) 1 0;
+  min-width: 0;
+  width: auto;
+  height: auto;
+}
+
+/* Weighted pair: one dominant frame at 2:1. */
+.piece-diptych.weight-left {
+  grid-template-columns: 2fr 1fr;
+}
+
+.piece-diptych.weight-right {
+  grid-template-columns: 1fr 2fr;
+}
+
+/* Collapse: below the shared 720px breakpoint (see the transform's
+   COLLAPSE constant), multi-column blocks stack at full column width. */
+@media (max-width: 719.98px) {
+  .piece-diptych,
+  .piece-triptych,
+  .piece-diptych.weight-left,
+  .piece-diptych.weight-right {
+    grid-template-columns: 1fr;
+  }
+
+  .piece-diptych.match-height,
+  .piece-triptych.match-height {
+    display: grid;
+  }
+
+  .piece-diptych.match-height img,
+  .piece-triptych.match-height img {
+    width: 100%;
+  }
 }
 
 /* Edge-to-edge breakout. The 50% refers to the figure's containing block,

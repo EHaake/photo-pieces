@@ -1,5 +1,7 @@
 import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
+import { imageMetadata } from 'astro/assets/utils';
 import { visit } from 'unist-util-visit';
 
 // Turns the closed set of piece image-treatment directives (parsed by
@@ -126,11 +128,22 @@ const BLOCKS = {
   },
 
   diptych: {
-    forms: 'leaf',
+    // Default: equal widths, center-aligned on a shared midline (spec 003
+    // review). match="height" equalizes heights instead (widths follow
+    // aspect ratio — needs the dimension probe); weight makes one frame
+    // dominant at 2:1. The two contradict and cannot combine.
+    forms: 'both',
+    body: 'caption',
     attrs: {
       required: ['left', 'right', 'leftAlt', 'rightAlt'],
-      optional: [],
-      enums: {},
+      optional: ['match', 'weight'],
+      enums: { match: ['height'], weight: ['left', 'right'] },
+    },
+    validate(attrs, fail) {
+      if (attrs.match && attrs.weight)
+        fail(
+          'diptych cannot combine weight with match="height" — they specify contradictory widths',
+        );
     },
     images(attrs, fail) {
       if (!attrs.left || !attrs.right) fail('diptych requires left and right attributes');
@@ -143,16 +156,34 @@ const BLOCKS = {
         { src: attrs.right, alt: attrs.rightAlt },
       ];
     },
-    sizing: () => ({ layout: 'constrained', sizes: '50vw' }),
+    classes: (attrs) => [
+      ...(attrs.match ? ['match-height'] : []),
+      ...(attrs.weight ? [`weight-${attrs.weight}`] : []),
+    ],
+    needsRatios: (attrs) => Boolean(attrs.match),
+    sizing(attrs, i, ratios) {
+      if (attrs.weight) {
+        const dominant = attrs.weight === 'left' ? 0 : 1;
+        const px = i === dominant ? 453 : 227;
+        return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, 94vw` };
+      }
+      if (attrs.match && ratios) {
+        const sum = ratios.reduce((a, b) => a + b, 0);
+        const px = Math.round((680 * ratios[i]) / sum);
+        return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, 94vw` };
+      }
+      return { layout: 'constrained', sizes: `${COLLAPSE} 340px, 94vw` };
+    },
     matted: true,
   },
 
   triptych: {
-    forms: 'leaf',
+    forms: 'both',
+    body: 'caption',
     attrs: {
       required: ['left', 'center', 'right', 'leftAlt', 'centerAlt', 'rightAlt'],
-      optional: [],
-      enums: {},
+      optional: ['match'],
+      enums: { match: ['height'] },
     },
     images(attrs, fail) {
       if (!attrs.left || !attrs.center || !attrs.right)
@@ -171,7 +202,16 @@ const BLOCKS = {
         { src: attrs.right, alt: attrs.rightAlt },
       ];
     },
-    sizing: () => ({ layout: 'constrained', sizes: '33vw' }),
+    classes: (attrs) => (attrs.match ? ['match-height'] : []),
+    needsRatios: (attrs) => Boolean(attrs.match),
+    sizing(attrs, i, ratios) {
+      if (attrs.match && ratios) {
+        const sum = ratios.reduce((a, b) => a + b, 0);
+        const px = Math.round((680 * ratios[i]) / sum);
+        return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, 94vw` };
+      }
+      return { layout: 'constrained', sizes: `${COLLAPSE} 227px, 94vw` };
+    },
     matted: true,
   },
 
@@ -185,7 +225,10 @@ const BLOCKS = {
 };
 
 export function remarkPiecesBlocks() {
-  return (tree, file) => {
+  // Async transformer: the dimension probe (match="height") awaits Astro's
+  // imageMetadata. Ordering vs Astro's own collector is unchanged — remark
+  // awaits a transformer's promise before running the next plugin.
+  return async (tree, file) => {
     // Restore text directives to the prose the author typed — name,
     // label, and attributes all round-trip.
     visit(tree, 'textDirective', (node, index, parent) => {
@@ -202,7 +245,12 @@ export function remarkPiecesBlocks() {
       return index + restored.length;
     });
 
+    const directives = [];
     visit(tree, ['leafDirective', 'containerDirective'], (node) => {
+      directives.push(node);
+    });
+
+    for (const node of directives) {
       const failHere = (message) => fail(file, node, message);
       const block = BLOCKS[node.name];
       if (!block) {
@@ -236,15 +284,35 @@ export function remarkPiecesBlocks() {
 
       const attrs = node.attributes ?? {};
       validateAttributes(block, node.name, attrs, failHere);
+      block.validate?.(attrs, failHere);
 
       const images = block.images(attrs, failHere);
       for (const image of images) checkSrcExists(file, node, image.src);
+
+      // match="height": probe each image's dimensions (orientation-aware —
+      // Astro swaps width/height for EXIF orientations 5–8, so a camera
+      // portrait stored as rotated landscape gets the correct ratio).
+      // Emitted --ar values are normalized so the smallest is 1: flex-grow
+      // factors summing below 1 would under-fill the row.
+      let ratios = null;
+      let normalized = null;
+      if (block.needsRatios?.(attrs)) {
+        ratios = await probeRatios(images, file, failHere);
+        const min = Math.min(...ratios);
+        normalized = ratios.map((r) => r / min);
+      }
+
       node.children = [
         ...images.map(({ src, alt }, imageIndex) => ({
           type: 'image',
           url: src,
           alt,
-          data: { hProperties: { ...block.sizing(attrs, imageIndex, null) } },
+          data: {
+            hProperties: {
+              ...block.sizing(attrs, imageIndex, ratios),
+              ...(normalized ? { style: `--ar: ${trimNumber(normalized[imageIndex])}` } : {}),
+            },
+          },
         })),
         ...(caption ? [caption] : []),
       ];
@@ -255,8 +323,30 @@ export function remarkPiecesBlocks() {
           className: ['piece-block', `piece-${node.name}`, ...(block.classes?.(attrs) ?? [])],
         },
       };
-    });
+    }
   };
+}
+
+async function probeRatios(images, file, fail) {
+  if (typeof file.path !== 'string') {
+    fail('match="height" needs piece-relative image files to measure');
+  }
+  return Promise.all(
+    images.map(async ({ src }) => {
+      const path = resolve(dirname(file.path), src);
+      let meta;
+      try {
+        meta = await imageMetadata(await readFile(path), src);
+      } catch {
+        fail(`could not read image dimensions for ${src} (match="height" needs them)`);
+      }
+      return meta.width / meta.height;
+    }),
+  );
+}
+
+function trimNumber(n) {
+  return Number(n.toFixed(4)).toString();
 }
 
 function rejectLabel(node, fail) {

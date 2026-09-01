@@ -44,7 +44,7 @@ weakening tests to pass.
       720px breakpoint constant commented at both ends. _Verify:
       tests per block (happy, caption, fails); built-output srcset
       spot-checks; build green._
-- [ ] **T205** — diptych/triptych upgrades: midline-centered default
+- [x] **T205** — diptych/triptych upgrades: midline-centered default
       (`align-items: center`), async metadata probe via
       `astro/assets/utils` `imageMetadata`, `match="height"` with
       ratio normalization + `var(--ar, 1)` fallback, `weight`

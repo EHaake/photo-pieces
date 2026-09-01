@@ -192,6 +192,102 @@ describe('standalone treatments: wide, tall, inset, fullbleed captions (T204)', 
   });
 });
 
+describe('diptych/triptych upgrades: match, weight, captions (T205)', () => {
+  // Fixtures: photo.jpg is 8x5 (ar 1.6); portrait.jpg is 400x600 (ar 0.667);
+  // rotated.jpg is a 600x400 pixel buffer with EXIF orientation 6 — a camera
+  // portrait as cameras write them, rendering 400x600 (ar 0.667).
+
+  it('match="height" emits normalized --ar styles (smallest ratio = 1)', async () => {
+    const { code } = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" match="height"}',
+    );
+    expect(code).toContain('<figure class="piece-block piece-diptych match-height">');
+    const markers = imageMarkers(code);
+    expect(markers[1].style).toBe('--ar: 1'); // portrait is smallest
+    expect(markers[0].style).toBe('--ar: 2.4'); // 1.6 / 0.6667
+  });
+
+  it('an EXIF-rotated camera portrait gets the rendered (swapped) ratio', async () => {
+    // If the probe ignored orientation, rotated.jpg would read as ar 1.5
+    // (landscape) and the pair would come out ~1.0667/1 — the swap is the
+    // difference between correct and silently broken equal heights.
+    const { code } = await render(
+      '::diptych{left="./photo.jpg" right="./rotated.jpg" leftAlt="l" rightAlt="r" match="height"}',
+    );
+    const markers = imageMarkers(code);
+    expect(markers[1].style).toBe('--ar: 1');
+    expect(markers[0].style).toBe('--ar: 2.4');
+  });
+
+  it('match mode derives per-image sizes from the ratios', async () => {
+    const { code } = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" match="height"}',
+    );
+    const markers = imageMarkers(code);
+    // shares of 680px: 1.6/(1.6+0.6667)≈0.706 → 480px; 0.294 → 200px
+    expect(markers[0].sizes).toContain('480px');
+    expect(markers[1].sizes).toContain('200px');
+  });
+
+  it('default (no match) emits no --ar styles and keeps equal-width sizes', async () => {
+    const { code } = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r"}',
+    );
+    const markers = imageMarkers(code);
+    expect(markers[0].style).toBeUndefined();
+    expect(markers[0].sizes).toBe('(min-width: 720px) 340px, 94vw');
+  });
+
+  it('weight="left" makes the left frame dominant in sizes and class', async () => {
+    const { code } = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" weight="left"}',
+    );
+    expect(code).toContain('piece-diptych weight-left');
+    const markers = imageMarkers(code);
+    expect(markers[0].sizes).toContain('453px');
+    expect(markers[1].sizes).toContain('227px');
+  });
+
+  it('weight + match="height" fails as contradictory', async () => {
+    await expect(
+      renderExpectingFailure(
+        '::diptych{left="./photo.jpg" right="./photo.jpg" leftAlt="l" rightAlt="r" weight="left" match="height"}',
+      ),
+    ).rejects.toThrow(/cannot combine weight with match="height"/);
+  });
+
+  it('invalid match value fails naming the enum', async () => {
+    await expect(
+      renderExpectingFailure(
+        '::diptych{left="./photo.jpg" right="./photo.jpg" leftAlt="l" rightAlt="r" match="width"}',
+      ),
+    ).rejects.toThrow(/invalid value "width" for match on diptych — allowed: height/);
+  });
+
+  it('weight is not accepted on triptych', async () => {
+    await expect(
+      renderExpectingFailure(
+        '::triptych{left="./photo.jpg" center="./photo.jpg" right="./photo.jpg" leftAlt="a" centerAlt="b" rightAlt="c" weight="left"}',
+      ),
+    ).rejects.toThrow(/unknown attribute "weight" on triptych/);
+  });
+
+  it('triptych match="height" normalizes across three ratios', async () => {
+    const { code } = await render(
+      '::triptych{left="./photo.jpg" center="./portrait.jpg" right="./rotated.jpg" leftAlt="a" centerAlt="b" rightAlt="c" match="height"}',
+    );
+    const markers = imageMarkers(code);
+    expect(markers.map((m) => m.style)).toEqual(['--ar: 2.4', '--ar: 1', '--ar: 1']);
+  });
+
+  it('diptych and triptych container forms carry figcaptions now', async () => {
+    const { code } = await render(
+      ':::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r"}\nTwo frames, minutes apart.\n:::',
+    );
+    expect(code).toContain('<figcaption>Two frames, minutes apart.</figcaption>');
+  });
+});
+
 describe('text directive restoration round-trips attributes (T202)', () => {
   it('a bare text directive with attributes comes back verbatim', async () => {
     const { code } = await render('Set the :hover{delay="80ms"} state carefully.');
