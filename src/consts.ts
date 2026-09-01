@@ -10,22 +10,27 @@ export const SITE = {
    *  language's strings while keeping their own date format. */
   locale: 'en',
   /** Site name — used in the header brand, <title>, and og:site_name. */
-  title: 'Astro Keel',
-  /** Default meta description for pages that don't set their own. */
-  description: 'A minimal, neutral, and modern portfolio and blog theme for Astro.',
-  /** Description of the RSS feed at /rss.xml. */
-  rssDescription: 'Notes, essays, and release logs from Astro Keel.',
+  title: 'Erik Haake Photography',
+  /** Default meta description for pages that don't set their own.
+   *  TODO-AUTHOR: interim factual wording — replace with Erik's own
+   *  (spec 002, task T114). */
+  description:
+    'Photography by Erik Haake — landscape and nature, street, portrait, and event work, presented as written pieces.',
+  /** Description of the RSS feed at /rss.xml.
+   *  TODO-AUTHOR: interim factual wording — replace with Erik's own
+   *  (spec 002, task T114). */
+  rssDescription: 'Pieces from Erik Haake Photography.',
   /** Default social share image, relative to the site root (see public/). */
   ogImage: '/og.jpg',
   /** Post author, emitted in JSON-LD BlogPosting structured data.
    *  Leave empty ('') to omit the author field. */
-  author: 'Astro Keel',
+  author: 'Erik Haake',
   /** Footer credit line. */
-  footerText: 'Built with Astro Keel.',
+  footerText: '© Erik Haake',
 } as const;
 
 /** Icons bundled with the theme — see `src/components/SocialLinks.astro`. */
-export type SocialIcon = 'github' | 'x' | 'linkedin' | 'rss' | 'email';
+export type SocialIcon = 'github' | 'x' | 'linkedin' | 'rss' | 'email' | 'instagram';
 
 export interface SocialLink {
   /** Accessible name announced on the icon-only link. */
@@ -38,7 +43,12 @@ export interface SocialLink {
 /** Social profiles rendered as inline SVG icons in the footer.
  *  Add or remove entries here — no template edits needed. */
 export const SOCIAL_LINKS: readonly SocialLink[] = [
-  { label: 'GitHub', href: 'https://github.com/kpab/astro-keel', icon: 'github' },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/erik.haake/',
+    icon: 'instagram',
+  },
+  { label: 'Email', href: 'mailto:erik@erikhaakephoto.com', icon: 'email' },
   { label: 'RSS feed', href: '/rss.xml', icon: 'rss' },
 ];
 

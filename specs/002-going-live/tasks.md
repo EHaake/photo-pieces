@@ -15,7 +15,7 @@ trail; nothing else depends on them unless stated.
 
 ## Phase 0 — Identity & config
 
-- [ ] **T101** — Site identity in `src/consts.ts`: title "Erik Haake
+- [x] **T101** — Site identity in `src/consts.ts`: title "Erik Haake
       Photography", author, interim factual description marked
       `TODO-AUTHOR`, Instagram social link (add an Instagram SVG to
       the footer icon set), remove upstream author's socials/values.
