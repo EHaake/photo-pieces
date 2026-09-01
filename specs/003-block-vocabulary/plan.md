@@ -179,10 +179,18 @@ corrected to match actual behavior.
 ## Sampler piece + docs
 
 - `src/content/pieces/vocabulary-sampler/`: every treatment, both
-  forms, all attributes, captions. Images are **generated
-  placeholders at varied real ratios** (3:2, 2:3, pano ~3:1, square)
-  via a sharp script — no dependency on the photographer's photos;
-  swap in real frames anytime. Fixture status: **this spec edits
+  forms, all attributes, captions — the mechanical reference.
+- Two essay-style demo pieces (added at plan review): fixture pieces
+  written as if real — e.g. a landscape-outing essay leaning on
+  fullbleed/wide/diptych/captions, and a street/portrait-flavored one
+  leaning on tall/aside/row/grid/strip — so the photographer reviews
+  the vocabulary as a reading experience. Invented prose is
+  sanctioned for fixtures (jetty-piece precedent); all fixtures
+  unpublish before launch.
+- Images for all three: **generated placeholders at varied real
+  ratios** (3:2, 2:3, pano ~3:1, square, 4:5) via a sharp script — no
+  dependency on the photographer's photos; swap in real frames
+  anytime. Fixture status: **this spec edits
   `specs/005-going-live/spec.md`** to list the sampler alongside the
   jetty piece in the unpublish-before-launch criterion (the draft
   wrongly asserted that edit as already-existing fact — review B4).

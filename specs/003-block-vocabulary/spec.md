@@ -44,10 +44,16 @@ Two structural changes come with the breadth:
 5. Authoring stays honest in Obsidian: the new syntax must not break
    the editing experience; Live Preview rendering extends to new
    blocks where the existing plugin pattern makes that cheap.
-6. A fixture "sampler" piece exercises every treatment for visual
-   verification and as living documentation (replacing the current
-   test piece's role; both remain fixtures to unpublish before launch,
-   per spec 005).
+6. Demo pieces showcase the whole vocabulary (added at plan review,
+   photographer's direction): one **reference sampler** exercising
+   every treatment and attribute mechanically (living documentation),
+   plus **two essay-style demo pieces** that read like real pieces —
+   prose and treatments used naturally, the way actual writing would
+   use them — so the vocabulary can be judged as a reading
+   experience, not just verified block by block. Placeholder images
+   are fine (photographer's call: "it doesn't matter what images you
+   use"). All three are fixtures, listed in spec 005's
+   unpublish-before-launch criterion alongside the jetty piece.
 
 ## The proposed vocabulary
 
@@ -205,8 +211,11 @@ uniform color field around the frame.
 - [ ] The unit suite covers every new block's happy path, caption
       path, and every fail-loudly case — and still passes for the
       existing blocks
-- [ ] A sampler fixture piece exercises every treatment (including
-      captions) and reads correctly end to end
+- [ ] The reference sampler exercises every treatment, both forms,
+      every attribute, and captions
+- [ ] Two essay-style demo pieces use the vocabulary naturally and
+      read correctly end to end — reviewed by the photographer as
+      reading experiences, not just rendered output
 - [ ] README's syntax reference and AUTHORING.md document the full
       vocabulary; the Obsidian plugin's behavior per block is stated
       honestly somewhere an author will look
