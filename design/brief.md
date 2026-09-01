@@ -55,10 +55,13 @@ lighting rather than handing each viewer a dimmer switch. The same
 images read differently against light and dark backgrounds, and that
 difference shouldn't be left to a visitor's OS setting.
 
-Base neutrals (background, surface, text, muted, borders) are inherited
-from the astro-keel fork and haven't raised any objection — warm-neutral
-off-whites and near-black charcoal text, all defined as CSS custom
-properties in `src/styles/global.css`.
+Base neutrals (background, surface, text, muted, borders) started as
+the astro-keel fork's warm-neutral off-whites with near-black charcoal
+text, all CSS custom properties in `src/styles/global.css`. Amended at
+the spec-003 sampler review: the ground was warmed one step
+(oklch 0.99 → 0.968, hue 95) so the pure-white mattes read as mats on
+a gallery wall — the wall is never paper-white; the mat is the
+brightest surface.
 
 **Current, not final**: the accent is now a dark teal,
 `oklch(0.36 0.075 185)` — hand-picked to replace the theme's default

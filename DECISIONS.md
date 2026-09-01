@@ -207,3 +207,17 @@ How to apply them was compared directly:
   the pipeline's dimensions stay honest; edge-to-edge treatments
   (fullbleed, tall, strip) can stay unmatted since the bleed is the
   point.
+
+## Ground tone: warmed so the mattes read
+
+At the spec-003 sampler review the pure-white mattes were nearly
+invisible against the paper-white page (~1% lightness apart). Four
+candidates were compared live on the sampler via a dev-only switcher:
+current ground, two warmed grounds, and a hairline mat edge on the
+current ground. Chosen: **gallery warm** — background to
+oklch(0.968 0.006 95) with surface/soft shifted in step (0.945/0.92)
+and the line hue warmed to match. The photographer's read: "initially
+looks slightly too warm, but our eyes adjust quickly." The mat-edge
+option was rejected as visually noisy; tinted mats were rejected as
+inverting the mat-brighter-than-wall logic. Derived copies resynced:
+the OG route's bg hex (#f6f4f0) and public/og.jpg.

@@ -100,6 +100,13 @@ weakening tests to pass.
       spans 1160px centered, fullbleed pair spans the viewport,
       mobile stacking intact; build green._
 
+- [x] **T209G** — Ground-tone retune (sampler review): four candidates
+      compared live; "gallery warm" chosen (bg 0.968/95 with
+      surface/soft/line in step; mat edge rejected as noisy). OG hexes
+      and public/og.jpg resynced; brief and DECISIONS record it.
+      _Verify: build green; mats legible on the new ground; hairlines
+      and code surfaces checked in the browser._
+
 ## Phase 5 — Authoring side and docs
 
 - [ ] **T210** — Obsidian plugin: leaf-form rendering for all

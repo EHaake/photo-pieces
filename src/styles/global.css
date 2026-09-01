@@ -6,13 +6,15 @@
   --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 84%);
   /* Text/icon color on top of a filled accent surface. */
   --color-on-accent: oklch(0.99 0.003 100);
-  --color-bg: oklch(0.99 0.003 100);
-  --color-surface: oklch(0.965 0.004 100);
+  /* Warmed at the spec-003 sampler review so pure-white mattes read as
+     mats on a gallery wall (chosen over mat edges and tinted mats). */
+  --color-bg: oklch(0.968 0.006 95);
+  --color-surface: oklch(0.945 0.007 95);
   --color-text: oklch(0.25 0.01 250);
   --color-muted: oklch(0.5 0.012 250);
-  --color-line: oklch(0.86 0.008 100);
+  --color-line: oklch(0.86 0.008 95);
   --color-line-strong: oklch(0.72 0.012 120);
-  --color-soft: oklch(0.94 0.006 100);
+  --color-soft: oklch(0.92 0.008 95);
   --font-display: 'Spectral', Georgia, serif;
   --font-body: 'Public Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
