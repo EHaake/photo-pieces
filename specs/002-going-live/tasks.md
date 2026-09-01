@@ -31,7 +31,7 @@ trail; nothing else depends on them unless stated.
 
 ## Phase 1 — Dark mode removal
 
-- [ ] **T104** — Remove the theme-init script, toggle markup, and
+- [x] **T104** — Remove the theme-init script, toggle markup, and
       toggle wiring from `BaseLayout.astro` (and any separate toggle
       component file). *Verify: build green; no `data-theme` attribute
       appears in built HTML.*
