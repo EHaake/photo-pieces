@@ -65,6 +65,18 @@ Existing, unchanged in meaning (captions added):
 - **diptych** — two up, side by side.
 - **triptych** — three up.
 
+Mixed-orientation behavior for diptych/triptych (resolved at spec
+review, visualized and discussed): images render at **equal widths,
+center-aligned on a shared midline** — a portrait beside a landscape
+extends above and below it, deliberately. The photographer expects
+this most in triptychs (horizontal–vertical–horizontal and the
+inverse). An opt-in attribute switches a block to **equal heights**
+(widths follow aspect ratio, forming one clean rectangle; requires
+build-time knowledge of image dimensions — plan detail). Cropping is
+never a behavior, in any mode. For same-orientation sets both modes
+render identically. Captions sit below the tallest image, spanning
+the block.
+
 New standalone treatments:
 
 - **wide** — the centered breakout: wider than the prose column,
