@@ -78,7 +78,7 @@ weakening tests to pass.
 
 ## Phase 4 — Demo content and full verification
 
-- [ ] **T209** — Placeholder-image generation script (varied ratios:
+- [x] **T209** — Placeholder-image generation script (varied ratios:
       3:2, 2:3, ~3:1 pano, square, 4:5); the reference sampler piece
       (every treatment, both forms, all attributes, captions); two
       essay-style demo pieces using the vocabulary naturally; edit

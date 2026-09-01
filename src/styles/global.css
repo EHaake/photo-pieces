@@ -1157,6 +1157,9 @@ pre code {
 
 .piece-strip img {
   width: auto;
+  /* Override the column-wide max-width caps: the whole point of the band
+     is that a panorama may be wider than the viewport. */
+  max-width: none;
   height: 100%;
   flex: none;
   scroll-snap-align: center;

@@ -37,10 +37,12 @@ DNS + dashboard only, zero code change.
       absolutize against `site` = erikhaakephoto.com, which doesn't
       serve this site until T117 — a debugger pointed at the test URL
       would fetch cards from whatever the domain serves meanwhile)
-- [ ] The `first-light-at-the-jetty` fixture piece (invented prose
-      from spec 001's T002, now featured on the homepage and index) is
-      replaced by real pieces or set `draft: true` before the site
-      faces the public
+- [ ] All fixture pieces are replaced by real pieces or set
+      `draft: true` before the site faces the public:
+      `first-light-at-the-jetty` (spec 001's test piece),
+      `vocabulary-sampler`, `where-the-fog-lets-go`, and
+      `market-day-camera-low` (spec 003's reference and demo
+      fixtures — invented prose, placeholder images)
 - [ ] The custom-domain flip is executed: `erikhaakephoto.com` serves
       the site over HTTPS via Squarespace DNS records (registration
       stays at Squarespace), canonicals match
