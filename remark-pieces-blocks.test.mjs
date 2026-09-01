@@ -123,11 +123,12 @@ describe('happy paths', () => {
 describe('fail-loudly cases', () => {
   const cases = [
     ['unknown directive', '::mystery{}', /the block vocabulary is closed/],
-    [
-      'container form of a known block',
-      ':::fullbleed{src="./photo.jpg" alt="x"}\ncaption\n:::',
-      /container form is not supported/,
-    ],
+    // The 001-era "container form of a known block fails" case was
+    // deliberately retired by spec 003, which makes the container form the
+    // caption mechanism (flagged and approved at the Phase 0 review, not
+    // weakened-to-pass). Its replacement coverage lives in
+    // remark-pieces-vocabulary.test.mjs: captions, [label] rejection,
+    // no-nesting, and wrong-form errors.
     ['reserved sequence block', '::sequence{}', /reserved but not implemented/],
     ['fullbleed without src', '::fullbleed{alt="x"}', /requires a src/],
     ['fullbleed without alt', '::fullbleed{src="./photo.jpg"}', /requires an alt/],

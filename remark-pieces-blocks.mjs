@@ -57,7 +57,8 @@ const BLOCKS = {
   },
 
   fullbleed: {
-    forms: 'leaf', // container form (caption) flips on in T204
+    forms: 'both',
+    body: 'caption',
     attrs: { required: ['src', 'alt'], optional: [], enums: {} },
     images(attrs, fail) {
       if (!attrs.src) fail('fullbleed requires a src attribute');
@@ -67,6 +68,61 @@ const BLOCKS = {
     },
     sizing: () => ({ layout: 'full-width', sizes: '100vw' }),
     matted: false,
+  },
+
+  wide: {
+    // Centered breakout to the content width; `bleed` runs the image to
+    // ONE viewport edge while the other side respects the column.
+    forms: 'both',
+    body: 'caption',
+    attrs: {
+      required: ['src', 'alt'],
+      optional: ['bleed'],
+      enums: { bleed: ['left', 'right'] },
+    },
+    images(attrs, fail) {
+      if (!attrs.src) fail('wide requires a src attribute');
+      if (attrs.alt === undefined)
+        fail('wide requires an alt attribute (use alt="" only for a truly decorative image)');
+      return [{ src: attrs.src, alt: attrs.alt }];
+    },
+    classes: (attrs) => (attrs.bleed ? [`bleed-${attrs.bleed}`] : []),
+    sizing: () => ({
+      layout: 'constrained',
+      sizes: '(min-width: 1240px) 1160px, 96vw',
+    }),
+    matted: true,
+  },
+
+  tall: {
+    // The vertical counterpart to fullbleed: capped at viewport height,
+    // width follows. Sizes err over (94vw) — height-capped rendering
+    // width depends on the viewport's aspect ratio.
+    forms: 'both',
+    body: 'caption',
+    attrs: { required: ['src', 'alt'], optional: [], enums: {} },
+    images(attrs, fail) {
+      if (!attrs.src) fail('tall requires a src attribute');
+      if (attrs.alt === undefined)
+        fail('tall requires an alt attribute (use alt="" only for a truly decorative image)');
+      return [{ src: attrs.src, alt: attrs.alt }];
+    },
+    sizing: () => ({ layout: 'constrained', sizes: '94vw' }),
+    matted: false,
+  },
+
+  inset: {
+    forms: 'both',
+    body: 'caption',
+    attrs: { required: ['src', 'alt'], optional: [], enums: {} },
+    images(attrs, fail) {
+      if (!attrs.src) fail('inset requires a src attribute');
+      if (attrs.alt === undefined)
+        fail('inset requires an alt attribute (use alt="" only for a truly decorative image)');
+      return [{ src: attrs.src, alt: attrs.alt }];
+    },
+    sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 440px, 80vw` }),
+    matted: true,
   },
 
   diptych: {
@@ -195,7 +251,9 @@ export function remarkPiecesBlocks() {
       node.data = {
         ...node.data,
         hName: 'figure',
-        hProperties: { className: ['piece-block', `piece-${node.name}`] },
+        hProperties: {
+          className: ['piece-block', `piece-${node.name}`, ...(block.classes?.(attrs) ?? [])],
+        },
       };
     });
   };

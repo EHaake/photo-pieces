@@ -38,7 +38,7 @@ weakening tests to pass.
 
 ## Phase 1 — Standalone treatments
 
-- [ ] **T204** — `wide` (+ `bleed` attribute), `inset`, `tall`:
+- [x] **T204** — `wide` (+ `bleed` attribute), `inset`, `tall`:
       transform entries, CSS (including the width-override form that
       can never stretch or crop), sizes per the table with the shared
       720px breakpoint constant commented at both ends. _Verify:

@@ -1028,3 +1028,53 @@ pre code {
   width: 100vw;
   margin-inline: calc(50% - 50vw);
 }
+
+/* Collapse breakpoint: 720px — shared with the transform's COLLAPSE
+   constant (remark-pieces-blocks.mjs) and every `sizes` string. Keep the
+   three in step by hand. Sizing coupling: the transform's 680px/440px
+   constants assume --prose-width (68ch ≈ 665px) and the matte padding —
+   see the sizes table in specs/003-block-vocabulary/plan.md. */
+
+/* Centered breakout: wider than the prose column, not the viewport. */
+.piece-wide {
+  --w: min(var(--content-width), 96vw);
+  width: var(--w);
+  margin-inline: calc(50% - var(--w) / 2);
+}
+
+/* Half-bleed: one edge at the viewport, the other at the column edge.
+   50% here is half the prose column; 50vw reaches the viewport edge. */
+.piece-wide.bleed-left {
+  --w: calc(50vw + 50%);
+  width: var(--w);
+  margin-inline: calc(50% - 50vw) 0;
+}
+
+.piece-wide.bleed-right {
+  --w: calc(50vw + 50%);
+  width: var(--w);
+  margin-inline: 0 calc(50% - 50vw);
+}
+
+/* Viewport-height cap for verticals. width:auto + max constraints (never
+   width:100%) so the image can neither stretch nor crop — spec 003 forbids
+   both. --tall-max is a sampler-review knob. */
+.piece-tall img {
+  width: auto;
+  max-width: 100%;
+  max-height: var(--tall-max, 92vh);
+  margin-inline: auto;
+}
+
+.piece-inset {
+  max-width: min(440px, 80vw);
+  margin-inline: auto;
+}
+
+.piece-block figcaption {
+  margin-top: calc(var(--baseline) / 3);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+}

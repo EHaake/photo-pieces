@@ -140,6 +140,58 @@ describe('single directive form and captions (T203)', () => {
   });
 });
 
+describe('standalone treatments: wide, tall, inset, fullbleed captions (T204)', () => {
+  it.each([
+    ['wide', '(min-width: 1240px) 1160px'],
+    ['tall', '94vw'],
+    ['inset', '440px'],
+  ])('%s leaf renders a classed figure with its sizing', async (name, sizeFragment) => {
+    const { code } = await render(`::${name}{src="./photo.jpg" alt="x"}`);
+    expect(code).toContain(`<figure class="piece-block piece-${name}">`);
+    const [marker] = imageMarkers(code);
+    expect(marker.layout).toBe('constrained');
+    expect(marker.sizes).toContain(sizeFragment);
+  });
+
+  it.each(['wide', 'tall', 'inset', 'fullbleed'])(
+    '%s container form carries a figcaption',
+    async (name) => {
+      const { code } = await render(`:::${name}{src="./photo.jpg" alt="x"}\nA caption.\n:::`);
+      expect(code).toContain(`piece-${name}`);
+      expect(code).toContain('<figcaption>A caption.</figcaption>');
+    },
+  );
+
+  it('wide with bleed=left gets the bleed class', async () => {
+    const { code } = await render('::wide{src="./photo.jpg" alt="x" bleed="left"}');
+    expect(code).toContain('<figure class="piece-block piece-wide bleed-left">');
+  });
+
+  it('wide with an invalid bleed value fails naming the enum', async () => {
+    await expect(
+      renderExpectingFailure('::wide{src="./photo.jpg" alt="x" bleed="up"}'),
+    ).rejects.toThrow(/invalid value "up" for bleed on wide — allowed: left \| right/);
+  });
+
+  it('bleed is not accepted on other blocks', async () => {
+    await expect(
+      renderExpectingFailure('::inset{src="./photo.jpg" alt="x" bleed="left"}'),
+    ).rejects.toThrow(/unknown attribute "bleed" on inset/);
+  });
+
+  it.each(['wide', 'tall', 'inset'])('%s keeps the family alt contract', async (name) => {
+    await expect(renderExpectingFailure(`::${name}{src="./photo.jpg"}`)).rejects.toThrow(
+      new RegExp(`${name} requires an alt attribute`),
+    );
+  });
+
+  it('missing files still fail with the piece-relative message', async () => {
+    await expect(renderExpectingFailure('::tall{src="./nope.jpg" alt="x"}')).rejects.toThrow(
+      /image not found: \.\/nope\.jpg/,
+    );
+  });
+});
+
 describe('text directive restoration round-trips attributes (T202)', () => {
   it('a bare text directive with attributes comes back verbatim', async () => {
     const { code } = await render('Set the :hover{delay="80ms"} state carefully.');
