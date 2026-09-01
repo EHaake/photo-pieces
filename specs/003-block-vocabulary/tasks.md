@@ -89,6 +89,17 @@ weakening tests to pass.
       for fullbleed/wide/half-bleed/strip, matte map); screenshots
       delivered for the photographer's reading-experience review._
 
+- [x] **T209R** — Sampler-review amendments (photographer's feedback):
+      `width="wide|fullbleed"` on diptych/triptych (breakout math
+      shared with wide/fullbleed; combines with match and weight;
+      fullbleed-width pairs unmatted; sizes scaled per variant), and
+      mattes moved from the container to **each image** — every frame
+      its own mat, gutters show the page, captions sit below the mats.
+      _Verify: 79 tests green; browser-measured — per-image mats,
+      match-height still exact with mats (flex basis floor), wide pair
+      spans 1160px centered, fullbleed pair spans the viewport,
+      mobile stacking intact; build green._
+
 ## Phase 5 — Authoring side and docs
 
 - [ ] **T210** — Obsidian plugin: leaf-form rendering for all

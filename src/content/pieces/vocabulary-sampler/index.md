@@ -27,7 +27,7 @@ The directive form, identical width:
 And captioned:
 
 :::single{src="./land-c.jpg" alt="A 3:2 placeholder"}
-A caption with *inline markdown* — the container body.
+A caption with _inline markdown_ — the container body.
 :::
 
 ## Inset
@@ -84,6 +84,13 @@ Weighted, left then right:
 
 ::diptych{left="./port-45.jpg" right="./land-c.jpg" leftAlt="Companion" rightAlt="Dominant" weight="right"}
 
+Width variants — the pair breaks out to the content width, then the
+viewport (mats drop at fullbleed; edge-to-edge is the point):
+
+::diptych{left="./land-a.jpg" right="./land-b.jpg" leftAlt="Left" rightAlt="Right" width="wide"}
+
+::diptych{left="./land-c.jpg" right="./port-a.jpg" leftAlt="Left" rightAlt="Portrait" width="fullbleed"}
+
 ## Triptych
 
 Horizontal–vertical–horizontal on the midline:
@@ -93,6 +100,10 @@ Horizontal–vertical–horizontal on the midline:
 Equal heights:
 
 ::triptych{left="./land-c.jpg" center="./port-b.jpg" right="./square.jpg" leftAlt="H" centerAlt="V" rightAlt="S" match="height"}
+
+Triptych at the content width:
+
+::triptych{left="./land-a.jpg" center="./port-b.jpg" right="./land-c.jpg" leftAlt="H" centerAlt="V" rightAlt="H" width="wide"}
 
 ## Grid
 

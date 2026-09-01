@@ -288,6 +288,58 @@ describe('diptych/triptych upgrades: match, weight, captions (T205)', () => {
   });
 });
 
+describe('pair width variants (sampler review)', () => {
+  it('width="wide" scales the pair sizes and adds the class', async () => {
+    const { code } = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" width="wide"}',
+    );
+    expect(code).toContain('piece-diptych width-wide');
+    expect(imageMarkers(code)[0].sizes).toBe('(min-width: 720px) 560px, 96vw');
+  });
+
+  it('width="fullbleed" uses viewport units and the class', async () => {
+    const { code } = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" width="fullbleed"}',
+    );
+    expect(code).toContain('piece-diptych width-fullbleed');
+    expect(imageMarkers(code)[0].sizes).toBe('(min-width: 720px) 48vw, 100vw');
+  });
+
+  it('triptych width="wide" scales thirds', async () => {
+    const { code } = await render(
+      '::triptych{left="./photo.jpg" center="./photo.jpg" right="./photo.jpg" leftAlt="a" centerAlt="b" rightAlt="c" width="wide"}',
+    );
+    expect(imageMarkers(code)[0].sizes).toBe('(min-width: 720px) 373px, 96vw');
+  });
+
+  it('width combines with weight (scaled px) and with match (vw shares)', async () => {
+    const weighted = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" weight="left" width="wide"}',
+    );
+    expect(imageMarkers(weighted.code)[0].sizes).toBe('(min-width: 720px) 773px, 96vw');
+    const matched = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" match="height" width="fullbleed"}',
+    );
+    // shares of 96vw: 1.6/(1.6+0.6667) → 68vw; remainder → 28vw
+    expect(imageMarkers(matched.code)[0].sizes).toBe('(min-width: 720px) 68vw, 100vw');
+    expect(imageMarkers(matched.code)[1].sizes).toBe('(min-width: 720px) 28vw, 100vw');
+  });
+
+  it('an invalid width value fails naming the enum', async () => {
+    await expect(
+      renderExpectingFailure(
+        '::diptych{left="./photo.jpg" right="./photo.jpg" leftAlt="l" rightAlt="r" width="huge"}',
+      ),
+    ).rejects.toThrow(/invalid value "huge" for width on diptych — allowed: wide \| fullbleed/);
+  });
+
+  it('width is not accepted on single-image blocks', async () => {
+    await expect(
+      renderExpectingFailure('::single{src="./photo.jpg" alt="x" width="wide"}'),
+    ).rejects.toThrow(/unknown attribute "width" on single/);
+  });
+});
+
 describe('grid and strip: body-sourced images (T206)', () => {
   it('grid takes consecutive image lines (one mdast paragraph) in order', async () => {
     const { code } = await render(

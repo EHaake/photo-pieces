@@ -136,8 +136,12 @@ const BLOCKS = {
     body: 'caption',
     attrs: {
       required: ['left', 'right', 'leftAlt', 'rightAlt'],
-      optional: ['match', 'weight'],
-      enums: { match: ['height'], weight: ['left', 'right'] },
+      optional: ['match', 'weight', 'width'],
+      enums: {
+        match: ['height'],
+        weight: ['left', 'right'],
+        width: ['wide', 'fullbleed'],
+      },
     },
     validate(attrs, fail) {
       if (attrs.match && attrs.weight)
@@ -159,21 +163,11 @@ const BLOCKS = {
     classes: (attrs) => [
       ...(attrs.match ? ['match-height'] : []),
       ...(attrs.weight ? [`weight-${attrs.weight}`] : []),
+      ...(attrs.width ? [`width-${attrs.width}`] : []),
     ],
     needsRatios: (attrs) => Boolean(attrs.match),
-    sizing(attrs, i, ratios) {
-      if (attrs.weight) {
-        const dominant = attrs.weight === 'left' ? 0 : 1;
-        const px = i === dominant ? 453 : 227;
-        return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, 94vw` };
-      }
-      if (attrs.match && ratios) {
-        const sum = ratios.reduce((a, b) => a + b, 0);
-        const px = Math.round((680 * ratios[i]) / sum);
-        return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, 94vw` };
-      }
-      return { layout: 'constrained', sizes: `${COLLAPSE} 340px, 94vw` };
-    },
+    sizing: (attrs, i, ratios) =>
+      pairSizing(attrs, i, ratios, { shares: 2, dominant: 453, companion: 227 }),
     matted: true,
   },
 
@@ -182,8 +176,8 @@ const BLOCKS = {
     body: 'caption',
     attrs: {
       required: ['left', 'center', 'right', 'leftAlt', 'centerAlt', 'rightAlt'],
-      optional: ['match'],
-      enums: { match: ['height'] },
+      optional: ['match', 'width'],
+      enums: { match: ['height'], width: ['wide', 'fullbleed'] },
     },
     images(attrs, fail) {
       if (!attrs.left || !attrs.center || !attrs.right)
@@ -202,16 +196,12 @@ const BLOCKS = {
         { src: attrs.right, alt: attrs.rightAlt },
       ];
     },
-    classes: (attrs) => (attrs.match ? ['match-height'] : []),
+    classes: (attrs) => [
+      ...(attrs.match ? ['match-height'] : []),
+      ...(attrs.width ? [`width-${attrs.width}`] : []),
+    ],
     needsRatios: (attrs) => Boolean(attrs.match),
-    sizing(attrs, i, ratios) {
-      if (attrs.match && ratios) {
-        const sum = ratios.reduce((a, b) => a + b, 0);
-        const px = Math.round((680 * ratios[i]) / sum);
-        return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, 94vw` };
-      }
-      return { layout: 'constrained', sizes: `${COLLAPSE} 227px, 94vw` };
-    },
+    sizing: (attrs, i, ratios) => pairSizing(attrs, i, ratios, { shares: 3 }),
     matted: true,
   },
 
@@ -303,6 +293,41 @@ const BLOCKS = {
     reservedMessage: 'the sequence block is reserved but not implemented yet — see ROADMAP.md',
   },
 };
+
+// Sizing for the pair blocks across their width variants (added at the
+// sampler review): base rendered width is the prose column (680px), the
+// content width (1160px) for width="wide", or the viewport for
+// width="fullbleed" (vw units). Mobile branches match the collapsed
+// stacked layout.
+function pairSizing(attrs, i, ratios, { shares, dominant, companion }) {
+  const width = attrs.width;
+  const mobile = width === 'fullbleed' ? '100vw' : width === 'wide' ? '96vw' : '94vw';
+  const basePx = width === 'wide' ? 1160 : 680;
+  if (attrs.weight && dominant) {
+    const isDominant = i === (attrs.weight === 'left' ? 0 : 1);
+    if (width === 'fullbleed') {
+      return { layout: 'constrained', sizes: `${COLLAPSE} ${isDominant ? 64 : 32}vw, ${mobile}` };
+    }
+    const scale = basePx / 680;
+    const px = Math.round((isDominant ? dominant : companion) * scale);
+    return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, ${mobile}` };
+  }
+  if (attrs.match && ratios) {
+    const sum = ratios.reduce((a, b) => a + b, 0);
+    if (width === 'fullbleed') {
+      const vw = Math.round((96 * ratios[i]) / sum);
+      return { layout: 'constrained', sizes: `${COLLAPSE} ${vw}vw, ${mobile}` };
+    }
+    const px = Math.round((basePx * ratios[i]) / sum);
+    return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, ${mobile}` };
+  }
+  if (width === 'fullbleed') {
+    const vw = Math.round(96 / shares);
+    return { layout: 'constrained', sizes: `${COLLAPSE} ${vw}vw, ${mobile}` };
+  }
+  const px = { 2: { 680: 340, 1160: 560 }, 3: { 680: 227, 1160: 373 } }[shares][basePx];
+  return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, ${mobile}` };
+}
 
 export function remarkPiecesBlocks() {
   // Async transformer: the dimension probe (match="height") awaits Astro's

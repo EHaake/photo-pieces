@@ -1112,6 +1112,20 @@ pre code {
   margin-inline: 0 calc(50% - 50vw);
 }
 
+/* Pair width variants (sampler-review addition): diptych/triptych can
+   break out to the content width or the viewport, same math as
+   wide/fullbleed. */
+.piece-block.width-wide {
+  --w: min(var(--content-width), 96vw);
+  width: var(--w);
+  margin-inline: calc(50% - var(--w) / 2);
+}
+
+.piece-block.width-fullbleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
 /* Viewport-height cap for verticals. width:auto + max constraints (never
    width:100%) so the image can neither stretch nor crop — spec 003 forbids
    both. --tall-max is a sampler-review knob. */
@@ -1249,38 +1263,42 @@ pre code {
   color: var(--color-muted);
 }
 
-/* ---- Mattes (spec 003 Phase 3) --------------------------------------
-   Application map — matted: single (both forms), inset, wide, diptych,
-   triptych, grid, and the figures inside aside/row; unmatted: fullbleed,
-   tall, strip (the bleed is the point), and half-bleed's bled edge.
-   Multi-image blocks share ONE matte: the figure's background shows
-   through the grid/flex gaps, so the gutters read as matte. Captions sit
-   inside the padded field — museum convention. */
+/* ---- Mattes (spec 003 Phase 3; per-image since the sampler review) --
+   Every frame carries its OWN mat — the photographer's presentation
+   style per image — so gutters in multi-image blocks show the page
+   between mats, and captions sit below the mats on the page (the wall
+   label sits on the wall, not the mat). Matted: single (both forms),
+   inset, wide, diptych, triptych, grid, aside, row. Unmatted:
+   fullbleed, tall, strip, width="fullbleed" pairs, and half-bleed's
+   bled edge. Equal-heights note: the padding participates in the flex
+   basis floor, so match="height" stays exact with per-image mats. */
 
-.piece-single,
-.piece-inset,
-.piece-wide,
-.piece-diptych,
-.piece-triptych,
-.piece-grid,
-.piece-aside,
-.piece-row figure {
-  background: var(--color-matte);
-  padding: var(--matte);
-}
-
-/* The plain-markdown shorthand single gets the same matte directly. */
+.piece-single img,
+.piece-inset img,
+.piece-wide img,
+.piece-diptych img,
+.piece-triptych img,
+.piece-grid img,
+.piece-aside img,
+.piece-row figure img,
 .prose > p > img {
   background: var(--color-matte);
   padding: var(--matte);
 }
 
-/* Half-bleed: the bled edge runs clean to the viewport; the matte holds
-   on the other three sides (fallback stance — a sampler-review knob). */
-.piece-wide.bleed-left {
+/* Half-bleed: the bled edge runs clean to the viewport; the mat holds
+   on the other three sides (sampler-review knob). */
+.piece-wide.bleed-left img {
   padding-left: 0;
 }
 
-.piece-wide.bleed-right {
+.piece-wide.bleed-right img {
   padding-right: 0;
+}
+
+/* Fullbleed-width pairs: edge-to-edge is the point — no mats. */
+.piece-diptych.width-fullbleed img,
+.piece-triptych.width-fullbleed img {
+  background: none;
+  padding: 0;
 }

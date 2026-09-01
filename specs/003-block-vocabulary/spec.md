@@ -76,7 +76,10 @@ review, visualized and discussed): images render at **equal widths,
 center-aligned on a shared midline** — a portrait beside a landscape
 extends above and below it, deliberately. The photographer expects
 this most in triptychs (horizontal–vertical–horizontal and the
-inverse). An opt-in attribute switches a block to **equal heights**
+inverse). A `width="wide|fullbleed"` attribute (added at the
+sampler review — column-only pairs felt too restrictive) breaks the
+pair out to the content width or the viewport, with mats dropped at
+fullbleed. An opt-in attribute switches a block to **equal heights**
 (widths follow aspect ratio, forming one clean rectangle; requires
 build-time knowledge of image dimensions — plan detail). Cropping is
 never a behavior, in any mode. For same-orientation sets both modes
@@ -143,6 +146,10 @@ carved out of the skeuomorphism ban — frames, shadows, textures stay
 banned): images on this site are presented **matted** — a flat,
 uniform color field around the frame.
 
+- **Per-image, not per-container** (resolved at the sampler review):
+  every frame carries its own mat; gutters in multi-image blocks show
+  the page between mats; captions sit below the mats on the page —
+  the wall label sits on the wall, not the mat.
 - **Applied by the site's CSS, never baked into image files.**
   Compared directly and decided: site-applied means one token retunes
   every matte (width, color in `global.css`); source files stay clean
