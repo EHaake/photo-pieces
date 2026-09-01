@@ -49,8 +49,8 @@ weakening tests to pass.
       `astro/assets/utils` `imageMetadata`, `match="height"` with
       ratio normalization + `var(--ar, 1)` fallback, `weight`
       (diptych), `weight`+`match` contradiction fails. _Verify:
-      orientation-6 EXIF fixture test proves the swap; --ar asserted
-      via _*ASTRO_IMAGE* markers; style-passthrough to rendered
+      orientation-6 EXIF fixture test proves the swap; `--ar` asserted
+      via `__ASTRO_IMAGE_` markers; style-passthrough to rendered
       output verified once against dist; build green._
 
 ## Phase 2 — Multi-image and prose blocks
