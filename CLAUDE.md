@@ -45,9 +45,11 @@ CMS or backend service for v1.
   references — never auto-generated from all site images — and each
   gallery entry may optionally reference the piece it came from.
 - **Closed block vocabulary**: image treatments inside a piece's body are
-  limited to a defined set of directive-backed treatments (single image,
-  diptych, triptych, full-bleed; a `sequence` type is reserved but its
-  final presentation is undecided — see `ROADMAP.md`). Adding a new
+  limited to a defined set of directive-backed treatments — as of spec
+  003: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
+  strip, aside, row, with captions via the container form and
+  site-applied mattes; a `sequence` type is reserved but its
+  final presentation is undecided — see `ROADMAP.md`. Adding a new
   treatment means deliberately adding a new directive + presentation
   contract — a handler in the remark transform (the vocabulary's single
   source of truth) plus the CSS that styles its output — not writing
