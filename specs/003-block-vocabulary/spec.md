@@ -118,9 +118,13 @@ New prose-bearing treatments:
   on narrow viewports (as do diptych/triptych/grid — responsive
   behavior is plan detail, but collapsing is the expectation).
 
-Captions: optional on every named image block (single, fullbleed,
-wide, inset, diptych, triptych, grid) via the container body. Leaf
-form without a body stays valid — captions are opt-in.
+Captions: optional on **every** named image block — single, fullbleed,
+wide, tall, inset, diptych, triptych, grid, strip — via the container
+body (corrected at plan review: the list originally omitted tall and
+strip). The prose-bearing blocks (aside, row) take no caption — their
+prose is the accompanying text. For blocks with a leaf form, the leaf
+form stays valid — captions are opt-in; grid and strip are
+container-only by nature (their images live in the body).
 
 Reserved, still excluded: **sequence** (interactive; needs its own
 design pass — unchanged from ROADMAP).
@@ -191,7 +195,8 @@ uniform color field around the frame.
       rendered width)
 - [ ] Captions render on every image block's container form, with
       inline markdown support, styled consistently site-wide
-- [ ] Leaf forms without captions remain valid for all image blocks
+- [ ] Caption-less usage remains valid for every image block (leaf
+      form where one exists; empty-trailing-body for grid/strip)
 - [ ] All fail-loudly contracts hold for the new blocks (unknown
       directive, missing/malformed attributes, missing image files,
       missing alts), with file + line in the error
