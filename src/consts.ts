@@ -29,6 +29,14 @@ export const SITE = {
   footerText: '© Erik Haake',
 } as const;
 
+/** Public contact address — used by the Contact page and the footer's
+ *  email icon. The interim contact mechanism until the roadmapped
+ *  contact-form spec. */
+export const CONTACT_EMAIL = 'erik@erikhaakephoto.com';
+
+/** Instagram profile — the primary arrival path spec 001 names. */
+export const INSTAGRAM_URL = 'https://www.instagram.com/erik.haake/';
+
 /** Icons bundled with the theme — see `src/components/SocialLinks.astro`. */
 export type SocialIcon = 'github' | 'x' | 'linkedin' | 'rss' | 'email' | 'instagram';
 
@@ -43,12 +51,8 @@ export interface SocialLink {
 /** Social profiles rendered as inline SVG icons in the footer.
  *  Add or remove entries here — no template edits needed. */
 export const SOCIAL_LINKS: readonly SocialLink[] = [
-  {
-    label: 'Instagram',
-    href: 'https://www.instagram.com/erik.haake/',
-    icon: 'instagram',
-  },
-  { label: 'Email', href: 'mailto:erik@erikhaakephoto.com', icon: 'email' },
+  { label: 'Instagram', href: INSTAGRAM_URL, icon: 'instagram' },
+  { label: 'Email', href: `mailto:${CONTACT_EMAIL}`, icon: 'email' },
   { label: 'RSS feed', href: '/rss.xml', icon: 'rss' },
 ];
 

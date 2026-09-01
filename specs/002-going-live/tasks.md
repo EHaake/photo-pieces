@@ -68,7 +68,7 @@ trail; nothing else depends on them unless stated.
       present) + "Pieces" nav entry. *Verify: build green; index lists
       the test piece; draft pieces excluded (test with a temporary
       draft).*
-- [ ] **T112** — `src/pages/contact/index.astro`: email
+- [x] **T112** — `src/pages/contact/index.astro`: email
       (erik@erikhaakephoto.com) + Instagram, footer link. *Verify:
       build green; mailto href correct; Instagram resolves.*
 - [ ] **T113 [author]** — About page with the photographer's text
