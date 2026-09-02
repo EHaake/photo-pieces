@@ -1,5 +1,6 @@
 import { Plugin, TFile, editorInfoField, editorLivePreviewField } from 'obsidian';
-import { EditorView, Decoration, DecorationSet, WidgetType } from '@codemirror/view';
+import { EditorView, Decoration, WidgetType } from '@codemirror/view';
+import type { DecorationSet } from '@codemirror/view';
 import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
 
 // Live Preview rendering for the LEAF form of the site's standalone image
@@ -48,11 +49,12 @@ const LEAF_BLOCKS: Record<string, Extract> = {
 const DIRECTIVE_PATTERN = `^::(${Object.keys(LEAF_BLOCKS).join('|')})\\{([^}]*)\\}[ \\t]*$`;
 
 function parseAttrs(raw: string): Record<string, string> {
+  // Quoted or unquoted values, as remark-directive accepts both.
   const attrs: Record<string, string> = {};
-  const attrRe = /(\w+)="([^"]*)"/g;
+  const attrRe = /(\w+)=(?:"([^"]*)"|(\S+))/g;
   let m: RegExpExecArray | null;
   while ((m = attrRe.exec(raw))) {
-    attrs[m[1]] = m[2];
+    attrs[m[1]] = m[2] ?? m[3];
   }
   return attrs;
 }

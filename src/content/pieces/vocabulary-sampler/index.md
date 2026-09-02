@@ -32,6 +32,8 @@ A caption with _inline markdown_ — the container body.
 
 ## Inset
 
+::inset{src="./square.jpg" alt="A square placeholder"}
+
 :::inset{src="./square.jpg" alt="A square placeholder"}
 Narrower than the text, centered. For detail shots.
 :::
@@ -52,11 +54,15 @@ Half-bleed, left and right:
 
 ## Fullbleed
 
+::fullbleed{src="./land-a.jpg" alt="A 3:2 placeholder"}
+
 :::fullbleed{src="./land-b.jpg" alt="A 3:2 placeholder"}
 Viewport edge to edge; the caption returns to the column.
 :::
 
 ## Tall
+
+::tall{src="./port-b.jpg" alt="A 2:3 placeholder"}
 
 :::tall{src="./port-a.jpg" alt="A 2:3 placeholder"}
 Capped at viewport height — the vertical counterpart to fullbleed.
@@ -71,7 +77,7 @@ Default — equal widths, mixed orientations centered on the midline:
 Captioned:
 
 :::diptych{left="./land-b.jpg" right="./land-c.jpg" leftAlt="Left frame" rightAlt="Right frame"}
-Two matched frames sharing one matte.
+Two matched frames, each on its own mat.
 :::
 
 Equal heights — widths follow the aspect ratios:
@@ -101,9 +107,11 @@ Equal heights:
 
 ::triptych{left="./land-c.jpg" center="./port-b.jpg" right="./square.jpg" leftAlt="H" centerAlt="V" rightAlt="S" match="height"}
 
-Triptych at the content width:
+Triptych at the content width, then the viewport:
 
 ::triptych{left="./land-a.jpg" center="./port-b.jpg" right="./land-c.jpg" leftAlt="H" centerAlt="V" rightAlt="H" width="wide"}
+
+::triptych{left="./land-b.jpg" center="./port-a.jpg" right="./land-a.jpg" leftAlt="H" centerAlt="V" rightAlt="H" width="fullbleed"}
 
 ## Grid
 

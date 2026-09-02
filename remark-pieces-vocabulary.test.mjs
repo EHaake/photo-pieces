@@ -302,7 +302,7 @@ describe('pair width variants (sampler review)', () => {
       '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" width="fullbleed"}',
     );
     expect(code).toContain('piece-diptych width-fullbleed');
-    expect(imageMarkers(code)[0].sizes).toBe('(min-width: 720px) 48vw, 100vw');
+    expect(imageMarkers(code)[0].sizes).toBe('(min-width: 720px) 50vw, 100vw');
   });
 
   it('triptych width="wide" scales thirds', async () => {
@@ -320,9 +320,9 @@ describe('pair width variants (sampler review)', () => {
     const matched = await render(
       '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" match="height" width="fullbleed"}',
     );
-    // shares of 96vw: 1.6/(1.6+0.6667) → 68vw; remainder → 28vw
-    expect(imageMarkers(matched.code)[0].sizes).toBe('(min-width: 720px) 68vw, 100vw');
-    expect(imageMarkers(matched.code)[1].sizes).toBe('(min-width: 720px) 28vw, 100vw');
+    // shares of 100vw: 1.6/(1.6+0.6667) → 71vw; remainder → 29vw
+    expect(imageMarkers(matched.code)[0].sizes).toBe('(min-width: 720px) 71vw, 100vw');
+    expect(imageMarkers(matched.code)[1].sizes).toBe('(min-width: 720px) 29vw, 100vw');
   });
 
   it('an invalid width value fails naming the enum', async () => {
@@ -369,6 +369,11 @@ describe('grid and strip: body-sourced images (T206)', () => {
     expect(imageMarkers(code)).toHaveLength(2);
   });
 
+  it('a hard line break (trailing double space) between images is fine', async () => {
+    const { code } = await render(':::grid\n![a](./photo.jpg)  \n![b](./portrait.jpg)\n:::');
+    expect(imageMarkers(code)).toHaveLength(2);
+  });
+
   it('mixing images and text in one paragraph fails with the blank-line hint', async () => {
     await expect(
       renderExpectingFailure(':::grid\n![a](./photo.jpg)\nThe caption right here\n:::'),
@@ -392,11 +397,13 @@ describe('grid and strip: body-sourced images (T206)', () => {
   it('strip renders the scroll band with probe-derived per-image sizes', async () => {
     const { code } = await render(':::strip\n![p](./photo.jpg)\n![q](./portrait.jpg)\n:::');
     expect(code).toContain('<figure class="piece-block piece-strip">');
-    expect(code).toContain('<div class="piece-strip-scroll">');
     const markers = imageMarkers(code);
     // photo.jpg ar 1.6 → 420*1.6 = 672px; portrait 0.6667 → 280px
     expect(markers[0].sizes).toBe('672px');
     expect(markers[1].sizes).toBe('280px');
+    // The probe drives sizes only — no --ar style (that's equal-heights).
+    expect(markers[0].style).toBeUndefined();
+    expect(code).toContain('<div class="piece-strip-scroll" tabindex="0">');
   });
 
   it('a single panorama is a valid strip and its caption lands after the band', async () => {
@@ -459,8 +466,26 @@ describe('aside and row: prose-bearing blocks (T207)', () => {
   });
 });
 
+describe('failure positions (spec: file + line)', () => {
+  it('a failure carries the directive line and column, not just the path', async () => {
+    let caught;
+    try {
+      await renderExpectingFailure('first line\n\n::mystery{}');
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toMatchObject({ line: 3, column: 1 });
+  });
+});
+
 describe('text directive restoration round-trips attributes (T202)', () => {
-  it('a bare text directive with attributes comes back verbatim', async () => {
+  it('a text directive nested in a label is restored too', async () => {
+    const { code } = await render('Press :kbd[Enter :now] to publish.');
+    expect(code).toContain('<p>Press :kbd[Enter :now] to publish.</p>');
+    expect(code).not.toContain('<div');
+  });
+
+  it('a bare text directive keeps its attributes (normalized key="value" form)', async () => {
     const { code } = await render('Set the :hover{delay="80ms"} state carefully.');
     expect(code).toContain('<p>Set the :hover{delay="80ms"} state carefully.</p>');
     expect(code).not.toContain('<div');

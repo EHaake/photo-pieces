@@ -16,7 +16,8 @@ the source of truth for how anything actually renders.
 | `:::grid` `:::strip` `:::aside` `:::row`             | raw text                           |
 | any directive typed mid-paragraph                    | raw text (the site rejects it too) |
 
-Captions are not shown — `alt` is accessibility text, not a caption,
+Attribute values may be quoted or unquoted, as on the site. Captions
+are not shown — `alt` is accessibility text, not a caption,
 so it is no longer displayed under the image. Missing images show a
 dashed "not found" box, which is telling the truth about what the
 build would do (it fails).

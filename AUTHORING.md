@@ -75,7 +75,8 @@ Learned by breaking them — each of these fails quietly if violated:
   doesn't parse anywhere, in Obsidian or the build.
 - **Directives go on their own line.** A `::name{...}` typed
   mid-paragraph is not a block: the site renders it as literal text
-  (attributes and all), and the Obsidian plugin — anchored to whole
+  (attributes included, normalized to `key="value"` form), and the
+  Obsidian plugin — anchored to whole
   lines since 0.2.0 — leaves it raw too, so the two agree.
 - **Captions go in the container body**, not in a `[label]`:
   `:::single{src="…" alt="…"}` / caption text / `:::`. A `[label]` on

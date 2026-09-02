@@ -118,6 +118,22 @@ weakening tests to pass.
       downward scroll, reveals on a small upward scroll, visible near
       top, focusin reveals; check/tests/build green._
 
+- [x] **T209X** — Pre-merge review amendments: grid was the one
+      multi-column block the collapse query missed (T209's "collapse at
+      720px" browser pass enumerated pairs/aside/row, not grid — the
+      checklist now names every block); captions on fullbleed,
+      fullbleed-width pairs, and half-bleeds return to the column; the
+      strip scroller is keyboard-focusable; plan.md's Mattes/Sizes/Shape
+      sections amended in place for T209R/G/H; the sampler says
+      per-image mats and covers both forms of every block; the dead
+      `matted` descriptor flag removed; tall/half-bleed/fullbleed-pair
+      `sizes` corrected; `--tall-max`/`--strip-h` promoted to tokens;
+      hard line breaks accepted between body images; nested text
+      directives restored; failure line/column pinned by a test; row
+      prose images matted; plugin accepts unquoted attribute values.
+      _Verify: tests green; build green; browser-measured grid stacking
+      at mobile, caption alignment on bleeds, strip focusability._
+
 ## Phase 5 — Authoring side and docs
 
 - [x] **T210** — Obsidian plugin: leaf-form rendering for all

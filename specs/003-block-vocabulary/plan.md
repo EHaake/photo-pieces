@@ -12,8 +12,10 @@ One transform (`remark-pieces-blocks.mjs`) grows from a leaf-only,
 attribute-only model to a block-descriptor model; `global.css` grows a
 matte token pair and per-treatment layout rules; the Obsidian plugin
 gains leaf-form rendering for the new standalone blocks (and absorbs
-two known fixes); a sampler fixture piece and doc updates close it
-out. No new routes. **Pre-implementation step, own commit**: amend
+two known fixes); a sampler fixture piece, two essay demos, and doc
+updates close it out. No new routes. Added at the sampler review: pair
+`width="wide|fullbleed"` variants, the warmed ground, and a full-width
+header that hides on scroll down (BaseLayout script + CSS). **Pre-implementation step, own commit**: amend
 CLAUDE.md's closed-vocabulary enumeration (constitution rule — it
 currently names only the 001 set).
 
@@ -128,8 +130,11 @@ grid, row, aside) render stacked at ~94vw, and their narrow `sizes`
 branch says `94vw` — the draft's `47vw/31vw` would have served
 visibly soft images on phones. Wide-viewport branches stay as
 drafted (single 680px¹, inset 440px, wide 1160px, halves 340px,
-thirds 227px, weighted 453/227px); `tall` errs over (94vw); strip is
-probe-derived per image. ¹Coupled to `--prose-width` and `--matte` —
+thirds 227px, weighted 453/227px); `tall` is bounded by the column
+(680px); half-bleed declares `calc(50vw + 340px)`; strip is
+probe-derived per image. Pair `width` variants scale the bases: wide →
+560/373px (weighted 773/387), fullbleed → 50/33vw (weighted 67/33vw,
+match shares of 100vw). ¹Coupled to `--prose-width` and `--matte` —
 comments at both ends note the coupling (review S4).
 
 **Global `image.layout: 'constrained'`** is set in `astro.config.mjs`
@@ -139,25 +144,35 @@ no srcset — contradicting the spec's "same rendered result" promise
 for single's two forms. Remaining `<Image>` components get checked at
 implementation for layout interaction.
 
-## Mattes
+## Mattes (amended at the sampler review — T209R/T209G)
 
-Tokens `--matte` (clamp-based width) and `--color-matte` (initial:
-pure white against the warm page). Matted: single (both forms — the
-shorthand via a `.prose > p > img` rule, more precise than `:not()`),
-inset, wide, diptych, triptych, grid, aside, row — background +
-padding on the figure; grid/flex gaps show the matte color through
-(verified: gaps paint the container background). Unmatted: fullbleed,
-tall, strip. Half-bleed: matte on the column side, none on the bled
-edge — the stated fallback, revisable at the sampler review.
-`figcaption` sits inside the matte field. Astro's image CSS can't
-interfere — it's inside `@layer astro.images`; our rules are
-unlayered and win.
+Tokens `--matte` (clamp-based width) and `--color-matte` (pure white).
+**Per image, not per container** (T209R, the photographer's call): every
+frame carries its own mat via `background + padding` on the `<img>` —
+matted are single (both forms; the shorthand via `.prose > p > img`),
+inset, wide, diptych, triptych, grid, and the images in aside/row;
+unmatted are fullbleed, tall, strip, `width="fullbleed"` pairs, and
+half-bleed's bled edge. Gutters in multi-image blocks show the page
+between mats. **Captions sit below the mats on the page**, and on
+edge-to-edge treatments they return to the reading column (centered,
+or aligned to the column edge for half-bleeds). The matte map is a
+CSS decision — the descriptors carry no `matted` flag (the pre-merge
+review found the earlier flag drifting from the CSS). Equal-heights
+mode survives per-image mats exactly: the padding participates in the
+flex-basis floor. The ground itself was warmed one step (T209G) so
+white mats read as mats.
 
-`tall`/`inset`/`strip` override `.piece-block img { width: 100% }`
-with `width: auto; max-width: 100%; max-height: <cap>; margin-inline:
-auto` (review S11) — `max-height` + forced `width: 100%` would
-stretch, and could crop if `object-fit` ever landed globally, which
-the spec forbids.
+`tall`/`strip` override `.piece-block img { width: 100% }` with
+`width: auto; max-width: 100%; …` (review S11) — a forced width plus
+a height cap would stretch or crop. `inset` instead caps the figure at
+`min(440px, 80vw)` and leaves the image at width 100% (no height cap,
+so nothing can stretch — a deliberate divergence from the S11 form).
+`--tall-max` and `--strip-h` are `:root` tokens.
+
+Known limitation (accepted): the 720px collapse breakpoint and strip's
+420px band ceiling are duplicated between the transform's `sizes` math
+and the CSS, commented at both ends; retuning one without the other
+degrades `sizes` accuracy with a green suite.
 
 ## Obsidian plugin
 

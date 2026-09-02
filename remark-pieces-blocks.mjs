@@ -17,7 +17,9 @@ import { visit } from 'unist-util-visit';
 //   attrs:  { required: [...], optional: [...], enums: { name: [...] } }
 //   images: (attrs, fail) => [{ src, alt }]  — validates and extracts
 //   sizing: (attrs, imageIndex, ratios) => ({ layout, sizes })
-//   matted: boolean — consumed by the matte CSS pass (spec 003 Phase 3)
+//
+// Which blocks are matted is a CSS decision (global.css's matte section),
+// not descriptor data — one source of truth.
 //
 // Images are emitted as real mdast `image` nodes (the node's children),
 // NOT prebuilt hast — Astro's own `remarkCollectImages` runs after user
@@ -55,7 +57,6 @@ const BLOCKS = {
       return [{ src: attrs.src, alt: attrs.alt }];
     },
     sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 680px, 94vw` }),
-    matted: true,
   },
 
   fullbleed: {
@@ -69,7 +70,6 @@ const BLOCKS = {
       return [{ src: attrs.src, alt: attrs.alt }];
     },
     sizing: () => ({ layout: 'full-width', sizes: '100vw' }),
-    matted: false,
   },
 
   wide: {
@@ -89,17 +89,20 @@ const BLOCKS = {
       return [{ src: attrs.src, alt: attrs.alt }];
     },
     classes: (attrs) => (attrs.bleed ? [`bleed-${attrs.bleed}`] : []),
-    sizing: () => ({
+    sizing: (attrs) => ({
       layout: 'constrained',
-      sizes: '(min-width: 1240px) 1160px, 96vw',
+      // half-bleed renders at 50vw + half the column; plain wide caps at
+      // the content width.
+      sizes: attrs.bleed
+        ? `${COLLAPSE} calc(50vw + 340px), 96vw`
+        : '(min-width: 1240px) 1160px, 96vw',
     }),
-    matted: true,
   },
 
   tall: {
     // The vertical counterpart to fullbleed: capped at viewport height,
-    // width follows. Sizes err over (94vw) — height-capped rendering
-    // width depends on the viewport's aspect ratio.
+    // width follows — but never wider than the column (no breakout), so
+    // the column width is a correct upper bound for sizes.
     forms: 'both',
     body: 'caption',
     attrs: { required: ['src', 'alt'], optional: [], enums: {} },
@@ -109,8 +112,7 @@ const BLOCKS = {
         fail('tall requires an alt attribute (use alt="" only for a truly decorative image)');
       return [{ src: attrs.src, alt: attrs.alt }];
     },
-    sizing: () => ({ layout: 'constrained', sizes: '94vw' }),
-    matted: false,
+    sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 680px, 94vw` }),
   },
 
   inset: {
@@ -124,7 +126,6 @@ const BLOCKS = {
       return [{ src: attrs.src, alt: attrs.alt }];
     },
     sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 440px, 80vw` }),
-    matted: true,
   },
 
   diptych: {
@@ -166,9 +167,9 @@ const BLOCKS = {
       ...(attrs.width ? [`width-${attrs.width}`] : []),
     ],
     needsRatios: (attrs) => Boolean(attrs.match),
+    emitsAr: (attrs) => Boolean(attrs.match),
     sizing: (attrs, i, ratios) =>
       pairSizing(attrs, i, ratios, { shares: 2, dominant: 453, companion: 227 }),
-    matted: true,
   },
 
   triptych: {
@@ -201,8 +202,8 @@ const BLOCKS = {
       ...(attrs.width ? [`width-${attrs.width}`] : []),
     ],
     needsRatios: (attrs) => Boolean(attrs.match),
+    emitsAr: (attrs) => Boolean(attrs.match),
     sizing: (attrs, i, ratios) => pairSizing(attrs, i, ratios, { shares: 3 }),
-    matted: true,
   },
 
   grid: {
@@ -214,7 +215,6 @@ const BLOCKS = {
     count: { min: 2, max: 6 },
     attrs: { required: [], optional: [], enums: {} },
     sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 340px, 94vw` }),
-    matted: true,
   },
 
   strip: {
@@ -232,7 +232,6 @@ const BLOCKS = {
       layout: 'constrained',
       sizes: `${Math.round(420 * (ratios?.[i] ?? 1.5))}px`,
     }),
-    matted: false,
   },
 
   aside: {
@@ -258,7 +257,6 @@ const BLOCKS = {
     },
     classes: (attrs) => [`side-${attrs.side}`],
     sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 300px, 94vw` }),
-    matted: true,
   },
 
   row: {
@@ -282,7 +280,6 @@ const BLOCKS = {
     },
     classes: (attrs) => [`side-${attrs.side}`],
     sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 340px, 94vw` }),
-    matted: true,
   },
 
   sequence: {
@@ -306,7 +303,7 @@ function pairSizing(attrs, i, ratios, { shares, dominant, companion }) {
   if (attrs.weight && dominant) {
     const isDominant = i === (attrs.weight === 'left' ? 0 : 1);
     if (width === 'fullbleed') {
-      return { layout: 'constrained', sizes: `${COLLAPSE} ${isDominant ? 64 : 32}vw, ${mobile}` };
+      return { layout: 'constrained', sizes: `${COLLAPSE} ${isDominant ? 67 : 33}vw, ${mobile}` };
     }
     const scale = basePx / 680;
     const px = Math.round((isDominant ? dominant : companion) * scale);
@@ -315,14 +312,14 @@ function pairSizing(attrs, i, ratios, { shares, dominant, companion }) {
   if (attrs.match && ratios) {
     const sum = ratios.reduce((a, b) => a + b, 0);
     if (width === 'fullbleed') {
-      const vw = Math.round((96 * ratios[i]) / sum);
+      const vw = Math.round((100 * ratios[i]) / sum);
       return { layout: 'constrained', sizes: `${COLLAPSE} ${vw}vw, ${mobile}` };
     }
     const px = Math.round((basePx * ratios[i]) / sum);
     return { layout: 'constrained', sizes: `${COLLAPSE} ${px}px, ${mobile}` };
   }
   if (width === 'fullbleed') {
-    const vw = Math.round(96 / shares);
+    const vw = Math.round(100 / shares);
     return { layout: 'constrained', sizes: `${COLLAPSE} ${vw}vw, ${mobile}` };
   }
   const px = { 2: { 680: 340, 1160: 560 }, 3: { 680: 227, 1160: 373 } }[shares][basePx];
@@ -347,7 +344,10 @@ export function remarkPiecesBlocks() {
             ]
           : [{ type: 'text', value: `:${node.name}${attrText}` }];
       parent.children.splice(index, 1, ...restored);
-      return index + restored.length;
+      // Continue AT index, not past the insertion: the restored label
+      // children may hold further text directives. No loop risk — the
+      // node now at index is a text node.
+      return index;
     });
 
     const directives = [];
@@ -427,8 +427,10 @@ export function remarkPiecesBlocks() {
       let normalized = null;
       if (block.needsRatios?.(attrs)) {
         ratios = await probeRatios(images, file, failHere);
-        const min = Math.min(...ratios);
-        normalized = ratios.map((r) => r / min);
+        if (block.emitsAr?.(attrs)) {
+          const min = Math.min(...ratios);
+          normalized = ratios.map((r) => r / min);
+        }
       }
 
       const imageNodes = images.map(({ src, alt }, imageIndex) => ({
@@ -470,7 +472,11 @@ export function remarkPiecesBlocks() {
       if (block.structure === 'scroll') {
         // strip: images live in a scrolling band inside the figure.
         node.children = [
-          wrapNode('div', ['piece-strip-scroll'], imageNodes),
+          // tabIndex: WebKit doesn't make scrollers focusable on its own;
+          // without it a keyboard user can't reach the off-screen part of
+          // a panorama (WCAG 2.1.1). The site's :focus-visible rule styles
+          // the ring.
+          wrapNode('div', ['piece-strip-scroll'], imageNodes, { tabIndex: 0 }),
           ...(caption ? [caption] : []),
         ];
         node.data = { ...node.data, hName: 'figure', hProperties: { className } };
@@ -487,13 +493,17 @@ export function remarkPiecesBlocks() {
   };
 }
 
-function wrapNode(hName, className, children) {
+function wrapNode(hName, className, children, extraProps = {}) {
+  const hProperties = {
+    ...(className.length > 0 ? { className } : {}),
+    ...extraProps,
+  };
   return {
     type: 'pieceWrap',
     children,
     data: {
       hName,
-      ...(className.length > 0 ? { hProperties: { className } } : {}),
+      ...(Object.keys(hProperties).length > 0 ? { hProperties } : {}),
     },
   };
 }
@@ -513,7 +523,8 @@ function partitionBody(children, name, fail) {
     const imageChildren = para.children.filter((c) => c.type === 'image');
     if (imageChildren.length === 0) break;
     const stray = para.children.find(
-      (c) => c.type !== 'image' && !(c.type === 'text' && c.value.trim() === ''),
+      (c) =>
+        c.type !== 'image' && c.type !== 'break' && !(c.type === 'text' && c.value.trim() === ''),
     );
     if (stray) {
       fail(

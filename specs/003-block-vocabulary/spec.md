@@ -113,6 +113,8 @@ Added at spec review (the "even esoteric" pass — all four chosen):
   wide image (panorama — the other aspect-ratio casualty of
   column layouts) or several uniform-height frames. Native scroll
   only, pure CSS, no JS — consistent with the no-islands constraint.
+  The scroller is keyboard-focusable (`tabindex`, markup not JS —
+  WebKit won't reach it otherwise).
 - **half-bleed** — an attribute on `wide` (`bleed="left|right"`): the
   image runs to one viewport edge while the other side respects the
   column. The most magazine-styled of the set, chosen with eyes open.

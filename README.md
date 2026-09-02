@@ -21,7 +21,7 @@ The "why" behind this project lives in these, not in this file:
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
 - `ROADMAP.md` — deliberately deferred features (shop, comments,
-  search, a newsletter)
+  a newsletter)
 
 This file is about running and maintaining the code.
 
@@ -170,7 +170,11 @@ photo-pieces/
 ├── astro.config.mjs
 ├── wrangler.jsonc                # Cloudflare Workers static assets
 ├── remark-pieces-blocks.mjs      # directive -> block transform
-├── remark-pieces-blocks.test.mjs # its unit suite (npm test)
+├── remark-pieces-blocks.test.mjs # legacy contracts (npm test)
+├── remark-pieces-vocabulary.test.mjs # spec-003 vocabulary suite
+├── tests/fixtures/               # unit-test images (incl. EXIF-rotated)
+├── scripts/gen-placeholders.mjs  # fixture-piece placeholder images
+├── obsidian-plugin/              # Live Preview rendering (see its README)
 ├── CLAUDE.md, ROADMAP.md, DECISIONS.md, AUTHORING.md
 ├── specs/                        # spec.md, plan.md, tasks.md per spec
 ├── design/brief.md

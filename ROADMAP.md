@@ -12,8 +12,9 @@ attached.
   the moderation overhead feel worth it.
 - **User accounts** — no identified need without comments or a shop;
   would likely arrive alongside whichever of those gets built first.
-- **Site search** — revisit once the number of pieces/images makes
-  category browsing alone insufficient.
+- ~~**Site search**~~ — inherited working from the theme (Pagefind at
+  `/search`, indexing piece bodies); never needed building. Revisit
+  only if its scope should widen beyond pieces.
 - **Newsletter / subscription** — revisit if there's a reason to want a
   push channel independent of Instagram.
 - **A CMS** (e.g. Keystatic) — not planned; the Obsidian + live-preview
@@ -33,14 +34,14 @@ attached.
   the day the first cross-piece link gets written, not before.
 - **Obsidian live rendering for photo blocks** — built, in a
   deliberately minimal form: a custom plugin in `obsidian-plugin/`
-  renders `fullbleed` directives as images in Live Preview, the mode
+  rendered `fullbleed` directives as images in Live Preview, the mode
   actually used while writing. The bar was set at seeing the photo
   instead of raw directive text, not matching the real site's styling —
   see `DECISIONS.md` for that scoping. As of spec 003 the plugin
   renders the leaf form of every standalone block (single, fullbleed,
   wide, tall, inset, diptych, triptych). What remains: Reading View is
   intentionally not handled, and container forms stay raw text (see
-  the vocabulary entry above).
+  the vocabulary entry below).
 - **Contact form** — wanted (decided at spec 002 review), deferred to
   its own spec: form handling on a static site means either a form
   service (new dependency to justify) or host-provided handling, and
