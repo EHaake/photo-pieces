@@ -68,12 +68,15 @@ Two things, tightly coupled:
 
 ## Entities
 
-- **Image** — every raster in a piece folder or the gallery-images
-  folder. Identity: a stable id derived from its location (plan
-  detail), a canonical URL `/images/<id>/`. Metadata: EXIF read at
-  build (exposure fields; GPS never published), plus an optional
-  sidecar with title, caption, and overrides. Knows which piece(s)
-  reference it and which galleries include it.
+- **Image** — every raster in a published piece's folder or the
+  gallery-images folder (images owned by a `draft: true` piece are
+  unpublished with it — spec 005's unpublish mechanism depends on
+  this; amended at plan review). Identity: a stable id derived from
+  its location (plan detail), a canonical URL `/images/<id>/`.
+  Metadata: EXIF read at build (exposure fields; GPS never published),
+  plus an optional sidecar with title, caption, and overrides. Knows
+  the piece it belongs to (by folder — one piece or none) and which
+  galleries include it.
 - **Gallery** — a named, ordered, hand-curated list of image ids with
   a title, category, description, and cover. URL `/galleries/<slug>/`.
 - **Category** — the shared taxonomy (landscape, street, portrait,
@@ -130,15 +133,20 @@ loudly).
 
 ## Acceptance criteria
 
-- [ ] Every image in every piece folder and in the gallery folder has
-      a page at a stable URL, and no page is thin: exposure info (when
-      EXIF exists), piece links (when referenced), alt/title/caption
-      as available
+- [ ] Every accepted image in every published piece's folder and in
+      the gallery folder has a page at a stable URL, and no page is
+      thin: exposure info (when EXIF exists), the owning piece's link,
+      alt/title/caption as available; images owned by draft pieces
+      have no page
 - [ ] Frontmatter sidecar fields override EXIF-derived ones; GPS is
-      never emitted
+      never emitted — proven against a fixture that carries GPS, both
+      in the label data and in every image file in the built output
 - [ ] Piece images (every block in the vocabulary, including the
-      shorthand single) link to their image pages; mattes and layouts
-      are unchanged by the link wrapping
+      shorthand single) link to their image pages — except images with
+      `alt=""`, which stay unlinked (a link with no accessible name
+      fails WCAG; a decorative image isn't a destination); mattes,
+      equal-heights exactness, and every 003 layout measurement are
+      unchanged by the link wrapping
 - [ ] Galleries render as ordered plain grids; every image links to
       its page; a gallery referencing a missing image fails the build
       with file + line
@@ -147,12 +155,17 @@ loudly).
 - [ ] A gallery image with no originating piece renders its page
       without error (spec 001 criterion)
 - [ ] The latest-work component renders the newest curated images and
-      is not placed on any page
+      is not placed on any page (the temporary review page is deleted
+      before merge)
 - [ ] Unit tests cover the image-id derivation, EXIF/override merge,
       and gallery validation; build green; existing 82 tests green
 - [ ] A galleries sampler (fixture galleries over the existing fixture
-      pieces' images) exists for the visual review; all fixtures join
-      spec 005's unpublish list
+      pieces' images, plus gallery-folder placeholders and sidecars)
+      exists for the visual review; all fixtures join spec 005's
+      unpublish list
+- [ ] A `Galleries` nav entry exists; category browsing's exact
+      surface (category pages vs pieces filter pages) is the
+      photographer's call at plan review
 
 ## Resolved decisions
 
