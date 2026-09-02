@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { CATEGORIES } from './lib/categories';
 
 // Astro 7 Content Layer API: each collection declares a `loader`.
 // Pieces are plain Markdown only (no MDX) so the files stay renderable
@@ -11,7 +12,7 @@ const pieces = defineCollection({
     z.object({
       title: z.string(),
       publishDate: z.coerce.date(),
-      categories: z.array(z.enum(['landscape', 'street', 'portrait', 'event'])).min(1),
+      categories: z.array(z.enum(CATEGORIES)).min(1),
       description: z.string(),
       cover: image().optional(),
       draft: z.boolean().default(false),

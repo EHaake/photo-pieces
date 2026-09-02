@@ -34,7 +34,7 @@ headers to confirm nothing was duplicated or dropped. -->
       deps, GPS never read). _Verify: the commit touches only CLAUDE.md;
       the wording names the registry as derived and galleries as
       curated, in that contrast._
-- [ ] **T302** — Pure core, part one — `src/lib/image-meta.mjs` +
+- [x] **T302** — Pure core, part one — `src/lib/image-meta.mjs` +
       `src/lib/categories.ts` (the category enum extracted; both
       collections import it in T304): `imageIdFor(path)` for both
       callers' input forms (root-absolute glob keys and the transform's
