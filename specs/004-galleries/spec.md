@@ -1,6 +1,6 @@
 # Spec: Galleries and Image Pages
 
-**Status**: Draft — pending review
+**Status**: Approved (photographer, plan review) — tasks.md follows
 **Depends on**: 001 (pieces, the gallery entity and flows), 003 (block
 vocabulary — piece images become the links into image pages). Feeds
 the homepage design pass (latest-work component) and the future rich

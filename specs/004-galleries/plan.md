@@ -1,8 +1,8 @@
 # Plan: Galleries and Image Pages
 
-**Status**: Draft — revised after skeptical review (verdict:
-sound-with-changes; eight blockers incorporated) — pending the
-photographer's review
+**Status**: Approved (photographer, after the skeptical review's eight
+blockers were incorporated and the category-pages and mixed-ratio
+questions were settled) — see tasks.md
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -147,6 +147,15 @@ when a gallery has no date.
   width (1160px), 2 between, 1 below the shared 720px breakpoint (no
   new breakpoint constants — reviewer: a fourth writer of the same
   facts); rows midline-centered; cells `a > img`, matted; no cropping.
+  **Mixed aspect ratios** (photographer's question at plan review):
+  the grid assumes nothing — equal-width columns, each image at its
+  own height, each row centered on a shared midline like the diptych
+  default, so a 5:8 frame is just a slightly taller cell. A row's
+  height follows its tallest image, so a landscape beside a portrait
+  sits in page-colored air; accepted as the gallery-wall look. The
+  photographer intends to curate so wildly different ratios don't sit
+  side by side; equal-height rows (the `match="height"` math per row)
+  would be a future spec if that ever changes, not a 004 option.
 - `/categories/[category].astro`: that category's galleries (cards)
   then pieces (`PieceList`); category eyebrows on piece, gallery, and
   image pages link here; `/pieces/` gains a category link row.
