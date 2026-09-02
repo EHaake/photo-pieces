@@ -221,3 +221,19 @@ looks slightly too warm, but our eyes adjust quickly." The mat-edge
 option was rejected as visually noisy; tinted mats were rejected as
 inverting the mat-brighter-than-wall logic. Derived copies resynced:
 the OG route's bg hex (#f6f4f0) and public/og.jpg.
+
+## Header: full width, hides on scroll down
+
+Surfaced at the spec-003 sampler review on the photographer's laptop:
+the sticky header inherited the content-width `.section` rule, so an
+edge-to-edge image scrolling beneath it showed on both sides of a
+narrower header band. Options weighed — full-width sticky, the
+headroom pattern (hide on scroll down, reveal on scroll up; the
+editorial/portfolio standard), a non-sticky header, and a translucent
+header (out: the brief bans glassmorphism). Chosen: full width **and**
+hide/reveal, the photographer's own instinct — the width fixes the
+bug; the hide/reveal keeps chrome off the photographs while reading,
+per the brief's images-as-interface principle. Details that keep it
+from being annoying: always visible near the top of the page, an
+8px jitter threshold, a reveal when keyboard focus enters the header,
+and the global reduced-motion rule collapsing the slide.

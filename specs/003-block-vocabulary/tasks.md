@@ -107,6 +107,17 @@ weakening tests to pass.
       _Verify: build green; mats legible on the new ground; hairlines
       and code surfaces checked in the browser._
 
+- [x] **T209H** — Header over edge-to-edge images (sampler review, seen
+      on the photographer's laptop): the sticky header shared the
+      content-width `.section` rule, so a fullbleed showed on both sides
+      of it. Now full viewport width with content centered via padding,
+      plus hide-on-scroll-down / reveal-on-scroll-up (always visible
+      near the top; keyboard focus reveals; reduced-motion respected
+      by the global rule). _Verify: browser-measured — header spans the
+      viewport, content stays aligned with the column, hides after a
+      downward scroll, reveals on a small upward scroll, visible near
+      top, focusin reveals; check/tests/build green._
+
 ## Phase 5 — Authoring side and docs
 
 - [ ] **T210** — Obsidian plugin: leaf-form rendering for all

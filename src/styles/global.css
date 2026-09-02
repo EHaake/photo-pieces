@@ -120,9 +120,25 @@ a:not(.brand, .button):hover {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1rem;
+  /* Full viewport width (overriding the shared .section width above) so
+     the background covers edge-to-edge images passing beneath; the
+     content stays centered at the content width via padding. Found at
+     the spec-003 sampler review — a fullbleed showed on both sides of a
+     content-width header. */
+  width: 100%;
+  margin-inline: 0;
   padding-block: calc(var(--baseline) * 0.85);
+  padding-inline: max(var(--page-pad), calc((100% - var(--content-width)) / 2));
   background: var(--color-bg);
   border-bottom: var(--hairline);
+  transition: transform 220ms ease;
+}
+
+/* Hide on scroll down, reveal on scroll up (BaseLayout's script sets the
+   attribute) — chrome gets out of the way of the photographs while
+   reading, per the brief's images-as-interface principle. */
+.site-header[data-hidden] {
+  transform: translateY(-100%);
 }
 
 .brand {
