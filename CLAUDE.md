@@ -41,9 +41,17 @@ CMS or backend service for v1.
 ## Architecture
 
 - **Content model**: a single `pieces` content collection is the primary
-  data source. Galleries are a separate, hand-curated collection of image
-  references — never auto-generated from all site images — and each
-  gallery entry may optionally reference the piece it came from.
+  data source. Beside it sits the **image registry** (spec 004): a
+  build-time index, _derived_ automatically over every accepted raster
+  in a published piece's folder and in `src/content/gallery-images/`,
+  giving each image a stable id (`<folder>/<basename>`), a page at
+  `/images/<id>/`, exposure metadata read from the file's EXIF, and an
+  optional frontmatter-only sidecar (`_<basename>.md`) that overrides
+  it. Galleries are the opposite kind of thing: a separate,
+  hand-_curated_ collection of ordered image ids — never auto-generated
+  from the registry — each tagged with a category. An image belongs to
+  at most one piece, by folder; galleries reference images, not pieces,
+  and the page for an image links back to its piece where one exists.
 - **Closed block vocabulary**: image treatments inside a piece's body are
   limited to a defined set of directive-backed treatments — as of spec
   003: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
@@ -68,8 +76,12 @@ CMS or backend service for v1.
   redefining their own — this keeps the custom parts visually coherent
   with the rest of the site.
 - **Images**: local and co-located with each piece for initial
-  development (`src/content/pieces/<slug>/`), using Astro's built-in
-  image handling — no external store required to start. Not the final
+  development (`src/content/pieces/<slug>/`), plus one flat
+  `src/content/gallery-images/` root for images that belong to no piece
+  (spec 004), using Astro's built-in image handling — no external store
+  required to start. A piece's folder is public territory: every
+  accepted image in it gets a page, referenced by the body or not, and
+  images under a `draft: true` piece are unpublished with it. Not the final
   architecture: migrate to an external store once repo size or clone
   speed becomes a real, not hypothetical, problem. See `plan.md` for
   the reasoning.
@@ -102,6 +114,20 @@ Default policy: prefer Astro's built-ins (content collections,
 packages. Any new dependency gets named and briefly justified here — or
 at minimum flagged in the relevant `plan.md` — before it's added, since
 this project is meant to stay maintainable by one person for years.
+
+Named here because they carry a standing constraint, not only a
+justification:
+
+- **`exifr`** (spec 004, build-time only): reads the exposure fields
+  the image registry publishes (camera, lens, focal length, aperture,
+  shutter, ISO, capture date) straight from the image files. Chosen
+  over `sharp().metadata()` plus a second decoder because it is
+  purpose-built, has zero transitive dependencies, and lets the read be
+  scoped to an allowlist with GPS parsing disabled. The constraint:
+  **GPS is never read and never emitted** — the reader stays configured
+  with `gps: false`, the registry's output is asserted allowlist-only
+  against a GPS-bearing fixture, and a post-build scan of every image
+  in `dist/` must find no GPS block.
 
 ## Project file safety
 
