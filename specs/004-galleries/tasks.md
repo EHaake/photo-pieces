@@ -24,7 +24,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundations (review after each task)
 
-- [ ] **T301** — Amend CLAUDE.md (constitution rule: own commit, before
+- [x] **T301** — Amend CLAUDE.md (constitution rule: own commit, before
       implementation): the Content model gains the **image registry**
       (auto-derived over every accepted raster in published pieces and
       the `gallery-images` root — distinct from galleries, which stay
