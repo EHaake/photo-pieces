@@ -1397,3 +1397,60 @@ pre code {
   width: 100%;
   height: auto;
 }
+
+/* ---- Gallery pages: rows packed to equal short sides (T307R) --------
+   The photographer's rule from the sampler review: every image's SHORT
+   side should render about the same, so a panorama isn't a sliver
+   beside a portrait. Each cell's flex basis is its width at a common
+   short side S (--gallery-short): portraits and squares want S,
+   landscapes want S × ratio (--w, from the --ar the page sets per
+   cell). Rows wrap in the photographer's order; grow is proportional
+   to --w, so one factor scales a whole row to fill the width and every
+   image in it lands on exactly the same short side — the triptych's
+   match="height" math with a different target. The mat's padding
+   rides in the basis as a constant so it doesn't skew the ratio.
+   A row that can't fill (a lone landscape before a panorama) stays
+   short, grown up to --gallery-stretch and centered — the cost of
+   keeping the order. Both are review knobs. */
+.gallery-flow {
+  --gallery-short: clamp(200px, 26vw, 280px);
+  --gallery-stretch: 1.35;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--baseline) * 0.75);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gallery-flow > li {
+  --w: max(var(--ar, 1), 1);
+  margin: 0;
+  flex: var(--w) 1 calc(var(--gallery-short) * var(--w) + 2 * var(--matte));
+  max-width: min(
+    100%,
+    calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--matte))
+  );
+}
+
+.gallery-flow > li > a.image-link {
+  display: block;
+  padding: var(--matte);
+  background: var(--color-matte);
+}
+
+.gallery-flow > li > a.image-link img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Below the collapse: one frame per row at the full width — the cap
+   would otherwise leave a phone-width portrait floating in margins. */
+@media (max-width: 719.98px) {
+  .gallery-flow > li {
+    max-width: 100%;
+  }
+}

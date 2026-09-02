@@ -59,8 +59,11 @@ Two things, tightly coupled:
   004's page is the baseline it grows from and must not paint it into
   a corner (the metadata model should be extensible, the URL stable).
 - **Lightboxes / overlays** — the brief chose pages over overlays.
-- **Masonry / justified gallery layouts** — plain grid, editorial
-  order (brief).
+- **Masonry and equal-height justified layouts** — no reordering, no
+  column packing, and no rows where a portrait ends up the smallest
+  frame. The gallery layout is rows in editorial order with every
+  image in a row at the same short side (amended at the sampler
+  review; see Design requirements).
 - **Shop / print sales** — roadmap; the image page is where it will
   eventually live, which is one more reason its URL must be stable.
 - **Homepage placement** of the latest-work component.
@@ -115,9 +118,17 @@ loudly).
   gets answered here in the sampler review.
 - Images as interface: the image page's chrome stays out of the way;
   the header's hide-on-scroll behavior applies.
-- No cropping in grids: thumbnails keep their aspect ratio (the grid
-  handles mixed orientations the way diptychs do — midline-centered
-  rows — or as a design-pass decision).
+- No cropping in grids: thumbnails keep their aspect ratio, rows are
+  midline-centered the way diptychs are.
+- **Equal short sides** (photographer, sampler review — "every
+  image's short side should be rendered about the same"): a gallery
+  page packs its images into rows in editorial order so that every
+  image in a row renders at the same short side; a panorama therefore
+  takes a whole row rather than a sliver of one, and a 3:2 takes one
+  and a half times a portrait's width. Rows that can't fill stay
+  short and centered — order is never changed to fill them. Density
+  (the target short side) and the short-row stretch cap are review
+  knobs. The gallery cards on the index keep the plain grid.
 
 ## Authoring requirements
 
@@ -147,9 +158,10 @@ loudly).
       fails WCAG; a decorative image isn't a destination); mattes,
       equal-heights exactness, and every 003 layout measurement are
       unchanged by the link wrapping
-- [ ] Galleries render as ordered plain grids; every image links to
-      its page; a gallery referencing a missing image fails the build
-      with file + line
+- [ ] Galleries render as ordered rows with every image in a row at
+      the same short side, nothing cropped, nothing reordered; every
+      image links to its page; a gallery referencing a missing image
+      fails the build with file + line
 - [ ] `/galleries/` groups by category; `/pieces/` gains category
       filtering; no per-genre site sections exist
 - [ ] A gallery image with no originating piece renders its page

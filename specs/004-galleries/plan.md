@@ -156,6 +156,24 @@ when a gallery has no date.
   photographer intends to curate so wildly different ratios don't sit
   side by side; equal-height rows (the `match="height"` math per row)
   would be a future spec if that ever changes, not a 004 option.
+  **Superseded at the sampler review (T307R):** seeing a 3:1 pano as a
+  sliver in one of three columns, the photographer asked for images
+  to be "roughly the same size perceptually — every image's short
+  side about the same". Gallery pages now use `.gallery-flow`: a
+  flex-wrap row layout where each cell's basis is its width at a
+  common short side S (`--gallery-short`; portraits and squares S,
+  landscapes S × ratio via a per-cell `--ar`), grow proportional to
+  that width, mat padding carried in the basis as a constant. One
+  factor scales each row to fill, so short sides are exactly equal
+  within a row and rows differ only by that factor, capped at
+  `--gallery-stretch` with leftover centered. Editorial order is
+  never changed to fill a row (the honest cost: a lone landscape
+  before a pano sits centered in a short row). Below the 720px
+  collapse the cap is lifted so one frame per row fills the width.
+  Integer column spans were rejected: a 3:2 in two of three columns
+  is a third too big, in one a third too small, and spans leave holes
+  once order is fixed. The gallery cards on the index keep the plain
+  `.gallery-grid`.
 - `/categories/[category].astro`: that category's galleries (cards)
   then pieces (`PieceList`); category eyebrows on piece, gallery, and
   image pages link here; `/pieces/` gains a category link row.

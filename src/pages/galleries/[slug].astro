@@ -1,9 +1,10 @@
 ---
-// A gallery page (spec 004): the brief's deliberately plain grid, in
-// the photographer's order, every cell a link to the image's page.
-// Column count follows the shared breakpoints (see .gallery-grid in
-// global.css); rows are midline-centered like the diptych default;
-// nothing is cropped.
+// A gallery page (spec 004): the photographer's images in the
+// photographer's order, every cell a link to the image's page, packed
+// into rows so that every image in a row renders at the same short
+// side (T307R — see .gallery-flow in global.css). Rows are
+// midline-centered like the diptych default; nothing is cropped;
+// nothing is reordered to fill a row.
 import { Image, getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate } from '../../i18n';
@@ -28,6 +29,20 @@ const cover = registry.byId.get(gallery.data.cover)!;
 const og = await getImage({ src: cover.image, width: 1200, format: 'jpg' });
 const description =
   gallery.data.description ?? `${images.length} images — ${categoryLabel(gallery.data.category)}.`;
+
+// Each cell hands its ratio to the CSS (--ar); the srcset ceiling is
+// the widest the cell can grow to at the desktop knobs (S = 280px,
+// stretch 1.35 — keep in step with .gallery-flow) at 2× density.
+const cells = images.map((image) => {
+  const ratio = image.image.width / image.image.height;
+  const widest = Math.round(280 * Math.max(ratio, 1) * 1.35);
+  return {
+    image,
+    ar: Math.round(ratio * 1000) / 1000,
+    width: Math.min(image.image.width, widest * 2),
+    sizes: `(min-width: 720px) ${widest}px, 94vw`,
+  };
+});
 ---
 
 <BaseLayout title={gallery.data.title} description={description} image={og.src}>
@@ -57,17 +72,17 @@ const description =
     </header>
 
     <div class="section">
-      <ul class="gallery-grid">
+      <ul class="gallery-flow">
         {
-          images.map((image) => (
-            <li>
+          cells.map(({ image, ar, width, sizes }) => (
+            <li style={`--ar: ${ar}`}>
               <a href={withBase(image.url)} class="image-link">
                 <Image
                   src={image.image}
                   alt={image.title}
                   layout="constrained"
-                  width={800}
-                  sizes="(min-width: 1160px) 373px, (min-width: 720px) 47vw, 94vw"
+                  width={width}
+                  sizes={sizes}
                   loading="lazy"
                 />
               </a>

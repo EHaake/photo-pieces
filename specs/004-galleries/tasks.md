@@ -148,6 +148,20 @@ headers to confirm nothing was duplicated or dropped. -->
       ladder galleries screenshotted in order, uniform to disparate,
       for the photographer's judgement of the mixed-ratio grid; every
       cell links to the right `/images/` URL; nav shows Galleries._
+- [x] **T307R** — Sampler-review amendment (photographer: "every
+      image's short side should be rendered about the same" — a pano
+      in one of three columns was a sliver): gallery pages switch from
+      the equal-column grid to `.gallery-flow`, rows packed in
+      editorial order to equal short sides (flex basis = width at a
+      common short side, grow ∝ that width, mat padding constant in
+      the basis, `--ar` per cell from the registry's dimensions; short
+      rows capped by `--gallery-stretch` and centered; cap lifted
+      below 720px). Spec non-goal and design requirement amended;
+      plan.md and DECISIONS.md record the reasoning; index cards keep
+      the plain grid. _Verify: browser-measured on Editor's picks and
+      the ladder — every image in a row has the same short side to the
+      pixel, the pano fills its row, no horizontal overflow at
+      1400/900/600px; build green._
 - [x] **T308** — Category browsing: `/categories/[category].astro`
       (that category's galleries as cards, then its pieces via
       `PieceList`); category eyebrows on piece, gallery, and image

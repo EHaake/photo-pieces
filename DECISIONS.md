@@ -257,3 +257,27 @@ and no longer shows `alt` as a caption. Container forms — captions,
 grid, strip, aside, row — remain raw text in Live Preview: they need a
 real parser, not a line regex, and raw text is honest about the build
 being the source of truth. Reading View stays out of scope.
+
+## Gallery layout: rows packed to equal short sides, in editorial order
+
+Spec 004's plan and the design brief said "plain grid" — equal
+columns, each image at its own height, rows midline-centered. At the
+sampler review (2026-09-01) the photographer saw a 3:1 panorama render
+as a sliver in one of three columns beside a full-height portrait and
+set the rule the layout now follows: _every image's short side should
+render about the same_, so a pano fills a row, a 3:2 takes one and a
+half times a portrait's width, and nothing looks small for being wide.
+
+The mechanism is the triptych's `match="height"` math with a different
+target: each cell's flex basis is its width at a common short side S,
+grow is proportional to that width, rows wrap in the photographer's
+order, and one factor scales each row to fill — so short sides are
+exactly equal within a row. Integer column spans were rejected (a 3:2
+in two of three columns is a third too big, in one a third too small,
+and spans leave holes once order is fixed). Masonry was never on the
+table (it reorders); equal-height justified rows were rejected because
+they make portraits the smallest frames on the page — the opposite of
+the rule. The accepted cost: a row that can't fill stays short and
+centered rather than pulling a later image forward. Density (S) and
+the short-row stretch cap are knobs. The index's gallery cards keep
+the plain grid, since a card's text wants uniform columns.
