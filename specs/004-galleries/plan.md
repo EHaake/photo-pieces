@@ -24,10 +24,10 @@ photographer's review
   galleries index and category filtering on `/pieces/`. The plan's
   proposed answer is one route family, `/categories/<category>/`,
   listing that category's galleries then pieces — linked from category
-  eyebrows, never in the nav (so not a "per-genre section"). **This is
-  new surface beyond the spec's wording and is a photographer decision
-  at plan review**; the fallback is a category link row on `/pieces/`
-  that filters via per-category list pages under `/pieces/`.
+  eyebrows, never in the nav (so not a "per-genre section"). Flagged
+  by the reviewer as new surface beyond the spec's wording; **chosen by
+  the photographer at plan review** over per-category list pages under
+  `/pieces/`.
 - **Piece images become links** to their pages (transform + CSS).
 - **Constitution amendment** (own commit): the Content model gains the
   image registry (auto-derived over all site images — distinct from
@@ -147,8 +147,9 @@ when a gallery has no date.
   width (1160px), 2 between, 1 below the shared 720px breakpoint (no
   new breakpoint constants — reviewer: a fourth writer of the same
   facts); rows midline-centered; cells `a > img`, matted; no cropping.
-- `/categories/[category].astro` (pending the decision above) or the
-  fallback pieces filter pages.
+- `/categories/[category].astro`: that category's galleries (cards)
+  then pieces (`PieceList`); category eyebrows on piece, gallery, and
+  image pages link here; `/pieces/` gains a category link row.
 - `LatestWork.astro`: exported, unplaced. Reviewed on a temporary page
   that is **deleted before merge** (stated, not implied).
 

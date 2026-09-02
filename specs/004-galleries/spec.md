@@ -163,9 +163,10 @@ loudly).
       pieces' images, plus gallery-folder placeholders and sidecars)
       exists for the visual review; all fixtures join spec 005's
       unpublish list
-- [ ] A `Galleries` nav entry exists; category browsing's exact
-      surface (category pages vs pieces filter pages) is the
-      photographer's call at plan review
+- [ ] A `Galleries` nav entry exists; category browsing is one route
+      family, `/categories/<category>/` (galleries then pieces), linked
+      from category labels and never placed in the nav — chosen at plan
+      review, and not a per-genre section
 
 ## Resolved decisions
 
