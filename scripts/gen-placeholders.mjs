@@ -119,6 +119,49 @@ const GALLERY_IMAGES = [
   ],
 ];
 
+// The ratio ladder (spec 004, T304A): the gallery-root set behind the
+// four graded fixture galleries — every ratio the grid has to cope
+// with, each frame labelled with its ratio and its number so gallery
+// order can be read straight off the page. Exposure values cycle so
+// the wall labels differ from frame to frame.
+const LADDER = {
+  // name: [width, height, label, count]
+  'wide-3x2': [1800, 1200, '3:2', 9],
+  'tall-2x3': [1200, 1800, '2:3', 4],
+  'tall-4x5': [1280, 1600, '4:5', 3],
+  'tall-5x8': [1125, 1800, '5:8', 3],
+  square: [1400, 1400, '1:1', 3],
+  'wide-16x9': [1920, 1080, '16:9', 2],
+  'pano-3x1': [2400, 800, '3:1', 2],
+};
+const FOCALS = ['24', '35', '50', '85'];
+const APERTURES = ['2', '2.8', '4', '5.6', '8', '11'];
+const SHUTTERS = ['1/60', '1/125', '1/250', '1/500', '1/1000'];
+const ISOS = ['100', '200', '400', '800'];
+const PALETTES = Object.keys(PALETTE);
+let frame = 0;
+for (const [name, [w, h, ratio, count]] of Object.entries(LADDER)) {
+  for (let i = 1; i <= count; i++, frame++) {
+    const nn = String(i).padStart(2, '0');
+    const hour = String(9 + Math.floor(frame / 60)).padStart(2, '0');
+    const minute = String(frame % 60).padStart(2, '0');
+    GALLERY_IMAGES.push([
+      `src/content/gallery-images/${name}-${nn}.jpg`,
+      w,
+      h,
+      PALETTES[frame % PALETTES.length],
+      `${ratio} · ${nn}`,
+      exif(
+        FOCALS[frame % FOCALS.length],
+        APERTURES[frame % APERTURES.length],
+        SHUTTERS[frame % SHUTTERS.length],
+        ISOS[frame % ISOS.length],
+        `2026:07:04 ${hour}:${minute}:00`,
+      ),
+    ]);
+  }
+}
+
 function exif(focal, aperture, shutter, iso, taken) {
   return {
     IFD0: { Make: 'Fixture', Model: 'Fixture FX-1', Software: 'gen-placeholders.mjs' },

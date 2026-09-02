@@ -45,10 +45,14 @@ DNS + dashboard only, zero code change.
       fixtures — invented prose, placeholder images). Spec 004's
       fixtures go too: the placeholder images in
       `src/content/gallery-images/` (`dock-a`, `dock-b` — the latter
-      carries a deliberate GPS block; gallery-root images have no
-      draft flag, so these are **deleted**, not drafted), the fixture
-      galleries `fog-frames` and `editors-picks`, and the sidecars
-      `_land-b.md` (in `where-the-fog-lets-go`) and `_dock-b.md`
+      carries a deliberate GPS block — and the ratio-ladder set
+      `wide-3x2-*`, `tall-2x3-*`, `tall-4x5-*`, `tall-5x8-*`,
+      `square-*`, `wide-16x9-*`, `pano-3x1-*`; gallery-root images
+      have no draft flag, so these are **deleted**, not drafted), the
+      fixture galleries `fog-frames`, `editors-picks`, and the four
+      ladder galleries `one-ratio`, `near-ratios`, `both-orientations`,
+      `every-ratio`, and the sidecars `_land-b.md` (in
+      `where-the-fog-lets-go`) and `_dock-b.md`
 - [ ] The custom-domain flip is executed: `erikhaakephoto.com` serves
       the site over HTTPS via Squarespace DNS records (registration
       stays at Squarespace), canonicals match

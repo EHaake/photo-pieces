@@ -83,7 +83,7 @@ headers to confirm nothing was duplicated or dropped. -->
       list. _Verify: build green with the fixtures loaded; a
       deliberately malformed gallery (bad category) fails schema
       validation loudly — output reported, then reverted._
-- [ ] **T304A** — Example galleries graded by uniformity
+- [x] **T304A** — Example galleries graded by uniformity
       (photographer's addition at tasks review): extend
       `scripts/gen-placeholders.mjs` with a `gallery-images/` set —
       enough frames at 3:2, 2:3, 4:5, 5:8, 1:1, 16:9, and 3:1, each
