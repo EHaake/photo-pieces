@@ -123,7 +123,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 2 — Pages (review after the phase)
 
-- [ ] **T306** — `/images/[...id].astro`: `<Image>` (constrained,
+- [x] **T306** — `/images/[...id].astro`: `<Image>` (constrained,
       matted), title chain (sidecar → first alt in the owning piece →
       humanized filename), wall label as a `<dl>` in the theme's
       eyebrow + hairline language, "From the piece …", "In galleries
@@ -135,7 +135,7 @@ headers to confirm nothing was duplicated or dropped. -->
       sidecar's values win on its page; a `gallery-images/` image with
       no piece renders without error; the OG `<meta>` points at a
       `/_astro/` URL._
-- [ ] **T307** — Galleries: `/galleries/index.astro` grouped by
+- [x] **T307** — Galleries: `/galleries/index.astro` grouped by
       category in enum order (cover, title, count), and the gallery
       page `/galleries/[slug].astro` as the plain grid — 3 columns at
       ≥ 1160px, 2 between, 1 below the shared 720px breakpoint, rows midline-
@@ -148,17 +148,18 @@ headers to confirm nothing was duplicated or dropped. -->
       ladder galleries screenshotted in order, uniform to disparate,
       for the photographer's judgement of the mixed-ratio grid; every
       cell links to the right `/images/` URL; nav shows Galleries._
-- [ ] **T308** — Category browsing: `/categories/[category].astro`
+- [x] **T308** — Category browsing: `/categories/[category].astro`
       (that category's galleries as cards, then its pieces via
       `PieceList`); category eyebrows on piece, gallery, and image
       pages link there; `/pieces/` gains a category link row; nothing
       added to the nav. _Verify: build green; all four category pages
       exist even when one is empty (renders an honest empty state);
       every eyebrow resolves; `NAV_ITEMS` unchanged by this task._
-- [ ] **T309** — `src/components/LatestWork.astro` (a strip of the N
+- [x] **T309** — `src/components/LatestWork.astro` (a strip of the N
       newest curated images from `latestWork`, each linked) plus a
-      temporary review page at `/_latest/` that **T314 deletes before
-      merge**. _Verify: build green; the temp page shows the expected
+      temporary review page at `/latest-review/` (an underscore-prefixed
+      route is excluded from routing, so not `/_latest/`) that **T314
+      deletes before merge**. _Verify: build green; the temp page shows the expected
       order for the fixture galleries' dates; the component is imported
       nowhere else._
 
@@ -215,14 +216,14 @@ headers to confirm nothing was duplicated or dropped. -->
       spec.md acceptance boxes checked against actual behavior.
       _Verify: build green; grep finds no doc describing galleries or
       image pages as future._
-- [ ] **T314** — Close-out: delete the `/_latest/` review page; update
+- [ ] **T314** — Close-out: delete the `/latest-review/` page; update
       `ROADMAP.md` (galleries shipped; the rich image detail page entry
       points at 004's id/URL/metadata model as its base; category
       filtering no longer deferred) — on the spec branch per the
       constitution's never-commit-to-main rule; run the pre-merge
       skeptical-reviewer sweep over the whole spec and resolve its
       findings; mark PR #4 ready and merge with a merge commit.
-      _Verify: `grep -r _latest src` empty; ROADMAP no longer lists
+      _Verify: `grep -r latest-review src` empty; ROADMAP no longer lists
       this spec's work as future; the sweep came back clean or every
       finding is resolved or explicitly deferred with a reason; all
       boxes above checked; CI green on the merged commit._
