@@ -7,3 +7,7 @@
 export const CATEGORIES = ['landscape', 'street', 'portrait', 'event'] as const;
 
 export type Category = (typeof CATEGORIES)[number];
+
+/** Display form of a category value: `landscape` → `Landscape`. */
+export const categoryLabel = (category: Category): string =>
+  category.charAt(0).toUpperCase() + category.slice(1);

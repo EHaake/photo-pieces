@@ -1,0 +1,210 @@
+---
+// The image page (spec 004): the design brief's signature element at
+// its baseline — a museum wall label in typography. Title, the image
+// matted as everywhere, exposure info from EXIF (sidecar overrides
+// applied by the registry), the piece it came from, the galleries it
+// sits in, a caption. The rich version is its own future spec; this
+// page's URL and data model are what it will grow from.
+import { Image, getImage } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE } from '../../consts';
+import { formatDate } from '../../i18n';
+import { categoryLabel } from '../../lib/categories';
+import { getImageRegistry } from '../../lib/images';
+import { plainText, renderMarkdown } from '../../lib/markdown';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const registry = await getImageRegistry();
+  return registry.images.map((image) => ({ params: { id: image.id }, props: { image } }));
+}
+
+const { image } = Astro.props;
+const { label, piece, galleries } = image;
+
+// The eyebrow: the owning piece's categories, or for a gallery-root
+// image the categories of the galleries that hold it.
+const categories = piece
+  ? piece.data.categories
+  : [...new Set(galleries.map((gallery) => gallery.data.category))];
+
+const captionHtml = image.caption ? await renderMarkdown(image.caption) : undefined;
+const description = captionHtml
+  ? plainText(captionHtml)
+  : piece
+    ? `From the piece “${piece.data.title}”.`
+    : `A photograph by ${SITE.author}.`;
+
+// OG image: the optimized, metadata-stripped output — never the
+// original file (which may carry EXIF the site doesn't publish).
+const og = await getImage({ src: image.image, width: 1200, format: 'jpg' });
+
+// The wall label: only what exists. Order is the label's reading order.
+const candidates: [string, string | undefined][] = [
+  ['Camera', label.camera],
+  ['Lens', label.lens],
+  ['Focal length', label.focalLength],
+  ['Aperture', label.aperture],
+  ['Shutter', label.shutter],
+  ['ISO', label.iso],
+  ['Date', label.date ? formatDate(label.date) : undefined],
+];
+const rows = candidates.filter((row): row is [string, string] => row[1] !== undefined);
+---
+
+<BaseLayout title={image.title} description={description} ogType="article" image={og.src}>
+  <article class="image-page">
+    <header class="page-head section">
+      {
+        categories.length > 0 && (
+          <p class="eyebrow">
+            <span>
+              {categories.map((category, index) => (
+                <>
+                  {index > 0 && ' / '}
+                  <a href={withBase(`/categories/${category}/`)}>{categoryLabel(category)}</a>
+                </>
+              ))}
+            </span>
+          </p>
+        )
+      }
+      <h1>{image.title}</h1>
+    </header>
+
+    <div class="section image-stage">
+      <figure class="image-frame">
+        <Image
+          src={image.image}
+          alt={image.title}
+          layout="constrained"
+          width={image.image.width}
+          height={image.image.height}
+          sizes="(min-width: 1240px) 1160px, 94vw"
+          loading="eager"
+        />
+      </figure>
+    </div>
+
+    <div class="section image-label">
+      {
+        rows.length > 0 && (
+          <dl class="wall-label">
+            {rows.map(([term, value]) => (
+              <div>
+                <dt>{term}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+      {captionHtml && <div class="image-caption" set:html={captionHtml} />}
+      {
+        piece && (
+          <p class="image-from">
+            From the piece <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
+          </p>
+        )
+      }
+      {
+        galleries.length > 0 && (
+          <p class="image-from">
+            In {galleries.length === 1 ? 'the gallery' : 'the galleries'}{' '}
+            {galleries.map((gallery, index) => (
+              <>
+                <a href={withBase(`/galleries/${gallery.id}/`)}>{gallery.data.title}</a>
+                {index < galleries.length - 1 ? ', ' : ''}
+              </>
+            ))}
+          </p>
+        )
+      }
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  /* Titles are sentences (an alt text, a sidecar title), not the
+     theme's short display headings. */
+  .image-page h1 {
+    max-width: 28ch;
+  }
+
+  /* The stage: the image centered on the page, never stretched or
+     cropped — width:auto plus max constraints, as the tall block. The
+     figure is the mat (padding + field), the same tokens as every
+     other frame on the site; sizing the image inside it keeps the
+     viewport-height cap honest with the mat included. */
+  .image-stage {
+    padding-block: clamp(2rem, 4vw, 3.5rem) 0;
+    text-align: center;
+  }
+
+  .image-frame {
+    display: inline-block;
+    max-width: 100%;
+    margin: 0;
+    padding: var(--matte);
+    background: var(--color-matte);
+    box-sizing: border-box;
+  }
+
+  .image-frame img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: calc(var(--tall-max) - 2 * var(--matte));
+  }
+
+  /* The wall label: the theme's eyebrow + hairline language — the
+     brief's open question, answered provisionally here and judged at
+     the sampler review. */
+  .image-label {
+    max-width: var(--prose-width);
+    padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(3rem, 5vw, 5rem);
+  }
+
+  .wall-label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--baseline) * 0.75) clamp(1.5rem, 3vw, 2.5rem);
+    margin: 0 0 var(--baseline);
+    padding-block: calc(var(--baseline) * 0.85);
+    border-top: var(--hairline);
+    border-bottom: var(--hairline);
+  }
+
+  .wall-label > div {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .wall-label dt {
+    margin: 0;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .wall-label dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1rem;
+  }
+
+  .image-caption :global(p) {
+    margin: 0 0 var(--baseline);
+    color: var(--color-muted);
+  }
+
+  .image-from {
+    margin: 0 0 calc(var(--baseline) * 0.45);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+</style>

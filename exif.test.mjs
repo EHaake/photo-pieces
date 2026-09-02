@@ -64,9 +64,17 @@ describe('exposure formatting (T303)', () => {
       iso: 'ISO 100',
     });
     expect(label.date).toBeInstanceOf(Date);
-    expect([label.date.getFullYear(), label.date.getMonth(), label.date.getDate()]).toEqual([
-      2026, 7, 28,
-    ]);
+    // The fixture's capture time is 06:41:12 on the 28th, camera wall
+    // clock; the label carries it as UTC wall-clock so the site's UTC
+    // date formatting prints the 28th in every build zone.
+    expect(label.date.toISOString()).toBe('2026-08-28T06:41:12.000Z');
+  });
+
+  it("re-bases exifr's local-zone Date to UTC wall-clock (same digits, zone UTC)", () => {
+    const local = new Date(2026, 7, 29, 18, 12, 44);
+    expect(formatExposure({ DateTimeOriginal: local }).date.toISOString()).toBe(
+      '2026-08-29T18:12:44.000Z',
+    );
   });
 
   it('reconstructs unit-fraction shutters from decimals and keeps long ones in seconds', () => {
@@ -103,7 +111,7 @@ describe('exposure formatting (T303)', () => {
 
   it('a text capture time falls back to the EXIF colon form; junk and absent fields are absent', () => {
     expect(formatExposure({ DateTimeOriginal: '2026:08:28 06:41:12' }).date).toEqual(
-      new Date(2026, 7, 28, 6, 41, 12),
+      new Date(Date.UTC(2026, 7, 28, 6, 41, 12)),
     );
     expect(
       formatExposure({ DateTimeOriginal: 'yesterday', FNumber: 0, ISO: -1, ExposureTime: NaN }),

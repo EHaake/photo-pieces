@@ -388,15 +388,33 @@ function cleanString(value) {
   return cleaned === '' ? undefined : cleaned;
 }
 
+// EXIF capture times carry no zone — "2026:08:29 18:12:44" is the
+// camera's wall clock. exifr revives that as a *local* Date on the build
+// machine; re-based here to UTC wall-clock (same digits, zone UTC) so
+// the site's UTC date formatting prints the day the frame was taken,
+// whatever zone the build runs in. YAML dates are already UTC midnight,
+// so every Date the site formats shares one convention.
 function toDate(value) {
-  if (value instanceof Date) return Number.isNaN(value.valueOf()) ? undefined : value;
+  if (value instanceof Date) {
+    if (Number.isNaN(value.valueOf())) return undefined;
+    return new Date(
+      Date.UTC(
+        value.getFullYear(),
+        value.getMonth(),
+        value.getDate(),
+        value.getHours(),
+        value.getMinutes(),
+        value.getSeconds(),
+      ),
+    );
+  }
   if (typeof value !== 'string') return undefined;
-  // EXIF's own "YYYY:MM:DD HH:MM:SS" — exifr normally revives this to a
-  // Date already; this is the fallback for a file it left as text.
+  // EXIF's own "YYYY:MM:DD HH:MM:SS" — the fallback for a file exifr
+  // left as text.
   const m = value.match(/^(\d{4}):(\d{2}):(\d{2})(?:[ T](\d{2}):(\d{2}):(\d{2}))?/);
   if (!m) return undefined;
   const [, y, mo, d, h = '0', mi = '0', s = '0'] = m;
-  const date = new Date(+y, +mo - 1, +d, +h, +mi, +s);
+  const date = new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi, +s));
   return Number.isNaN(date.valueOf()) ? undefined : date;
 }
 
