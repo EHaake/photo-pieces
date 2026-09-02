@@ -121,8 +121,11 @@ loudly).
 - Sidecar and gallery files are plain YAML-frontmatter `.md`,
   Obsidian-native, validated by content-collection schemas.
 - EXIF must survive the photographer's web exports for automation to
-  work — documented in AUTHORING.md, with the frontmatter override as
-  the fallback when it doesn't.
+  work — confirmed at spec review (exports keep EXIF), documented in
+  AUTHORING.md, with the frontmatter override as the fallback for
+  corrections and enrichment.
+- Fixture placeholders carry synthetic EXIF so the samplers exercise
+  the EXIF-driven page, not only the frontmatter-only path.
 - The Obsidian plugin is unaffected (no new directives).
 
 ## Acceptance criteria
