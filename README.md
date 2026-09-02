@@ -14,8 +14,9 @@ The "why" behind this project lives in these, not in this file:
 
 - `CLAUDE.md` — the project constitution: platform choices,
   architecture rules, git conventions
-- `specs/001-site-foundation/` — the spec, plan, and tasks for the
-  current build phase
+- `specs/<NNN>-<slug>/` — the spec, plan, and tasks for each build
+  phase (001 foundation, 002 identity/teardown, 003 block vocabulary,
+  005 going live — deferred)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
@@ -71,23 +72,52 @@ plain Markdown:
 ![First light over the playa](./photo-1.jpg)
 ```
 
-Everything else in the closed block vocabulary uses directive syntax:
+Everything else in the closed block vocabulary uses directive syntax.
+A block is a leaf (`::name{...}` on its own line) or, to carry a
+caption, a container whose body is the caption:
 
 ```md
-::fullbleed{src="./photo-2.jpg" alt="The playa at dusk"}
+::wide{src="./photo-2.jpg" alt="The playa at dusk"}
+
+:::diptych{left="./a.jpg" right="./b.jpg" leftAlt="Before" rightAlt="After"}
+Three minutes apart. Captions take _inline markdown_.
+:::
 ```
 
-**Current status**: `fullbleed`, `diptych`, and `triptych` are all
-implemented — transform, styling, and unit tests — with images going
-through Astro's asset pipeline (hashed src, responsive srcset).
-`sequence` is reserved but deliberately fails the build until its
-presentation is designed (`ROADMAP.md`). Pieces are the site's only
-long-form content: they render at `/pieces/<slug>/`, list at
+| Block       | Forms          | Attributes                                                                                         | Matted | Obsidian Live Preview |
+| ----------- | -------------- | -------------------------------------------------------------------------------------------------- | ------ | --------------------- |
+| `single`    | leaf/container | `src` `alt`                                                                                        | yes    | image (leaf)          |
+| `inset`     | leaf/container | `src` `alt`                                                                                        | yes    | image (leaf)          |
+| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                    | yes¹   | image (leaf)          |
+| `fullbleed` | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
+| `tall`      | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
+| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed` | yes²   | images (leaf)         |
+| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                            | yes²   | images (leaf)         |
+| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                         | yes    | raw text              |
+| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption               | no     | raw text              |
+| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                            | yes    | raw text              |
+| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                       | yes    | raw text              |
+| `sequence`  | reserved       | fails the build until its presentation is designed (`ROADMAP.md`)                                  | —      | —                     |
+
+¹ the bled edge runs clean. ² dropped at `width="fullbleed"`.
+Plain `![alt](./photo.jpg)` remains the captionless shorthand for
+`single` — same rendered result. Every image carries its own flat
+matte, applied by the site's CSS (never bake mattes into files).
+Rules the build enforces loudly: alt is required on every image
+(`alt=""` only for decorative), unknown blocks and attributes fail,
+the `[label]` form fails, blocks can't nest, images must exist. The
+sampler piece (`src/content/pieces/vocabulary-sampler/`) shows every
+treatment rendered.
+
+**Current status**: the full spec-003 vocabulary above is implemented
+— transform, styling, mattes, unit tests, and the Obsidian plugin's
+leaf-form rendering — with images going through Astro's asset pipeline
+(hashed src, responsive srcset per treatment). Pieces are the site's
+only long-form content: they render at `/pieces/<slug>/`, list at
 `/pieces/` (in the nav), and feed the homepage, RSS, and per-piece
-Open Graph images. The theme's original `blog`/`works` collections
-were fully torn out in spec 002. Check the newest
-`specs/*/tasks.md` for what's actually done versus still planned —
-don't assume this list is current by the time you're reading it.
+Open Graph images. Check the newest `specs/*/tasks.md` for what's
+actually done versus still planned — don't assume this list is current
+by the time you're reading it.
 
 ## Configuration
 

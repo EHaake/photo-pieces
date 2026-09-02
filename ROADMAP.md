@@ -36,28 +36,23 @@ attached.
   renders `fullbleed` directives as images in Live Preview, the mode
   actually used while writing. The bar was set at seeing the photo
   instead of raw directive text, not matching the real site's styling —
-  see `DECISIONS.md` for that scoping. What remains on the roadmap is
-  the rest: Reading View is intentionally not handled, and
-  `diptych`/`triptych` — which now do exist on the Astro side
-  (transform, styling, and tests landed with spec 001) — still render
-  as raw directive text in Obsidian until the plugin gains a regex and
-  widget class per block, following the fullbleed pattern.
+  see `DECISIONS.md` for that scoping. As of spec 003 the plugin
+  renders the leaf form of every standalone block (single, fullbleed,
+  wide, tall, inset, diptych, triptych). What remains: Reading View is
+  intentionally not handled, and container forms stay raw text (see
+  the vocabulary entry above).
 - **Contact form** — wanted (decided at spec 002 review), deferred to
   its own spec: form handling on a static site means either a form
   service (new dependency to justify) or host-provided handling, and
   the choice interacts with the hosting decision. Until then the
   Contact page carries direct email + Instagram.
-- **Block vocabulary expansion** — treatments the photographer already
-  anticipates beyond the built set (single, fullbleed, diptych,
-  triptych): images floated left/right sharing a row with prose;
-  image-beside-text rows without wrap; a centered breakout wider than
-  the prose column but not full-bleed. To be specced from a concrete
-  list gathered by _writing real pieces_ and noting where the current
-  vocabulary pinches — not speculatively. Two structural notes for
-  that spec: prose-sharing blocks likely need the `:::container`
-  directive form (currently rejected deliberately), and every new
-  treatment carries an Obsidian-plugin live-preview cost alongside the
-  transform + CSS pair.
+- ~~**Block vocabulary expansion**~~ — done in spec 003, which chose
+  breadth over the demand-driven growth this entry originally
+  prescribed (the photographer's call: better to have the vocabulary
+  ready before writing than to interrupt writing to build it — see
+  `DECISIONS.md`). What remains: Obsidian Live Preview for container
+  forms (captions, grid, strip, aside, row), which needs a real parser
+  rather than the plugin's line regex.
 - ~~**Dark mode removal**~~ — done in spec 002 (T104/T105): palette,
   toggle, and `prefers-color-scheme` handling all removed; the accent
   is a single-line change again.

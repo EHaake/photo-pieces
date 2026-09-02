@@ -39,10 +39,14 @@ Why this shape:
   repo machinery.
 - **Core Templates plugin:** point it at `templates/`, and keep a
   `piece.md` template there (skeleton below).
-- **Community plugins → Photo Pieces Blocks: enabled.** Renders
-  `::fullbleed{...}` as an image while writing. Live Preview only —
-  Reading view is intentionally out of scope (see `DECISIONS.md`).
-  Install/rebuild instructions: `obsidian-plugin/README.md`.
+- **Community plugins → Photo Pieces Blocks: enabled.** Renders the
+  leaf form of every standalone block (`::single`, `::fullbleed`,
+  `::wide`, `::tall`, `::inset`, `::diptych`, `::triptych`) as images
+  while writing. Container forms (captions), `grid`, `strip`, `aside`,
+  and `row` stay raw text — the site build is the truth for those.
+  Live Preview only — Reading view is intentionally out of scope (see
+  `DECISIONS.md`). Build/install instructions:
+  `obsidian-plugin/README.md`.
 
 ## Piece template
 
@@ -69,9 +73,19 @@ Learned by breaking them — each of these fails quietly if violated:
 
 - **`---` must be the literal first line of the file** or frontmatter
   doesn't parse anywhere, in Obsidian or the build.
-- **Directives go on their own line.** The Obsidian plugin's regex
-  tolerates a directive mid-paragraph; the real remark pipeline does
-  not — it will render as literal text on the site.
+- **Directives go on their own line.** A `::name{...}` typed
+  mid-paragraph is not a block: the site renders it as literal text
+  (attributes and all), and the Obsidian plugin — anchored to whole
+  lines since 0.2.0 — leaves it raw too, so the two agree.
+- **Captions go in the container body**, not in a `[label]`:
+  `:::single{src="…" alt="…"}` / caption text / `:::`. A `[label]` on
+  either form fails the build rather than silently vanishing.
+- **`grid` and `strip` take their images in the body** — plain
+  markdown images, one per line — and any text after a blank line is
+  the caption. Mixing images and text in the same paragraph fails with
+  a hint to add the blank line.
+- **Blocks don't nest.** A block directive inside another block's body
+  fails the build.
 - **Images must live in the vault**, in the piece's own folder
   (`src/content/pieces/<slug>/`). Absolute OS paths (`~/Downloads/...`)
   resolve nowhere — not in Obsidian's preview, not in the build. The
@@ -117,4 +131,6 @@ long edge, 1–3MB. Never RAW files or full-resolution masters: git
 history keeps every byte forever, and the build only needs enough
 pixels for its largest responsive variant. Masters live in the photo
 archive, not the repo. (Decision and numbers: `DECISIONS.md`, "Images
-stay committed to git".)
+stay committed to git".) And **never bake a matte into the file**:
+the site applies every matte itself (spec 003), so a pre-matted export
+would render double-matted and lie to the layout math.

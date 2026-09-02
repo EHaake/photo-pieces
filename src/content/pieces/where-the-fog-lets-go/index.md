@@ -17,7 +17,7 @@ a color too.
 ![The headland trail disappearing into the marine layer](./land-a.jpg)
 
 By half past, the first seams opened. This is the part I never manage
-to explain: the fog doesn't lift so much as *let go* — it releases the
+to explain: the fog doesn't lift so much as _let go_ — it releases the
 ridgeline first, then the water, and for about ten minutes everything
 exists in both states at once.
 

@@ -1,6 +1,6 @@
 # Spec: Block Vocabulary
 
-**Status**: Draft — pending review
+**Status**: Implemented (Phases 0–5); pending the pre-merge review
 **Depends on**: 001 (transform pipeline, fullbleed/diptych/triptych),
 002 (pieces-only site). Feeds 004 (galleries) and 005 (going live).
 

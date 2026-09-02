@@ -1,8 +1,9 @@
 # Plan: Block Vocabulary
 
-**Status**: Draft — revised after skeptical review (verdict:
-sound-with-changes; all blockers incorporated) — pending the
-photographer's review
+**Status**: Implemented as revised after skeptical review (verdict:
+sound-with-changes; all blockers incorporated); amended at the
+sampler review (per-image mattes, pair widths, warmed ground,
+full-width hiding header)
 **Implements**: spec.md in this directory
 
 ## Shape of the change

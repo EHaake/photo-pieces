@@ -103,9 +103,10 @@ Reading View is intentionally not handled — Live Preview is the mode
 actually used while writing, which is the specific problem this
 solves.
 
-Source lives in `obsidian-plugin/` in this repo. Extending it to
-`diptych`/`triptych` once those exist on the Astro side follows the
-same pattern: a regex and a widget class per block type.
+Source lives in `obsidian-plugin/` in this repo. _Superseded in part
+by spec 003 — see "Spec 003: breadth over demand-driven growth; plugin
+approximations" below: the plugin now renders every standalone leaf
+block; container forms stay raw._
 
 ## Markdown processor: legacy remark pipeline kept over Sätteri
 
@@ -237,3 +238,22 @@ per the brief's images-as-interface principle. Details that keep it
 from being annoying: always visible near the top of the page, an
 8px jitter threshold, a reveal when keyboard focus enters the header,
 and the global reduced-motion rule collapsing the slide.
+
+## Spec 003: breadth over demand-driven growth; plugin approximations
+
+ROADMAP originally prescribed growing the block vocabulary "from a
+concrete list gathered by writing real pieces — not speculatively."
+At spec 003 the photographer reversed that deliberately: the vocabulary
+was built broad first (eleven treatments plus captions and mattes), on
+the reasoning that unused treatments cost little now that the pipeline
+is proven, while missing ones interrupt writing. Real writing may still
+surface a gap; additions have become cheap (a descriptor, CSS, tests).
+
+The Obsidian plugin's approximation widened accordingly and stays an
+approximation: it renders the leaf form of the seven standalone blocks
+(pairs and triptychs as side-by-side thumbnails), anchored to whole
+lines so it agrees with the pipeline about mid-paragraph directives,
+and no longer shows `alt` as a caption. Container forms — captions,
+grid, strip, aside, row — remain raw text in Live Preview: they need a
+real parser, not a line regex, and raw text is honest about the build
+being the source of truth. Reading View stays out of scope.

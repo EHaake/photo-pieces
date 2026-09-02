@@ -1,6 +1,6 @@
 # Tasks: Block Vocabulary
 
-**Status**: Draft — pending review
+**Status**: Complete through Phase 5; pending the pre-merge review
 **Implements**: plan.md in this directory
 
 Ordered, small, independently verifiable. Per the constitution: every
@@ -126,7 +126,7 @@ weakening tests to pass.
       `main.js` path, alt-no-longer-rendered-as-caption. _Verify:
       `tsc -noEmit` + esbuild build green; behavior summary reported
       for the photographer's hand-check in Obsidian._
-- [ ] **T211** — Docs: README syntax table (name, forms, attributes,
+- [x] **T211** — Docs: README syntax table (name, forms, attributes,
       captions, matte, Obsidian honesty); AUTHORING.md (grid/strip
       body syntax, no-nesting, no baked mattes, mid-paragraph
       correction); DECISIONS.md (plugin approximations; breadth-first
