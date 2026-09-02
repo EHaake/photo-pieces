@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getPublishedPieces } from '../../lib/pieces';
 import { withBase } from '../../lib/url';
 import { formatDate } from '../../i18n';
+import { categoryLabel } from '../../lib/categories';
 
 export async function getStaticPaths() {
   const pieces = await getPublishedPieces();
@@ -23,7 +24,18 @@ const { Content } = await render(piece);
   <article data-pagefind-body>
     <header class="page-head section">
       <div class="piece-column">
-        <p class="eyebrow">{piece.data.categories.join(' / ')}</p>
+        <p class="eyebrow">
+          <span>
+            {
+              piece.data.categories.map((category, index) => (
+                <>
+                  {index > 0 && ' / '}
+                  <a href={withBase(`/categories/${category}/`)}>{categoryLabel(category)}</a>
+                </>
+              ))
+            }
+          </span>
+        </p>
         <h1>{piece.data.title}</h1>
         <p class="lead">{piece.data.description}</p>
         <div class="entry-meta">

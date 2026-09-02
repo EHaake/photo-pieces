@@ -1,0 +1,72 @@
+---
+// Category browsing (spec 004): one route family, reached from category
+// labels everywhere and never from the nav — a lens over the site, not
+// a per-genre section. That category's galleries, then its pieces.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GalleryCards from '../../components/GalleryCards.astro';
+import PieceList from '../../components/PieceList.astro';
+import { CATEGORIES, categoryLabel } from '../../lib/categories';
+import { getImageRegistry } from '../../lib/images';
+import { getPublishedPieces } from '../../lib/pieces';
+
+export function getStaticPaths() {
+  return CATEGORIES.map((category) => ({ params: { category }, props: { category } }));
+}
+
+const { category } = Astro.props;
+const registry = await getImageRegistry();
+const galleries = registry.galleries.filter((gallery) => gallery.data.category === category);
+const pieces = (await getPublishedPieces()).filter((piece) =>
+  piece.data.categories.includes(category),
+);
+const label = categoryLabel(category);
+---
+
+<BaseLayout title={label} description={`${label} galleries and pieces.`}>
+  <section class="page-head section">
+    <p class="eyebrow">Category</p>
+    <h1>{label}</h1>
+  </section>
+
+  {
+    galleries.length > 0 && (
+      <section class="section category-group" aria-labelledby="category-galleries">
+        <h2 id="category-galleries" class="eyebrow">
+          Galleries
+        </h2>
+        <GalleryCards galleries={galleries} />
+      </section>
+    )
+  }
+
+  {
+    pieces.length > 0 && (
+      <section class="section category-group" aria-labelledby="category-pieces">
+        <h2 id="category-pieces" class="eyebrow">
+          Pieces
+        </h2>
+        <PieceList pieces={pieces} />
+      </section>
+    )
+  }
+
+  {
+    galleries.length === 0 && pieces.length === 0 && (
+      <section class="section">
+        <p class="lead">Nothing in {label.toLowerCase()} yet.</p>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .category-group {
+    padding-block: clamp(2rem, 4vw, 3rem);
+    border-bottom: var(--hairline);
+  }
+
+  .category-group h2.eyebrow {
+    margin-bottom: calc(var(--baseline) * 1.25);
+    font-size: 0.75rem;
+  }
+</style>
