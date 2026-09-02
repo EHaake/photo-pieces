@@ -179,7 +179,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 3 — Piece images as links (review after the phase; photographer's visual gate)
 
-- [ ] **T310** — Transform: wrap every emitted image node and every
+- [x] **T310** — Transform: wrap every emitted image node and every
       shorthand `image` node not already inside a link in an mdast
       `link` to `/images/<piece-folder>/<basename>/` (folder from
       `file.path`; comment on why `withBase` can't apply here);
