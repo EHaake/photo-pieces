@@ -70,6 +70,13 @@ DNS + dashboard only, zero code change.
       repo connection (walkthrough already provided; repo is now
       private, which Workers Builds supports).
 - [ ] **T116** — End-to-end verification against the deployed test
-      URL, each check reported with actual results.
+      URL, each check reported with actual results. Include the CI
+      workflow itself: as of 2026-09-02 (spec 004's close-out) GitHub
+      has recorded **zero** Actions runs for this repo although
+      `.github/workflows/ci.yml` has been on `main` since 002 and
+      triggers on `pull_request` — every verification so far has been
+      local. Find out why (Actions settings, billing for a private
+      repo, or the workflow never being picked up) before relying on a
+      green check at the domain flip.
 - [ ] **T117 [author-gated]** — Domain flip via Squarespace DNS +
       Cloudflare custom domain.

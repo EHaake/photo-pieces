@@ -166,7 +166,7 @@ loudly).
       filtering; no per-genre site sections exist
 - [x] A gallery image with no originating piece renders its page
       without error (spec 001 criterion)
-- [ ] The latest-work component renders the newest curated images and
+- [x] The latest-work component renders the newest curated images and
       is not placed on any page (the temporary review page is deleted
       before merge)
 - [x] Unit tests cover the image-id derivation, EXIF/override merge,
