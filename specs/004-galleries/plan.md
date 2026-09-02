@@ -1,8 +1,8 @@
 # Plan: Galleries and Image Pages
 
-**Status**: Approved (photographer, after the skeptical review's eight
-blockers were incorporated and the category-pages and mixed-ratio
-questions were settled) — see tasks.md
+**Status**: Implemented — with two review amendments recorded in
+place (T307R equal-short-side gallery rows; T306R image-first page)
+and the corrections listed at the end
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -248,6 +248,44 @@ deleting the files, not setting a draft flag.
 ## Dependencies
 
 - `exifr` (new, build-time) — named here and in CLAUDE.md.
+
+## Corrections made during implementation
+
+- **Image page order (T306R, visual gate):** the title above the image
+  pushed most frames below the fold. The page now opens on a stage
+  exactly the height of the viewport below the sticky header, with the
+  matted frame centered in it and sized to fit whole; title, label,
+  caption, and back-references follow. The header publishes its real
+  height as `--header-h` from the layout script (it varies with width
+  and nav wrapping), with a CSS fallback matching the desktop size.
+- **Calendar dates:** the theme's `formatDate` formatted in local time,
+  so YAML dates (UTC midnight) printed the previous day west of
+  Greenwich. It formats in UTC now, and EXIF capture times are re-based
+  to UTC wall-clock in `formatExposure` so both conventions agree.
+- **Sidecar ids:** the `imageMeta` loader uses a custom `generateId`
+  returning the path verbatim, so the mapping to an image id never
+  passes through Astro's slugger.
+- **Captions:** rendered with `@astrojs/markdown-remark`'s
+  `createMarkdownProcessor` (already a dependency) from
+  `src/lib/markdown.ts` — no new package.
+- **Build cache:** Astro's content layer caches rendered entries by
+  digest in `node_modules/.astro/data-store.json`; a transform change
+  doesn't reach `astro build` output locally until that file is
+  deleted. CI builds fresh. Recorded in AUTHORING.md.
+- **Uppercase extensions:** `imageIdFor` accepts `.JPG`; the registry's
+  glob lists both cases so the transform can't link to a page the
+  registry never made.
+- **Temporary review route:** `/latest-review/` (an underscore-prefixed
+  route would be excluded from routing), deleted at T314.
+- **Originals in the output (T312):** the post-build scan found the
+  OG request for a source-sized JPEG passed the original through
+  (fixed in `src/lib/og.ts`), and that Astro leaves every
+  ESM-imported image's untouched original in `dist/_astro/` because
+  its referenced-outside-processing check marks them all in this
+  static build — 33 files, predating 004 (covers). The plan's "the
+  registry must never cause that" turned out to be Astro's doing;
+  `scripts/prune-unreferenced-originals.mjs` deletes unreferenced
+  originals in `postbuild` before the scan. Reasoning in DECISIONS.md.
 
 ## Known limitations / deferred
 

@@ -209,9 +209,24 @@ headers to confirm nothing was duplicated or dropped. -->
       photographer's review of galleries, an image page, and a linked
       piece together._
 
+- [x] **T306R** — Visual-gate amendment (photographer: the title above
+      the image pushed most frames below the fold): the image page's
+      first viewport belongs to the photograph — a stage exactly the
+      height of the viewport below the sticky header, the matted frame
+      centered in it and sized to fit whole; title, eyebrow, wall label,
+      caption, and back-references follow beneath. The header publishes
+      its real height as `--header-h` (it varies by width) from the
+      layout script. _Verify: browser-measured at two widths — the
+      frame's center sits at the center of the space below the header
+      on load, and the whole frame (mat included) is inside the first
+      viewport for a portrait; build green._
+
 ## Phase 4 — Proof, docs, close-out
 
-- [ ] **T312** — GPS leak scan: `scripts/check-no-gps.mjs` parses EXIF
+- [x] **T312** — GPS leak scan (the scan's first run caught two real
+      leaks — the OG passthrough and Astro's un-pruned originals — see
+      plan.md's corrections; `scripts/prune-unreferenced-originals.mjs`
+      now precedes it in `postbuild`): `scripts/check-no-gps.mjs` parses EXIF
       from every `dist/**/*.{jpg,jpeg,webp,avif,tiff}` with `exifr` and
       exits non-zero on any GPS block; wired into `postbuild` after
       pagefind and therefore into CI's build step. _Verify: the scan
@@ -219,7 +234,7 @@ headers to confirm nothing was duplicated or dropped. -->
       a GPS-bearing file planted in `dist/` makes it fail (actual
       output reported, then removed) — the check can fail for its named
       reason._
-- [ ] **T313** — Docs: README (galleries, image pages, sidecars, ids —
+- [x] **T313** — Docs: README (galleries, image pages, sidecars, ids —
       a syntax table for gallery and sidecar frontmatter); AUTHORING.md
       (a piece folder is public territory; EXIF must survive the web
       export, with the sidecar as the correction path; image ids and

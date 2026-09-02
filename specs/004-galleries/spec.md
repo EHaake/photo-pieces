@@ -144,38 +144,38 @@ loudly).
 
 ## Acceptance criteria
 
-- [ ] Every accepted image in every published piece's folder and in
+- [x] Every accepted image in every published piece's folder and in
       the gallery folder has a page at a stable URL, and no page is
       thin: exposure info (when EXIF exists), the owning piece's link,
       alt/title/caption as available; images owned by draft pieces
       have no page
-- [ ] Frontmatter sidecar fields override EXIF-derived ones; GPS is
+- [x] Frontmatter sidecar fields override EXIF-derived ones; GPS is
       never emitted — proven against a fixture that carries GPS, both
       in the label data and in every image file in the built output
-- [ ] Piece images (every block in the vocabulary, including the
+- [x] Piece images (every block in the vocabulary, including the
       shorthand single) link to their image pages — except images with
       `alt=""`, which stay unlinked (a link with no accessible name
       fails WCAG; a decorative image isn't a destination); mattes,
       equal-heights exactness, and every 003 layout measurement are
       unchanged by the link wrapping
-- [ ] Galleries render as ordered rows with every image in a row at
+- [x] Galleries render as ordered rows with every image in a row at
       the same short side, nothing cropped, nothing reordered; every
       image links to its page; a gallery referencing a missing image
       fails the build with file + line
-- [ ] `/galleries/` groups by category; `/pieces/` gains category
+- [x] `/galleries/` groups by category; `/pieces/` gains category
       filtering; no per-genre site sections exist
-- [ ] A gallery image with no originating piece renders its page
+- [x] A gallery image with no originating piece renders its page
       without error (spec 001 criterion)
 - [ ] The latest-work component renders the newest curated images and
       is not placed on any page (the temporary review page is deleted
       before merge)
-- [ ] Unit tests cover the image-id derivation, EXIF/override merge,
+- [x] Unit tests cover the image-id derivation, EXIF/override merge,
       and gallery validation; build green; existing 82 tests green
-- [ ] A galleries sampler (fixture galleries over the existing fixture
+- [x] A galleries sampler (fixture galleries over the existing fixture
       pieces' images, plus gallery-folder placeholders and sidecars)
       exists for the visual review; all fixtures join spec 005's
       unpublish list
-- [ ] A `Galleries` nav entry exists; category browsing is one route
+- [x] A `Galleries` nav entry exists; category browsing is one route
       family, `/categories/<category>/` (galleries then pieces), linked
       from category labels and never placed in the nav — chosen at plan
       review, and not a per-genre section

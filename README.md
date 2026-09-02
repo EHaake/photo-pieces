@@ -16,7 +16,7 @@ The "why" behind this project lives in these, not in this file:
   architecture rules, git conventions
 - `specs/<NNN>-<slug>/` — the spec, plan, and tasks for each build
   phase (001 foundation, 002 identity/teardown, 003 block vocabulary,
-  005 going live — deferred)
+  004 galleries and image pages, 005 going live — deferred)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
@@ -112,12 +112,88 @@ treatment rendered.
 **Current status**: the full spec-003 vocabulary above is implemented
 — transform, styling, mattes, unit tests, and the Obsidian plugin's
 leaf-form rendering — with images going through Astro's asset pipeline
-(hashed src, responsive srcset per treatment). Pieces are the site's
-only long-form content: they render at `/pieces/<slug>/`, list at
-`/pieces/` (in the nav), and feed the homepage, RSS, and per-piece
-Open Graph images. Check the newest `specs/*/tasks.md` for what's
-actually done versus still planned — don't assume this list is current
-by the time you're reading it.
+(hashed src, responsive srcset per treatment). Pieces render at
+`/pieces/<slug>/`, list at `/pieces/` (in the nav), and feed the
+homepage, RSS, and per-piece Open Graph images. Since spec 004 every
+image in a piece links to its own page (next section). Check the
+newest `specs/*/tasks.md` for what's actually done versus still
+planned — don't assume this list is current by the time you're reading
+it.
+
+## Images, galleries, and image pages
+
+Every accepted raster (`jpg jpeg png webp avif tiff`) in a published
+piece's folder — or in the flat `src/content/gallery-images/` root for
+images that belong to no piece — gets a page at `/images/<id>/`, where
+the id is `<piece-folder>/<basename>` or `gallery/<basename>`. The
+page shows the image matted, its title, a wall label of exposure info
+read from the file's EXIF (camera, lens, focal length, aperture,
+shutter, ISO, capture date), the piece it came from, the galleries it
+sits in, and an optional caption. Every image in a piece links there;
+so does every gallery cell. Rules the build enforces: piece folders
+must be slugs, images live directly in the folder (no sub-folders),
+two files differing only by extension are a collision, and a `draft:
+true` piece unpublishes its images with it. Moving or renaming an
+image changes its URL — there are no redirects yet.
+
+**Sidecar** — optional, frontmatter-only, `_<basename>.md` beside the
+image (the underscore keeps it out of the pieces collection). Every
+field is optional; label fields override the EXIF-derived value as
+written:
+
+```yaml
+---
+title: The bank letting go
+caption: One paragraph, *inline markdown* allowed.
+date: 2026-08-28 # replaces the capture date
+camera: Leica M6
+lens: Summicron 35
+focalLength: 35 mm
+aperture: f/8
+shutter: 1/250 s
+iso: ISO 400
+---
+```
+
+A sidecar naming an image that doesn't exist fails the build.
+
+**Gallery** — `src/content/galleries/<slug>.md`, a hand-curated,
+ordered list of image ids with one category; `cover` defaults to the
+first image:
+
+```yaml
+---
+title: Fog frames
+category: landscape # landscape | street | portrait | event
+description: Optional.
+date: 2026-08-28 # optional; orders the index and the latest-work strip
+cover: where-the-fog-lets-go/land-b
+images:
+  - where-the-fog-lets-go/land-a
+  - where-the-fog-lets-go/land-b
+  - gallery/dock-a
+---
+```
+
+A gallery page packs its images into rows in that order so every
+image in a row renders at the same short side (a panorama takes a
+whole row; nothing is cropped or reordered — `DECISIONS.md` has the
+reasoning). `/galleries/` groups galleries by category and is in the
+nav; `/categories/<category>/` lists a category's galleries then its
+pieces and is reached from category labels, never from the nav. A
+missing, duplicate, or draft-owned id in a gallery fails the build
+with the file and line. `src/components/LatestWork.astro` renders the
+newest curated images as a strip and is not placed on any page yet
+(the homepage design pass will place it).
+
+**GPS is never published.** The EXIF reader asks for an allowlist of
+exposure tags with GPS parsing off, its output is asserted against a
+fixture that carries coordinates, and `postbuild` first prunes the
+untouched originals Astro leaves in `dist/_astro/`
+(`scripts/prune-unreferenced-originals.mjs` — `DECISIONS.md` explains)
+and then scans every image in `dist/` (`scripts/check-no-gps.mjs`),
+failing the build on any GPS block. EXIF must survive your web export
+for the wall label to fill itself in; the sidecar is the fallback.
 
 ## Configuration
 
@@ -169,22 +245,31 @@ fallback for other pages.
 photo-pieces/
 ├── astro.config.mjs
 ├── wrangler.jsonc                # Cloudflare Workers static assets
-├── remark-pieces-blocks.mjs      # directive -> block transform
+├── remark-pieces-blocks.mjs      # directive -> block transform (+ image links)
 ├── remark-pieces-blocks.test.mjs # legacy contracts (npm test)
 ├── remark-pieces-vocabulary.test.mjs # spec-003 vocabulary suite
-├── tests/fixtures/               # unit-test images (incl. EXIF-rotated)
-├── scripts/gen-placeholders.mjs  # fixture-piece placeholder images
+├── image-meta.test.mjs, exif.test.mjs, galleries.test.mjs # spec-004 suites
+├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
+├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
+├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
+├── scripts/check-no-gps.mjs      # postbuild: no GPS in any built image
 ├── obsidian-plugin/              # Live Preview rendering (see its README)
 ├── CLAUDE.md, ROADMAP.md, DECISIONS.md, AUTHORING.md
 ├── specs/                        # spec.md, plan.md, tasks.md per spec
 ├── design/brief.md
 ├── src/
 │   ├── consts.ts                 # site identity
-│   ├── content.config.ts         # the pieces collection
-│   ├── content/pieces/           # one folder per piece + its images
+│   ├── content.config.ts         # pieces, galleries, imageMeta collections
+│   ├── content/pieces/           # one folder per piece + its images (+ _sidecars)
+│   ├── content/gallery-images/   # images that belong to no piece
+│   ├── content/galleries/        # one file per gallery
 │   ├── lib/pieces.ts             # the one published-pieces query
-│   ├── components/PieceList.astro
-│   ├── pages/                    # index, pieces/, about, contact, search, 404
+│   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries)
+│   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
+│   ├── lib/exif.mjs              # the allowlisted EXIF reader
+│   ├── lib/categories.ts         # the category taxonomy
+│   ├── components/               # PieceList, GalleryCards, LatestWork
+│   ├── pages/                    # index, pieces/, galleries/, images/, categories/, about, contact, search, 404
 │   └── styles/global.css
 ```
 
