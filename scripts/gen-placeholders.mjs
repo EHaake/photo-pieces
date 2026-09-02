@@ -1,13 +1,17 @@
-// Generates the placeholder images for the spec-003 fixture pieces
-// (vocabulary sampler + the two essay-style demos). Flat, muted duotone
-// fields with a horizon band and a small ratio label — clearly not
+// Generates the placeholder images for the fixture pieces (spec 003's
+// vocabulary sampler + the two essay-style demos) and the test fixtures
+// that need synthetic metadata (spec 004). Flat, muted duotone fields
+// with a horizon band and a small ratio label — clearly not
 // photographs, pleasant enough to judge layout by. Swap real frames into
 // the piece folders anytime; nothing references these by content.
 //
-//   node scripts/gen-placeholders.mjs
+//   node scripts/gen-placeholders.mjs            # everything
+//   node scripts/gen-placeholders.mjs pieces     # the fixture pieces only
+//   node scripts/gen-placeholders.mjs fixtures   # tests/fixtures only
 //
 // Idempotent: rewrites every placeholder in place.
 import { mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import sharp from 'sharp';
 
 const PALETTE = {
@@ -21,7 +25,8 @@ const PALETTE = {
 
 // Synthetic EXIF (spec 004): fictional make/model so no real gear is
 // implied, realistic exposure values varied per image, so the image
-// pages' wall labels exercise the EXIF path. GPS deliberately absent.
+// pages' wall labels exercise the EXIF path. GPS deliberately absent
+// from every placeholder that ships in content.
 const IMAGES = [
   // [file, width, height, palette, label, exif]
   ['land-a.jpg', 1800, 1200, 'sage', '3:2', exif('35', '8', '1/250', '100', '2026:08:28 06:41:12')],
@@ -62,6 +67,31 @@ const IMAGES = [
   ['pano.jpg', 2400, 800, 'sage', '3:1', exif('24', '16', '1/30', '100', '2026:08:28 07:40:27')],
 ];
 
+// Test fixtures. gps.jpg is the subject of spec 004's leak tests: full
+// exposure EXIF plus a GPS block (IFD3) — the allowlist reader must
+// never surface the coordinates, and nothing like it may exist in a
+// built site. The coordinates are sharp's own documentation example
+// (Trafalgar Square), not anywhere the photographer has been.
+const FIXTURES = [
+  [
+    'tests/fixtures/gps.jpg',
+    600,
+    400,
+    'ochre',
+    'GPS',
+    {
+      ...exif('35', '8', '1/250', '100', '2026:08:28 06:41:12'),
+      IFD3: {
+        GPSVersionID: '2 3 0 0',
+        GPSLatitudeRef: 'N',
+        GPSLatitude: '51/1 30/1 3230/100',
+        GPSLongitudeRef: 'W',
+        GPSLongitude: '0/1 7/1 4366/100',
+      },
+    },
+  ],
+];
+
 function exif(focal, aperture, shutter, iso, taken) {
   return {
     IFD0: { Make: 'Fixture', Model: 'Fixture FX-1', Software: 'gen-placeholders.mjs' },
@@ -89,17 +119,32 @@ const svgOverlay = (w, h, [, dark], label) => `
         font-size="${Math.round(Math.min(w, h) * 0.05)}" fill="#ffffff" fill-opacity="0.55">${label}</text>
 </svg>`;
 
-for (const dir of PIECES) {
-  await mkdir(dir, { recursive: true });
-  for (const [file, w, h, palette, label, meta] of IMAGES) {
-    const [light] = PALETTE[palette];
-    await sharp({
-      create: { width: w, height: h, channels: 3, background: light },
-    })
-      .composite([{ input: Buffer.from(svgOverlay(w, h, PALETTE[palette], label)) }])
-      .withExif(meta)
-      .jpeg({ quality: 82 })
-      .toFile(`${dir}/${file}`);
+async function writePlaceholder(path, w, h, palette, label, meta) {
+  const [light] = PALETTE[palette];
+  await mkdir(dirname(path), { recursive: true });
+  await sharp({
+    create: { width: w, height: h, channels: 3, background: light },
+  })
+    .composite([{ input: Buffer.from(svgOverlay(w, h, PALETTE[palette], label)) }])
+    .withExif(meta)
+    .jpeg({ quality: 82 })
+    .toFile(path);
+}
+
+const target = process.argv[2] ?? 'all';
+
+if (target === 'all' || target === 'pieces') {
+  for (const dir of PIECES) {
+    for (const [file, w, h, palette, label, meta] of IMAGES) {
+      await writePlaceholder(`${dir}/${file}`, w, h, palette, label, meta);
+    }
+    console.log('wrote placeholders →', dir);
   }
-  console.log('wrote placeholders →', dir);
+}
+
+if (target === 'all' || target === 'fixtures') {
+  for (const [path, w, h, palette, label, meta] of FIXTURES) {
+    await writePlaceholder(path, w, h, palette, label, meta);
+    console.log('wrote fixture →', path);
+  }
 }

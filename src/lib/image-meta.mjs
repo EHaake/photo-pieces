@@ -156,6 +156,126 @@ export function humanizeBasename(basename) {
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
+/**
+ * The EXIF tags the site reads — and the only ones. The reader in
+ * `exif.mjs` picks exactly these with GPS parsing disabled, and filters
+ * its output to this set again on the way out, so nothing else in a
+ * file (GPS above all) can reach a page.
+ */
+export const EXPOSURE_TAGS = Object.freeze([
+  'Make',
+  'Model',
+  'LensModel',
+  'FocalLength',
+  'FNumber',
+  'ExposureTime',
+  'ISO',
+  'DateTimeOriginal',
+]);
+
+/** The wall-label fields a sidecar may override, in label order. The
+ *  capture date is handled beside them (a sidecar `date` wins). */
+export const EXPOSURE_FIELDS = Object.freeze([
+  'camera',
+  'lens',
+  'focalLength',
+  'aperture',
+  'shutter',
+  'iso',
+]);
+
+/**
+ * Formats exifr's raw allowlisted tags into wall-label strings, using
+ * exifr's real value shapes: numbers for ExposureTime (seconds, e.g.
+ * 0.004), FNumber, FocalLength, and ISO; a Date for DateTimeOriginal.
+ * Fields absent from the file are absent from the result — the page
+ * prints what exists and nothing else.
+ */
+export function formatExposure(raw) {
+  const tags = raw ?? {};
+  const out = {};
+  const camera = formatCamera(tags.Make, tags.Model);
+  if (camera) out.camera = camera;
+  const lens = cleanString(tags.LensModel);
+  if (lens) out.lens = lens;
+  if (isPositive(tags.FocalLength)) out.focalLength = `${trimNumber(tags.FocalLength)} mm`;
+  if (isPositive(tags.FNumber)) out.aperture = `f/${trimNumber(tags.FNumber)}`;
+  const shutter = formatShutter(tags.ExposureTime);
+  if (shutter) out.shutter = shutter;
+  if (isPositive(tags.ISO)) out.iso = `ISO ${Math.round(tags.ISO)}`;
+  const date = toDate(tags.DateTimeOriginal);
+  if (date) out.date = date;
+  return out;
+}
+
+/**
+ * A sidecar's label fields win verbatim over the EXIF-derived ones;
+ * a sidecar `date` (already a Date via the schema) replaces the capture
+ * date. Empty strings don't override — an author clearing a field in
+ * Obsidian shouldn't blank the label.
+ */
+export function mergeOverrides(exposure, sidecar) {
+  const merged = { ...(exposure ?? {}) };
+  const overrides = sidecar ?? {};
+  for (const field of EXPOSURE_FIELDS) {
+    const value = overrides[field];
+    if (typeof value === 'string' && value.trim() !== '') merged[field] = value.trim();
+  }
+  if (overrides.date instanceof Date && !Number.isNaN(overrides.date.valueOf())) {
+    merged.date = overrides.date;
+  }
+  return merged;
+}
+
+function formatCamera(make, model) {
+  const m = cleanString(make);
+  const mo = cleanString(model);
+  if (!m && !mo) return undefined;
+  if (!mo) return m;
+  if (!m) return mo;
+  // "Canon" + "Canon EOS R5" → "Canon EOS R5"; "NIKON CORPORATION" +
+  // "NIKON Z 8" → "NIKON Z 8"; "FUJIFILM" + "X-T5" → "FUJIFILM X-T5".
+  const brand = m.split(/\s+/)[0].toLowerCase();
+  return mo.toLowerCase().startsWith(brand) ? mo : `${m} ${mo}`;
+}
+
+function formatShutter(seconds) {
+  if (!isPositive(seconds)) return undefined;
+  if (seconds >= 1) return `${trimNumber(seconds)} s`;
+  // Reconstruct the 1/n form from the decimal exifr returns, unless the
+  // exposure genuinely isn't a unit fraction (0.4 s stays 0.4 s).
+  const denominator = 1 / seconds;
+  const rounded = Math.round(denominator);
+  if (Math.abs(denominator - rounded) / denominator < 0.02) return `1/${rounded} s`;
+  return `${trimNumber(seconds)} s`;
+}
+
+function isPositive(n) {
+  return typeof n === 'number' && Number.isFinite(n) && n > 0;
+}
+
+function trimNumber(n) {
+  return String(Math.round(n * 100) / 100);
+}
+
+function cleanString(value) {
+  if (typeof value !== 'string') return undefined;
+  const cleaned = value.replaceAll('\0', '').trim();
+  return cleaned === '' ? undefined : cleaned;
+}
+
+function toDate(value) {
+  if (value instanceof Date) return Number.isNaN(value.valueOf()) ? undefined : value;
+  if (typeof value !== 'string') return undefined;
+  // EXIF's own "YYYY:MM:DD HH:MM:SS" — exifr normally revives this to a
+  // Date already; this is the fallback for a file it left as text.
+  const m = value.match(/^(\d{4}):(\d{2}):(\d{2})(?:[ T](\d{2}):(\d{2}):(\d{2}))?/);
+  if (!m) return undefined;
+  const [, y, mo, d, h = '0', mi = '0', s = '0'] = m;
+  const date = new Date(+y, +mo - 1, +d, +h, +mi, +s);
+  return Number.isNaN(date.valueOf()) ? undefined : date;
+}
+
 function refersTo(value, basename) {
   if (!value) return false;
   const rel = value.startsWith('./') ? value.slice(2) : value;

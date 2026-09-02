@@ -47,7 +47,7 @@ headers to confirm nothing was duplicated or dropped. -->
       same file; `Jetty Dawn/` fails with the hint; `./detail/img.jpg`
       fails; `shot.jpg` + `shot.webp` reported together; alt recovery
       for all three forms; 82 existing tests green; build green._
-- [ ] **T303** — Pure core, part two — EXIF: add `exifr` (pinned);
+- [x] **T303** — Pure core, part two — EXIF: add `exifr` (pinned);
       `readExposure(path)` with `pick` on the allowlist (Make, Model,
       LensModel, FocalLength, FNumber, ExposureTime, ISO,
       DateTimeOriginal) and `gps: false`; `formatExposure()` reconstructing `1/500 s` /
