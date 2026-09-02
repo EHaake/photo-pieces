@@ -65,7 +65,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 1 — Content model and registry (review after each task)
 
-- [ ] **T304** — Collections and fixtures: `galleries` (`title`,
+- [x] **T304** — Collections and fixtures: `galleries` (`title`,
       `category` from the shared enum, `description`, optional `date`,
       optional `cover` id defaulting to the first image, `images`
       non-empty ordered ids) and `imageMeta` (a glob loader based at

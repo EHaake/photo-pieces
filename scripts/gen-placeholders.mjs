@@ -7,6 +7,7 @@
 //
 //   node scripts/gen-placeholders.mjs            # everything
 //   node scripts/gen-placeholders.mjs pieces     # the fixture pieces only
+//   node scripts/gen-placeholders.mjs gallery    # src/content/gallery-images only
 //   node scripts/gen-placeholders.mjs fixtures   # tests/fixtures only
 //
 // Idempotent: rewrites every placeholder in place.
@@ -25,8 +26,10 @@ const PALETTE = {
 
 // Synthetic EXIF (spec 004): fictional make/model so no real gear is
 // implied, realistic exposure values varied per image, so the image
-// pages' wall labels exercise the EXIF path. GPS deliberately absent
-// from every placeholder that ships in content.
+// pages' wall labels exercise the EXIF path. GPS is absent from every
+// piece placeholder; the one content image that carries it (dock-b in
+// the gallery root) does so deliberately, as the build-level leak
+// test's subject.
 const IMAGES = [
   // [file, width, height, palette, label, exif]
   ['land-a.jpg', 1800, 1200, 'sage', '3:2', exif('35', '8', '1/250', '100', '2026:08:28 06:41:12')],
@@ -67,11 +70,22 @@ const IMAGES = [
   ['pano.jpg', 2400, 800, 'sage', '3:1', exif('24', '16', '1/30', '100', '2026:08:28 07:40:27')],
 ];
 
-// Test fixtures. gps.jpg is the subject of spec 004's leak tests: full
-// exposure EXIF plus a GPS block (IFD3) — the allowlist reader must
-// never surface the coordinates, and nothing like it may exist in a
-// built site. The coordinates are sharp's own documentation example
-// (Trafalgar Square), not anywhere the photographer has been.
+// A GPS block (IFD3) for the leak-test subjects. The coordinates are
+// sharp's own documentation example (Trafalgar Square), not anywhere
+// the photographer has been.
+const TRAFALGAR_GPS = {
+  IFD3: {
+    GPSVersionID: '2 3 0 0',
+    GPSLatitudeRef: 'N',
+    GPSLatitude: '51/1 30/1 3230/100',
+    GPSLongitudeRef: 'W',
+    GPSLongitude: '0/1 7/1 4366/100',
+  },
+};
+
+// Test fixtures. gps.jpg is the subject of spec 004's unit-level leak
+// tests: full exposure EXIF plus GPS — the allowlist reader must never
+// surface the coordinates.
 const FIXTURES = [
   [
     'tests/fixtures/gps.jpg',
@@ -79,16 +93,29 @@ const FIXTURES = [
     400,
     'ochre',
     'GPS',
-    {
-      ...exif('35', '8', '1/250', '100', '2026:08:28 06:41:12'),
-      IFD3: {
-        GPSVersionID: '2 3 0 0',
-        GPSLatitudeRef: 'N',
-        GPSLatitude: '51/1 30/1 3230/100',
-        GPSLongitudeRef: 'W',
-        GPSLongitude: '0/1 7/1 4366/100',
-      },
-    },
+    { ...exif('35', '8', '1/250', '100', '2026:08:28 06:41:12'), ...TRAFALGAR_GPS },
+  ],
+];
+
+// Gallery-root placeholders (spec 004): images that belong to no piece.
+// dock-b carries GPS so the build-level scan of dist/ has a real leak
+// to catch if the pipeline ever emits an original.
+const GALLERY_IMAGES = [
+  [
+    'src/content/gallery-images/dock-a.jpg',
+    1800,
+    1200,
+    'fog',
+    '3:2',
+    exif('35', '5.6', '1/320', '200', '2026:08:29 18:12:44'),
+  ],
+  [
+    'src/content/gallery-images/dock-b.jpg',
+    1200,
+    1800,
+    'clay',
+    '2:3 · GPS',
+    { ...exif('50', '2.8', '1/125', '640', '2026:08:29 19:03:10'), ...TRAFALGAR_GPS },
   ],
 ];
 
@@ -139,6 +166,13 @@ if (target === 'all' || target === 'pieces') {
       await writePlaceholder(`${dir}/${file}`, w, h, palette, label, meta);
     }
     console.log('wrote placeholders →', dir);
+  }
+}
+
+if (target === 'all' || target === 'gallery') {
+  for (const [path, w, h, palette, label, meta] of GALLERY_IMAGES) {
+    await writePlaceholder(path, w, h, palette, label, meta);
+    console.log('wrote gallery image →', path);
   }
 }
 

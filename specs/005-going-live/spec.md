@@ -42,7 +42,13 @@ DNS + dashboard only, zero code change.
       `first-light-at-the-jetty` (spec 001's test piece),
       `vocabulary-sampler`, `where-the-fog-lets-go`, and
       `market-day-camera-low` (spec 003's reference and demo
-      fixtures — invented prose, placeholder images)
+      fixtures — invented prose, placeholder images). Spec 004's
+      fixtures go too: the placeholder images in
+      `src/content/gallery-images/` (`dock-a`, `dock-b` — the latter
+      carries a deliberate GPS block; gallery-root images have no
+      draft flag, so these are **deleted**, not drafted), the fixture
+      galleries `fog-frames` and `editors-picks`, and the sidecars
+      `_land-b.md` (in `where-the-fog-lets-go`) and `_dock-b.md`
 - [ ] The custom-domain flip is executed: `erikhaakephoto.com` serves
       the site over HTTPS via Squarespace DNS records (registration
       stays at Squarespace), canonicals match
