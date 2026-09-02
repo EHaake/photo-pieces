@@ -8,6 +8,14 @@ attached.
   images. Deferred out of `specs/001-site-foundation` because it's a
   substantial feature in its own right (payments, fulfillment,
   licensing) that deserves its own spec once the core site exists.
+- **The rich image detail page** — the photographer's motivating
+  feature: an image page richer than any site builder offers — deep
+  metadata, the image's own story, potentially its own writing, and
+  eventually the print-sales entry point. Spec 004 gives every image a
+  stable URL and a baseline wall-label page (title, exposure info,
+  piece links, caption) precisely so this can grow without moving
+  anything; the rich version is its own spec after 004, with its own
+  design conversation.
 - **Comments** — not wanted for v1. Revisit if reader engagement makes
   the moderation overhead feel worth it.
 - **User accounts** — no identified need without comments or a shop;
