@@ -10,6 +10,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate } from '../../i18n';
 import { categoryLabel } from '../../lib/categories';
 import { getImageRegistry } from '../../lib/images';
+import { ogImageOptions } from '../../lib/og';
 import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
@@ -26,7 +27,7 @@ const registry = await getImageRegistry();
 // Every id was validated by the registry; the lookups can't miss.
 const images = gallery.data.images.map((id) => registry.byId.get(id)!);
 const cover = registry.byId.get(gallery.data.cover)!;
-const og = await getImage({ src: cover.image, width: 1200, format: 'jpg' });
+const og = await getImage(ogImageOptions(cover.image));
 const description =
   gallery.data.description ?? `${images.length} images — ${categoryLabel(gallery.data.category)}.`;
 
