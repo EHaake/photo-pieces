@@ -1,10 +1,13 @@
 ---
 // The image page (spec 004): the design brief's signature element at
-// its baseline — a museum wall label in typography. Title, the image
-// matted as everywhere, exposure info from EXIF (sidecar overrides
-// applied by the registry), the piece it came from, the galleries it
-// sits in, a caption. The rich version is its own future spec; this
-// page's URL and data model are what it will grow from.
+// its baseline — a museum wall label in typography. The first viewport
+// belongs to the photograph: the stage fills the space below the
+// header and the matted frame sits centered in it, whole (photographer,
+// sampler review — a title above pushed most images below the fold).
+// Title, exposure info from EXIF (sidecar overrides applied by the
+// registry), the piece it came from, the galleries it sits in, and a
+// caption follow beneath, a scroll away. The rich version is its own
+// future spec; this page's URL and data model are what it grows from.
 import { Image, getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { SITE } from '../../consts';
@@ -12,6 +15,7 @@ import { formatDate } from '../../i18n';
 import { categoryLabel } from '../../lib/categories';
 import { getImageRegistry } from '../../lib/images';
 import { plainText, renderMarkdown } from '../../lib/markdown';
+import { ogImageOptions } from '../../lib/og';
 import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
@@ -36,8 +40,9 @@ const description = captionHtml
     : `A photograph by ${SITE.author}.`;
 
 // OG image: the optimized, metadata-stripped output — never the
-// original file (which may carry EXIF the site doesn't publish).
-const og = await getImage({ src: image.image, width: 1200, format: 'jpg' });
+// original file (which may carry EXIF the site doesn't publish); see
+// ogImageOptions for the passthrough case the scan caught.
+const og = await getImage(ogImageOptions(image.image));
 
 // The wall label: only what exists. Order is the label's reading order.
 const candidates: [string, string | undefined][] = [
@@ -54,6 +59,20 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
 
 <BaseLayout title={image.title} description={description} ogType="article" image={og.src}>
   <article class="image-page">
+    <div class="image-stage">
+      <figure class="image-frame">
+        <Image
+          src={image.image}
+          alt={image.title}
+          layout="constrained"
+          width={image.image.width}
+          height={image.image.height}
+          sizes="(min-width: 1240px) 1160px, 94vw"
+          loading="eager"
+        />
+      </figure>
+    </div>
+
     <header class="page-head section">
       {
         categories.length > 0 && (
@@ -71,20 +90,6 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
       }
       <h1>{image.title}</h1>
     </header>
-
-    <div class="section image-stage">
-      <figure class="image-frame">
-        <Image
-          src={image.image}
-          alt={image.title}
-          layout="constrained"
-          width={image.image.width}
-          height={image.image.height}
-          sizes="(min-width: 1240px) 1160px, 94vw"
-          loading="eager"
-        />
-      </figure>
-    </div>
 
     <div class="section image-label">
       {
@@ -125,29 +130,26 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
 </BaseLayout>
 
 <style>
-  /* Titles are sentences (an alt text, a sidecar title), not the
-     theme's short display headings. */
-  .image-page h1 {
-    max-width: 28ch;
-  }
-
-  /* The stage: the image centered on the page, never stretched or
-     cropped — width:auto plus max constraints, as the tall block. The
-     figure is the mat (padding + field), the same tokens as every
-     other frame on the site; sizing the image inside it keeps the
-     viewport-height cap honest with the mat included. */
+  /* The stage: exactly the viewport below the sticky header (which
+     publishes its real height as --header-h; the fallback matches its
+     usual size), with the frame centered in it. The image is sized
+     inside the mat so the whole frame — mat included — fits the stage
+     with breathing room; width:auto plus max constraints, never
+     stretched or cropped, as the tall block. */
   .image-stage {
-    padding-block: clamp(2rem, 4vw, 3.5rem) 0;
-    text-align: center;
+    --stage-pad: clamp(1rem, 3vh, 2rem);
+    display: grid;
+    place-items: center;
+    min-height: calc(100vh - var(--header-h, 4.5rem));
+    min-height: calc(100svh - var(--header-h, 4.5rem));
+    padding: var(--stage-pad) var(--page-pad);
   }
 
   .image-frame {
-    display: inline-block;
-    max-width: 100%;
+    max-width: min(100%, var(--content-width));
     margin: 0;
     padding: var(--matte);
     background: var(--color-matte);
-    box-sizing: border-box;
   }
 
   .image-frame img {
@@ -155,7 +157,14 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
     width: auto;
     max-width: 100%;
     height: auto;
-    max-height: calc(var(--tall-max) - 2 * var(--matte));
+    max-height: calc(100vh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - 2 * var(--matte));
+    max-height: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - 2 * var(--matte));
+  }
+
+  /* Titles are sentences (an alt text, a sidecar title), not the
+     theme's short display headings. */
+  .image-page h1 {
+    max-width: 28ch;
   }
 
   /* The wall label: the theme's eyebrow + hairline language — the
