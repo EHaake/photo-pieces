@@ -19,17 +19,62 @@ const PALETTE = {
   clay: ['#b39c94', '#937b73'],
 };
 
+// Synthetic EXIF (spec 004): fictional make/model so no real gear is
+// implied, realistic exposure values varied per image, so the image
+// pages' wall labels exercise the EXIF path. GPS deliberately absent.
 const IMAGES = [
-  // [file, width, height, palette, label]
-  ['land-a.jpg', 1800, 1200, 'sage', '3:2'],
-  ['land-b.jpg', 1800, 1200, 'slate', '3:2'],
-  ['land-c.jpg', 1800, 1200, 'ochre', '3:2'],
-  ['port-a.jpg', 1200, 1800, 'fog', '2:3'],
-  ['port-b.jpg', 1200, 1800, 'moss', '2:3'],
-  ['port-45.jpg', 1280, 1600, 'clay', '4:5'],
-  ['square.jpg', 1400, 1400, 'slate', '1:1'],
-  ['pano.jpg', 2400, 800, 'sage', '3:1'],
+  // [file, width, height, palette, label, exif]
+  ['land-a.jpg', 1800, 1200, 'sage', '3:2', exif('35', '8', '1/250', '100', '2026:08:28 06:41:12')],
+  [
+    'land-b.jpg',
+    1800,
+    1200,
+    'slate',
+    '3:2',
+    exif('24', '11', '1/60', '200', '2026:08:28 07:02:40'),
+  ],
+  [
+    'land-c.jpg',
+    1800,
+    1200,
+    'ochre',
+    '3:2',
+    exif('50', '5.6', '1/500', '400', '2026:08:28 07:15:03'),
+  ],
+  ['port-a.jpg', 1200, 1800, 'fog', '2:3', exif('85', '2', '1/1000', '160', '2026:08:30 09:12:55')],
+  ['port-b.jpg', 1200, 1800, 'moss', '2:3', exif('35', '4', '1/125', '800', '2026:08:30 09:48:19')],
+  [
+    'port-45.jpg',
+    1280,
+    1600,
+    'clay',
+    '4:5',
+    exif('85', '1.8', '1/640', '100', '2026:08:30 10:05:31'),
+  ],
+  [
+    'square.jpg',
+    1400,
+    1400,
+    'slate',
+    '1:1',
+    exif('50', '2.8', '1/200', '320', '2026:08:30 10:22:08'),
+  ],
+  ['pano.jpg', 2400, 800, 'sage', '3:1', exif('24', '16', '1/30', '100', '2026:08:28 07:40:27')],
 ];
+
+function exif(focal, aperture, shutter, iso, taken) {
+  return {
+    IFD0: { Make: 'Fixture', Model: 'Fixture FX-1', Software: 'gen-placeholders.mjs' },
+    IFD2: {
+      LensModel: 'Fixture 24-85mm f/1.8',
+      FocalLength: focal,
+      FNumber: aperture,
+      ExposureTime: shutter,
+      ISOSpeedRatings: iso,
+      DateTimeOriginal: taken,
+    },
+  };
+}
 
 const PIECES = [
   'src/content/pieces/vocabulary-sampler',
@@ -46,12 +91,13 @@ const svgOverlay = (w, h, [, dark], label) => `
 
 for (const dir of PIECES) {
   await mkdir(dir, { recursive: true });
-  for (const [file, w, h, palette, label] of IMAGES) {
+  for (const [file, w, h, palette, label, meta] of IMAGES) {
     const [light] = PALETTE[palette];
     await sharp({
       create: { width: w, height: h, channels: 3, background: light },
     })
       .composite([{ input: Buffer.from(svgOverlay(w, h, PALETTE[palette], label)) }])
+      .withExif(meta)
       .jpeg({ quality: 82 })
       .toFile(`${dir}/${file}`);
   }
