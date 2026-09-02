@@ -286,6 +286,19 @@ deleting the files, not setting a draft flag.
   registry must never cause that" turned out to be Astro's doing;
   `scripts/prune-unreferenced-originals.mjs` deletes unreferenced
   originals in `postbuild` before the scan. Reasoning in DECISIONS.md.
+- **Pre-merge review amendments (T314):** the suite is pinned to a
+  non-UTC zone (`vitest.config.ts`) with a guard test, so the date
+  re-basing tests can fail on a UTC runner as they must; file
+  basenames are validated as URL segments; an image directly in
+  `pieces/` (or beside a flat `pieces/foo.md`) fails in both the
+  registry and the transform; the image page caps its request at 2×
+  the content width; the pruner reads the extension list from
+  `image-meta.mjs` case-insensitively; `ogImageOptions` has a unit
+  test; "published" is one predicate (`isPublished` in `pieces.ts`)
+  shared with the registry; two undated galleries keep input order;
+  the gallery layout knobs live in `src/lib/gallery-layout.ts` and
+  reach the CSS as custom properties from the page; and the docs no
+  longer claim CI has enforced anything — it has never run (spec 005).
 
 ## Known limitations / deferred
 

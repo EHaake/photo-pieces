@@ -61,12 +61,16 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
   <article class="image-page">
     <div class="image-stage">
       <figure class="image-frame">
+        {
+          /* Width capped at 2× the content width: enough for a retina
+            1160px stage, and never the source's own width — that
+            request shape is the one Astro passes through untouched. */
+        }
         <Image
           src={image.image}
           alt={image.title}
           layout="constrained"
-          width={image.image.width}
-          height={image.image.height}
+          width={Math.min(image.image.width, 2320)}
           sizes="(min-width: 1240px) 1160px, 94vw"
           loading="eager"
         />

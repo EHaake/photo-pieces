@@ -28,7 +28,7 @@ const images = registry.latest(limit);
             layout="constrained"
             width={Math.round(520 * (image.image.width / image.image.height))}
             height={520}
-            sizes="(min-width: 720px) 40vw, 80vw"
+            sizes={`${Math.round(260 * (image.image.width / image.image.height))}px`}
             loading="lazy"
           />
         </a>
@@ -39,7 +39,9 @@ const images = registry.latest(limit);
 
 <style>
   /* Same band mechanics as the strip block: native horizontal scroll
-     with snap, a fixed band height, every frame at its own width. */
+     with snap, a fixed band height, every frame at its own width. The
+     band's 260px ceiling is the `sizes` basis above (height × ratio)
+     — keep the two in step. */
   .latest-work {
     display: flex;
     gap: calc(var(--baseline) * 0.75);

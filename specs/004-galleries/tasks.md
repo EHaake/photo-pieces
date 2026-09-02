@@ -245,7 +245,9 @@ headers to confirm nothing was duplicated or dropped. -->
       spec.md acceptance boxes checked against actual behavior.
       _Verify: build green; grep finds no doc describing galleries or
       image pages as future._
-- [ ] **T314** — Close-out: delete the `/latest-review/` page; update
+- [x] **T314** — Close-out (pre-merge sweep verdict: sound-with-changes;
+      both blockers and every second-look finding resolved — see
+      plan.md's "Pre-merge review amendments"): delete the `/latest-review/` page; update
       `ROADMAP.md` (galleries shipped; the rich image detail page entry
       points at 004's id/URL/metadata model as its base; category
       filtering no longer deferred) — on the spec branch per the
@@ -255,7 +257,10 @@ headers to confirm nothing was duplicated or dropped. -->
       _Verify: `grep -r latest-review src` empty; ROADMAP no longer lists
       this spec's work as future; the sweep came back clean or every
       finding is resolved or explicitly deferred with a reason; all
-      boxes above checked; CI green on the merged commit._
+      boxes above checked; build, tests, check, and format green on
+      the merge commit locally — CI has never executed for this repo
+      (GitHub records zero Actions runs), which spec 005's T116 now
+      investigates before go-live._
 
 ---
 

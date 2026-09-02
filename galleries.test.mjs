@@ -152,6 +152,15 @@ describe('latest-work ordering (T305)', () => {
     expect(orderLatestWork(galleries, new Map())).toEqual(['c', 'a', 'b', 'd', 'e']);
   });
 
+  it('two undated galleries with no capture dates keep their input order', () => {
+    const pair = [
+      { id: 'first', images: ['a'] },
+      { id: 'second', images: ['b'] },
+      { id: 'dated', date: d('2026-01-01'), images: ['c'] },
+    ];
+    expect(orderLatestWork(pair, new Map())).toEqual(['c', 'a', 'b']);
+  });
+
   it('honours the limit after de-duplication', () => {
     expect(orderLatestWork(galleries, new Map(), 3)).toEqual(['c', 'a', 'b']);
   });

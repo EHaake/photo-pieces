@@ -70,6 +70,12 @@ describe('exposure formatting (T303)', () => {
     expect(label.date.toISOString()).toBe('2026-08-28T06:41:12.000Z');
   });
 
+  it('the suite runs in a non-UTC zone, or the re-basing tests below prove nothing', () => {
+    // vitest.config.ts pins TZ; if that pin is lost, a UTC runner would
+    // make re-basing the identity and the next two tests hollow.
+    expect(new Date(2026, 7, 29, 18, 12, 44).getTimezoneOffset()).not.toBe(0);
+  });
+
   it("re-bases exifr's local-zone Date to UTC wall-clock (same digits, zone UTC)", () => {
     const local = new Date(2026, 7, 29, 18, 12, 44);
     expect(formatExposure({ DateTimeOriginal: local }).date.toISOString()).toBe(

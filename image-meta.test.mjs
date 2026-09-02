@@ -64,6 +64,15 @@ describe('image ids (T302)', () => {
   it('a bare file name with no parent folder cannot be an id', () => {
     expect(() => imageIdFor('photo.jpg')).toThrow(/no parent folder/);
   });
+
+  it('a file name that cannot be a URL segment fails with a rename hint', () => {
+    expect(() => imageIdFor('/src/content/pieces/a-piece/Fog 01.jpg')).toThrow(
+      /file name "Fog 01.jpg" can't be a URL segment .* \(e\.g\. "fog-01\.jpg"\)/,
+    );
+    expect(() => imageIdFor('/src/content/pieces/a-piece/été.jpg')).toThrow(/URL segment/);
+    // Camera-style names are fine.
+    expect(imageIdFor('/src/content/pieces/a-piece/DSC_0001.JPG')).toBe('a-piece/DSC_0001');
+  });
 });
 
 describe('registry classification (T302)', () => {
@@ -96,6 +105,12 @@ describe('registry classification (T302)', () => {
       root: 'gallery-images',
       nested: true,
     });
+  });
+
+  it('an image directly in pieces/ (no piece folder) is rejected, not minted', () => {
+    expect(() => classifyContentImage('/src/content/pieces/stray.jpg')).toThrow(
+      /sits directly in \/src\/content\/pieces\/ — a piece lives in its own folder/,
+    );
   });
 
   it('files outside the two roots are rejected', () => {

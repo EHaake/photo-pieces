@@ -4,6 +4,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { readExposure } from './exif.mjs';
+import { isPublished } from './pieces';
 import {
   classifyContentImage,
   findIdCollisions,
@@ -142,7 +143,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
             `[images] src/content/pieces/${file.pieceSlug}/ has images but no index.md — they stay unpublished until the piece exists`,
           );
         }
-      } else if (piece.data.draft) {
+      } else if (!isPublished(piece)) {
         status = 'draft';
       }
     }

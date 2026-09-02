@@ -18,10 +18,13 @@
 //   node scripts/prune-unreferenced-originals.mjs [dist]
 import { readdir, readFile, unlink } from 'node:fs/promises';
 import { extname, join } from 'node:path';
+import { IMAGE_EXTENSIONS } from '../src/lib/image-meta.mjs';
 
 const root = process.argv[2] ?? 'dist';
 const assets = join(root, '_astro');
-const RASTER = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif', '.tif', '.tiff', '.gif']);
+// The registry's accepted formats plus the ones Astro can emit for a
+// plain markdown image; matched case-insensitively (`.JPG` is accepted).
+const RASTER = new Set([...IMAGE_EXTENSIONS, 'tif', 'gif'].map((ext) => `.${ext}`));
 const TEXT = new Set([
   '.html',
   '.css',
@@ -36,8 +39,8 @@ const TEXT = new Set([
 
 // An emitted original is `<base>.<hash>.<ext>`; its transforms are
 // `<base>.<hash>_<hash>.<ext>` — the underscore separates them.
-const ORIGINAL = /^(.+\.[A-Za-z0-9_-]+)\.([a-z]+)$/;
-const TRANSFORM = /^(.+\.[A-Za-z0-9_-]+)_[A-Za-z0-9_-]+\.[a-z]+$/;
+const ORIGINAL = /^(.+\.[A-Za-z0-9_-]+)\.([a-z]+)$/i;
+const TRANSFORM = /^(.+\.[A-Za-z0-9_-]+)_[A-Za-z0-9_-]+\.[a-z]+$/i;
 
 async function* files(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {

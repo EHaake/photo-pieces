@@ -9,6 +9,7 @@ import { Image, getImage } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate } from '../../i18n';
 import { categoryLabel } from '../../lib/categories';
+import { galleryCell, galleryFlowStyle } from '../../lib/gallery-layout';
 import { getImageRegistry } from '../../lib/images';
 import { ogImageOptions } from '../../lib/og';
 import { withBase } from '../../lib/url';
@@ -31,19 +32,9 @@ const og = await getImage(ogImageOptions(cover.image));
 const description =
   gallery.data.description ?? `${images.length} images — ${categoryLabel(gallery.data.category)}.`;
 
-// Each cell hands its ratio to the CSS (--ar); the srcset ceiling is
-// the widest the cell can grow to at the desktop knobs (S = 280px,
-// stretch 1.35 — keep in step with .gallery-flow) at 2× density.
-const cells = images.map((image) => {
-  const ratio = image.image.width / image.image.height;
-  const widest = Math.round(280 * Math.max(ratio, 1) * 1.35);
-  return {
-    image,
-    ar: Math.round(ratio * 1000) / 1000,
-    width: Math.min(image.image.width, widest * 2),
-    sizes: `(min-width: 720px) ${widest}px, 94vw`,
-  };
-});
+// Each cell hands its ratio to the CSS (--ar) and sizes its srcset from
+// the same knobs the CSS gets (src/lib/gallery-layout.ts).
+const cells = images.map((image) => ({ image, ...galleryCell(image.image) }));
 ---
 
 <BaseLayout title={gallery.data.title} description={description} image={og.src}>
@@ -73,7 +64,7 @@ const cells = images.map((image) => {
     </header>
 
     <div class="section">
-      <ul class="gallery-flow">
+      <ul class="gallery-flow" style={galleryFlowStyle}>
         {
           cells.map(({ image, ar, width, sizes }) => (
             <li style={`--ar: ${ar}`}>

@@ -562,8 +562,16 @@ function imagePageUrl(file, src, fail) {
   if (URL.canParse(src) || src.startsWith('/')) return null;
   const ext = src.slice(src.lastIndexOf('.') + 1).toLowerCase();
   if (!IMAGE_EXTENSIONS.includes(ext)) return null;
+  const folder = dirname(file.path);
+  if (folder.endsWith('/src/content/pieces')) {
+    // A flat pieces/foo.md: its images sit in the pieces root, where the
+    // registry refuses them — linking would point at a page nobody makes.
+    fail(
+      `"${src}" sits directly in src/content/pieces/ — a piece lives in its own folder (pieces/<slug>/index.md) so its images can have pages`,
+    );
+  }
   try {
-    return imageUrlFor(imageIdFor(resolve(dirname(file.path), src)));
+    return imageUrlFor(imageIdFor(resolve(folder, src)));
   } catch (error) {
     if (error instanceof ImageIdError) fail(error.message);
     throw error;

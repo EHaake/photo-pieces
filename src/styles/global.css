@@ -1456,10 +1456,10 @@ pre code {
    rides in the basis as a constant so it doesn't skew the ratio.
    A row that can't fill (a lone landscape before a panorama) stays
    short, grown up to --gallery-stretch and centered — the cost of
-   keeping the order. Both are review knobs. */
+   keeping the order. Both knobs are set by the gallery page from
+   src/lib/gallery-layout.ts (one source for the CSS and the srcset
+   math); nothing here declares them. */
 .gallery-flow {
-  --gallery-short: clamp(200px, 26vw, 280px);
-  --gallery-stretch: 1.35;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

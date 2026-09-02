@@ -22,6 +22,9 @@ export const GALLERY_FOLDER = 'gallery';
 
 const CONTENT_ROOT = '/src/content/';
 const SLUG = /^[a-z0-9-]+$/;
+// File names become URL segments verbatim (`/images/<folder>/<basename>/`):
+// camera-style `DSC_0001` is fine, spaces and punctuation are not.
+const BASENAME = /^[A-Za-z0-9._-]+$/;
 
 export class ImageIdError extends Error {
   constructor(message) {
@@ -51,6 +54,11 @@ export function parseImagePath(filePath) {
     );
   }
   const basename = file.slice(0, dot);
+  if (!BASENAME.test(basename)) {
+    throw new ImageIdError(
+      `image file name "${file}" can't be a URL segment — use letters, digits, dots, hyphens, and underscores only (e.g. "${slugHint(basename)}.${ext}")`,
+    );
+  }
   const folder = parent === GALLERY_ROOT ? GALLERY_FOLDER : parent;
   if (!SLUG.test(folder)) {
     throw new ImageIdError(
@@ -93,6 +101,13 @@ export function classifyContentImage(globKey) {
   else {
     throw new ImageIdError(
       `"${key}" is under ${CONTENT_ROOT}${root}/ — images live in pieces/<slug>/ or ${GALLERY_ROOT}/`,
+    );
+  }
+  if (root === 'pieces' && rest.length < expectedDepth) {
+    // An image directly in pieces/ has no piece folder to belong to; a
+    // flat `pieces/foo.md` beside it would link to a page nobody makes.
+    throw new ImageIdError(
+      `"${key}" sits directly in ${CONTENT_ROOT}pieces/ — a piece lives in its own folder (pieces/<slug>/index.md) so its images can have pages`,
     );
   }
   const pieceSlug = root === 'pieces' ? (rest[0] ?? null) : null;
@@ -314,7 +329,14 @@ export function orderLatestWork(galleries, captureDates, limit = Infinity) {
     gallery,
     when: gallery.date ?? newestCapture(gallery.images, captureDates),
   }));
-  placed.sort((a, b) => (b.when?.valueOf() ?? -Infinity) - (a.when?.valueOf() ?? -Infinity));
+  // Undated galleries rank below every dated one and keep their input
+  // order among themselves (a plain subtraction would be NaN there).
+  const rank = (entry) => entry.when?.valueOf() ?? -Infinity;
+  placed.sort((a, b) => {
+    const ra = rank(a);
+    const rb = rank(b);
+    return ra === rb ? 0 : rb > ra ? 1 : -1;
+  });
   const out = [];
   const seen = new Set();
   for (const { gallery } of placed) {

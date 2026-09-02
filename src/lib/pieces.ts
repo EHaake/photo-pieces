@@ -1,4 +1,4 @@
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 
 /**
  * Every published (non-draft) piece, newest first — the one definition of
@@ -14,7 +14,13 @@ import { getCollection } from 'astro:content';
  * consumer's output).
  */
 export async function getPublishedPieces() {
-  return (await getCollection('pieces', ({ data }) => !data.draft)).sort(
+  return (await getCollection('pieces', isPublished)).sort(
     (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
   );
+}
+
+/** The one definition of "published" — shared with the image registry,
+ *  which unpublishes a piece's images by the same rule (spec 004). */
+export function isPublished(piece: CollectionEntry<'pieces'>): boolean {
+  return !piece.data.draft;
 }

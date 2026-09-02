@@ -275,8 +275,9 @@ enforced three ways because each covers a different failure: the
 reader's allowlist (tested against a fixture that carries GPS, and
 shown to fail against a naive reader before the test was trusted),
 the registry's output shape, and a post-build scan of every raster in
-`dist/` (`scripts/check-no-gps.mjs`, wired into `postbuild` so CI
-can't go green with a leak — shown to fail on a planted file). One
+`dist/` (`scripts/check-no-gps.mjs`, wired into `npm run build`'s
+`postbuild`, which CI runs — though CI itself has yet to execute for
+this repo, see spec 005 — and shown to fail on a planted file). One
 fixture image in content carries GPS on purpose so the last barrier
 always has something real to strip.
 

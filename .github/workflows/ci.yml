@@ -37,5 +37,7 @@ jobs:
         # The remark transform suite (see CLAUDE.md's testing rules).
         run: npm test
       - name: Build
-        # Also exercises the postbuild Pagefind index step.
+        # Also exercises postbuild: the Pagefind index, the pruning of
+        # unreferenced originals, and the no-GPS scan of every built image
+        # (spec 004) — a leak fails this step.
         run: npm run build

@@ -597,4 +597,16 @@ describe('image links (T310, spec 004)', () => {
     expect(links(code)).toEqual([]);
     expect(code).toMatch(/<a href="https:\/\/example.com\/"><img/);
   });
+
+  it('an image beside a flat pieces/foo.md fails — the registry would never make its page', async () => {
+    const flat = new URL('./src/content/pieces/flat.md', import.meta.url);
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await expect(processor.render('![x](./photo.jpg)', { fileURL: flat })).rejects.toThrow(
+        /sits directly in src\/content\/pieces\/ — a piece lives in its own folder/,
+      );
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });

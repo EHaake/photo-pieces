@@ -131,10 +131,13 @@ read from the file's EXIF (camera, lens, focal length, aperture,
 shutter, ISO, capture date), the piece it came from, the galleries it
 sits in, and an optional caption. Every image in a piece links there;
 so does every gallery cell. Rules the build enforces: piece folders
-must be slugs, images live directly in the folder (no sub-folders),
-two files differing only by extension are a collision, and a `draft:
-true` piece unpublishes its images with it. Moving or renaming an
-image changes its URL — there are no redirects yet.
+must be slugs and file names URL-safe (letters, digits, `.`, `-`,
+`_`), an image directly in `pieces/` or beside a flat `pieces/foo.md`
+fails, a file nested in a sub-folder is ignored with a warning (a
+directive pointing into one fails), two files differing only by
+extension are a collision, and a `draft: true` piece unpublishes its
+images with it. Moving or renaming an image changes its URL — there
+are no redirects yet.
 
 **Sidecar** — optional, frontmatter-only, `_<basename>.md` beside the
 image (the underscore keeps it out of the pieces collection). Every

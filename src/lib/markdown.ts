@@ -3,10 +3,11 @@ import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 /**
  * Renders a frontmatter string as markdown — used for image sidecar
  * captions (spec 004), which live in frontmatter rather than a body so
- * the sidecar stays a plain metadata file in Obsidian. The site's own
- * markdown pipeline is the processor, minus the directive transform
- * (a caption is inline prose, not a place for image blocks) and
- * syntax highlighting.
+ * the sidecar stays a plain metadata file in Obsidian. This is Astro's
+ * markdown processor with default options — deliberately NOT the
+ * site's remark pipeline from astro.config.mjs: a caption is inline
+ * prose, so the directive transform (image blocks) and syntax
+ * highlighting don't apply. GFM and smart punctuation match the pieces.
  */
 let processor: ReturnType<typeof createMarkdownProcessor> | undefined;
 

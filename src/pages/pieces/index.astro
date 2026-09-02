@@ -15,7 +15,7 @@ const pieces = await getPublishedPieces();
   <section class="page-head section">
     <p class="eyebrow">Index</p>
     <h1>Pieces</h1>
-    <p class="meta category-row" aria-label="Browse by category">
+    <nav class="meta category-row" aria-label="Browse by category">
       {
         CATEGORIES.map((category, index) => (
           <>
@@ -24,7 +24,7 @@ const pieces = await getPublishedPieces();
           </>
         ))
       }
-    </p>
+    </nav>
   </section>
 
   <section class="section index-feed" aria-label="All pieces">
