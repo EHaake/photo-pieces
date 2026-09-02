@@ -35,7 +35,7 @@ export const getStaticPaths = (async () => {
 // pre-merge review of spec 001 caught the accent still terracotta after
 // the token had gone teal).
 const COLOR = {
-  bg: '#fcfcfa',
+  bg: '#f6f4f0',
   text: '#1e2226',
   muted: '#5e646a',
   line: '#d2d1cb',

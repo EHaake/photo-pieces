@@ -76,7 +76,12 @@ describe('happy paths', () => {
     expect(markers).toHaveLength(2);
     expect(markers.map((m) => m.alt)).toEqual(['l', 'r']);
     for (const marker of markers)
-      expect(marker).toMatchObject({ layout: 'constrained', sizes: '50vw' });
+      // sizes updated by spec 003 (plan B3): narrow branch matches the
+      // collapsed stacked layout instead of under-serving phones.
+      expect(marker).toMatchObject({
+        layout: 'constrained',
+        sizes: '(min-width: 720px) 340px, 94vw',
+      });
     // Duplicate srcs must stay distinguishable for the asset pipeline.
     expect(markers.map((m) => m.index)).toEqual([0, 1]);
   });
@@ -89,7 +94,10 @@ describe('happy paths', () => {
     const markers = imageMarkers(code);
     expect(markers.map((m) => m.alt)).toEqual(['a', 'b', 'c']);
     for (const marker of markers)
-      expect(marker).toMatchObject({ layout: 'constrained', sizes: '33vw' });
+      expect(marker).toMatchObject({
+        layout: 'constrained',
+        sizes: '(min-width: 720px) 227px, 94vw',
+      });
   });
 
   it('empty alt is accepted as an explicit decorative declaration', async () => {
@@ -123,11 +131,12 @@ describe('happy paths', () => {
 describe('fail-loudly cases', () => {
   const cases = [
     ['unknown directive', '::mystery{}', /the block vocabulary is closed/],
-    [
-      'container form of a known block',
-      ':::fullbleed{src="./photo.jpg" alt="x"}\ncaption\n:::',
-      /container form is not supported/,
-    ],
+    // The 001-era "container form of a known block fails" case was
+    // deliberately retired by spec 003, which makes the container form the
+    // caption mechanism (flagged and approved at the Phase 0 review, not
+    // weakened-to-pass). Its replacement coverage lives in
+    // remark-pieces-vocabulary.test.mjs: captions, [label] rejection,
+    // no-nesting, and wrong-form errors.
     ['reserved sequence block', '::sequence{}', /reserved but not implemented/],
     ['fullbleed without src', '::fullbleed{alt="x"}', /requires a src/],
     ['fullbleed without alt', '::fullbleed{src="./photo.jpg"}', /requires an alt/],

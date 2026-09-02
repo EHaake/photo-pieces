@@ -28,6 +28,7 @@ the point, which is what the diptych treatment is for:
 
 ::diptych{left="./jetty-dawn.jpg" right="./jetty-dawn.jpg" leftAlt="The jetty before sunrise, cool and blue" rightAlt="The same view minutes later, first warmth on the horizon"}
 
-This piece now exercises the full built vocabulary: prose, a plain
-single image, a full-bleed, and a diptych. Only `sequence` remains
-reserved for a future design pass.
+This piece stays deliberately small — prose, a plain single image, a
+full-bleed, and a diptych. The full vocabulary lives in the sampler
+piece, and the two demo essays show it used the way real writing
+would.

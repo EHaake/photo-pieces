@@ -103,9 +103,10 @@ Reading View is intentionally not handled — Live Preview is the mode
 actually used while writing, which is the specific problem this
 solves.
 
-Source lives in `obsidian-plugin/` in this repo. Extending it to
-`diptych`/`triptych` once those exist on the Astro side follows the
-same pattern: a regex and a widget class per block type.
+Source lives in `obsidian-plugin/` in this repo. _Superseded in part
+by spec 003 — see "Spec 003: breadth over demand-driven growth; plugin
+approximations" below: the plugin now renders every standalone leaf
+block; container forms stay raw._
 
 ## Markdown processor: legacy remark pipeline kept over Sätteri
 
@@ -185,3 +186,74 @@ Three decisions from spec 002's Phase 3 review (2026-08-31):
   single seam where relative paths would become store URLs, so pieces
   themselves won't change. Git LFS was considered and rejected: it
   complicates CI and its bandwidth pricing punishes exactly this use.
+
+## Mattes: site-applied, never baked into files
+
+Surfaced at spec 003 review: the photographer mattes every image they
+present, on every channel — so the site presents images matted, and
+the design brief's skeuomorphism ban was amended (its own commit) to
+carve out the flat matte specifically. Frames, shadows, bevels, and
+textures remain banned; the matte is a flat, token-driven color field.
+
+How to apply them was compared directly:
+
+- **Baked into uploaded files** — rejected: retuning means
+  re-exporting every image ever committed; files become unusable
+  elsewhere without double-matting; the matte shrinks with the image
+  on small viewports; srcset pixels are wasted on matte; and every
+  aspect ratio lies to the layout math (including diptych/triptych
+  centered alignment).
+- **Applied by site CSS** — chosen: one token retunes all mattes;
+  source files stay clean exports; responsive behavior is controlled;
+  the pipeline's dimensions stay honest; edge-to-edge treatments
+  (fullbleed, tall, strip) can stay unmatted since the bleed is the
+  point.
+
+## Ground tone: warmed so the mattes read
+
+At the spec-003 sampler review the pure-white mattes were nearly
+invisible against the paper-white page (~1% lightness apart). Four
+candidates were compared live on the sampler via a dev-only switcher:
+current ground, two warmed grounds, and a hairline mat edge on the
+current ground. Chosen: **gallery warm** — background to
+oklch(0.968 0.006 95) with surface/soft shifted in step (0.945/0.92)
+and the line hue warmed to match. The photographer's read: "initially
+looks slightly too warm, but our eyes adjust quickly." The mat-edge
+option was rejected as visually noisy; tinted mats were rejected as
+inverting the mat-brighter-than-wall logic. Derived copies resynced:
+the OG route's bg hex (#f6f4f0) and public/og.jpg.
+
+## Header: full width, hides on scroll down
+
+Surfaced at the spec-003 sampler review on the photographer's laptop:
+the sticky header inherited the content-width `.section` rule, so an
+edge-to-edge image scrolling beneath it showed on both sides of a
+narrower header band. Options weighed — full-width sticky, the
+headroom pattern (hide on scroll down, reveal on scroll up; the
+editorial/portfolio standard), a non-sticky header, and a translucent
+header (out: the brief bans glassmorphism). Chosen: full width **and**
+hide/reveal, the photographer's own instinct — the width fixes the
+bug; the hide/reveal keeps chrome off the photographs while reading,
+per the brief's images-as-interface principle. Details that keep it
+from being annoying: always visible near the top of the page, an
+8px jitter threshold, a reveal when keyboard focus enters the header,
+and the global reduced-motion rule collapsing the slide.
+
+## Spec 003: breadth over demand-driven growth; plugin approximations
+
+ROADMAP originally prescribed growing the block vocabulary "from a
+concrete list gathered by writing real pieces — not speculatively."
+At spec 003 the photographer reversed that deliberately: the vocabulary
+was built broad first (eleven treatments plus captions and mattes), on
+the reasoning that unused treatments cost little now that the pipeline
+is proven, while missing ones interrupt writing. Real writing may still
+surface a gap; additions have become cheap (a descriptor, CSS, tests).
+
+The Obsidian plugin's approximation widened accordingly and stays an
+approximation: it renders the leaf form of the seven standalone blocks
+(pairs and triptychs as side-by-side thumbnails), anchored to whole
+lines so it agrees with the pipeline about mid-paragraph directives,
+and no longer shows `alt` as a caption. Container forms — captions,
+grid, strip, aside, row — remain raw text in Live Preview: they need a
+real parser, not a line regex, and raw text is honest about the build
+being the source of truth. Reading View stays out of scope.

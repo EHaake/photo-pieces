@@ -1,28 +1,43 @@
 # photo-pieces-blocks (Obsidian plugin)
 
-Renders `::fullbleed{src="..." alt="..."}` as an actual image while
+Renders the site's image block directives as actual images while
 writing in Obsidian's Live Preview, instead of raw directive text.
 Deliberately approximate, not styled to match the real site — see
-`DECISIONS.md` at the repo root for the reasoning.
+`DECISIONS.md` at the repo root for the reasoning. The site build is
+the source of truth for how anything actually renders.
 
-## Install (prebuilt)
+## What renders, what stays raw
 
-Copy `manifest.json`, `main.js`, and `styles.css` into a new folder
-inside your vault:
+| Syntax                                               | In Live Preview                    |
+| ---------------------------------------------------- | ---------------------------------- |
+| `::single` `::fullbleed` `::wide` `::tall` `::inset` | the image                          |
+| `::diptych` `::triptych`                             | the images side by side            |
+| `:::name … :::` container forms (captions)           | raw text                           |
+| `:::grid` `:::strip` `:::aside` `:::row`             | raw text                           |
+| any directive typed mid-paragraph                    | raw text (the site rejects it too) |
 
-```
-<vault>/.obsidian/plugins/photo-pieces-blocks/
+Attribute values may be quoted or unquoted, as on the site. Captions
+are not shown — `alt` is accessibility text, not a caption,
+so it is no longer displayed under the image. Missing images show a
+dashed "not found" box, which is telling the truth about what the
+build would do (it fails).
+
+## Build and install
+
+`main.js` is a build artifact and is not committed. Build it, then copy
+the three files into your vault:
+
+```sh
+cd obsidian-plugin
+npm install --legacy-peer-deps
+npm run build
+mkdir -p "<vault>/.obsidian/plugins/photo-pieces-blocks"
+cp manifest.json main.js styles.css "<vault>/.obsidian/plugins/photo-pieces-blocks/"
 ```
 
 Then in Obsidian: Settings → Community plugins → enable
-"Photo Pieces Blocks".
-
-## Rebuild from source
-
-```sh
-npm install --legacy-peer-deps
-npm run build
-```
+"Photo Pieces Blocks". After rebuilding, disable and re-enable the
+plugin (or reload Obsidian) to pick up the new `main.js`.
 
 `--legacy-peer-deps` is required — the `obsidian` types package pins
 an older peer version of `@codemirror/state` than `@codemirror/view`
@@ -30,8 +45,10 @@ itself wants. Both packages are dev-only (type declarations); Obsidian
 provides the real CodeMirror instance at runtime, which is why
 `@codemirror/*` is marked external in `esbuild.config.mjs`.
 
-## Extending to diptych/triptych
+## Extending
 
-Once those exist as real directives on the Astro side, follow the same
-pattern already in `main.ts`: a regex to recognize the syntax, a
-`WidgetType` subclass to render it, both wired into `buildDecorations`.
+The vocabulary lives in `LEAF_BLOCKS` in `main.ts`: one entry per block
+name mapping its attributes to the images to show. Adding a leaf block
+on the Astro side means adding one entry here. Container forms would
+need a real parser rather than a line regex — a deliberate non-goal
+for now.

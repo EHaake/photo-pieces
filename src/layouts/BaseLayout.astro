@@ -101,5 +101,47 @@ const isActive = (href: string) => {
     </footer>
 
     <CodeCopy />
+
+    <script>
+      // Header hide-on-scroll-down / reveal-on-scroll-up. Bound once at
+      // module load (view transitions don't re-run this); the header is
+      // looked up per event because the router swaps it. Always visible
+      // near the top; a small upward scroll reveals it; keyboard focus
+      // entering it reveals it too.
+      const REVEAL_NEAR_TOP = 80;
+      const JITTER = 8;
+      let lastY = window.scrollY;
+      const header = () => document.querySelector<HTMLElement>('.site-header');
+
+      // Runs per scroll event: a few reads and an attribute toggle only on
+      // state change, so there's nothing worth coalescing.
+      const setHidden = (h: HTMLElement, hidden: boolean) => {
+        if (hidden !== h.hasAttribute('data-hidden')) {
+          if (hidden) h.setAttribute('data-hidden', '');
+          else h.removeAttribute('data-hidden');
+        }
+      };
+      const update = () => {
+        const h = header();
+        if (!h) return;
+        const y = window.scrollY;
+        const delta = y - lastY;
+        if (y < REVEAL_NEAR_TOP) setHidden(h, false);
+        else if (delta > JITTER) setHidden(h, true);
+        else if (delta < -JITTER) setHidden(h, false);
+        if (Math.abs(delta) > JITTER) lastY = y;
+      };
+
+      window.addEventListener('scroll', update, { passive: true });
+      document.addEventListener('astro:after-swap', () => {
+        lastY = window.scrollY;
+      });
+      document.addEventListener('focusin', (event) => {
+        const h = header();
+        if (h && event.target instanceof Node && h.contains(event.target)) {
+          h.removeAttribute('data-hidden');
+        }
+      });
+    </script>
   </body>
 </html>

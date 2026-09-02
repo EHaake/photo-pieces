@@ -1,14 +1,25 @@
-.photo-pieces-fullbleed-preview {
+.photo-pieces-preview {
   margin: 0.5em 0;
 }
 
-.photo-pieces-fullbleed-caption {
-  font-size: 0.85em;
-  color: var(--text-muted);
-  margin-top: 0.35em;
+.photo-pieces-preview img {
+  display: block;
+  max-width: 100%;
 }
 
-.photo-pieces-fullbleed-missing {
+/* diptych / triptych: thumbnails side by side */
+.photo-pieces-preview-row {
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+}
+
+.photo-pieces-preview-row img {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.photo-pieces-missing {
   padding: 0.75em 1em;
   border: 1px dashed var(--text-error);
   color: var(--text-error);
