@@ -27,3 +27,6 @@ pnpm-debug.log*
 # editor / agent local state
 .codex/
 .claude/
+
+# Obsidian plugin build artifact (see obsidian-plugin/README.md)
+obsidian-plugin/main.js

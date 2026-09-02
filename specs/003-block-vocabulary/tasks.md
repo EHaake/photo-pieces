@@ -120,7 +120,7 @@ weakening tests to pass.
 
 ## Phase 5 — Authoring side and docs
 
-- [ ] **T210** — Obsidian plugin: leaf-form rendering for all
+- [x] **T210** — Obsidian plugin: leaf-form rendering for all
       standalone blocks (shared multi-image widget), anchored regex
       (`m` flag), README build instructions replacing the phantom
       `main.js` path, alt-no-longer-rendered-as-caption. _Verify:
