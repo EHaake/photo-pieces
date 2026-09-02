@@ -1349,3 +1349,51 @@ pre code {
   background: none;
   padding: 0;
 }
+
+/* ---- Galleries (spec 004) --------------------------------------------
+   The brief's deliberately plain grid, shared by gallery pages and the
+   gallery-card lists. Equal-width columns; each image at its own
+   height; rows centered on a shared midline like the diptych default;
+   nothing cropped. Column count follows the site's two existing width
+   facts and no new ones: one column below the 720px collapse the
+   piece blocks use, two between, three from --content-width (1160px —
+   a media query can't read the token, so the number is repeated here
+   on purpose; change both together). Density is a review knob. */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: calc(var(--baseline) * 0.75);
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gallery-grid li {
+  margin: 0;
+}
+
+@media (min-width: 720px) {
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1160px) {
+  .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* A grid cell is one link carrying the mat; the image fills it. */
+.gallery-grid > li > a.image-link {
+  display: block;
+  padding: var(--matte);
+  background: var(--color-matte);
+}
+
+.gallery-grid > li > a.image-link img {
+  display: block;
+  width: 100%;
+  height: auto;
+}

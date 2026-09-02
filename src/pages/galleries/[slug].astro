@@ -1,0 +1,87 @@
+---
+// A gallery page (spec 004): the brief's deliberately plain grid, in
+// the photographer's order, every cell a link to the image's page.
+// Column count follows the shared breakpoints (see .gallery-grid in
+// global.css); rows are midline-centered like the diptych default;
+// nothing is cropped.
+import { Image, getImage } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../i18n';
+import { categoryLabel } from '../../lib/categories';
+import { getImageRegistry } from '../../lib/images';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const registry = await getImageRegistry();
+  return registry.galleries.map((gallery) => ({
+    params: { slug: gallery.id },
+    props: { gallery },
+  }));
+}
+
+const { gallery } = Astro.props;
+const registry = await getImageRegistry();
+
+// Every id was validated by the registry; the lookups can't miss.
+const images = gallery.data.images.map((id) => registry.byId.get(id)!);
+const cover = registry.byId.get(gallery.data.cover)!;
+const og = await getImage({ src: cover.image, width: 1200, format: 'jpg' });
+const description =
+  gallery.data.description ?? `${images.length} images — ${categoryLabel(gallery.data.category)}.`;
+---
+
+<BaseLayout title={gallery.data.title} description={description} image={og.src}>
+  <article>
+    <header class="page-head section">
+      <p class="eyebrow">
+        <a href={withBase(`/categories/${gallery.data.category}/`)}>
+          {categoryLabel(gallery.data.category)}
+        </a>
+      </p>
+      <h1>{gallery.data.title}</h1>
+      {gallery.data.description && <p class="lead">{gallery.data.description}</p>}
+      <div class="entry-meta">
+        {images.length}
+        {images.length === 1 ? 'image' : 'images'}
+        {
+          gallery.data.date && (
+            <>
+              {' · '}
+              <time datetime={gallery.data.date.toISOString()}>
+                {formatDate(gallery.data.date)}
+              </time>
+            </>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="section">
+      <ul class="gallery-grid">
+        {
+          images.map((image) => (
+            <li>
+              <a href={withBase(image.url)} class="image-link">
+                <Image
+                  src={image.image}
+                  alt={image.title}
+                  layout="constrained"
+                  width={800}
+                  sizes="(min-width: 1160px) 373px, (min-width: 720px) 47vw, 94vw"
+                  loading="lazy"
+                />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  /* Titles are short here; the lead can run to the prose width. */
+  .lead {
+    max-width: var(--prose-width);
+  }
+</style>

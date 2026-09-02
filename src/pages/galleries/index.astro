@@ -1,0 +1,45 @@
+---
+// The galleries index (spec 004): every gallery, grouped by category in
+// the taxonomy's order, newest first within a group.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GalleryCards from '../../components/GalleryCards.astro';
+import { CATEGORIES, categoryLabel } from '../../lib/categories';
+import { getImageRegistry } from '../../lib/images';
+import { withBase } from '../../lib/url';
+
+const registry = await getImageRegistry();
+const groups = CATEGORIES.map((category) => ({
+  category,
+  galleries: registry.galleries.filter((gallery) => gallery.data.category === category),
+})).filter((group) => group.galleries.length > 0);
+---
+
+<BaseLayout title="Galleries" description="Curated galleries, grouped by category.">
+  <section class="page-head section">
+    <p class="eyebrow">Index</p>
+    <h1>Galleries</h1>
+  </section>
+
+  {
+    groups.map(({ category, galleries }) => (
+      <section class="section gallery-group" aria-labelledby={`galleries-${category}`}>
+        <h2 id={`galleries-${category}`} class="eyebrow">
+          <a href={withBase(`/categories/${category}/`)}>{categoryLabel(category)}</a>
+        </h2>
+        <GalleryCards galleries={galleries} />
+      </section>
+    ))
+  }
+</BaseLayout>
+
+<style>
+  .gallery-group {
+    padding-block: clamp(2rem, 4vw, 3rem);
+    border-bottom: var(--hairline);
+  }
+
+  .gallery-group h2.eyebrow {
+    margin-bottom: calc(var(--baseline) * 1.25);
+    font-size: 0.75rem;
+  }
+</style>
