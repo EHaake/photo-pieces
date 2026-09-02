@@ -100,7 +100,7 @@ headers to confirm nothing was duplicated or dropped. -->
       galleries schema-valid (id resolution is proven by T305's
       registry); T307's browser pass then reviews the ladder end to
       end._
-- [ ] **T305** — The registry, `src/lib/images.ts` (thin Astro wrapper
+- [x] **T305** — The registry, `src/lib/images.ts` (thin Astro wrapper
       over T302/T303): `import.meta.glob` discovery of
       `{pieces,gallery-images}/**/*.{jpg,jpeg,png,webp,avif,tiff}`,
       draft-owned exclusion via the same `draft` definition

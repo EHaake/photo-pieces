@@ -239,6 +239,130 @@ function formatCamera(make, model) {
   return mo.toLowerCase().startsWith(brand) ? mo : `${m} ${mo}`;
 }
 
+/**
+ * A sidecar collection entry id (the path verbatim, extension dropped)
+ * → the image id it describes: `pieces/<slug>/_land-b` → `<slug>/land-b`,
+ * `gallery-images/_dock-b` → `gallery/dock-b`.
+ */
+export function sidecarImageId(entryId) {
+  const m = String(entryId).match(/^(?:pieces\/([^/]+)|gallery-images)\/_([^/]+)$/);
+  if (!m) {
+    throw new ImageIdError(
+      `sidecar "${entryId}" is not an _<basename>.md beside an image in pieces/<slug>/ or ${GALLERY_ROOT}/`,
+    );
+  }
+  return `${m[1] ?? GALLERY_FOLDER}/${m[2]}`;
+}
+
+/**
+ * Checks every gallery's image list against the registry: each id must
+ * name an image on the site, belong to a published piece (or to no
+ * piece), and appear once. `galleries` is `[{ id, filePath, source,
+ * images }]` with `source` the gallery file's text so each problem can
+ * carry the line the id sits on; `known` maps every discovered image
+ * id to 'published' | 'draft' | 'unowned'. Returns problems in file
+ * order — the caller fails the build with all of them at once.
+ */
+export function validateGalleries(galleries, known) {
+  const problems = [];
+  for (const gallery of galleries) {
+    const seen = new Map();
+    gallery.images.forEach((imageId) => {
+      const occurrence = seen.get(imageId) ?? 0;
+      seen.set(imageId, occurrence + 1);
+      const status = known.get(imageId);
+      let reason;
+      if (occurrence > 0) reason = `"${imageId}" is listed more than once`;
+      else if (status === undefined)
+        reason = `"${imageId}" is not an image on the site${nearestHint(imageId, known)}`;
+      else if (status === 'draft')
+        reason = `"${imageId}" belongs to a draft piece — publish the piece or drop the image`;
+      else if (status !== 'published')
+        reason = `"${imageId}" sits in a piece folder with no index.md, so it is unpublished`;
+      if (reason) {
+        problems.push({
+          galleryId: gallery.id,
+          filePath: gallery.filePath,
+          line: findIdLine(gallery.source, imageId, occurrence),
+          imageId,
+          reason,
+        });
+      }
+    });
+  }
+  return problems;
+}
+
+export function formatGalleryProblems(problems) {
+  return problems
+    .map(
+      (p) => `${p.filePath}${p.line ? `:${p.line}` : ''} — gallery "${p.galleryId}": ${p.reason}`,
+    )
+    .join('\n');
+}
+
+/**
+ * Latest-work ordering: galleries newest first, each gallery's images
+ * in the photographer's order, de-duplicated across galleries. A
+ * gallery with no date is placed by its newest image's capture date —
+ * the only place EXIF dates affect ordering — and after everything
+ * dated if none of its images has one. `galleries` is `[{ id, date?,
+ * images }]`; `captureDates` maps image ids to Dates.
+ */
+export function orderLatestWork(galleries, captureDates, limit = Infinity) {
+  const placed = galleries.map((gallery) => ({
+    gallery,
+    when: gallery.date ?? newestCapture(gallery.images, captureDates),
+  }));
+  placed.sort((a, b) => (b.when?.valueOf() ?? -Infinity) - (a.when?.valueOf() ?? -Infinity));
+  const out = [];
+  const seen = new Set();
+  for (const { gallery } of placed) {
+    for (const id of gallery.images) {
+      if (seen.has(id)) continue;
+      seen.add(id);
+      out.push(id);
+      if (out.length >= limit) return out;
+    }
+  }
+  return out;
+}
+
+function newestCapture(ids, captureDates) {
+  let newest;
+  for (const id of ids) {
+    const date = captureDates.get(id);
+    if (date instanceof Date && (newest === undefined || date > newest)) newest = date;
+  }
+  return newest;
+}
+
+// The 1-based line of the nth list item naming `id` in a gallery file
+// (`  - <id>`, quoted or not), falling back to the nth line mentioning
+// it at all. Undefined only if the id isn't in the file — which can't
+// happen for an id that came out of parsing it.
+function findIdLine(source, id, nth) {
+  if (typeof source !== 'string') return undefined;
+  const lines = source.split(/\r?\n/);
+  const item = new RegExp(`^\\s*-\\s*["']?${escapeRegExp(id)}["']?\\s*$`);
+  const matches = lines.flatMap((line, i) => (item.test(line) ? [i + 1] : []));
+  if (matches[nth] !== undefined) return matches[nth];
+  const mentions = lines.flatMap((line, i) => (line.includes(id) ? [i + 1] : []));
+  return mentions[nth] ?? mentions[0];
+}
+
+function nearestHint(imageId, known) {
+  const basename = imageId.split('/').at(-1);
+  const candidates = [...known.keys()].filter((k) => k.split('/').at(-1) === basename);
+  return candidates.length
+    ? ` — did you mean ${candidates.map((c) => `"${c}"`).join(' or ')}?`
+    : '';
+}
+
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function formatShutter(seconds) {
   if (!isPositive(seconds)) return undefined;
   if (seconds >= 1) return `${trimNumber(seconds)} s`;

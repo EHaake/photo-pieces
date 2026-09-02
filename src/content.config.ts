@@ -38,7 +38,7 @@ const galleries = defineCollection({
     .superRefine((gallery, ctx) => {
       if (gallery.cover !== undefined && !gallery.images.includes(gallery.cover)) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: ['cover'],
           message: `cover "${gallery.cover}" is not one of this gallery's images`,
         });
