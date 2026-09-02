@@ -66,6 +66,11 @@ const imageMarkers = (code) =>
     JSON.parse(m[1].replaceAll('&#x22;', '"')),
   );
 
+// The inline style of each image-link anchor in document order (spec
+// 004 moved --ar from the img to its anchor — the flex item).
+const anchorStyles = (code) =>
+  [...code.matchAll(/<a href="[^"]*" class="image-link"(?: style="([^"]*)")?>/g)].map((m) => m[1]);
+
 describe('single directive form and captions (T203)', () => {
   it('leaf single renders a classed figure with constrained responsive sizing', async () => {
     const { code, metadata } = await render('::single{src="./photo.jpg" alt="dawn"}');
@@ -202,9 +207,11 @@ describe('diptych/triptych upgrades: match, weight, captions (T205)', () => {
       '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" match="height"}',
     );
     expect(code).toContain('<figure class="piece-block piece-diptych match-height">');
-    const markers = imageMarkers(code);
-    expect(markers[1].style).toBe('--ar: 1'); // portrait is smallest
-    expect(markers[0].style).toBe('--ar: 2.4'); // 1.6 / 0.6667
+    // Since spec 004 the anchor is the flex item, so --ar rides on it
+    // (T310); the values are unchanged.
+    const styles = anchorStyles(code);
+    expect(styles[1]).toBe('--ar: 1'); // portrait is smallest
+    expect(styles[0]).toBe('--ar: 2.4'); // 1.6 / 0.6667
   });
 
   it('an EXIF-rotated camera portrait gets the rendered (swapped) ratio', async () => {
@@ -214,9 +221,9 @@ describe('diptych/triptych upgrades: match, weight, captions (T205)', () => {
     const { code } = await render(
       '::diptych{left="./photo.jpg" right="./rotated.jpg" leftAlt="l" rightAlt="r" match="height"}',
     );
-    const markers = imageMarkers(code);
-    expect(markers[1].style).toBe('--ar: 1');
-    expect(markers[0].style).toBe('--ar: 2.4');
+    const styles = anchorStyles(code);
+    expect(styles[1]).toBe('--ar: 1');
+    expect(styles[0]).toBe('--ar: 2.4');
   });
 
   it('match mode derives per-image sizes from the ratios', async () => {
@@ -276,8 +283,7 @@ describe('diptych/triptych upgrades: match, weight, captions (T205)', () => {
     const { code } = await render(
       '::triptych{left="./photo.jpg" center="./portrait.jpg" right="./rotated.jpg" leftAlt="a" centerAlt="b" rightAlt="c" match="height"}',
     );
-    const markers = imageMarkers(code);
-    expect(markers.map((m) => m.style)).toEqual(['--ar: 2.4', '--ar: 1', '--ar: 1']);
+    expect(anchorStyles(code)).toEqual(['--ar: 2.4', '--ar: 1', '--ar: 1']);
   });
 
   it('diptych and triptych container forms carry figcaptions now', async () => {
@@ -499,5 +505,108 @@ describe('text directive restoration round-trips attributes (T202)', () => {
   it('a valueless attribute round-trips without ="" noise', async () => {
     const { code } = await render('The :toggle{on} flag.');
     expect(code).toContain('<p>The :toggle{on} flag.</p>');
+  });
+});
+
+describe('image links (T310, spec 004)', () => {
+  // Every anchor the transform emits, in document order, with its
+  // inline style (the --ar variable rides on the anchor now).
+  const links = (code) =>
+    [...code.matchAll(/<a href="([^"]*)" class="image-link"(?: style="([^"]*)")?>/g)].map((m) => ({
+      href: m[1],
+      style: m[2],
+    }));
+
+  it('a block image is wrapped in a link to its page, derived from the piece folder', async () => {
+    const { code } = await render('::single{src="./photo.jpg" alt="A photo"}');
+    expect(links(code)).toEqual([{ href: '/images/fixtures/photo/', style: undefined }]);
+    // The image inside is still the optimizer's — the marker is intact.
+    expect(code).toMatch(
+      /<a href="\/images\/fixtures\/photo\/" class="image-link"><img[^>]*__ASTRO_IMAGE_/,
+    );
+  });
+
+  it('every image in a pair, a grid body, and a strip is wrapped', async () => {
+    const pair = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r"}',
+    );
+    expect(links(pair.code).map((l) => l.href)).toEqual([
+      '/images/fixtures/photo/',
+      '/images/fixtures/portrait/',
+    ]);
+    const grid = await render(
+      ':::grid\n![a](./photo.jpg)\n![b](./portrait.jpg)\n![c](./rotated.jpg)\n:::',
+    );
+    expect(links(grid.code)).toHaveLength(3);
+    const strip = await render(':::strip\n![a](./photo.jpg)\n![b](./portrait.jpg)\n:::');
+    expect(strip.code).toMatch(
+      /<div class="piece-strip-scroll" tabindex="0"><a href="\/images\/fixtures\/photo\/" class="image-link">/,
+    );
+    expect(links(strip.code)).toHaveLength(2);
+  });
+
+  it('the shorthand image in prose is wrapped too', async () => {
+    const { code } = await render('Text.\n\n![A photo](./photo.jpg)\n');
+    expect(code).toMatch(/<p><a href="\/images\/fixtures\/photo\/" class="image-link"><img/);
+  });
+
+  it('alt="" is not wrapped — a decorative image is not a destination', async () => {
+    const block = await render('::fullbleed{src="./photo.jpg" alt=""}');
+    expect(links(block.code)).toEqual([]);
+    expect(block.code).toMatch(/<figure class="piece-block piece-fullbleed"><img/);
+    const shorthand = await render('![](./photo.jpg)');
+    expect(links(shorthand.code)).toEqual([]);
+  });
+
+  it('match="height" puts --ar on the anchor, not the image', async () => {
+    const { code } = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" match="height"}',
+    );
+    expect(links(code).map((l) => l.style)).toEqual(['--ar: 2.4', '--ar: 1']);
+    expect(imageMarkers(code).map((m) => m.style)).toEqual([undefined, undefined]);
+  });
+
+  it('an alt="" image in a matched pair stays the flex item and keeps --ar itself', async () => {
+    const { code } = await render(
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="" rightAlt="r" match="height"}',
+    );
+    expect(links(code).map((l) => l.style)).toEqual(['--ar: 1']);
+    expect(imageMarkers(code)[0].style).toBe('--ar: 2.4');
+  });
+
+  it('a src into a sub-folder or a sibling folder fails naming the rule', async () => {
+    await expect(
+      renderExpectingFailure('::single{src="./detail/photo.jpg" alt="x"}'),
+    ).rejects.toThrow(/points outside the piece's own folder/);
+    await expect(renderExpectingFailure('![x](../other/photo.jpg)')).rejects.toThrow(
+      /points outside the piece's own folder/,
+    );
+  });
+
+  it('remote, root-absolute, and non-photograph srcs are left to Astro, unwrapped', async () => {
+    const remote = await render('![x](https://example.com/p.jpg)');
+    expect(links(remote.code)).toEqual([]);
+    const rooted = await render('![x](/p.jpg)');
+    expect(links(rooted.code)).toEqual([]);
+    const gif = await render('![x](./anim.gif)');
+    expect(links(gif.code)).toEqual([]);
+  });
+
+  it("an author's own link around an image is left alone", async () => {
+    const { code } = await render('[![x](./photo.jpg)](https://example.com/)');
+    expect(links(code)).toEqual([]);
+    expect(code).toMatch(/<a href="https:\/\/example.com\/"><img/);
+  });
+
+  it('an image beside a flat pieces/foo.md fails — the registry would never make its page', async () => {
+    const flat = new URL('./src/content/pieces/flat.md', import.meta.url);
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await expect(processor.render('![x](./photo.jpg)', { fileURL: flat })).rejects.toThrow(
+        /sits directly in src\/content\/pieces\/ — a piece lives in its own folder/,
+      );
+    } finally {
+      spy.mockRestore();
+    }
   });
 });

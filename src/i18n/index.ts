@@ -57,12 +57,20 @@ export const readingTime = (minutesRead: unknown): string =>
     : String(minutesRead ?? '');
 
 /** Format a publish date in the active locale. `long` spells the month out;
- *  `short` abbreviates it. Both are locale-aware, including field order. */
+ *  `short` abbreviates it. Both are locale-aware, including field order.
+ *
+ *  Formatted in UTC on purpose: every date on the site is a calendar
+ *  date — YAML `2026-08-28` parses to UTC midnight, and EXIF capture
+ *  times are normalized to UTC wall-clock by the image registry — so
+ *  formatting in the build machine's zone printed the previous day
+ *  anywhere west of Greenwich (found at spec 004: a piece dated the
+ *  28th read "August 27" on the photographer's laptop). */
 export const formatDate = (date: Date, style: 'long' | 'short' = 'long'): string =>
   new Intl.DateTimeFormat(locale, {
     month: style,
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'UTC',
   }).format(date);
 
 /** Resolve a nav entry's label. `NavItem` requires exactly one of `label` or

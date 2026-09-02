@@ -42,7 +42,17 @@ DNS + dashboard only, zero code change.
       `first-light-at-the-jetty` (spec 001's test piece),
       `vocabulary-sampler`, `where-the-fog-lets-go`, and
       `market-day-camera-low` (spec 003's reference and demo
-      fixtures — invented prose, placeholder images)
+      fixtures — invented prose, placeholder images). Spec 004's
+      fixtures go too: the placeholder images in
+      `src/content/gallery-images/` (`dock-a`, `dock-b` — the latter
+      carries a deliberate GPS block — and the ratio-ladder set
+      `wide-3x2-*`, `tall-2x3-*`, `tall-4x5-*`, `tall-5x8-*`,
+      `square-*`, `wide-16x9-*`, `pano-3x1-*`; gallery-root images
+      have no draft flag, so these are **deleted**, not drafted), the
+      fixture galleries `fog-frames`, `editors-picks`, and the four
+      ladder galleries `one-ratio`, `near-ratios`, `both-orientations`,
+      `every-ratio`, and the sidecars `_land-b.md` (in
+      `where-the-fog-lets-go`) and `_dock-b.md`
 - [ ] The custom-domain flip is executed: `erikhaakephoto.com` serves
       the site over HTTPS via Squarespace DNS records (registration
       stays at Squarespace), canonicals match
@@ -60,6 +70,13 @@ DNS + dashboard only, zero code change.
       repo connection (walkthrough already provided; repo is now
       private, which Workers Builds supports).
 - [ ] **T116** — End-to-end verification against the deployed test
-      URL, each check reported with actual results.
+      URL, each check reported with actual results. Include the CI
+      workflow itself: as of 2026-09-02 (spec 004's close-out) GitHub
+      has recorded **zero** Actions runs for this repo although
+      `.github/workflows/ci.yml` has been on `main` since 002 and
+      triggers on `pull_request` — every verification so far has been
+      local. Find out why (Actions settings, billing for a private
+      repo, or the workflow never being picked up) before relying on a
+      green check at the domain flip.
 - [ ] **T117 [author-gated]** — Domain flip via Squarespace DNS +
       Cloudflare custom domain.

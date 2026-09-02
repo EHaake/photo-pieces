@@ -11,7 +11,10 @@ The vault is a **parent** of the repo, not the content folder itself:
 ```
 ~/photo-brain/                  <- Obsidian vault root
 ├── photo-pieces/               <- this repo, a normal git clone
-│   └── src/content/pieces/     <- published pieces live here
+│   └── src/content/
+│       ├── pieces/             <- published pieces live here
+│       ├── gallery-images/     <- images that belong to no piece
+│       └── galleries/          <- one file per gallery
 ├── notes/                      <- private second-brain material
 └── templates/                  <- Obsidian template files
 ```
@@ -67,6 +70,86 @@ draft: true
 
 `categories` values: `landscape`, `street`, `portrait`, `event`.
 
+Two more skeletons worth keeping in `templates/` (spec 004 — the
+field reference is in `README.md`):
+
+```markdown
+---
+title:
+caption:
+---
+```
+
+saved as `_<basename>.md` beside an image, and
+
+```markdown
+---
+title:
+category:
+description:
+date:
+images:
+  -
+---
+```
+
+saved in `src/content/galleries/`.
+
+## A piece folder is public territory
+
+Since spec 004 every accepted image in a published piece's folder has
+its own page at `/images/<piece-folder>/<basename>/` — whether or not
+the piece's text references it. Consequences worth internalizing:
+
+- **Don't park alternates in the folder.** An unreferenced frame is
+  still published with a page. Keep contact-sheet material in `notes/`
+  or the archive; move a frame into the folder when it's chosen.
+- **No sub-folders.** Images live directly in the piece folder; a
+  `detail/` folder is ignored with a build warning, and a directive
+  pointing into one fails the build.
+- **File names are URLs.** `land-b.jpg` becomes `/images/<slug>/land-b/`.
+  Renaming or moving an image changes its URL (no redirects yet —
+  nothing is live), so name frames before publishing, not after.
+- **`draft: true` hides the images too.** A gallery that lists one of
+  them fails the build until the piece is published.
+- **The folder name must be a slug** (`lowercase-with-hyphens`), as
+  they all are already — the build says so, with the fix, if not.
+
+## Metadata: EXIF, then a sidecar
+
+The wall label on an image's page fills itself from the file's EXIF —
+camera, lens, focal length, aperture, shutter, ISO, capture date — so
+**the web export has to keep EXIF**. In Lightroom's export dialog that
+is Metadata → "All Except Camera Raw Info" (or "All Metadata"); the
+options that mention "Camera" strip exactly the exposure fields the
+label needs, and "Copyright Only" strips the lot, so the label comes
+out empty. Tick "Remove Location Info" while you're there: the site
+never reads GPS and the build fails if any built image carries it, but
+there is no reason to commit coordinates to git either.
+
+Anything the file gets wrong or lacks goes in a sidecar, `_<basename>.md`
+beside the image — a frontmatter-only file whose `title`, `caption`
+(one paragraph, inline markdown), `date`, and label fields override
+what EXIF said, field by field, as written. The body is reserved for
+the rich image page (`ROADMAP.md`) and is ignored for now. Obsidian
+treats a sidecar as an ordinary note; the leading underscore is what
+keeps it out of the pieces collection.
+
+## Curating a gallery
+
+A gallery is one file in `src/content/galleries/`: a title, one
+category, an optional description and date, an ordered list of image
+ids, and an optional cover (defaults to the first image). Ids are
+`<piece-folder>/<basename>` for a piece's image and
+`gallery/<basename>` for one in `src/content/gallery-images/`. The
+order is the order on the page; the layout packs rows so every image
+in a row renders at the same short side, and it never reorders to fill
+a row — so a lone frame before a panorama sits centered in a short row
+by design. The build refuses a missing, duplicate, or draft-owned id
+and names the file and line. Images that belong to no piece go in
+`gallery-images/`, flat, and have no draft flag: to unpublish one,
+delete it.
+
 ## Hard-won syntax rules
 
 Learned by breaking them — each of these fails quietly if violated:
@@ -115,6 +198,15 @@ special treatments use directives and render via the plugin. Publish
 is `git commit` + `git push` from the repo — though until spec 005
 executes, a push updates only the private repo; nothing deploys
 anywhere.
+
+One limit of the loop: the image registry is built once per dev-server
+run. Text edits hot-reload; **adding, removing, or renaming images,
+sidecars, or galleries needs `npm run dev` restarted** before their
+pages, links, and validation catch up. (For the record, `astro build`
+caches rendered pieces by content digest in
+`node_modules/.astro/data-store.json`; a change to the remark
+transform itself doesn't show in a local build until that file is
+deleted. CI builds fresh.)
 
 ## Deliberately no methodology
 

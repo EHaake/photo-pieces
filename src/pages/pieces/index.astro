@@ -5,6 +5,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PieceList from '../../components/PieceList.astro';
 import { getPublishedPieces } from '../../lib/pieces';
+import { CATEGORIES, categoryLabel } from '../../lib/categories';
+import { withBase } from '../../lib/url';
 
 const pieces = await getPublishedPieces();
 ---
@@ -13,6 +15,16 @@ const pieces = await getPublishedPieces();
   <section class="page-head section">
     <p class="eyebrow">Index</p>
     <h1>Pieces</h1>
+    <nav class="meta category-row" aria-label="Browse by category">
+      {
+        CATEGORIES.map((category, index) => (
+          <>
+            {index > 0 && ' · '}
+            <a href={withBase(`/categories/${category}/`)}>{categoryLabel(category)}</a>
+          </>
+        ))
+      }
+    </nav>
   </section>
 
   <section class="section index-feed" aria-label="All pieces">

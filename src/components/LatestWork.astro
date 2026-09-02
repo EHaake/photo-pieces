@@ -1,0 +1,73 @@
+---
+// Latest work (spec 004): the newest curated images — galleries newest
+// first, each in the photographer's order, de-duplicated (see
+// orderLatestWork) — as a scroll strip, every frame matted and linked
+// to its page. Exported for the homepage design pass to place; placed
+// nowhere by spec 004 itself.
+import { Image } from 'astro:assets';
+import { getImageRegistry } from '../lib/images';
+import { withBase } from '../lib/url';
+
+interface Props {
+  limit?: number;
+}
+
+const { limit = 8 } = Astro.props;
+const registry = await getImageRegistry();
+const images = registry.latest(limit);
+---
+
+<ul class="latest-work" aria-label="Latest work">
+  {
+    images.map((image) => (
+      <li>
+        <a href={withBase(image.url)} class="image-link">
+          <Image
+            src={image.image}
+            alt={image.title}
+            layout="constrained"
+            width={Math.round(520 * (image.image.width / image.image.height))}
+            height={520}
+            sizes={`${Math.round(260 * (image.image.width / image.image.height))}px`}
+            loading="lazy"
+          />
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  /* Same band mechanics as the strip block: native horizontal scroll
+     with snap, a fixed band height, every frame at its own width. The
+     band's 260px ceiling is the `sizes` basis above (height × ratio)
+     — keep the two in step. */
+  .latest-work {
+    display: flex;
+    gap: calc(var(--baseline) * 0.75);
+    margin: 0;
+    padding: 0 0 calc(var(--baseline) * 0.5);
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+  }
+
+  .latest-work li {
+    flex: none;
+    scroll-snap-align: start;
+  }
+
+  .image-link {
+    display: block;
+    height: 100%;
+    padding: var(--matte);
+    background: var(--color-matte);
+  }
+
+  .image-link img {
+    display: block;
+    width: auto;
+    height: clamp(180px, 30vh, 260px);
+  }
+</style>

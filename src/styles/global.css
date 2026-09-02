@@ -1029,6 +1029,33 @@ pre code {
   height: auto;
 }
 
+/* Spec 004: every image is a link to its page, and the anchor is the
+   layout item — the flex or grid child, the thing that floats, the
+   thing that carries the mat — with the image filling it. background:
+   none drops the theme's gradient underline; the site's :focus-visible
+   ring draws around the whole frame. */
+.piece-block a.image-link,
+.prose > p > a.image-link,
+.piece-row-prose > p > a.image-link {
+  display: block;
+  background: none;
+}
+
+/* Shorthand images sit in a paragraph at their own width, as before —
+   the mat must hug the image, not span the column. */
+.prose > p > a.image-link,
+.piece-row-prose > p > a.image-link {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.prose > p > a.image-link img,
+.piece-row-prose > p > a.image-link img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 /* Side-by-side treatments: thin token-derived gutters, flat, filling the
    reading column. Differing aspect ratios keep their natural heights —
    pairing images that sit well together is the author's curation call,
@@ -1058,8 +1085,11 @@ pre code {
   gap: calc(var(--baseline) / 3);
 }
 
-.piece-diptych.match-height img,
-.piece-triptych.match-height img {
+.piece-diptych.match-height > :is(a.image-link, img),
+.piece-triptych.match-height > :is(a.image-link, img) {
+  /* The flex item is the anchor (or a bare img when alt="" — no link).
+     border-box floors the item's base size at its mat padding, so the
+     proportional part is the image alone: heights come out exact. */
   flex: var(--ar, 1) 1 0;
   min-width: 0;
   width: auto;
@@ -1090,8 +1120,8 @@ pre code {
     display: grid;
   }
 
-  .piece-diptych.match-height img,
-  .piece-triptych.match-height img {
+  .piece-diptych.match-height > :is(a.image-link, img),
+  .piece-triptych.match-height > :is(a.image-link, img) {
     width: 100%;
   }
 }
@@ -1150,6 +1180,12 @@ pre code {
 /* Viewport-height cap for verticals. width:auto + max constraints (never
    width:100%) so the image can neither stretch nor crop — spec 003 forbids
    both. --tall-max is a sampler-review knob. */
+.piece-tall > a.image-link {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
 .piece-tall img {
   width: auto;
   max-width: 100%;
@@ -1190,14 +1226,18 @@ pre code {
   height: var(--strip-h);
 }
 
+.piece-strip-scroll > :is(a.image-link, img) {
+  flex: none;
+  height: 100%;
+  scroll-snap-align: center;
+}
+
 .piece-strip img {
   width: auto;
   /* Override the column-wide max-width caps: the whole point of the band
      is that a panorama may be wider than the viewport. */
   max-width: none;
   height: 100%;
-  flex: none;
-  scroll-snap-align: center;
 }
 
 /* Captions on edge-to-edge treatments return to the reading column
@@ -1317,35 +1357,145 @@ pre code {
    inset, wide, diptych, triptych, grid, aside, row. Unmatted:
    fullbleed, tall, strip, width="fullbleed" pairs, and half-bleed's
    bled edge. Equal-heights note: the padding participates in the flex
-   basis floor, so match="height" stays exact with per-image mats. */
+   basis floor, so match="height" stays exact with per-image mats.
+   Since spec 004 the mat sits on the image's link (the layout item);
+   a bare img — alt="" gets no link — carries it itself. */
 
-.piece-single img,
-.piece-inset img,
-.piece-wide img,
-.piece-diptych img,
-.piece-triptych img,
-.piece-grid img,
-.piece-aside img,
-.piece-row figure img,
-.piece-row-prose img,
-.prose > p > img {
+:is(
+    .piece-single,
+    .piece-inset,
+    .piece-wide,
+    .piece-diptych,
+    .piece-triptych,
+    .piece-grid,
+    .piece-aside,
+    .piece-row figure
+  )
+  > :is(a.image-link, img),
+:is(.prose, .piece-row-prose) > p > :is(a.image-link, img),
+:is(.prose, .piece-row-prose) > p > a:not(.image-link) > img {
   background: var(--color-matte);
   padding: var(--matte);
 }
 
 /* Half-bleed: the bled edge runs clean to the viewport; the mat holds
    on the other three sides (sampler-review knob). */
-.piece-wide.bleed-left img {
+.piece-wide.bleed-left > :is(a.image-link, img) {
   padding-left: 0;
 }
 
-.piece-wide.bleed-right img {
+.piece-wide.bleed-right > :is(a.image-link, img) {
   padding-right: 0;
 }
 
 /* Fullbleed-width pairs: edge-to-edge is the point — no mats. */
-.piece-diptych.width-fullbleed img,
-.piece-triptych.width-fullbleed img {
+.piece-diptych.width-fullbleed > :is(a.image-link, img),
+.piece-triptych.width-fullbleed > :is(a.image-link, img) {
   background: none;
   padding: 0;
+}
+
+/* ---- Galleries (spec 004) --------------------------------------------
+   The brief's deliberately plain grid, shared by gallery pages and the
+   gallery-card lists. Equal-width columns; each image at its own
+   height; rows centered on a shared midline like the diptych default;
+   nothing cropped. Column count follows the site's two existing width
+   facts and no new ones: one column below the 720px collapse the
+   piece blocks use, two between, three from --content-width (1160px —
+   a media query can't read the token, so the number is repeated here
+   on purpose; change both together). Density is a review knob. */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: calc(var(--baseline) * 0.75);
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gallery-grid li {
+  margin: 0;
+}
+
+@media (min-width: 720px) {
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1160px) {
+  .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* A grid cell is one link carrying the mat; the image fills it. */
+.gallery-grid > li > a.image-link {
+  display: block;
+  padding: var(--matte);
+  background: var(--color-matte);
+}
+
+.gallery-grid > li > a.image-link img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---- Gallery pages: rows packed to equal short sides (T307R) --------
+   The photographer's rule from the sampler review: every image's SHORT
+   side should render about the same, so a panorama isn't a sliver
+   beside a portrait. Each cell's flex basis is its width at a common
+   short side S (--gallery-short): portraits and squares want S,
+   landscapes want S × ratio (--w, from the --ar the page sets per
+   cell). Rows wrap in the photographer's order; grow is proportional
+   to --w, so one factor scales a whole row to fill the width and every
+   image in it lands on exactly the same short side — the triptych's
+   match="height" math with a different target. The mat's padding
+   rides in the basis as a constant so it doesn't skew the ratio.
+   A row that can't fill (a lone landscape before a panorama) stays
+   short, grown up to --gallery-stretch and centered — the cost of
+   keeping the order. Both knobs are set by the gallery page from
+   src/lib/gallery-layout.ts (one source for the CSS and the srcset
+   math); nothing here declares them. */
+.gallery-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--baseline) * 0.75);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gallery-flow > li {
+  --w: max(var(--ar, 1), 1);
+  margin: 0;
+  flex: var(--w) 1 calc(var(--gallery-short) * var(--w) + 2 * var(--matte));
+  max-width: min(
+    100%,
+    calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--matte))
+  );
+}
+
+.gallery-flow > li > a.image-link {
+  display: block;
+  padding: var(--matte);
+  background: var(--color-matte);
+}
+
+.gallery-flow > li > a.image-link img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Below the collapse: one frame per row at the full width — the cap
+   would otherwise leave a phone-width portrait floating in margins. */
+@media (max-width: 719.98px) {
+  .gallery-flow > li {
+    max-width: 100%;
+  }
 }

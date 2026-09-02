@@ -113,6 +113,25 @@ const isActive = (href: string) => {
       let lastY = window.scrollY;
       const header = () => document.querySelector<HTMLElement>('.site-header');
 
+      // Publish the header's real height as --header-h for layouts that
+      // fill the viewport below it (the image page's stage, spec 004).
+      // It varies with width and nav wrapping, so no token can be right
+      // everywhere; the CSS fallback matches the desktop size so the
+      // first paint is at most a few pixels off. A ResizeObserver keeps
+      // it current across resizes and router swaps.
+      const publishHeight = () => {
+        const h = header();
+        if (h) document.documentElement.style.setProperty('--header-h', `${h.offsetHeight}px`);
+      };
+      const resizer = new ResizeObserver(publishHeight);
+      const observeHeader = () => {
+        const h = header();
+        if (h) resizer.observe(h);
+        publishHeight();
+      };
+      observeHeader();
+      document.addEventListener('astro:after-swap', observeHeader);
+
       // Runs per scroll event: a few reads and an attribute toggle only on
       // state change, so there's nothing worth coalescing.
       const setHidden = (h: HTMLElement, hidden: boolean) => {

@@ -257,3 +257,80 @@ and no longer shows `alt` as a caption. Container forms — captions,
 grid, strip, aside, row — remain raw text in Live Preview: they need a
 real parser, not a line regex, and raw text is honest about the build
 being the source of truth. Reading View stays out of scope.
+
+## EXIF via `exifr`; GPS never leaves the build
+
+Spec 004's wall label reads exposure fields from each image file at
+build time. `exifr` (7.1.3, pinned) was chosen over `sharp().metadata()`
+plus a second decoder: purpose-built, zero transitive dependencies,
+and its `pick` option plus `gps: false` let the read be scoped to an
+allowlist at the source. It is a single-maintainer package with no
+release since 2022 — accepted, because it is small, stable, and does
+one thing; if it ever breaks, the reader is one file (`src/lib/exif.mjs`)
+behind a pure formatter, and the fixture-backed tests say exactly what
+a replacement must return.
+
+The standing constraint is that no location data can reach the site,
+enforced three ways because each covers a different failure: the
+reader's allowlist (tested against a fixture that carries GPS, and
+shown to fail against a naive reader before the test was trusted),
+the registry's output shape, and a post-build scan of every raster in
+`dist/` (`scripts/check-no-gps.mjs`, wired into `npm run build`'s
+`postbuild`, which CI runs — though CI itself has yet to execute for
+this repo, see spec 005 — and shown to fail on a planted file). One
+fixture image in content carries GPS on purpose so the last barrier
+always has something real to strip.
+
+The last barrier caught two real leaks on its first run. First, the
+Open Graph request for a 1200px-wide JPEG at 1200px as JPEG: Astro's
+service passes the original through untouched when width and format
+match the source, so the page's OG image was the file itself, GPS
+included (`src/lib/og.ts` now asks for one pixel less in that case).
+Second, and larger: Astro emits every ESM-imported image into
+`dist/_astro/` as an untouched original so its service can read it,
+and is meant to delete the ones nothing references afterwards — but
+in this static build its "referenced outside processing" check marks
+every imported image (piece covers and registry imports alike), so
+33 originals shipped unlinked from any page, metadata and all. It
+predates spec 004 (covers were already imported) and is Astro's
+behavior, not the registry's. `scripts/prune-unreferenced-originals.mjs`
+now does the deletion Astro meant to, in `postbuild` before the scan:
+an original with transform siblings that no file in `dist/` mentions
+is removed. If Astro fixes the check the pruner becomes a no-op; the
+scan stays regardless.
+
+## Category browsing: one route family, not per-genre sections
+
+Spec 001 ruled out per-genre site sections; spec 004 needed category
+browsing anyway (galleries grouped by category, pieces filterable).
+Chosen at plan review: a single `/categories/<category>/` route family
+listing a category's galleries then its pieces, reached only from
+category labels on piece, gallery, and image pages and from a link row
+on `/pieces/` — never from the nav. The alternative, per-category list
+pages under `/pieces/`, would have needed a second family for
+galleries and drifted toward the sections the site deliberately
+doesn't have.
+
+## Gallery layout: rows packed to equal short sides, in editorial order
+
+Spec 004's plan and the design brief said "plain grid" — equal
+columns, each image at its own height, rows midline-centered. At the
+sampler review (2026-09-01) the photographer saw a 3:1 panorama render
+as a sliver in one of three columns beside a full-height portrait and
+set the rule the layout now follows: _every image's short side should
+render about the same_, so a pano fills a row, a 3:2 takes one and a
+half times a portrait's width, and nothing looks small for being wide.
+
+The mechanism is the triptych's `match="height"` math with a different
+target: each cell's flex basis is its width at a common short side S,
+grow is proportional to that width, rows wrap in the photographer's
+order, and one factor scales each row to fill — so short sides are
+exactly equal within a row. Integer column spans were rejected (a 3:2
+in two of three columns is a third too big, in one a third too small,
+and spans leave holes once order is fixed). Masonry was never on the
+table (it reorders); equal-height justified rows were rejected because
+they make portraits the smallest frames on the page — the opposite of
+the rule. The accepted cost: a row that can't fill stays short and
+centered rather than pulling a later image forward. Density (S) and
+the short-row stretch cap are knobs. The index's gallery cards keep
+the plain grid, since a card's text wants uniform columns.

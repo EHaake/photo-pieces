@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { imageMetadata } from 'astro/assets/utils';
 import { visit } from 'unist-util-visit';
+import { IMAGE_EXTENSIONS, ImageIdError, imageIdFor, imageUrlFor } from './src/lib/image-meta.mjs';
 
 // Turns the closed set of piece image-treatment directives (parsed by
 // `remark-directive`) into figure-wrapped images. The vocabulary is closed
@@ -29,6 +30,15 @@ import { visit } from 'unist-util-visit';
 // `![alt](./photo.jpg)`. The `layout`/`sizes` from `sizing` ride each
 // image node's hProperties into that pipeline as per-image getImage()
 // options.
+//
+// Spec 004: every image links to its page (`/images/<folder>/<basename>/`,
+// derived by the same rule the image registry uses, from
+// src/lib/image-meta.mjs). The mdast `link` wrapping an image carries
+// class `image-link` and, for match="height", the `--ar` variable — the
+// anchor is the layout item now, and the mat sits on it (global.css).
+// Exceptions: alt="" (decorative; a link with no accessible name fails
+// WCAG 2.4.4), remote and root-absolute srcs (no page exists), formats
+// outside the registry (gif, svg), and images an author already linked.
 //
 // Single-colon text directives (`:word` mid-prose) are restored to the
 // literal text the author typed, attributes included: none of the
@@ -416,7 +426,13 @@ export function remarkPiecesBlocks() {
       } else {
         images = block.images(attrs, failHere);
       }
-      for (const image of images) checkSrcExists(file, node, image.src);
+      for (const image of images) {
+        rejectNestedSrc(image.src, failHere);
+        checkSrcExists(file, node, image.src);
+      }
+      // Spec 004: every image links to its page — the URL derives from
+      // the piece folder + basename, the same rule the registry uses.
+      const pageUrls = images.map((image) => imagePageUrl(file, image.src, failHere));
 
       // match="height": probe each image's dimensions (orientation-aware —
       // Astro swaps width/height for EXIF orientations 5–8, so a camera
@@ -433,17 +449,25 @@ export function remarkPiecesBlocks() {
         }
       }
 
-      const imageNodes = images.map(({ src, alt }, imageIndex) => ({
-        type: 'image',
-        url: src,
-        alt,
-        data: {
-          hProperties: {
-            ...block.sizing(attrs, imageIndex, ratios),
-            ...(normalized ? { style: `--ar: ${trimNumber(normalized[imageIndex])}` } : {}),
-          },
-        },
-      }));
+      const imageNodes = images.map(({ src, alt }, imageIndex) => {
+        const arStyle = normalized ? { style: `--ar: ${trimNumber(normalized[imageIndex])}` } : {};
+        const image = {
+          type: 'image',
+          url: src,
+          alt,
+          data: { hProperties: { ...block.sizing(attrs, imageIndex, ratios) } },
+        };
+        // The anchor becomes the layout item, so --ar rides on it (the
+        // CSS flexes the figure's direct child). An image with alt=""
+        // is decorative: no link (a link with no accessible name fails
+        // WCAG 2.4.4), so it stays the item itself and keeps --ar.
+        const url = alt === '' ? null : pageUrls[imageIndex];
+        if (!url) {
+          image.data.hProperties = { ...image.data.hProperties, ...arStyle };
+          return image;
+        }
+        return wrapInLink(image, url, arStyle);
+      });
       const className = ['piece-block', `piece-${node.name}`, ...(block.classes?.(attrs) ?? [])];
 
       if (block.structure === 'unwrap') {
@@ -490,7 +514,68 @@ export function remarkPiecesBlocks() {
         hProperties: { className },
       };
     }
+
+    // Shorthand images (`![alt](./x.jpg)` in prose) link to their pages
+    // too — the same rule, the same exceptions (alt="", remote or
+    // root-absolute src, an author's own surrounding link).
+    visit(tree, 'image', (node, index, parent) => {
+      if (!parent || parent.type === 'link') return;
+      const failHere = (message) => fail(file, node, message);
+      rejectNestedSrc(node.url, failHere);
+      const url = node.alt === '' ? null : imagePageUrl(file, node.url, failHere);
+      if (!url) return;
+      parent.children.splice(index, 1, wrapInLink(node, url));
+      return index + 1;
+    });
   };
+}
+
+function wrapInLink(imageNode, url, extraProps = {}) {
+  return {
+    type: 'link',
+    url,
+    children: [imageNode],
+    data: { hProperties: { className: ['image-link'], ...extraProps } },
+  };
+}
+
+// Images live directly in the piece's folder — that is what gives them
+// an id and a page. A src into a sub-folder (or out to a sibling piece)
+// would resolve, but to an image that has no page or someone else's.
+function rejectNestedSrc(src, fail) {
+  if (typeof src !== 'string' || URL.canParse(src) || src.startsWith('/')) return;
+  const rel = src.startsWith('./') ? src.slice(2) : src;
+  if (rel.includes('/')) {
+    fail(
+      `image src "${src}" points outside the piece's own folder — images live directly in the piece folder (each one gets a page there)`,
+    );
+  }
+}
+
+// The page URL for a local image, or null when it gets no page: remote
+// and root-absolute srcs are left to Astro as before; a non-photograph
+// format (gif, svg) isn't in the registry. Note `withBase` can't apply
+// inside a remark plugin; BASE_URL is `/` and imageUrlFor is the one
+// definition of the shape.
+function imagePageUrl(file, src, fail) {
+  if (typeof file.path !== 'string') return null;
+  if (URL.canParse(src) || src.startsWith('/')) return null;
+  const ext = src.slice(src.lastIndexOf('.') + 1).toLowerCase();
+  if (!IMAGE_EXTENSIONS.includes(ext)) return null;
+  const folder = dirname(file.path);
+  if (folder.endsWith('/src/content/pieces')) {
+    // A flat pieces/foo.md: its images sit in the pieces root, where the
+    // registry refuses them — linking would point at a page nobody makes.
+    fail(
+      `"${src}" sits directly in src/content/pieces/ — a piece lives in its own folder (pieces/<slug>/index.md) so its images can have pages`,
+    );
+  }
+  try {
+    return imageUrlFor(imageIdFor(resolve(folder, src)));
+  } catch (error) {
+    if (error instanceof ImageIdError) fail(error.message);
+    throw error;
+  }
 }
 
 function wrapNode(hName, className, children, extraProps = {}) {
