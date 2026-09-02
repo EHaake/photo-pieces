@@ -190,7 +190,7 @@ headers to confirm nothing was duplicated or dropped. -->
       URL (`/images/fixtures/photo/`), shorthand wrapped, `alt=""` not,
       `--ar` on the anchor, subfolder fails with file + line, remote
       not wrapped; 82 legacy + vocabulary tests green; build green._
-- [ ] **T311** — CSS: the matte moves to the anchor for every matted
+- [x] **T311** — CSS: the matte moves to the anchor for every matted
       block (background + padding on the anchor; the img inside becomes
       `display: block; width: 100%`), with every retarget the plan
       enumerates (match-height flex + `--ar` → anchor; strip's sizing →
