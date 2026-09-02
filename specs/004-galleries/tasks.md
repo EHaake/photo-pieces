@@ -75,13 +75,31 @@ headers to confirm nothing was duplicated or dropped. -->
       schema fields title, caption, date, camera, lens, focalLength,
       aperture, shutter, iso — all optional). Fixture content: two
       `gallery-images/` placeholders with synthetic EXIF (one **with
-      GPS** — the build-level leak test's subject), three galleries
-      over the demo pieces' images (landscape, street, a "best of"
-      mixing both), two sidecars (title + caption; overrides), and all
-      of it added to `specs/005-going-live/spec.md`'s unpublish list.
-      _Verify: build green with the fixtures loaded; a deliberately
-      malformed gallery (bad category) fails schema validation loudly
-      — output reported, then reverted._
+      GPS** — the build-level leak test's subject), two galleries over
+      the demo pieces' images (a landscape set and a "best of" across
+      both essays — the piece-owned back-reference cases; the layout
+      galleries are T304A), two sidecars (title + caption; overrides),
+      and all of it added to `specs/005-going-live/spec.md`'s unpublish
+      list. _Verify: build green with the fixtures loaded; a
+      deliberately malformed gallery (bad category) fails schema
+      validation loudly — output reported, then reverted._
+- [ ] **T304A** — Example galleries graded by uniformity
+      (photographer's addition at tasks review): extend
+      `scripts/gen-placeholders.mjs` with a `gallery-images/` set —
+      enough frames at 3:2, 2:3, 4:5, 5:8, 1:1, 16:9, and 3:1, each
+      labeled with its ratio, palettes varied, synthetic EXIF — and
+      four galleries, one per category, stepping from very uniform to
+      very disparate: (1) landscape — all 3:2 horizontals; (2) portrait
+      — all verticals, but at near-ratios (2:3, 4:5, 5:8: the "slightly
+      shorter than 2:3" case); (3) street — horizontals and verticals
+      mixed (3:2, 2:3, 1:1); (4) event — everything at once (3:1 pano,
+      16:9, 3:2, 1:1, 4:5, 2:3, 5:8). Eight to twelve images each, the
+      description naming its rung of the ladder; added to spec 005's
+      unpublish list (gallery-folder fixtures are deleted, not drafted
+      — they have no owning piece). _Verify: build green with the four
+      galleries schema-valid (id resolution is proven by T305's
+      registry); T307's browser pass then reviews the ladder end to
+      end._
 - [ ] **T305** — The registry, `src/lib/images.ts` (thin Astro wrapper
       over T302/T303): `import.meta.glob` discovery of
       `{pieces,gallery-images}/**/*.{jpg,jpeg,png,webp,avif,tiff}`,
@@ -126,8 +144,10 @@ headers to confirm nothing was duplicated or dropped. -->
       spec if ever wanted), description, category eyebrow, cover as OG
       image; **Galleries** nav entry in `consts.ts`. _Verify: build
       green; browser-measured column counts at three widths; a
-      landscape beside a portrait share a row midline; every cell
-      links to the right `/images/` URL; nav shows Galleries._
+      landscape beside a portrait share a row midline; the four T304A
+      ladder galleries screenshotted in order, uniform to disparate,
+      for the photographer's judgement of the mixed-ratio grid; every
+      cell links to the right `/images/` URL; nav shows Galleries._
 - [ ] **T308** — Category browsing: `/categories/[category].astro`
       (that category's galleries as cards, then its pieces via
       `PieceList`); category eyebrows on piece, gallery, and image

@@ -192,11 +192,21 @@ after the change.
 ## Fixtures
 
 Two `gallery-images/` placeholders with synthetic EXIF — one **with
-GPS** (the leak test's subject); three fixture galleries over the demo
-pieces' images (landscape, street, "best of"); two sidecars (title +
-caption, and overrides); all added to spec 005's unpublish list. One
-fixture piece set `draft: true` in a test build to prove its images
-vanish.
+GPS** (the leak test's subject); two fixture galleries over the demo
+pieces' images (landscape, "best of" — the piece-owned back-reference
+cases); two sidecars (title + caption, and overrides); all added to
+spec 005's unpublish list. One fixture piece set `draft: true` in a
+test build to prove its images vanish.
+
+**Graded example galleries** (photographer's addition at tasks
+review): four more galleries over a generated `gallery-images/` set,
+one per category, stepping from very uniform to very disparate — all
+3:2; all vertical at near-ratios (2:3, 4:5, 5:8); horizontals and
+verticals mixed; every ratio at once including the 3:1 pano and 16:9.
+They exist so the mixed-ratio grid is judged across the whole range
+at the sampler review, not only on a tidy case. Gallery-folder
+fixtures have no owning piece, so unpublishing them at spec 005 means
+deleting the files, not setting a draft flag.
 
 ## Testing strategy
 
