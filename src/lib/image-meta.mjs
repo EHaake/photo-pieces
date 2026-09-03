@@ -26,6 +26,29 @@ const SLUG = /^[a-z0-9-]+$/;
 // camera-style `DSC_0001` is fine, spaces and punctuation are not.
 const BASENAME = /^[A-Za-z0-9._-]+$/;
 
+/**
+ * Private rasters (spec 006): a raster whose basename starts with `_`
+ * is not an image of the site — it is the camera's frame of the image
+ * with the same basename (`_land-b.jpg` beside `land-b.jpg`), the
+ * underscore rule the sidecar (`_land-b.md`) already uses. No id, no
+ * page, never in a gallery, never referenced from a piece; the
+ * registry attaches it to its target for the raw-to-finished compare.
+ */
+const PRIVATE = /^_/;
+
+export function isPrivateRaster(basename) {
+  return PRIVATE.test(String(basename));
+}
+
+/** `_land-b` → `land-b`: the basename of the image a private raster belongs to. */
+export function privateTargetOf(basename) {
+  return String(basename).replace(PRIVATE, '');
+}
+
+function privateMessage(file, basename) {
+  return `"${file}" is private — the camera's frame of "${privateTargetOf(basename)}", not an image of the site: it has no page and can't be placed in a piece or a gallery`;
+}
+
 export class ImageIdError extends Error {
   constructor(message) {
     super(message);
@@ -58,6 +81,9 @@ export function parseImagePath(filePath) {
     throw new ImageIdError(
       `image file name "${file}" can't be a URL segment — use letters, digits, dots, hyphens, and underscores only (e.g. "${slugHint(basename)}.${ext}")`,
     );
+  }
+  if (isPrivateRaster(basename)) {
+    throw new ImageIdError(privateMessage(file, basename));
   }
   const folder = parent === GALLERY_ROOT ? GALLERY_FOLDER : parent;
   if (!SLUG.test(folder)) {
@@ -114,7 +140,27 @@ export function classifyContentImage(globKey) {
   if (rest.length > expectedDepth) {
     return { path: key, root, pieceSlug, nested: true };
   }
-  return { path: key, root, pieceSlug, nested: false, ...parseImagePath(key) };
+  // A private raster is classified before an id would be minted: the
+  // registry attaches it to its target instead of paging it.
+  const file = rest.at(-1);
+  const dot = file.lastIndexOf('.');
+  const basename = dot > 0 ? file.slice(0, dot) : file;
+  const ext = dot > 0 ? file.slice(dot + 1).toLowerCase() : '';
+  if (IMAGE_EXTENSIONS.includes(ext) && isPrivateRaster(basename)) {
+    return {
+      path: key,
+      root,
+      pieceSlug,
+      nested: false,
+      private: true,
+      folder: root === 'pieces' ? pieceSlug : GALLERY_FOLDER,
+      basename,
+      target: privateTargetOf(basename),
+      ext,
+      file,
+    };
+  }
+  return { path: key, root, pieceSlug, nested: false, private: false, ...parseImagePath(key) };
 }
 
 /**
@@ -147,22 +193,45 @@ export function formatCollision({ id, files }) {
  * back to the humanized filename.
  */
 export function firstAltFor(body, basename) {
+  for (const ref of imageReferences(body)) {
+    if (refersTo(ref.src, basename) && ref.alt) return ref.alt;
+  }
+  return undefined;
+}
+
+/**
+ * Whether a piece body (or any markdown text) references the image
+ * with this basename, in any form the vocabulary allows — the one
+ * definition of "this text names this file" (spec 006), shared by the
+ * title fallback, the piece's frame order, and the passage lookup so
+ * they can't disagree about what counts as a reference.
+ */
+export function referencesImage(text, basename) {
+  for (const ref of imageReferences(text)) {
+    if (refersTo(ref.src, basename)) return true;
+  }
+  return false;
+}
+
+// Every image reference in document order, as `{ src, alt, index }`:
+// shorthand `![alt](./x.jpg)`, a directive's `src="./x.jpg" alt="…"`,
+// and the pair/triptych `left|center|right` slots with their `…Alt`.
+function* imageReferences(text) {
   const refs = /!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?[^)]*\)|\{([^}]*)\}/g;
-  for (const match of String(body).matchAll(refs)) {
+  for (const match of String(text).matchAll(refs)) {
     const [, shorthandAlt, shorthandSrc, attrText] = match;
     if (attrText !== undefined) {
       const attrs = parseAttributeText(attrText);
       for (const key of ['src', 'left', 'center', 'right']) {
-        if (refersTo(attrs[key], basename)) {
+        if (attrs[key]) {
           const alt = key === 'src' ? attrs.alt : attrs[`${key}Alt`];
-          if (alt) return alt;
+          yield { src: attrs[key], alt, index: match.index };
         }
       }
-    } else if (refersTo(shorthandSrc, basename) && shorthandAlt) {
-      return shorthandAlt;
+    } else {
+      yield { src: shorthandSrc, alt: shorthandAlt, index: match.index };
     }
   }
-  return undefined;
 }
 
 /** `land-a` → `Land a`, `IMG_1234` → `IMG 1234`: the last title fallback. */
@@ -288,6 +357,8 @@ export function validateGalleries(galleries, known) {
       const status = known.get(imageId);
       let reason;
       if (occurrence > 0) reason = `"${imageId}" is listed more than once`;
+      else if (isPrivateRaster(imageId.split('/').at(-1)))
+        reason = `"${imageId}" is a camera's frame, not an image of the site — list "${privateTargetImageId(imageId)}" instead`;
       else if (status === undefined)
         reason = `"${imageId}" is not an image on the site${nearestHint(imageId, known)}`;
       else if (status === 'draft')
@@ -371,6 +442,13 @@ function findIdLine(source, id, nth) {
   if (matches[nth] !== undefined) return matches[nth];
   const mentions = lines.flatMap((line, i) => (line.includes(id) ? [i + 1] : []));
   return mentions[nth] ?? mentions[0];
+}
+
+// `a-piece/_land-b` → `a-piece/land-b`: the image a private id points at.
+function privateTargetImageId(imageId) {
+  const parts = imageId.split('/');
+  parts[parts.length - 1] = privateTargetOf(parts.at(-1));
+  return parts.join('/');
 }
 
 function nearestHint(imageId, known) {

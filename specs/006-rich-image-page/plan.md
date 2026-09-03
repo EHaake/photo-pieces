@@ -1,8 +1,8 @@
 # Plan: The Rich Image Detail Page
 
-**Status**: Draft — pending the photographer's review (skeptical
-reviewer: sound with changes, all incorporated — see "Review
-amendments" at the end)
+**Status**: Approved (photographer, 2026-09-02) — implementation in
+progress (skeptical reviewer at the plan gate: sound with changes, all
+incorporated — see "Review amendments" at the end)
 **Implements**: spec.md in this directory
 
 ## Shape of the change

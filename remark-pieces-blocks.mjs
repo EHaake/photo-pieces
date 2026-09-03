@@ -3,7 +3,14 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { imageMetadata } from 'astro/assets/utils';
 import { visit } from 'unist-util-visit';
-import { IMAGE_EXTENSIONS, ImageIdError, imageIdFor, imageUrlFor } from './src/lib/image-meta.mjs';
+import {
+  IMAGE_EXTENSIONS,
+  ImageIdError,
+  imageIdFor,
+  imageUrlFor,
+  isPrivateRaster,
+  privateTargetOf,
+} from './src/lib/image-meta.mjs';
 
 // Turns the closed set of piece image-treatment directives (parsed by
 // `remark-directive`) into figure-wrapped images. The vocabulary is closed
@@ -428,6 +435,7 @@ export function remarkPiecesBlocks() {
       }
       for (const image of images) {
         rejectNestedSrc(image.src, failHere);
+        rejectPrivateSrc(image.src, failHere);
         checkSrcExists(file, node, image.src);
       }
       // Spec 004: every image links to its page — the URL derives from
@@ -522,6 +530,7 @@ export function remarkPiecesBlocks() {
       if (!parent || parent.type === 'link') return;
       const failHere = (message) => fail(file, node, message);
       rejectNestedSrc(node.url, failHere);
+      rejectPrivateSrc(node.url, failHere);
       const url = node.alt === '' ? null : imagePageUrl(file, node.url, failHere);
       if (!url) return;
       parent.children.splice(index, 1, wrapInLink(node, url));
@@ -548,6 +557,24 @@ function rejectNestedSrc(src, fail) {
   if (rel.includes('/')) {
     fail(
       `image src "${src}" points outside the piece's own folder — images live directly in the piece folder (each one gets a page there)`,
+    );
+  }
+}
+
+// Spec 006: a `_`-prefixed raster is private — the camera's frame of the
+// image with the same basename, shown only on that image's page. A piece
+// must not place it (it has no page to link to, and it isn't a
+// photograph the site presents), whatever the alt — so this runs before
+// the alt="" exemption, not inside imagePageUrl.
+function rejectPrivateSrc(src, fail) {
+  if (typeof src !== 'string' || URL.canParse(src) || src.startsWith('/')) return;
+  const file = src.startsWith('./') ? src.slice(2) : src;
+  const dot = file.lastIndexOf('.');
+  const basename = dot > 0 ? file.slice(0, dot) : file;
+  const ext = dot > 0 ? file.slice(dot + 1).toLowerCase() : '';
+  if (IMAGE_EXTENSIONS.includes(ext) && isPrivateRaster(basename)) {
+    fail(
+      `"${src}" is private — the camera's frame of "${privateTargetOf(basename)}", not an image of the site: place "${privateTargetOf(basename)}.${ext}" here and the frame shows on its page`,
     );
   }
 }

@@ -1,6 +1,6 @@
 # Tasks: The Rich Image Detail Page
 
-**Status**: Draft — pending review
+**Status**: Approved (photographer, 2026-09-02) — in progress
 **Implements**: plan.md in this directory
 
 Ordered, small, independently verifiable. Per the constitution: every
@@ -24,7 +24,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Pure rules, schema, fixtures (review after each task)
 
-- [ ] **T401** — One reference rule, and private rasters: in
+- [x] **T401** — One reference rule, and private rasters: in
       `image-meta.mjs`, `referencesImage(text, basename)` (shorthand
       and directive-attribute forms, with or without `./`, never a
       near-miss basename) with `firstAltFor` rewritten over it;

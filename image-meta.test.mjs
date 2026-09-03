@@ -7,7 +7,10 @@ import {
   humanizeBasename,
   imageIdFor,
   imageUrlFor,
+  isPrivateRaster,
   parseImagePath,
+  privateTargetOf,
+  referencesImage,
 } from './src/lib/image-meta.mjs';
 
 // Spec 004's pure core. The registry (`src/lib/images.ts`) and the
@@ -200,5 +203,84 @@ describe('humanized filename (T302)', () => {
     expect(humanizeBasename('land-a')).toBe('Land a');
     expect(humanizeBasename('IMG_1234')).toBe('IMG 1234');
     expect(humanizeBasename('harbour--dawn')).toBe('Harbour dawn');
+  });
+});
+
+// Spec 006 — one reference rule, and private rasters.
+
+describe('one reference rule (T401)', () => {
+  it('finds a shorthand reference, with or without ./', () => {
+    expect(referencesImage('Text\n\n![The bank](./land-b.jpg)', 'land-b')).toBe(true);
+    expect(referencesImage('![](land-b.jpg)', 'land-b')).toBe(true);
+  });
+
+  it('finds a directive src and a pair/triptych slot', () => {
+    expect(referencesImage('::wide{src="./land-b.jpg" alt="x"}', 'land-b')).toBe(true);
+    expect(
+      referencesImage(':::diptych{left="./land-c.jpg" right="./port-b.jpg"}\nCap.\n:::', 'port-b'),
+    ).toBe(true);
+    expect(referencesImage('::triptych{left=a.jpg center=land-b.jpg right=c.jpg}', 'land-b')).toBe(
+      true,
+    );
+  });
+
+  it('a near-miss basename, another folder, or no reference is not a reference', () => {
+    expect(referencesImage('![x](./land-bb.jpg)', 'land-b')).toBe(false);
+    expect(referencesImage('![x](./land-b.jpg)', 'land-bb')).toBe(false);
+    expect(referencesImage('![x](../other/land-b.jpg)', 'land-b')).toBe(false);
+    expect(referencesImage('Prose that mentions land-b.jpg in passing.', 'land-b')).toBe(false);
+    expect(referencesImage('', 'land-b')).toBe(false);
+  });
+
+  it('the title fallback uses the same rule (alt="" is a reference without a title)', () => {
+    const body = '::single{src="./land-b.jpg" alt=""}';
+    expect(referencesImage(body, 'land-b')).toBe(true);
+    expect(firstAltFor(body, 'land-b')).toBeUndefined();
+  });
+});
+
+describe('private rasters (T401)', () => {
+  it('a leading underscore marks a raster private, naming its target', () => {
+    expect(isPrivateRaster('_land-b')).toBe(true);
+    expect(privateTargetOf('_land-b')).toBe('land-b');
+    expect(isPrivateRaster('land-b')).toBe(false);
+    expect(isPrivateRaster('DSC_0001')).toBe(false);
+  });
+
+  it('is classified as private before an id would be minted, in either root and case', () => {
+    expect(classifyContentImage('/src/content/pieces/a-piece/_land-b.jpg')).toEqual({
+      path: '/src/content/pieces/a-piece/_land-b.jpg',
+      root: 'pieces',
+      pieceSlug: 'a-piece',
+      nested: false,
+      private: true,
+      folder: 'a-piece',
+      basename: '_land-b',
+      target: 'land-b',
+      ext: 'jpg',
+      file: '_land-b.jpg',
+    });
+    expect(classifyContentImage('/src/content/pieces/a-piece/_land-b.JPG')).toMatchObject({
+      private: true,
+      target: 'land-b',
+      ext: 'jpg',
+    });
+    expect(classifyContentImage('/src/content/gallery-images/_x.webp')).toMatchObject({
+      private: true,
+      folder: 'gallery',
+      target: 'x',
+      pieceSlug: null,
+    });
+    expect(classifyContentImage('/src/content/pieces/a-piece/land-a.jpg')).toMatchObject({
+      private: false,
+      id: 'a-piece/land-a',
+    });
+  });
+
+  it('never gets an id — the transform reports a piece that places one', () => {
+    expect(() => imageIdFor('/src/content/pieces/a-piece/_land-b.jpg')).toThrow(
+      /"_land-b\.jpg" is private — the camera's frame of "land-b", not an image of the site/,
+    );
+    expect(() => parseImagePath('/src/content/gallery-images/_dock-b.png')).toThrow(/is private/);
   });
 });
