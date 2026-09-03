@@ -340,6 +340,26 @@ src/pages/image-review/          deleted at close-out
   chrome ignored.
 - **No new dependency.**
 
+## Corrections made during implementation
+
+- **The pruner's rule (T403):** the camera's-frame fixture, imported
+  by the registry's glob but not yet rendered by any page, shipped as
+  an untouched original with its GPS block — the post-build scan
+  failed the build. `scripts/prune-unreferenced-originals.mjs` had
+  pruned only originals with a transform sibling (the sign Astro had
+  processed the image); an image imported and never rendered has none.
+  It now prunes every original no text file in `dist/` names: nothing
+  can reach a file no page mentions, so the sibling condition was a
+  proxy, not the test. The plan's claim that the GPS fixture was only
+  a tripwire for the passthrough shape was too narrow — it also guards
+  this one.
+- **Unknown sidecar fields are stripped, not rejected.** T403's verify
+  expected the schema to refuse a misspelled field; Astro's collection
+  schemas aren't strict, and none here are. Left as is: Obsidian writes
+  properties of its own (`tags`, `aliases`, `cssclasses`) into
+  frontmatter, and a strict schema would fail the build on them. A
+  wrong-typed known field is rejected with the field named.
+
 ## Review amendments (skeptical reviewer, plan gate)
 
 Blocking findings, each resolved above: the set-selection race

@@ -10,10 +10,15 @@
 // untouched originals (metadata included) ship alongside the
 // transforms, unlinked from any page. Spec 004's contract is that an
 // original never reaches the output, so this does the deletion Astro
-// meant to: an original is pruned when it has at least one transform
-// sibling and no file in dist/ mentions its name. Runs from `postbuild`
-// before the GPS scan (scripts/check-no-gps.mjs), which stays the
-// barrier if this ever misses.
+// meant to: an original is pruned when no file in dist/ mentions its
+// name. (Until spec 006 the rule also required a transform sibling, as
+// the sign Astro had processed the image — but an image that is
+// imported and never rendered has no transforms and still ships as an
+// original, which the GPS scan caught at T403 with the camera's-frame
+// fixture. Unreferenced is the whole test: nothing can reach a file no
+// page names.) Runs from `postbuild` before the GPS scan
+// (scripts/check-no-gps.mjs), which stays the barrier if this ever
+// misses.
 //
 //   node scripts/prune-unreferenced-originals.mjs [dist]
 import { readdir, readFile, unlink } from 'node:fs/promises';
@@ -51,16 +56,10 @@ async function* files(dir) {
 }
 
 const names = await readdir(assets).catch(() => []);
-const stems = new Set();
-for (const name of names) {
-  const m = name.match(TRANSFORM);
-  if (m && RASTER.has(extname(name).toLowerCase())) stems.add(m[1]);
-}
 const candidates = names.filter((name) => {
   if (!RASTER.has(extname(name).toLowerCase())) return false;
   if (TRANSFORM.test(name)) return false;
-  const m = name.match(ORIGINAL);
-  return m !== null && stems.has(m[1]);
+  return ORIGINAL.test(name);
 });
 
 if (candidates.length === 0) {

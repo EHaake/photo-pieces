@@ -48,8 +48,8 @@ const galleries = defineCollection({
 });
 
 // Image sidecars (spec 004): an optional `_<basename>.md` beside an
-// image, frontmatter-only for now (the body is reserved for the rich
-// image page). The leading underscore keeps sidecars out of the
+// image — the wall label's overrides and, since spec 006, the rich
+// page's fields, with the body as the image's own story. The leading underscore keeps sidecars out of the
 // `pieces` loader by construction. The id is the path verbatim
 // (`pieces/<slug>/_land-b`, `gallery-images/_dock-b`) so the registry
 // maps it to the image id deterministically, without Astro's slugger
@@ -71,6 +71,18 @@ const imageMeta = defineCollection({
     aperture: z.string().optional(),
     shutter: z.string().optional(),
     iso: z.string().optional(),
+    // Spec 006 — the rich page's authored fields, all optional; a section
+    // renders only when at least one of its fields exists. The body of
+    // the sidecar is the image's story.
+    place: z.string().optional(),
+    time: z.string().optional(),
+    format: z.string().optional(),
+    filters: z.string().optional(),
+    support: z.string().optional(),
+    processing: z.string().optional(),
+    edition: z.string().optional(),
+    sizes: z.string().optional(),
+    paper: z.string().optional(),
   }),
 });
 

@@ -57,7 +57,7 @@ headers to confirm nothing was duplicated or dropped. -->
       reference; sections for the empty sidecar (none), story only,
       fields only, everything — each shown to fail with its rule
       broken; build green._
-- [ ] **T403** — Schema and fixtures: the nine optional sidecar fields
+- [x] **T403** — Schema and fixtures: the nine optional sidecar fields
       in `content.config.ts`; `gen-placeholders.mjs` gains the camera's
       frame for the demo hero (`where-the-fog-lets-go/_land-b.jpg`: a
       flat, desaturated **4:3** variant of the 3:2 `land-b`, with GPS);
@@ -65,10 +65,17 @@ headers to confirm nothing was duplicated or dropped. -->
       story; `gallery-images/_dock-b.md` gains a story containing a
       diptych of `./dock-a.jpg` and `./dock-b.jpg`. All join spec 005's
       unpublish list. _Verify: `astro check` and build green with the
-      fixtures in place; a sidecar with an unknown field is rejected by
-      the schema (temporary, reverted); the frame's dimensions are 4:3
-      and its GPS block is present in the source file (one-off `exifr`
-      read) so the passthrough tripwire is real._
+      fixtures in place; a sidecar field of the wrong type is rejected
+      by the schema (temporary, reverted) — an unknown field is
+      stripped, not rejected, as in every collection here (found at
+      T403: Astro's schemas aren't strict, and Obsidian adds properties
+      of its own, so strictness would be the wrong trade); the frame's
+      dimensions are 4:3 and its GPS block is present in the source
+      file (one-off `exifr` read) so the passthrough tripwire is real.
+      Found at T403: the tripwire fired one task early — an imported,
+      not-yet-rendered image ships as an untouched original, and the
+      pruner only pruned originals with transform siblings. The pruner
+      now prunes every unreferenced original (plan.md, Corrections)._
 
 ## Phase 1 — Registry (review after each task)
 
