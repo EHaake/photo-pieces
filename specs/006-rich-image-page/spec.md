@@ -133,10 +133,11 @@ section absent.
 
 ### Looking
 
-From the frame the reader enters quiet view: header, label, and
-everything below disappear and the photograph takes the viewport on the
-same ground. Escape, or a click on the ground, returns to the page at
-the top. Nothing about the URL or history changes.
+A click on the photograph (or the small toggle beneath it) enters
+quiet view: header, label, and everything below disappear, the ground
+dims, and the photograph fills the viewport with a small margin.
+Escape, or any click, returns to the page at the top. Nothing about
+the URL or history changes.
 
 ### Stepping through a set
 
@@ -191,9 +192,14 @@ subject.
   with the frame.
 - **Related frames pack to equal short sides** as galleries do, and
   wrap on narrow screens rather than shrinking a portrait to a sliver.
-- **Quiet view is the same ground**, light, matted — the site controls
-  how the work is seen (light-only decision, spec 002). No dimming, no
-  overlay.
+- **Quiet view dims the ground** (amended at the visual gate, T409a —
+  the photographer: "we get the dark mode but only in specific,
+  controlled situations"): the photograph, still matted, as large as
+  the viewport allows with a small margin, on a darkened wall. Entered
+  by clicking the photograph or the toggle; any click or Escape leaves.
+  Not an overlay, not a site-wide mode — the light-only decision of
+  spec 002 stands everywhere else; the site controls how the work is
+  seen, here too.
 - **Sample values never ship**: every field renders only what the
   photographer wrote.
 
@@ -245,8 +251,9 @@ subject.
 - [ ] The piece passage is quoted with its caption and links to the
       piece; related frames pack to equal short sides and wrap below
       the 720px breakpoint
-- [ ] Quiet view hides all chrome, keeps the ground, fits the frame to
-      the viewport, and exits on Escape or a ground click without
+- [ ] Quiet view hides all chrome, dims the ground, fills the viewport
+      with the frame (a small margin, the mat kept), enters on a click
+      on the photograph, and exits on Escape or any click without
       changing the URL; it is unavailable, not broken, without script
 - [ ] Image pages are in the search index; a place or a story line is
       findable

@@ -169,6 +169,18 @@ headers to confirm nothing was duplicated or dropped. -->
       _Verify: the photographer's sign-off recorded here; any
       amendment becomes a sub-lettered task (T409a…) rather than a
       silent change._
+- [x] **T409a** — Quiet view, per the photographer at the gate: a
+      click on the photograph enters it (the toggle stays as a second
+      way in); the frame fills the viewport with a small margin (the
+      reading-width cap lifted, the stage padding shrunk, the mat
+      kept); the ground dims to a new `--color-quiet` token; any click
+      or Escape leaves; the stage image's `sizes` swaps to `100vw` in
+      quiet view so a wide frame stays sharp. _Verify: browser at
+      1280×900 — a click on the frame sets `data-quiet`, the frame's
+      width or height reaches within the margin of the viewport, the
+      computed ground colour is the token, a click on the frame leaves,
+      the toggle still enters, Escape leaves, `sizes` swaps both ways;
+      at 375px the frame fills the width; build green._
 
 ## Phase 3 — Docs and close-out
 

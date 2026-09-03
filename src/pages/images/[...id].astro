@@ -704,9 +704,27 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
     box-shadow: var(--focus-ring);
   }
 
-  /* Quiet view: chrome gone, the frame owns the viewport. Still a page
-     on the same ground — Esc or a click on the ground returns. The
-     toggle is hidden until the script can honour it. */
+  /* Quiet view: chrome gone, the ground dimmed to --color-quiet, the
+     frame as large as the viewport allows with a small margin — the
+     photograph on a dark wall. Entered by clicking the photograph (or
+     the toggle); left by Esc or any click. Still a page: the URL and
+     history don't change. The toggle and the zoom cursor appear only
+     once the script can honour them. */
+  .image-stage[data-quiet-ready] .image-frame {
+    cursor: zoom-in;
+  }
+  :global(html),
+  :global(body),
+  .image-stage {
+    transition: background-color 220ms ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(html),
+    :global(body),
+    .image-stage {
+      transition: none;
+    }
+  }
   .quiet-toggle {
     position: absolute;
     right: var(--page-pad);
@@ -732,9 +750,21 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
   :global(html[data-quiet]) .quiet-toggle {
     display: none;
   }
+  :global(html[data-quiet]),
+  :global(html[data-quiet] body) {
+    background: var(--color-quiet);
+  }
   :global(html[data-quiet]) .image-stage {
+    --stage-pad: clamp(0.5rem, 1.5vh, 1rem);
     min-height: 100vh;
     min-height: 100svh;
+    padding-inline: var(--stage-pad);
+    background: var(--color-quiet);
+    cursor: zoom-out;
+  }
+  :global(html[data-quiet]) .image-frame,
+  :global(html[data-quiet]) .image-stage[data-quiet-ready] .image-frame {
+    max-width: 100%;
     cursor: zoom-out;
   }
   :global(html[data-quiet]) .image-frame img {
@@ -769,9 +799,15 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
     },
   };
 
+  // The stage image's `sizes` describes the page layout; in quiet view
+  // the frame can be wider than the reading width, so tell the browser
+  // the truth and let it pick a larger candidate from the srcset.
+  const PAGE_SIZES = '(min-width: 1240px) 1160px, 94vw';
   const setQuiet = (quiet: boolean) => {
     root.toggleAttribute('data-quiet', quiet);
     store.set(QUIET_KEY, quiet ? '1' : null);
+    const img = document.querySelector<HTMLImageElement>('.image-frame img');
+    if (img) img.sizes = quiet ? '100vw' : PAGE_SIZES;
     if (quiet) window.scrollTo({ top: 0 });
   };
 
@@ -791,18 +827,24 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
     const match = wanted ? navs.find((nav) => nav.dataset.set === wanted) : undefined;
     if (match) for (const nav of navs) nav.hidden = nav !== match;
 
-    // Quiet view.
+    // Quiet view: the photograph itself is the way in (photographer,
+    // visual gate T409a), the toggle a second one; any click leaves.
     const toggle = document.querySelector<HTMLButtonElement>('[data-quiet-toggle]');
     if (toggle) {
       toggle.hidden = false;
       toggle.addEventListener('click', () => setQuiet(true));
     }
-    document.querySelector('.image-stage')?.addEventListener('click', (event) => {
-      if (!root.hasAttribute('data-quiet')) return;
-      if ((event.target as HTMLElement).closest('.image-frame, [data-quiet-toggle]')) return;
-      setQuiet(false);
-    });
-    if (store.get(QUIET_KEY)) root.setAttribute('data-quiet', '');
+    const stage = document.querySelector<HTMLElement>('.image-stage');
+    if (stage) {
+      stage.dataset.quietReady = '';
+      stage.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement;
+        if (target.closest('[data-quiet-toggle]')) return;
+        if (root.hasAttribute('data-quiet')) setQuiet(false);
+        else if (target.closest('.image-frame')) setQuiet(true);
+      });
+    }
+    if (store.get(QUIET_KEY)) setQuiet(true);
 
     // The compare: overlay the frames and reveal the range input.
     for (const figure of document.querySelectorAll<HTMLElement>('.compare')) {

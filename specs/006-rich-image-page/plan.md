@@ -202,10 +202,17 @@ piece → Related frames → The print.
   rendered, the default visible, the others `hidden`; each carries
   `data-set` and its links carry the same `data-set`. Titles truncated;
   arrows as text; a two-column stack below 720px.
-- **Quiet view**: a `<button hidden data-quiet-toggle>` under the frame
-  that the script un-hides; `html[data-quiet]` hides header, footer,
-  navs, and body sections and sets the stage to `100svh`; Escape or a
-  ground click exits. The attribute persists across `ClientRouter`
+- **Quiet view**: entered by a click on the photograph (the stage gets
+  a zoom-in cursor once the script is live) or the `<button hidden
+data-quiet-toggle>` the script un-hides; `html[data-quiet]` hides
+  header, footer, navs, and body sections, dims `html`, `body`, and the
+  stage to the `--color-quiet` token, lifts the frame's reading-width
+  cap and shrinks the stage padding so the frame fills the viewport
+  with a small margin, and swaps the stage image's `sizes` to `100vw`
+  so the browser picks a larger srcset candidate; Escape or any click
+  exits (T409a — the photographer's amendment at the visual gate; the
+  first cut kept the light ground and the reading width, and "didn't
+  really do anything"). The attribute persists across `ClientRouter`
   swaps by design **between image pages** — stepping through a set
   with the arrow keys stays quiet — and the script clears it on any
   page that is not an image page.
@@ -359,6 +366,13 @@ src/pages/image-review/          deleted at close-out
   properties of its own (`tags`, `aliases`, `cssclasses`) into
   frontmatter, and a strict schema would fail the build on them. A
   wrong-typed known field is rejected with the field named.
+
+- **Quiet view, at the visual gate (T409a):** the photographer's
+  three asks — enter by clicking the photograph, fill the screen, dim
+  the ground ("dark mode, but only in specific controlled
+  situations"). The ground colour is a token (`--color-quiet` in
+  `global.css`) beside the matte tokens; spec 002's light-only decision
+  stands everywhere else and `DECISIONS.md` records the carve-out.
 
 ## Review amendments (skeptical reviewer, plan gate)
 

@@ -31,6 +31,11 @@
      never add shadow, bevel, or texture. */
   --matte: clamp(0.5rem, 1.4vw, 1.05rem);
   --color-matte: oklch(1 0 0);
+  /* Quiet view's ground (spec 006, the photographer's call at the
+     visual gate): the one place the site goes dark — a dimmed wall
+     behind a single matted frame, entered and left on purpose, never a
+     site-wide mode (the light-only decision of spec 002 stands). */
+  --color-quiet: oklch(0.2 0.008 95);
   /* Sampler-review knobs for the tall and strip treatments. */
   --tall-max: 92vh;
   --strip-h: clamp(240px, 45vh, 420px);
