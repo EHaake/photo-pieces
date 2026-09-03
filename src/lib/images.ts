@@ -39,6 +39,9 @@ import {
  */
 
 export interface ImageLabel {
+  /** Spec 006, sidecar-only: where and when, in the photographer's words. */
+  place?: string;
+  time?: string;
   camera?: string;
   lens?: string;
   focalLength?: string;
@@ -46,6 +49,21 @@ export interface ImageLabel {
   shutter?: string;
   iso?: string;
   date?: Date;
+}
+
+/** "How it was made" (spec 006) — sidecar fields, all optional. */
+export interface ImageRecord {
+  format?: string;
+  filters?: string;
+  support?: string;
+  processing?: string;
+}
+
+/** "The print" (spec 006) — sidecar fields, all optional. */
+export interface ImagePrint {
+  edition?: string;
+  sizes?: string;
+  paper?: string;
 }
 
 export interface SiteImage {
@@ -66,6 +84,14 @@ export interface SiteImage {
   title: string;
   caption?: string;
   label: ImageLabel;
+  /** The sidecar body has content — the image's story (spec 006). */
+  hasStory: boolean;
+  record: ImageRecord;
+  print: ImagePrint;
+  /** The camera's frame (`_<basename>.<ext>` beside the image), for the
+   *  raw-to-finished compare; null when there is none. Never an image
+   *  of the site — no id, no page. */
+  before: ImageMetadata | null;
 }
 
 export interface ImageRegistry {
@@ -93,11 +119,37 @@ export function getImageRegistry(): Promise<ImageRegistry> {
 
 type Status = 'published' | 'draft' | 'unowned';
 
+// classifyContentImage's three shapes (image-meta.mjs is plain JS, and
+// its inferred union is too loose to narrow on): nested, private, image.
+type Classified = { path: string; root: string; pieceSlug: string | null } & (
+  | { nested: true }
+  | {
+      nested: false;
+      private: true;
+      folder: string;
+      basename: string;
+      target: string;
+      ext: string;
+      file: string;
+    }
+  | {
+      nested: false;
+      private: false;
+      id: string;
+      folder: string;
+      basename: string;
+      ext: string;
+      file: string;
+    }
+);
+
 async function buildRegistry(): Promise<ImageRegistry> {
   const pieces = await getCollection('pieces');
   const pieceById = new Map(pieces.map((piece) => [piece.id, piece]));
 
-  // Discovery: classify every file, drop nested ones with a warning.
+  // Discovery: classify every file, drop nested ones with a warning,
+  // set private rasters (camera's frames, spec 006) aside for their
+  // photographs — they never get an id.
   const files: {
     key: string;
     id: string;
@@ -105,12 +157,17 @@ async function buildRegistry(): Promise<ImageRegistry> {
     basename: string;
     pieceSlug: string | null;
   }[] = [];
+  const privates: { key: string; folder: string; target: string }[] = [];
   for (const key of Object.keys(discovered).sort()) {
-    const info = classifyContentImage(key);
-    if (info.nested || !('id' in info)) {
+    const info = classifyContentImage(key) as Classified;
+    if (info.nested) {
       console.warn(
         `[images] ignoring ${key}: images live directly in a piece folder or the gallery root, not in sub-folders`,
       );
+      continue;
+    }
+    if (info.private) {
+      privates.push({ key, folder: info.folder, target: info.target });
       continue;
     }
     files.push({
@@ -148,6 +205,39 @@ async function buildRegistry(): Promise<ImageRegistry> {
       }
     }
     known.set(file.id, status);
+  }
+
+  // Camera's frames: each must sit beside its photograph — by basename,
+  // whatever the two extensions — in a folder the site knows, published
+  // or not (a frame in a draft piece's folder is fine). An orphan is
+  // the author's typo, and silence would hide it; two frames for one
+  // photograph is a choice the site can't make for them.
+  const basenamesByFolder = new Map<string, Set<string>>();
+  for (const file of files) {
+    if (!basenamesByFolder.has(file.folder)) basenamesByFolder.set(file.folder, new Set());
+    basenamesByFolder.get(file.folder)!.add(file.basename);
+  }
+  const frameProblems: string[] = [];
+  const beforeByTarget = new Map<string, ImageMetadata>();
+  for (const frame of privates) {
+    const targetId = `${frame.folder}/${frame.target}`;
+    const where = frame.key.replace(/^\//, '');
+    if (!basenamesByFolder.get(frame.folder)?.has(frame.target)) {
+      frameProblems.push(
+        `${where} has no photograph: a "_" raster is the camera's frame of the image with the same name, so "${frame.target}.<ext>" should sit beside it`,
+      );
+    } else if (beforeByTarget.has(targetId)) {
+      frameProblems.push(
+        `${where} is a second camera's frame for "${targetId}" — keep one (any accepted extension)`,
+      );
+    } else {
+      beforeByTarget.set(targetId, discovered[frame.key].default);
+    }
+  }
+  if (frameProblems.length) {
+    throw new Error(
+      `[images] camera's frame${frameProblems.length > 1 ? 's' : ''}:\n${frameProblems.join('\n')}`,
+    );
   }
 
   // Sidecars: each must describe an image that exists (published or
@@ -201,6 +291,8 @@ async function buildRegistry(): Promise<ImageRegistry> {
           await readExposure(fileURLToPath(new URL(`.${file.key}`, root))),
         );
         const label: ImageLabel = mergeOverrides(exposure, sidecar?.data);
+        if (sidecar?.data.place) label.place = sidecar.data.place;
+        if (sidecar?.data.time) label.time = sidecar.data.time;
         const title =
           sidecar?.data.title ??
           (piece ? firstAltFor(piece.body ?? '', file.basename) : undefined) ??
@@ -217,6 +309,10 @@ async function buildRegistry(): Promise<ImageRegistry> {
           title,
           caption: sidecar?.data.caption,
           label,
+          hasStory: (sidecar?.body ?? '').trim() !== '',
+          record: pick(sidecar?.data, ['format', 'filters', 'support', 'processing']),
+          print: pick(sidecar?.data, ['edition', 'sizes', 'paper']),
+          before: beforeByTarget.get(file.id) ?? null,
         };
       }),
   );
@@ -238,6 +334,20 @@ async function buildRegistry(): Promise<ImageRegistry> {
     latest: (limit) =>
       orderLatestWork(galleryLists, captureDates, limit).map((id: string) => byId.get(id)!),
   };
+}
+
+// The named sidecar fields that are non-empty strings, as an object —
+// an author clearing a field in Obsidian shouldn't leave a blank row.
+function pick<K extends string>(
+  data: Partial<Record<K, string>> | undefined,
+  keys: readonly K[],
+): Partial<Record<K, string>> {
+  const out: Partial<Record<K, string>> = {};
+  for (const key of keys) {
+    const value = data?.[key];
+    if (typeof value === 'string' && value.trim() !== '') out[key] = value.trim();
+  }
+  return out;
 }
 
 function byNewest(a: CollectionEntry<'galleries'>, b: CollectionEntry<'galleries'>): number {

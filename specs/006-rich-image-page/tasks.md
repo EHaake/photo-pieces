@@ -79,7 +79,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 1 — Registry (review after each task)
 
-- [ ] **T404** — Registry, part one: an explicit private branch in
+- [x] **T404** — Registry, part one: an explicit private branch in
       discovery (own map, no nested-file warning), private rasters
       attached as `before` on their target by basename across
       extensions and cases; an orphan private raster (no target among
