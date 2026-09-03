@@ -65,8 +65,8 @@ extensions need not match, so the target check compares basenames,
 not filenames. Enforced:
 
 - The registry never gives a private raster an id or a page.
-  `classifyContentImage` returns `{ private: true, target, folder,
-path }` for it before `parseImagePath` would run; the discovery loop
+  `classifyContentImage` returns a private classification (target,
+  folder, path) for it before `parseImagePath` would run; the discovery loop
   gets an explicit private branch that collects them into their own
   map (their `ImageMetadata` is needed for `<Image>`), separate from
   the nested-file warning whose message would be wrong for them.

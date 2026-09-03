@@ -29,8 +29,8 @@ headers to confirm nothing was duplicated or dropped. -->
       and directive-attribute forms, with or without `./`, never a
       near-miss basename) with `firstAltFor` rewritten over it;
       `isPrivateRaster(basename)` and `privateTargetOf(basename)`;
-      `classifyContentImage` returns `{ private: true, target, folder,
-    path }` for a `_`-prefixed raster before parsing an id;
+      `classifyContentImage` returns a private classification (target,
+      folder, path) for a `_`-prefixed raster before parsing an id;
       `parseImagePath` throws an `ImageIdError` with the private-file
       message for `_`-prefixed basenames (so the transform reports a
       piece referencing `./_land-b.jpg` with file and line);
