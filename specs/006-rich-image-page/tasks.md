@@ -90,7 +90,10 @@ headers to confirm nothing was duplicated or dropped. -->
       temporary `gallery-images/_nothing.jpg` fails the build with its
       path (reverted); a temporary `_land-a.png` beside a temporarily
       `draft: true` piece does not fail (reverted); the post-build GPS
-      scan passes; 149+ tests green._
+      scan passes; 149+ tests green. (Done — also probed: a second
+      frame `_land-b.png` beside `_land-b.jpg` fails naming the
+      photograph; the draft case used an isolated temporary piece,
+      since drafting a fixture piece trips the gallery rule first.)_
 - [x] **T405** — Registry, part two: `sets` (every gallery holding the
       image, newest first, then the piece's `pieceOrder` set; each with
       index, count, prev and next **ids**), `related` (ids of the six
@@ -197,7 +200,7 @@ headers to confirm nothing was duplicated or dropped. -->
       index scoping. _Verify: Prettier clean; the template in
       AUTHORING.md parses (copy it into a temporary sidecar, build,
       revert)._
-- [ ] **T411** — Delete `src/pages/image-review/`; update `ROADMAP.md`
+- [x] **T411** — Delete `src/pages/image-review/`; update `ROADMAP.md`
       (the rich page shipped; follow-ups it surfaced; the processing
       showcase and `sequence` entries say the compare is a page
       section and the block stays reserved); then request the
@@ -205,7 +208,9 @@ headers to confirm nothing was duplicated or dropped. -->
       findings. _Verify: no `/image-review/` routes in the build;
       ROADMAP no longer lists the rich page as future; the sweep came
       back clean or its findings were resolved; build, tests, check,
-      GPS scan, and format all green — actual output reported._
+      GPS scan, and format all green — actual output reported. (Done:
+      sweep verdict sound-with-changes, all findings resolved —
+      plan.md, "Pre-merge review amendments".)_
 
 ---
 
