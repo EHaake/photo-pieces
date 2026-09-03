@@ -334,3 +334,66 @@ the rule. The accepted cost: a row that can't fill stays short and
 centered rather than pulling a later image forward. Density (S) and
 the short-row stretch cap are knobs. The index's gallery cards keep
 the plain grid, since a card's text wants uniform columns.
+
+## Spec 006: the rich image page
+
+Decisions made at the mock-up review, the plan gate, and the visual
+gate (2026-09-02), recorded here because the code only shows the
+outcome.
+
+**Private rasters by `_` prefix, not a sidecar field.** The camera's
+frame for the compare is `_land-b.jpg` beside `land-b.jpg` — the
+sidecar's own underscore rule, extended. A sidecar field pointing at
+any file was the alternative; it would have been a second mechanism
+saying the same thing (drift), and it would still have needed the
+private rule to keep the frame off the site. Two relations share one
+prefix on purpose (`_x.md` is _about_ x, `_x.jpg` is _the raw of_ x);
+`AUTHORING.md` says so. One frame per photograph; an orphan or a
+second frame fails the build. The photographer delegated this call.
+
+**Story first.** The photographer, over the recommendation of label
+first: "if there is a story, I want that to be more important than the
+settings." A page without a story is the same page minus one section;
+the title is the story's heading.
+
+**Related frames are the outing only.** Six nearest in the piece's
+order; none for gallery-root images — the flat gallery root is a pool,
+not an outing, and would have listed every fixture it holds. The strip
+uses the gallery's own equal-short-side packing at a smaller target
+(`gallery-layout.ts`), not a second rule.
+
+**Set selection by a click, with the default as every failure mode.**
+Static pages can't know the referrer, so the HTML shows the default
+set (the newest gallery holding the image, else the piece). A
+capture-phase click handler in the layout is the one writer of the
+set (a neighbour link's own set, else the gallery or piece the click
+came from); the image page reads it. A typed URL or an outside link
+shows the default or the last clicked set — accepted.
+
+**Search takes pages with something to find.** Image pages join the
+Pagefind index only with a story, a caption, or a place; exposure
+rows, from-lines, navs, and the related strip are ignored. Thirty
+label-only fixture pages would otherwise swamp four pieces with
+junk excerpts.
+
+**Quiet view dims the ground — the one dark surface.** The first cut
+kept the light ground and the reading width, and the photographer's
+verdict was that it "didn't really do anything". Now a click on the
+photograph hides the chrome, dims `html`, `body`, and the stage to a
+`--color-quiet` token beside the matte tokens, and gives the frame the
+viewport with a small margin: "the dark mode, but only in specific
+controlled situations". Spec 002's light-only decision stands
+everywhere else; this is a state of one page, entered and left on
+purpose, not a mode.
+
+**The pruner prunes every unreferenced original.** The spec-004 rule
+required a transform sibling as the sign Astro had processed an image;
+the camera's-frame fixture, imported by the registry but not yet
+rendered, shipped as an untouched original with its GPS block and the
+scan failed the build at T403. Unreferenced is the whole test: nothing
+can reach a file no page names.
+
+**Unknown sidecar fields are stripped, not rejected.** Astro's
+collection schemas aren't strict, none here are, and Obsidian writes
+properties of its own into frontmatter; a strict schema would fail the
+build on them. A wrong-typed known field is rejected with its name.

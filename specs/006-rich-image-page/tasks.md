@@ -163,12 +163,13 @@ headers to confirm nothing was duplicated or dropped. -->
       the piece nav, from a neighbour link the same set as before,
       from a cold load the default; ArrowRight with the slider focused
       moves the slider and not the page; build green._
-- [ ] **T409** — Visual gate: the real page beside the mock-up on the
+- [x] **T409** — Visual gate: the real page beside the mock-up on the
       dev server for the photographer, at desktop and 375px; the 004
       image-page geometry checks re-run (stage height, frame fit).
       _Verify: the photographer's sign-off recorded here; any
       amendment becomes a sub-lettered task (T409a…) rather than a
-      silent change._
+      silent change. Signed off 2026-09-02 ("Looks great") after
+      T409a._
 - [x] **T409a** — Quiet view, per the photographer at the gate: a
       click on the photograph enters it (the toggle stays as a second
       way in); the frame fills the viewport with a small margin (the
@@ -184,7 +185,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 3 — Docs and close-out
 
-- [ ] **T410** — Docs: `AUTHORING.md` — a full sidecar template with
+- [x] **T410** — Docs: `AUTHORING.md` — a full sidecar template with
       every field and an example, the story as the body, the camera's
       frame convention (`_<basename>.<ext>`, one per photograph, never
       referenced from a piece, and the note that `_x.md` and `_x.jpg`

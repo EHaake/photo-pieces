@@ -77,10 +77,22 @@ field reference is in `README.md`):
 ---
 title:
 caption:
+place:
+time:
+format:
+filters:
+support:
+processing:
+edition:
+sizes:
+paper:
 ---
+
+The story, if there is one.
 ```
 
-saved as `_<basename>.md` beside an image, and
+saved as `_<basename>.md` beside an image (every field optional — see
+"Metadata: EXIF, then a sidecar" below), and
 
 ```markdown
 ---
@@ -114,6 +126,10 @@ the piece's text references it. Consequences worth internalizing:
   them fails the build until the piece is published.
 - **The folder name must be a slug** (`lowercase-with-hyphens`), as
   they all are already — the build says so, with the fix, if not.
+- **An underscore makes a file private.** `_land-b.jpg` beside
+  `land-b.jpg` is that photograph's camera's frame (spec 006): it gets
+  no page, can't be listed in a gallery, and a piece that places it
+  fails the build. See "The camera's frame" below.
 
 ## Metadata: EXIF, then a sidecar
 
@@ -128,12 +144,60 @@ never reads GPS and the build fails if any built image carries it, but
 there is no reason to commit coordinates to git either.
 
 Anything the file gets wrong or lacks goes in a sidecar, `_<basename>.md`
-beside the image — a frontmatter-only file whose `title`, `caption`
-(one paragraph, inline markdown), `date`, and label fields override
-what EXIF said, field by field, as written. The body is reserved for
-the rich image page (`ROADMAP.md`) and is ignored for now. Obsidian
-treats a sidecar as an ordinary note; the leading underscore is what
-keeps it out of the pieces collection.
+beside the image, whose `title`, `caption` (one paragraph, inline
+markdown), `date`, and label fields (`camera`, `lens`, `focalLength`,
+`aperture`, `shutter`, `iso`) override what EXIF said, field by field,
+as written. Obsidian treats a sidecar as an ordinary note; the leading
+underscore is what keeps it out of the pieces collection. A misspelled
+field is silently ignored (Obsidian adds properties of its own, so the
+schema can't be strict); a field of the wrong type fails the build
+naming it.
+
+### The rich page's fields and the story
+
+Since spec 006 the same sidecar carries everything else an image's
+page can show — every field optional, every section appearing only
+when its fields exist, so most sidecars will stay short:
+
+```yaml
+---
+title: The bank letting go
+caption: One paragraph, *inline markdown* allowed.
+place: The headlands above the cove # prose, never coordinates
+time: 06:40 — forty minutes before sunrise, late November
+format: Digital, full-frame # "How it was made", with the three below
+filters: None
+support: Tripod, two-second timer
+processing: Single frame. Lifted the shadows on the ridge…
+edition: Open edition, signed on the back # "The print", with the two below
+sizes: 12 × 18, 16 × 24, and 24 × 36 inches
+paper: Hahnemühle Photo Rag Baryta
+---
+
+The body is the photograph's story: ordinary markdown, in your own
+words, rendered under the title ahead of the wall label. The block
+vocabulary works here too (a diptych in a story is legal), though
+plain prose is the expectation.
+```
+
+The page's headings and row names ("How it was made", "Ask about a
+print"…) live in one block at the top of
+`src/pages/images/[...id].astro` — retune them there.
+
+### The camera's frame
+
+To show the raw-to-finished compare, export the camera's frame — the
+unprocessed file, at web size like everything else — and drop it
+beside the photograph under the same name with a leading underscore:
+`_land-b.jpg` beside `land-b.jpg` (any accepted extension; the two
+need not match). Nothing to declare: the site finds it. One frame per
+photograph. The frame is private — no page, never in a gallery, never
+placed in a piece; a frame with no photograph beside it fails the
+build naming the file, as a stray sidecar does. Two relations share
+one prefix, deliberately: `_land-b.md` is _about_ `land-b.jpg`, and
+`_land-b.jpg` is _the raw of_ `land-b.jpg`. Strip location metadata
+from the frame's export as from any other (the build fails on GPS in
+the output either way).
 
 ## Curating a gallery
 
