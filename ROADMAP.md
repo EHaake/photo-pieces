@@ -17,8 +17,23 @@ attached.
   from EXIF with sidecar overrides, piece and gallery links, caption),
   and a metadata model to grow from: the sidecar's frontmatter is the
   label today and its body is deliberately reserved for the image's
-  own writing. The rich version is its own spec with its own design
-  conversation; nothing has to move.
+  own writing. The rich version is spec 006, in progress: its shape was
+  chosen from a mock-up on the dev server (the photographer kept every
+  proposed section — writing, place and time, the capture record, a
+  raw-to-finished compare, context, print enquiry, quiet view — each
+  optional per image).
+- **The processing showcase** — the photographer's own reason for
+  building the site rather than using a builder: presenting
+  post-processing as a semi-interactive, semi-educative showcase of how
+  processing is core to the work and how creative and transformative it
+  can be — ideas for workflow, and how specific techniques and
+  approaches change an image, more than tool-specific step lists
+  (though those aren't ruled out). Spec 006 ships the seed: a single
+  raw-to-finished compare slider on the image page with a processing
+  note. The showcase itself needs its own spec and design exploration
+  once real processed work exists to test against: it could be part of
+  the image detail page, its own kind of piece, or spread across both.
+  Subsumes the `sequence` block's open interaction design below.
 - ~~**Galleries and image pages**~~ — done in spec 004: the image
   registry, image pages, named galleries with a category (rows packed
   to equal short sides in editorial order — the photographer's rule
@@ -51,10 +66,12 @@ attached.
   project repo becomes a real need.
 - **The "sequence" block's final interaction design** — the underlying
   data (an ordered list of image + label pairs, for image-processing/
-  editing narratives) is reserved in the content model now. The actual
-  presentation — carousel, step-through, before/after slider — needs a
-  dedicated Claude Design exploration once real processing-themed pieces
-  exist to test it against.
+  editing narratives) is reserved in the content model now. Spec 006
+  gives it a first presentation on the image page — a before/after
+  compare slider between the camera's frame and the finished
+  photograph. The fuller presentation — carousel, step-through,
+  multi-step narratives — belongs to the processing showcase entry
+  above, once real processing-themed pieces exist to test it against.
 - **Internal piece-to-piece link rewriting** — links between pieces
   authored as vault-relative markdown links (which is what Obsidian's
   `[[` autocomplete inserts, and what feeds its graph/backlinks) need a
