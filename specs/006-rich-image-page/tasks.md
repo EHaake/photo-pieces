@@ -108,7 +108,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 2 — The page (review after the phase; visual gate at its end)
 
-- [ ] **T406** — Static sections, in spec order: the story via
+- [x] **T406** — Static sections, in spec order: the story via
       `render(sidecar)` in the reading column at text colour; the
       share description from the story's first paragraph; place and
       time rows at the label's head; How it was made; In the piece
@@ -125,8 +125,12 @@ headers to confirm nothing was duplicated or dropped. -->
       against its 004 build — same stage markup, same label rows in the
       same order, same caption and piece/gallery links, no empty
       section elements; related short sides equal within a row
-      (browser measurement); build green._
-- [ ] **T407** — Static compare and neighbours: the `compare` figure
+      (browser measurement); build green. (Done: equivalence checked by
+      a script over the two builds — the 004 page from `main` built
+      temporarily — with Astro's scoping attributes normalized; the
+      only difference outside the new sections is the label's
+      `data-pagefind-ignore` markers.)_
+- [x] **T407** — Static compare and neighbours: the `compare` figure
       with before above after, real alt texts, visible labels, the
       before frame letterboxed in the photograph's box (no script yet);
       one `frame-nav` per set with the default visible and the others
@@ -142,7 +146,7 @@ headers to confirm nothing was duplicated or dropped. -->
       page, and a search for a story line finds `land-b`; the compare
       requests webp (no source-format, source-width variant in the
       output); build green._
-- [ ] **T408** — Page-level script: `data-js` on the compare with the
+- [x] **T408** — Page-level script: `data-js` on the compare with the
       overlay, clip at `--split`, the range input by pointer and
       keyboard with a visible focus ring on the figure; quiet view
       (button revealed, `html[data-quiet]`, Escape and ground click

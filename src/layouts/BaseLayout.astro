@@ -151,6 +151,39 @@ const isActive = (href: string) => {
         if (Math.abs(delta) > JITTER) lastY = y;
       };
 
+      // Spec 006: remember which set the reader is stepping through. The
+      // one writer of `image-set`: when a link to an image page is
+      // activated, store the link's own set (neighbour links carry
+      // `data-set`), else the gallery or piece this page is, else
+      // nothing. The image page reads it at load and shows that set's
+      // neighbours; every failure mode is the default set. Capture
+      // phase, so it runs before the router takes the click.
+      const IMAGES_PATH = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/images/`;
+      document.addEventListener(
+        'click',
+        (event) => {
+          const link =
+            event.target instanceof Element
+              ? event.target.closest<HTMLAnchorElement>('a[href]')
+              : null;
+          if (!link) return;
+          const url = new URL(link.href, location.href);
+          if (url.origin !== location.origin || !url.pathname.startsWith(IMAGES_PATH)) return;
+          let set = link.dataset.set ?? null;
+          if (!set) {
+            const m = location.pathname.match(/\/(galleries|pieces)\/([^/]+)\/?$/);
+            if (m) set = `${m[1] === 'galleries' ? 'gallery' : 'piece'}:${m[2]}`;
+          }
+          try {
+            if (set) sessionStorage.setItem('image-set', set);
+            else sessionStorage.removeItem('image-set');
+          } catch {
+            /* storage unavailable: the default set */
+          }
+        },
+        true,
+      );
+
       window.addEventListener('scroll', update, { passive: true });
       document.addEventListener('astro:after-swap', () => {
         lastY = window.scrollY;

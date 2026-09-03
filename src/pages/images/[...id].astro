@@ -1,18 +1,28 @@
 ---
-// The image page (spec 004): the design brief's signature element at
-// its baseline — a museum wall label in typography. The first viewport
-// belongs to the photograph: the stage fills the space below the
-// header and the matted frame sits centered in it, whole (photographer,
-// sampler review — a title above pushed most images below the fold).
-// Title, exposure info from EXIF (sidecar overrides applied by the
-// registry), the piece it came from, the galleries it sits in, and a
-// caption follow beneath, a scroll away. The rich version is its own
-// future spec; this page's URL and data model are what it grows from.
+// The image page (spec 004, grown into its rich version at spec 006):
+// the design brief's signature element — a museum wall label in
+// typography, and the page where a photograph gets to be more than a
+// thumbnail. The first viewport belongs to the photograph: the stage
+// fills the space below the header and the matted frame sits centered
+// in it, whole. Then, in the spec's reading order, each only when it
+// exists: the neighbour line for the set the reader is stepping
+// through, the title, the photograph's own story (sidecar body), the
+// wall label (place and time, then exposure from EXIF with sidecar
+// overrides), caption, piece and gallery links, how it was made, the
+// raw-to-finished compare against the camera's frame, the passage of
+// the piece it sits in, related frames, and the print. An image with
+// nothing but its file renders the 004 baseline.
+//
+// Static HTML throughout; the script below is page-level enhancement:
+// the compare slider, quiet view, and set selection by route in.
 import { Image, getImage } from 'astro:assets';
+import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { SITE } from '../../consts';
+import { CONTACT_EMAIL, SITE } from '../../consts';
 import { formatDate } from '../../i18n';
 import { categoryLabel } from '../../lib/categories';
+import { RELATED_SHORT_PX, galleryCell, relatedFlowStyle } from '../../lib/gallery-layout';
+import { sectionsFor } from '../../lib/image-meta.mjs';
 import { getImageRegistry } from '../../lib/images';
 import { plainText, renderMarkdown } from '../../lib/markdown';
 import { ogImageOptions } from '../../lib/og';
@@ -23,8 +33,57 @@ export async function getStaticPaths() {
   return registry.images.map((image) => ({ params: { id: image.id }, props: { image } }));
 }
 
+// The page's words, in one place — the photographer retunes them here
+// (spec 006 review: "I can always modify it later, to taste").
+const WORDING = {
+  label: {
+    place: 'Place',
+    time: 'Time',
+    camera: 'Camera',
+    lens: 'Lens',
+    focalLength: 'Focal length',
+    aperture: 'Aperture',
+    shutter: 'Shutter',
+    iso: 'ISO',
+    date: 'Date',
+  },
+  fromPiece: 'From the piece',
+  inGallery: 'In the gallery',
+  inGalleries: 'In the galleries',
+  record: {
+    heading: 'How it was made',
+    format: 'Format',
+    filters: 'Filters',
+    support: 'Support',
+    processing: 'Processing',
+  },
+  compare: {
+    heading: 'Raw to finished',
+    before: "The camera's frame",
+    after: 'The finished photograph',
+    beforeTag: 'Camera',
+    afterTag: 'Finished',
+    reveal: 'Reveal the finished photograph',
+  },
+  passage: { heading: 'In the piece', readInPlace: 'Read it in place →' },
+  related: { heading: 'Related frames' },
+  print: {
+    heading: 'The print',
+    edition: 'Edition',
+    sizes: 'Sizes',
+    paper: 'Paper',
+    ask: 'Ask about a print →',
+    subject: 'Print enquiry',
+  },
+  quiet: 'Quiet view',
+  neighbours: { inGallery: 'In', fromPiece: 'From' },
+};
+
 const { image } = Astro.props;
+const registry = await getImageRegistry();
 const { label, piece, galleries } = image;
+const sections = sectionsFor(image);
+const shows = (section: string) => sections.includes(section);
 
 // The eyebrow: the owning piece's categories, or for a gallery-root
 // image the categories of the galleries that hold it.
@@ -32,33 +91,93 @@ const categories = piece
   ? piece.data.categories
   : [...new Set(galleries.map((gallery) => gallery.data.category))];
 
+// The story: the sidecar body through the site's own pipeline, so it is
+// a piece body in miniature (blocks included).
+const story = shows('story') && image.sidecar ? await render(image.sidecar) : null;
+const storyLead = image.sidecar?.body?.trim().split(/\n\s*\n/)[0];
+const storyLeadText = storyLead ? plainText(await renderMarkdown(storyLead)) : undefined;
+
 const captionHtml = image.caption ? await renderMarkdown(image.caption) : undefined;
-const description = captionHtml
-  ? plainText(captionHtml)
-  : piece
-    ? `From the piece “${piece.data.title}”.`
-    : `A photograph by ${SITE.author}.`;
+const description =
+  storyLeadText ??
+  (captionHtml
+    ? plainText(captionHtml)
+    : piece
+      ? `From the piece “${piece.data.title}”.`
+      : `A photograph by ${SITE.author}.`);
 
 // OG image: the optimized, metadata-stripped output — never the
 // original file (which may carry EXIF the site doesn't publish); see
 // ogImageOptions for the passthrough case the scan caught.
 const og = await getImage(ogImageOptions(image.image));
 
-// The wall label: only what exists. Order is the label's reading order.
-const candidates: [string, string | undefined][] = [
-  ['Camera', label.camera],
-  ['Lens', label.lens],
-  ['Focal length', label.focalLength],
-  ['Aperture', label.aperture],
-  ['Shutter', label.shutter],
-  ['ISO', label.iso],
-  ['Date', label.date ? formatDate(label.date) : undefined],
-];
-const rows = candidates.filter((row): row is [string, string] => row[1] !== undefined);
+// The wall label: only what exists. Order is the label's reading order;
+// place and time head it (spec 006). Exposure rows are kept out of the
+// search index — they are tokens, not text to find.
+type Row = { term: string; value: string; indexed: boolean };
+const labelRows: Row[] = (
+  [
+    ['place', label.place, true],
+    ['time', label.time, true],
+    ['camera', label.camera, false],
+    ['lens', label.lens, false],
+    ['focalLength', label.focalLength, false],
+    ['aperture', label.aperture, false],
+    ['shutter', label.shutter, false],
+    ['iso', label.iso, false],
+    ['date', label.date ? formatDate(label.date) : undefined, false],
+  ] as const
+).flatMap(([key, value, indexed]) => (value ? [{ term: WORDING.label[key], value, indexed }] : []));
+
+// "How it was made": the processing note lives with the compare when
+// the camera's frame exists (sectionsFor's rule), here otherwise.
+const recordRows = (
+  [
+    ['format', image.record.format],
+    ['filters', image.record.filters],
+    ['support', image.record.support],
+    ['processing', image.before ? undefined : image.record.processing],
+  ] as const
+).flatMap(([key, value]) => (value ? [{ term: WORDING.record[key], value }] : []));
+
+const printRows = (
+  [
+    ['edition', image.print.edition],
+    ['sizes', image.print.sizes],
+    ['paper', image.print.paper],
+  ] as const
+).flatMap(([key, value]) => (value ? [{ term: WORDING.print[key], value }] : []));
+const printSubject = encodeURIComponent(`${WORDING.print.subject}: ${image.title}`);
+
+// The passage, quoted: prose and caption both as markdown (an
+// _emphasis_ in a piece caption must not print as underscores).
+const passageHtml = image.passage?.prose ? await renderMarkdown(image.passage.prose) : undefined;
+const passageCaptionHtml = image.passage?.caption
+  ? await renderMarkdown(image.passage.caption)
+  : undefined;
+
+// Related frames: the gallery's packing rule at a smaller short side.
+const related = image.related.flatMap((id) => {
+  const other = registry.byId.get(id);
+  return other ? [{ other, ...galleryCell(other.image, RELATED_SHORT_PX) }] : [];
+});
+
+// Neighbours: one nav per set, the default (sets[0]) visible; the
+// script shows the set the reader came through when it knows it.
+const sets = image.sets.map((set) => ({
+  ...set,
+  key: `${set.kind}:${set.id}`,
+  prevImage: set.prev ? registry.byId.get(set.prev) : undefined,
+  nextImage: set.next ? registry.byId.get(set.next) : undefined,
+}));
+
+// The search index takes pages with something to find: a story, a
+// caption, or a place. Label-only pages would only swamp the pieces.
+const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place);
 ---
 
 <BaseLayout title={image.title} description={description} ogType="article" image={og.src}>
-  <article class="image-page">
+  <article class="image-page" data-pagefind-body={indexed || undefined}>
     <div class="image-stage">
       <figure class="image-frame">
         {
@@ -75,9 +194,41 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
           loading="eager"
         />
       </figure>
+      <button class="quiet-toggle" type="button" hidden data-quiet-toggle>{WORDING.quiet}</button>
     </div>
 
-    <header class="page-head section">
+    {
+      sets.map((set, index) => (
+        <nav
+          class="frame-nav"
+          data-set={set.key}
+          hidden={index > 0}
+          aria-label={`${set.title}: neighbouring frames`}
+          data-pagefind-ignore
+        >
+          <span class="frame-nav-prev">
+            {set.prevImage && (
+              <a href={withBase(set.prevImage.url)} rel="prev" data-nav="prev" data-set={set.key}>
+                ← {set.prevImage.title}
+              </a>
+            )}
+          </span>
+          <span class="frame-nav-where">
+            {set.kind === 'gallery' ? WORDING.neighbours.inGallery : WORDING.neighbours.fromPiece}{' '}
+            <a href={withBase(set.url)}>{set.title}</a> · {set.index + 1} of {set.count}
+          </span>
+          <span class="frame-nav-next">
+            {set.nextImage && (
+              <a href={withBase(set.nextImage.url)} rel="next" data-nav="next" data-set={set.key}>
+                {set.nextImage.title} →
+              </a>
+            )}
+          </span>
+        </nav>
+      ))
+    }
+
+    <header class="page-head section image-head">
       {
         categories.length > 0 && (
           <p class="eyebrow">
@@ -95,38 +246,177 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
       <h1>{image.title}</h1>
     </header>
 
-    <div class="section image-label">
+    <div class="image-body">
       {
-        rows.length > 0 && (
-          <dl class="wall-label">
-            {rows.map(([term, value]) => (
-              <div>
-                <dt>{term}</dt>
-                <dd>{value}</dd>
+        story && (
+          <section class="sec sec-story prose" aria-label="The story">
+            <story.Content />
+          </section>
+        )
+      }
+
+      <section class="sec sec-label" aria-label="Wall label">
+        {
+          labelRows.length > 0 && (
+            <dl class="wall-label">
+              {labelRows.map(({ term, value, indexed }) => (
+                <div data-pagefind-ignore={indexed ? undefined : true}>
+                  <dt>{term}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          )
+        }
+        {captionHtml && <div class="image-caption" set:html={captionHtml} />}
+        {
+          piece && (
+            <p class="image-from" data-pagefind-ignore>
+              {WORDING.fromPiece} <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
+            </p>
+          )
+        }
+        {
+          galleries.length > 0 && (
+            <p class="image-from" data-pagefind-ignore>
+              {galleries.length === 1 ? WORDING.inGallery : WORDING.inGalleries}{' '}
+              {galleries.map((gallery, index) => (
+                <>
+                  <a href={withBase(`/galleries/${gallery.id}/`)}>{gallery.data.title}</a>
+                  {index < galleries.length - 1 ? ', ' : ''}
+                </>
+              ))}
+            </p>
+          )
+        }
+      </section>
+
+      {
+        shows('record') && (
+          <section class="sec sec-record" aria-labelledby="sec-record">
+            <h2 class="sec-title" id="sec-record">
+              {WORDING.record.heading}
+            </h2>
+            <dl class="wall-label wall-label-rows">
+              {recordRows.map(({ term, value }) => (
+                <div>
+                  <dt>{term}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )
+      }
+
+      {
+        shows('compare') && image.before && (
+          <section class="sec sec-compare" aria-labelledby="sec-compare">
+            <h2 class="sec-title" id="sec-compare">
+              {WORDING.compare.heading}
+            </h2>
+            <figure class="compare" style={`--ar: ${image.image.width} / ${image.image.height}`}>
+              <div class="compare-frames">
+                <div class="compare-frame compare-before">
+                  <Image
+                    src={image.before}
+                    alt={WORDING.compare.before}
+                    layout="constrained"
+                    width={Math.min(image.before.width, 1400)}
+                    sizes="(min-width: 800px) 700px, 94vw"
+                  />
+                  <span class="compare-tag">{WORDING.compare.beforeTag}</span>
+                </div>
+                <div class="compare-frame compare-after">
+                  <Image
+                    src={image.image}
+                    alt={WORDING.compare.after}
+                    layout="constrained"
+                    width={Math.min(image.image.width, 1400)}
+                    sizes="(min-width: 800px) 700px, 94vw"
+                  />
+                  <span class="compare-tag">{WORDING.compare.afterTag}</span>
+                </div>
+                <span class="compare-line" aria-hidden="true" />
+                <input
+                  class="compare-range"
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="50"
+                  aria-label={WORDING.compare.reveal}
+                  hidden
+                />
               </div>
-            ))}
-          </dl>
+              {image.record.processing && (
+                <figcaption class="compare-note">{image.record.processing}</figcaption>
+              )}
+            </figure>
+          </section>
         )
       }
-      {captionHtml && <div class="image-caption" set:html={captionHtml} />}
+
       {
-        piece && (
-          <p class="image-from">
-            From the piece <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
-          </p>
+        shows('passage') && piece && (
+          <section class="sec sec-passage" aria-labelledby="sec-passage" data-pagefind-ignore>
+            <h2 class="sec-title" id="sec-passage">
+              {WORDING.passage.heading}
+            </h2>
+            <blockquote class="in-piece">
+              {passageHtml && <div set:html={passageHtml} />}
+              {passageCaptionHtml && <div class="in-piece-caption" set:html={passageCaptionHtml} />}
+              <p class="image-from">
+                <a href={withBase(`/pieces/${piece.id}/`)}>{WORDING.passage.readInPlace}</a>
+              </p>
+            </blockquote>
+          </section>
         )
       }
+
       {
-        galleries.length > 0 && (
-          <p class="image-from">
-            In {galleries.length === 1 ? 'the gallery' : 'the galleries'}{' '}
-            {galleries.map((gallery, index) => (
-              <>
-                <a href={withBase(`/galleries/${gallery.id}/`)}>{gallery.data.title}</a>
-                {index < galleries.length - 1 ? ', ' : ''}
-              </>
-            ))}
-          </p>
+        shows('related') && related.length > 0 && (
+          <section class="sec sec-related" aria-labelledby="sec-related" data-pagefind-ignore>
+            <h2 class="sec-title" id="sec-related">
+              {WORDING.related.heading}
+            </h2>
+            <ul class="gallery-flow related-flow" style={relatedFlowStyle}>
+              {related.map(({ other, ar, width, sizes }) => (
+                <li style={`--ar: ${ar}`}>
+                  <a href={withBase(other.url)} class="image-link" title={other.title}>
+                    <Image
+                      src={other.image}
+                      alt={other.title}
+                      layout="constrained"
+                      width={width}
+                      sizes={sizes}
+                      loading="lazy"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        shows('print') && (
+          <section class="sec sec-print" aria-labelledby="sec-print">
+            <h2 class="sec-title" id="sec-print">
+              {WORDING.print.heading}
+            </h2>
+            <dl class="wall-label wall-label-rows">
+              {printRows.map(({ term, value }) => (
+                <div>
+                  <dt>{term}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+            <p class="image-from">
+              <a href={`mailto:${CONTACT_EMAIL}?subject=${printSubject}`}>{WORDING.print.ask}</a>
+            </p>
+          </section>
         )
       }
     </div>
@@ -142,6 +432,7 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
      stretched or cropped, as the tall block. */
   .image-stage {
     --stage-pad: clamp(1rem, 3vh, 2rem);
+    position: relative;
     display: grid;
     place-items: center;
     min-height: calc(100vh - var(--header-h, 4.5rem));
@@ -171,14 +462,42 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
     max-width: 28ch;
   }
 
-  /* The wall label: the theme's eyebrow + hairline language — the
-     brief's open question, answered provisionally here and judged at
-     the sampler review. */
-  .image-label {
+  /* The body: the label's column, sections in the spec's order, the
+     label's hairline rhythm between them. */
+  .image-body {
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
     max-width: var(--prose-width);
+    margin-inline: auto;
     padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(3rem, 5vw, 5rem);
   }
 
+  .sec + .sec {
+    padding-top: calc(var(--baseline) * 1.5);
+  }
+
+  .sec-title {
+    max-width: none;
+    margin-bottom: calc(var(--baseline) * 0.6);
+    font-size: 1.1rem;
+    line-height: 1.3;
+  }
+
+  /* The story: the reading voice, at text colour — it is the
+     photograph's text, not a caption (the theme mutes .prose p). The
+     title above is its heading. */
+  .sec-story {
+    max-width: none;
+    padding-bottom: calc(var(--baseline) * 0.5);
+  }
+  .sec-story :global(p) {
+    color: var(--color-text);
+  }
+  .sec-story :global(> :last-child) {
+    margin-bottom: 0;
+  }
+
+  /* The wall label: the theme's eyebrow + hairline language — the
+     brief's open question, answered at the 004 sampler review. */
   .wall-label {
     display: flex;
     flex-wrap: wrap;
@@ -209,6 +528,14 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
     font-size: 1rem;
   }
 
+  /* Record and print: sentence-length values stack in one column
+     rather than flowing beside short tokens. */
+  .wall-label-rows {
+    flex-direction: column;
+    gap: calc(var(--baseline) * 0.5);
+    margin-bottom: calc(var(--baseline) * 0.6);
+  }
+
   .image-caption :global(p) {
     margin: 0 0 var(--baseline);
     color: var(--color-muted);
@@ -220,4 +547,290 @@ const rows = candidates.filter((row): row is [string, string] => row[1] !== unde
     font-family: var(--font-mono);
     font-size: 0.8rem;
   }
+
+  /* Neighbours: a slim mono line under the stage, one per set, the
+     default visible. Titles truncate rather than wrap. */
+  .frame-nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    margin-inline: auto;
+    padding-block: 0 calc(var(--baseline) * 0.5);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+  .frame-nav[hidden] {
+    display: none;
+  }
+  .frame-nav > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .frame-nav-where {
+    text-align: center;
+  }
+  .frame-nav-next {
+    text-align: right;
+  }
+  @media (max-width: 719.98px) {
+    .frame-nav {
+      grid-template-columns: 1fr 1fr;
+    }
+    .frame-nav-where {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+
+  /* In the piece: the passage, quoted. */
+  .in-piece {
+    margin: 0;
+    padding-left: calc(var(--baseline) * 0.85);
+    border-left: 1px solid var(--color-accent);
+  }
+  .in-piece :global(p) {
+    margin-bottom: calc(var(--baseline) * 0.6);
+    color: var(--color-muted);
+  }
+  .in-piece-caption {
+    font-style: italic;
+  }
+
+  /* Raw to finished. Without script: the two frames stacked, before
+     above after, each labelled. With script (data-js): one box at the
+     photograph's ratio, the frames overlaid, the camera's frame
+     letterboxed if its crop differs and clipped at --split (unitless
+     0–100, so calc() multiplies a length by a number), a hairline
+     divider, and an invisible full-area range input for pointer and
+     keyboard — with the focus ring drawn on the box. */
+  .compare {
+    --split: 50;
+    margin: 0;
+    padding: var(--matte);
+    background: var(--color-matte);
+  }
+  .compare-frames {
+    display: grid;
+    gap: var(--matte);
+  }
+  .compare-frame {
+    position: relative;
+  }
+  .compare-frame :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .compare-tag {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .compare-line {
+    display: none;
+  }
+  .compare-note {
+    margin: var(--matte) 0 0;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .compare[data-js] .compare-frames {
+    display: block;
+    position: relative;
+    aspect-ratio: var(--ar);
+    overflow: hidden;
+  }
+  .compare[data-js] .compare-frame {
+    position: absolute;
+    inset: 0;
+  }
+  .compare[data-js] .compare-frame :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: var(--color-matte);
+  }
+  .compare[data-js] .compare-before {
+    clip-path: inset(0 calc(100% - var(--split) * 1%) 0 0);
+  }
+  .compare[data-js] .compare-tag {
+    position: absolute;
+    bottom: 0.5rem;
+    margin: 0;
+    padding: 0.15rem 0.45rem;
+    background: oklch(0 0 0 / 0.45);
+    color: white;
+    pointer-events: none;
+  }
+  .compare[data-js] .compare-before .compare-tag {
+    left: 0.5rem;
+  }
+  .compare[data-js] .compare-after .compare-tag {
+    right: 0.5rem;
+  }
+  .compare[data-js] .compare-line {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(100% * var(--split) / 100);
+    width: 1px;
+    background: var(--color-matte);
+    box-shadow: 0 0 0 1px oklch(0 0 0 / 0.25);
+    pointer-events: none;
+  }
+  .compare-range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+  }
+  .compare-frames:has(.compare-range:focus-visible) {
+    outline: 1px solid var(--color-accent);
+    outline-offset: 3px;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* Quiet view: chrome gone, the frame owns the viewport. Still a page
+     on the same ground — Esc or a click on the ground returns. The
+     toggle is hidden until the script can honour it. */
+  .quiet-toggle {
+    position: absolute;
+    right: var(--page-pad);
+    bottom: 0.35rem;
+    padding: 0.25rem 0;
+    border: 0;
+    background: none;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .quiet-toggle[hidden] {
+    display: none;
+  }
+  :global(html[data-quiet]) :global(.site-header),
+  :global(html[data-quiet]) :global(.site-footer),
+  :global(html[data-quiet]) .frame-nav,
+  :global(html[data-quiet]) .image-head,
+  :global(html[data-quiet]) .image-body,
+  :global(html[data-quiet]) .quiet-toggle {
+    display: none;
+  }
+  :global(html[data-quiet]) .image-stage {
+    min-height: 100vh;
+    min-height: 100svh;
+    cursor: zoom-out;
+  }
+  :global(html[data-quiet]) .image-frame img {
+    max-height: calc(100vh - 2 * var(--stage-pad) - 2 * var(--matte));
+    max-height: calc(100svh - 2 * var(--stage-pad) - 2 * var(--matte));
+  }
 </style>
+
+<script>
+  // Page-level enhancement over the static page (spec 006). Bound once
+  // per module; `astro:page-load` fires on the first load and after
+  // every ClientRouter swap, so per-page setup lives in init().
+  const root = document.documentElement;
+  const SET_KEY = 'image-set';
+  const QUIET_KEY = 'image-quiet';
+
+  const store = {
+    get: (key: string) => {
+      try {
+        return sessionStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    },
+    set: (key: string, value: string | null) => {
+      try {
+        if (value === null) sessionStorage.removeItem(key);
+        else sessionStorage.setItem(key, value);
+      } catch {
+        /* storage unavailable: the default behaviour */
+      }
+    },
+  };
+
+  const setQuiet = (quiet: boolean) => {
+    root.toggleAttribute('data-quiet', quiet);
+    store.set(QUIET_KEY, quiet ? '1' : null);
+    if (quiet) window.scrollTo({ top: 0 });
+  };
+
+  const init = () => {
+    const page = document.querySelector('.image-page');
+    if (!page) {
+      // Quiet view lives between image pages only.
+      root.removeAttribute('data-quiet');
+      store.set(QUIET_KEY, null);
+      return;
+    }
+
+    // The set the reader is stepping through (written by the layout's
+    // click handler); the matching nav replaces the default.
+    const navs = [...document.querySelectorAll<HTMLElement>('.frame-nav')];
+    const wanted = store.get(SET_KEY);
+    const match = wanted ? navs.find((nav) => nav.dataset.set === wanted) : undefined;
+    if (match) for (const nav of navs) nav.hidden = nav !== match;
+
+    // Quiet view.
+    const toggle = document.querySelector<HTMLButtonElement>('[data-quiet-toggle]');
+    if (toggle) {
+      toggle.hidden = false;
+      toggle.addEventListener('click', () => setQuiet(true));
+    }
+    document.querySelector('.image-stage')?.addEventListener('click', (event) => {
+      if (!root.hasAttribute('data-quiet')) return;
+      if ((event.target as HTMLElement).closest('.image-frame, [data-quiet-toggle]')) return;
+      setQuiet(false);
+    });
+    if (store.get(QUIET_KEY)) root.setAttribute('data-quiet', '');
+
+    // The compare: overlay the frames and reveal the range input.
+    for (const figure of document.querySelectorAll<HTMLElement>('.compare')) {
+      const range = figure.querySelector<HTMLInputElement>('.compare-range');
+      if (!range) continue;
+      figure.dataset.js = '';
+      range.hidden = false;
+      const apply = () => figure.style.setProperty('--split', range.value);
+      range.addEventListener('input', apply);
+      apply();
+    }
+  };
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && root.hasAttribute('data-quiet')) setQuiet(false);
+    // Inputs keep their own arrow keys (the compare slider above all).
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)
+      return;
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const nav = document.querySelector<HTMLElement>('.frame-nav:not([hidden])');
+    if (!nav) return;
+    // Activating the link (not assigning location) lets the layout's
+    // click handler record the set for the next page.
+    const go = (which: 'prev' | 'next') =>
+      nav.querySelector<HTMLAnchorElement>(`[data-nav="${which}"]`)?.click();
+    if (event.key === 'ArrowLeft') go('prev');
+    if (event.key === 'ArrowRight') go('next');
+  });
+
+  document.addEventListener('astro:page-load', init);
+</script>
