@@ -45,8 +45,15 @@ export function privateTargetOf(basename) {
   return String(basename).replace(PRIVATE, '');
 }
 
-function privateMessage(file, basename) {
-  return `"${file}" is private — the camera's frame of "${privateTargetOf(basename)}", not an image of the site: it has no page and can't be placed in a piece or a gallery`;
+/**
+ * The one sentence for a private raster met where an image was
+ * expected — the registry, the transform, and the gallery check all
+ * say it this way. `hint` is the caller's advice on what to do instead.
+ */
+export function privateMessage(file, basename, hint) {
+  const target = privateTargetOf(basename);
+  const advice = hint ?? "it has no page and can't be placed in a piece or a gallery";
+  return `"${file}" is private — the camera's frame of "${target}", not an image of the site: ${advice}`;
 }
 
 export class ImageIdError extends Error {

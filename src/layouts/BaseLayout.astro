@@ -103,6 +103,8 @@ const isActive = (href: string) => {
     <CodeCopy />
 
     <script>
+      import { IMAGE_SET_KEY, setKeyFromPath } from '../lib/image-set';
+
       // Header hide-on-scroll-down / reveal-on-scroll-up. Bound once at
       // module load (view transitions don't re-run this); the header is
       // looked up per event because the router swaps it. Always visible
@@ -169,14 +171,10 @@ const isActive = (href: string) => {
           if (!link) return;
           const url = new URL(link.href, location.href);
           if (url.origin !== location.origin || !url.pathname.startsWith(IMAGES_PATH)) return;
-          let set = link.dataset.set ?? null;
-          if (!set) {
-            const m = location.pathname.match(/\/(galleries|pieces)\/([^/]+)\/?$/);
-            if (m) set = `${m[1] === 'galleries' ? 'gallery' : 'piece'}:${m[2]}`;
-          }
+          const set = link.dataset.set ?? setKeyFromPath(location.pathname);
           try {
-            if (set) sessionStorage.setItem('image-set', set);
-            else sessionStorage.removeItem('image-set');
+            if (set) sessionStorage.setItem(IMAGE_SET_KEY, set);
+            else sessionStorage.removeItem(IMAGE_SET_KEY);
           } catch {
             /* storage unavailable: the default set */
           }

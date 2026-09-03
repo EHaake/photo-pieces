@@ -16,7 +16,8 @@ The "why" behind this project lives in these, not in this file:
   architecture rules, git conventions
 - `specs/<NNN>-<slug>/` — the spec, plan, and tasks for each build
   phase (001 foundation, 002 identity/teardown, 003 block vocabulary,
-  004 galleries and image pages, 005 going live — deferred)
+  004 galleries and image pages, 005 going live — deferred, 006 the
+  rich image page)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)

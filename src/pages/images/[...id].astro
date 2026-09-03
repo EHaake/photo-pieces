@@ -21,7 +21,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { CONTACT_EMAIL, SITE } from '../../consts';
 import { formatDate } from '../../i18n';
 import { categoryLabel } from '../../lib/categories';
-import { RELATED_SHORT_PX, galleryCell, relatedFlowStyle } from '../../lib/gallery-layout';
+import {
+  RELATED_NARROW_SHORT_PX,
+  RELATED_SHORT_PX,
+  galleryCell,
+  relatedFlowStyle,
+} from '../../lib/gallery-layout';
+import { setKey } from '../../lib/image-set';
 import { sectionsFor } from '../../lib/image-meta.mjs';
 import { getImageRegistry } from '../../lib/images';
 import { plainText, renderMarkdown } from '../../lib/markdown';
@@ -114,7 +120,7 @@ const og = await getImage(ogImageOptions(image.image));
 // The wall label: only what exists. Order is the label's reading order;
 // place and time head it (spec 006). Exposure rows are kept out of the
 // search index — they are tokens, not text to find.
-type Row = { term: string; value: string; indexed: boolean };
+type Row = { term: string; value: string; findable: boolean };
 const labelRows: Row[] = (
   [
     ['place', label.place, true],
@@ -127,7 +133,9 @@ const labelRows: Row[] = (
     ['iso', label.iso, false],
     ['date', label.date ? formatDate(label.date) : undefined, false],
   ] as const
-).flatMap(([key, value, indexed]) => (value ? [{ term: WORDING.label[key], value, indexed }] : []));
+).flatMap(([key, value, findable]) =>
+  value ? [{ term: WORDING.label[key], value, findable }] : [],
+);
 
 // "How it was made": the processing note lives with the compare when
 // the camera's frame exists (sectionsFor's rule), here otherwise.
@@ -159,14 +167,16 @@ const passageCaptionHtml = image.passage?.caption
 // Related frames: the gallery's packing rule at a smaller short side.
 const related = image.related.flatMap((id) => {
   const other = registry.byId.get(id);
-  return other ? [{ other, ...galleryCell(other.image, RELATED_SHORT_PX) }] : [];
+  return other
+    ? [{ other, ...galleryCell(other.image, RELATED_SHORT_PX, RELATED_NARROW_SHORT_PX) }]
+    : [];
 });
 
 // Neighbours: one nav per set, the default (sets[0]) visible; the
 // script shows the set the reader came through when it knows it.
 const sets = image.sets.map((set) => ({
   ...set,
-  key: `${set.kind}:${set.id}`,
+  key: setKey(set.kind, set.id),
   prevImage: set.prev ? registry.byId.get(set.prev) : undefined,
   nextImage: set.next ? registry.byId.get(set.next) : undefined,
 }));
@@ -182,8 +192,11 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
       <figure class="image-frame">
         {
           /* Width capped at 2× the content width: enough for a retina
-            1160px stage, and never the source's own width — that
-            request shape is the one Astro passes through untouched. */
+            1160px stage. For most sources this IS the source width; the
+            request is still a real transform because Astro's default
+            output is webp — a source-format request at source width is
+            the shape that passes the original through (og.ts guards
+            that one, where the format is jpg on purpose). */
         }
         <Image
           src={image.image}
@@ -259,8 +272,8 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
         {
           labelRows.length > 0 && (
             <dl class="wall-label">
-              {labelRows.map(({ term, value, indexed }) => (
-                <div data-pagefind-ignore={indexed ? undefined : true}>
+              {labelRows.map(({ term, value, findable }) => (
+                <div data-pagefind-ignore={findable ? undefined : true}>
                   <dt>{term}</dt>
                   <dd>{value}</dd>
                 </div>
@@ -485,14 +498,14 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
   /* The story: the reading voice, at text colour — it is the
      photograph's text, not a caption (the theme mutes .prose p). The
      title above is its heading. */
-  .sec-story {
+  .sec-story.prose {
     max-width: none;
     padding-bottom: calc(var(--baseline) * 0.5);
   }
-  .sec-story :global(p) {
+  .sec-story.prose :global(p) {
     color: var(--color-text);
   }
-  .sec-story :global(> :last-child) {
+  .sec-story.prose :global(> :last-child) {
     margin-bottom: 0;
   }
 
@@ -609,6 +622,9 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
      keyboard — with the focus ring drawn on the box. */
   .compare {
     --split: 50;
+    /* The one place --split becomes a length: the clip and the divider
+       both read it. */
+    --split-pct: calc(var(--split) * 1%);
     margin: 0;
     padding: var(--matte);
     background: var(--color-matte);
@@ -661,7 +677,7 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
     background: var(--color-matte);
   }
   .compare[data-js] .compare-before {
-    clip-path: inset(0 calc(100% - var(--split) * 1%) 0 0);
+    clip-path: inset(0 calc(100% - var(--split-pct)) 0 0);
   }
   .compare[data-js] .compare-tag {
     position: absolute;
@@ -683,7 +699,7 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
     position: absolute;
     top: 0;
     bottom: 0;
-    left: calc(100% * var(--split) / 100);
+    left: var(--split-pct);
     width: 1px;
     background: var(--color-matte);
     box-shadow: 0 0 0 1px oklch(0 0 0 / 0.25);
@@ -777,9 +793,9 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
   // Page-level enhancement over the static page (spec 006). Bound once
   // per module; `astro:page-load` fires on the first load and after
   // every ClientRouter swap, so per-page setup lives in init().
+  import { IMAGE_QUIET_KEY as QUIET_KEY, IMAGE_SET_KEY as SET_KEY } from '../../lib/image-set';
+
   const root = document.documentElement;
-  const SET_KEY = 'image-set';
-  const QUIET_KEY = 'image-quiet';
 
   const store = {
     get: (key: string) => {
@@ -801,13 +817,19 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
 
   // The stage image's `sizes` describes the page layout; in quiet view
   // the frame can be wider than the reading width, so tell the browser
-  // the truth and let it pick a larger candidate from the srcset.
-  const PAGE_SIZES = '(min-width: 1240px) 1160px, 94vw';
-  const setQuiet = (quiet: boolean) => {
+  // the truth and let it pick a larger candidate from the srcset. The
+  // page value is read off the attribute, not repeated here.
+  const applyQuiet = (quiet: boolean) => {
     root.toggleAttribute('data-quiet', quiet);
-    store.set(QUIET_KEY, quiet ? '1' : null);
     const img = document.querySelector<HTMLImageElement>('.image-frame img');
-    if (img) img.sizes = quiet ? '100vw' : PAGE_SIZES;
+    if (img) {
+      img.dataset.pageSizes ??= img.sizes;
+      img.sizes = quiet ? '100vw' : img.dataset.pageSizes;
+    }
+  };
+  const setQuiet = (quiet: boolean) => {
+    applyQuiet(quiet);
+    store.set(QUIET_KEY, quiet ? '1' : null);
     if (quiet) window.scrollTo({ top: 0 });
   };
 
@@ -844,7 +866,7 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
         else if (target.closest('.image-frame')) setQuiet(true);
       });
     }
-    if (store.get(QUIET_KEY)) setQuiet(true);
+    if (store.get(QUIET_KEY)) applyQuiet(true);
 
     // The compare: overlay the frames and reveal the range input.
     for (const figure of document.querySelectorAll<HTMLElement>('.compare')) {
@@ -874,5 +896,11 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
     if (event.key === 'ArrowRight') go('next');
   });
 
+  // The router replaces <html>'s attributes on every swap, so quiet
+  // view is re-applied — at after-swap, before the new page paints its
+  // chrome, while the reader is still on an image page.
+  document.addEventListener('astro:after-swap', () => {
+    if (store.get(QUIET_KEY) && document.querySelector('.image-page')) applyQuiet(true);
+  });
   document.addEventListener('astro:page-load', init);
 </script>

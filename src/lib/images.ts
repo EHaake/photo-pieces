@@ -14,12 +14,14 @@ import {
   formatGalleryProblems,
   humanizeBasename,
   imageUrlFor,
+  isPrivateRaster,
   mergeOverrides,
   nearest,
   neighbours,
   orderLatestWork,
   passageFor,
   pieceOrder,
+  privateMessage,
   sidecarImageId,
   validateGalleries,
 } from './image-meta.mjs';
@@ -219,6 +221,18 @@ async function buildRegistry(): Promise<ImageRegistry> {
     });
   }
 
+  // A piece's `cover` is a reference too: a camera's frame there would
+  // present the raw as the piece's face on every list. Body references
+  // are the transform's to refuse; this is the frontmatter half.
+  for (const piece of pieces) {
+    const coverFile = piece.data.cover?.src.split('/').pop()?.split('?')[0] ?? '';
+    if (isPrivateRaster(coverFile)) {
+      throw new Error(
+        `[images] ${piece.filePath ?? piece.id}: ${privateMessage(coverFile, coverFile.replace(/\..*$/, ''), 'choose the photograph itself as the cover')}`,
+      );
+    }
+  }
+
   const collisions = findIdCollisions(files.map((f) => f.key));
   if (collisions.length) {
     throw new Error(`[images] ${collisions.map(formatCollision).join('\n')}`);
@@ -348,8 +362,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
           await readExposure(fileURLToPath(new URL(`.${file.key}`, root))),
         );
         const label: ImageLabel = mergeOverrides(exposure, sidecar?.data);
-        if (sidecar?.data.place) label.place = sidecar.data.place;
-        if (sidecar?.data.time) label.time = sidecar.data.time;
+        Object.assign(label, pick(sidecar?.data, ['place', 'time']));
         const inGalleries = galleries.filter((gallery) => gallery.data.images.includes(file.id));
         const sets: ImageSet[] = inGalleries.map((gallery) => ({
           kind: 'gallery',

@@ -77,6 +77,13 @@ field reference is in `README.md`):
 ---
 title:
 caption:
+date:
+camera:
+lens:
+focalLength:
+aperture:
+shutter:
+iso:
 place:
 time:
 format:
@@ -163,6 +170,13 @@ when its fields exist, so most sidecars will stay short:
 ---
 title: The bank letting go
 caption: One paragraph, *inline markdown* allowed.
+date: 2026-08-28 # the label's overrides, each replacing what EXIF said
+camera: Leica M6
+lens: Summicron 35
+focalLength: 35 mm
+aperture: f/8
+shutter: 1/250 s
+iso: ISO 400
 place: The headlands above the cove # prose, never coordinates
 time: 06:40 — forty minutes before sunrise, late November
 format: Digital, full-frame # "How it was made", with the three below

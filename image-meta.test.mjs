@@ -282,7 +282,7 @@ describe('private rasters (T401)', () => {
     });
   });
 
-  it('never gets an id — the transform reports a piece that places one', () => {
+  it('parseImagePath refuses to mint an id for a private raster (the transform checks earlier, with the same sentence)', () => {
     expect(() => imageIdFor('/src/content/pieces/a-piece/_land-b.jpg')).toThrow(
       /"_land-b\.jpg" is private — the camera's frame of "land-b", not an image of the site/,
     );

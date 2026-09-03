@@ -9,6 +9,7 @@ import {
   imageIdFor,
   imageUrlFor,
   isPrivateRaster,
+  privateMessage,
   privateTargetOf,
 } from './src/lib/image-meta.mjs';
 
@@ -574,7 +575,11 @@ function rejectPrivateSrc(src, fail) {
   const ext = dot > 0 ? file.slice(dot + 1).toLowerCase() : '';
   if (IMAGE_EXTENSIONS.includes(ext) && isPrivateRaster(basename)) {
     fail(
-      `"${src}" is private — the camera's frame of "${privateTargetOf(basename)}", not an image of the site: place "${privateTargetOf(basename)}.${ext}" here and the frame shows on its page`,
+      privateMessage(
+        src,
+        basename,
+        `place "${privateTargetOf(basename)}.${ext}" here and the frame shows on its page`,
+      ),
     );
   }
 }

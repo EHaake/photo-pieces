@@ -123,10 +123,11 @@ const GALLERY_IMAGES = [
 // its photograph, shown only on that image's page as the "before" of
 // the raw-to-finished compare. Deliberately a different crop (4:3
 // against the 3:2 photograph) so the page's letterbox path is
-// exercised, flattened to read as unprocessed, and carrying GPS: the
-// tripwire for the one leak shape 004 found (a source-size,
-// source-format request passing the original through) — the compare
-// requests webp, so the scan stays clean unless that changes.
+// exercised, flattened to read as unprocessed, and carrying GPS so the
+// post-build scan has a real block to find if a private raster ever
+// reaches the output untouched — which it did once, at T403, when the
+// registry imported it before any page rendered it (the pruner's rule
+// changed for that; DECISIONS.md).
 const FRAMES = [
   [
     'src/content/pieces/where-the-fog-lets-go/_land-b.jpg',

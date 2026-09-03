@@ -1498,9 +1498,15 @@ pre code {
 }
 
 /* Below the collapse: one frame per row at the full width — the cap
-   would otherwise leave a phone-width portrait floating in margins. */
+   would otherwise leave a phone-width portrait floating in margins.
+   The related strip (spec 006) keeps its cap: its short side is small
+   enough for two or three per row, and a leftover thumbnail should
+   not stretch to the column. */
 @media (max-width: 719.98px) {
   .gallery-flow > li {
     max-width: 100%;
+  }
+  .gallery-flow.related-flow > li {
+    max-width: calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--matte));
   }
 }

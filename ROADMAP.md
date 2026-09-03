@@ -73,8 +73,8 @@ attached.
   data (an ordered list of image + label pairs, for image-processing/
   editing narratives) is reserved in the content model now, and the
   directive still fails the build. Spec 006's before/after compare on
-  the image page is a page section fed by a sidecar-side convention,
-  not this block. The block's presentation — carousel, step-through,
+  the image page is a page section fed by a file-naming convention
+  (the private camera's frame beside the photograph), not this block. The block's presentation — carousel, step-through,
   multi-step narratives — belongs to the processing showcase entry
   above, once real processing-themed pieces exist to test it against.
 - **Internal piece-to-piece link rewriting** — links between pieces
