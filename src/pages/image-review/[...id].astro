@@ -1,0 +1,842 @@
+---
+// TEMPORARY review page — the rich image page mock-up, ahead of its spec.
+// Untracked and never committed: renders any registry image at
+// /image-review/<id>/ with every proposed enhancement in place, plus a
+// review bar to switch each one off so the photographer can compose the
+// page they want. Delete once the enhancements are chosen.
+//
+// Everything marked "sample" below is invented placeholder content
+// standing in for data the spec would add (sidecar fields and body).
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { CONTACT_EMAIL } from '../../consts';
+import { formatDate } from '../../i18n';
+import { categoryLabel } from '../../lib/categories';
+import { getImageRegistry, type SiteImage } from '../../lib/images';
+import { renderMarkdown } from '../../lib/markdown';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const registry = await getImageRegistry();
+  return registry.images.map((image) => ({ params: { id: image.id }, props: { image } }));
+}
+
+const { image } = Astro.props as { image: SiteImage };
+const registry = await getImageRegistry();
+const { label, piece, galleries } = image;
+const review = (id: string) => withBase(`/image-review/${id}/`);
+
+const categories = piece
+  ? piece.data.categories
+  : [...new Set(galleries.map((gallery) => gallery.data.category))];
+
+const captionHtml = image.caption ? await renderMarkdown(image.caption) : undefined;
+
+// Baseline wall label (as shipped in spec 004).
+const candidates: [string, string | undefined][] = [
+  ['Camera', label.camera],
+  ['Lens', label.lens],
+  ['Focal length', label.focalLength],
+  ['Aperture', label.aperture],
+  ['Shutter', label.shutter],
+  ['ISO', label.iso],
+  ['Date', label.date ? formatDate(label.date) : undefined],
+];
+const rows = candidates.filter((row): row is [string, string] => row[1] !== undefined);
+
+// --- Sample data the spec would add as sidecar fields -------------------
+const sample = {
+  place: 'The headlands above the cove, north Pacific coast',
+  time: '06:40 — forty minutes before sunrise, late November',
+  record: [
+    ['Format', 'Digital, full-frame'],
+    ['Filters', 'None'],
+    ['Support', 'Tripod, two-second timer'],
+    [
+      'Processing',
+      'Single frame. Lifted the shadows on the ridge, held the highlights in the fog, warmed the whole thing a touch.',
+    ],
+  ] as [string, string][],
+  print: [
+    ['Edition', 'Open edition, signed on the back'],
+    ['Sizes', '12 × 18, 16 × 24, and 24 × 36 inches'],
+    ['Paper', 'Hahnemühle Photo Rag Baryta'],
+  ] as [string, string][],
+  story: [
+    'I had been standing in the same place for an hour when the far bank first showed. Not all at once: a darker gray inside the gray, then a line where the water stopped and the trees began. I made this frame in the first minute and did not move the tripod for the next ten.',
+    'The exposure is long enough that the surface went to glass. That was not the plan. The plan was to hold the highlights in the fog, and the shutter that did it happened to still the water too. I have learned to let the second thing happen.',
+    'It is the frame the whole morning was waiting for, and the one I would print from that day.',
+  ],
+};
+
+// --- Context: where this frame sits ------------------------------------
+// The gallery we "arrived from" (newest first), else the piece folder.
+const from = galleries[0] ?? null;
+const sequence = from
+  ? from.data.images
+  : registry.images.filter((other) => other.folder === image.folder).map((other) => other.id);
+const at = sequence.indexOf(image.id);
+const prev = at > 0 ? registry.byId.get(sequence[at - 1]) : undefined;
+const next = at >= 0 && at < sequence.length - 1 ? registry.byId.get(sequence[at + 1]) : undefined;
+const sequenceTitle = from ? from.data.title : (piece?.data.title ?? 'This folder');
+
+// The paragraph the image sits in: the nearest prose block before the
+// first reference to the file in the piece body, plus a container
+// block's caption line where there is one.
+function paragraphFor(body: string, basename: string): { prose?: string; caption?: string } {
+  const blocks = body.split(/\n\s*\n/);
+  const hit = blocks.findIndex((block) => block.includes(`./${basename}.`));
+  if (hit < 0) return {};
+  const block = blocks[hit];
+  const isDirective = (text: string) => /^\s*(:{2,3}|!\[)/.test(text);
+  let caption: string | undefined;
+  if (block.startsWith(':::')) {
+    caption = block
+      .split('\n')
+      .slice(1)
+      .filter((line) => line.trim() !== ':::')
+      .join(' ')
+      .trim();
+  }
+  let prose: string | undefined;
+  for (let i = hit - 1; i >= 0; i--) {
+    if (!isDirective(blocks[i])) {
+      prose = blocks[i];
+      break;
+    }
+  }
+  return { prose, caption };
+}
+const inPiece = piece ? paragraphFor(piece.body ?? '', image.basename) : {};
+const inPieceHtml = inPiece.prose ? await renderMarkdown(inPiece.prose) : undefined;
+
+// Related frames: the rest of the folder.
+const related = registry.images
+  .filter((other) => other.folder === image.folder && other.id !== image.id)
+  .slice(0, 4);
+
+const printSubject = encodeURIComponent(`Print enquiry: ${image.title}`);
+---
+
+<BaseLayout title={`${image.title} (mock-up)`} description="Rich image page mock-up — review only.">
+  <article class="image-page">
+    <div class="image-stage">
+      <figure class="image-frame">
+        <Image
+          src={image.image}
+          alt={image.title}
+          layout="constrained"
+          width={Math.min(image.image.width, 2320)}
+          sizes="(min-width: 1240px) 1160px, 94vw"
+          loading="eager"
+        />
+      </figure>
+      <button class="quiet-toggle" type="button" data-enh="quiet" data-quiet-toggle>
+        Quiet view
+      </button>
+    </div>
+
+    <nav class="frame-nav" data-enh="context" aria-label="Neighbouring frames">
+      <span class="frame-nav-prev">
+        {prev && <a href={review(prev.id)} rel="prev" data-nav="prev">← {prev.title}</a>}
+      </span>
+      <span class="frame-nav-where">
+        {from ? 'In ' : ''}{sequenceTitle}{at >= 0 && ` · ${at + 1} of ${sequence.length}`}
+      </span>
+      <span class="frame-nav-next">
+        {next && <a href={review(next.id)} rel="next" data-nav="next">{next.title} →</a>}
+      </span>
+    </nav>
+
+    <header class="page-head section image-head">
+      {
+        categories.length > 0 && (
+          <p class="eyebrow">
+            <span>
+              {categories.map((category, index) => (
+                <>
+                  {index > 0 && ' / '}
+                  <a href={withBase(`/categories/${category}/`)}>{categoryLabel(category)}</a>
+                </>
+              ))}
+            </span>
+          </p>
+        )
+      }
+      <h1>{image.title}</h1>
+    </header>
+
+    <div class="image-body">
+      <section class="sec sec-label">
+        <dl class="wall-label">
+          <div data-enh="place">
+            <dt>Place</dt>
+            <dd>{sample.place} <i class="sample">sample</i></dd>
+          </div>
+          <div data-enh="place">
+            <dt>Time</dt>
+            <dd>{sample.time} <i class="sample">sample</i></dd>
+          </div>
+          {
+            rows.map(([term, value]) => (
+              <div>
+                <dt>{term}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        {captionHtml && <div class="image-caption" set:html={captionHtml} />}
+        {
+          piece && (
+            <p class="image-from">
+              From the piece <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
+            </p>
+          )
+        }
+        {
+          galleries.length > 0 && (
+            <p class="image-from">
+              In {galleries.length === 1 ? 'the gallery' : 'the galleries'}{' '}
+              {galleries.map((gallery, index) => (
+                <>
+                  <a href={withBase(`/galleries/${gallery.id}/`)}>{gallery.data.title}</a>
+                  {index < galleries.length - 1 ? ', ' : ''}
+                </>
+              ))}
+            </p>
+          )
+        }
+      </section>
+
+      <section class="sec sec-writing prose" data-enh="writing">
+        <p class="review-note">Sample copy — the sidecar body, in your own words</p>
+        {sample.story.map((paragraph) => <p>{paragraph}</p>)}
+      </section>
+
+      <section class="sec sec-record" data-enh="record">
+        <h2 class="sec-title">How it was made</h2>
+        <dl class="wall-label wall-label-record">
+          {
+            sample.record.map(([term, value]) => (
+              <div>
+                <dt>{term}</dt>
+                <dd>
+                  {value} <i class="sample">sample</i>
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      <section class="sec sec-process" data-enh="process">
+        <h2 class="sec-title">Raw to finished</h2>
+        <p class="review-note">
+          The reserved sequence block, as a compare slider — drag or use the arrow keys. The
+          "raw" side is the finished file flattened, standing in for the camera's frame.
+        </p>
+        <figure class="compare" style={`--ar: ${image.image.width} / ${image.image.height}`}>
+          <Image
+            class="compare-after"
+            src={image.image}
+            alt=""
+            layout="constrained"
+            width={Math.min(image.image.width, 1400)}
+            sizes="(min-width: 800px) 700px, 94vw"
+          />
+          <Image
+            class="compare-before"
+            src={image.image}
+            alt=""
+            layout="constrained"
+            width={Math.min(image.image.width, 1400)}
+            sizes="(min-width: 800px) 700px, 94vw"
+          />
+          <span class="compare-line" aria-hidden="true"></span>
+          <span class="compare-tag compare-tag-before" aria-hidden="true">Raw</span>
+          <span class="compare-tag compare-tag-after" aria-hidden="true">Finished</span>
+          <input
+            class="compare-range"
+            type="range"
+            min="0"
+            max="100"
+            value="50"
+            aria-label="Reveal the finished frame"
+          />
+        </figure>
+      </section>
+
+      <section class="sec sec-context" data-enh="context">
+        {
+          inPieceHtml && piece && (
+            <>
+              <h2 class="sec-title">In the piece</h2>
+              <blockquote class="in-piece">
+                <div set:html={inPieceHtml} />
+                {inPiece.caption && <p class="in-piece-caption">{inPiece.caption}</p>}
+                <p class="image-from">
+                  <a href={withBase(`/pieces/${piece.id}/`)}>Read it in place →</a>
+                </p>
+              </blockquote>
+            </>
+          )
+        }
+        {
+          related.length > 0 && (
+            <>
+              <h2 class="sec-title">Related frames</h2>
+              <ul class="related">
+                {related.map((other) => (
+                  <li style={`--ar: ${other.image.width / other.image.height}`}>
+                    <a href={review(other.id)} title={other.title}>
+                      <Image
+                        src={other.image}
+                        alt={other.title}
+                        layout="constrained"
+                        width={Math.min(other.image.width, 720)}
+                        sizes="(min-width: 800px) 240px, 45vw"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )
+        }
+      </section>
+
+      <section class="sec sec-print" data-enh="print">
+        <h2 class="sec-title">The print</h2>
+        <dl class="wall-label wall-label-record">
+          {
+            sample.print.map(([term, value]) => (
+              <div>
+                <dt>{term}</dt>
+                <dd>
+                  {value} <i class="sample">sample</i>
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+        <p class="image-from">
+          <a href={`mailto:${CONTACT_EMAIL}?subject=${printSubject}`}>Ask about a print →</a>
+        </p>
+      </section>
+    </div>
+  </article>
+
+  <aside class="review-bar" aria-label="Mock-up controls">
+    <span class="review-tag">Mock-up</span>
+    <label><input type="checkbox" data-toggle="place" /> Place &amp; time</label>
+    <label><input type="checkbox" data-toggle="writing" /> Writing</label>
+    <label><input type="checkbox" data-toggle="record" /> How it was made</label>
+    <label><input type="checkbox" data-toggle="process" /> Raw to finished</label>
+    <label><input type="checkbox" data-toggle="context" /> Context</label>
+    <label><input type="checkbox" data-toggle="print" /> Print</label>
+    <label><input type="checkbox" data-toggle="quiet" /> Quiet view</label>
+    <span class="review-sep" aria-hidden="true"></span>
+    <label><input type="radio" name="order" value="label" /> Label first</label>
+    <label><input type="radio" name="order" value="story" /> Story first</label>
+    <span class="review-sep" aria-hidden="true"></span>
+    <button type="button" data-preset="none">Baseline</button>
+    <button type="button" data-preset="all">Everything</button>
+  </aside>
+</BaseLayout>
+
+<style>
+  /* ---- Baseline, copied from src/pages/images/[...id].astro ---------- */
+  .image-stage {
+    --stage-pad: clamp(1rem, 3vh, 2rem);
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: calc(100vh - var(--header-h, 4.5rem));
+    min-height: calc(100svh - var(--header-h, 4.5rem));
+    padding: var(--stage-pad) var(--page-pad);
+  }
+
+  .image-frame {
+    max-width: min(100%, var(--content-width));
+    margin: 0;
+    padding: var(--matte);
+    background: var(--color-matte);
+  }
+
+  .image-frame img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: calc(100vh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - 2 * var(--matte));
+    max-height: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - 2 * var(--matte));
+  }
+
+  .image-page h1 {
+    max-width: 28ch;
+  }
+
+  .image-body {
+    display: flex;
+    flex-direction: column;
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    max-width: var(--prose-width);
+    margin-inline: auto;
+    padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(3rem, 5vw, 5rem);
+    /* Room for the review bar. */
+    margin-bottom: 5rem;
+  }
+
+  .wall-label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--baseline) * 0.75) clamp(1.5rem, 3vw, 2.5rem);
+    margin: 0 0 var(--baseline);
+    padding-block: calc(var(--baseline) * 0.85);
+    border-top: var(--hairline);
+    border-bottom: var(--hairline);
+  }
+
+  .wall-label > div {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .wall-label dt {
+    margin: 0;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .wall-label dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1rem;
+  }
+
+  .image-caption :global(p) {
+    margin: 0 0 var(--baseline);
+    color: var(--color-muted);
+  }
+
+  .image-from {
+    margin: 0 0 calc(var(--baseline) * 0.45);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  /* ---- Enhancements --------------------------------------------------- */
+
+  /* Sections: hairline-separated, in the label's rhythm. */
+  .sec + .sec {
+    padding-top: calc(var(--baseline) * 1.5);
+  }
+
+  .sec-title {
+    max-width: none;
+    margin-bottom: calc(var(--baseline) * 0.6);
+    font-size: 1.1rem;
+    line-height: 1.3;
+  }
+
+  /* Order: the label column is the default; "story first" lifts the
+     writing above the label. */
+  .sec-label {
+    order: 1;
+  }
+  .sec-writing {
+    order: 2;
+  }
+  .sec-record {
+    order: 3;
+  }
+  .sec-process {
+    order: 4;
+  }
+  .sec-context {
+    order: 5;
+  }
+  .sec-print {
+    order: 6;
+  }
+  :global(html[data-order='story']) .sec-writing {
+    order: 0;
+    padding-top: 0;
+  }
+  :global(html[data-order='story']) .sec-label {
+    padding-top: calc(var(--baseline) * 1.5);
+  }
+
+  /* The writing: the piece's prose voice, no heading — the title is
+     its heading. The theme mutes .prose p; the story reads in text color. */
+  .sec-writing {
+    max-width: none;
+  }
+  .sec-writing p {
+    color: var(--color-text);
+  }
+  .sec-writing p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Record and print labels: a single column of rows, since these
+     values are sentences, not tokens. */
+  .wall-label-record {
+    flex-direction: column;
+    gap: calc(var(--baseline) * 0.5);
+    margin-bottom: calc(var(--baseline) * 0.6);
+  }
+
+  /* Neighbours: a slim mono line under the stage. */
+  .frame-nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    margin-inline: auto;
+    padding-block: 0 calc(var(--baseline) * 0.5);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+  .frame-nav > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .frame-nav-where {
+    text-align: center;
+  }
+  .frame-nav-next {
+    text-align: right;
+  }
+  @media (max-width: 719.98px) {
+    .frame-nav {
+      grid-template-columns: 1fr 1fr;
+    }
+    .frame-nav-where {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+    .image-body {
+      margin-bottom: 10rem;
+    }
+  }
+
+  /* In the piece: the surrounding paragraph, quoted. */
+  .in-piece {
+    margin: 0;
+    padding-left: calc(var(--baseline) * 0.85);
+    border-left: 1px solid var(--color-accent);
+  }
+  .in-piece :global(p) {
+    margin-bottom: calc(var(--baseline) * 0.6);
+    color: var(--color-muted);
+  }
+  .in-piece-caption {
+    font-style: italic;
+  }
+
+  /* Related frames: equal short sides, as the galleries pack. */
+  .related {
+    display: flex;
+    gap: calc(var(--baseline) / 3);
+    margin: 0 0 var(--baseline);
+    padding: 0;
+    list-style: none;
+  }
+  .related li {
+    flex: var(--ar, 1) 1 0;
+    min-width: 0;
+  }
+  .related a {
+    display: block;
+    padding: calc(var(--matte) * 0.5);
+    background: var(--color-matte);
+  }
+  .related img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* After the flex shorthand above, so the basis wins by source order. */
+  @media (max-width: 719.98px) {
+    .related {
+      flex-wrap: wrap;
+    }
+    .related li {
+      flex-basis: 40%;
+    }
+  }
+
+  /* Raw to finished: the compare slider. Both frames fill the same box;
+     the "raw" one is clipped at --split and flattened by a filter. */
+  .compare {
+    /* Unitless 0–100: calc() can multiply a length by a number, not by
+       a percentage. */
+    --split: 50;
+    position: relative;
+    margin: 0;
+    padding: var(--matte);
+    background: var(--color-matte);
+  }
+  .compare :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .compare :global(.compare-before) {
+    position: absolute;
+    inset: var(--matte);
+    width: calc(100% - 2 * var(--matte));
+    height: calc(100% - 2 * var(--matte));
+    clip-path: inset(0 calc(100% - var(--split) * 1%) 0 0);
+    filter: saturate(0.35) contrast(0.8) brightness(1.08);
+  }
+  .compare-line {
+    position: absolute;
+    top: var(--matte);
+    bottom: var(--matte);
+    left: calc(var(--matte) + (100% - 2 * var(--matte)) * var(--split) / 100);
+    width: 1px;
+    background: var(--color-matte);
+    box-shadow: 0 0 0 1px oklch(0 0 0 / 0.25);
+    pointer-events: none;
+  }
+  .compare-tag {
+    position: absolute;
+    bottom: calc(var(--matte) + 0.5rem);
+    padding: 0.15rem 0.45rem;
+    background: oklch(0 0 0 / 0.45);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .compare-tag-before {
+    left: calc(var(--matte) + 0.5rem);
+  }
+  .compare-tag-after {
+    right: calc(var(--matte) + 0.5rem);
+  }
+  .compare-range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+  }
+
+  /* Quiet view: chrome gone, the frame owns the viewport. Still a page —
+     Esc or a click on the ground returns. */
+  .quiet-toggle {
+    position: absolute;
+    right: var(--page-pad);
+    bottom: 0.35rem;
+    padding: 0.25rem 0;
+    border: 0;
+    background: none;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  :global(html[data-quiet]) :global(.site-header),
+  :global(html[data-quiet]) :global(.site-footer),
+  :global(html[data-quiet]) .review-bar,
+  :global(html[data-quiet]) .frame-nav,
+  :global(html[data-quiet]) .image-head,
+  :global(html[data-quiet]) .image-body {
+    display: none;
+  }
+  :global(html[data-quiet]) .image-stage {
+    min-height: 100vh;
+    min-height: 100svh;
+    cursor: zoom-out;
+  }
+  :global(html[data-quiet]) .image-frame img {
+    max-height: calc(100vh - 2 * var(--stage-pad) - 2 * var(--matte));
+    max-height: calc(100svh - 2 * var(--stage-pad) - 2 * var(--matte));
+  }
+  :global(html[data-quiet]) .quiet-toggle {
+    display: none;
+  }
+
+  /* ---- Review chrome -------------------------------------------------- */
+  :global(html[data-off-place]) [data-enh='place'],
+  :global(html[data-off-writing]) [data-enh='writing'],
+  :global(html[data-off-record]) [data-enh='record'],
+  :global(html[data-off-process]) [data-enh='process'],
+  :global(html[data-off-context]) [data-enh='context'],
+  :global(html[data-off-print]) [data-enh='print'],
+  :global(html[data-off-quiet]) [data-enh='quiet'] {
+    display: none;
+  }
+
+  .sample {
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-style: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+
+  .review-note {
+    margin: 0 0 calc(var(--baseline) * 0.6);
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+  }
+
+  .review-bar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 200;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 1rem;
+    padding: 0.5rem var(--page-pad);
+    border-top: 1px dashed var(--color-accent);
+    background: var(--color-bg);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+  }
+  .review-tag {
+    padding: 0.1rem 0.4rem;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .review-bar label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+  }
+  .review-sep {
+    width: 1px;
+    height: 1.2rem;
+    background: var(--color-line-strong);
+  }
+  .review-bar button {
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--color-line-strong);
+    background: none;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  // Review-bar state: which enhancements show, and the section order.
+  // Kept in localStorage so it survives prev/next navigation.
+  const KEYS = ['place', 'writing', 'record', 'process', 'context', 'print', 'quiet'] as const;
+  type Key = (typeof KEYS)[number];
+  type State = { on: Record<Key, boolean>; order: 'label' | 'story' };
+  const STORE = 'image-review-state';
+  const root = document.documentElement;
+
+  const everything = (): State => ({
+    on: Object.fromEntries(KEYS.map((k) => [k, true])) as Record<Key, boolean>,
+    order: 'label',
+  });
+  const load = (): State => {
+    try {
+      const raw = localStorage.getItem(STORE);
+      if (raw) return { ...everything(), ...JSON.parse(raw) };
+    } catch {}
+    return everything();
+  };
+  const save = (state: State) => {
+    try {
+      localStorage.setItem(STORE, JSON.stringify(state));
+    } catch {}
+  };
+
+  const init = () => {
+    const bar = document.querySelector<HTMLElement>('.review-bar');
+    if (!bar) return;
+    const state = load();
+
+    const apply = () => {
+      for (const key of KEYS) root.toggleAttribute(`data-off-${key}`, !state.on[key]);
+      root.dataset.order = state.order;
+      bar.querySelectorAll<HTMLInputElement>('[data-toggle]').forEach((input) => {
+        input.checked = state.on[input.dataset.toggle as Key];
+      });
+      bar.querySelectorAll<HTMLInputElement>('[name="order"]').forEach((input) => {
+        input.checked = input.value === state.order;
+      });
+      save(state);
+    };
+
+    bar.addEventListener('change', (event) => {
+      const input = event.target as HTMLInputElement;
+      if (input.dataset.toggle) state.on[input.dataset.toggle as Key] = input.checked;
+      if (input.name === 'order') state.order = input.value as State['order'];
+      apply();
+    });
+    bar.addEventListener('click', (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLElement>('[data-preset]');
+      if (!button) return;
+      const on = button.dataset.preset === 'all';
+      for (const key of KEYS) state.on[key] = on;
+      apply();
+    });
+    apply();
+
+    // Quiet view: enter from the toggle; leave with Esc or a click on the
+    // ground (not on the frame itself).
+    const setQuiet = (quiet: boolean) => {
+      root.toggleAttribute('data-quiet', quiet);
+      if (quiet) window.scrollTo({ top: 0 });
+    };
+    document.querySelector('[data-quiet-toggle]')?.addEventListener('click', () => setQuiet(true));
+    document.querySelector('.image-stage')?.addEventListener('click', (event) => {
+      if (!root.hasAttribute('data-quiet')) return;
+      // The toggle sits inside the stage: its click bubbles here too.
+      if ((event.target as HTMLElement).closest('.image-frame, [data-quiet-toggle]')) return;
+      setQuiet(false);
+    });
+
+    // Compare slider.
+    document.querySelectorAll<HTMLInputElement>('.compare-range').forEach((range) => {
+      const figure = range.closest<HTMLElement>('.compare');
+      const set = () => figure?.style.setProperty('--split', range.value);
+      range.addEventListener('input', set);
+      set();
+    });
+  };
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') root.removeAttribute('data-quiet');
+    if (event.target instanceof HTMLInputElement) return;
+    if (root.hasAttribute('data-off-context')) return;
+    const go = (which: 'prev' | 'next') => {
+      const link = document.querySelector<HTMLAnchorElement>(`[data-nav="${which}"]`);
+      if (link) window.location.href = link.href;
+    };
+    if (event.key === 'ArrowLeft') go('prev');
+    if (event.key === 'ArrowRight') go('next');
+  });
+
+  document.addEventListener('astro:page-load', init);
+</script>
