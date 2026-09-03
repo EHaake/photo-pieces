@@ -598,6 +598,25 @@ describe('image links (T310, spec 004)', () => {
     expect(code).toMatch(/<a href="https:\/\/example.com\/"><img/);
   });
 
+  it("a private raster (a camera's frame) placed in a piece fails, whatever the alt (T401, spec 006)", async () => {
+    // tests/fixtures/_photo.jpg exists, so the failure is the private
+    // rule, not the missing-file check.
+    await expect(
+      renderExpectingFailure('::single{src="./_photo.jpg" alt="The raw frame"}'),
+    ).rejects.toThrow(
+      /"\.\/_photo\.jpg" is private — the camera's frame of "photo", not an image of the site: place "photo\.jpg" here/,
+    );
+    await expect(renderExpectingFailure('![x](./_photo.jpg)')).rejects.toThrow(/is private/);
+    // alt="" would skip the link (no page to link to) — the private rule
+    // still applies, since the frame is not a photograph to present.
+    await expect(renderExpectingFailure('![](./_photo.jpg)')).rejects.toThrow(/is private/);
+    await expect(
+      renderExpectingFailure(
+        '::diptych{left="./photo.jpg" right="./_photo.jpg" leftAlt="l" rightAlt=""}',
+      ),
+    ).rejects.toThrow(/is private/);
+  });
+
   it('an image beside a flat pieces/foo.md fails — the registry would never make its page', async () => {
     const flat = new URL('./src/content/pieces/flat.md', import.meta.url);
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});

@@ -14,8 +14,14 @@ import {
   formatGalleryProblems,
   humanizeBasename,
   imageUrlFor,
+  isPrivateRaster,
   mergeOverrides,
+  nearest,
+  neighbours,
   orderLatestWork,
+  passageFor,
+  pieceOrder,
+  privateMessage,
   sidecarImageId,
   validateGalleries,
 } from './image-meta.mjs';
@@ -39,6 +45,9 @@ import {
  */
 
 export interface ImageLabel {
+  /** Spec 006, sidecar-only: where and when, in the photographer's words. */
+  place?: string;
+  time?: string;
   camera?: string;
   lens?: string;
   focalLength?: string;
@@ -46,6 +55,47 @@ export interface ImageLabel {
   shutter?: string;
   iso?: string;
   date?: Date;
+}
+
+/** "How it was made" (spec 006) — sidecar fields, all optional. */
+export interface ImageRecord {
+  format?: string;
+  filters?: string;
+  support?: string;
+  processing?: string;
+}
+
+/** "The print" (spec 006) — sidecar fields, all optional. */
+export interface ImagePrint {
+  edition?: string;
+  sizes?: string;
+  paper?: string;
+}
+
+/**
+ * A set the reader can step through from an image (spec 006): a
+ * gallery in its curated order, or the piece's frames in the order the
+ * piece shows them. Neighbours are ids — resolve through `byId` — so
+ * the registry stays a tree, not a graph.
+ */
+export interface ImageSet {
+  kind: 'gallery' | 'piece';
+  /** The gallery's or piece's id. */
+  id: string;
+  title: string;
+  /** Site-root path; pages apply `withBase`. */
+  url: string;
+  /** 0-based position in the set. */
+  index: number;
+  count: number;
+  prev?: string;
+  next?: string;
+}
+
+/** The passage of the piece an image sits in — markdown source. */
+export interface ImagePassage {
+  prose?: string;
+  caption?: string;
 }
 
 export interface SiteImage {
@@ -66,6 +116,21 @@ export interface SiteImage {
   title: string;
   caption?: string;
   label: ImageLabel;
+  /** The sidecar body has content — the image's story (spec 006). */
+  hasStory: boolean;
+  record: ImageRecord;
+  print: ImagePrint;
+  /** The camera's frame (`_<basename>.<ext>` beside the image), for the
+   *  raw-to-finished compare; null when there is none. Never an image
+   *  of the site — no id, no page. */
+  before: ImageMetadata | null;
+  /** Every set this image belongs to: its galleries newest first, then
+   *  its piece. `sets[0]` is the default the page shows. */
+  sets: ImageSet[];
+  /** Ids of the nearest other frames of the same outing (the piece
+   *  folder, in the piece's order) — up to six; none at the gallery root. */
+  related: string[];
+  passage: ImagePassage | null;
 }
 
 export interface ImageRegistry {
@@ -84,6 +149,9 @@ const discovered = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true },
 );
 
+/** The related strip's cap (spec 006): the nearest frames of the outing. */
+const RELATED_LIMIT = 6;
+
 let registry: Promise<ImageRegistry> | undefined;
 
 export function getImageRegistry(): Promise<ImageRegistry> {
@@ -93,11 +161,37 @@ export function getImageRegistry(): Promise<ImageRegistry> {
 
 type Status = 'published' | 'draft' | 'unowned';
 
+// classifyContentImage's three shapes (image-meta.mjs is plain JS, and
+// its inferred union is too loose to narrow on): nested, private, image.
+type Classified = { path: string; root: string; pieceSlug: string | null } & (
+  | { nested: true }
+  | {
+      nested: false;
+      private: true;
+      folder: string;
+      basename: string;
+      target: string;
+      ext: string;
+      file: string;
+    }
+  | {
+      nested: false;
+      private: false;
+      id: string;
+      folder: string;
+      basename: string;
+      ext: string;
+      file: string;
+    }
+);
+
 async function buildRegistry(): Promise<ImageRegistry> {
   const pieces = await getCollection('pieces');
   const pieceById = new Map(pieces.map((piece) => [piece.id, piece]));
 
-  // Discovery: classify every file, drop nested ones with a warning.
+  // Discovery: classify every file, drop nested ones with a warning,
+  // set private rasters (camera's frames, spec 006) aside for their
+  // photographs — they never get an id.
   const files: {
     key: string;
     id: string;
@@ -105,12 +199,17 @@ async function buildRegistry(): Promise<ImageRegistry> {
     basename: string;
     pieceSlug: string | null;
   }[] = [];
+  const privates: { key: string; folder: string; target: string }[] = [];
   for (const key of Object.keys(discovered).sort()) {
-    const info = classifyContentImage(key);
-    if (info.nested || !('id' in info)) {
+    const info = classifyContentImage(key) as Classified;
+    if (info.nested) {
       console.warn(
         `[images] ignoring ${key}: images live directly in a piece folder or the gallery root, not in sub-folders`,
       );
+      continue;
+    }
+    if (info.private) {
+      privates.push({ key, folder: info.folder, target: info.target });
       continue;
     }
     files.push({
@@ -120,6 +219,18 @@ async function buildRegistry(): Promise<ImageRegistry> {
       basename: info.basename,
       pieceSlug: info.pieceSlug,
     });
+  }
+
+  // A piece's `cover` is a reference too: a camera's frame there would
+  // present the raw as the piece's face on every list. Body references
+  // are the transform's to refuse; this is the frontmatter half.
+  for (const piece of pieces) {
+    const coverFile = piece.data.cover?.src.split('/').pop()?.split('?')[0] ?? '';
+    if (isPrivateRaster(coverFile)) {
+      throw new Error(
+        `[images] ${piece.filePath ?? piece.id}: ${privateMessage(coverFile, coverFile.replace(/\..*$/, ''), 'choose the photograph itself as the cover')}`,
+      );
+    }
   }
 
   const collisions = findIdCollisions(files.map((f) => f.key));
@@ -148,6 +259,39 @@ async function buildRegistry(): Promise<ImageRegistry> {
       }
     }
     known.set(file.id, status);
+  }
+
+  // Camera's frames: each must sit beside its photograph — by basename,
+  // whatever the two extensions — in a folder the site knows, published
+  // or not (a frame in a draft piece's folder is fine). An orphan is
+  // the author's typo, and silence would hide it; two frames for one
+  // photograph is a choice the site can't make for them.
+  const basenamesByFolder = new Map<string, Set<string>>();
+  for (const file of files) {
+    if (!basenamesByFolder.has(file.folder)) basenamesByFolder.set(file.folder, new Set());
+    basenamesByFolder.get(file.folder)!.add(file.basename);
+  }
+  const frameProblems: string[] = [];
+  const beforeByTarget = new Map<string, ImageMetadata>();
+  for (const frame of privates) {
+    const targetId = `${frame.folder}/${frame.target}`;
+    const where = frame.key.replace(/^\//, '');
+    if (!basenamesByFolder.get(frame.folder)?.has(frame.target)) {
+      frameProblems.push(
+        `${where} has no photograph: a "_" raster is the camera's frame of the image with the same name, so "${frame.target}.<ext>" should sit beside it`,
+      );
+    } else if (beforeByTarget.has(targetId)) {
+      frameProblems.push(
+        `${where} is a second camera's frame for "${targetId}" — keep one (any accepted extension)`,
+      );
+    } else {
+      beforeByTarget.set(targetId, discovered[frame.key].default);
+    }
+  }
+  if (frameProblems.length) {
+    throw new Error(
+      `[images] camera's frame${frameProblems.length > 1 ? 's' : ''}:\n${frameProblems.join('\n')}`,
+    );
   }
 
   // Sidecars: each must describe an image that exists (published or
@@ -190,6 +334,23 @@ async function buildRegistry(): Promise<ImageRegistry> {
   }
   const galleries = [...galleryEntries].sort(byNewest);
 
+  // Each published piece's frames in the piece's own order (spec 006):
+  // the set the reader steps through from a piece, and the pool the
+  // related strip draws on.
+  const orderByFolder = new Map<string, string[]>();
+  for (const file of files) {
+    if (known.get(file.id) !== 'published' || file.pieceSlug === null) continue;
+    if (!orderByFolder.has(file.folder)) orderByFolder.set(file.folder, []);
+    orderByFolder.get(file.folder)!.push(file.basename);
+  }
+  for (const [folder, basenames] of orderByFolder) {
+    const body = pieceById.get(folder)?.body ?? '';
+    orderByFolder.set(
+      folder,
+      pieceOrder(body, basenames).map((basename) => `${folder}/${basename}`),
+    );
+  }
+
   // The published set, with labels.
   const images = await Promise.all(
     files
@@ -201,6 +362,27 @@ async function buildRegistry(): Promise<ImageRegistry> {
           await readExposure(fileURLToPath(new URL(`.${file.key}`, root))),
         );
         const label: ImageLabel = mergeOverrides(exposure, sidecar?.data);
+        Object.assign(label, pick(sidecar?.data, ['place', 'time']));
+        const inGalleries = galleries.filter((gallery) => gallery.data.images.includes(file.id));
+        const sets: ImageSet[] = inGalleries.map((gallery) => ({
+          kind: 'gallery',
+          id: gallery.id,
+          title: gallery.data.title,
+          url: `/galleries/${gallery.id}/`,
+          count: gallery.data.images.length,
+          ...neighbours(gallery.data.images, file.id),
+        }));
+        const folderOrder = orderByFolder.get(file.folder) ?? [];
+        if (piece) {
+          sets.push({
+            kind: 'piece',
+            id: piece.id,
+            title: piece.data.title,
+            url: `/pieces/${piece.id}/`,
+            count: folderOrder.length,
+            ...neighbours(folderOrder, file.id),
+          });
+        }
         const title =
           sidecar?.data.title ??
           (piece ? firstAltFor(piece.body ?? '', file.basename) : undefined) ??
@@ -212,11 +394,18 @@ async function buildRegistry(): Promise<ImageRegistry> {
           basename: file.basename,
           image: discovered[file.key].default,
           piece,
-          galleries: galleries.filter((gallery) => gallery.data.images.includes(file.id)),
+          galleries: inGalleries,
           sidecar,
           title,
           caption: sidecar?.data.caption,
           label,
+          hasStory: (sidecar?.body ?? '').trim() !== '',
+          record: pick(sidecar?.data, ['format', 'filters', 'support', 'processing']),
+          print: pick(sidecar?.data, ['edition', 'sizes', 'paper']),
+          before: beforeByTarget.get(file.id) ?? null,
+          sets,
+          related: piece ? nearest(folderOrder, file.id, RELATED_LIMIT) : [],
+          passage: piece ? passageFor(piece.body ?? '', file.basename) : null,
         };
       }),
   );
@@ -238,6 +427,20 @@ async function buildRegistry(): Promise<ImageRegistry> {
     latest: (limit) =>
       orderLatestWork(galleryLists, captureDates, limit).map((id: string) => byId.get(id)!),
   };
+}
+
+// The named sidecar fields that are non-empty strings, as an object —
+// an author clearing a field in Obsidian shouldn't leave a blank row.
+function pick<K extends string>(
+  data: Partial<Record<K, string>> | undefined,
+  keys: readonly K[],
+): Partial<Record<K, string>> {
+  const out: Partial<Record<K, string>> = {};
+  for (const key of keys) {
+    const value = data?.[key];
+    if (typeof value === 'string' && value.trim() !== '') out[key] = value.trim();
+  }
+  return out;
 }
 
 function byNewest(a: CollectionEntry<'galleries'>, b: CollectionEntry<'galleries'>): number {

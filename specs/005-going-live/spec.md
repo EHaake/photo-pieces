@@ -52,7 +52,12 @@ DNS + dashboard only, zero code change.
       fixture galleries `fog-frames`, `editors-picks`, and the four
       ladder galleries `one-ratio`, `near-ratios`, `both-orientations`,
       `every-ratio`, and the sidecars `_land-b.md` (in
-      `where-the-fog-lets-go`) and `_dock-b.md`
+      `where-the-fog-lets-go`) and `_dock-b.md`. Spec 006 added to
+      those two sidecars a fixture story and, in `_land-b.md`, every
+      rich-page field — invented copy, all of it — and the camera's
+      frame `where-the-fog-lets-go/_land-b.jpg` (a private raster that
+      carries a deliberate GPS block): drafting the piece removes its
+      page, but the frame and both sidecars are deleted with the rest
 - [ ] The custom-domain flip is executed: `erikhaakephoto.com` serves
       the site over HTTPS via Squarespace DNS records (registration
       stays at Squarespace), canonicals match

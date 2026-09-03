@@ -96,6 +96,19 @@ describe('gallery validation (T305)', () => {
     ]);
   });
 
+  it("a camera's frame is refused for what it is, not as an unknown id (T401)", () => {
+    // Private rasters are never in `known`, so the generic unknown-id
+    // branch would fire without this rule — the reason names the frame's
+    // photograph instead of guessing at a typo.
+    const problems = validateGalleries([gallery('raw', 'a-piece/_land-b')], known);
+    expect(problems.map((p) => [p.line, p.reason])).toEqual([
+      [
+        5,
+        '"a-piece/_land-b" is a camera\'s frame, not an image of the site — list "a-piece/land-b" instead',
+      ],
+    ]);
+  });
+
   it('finds the line for quoted ids and falls back to any mention', () => {
     const quoted = {
       id: 'q',

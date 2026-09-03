@@ -119,6 +119,27 @@ const GALLERY_IMAGES = [
   ],
 ];
 
+// Camera's frames (spec 006): a private raster `_<basename>.jpg` beside
+// its photograph, shown only on that image's page as the "before" of
+// the raw-to-finished compare. Deliberately a different crop (4:3
+// against the 3:2 photograph) so the page's letterbox path is
+// exercised, flattened to read as unprocessed, and carrying GPS so the
+// post-build scan has a real block to find if a private raster ever
+// reaches the output untouched — which it did once, at T403, when the
+// registry imported it before any page rendered it (the pruner's rule
+// changed for that; DECISIONS.md).
+const FRAMES = [
+  [
+    'src/content/pieces/where-the-fog-lets-go/_land-b.jpg',
+    1600,
+    1200,
+    'slate',
+    '4:3 · camera',
+    { ...exif('24', '11', '1/60', '200', '2026:08:28 07:02:40'), ...TRAFALGAR_GPS },
+    { flat: true },
+  ],
+];
+
 // The ratio ladder (spec 004, T304A): the gallery-root set behind the
 // four graded fixture galleries — every ratio the grid has to cope
 // with, each frame labelled with its ratio and its number so gallery
@@ -189,16 +210,17 @@ const svgOverlay = (w, h, [, dark], label) => `
         font-size="${Math.round(Math.min(w, h) * 0.05)}" fill="#ffffff" fill-opacity="0.55">${label}</text>
 </svg>`;
 
-async function writePlaceholder(path, w, h, palette, label, meta) {
+async function writePlaceholder(path, w, h, palette, label, meta, options = {}) {
   const [light] = PALETTE[palette];
   await mkdir(dirname(path), { recursive: true });
-  await sharp({
+  let image = sharp({
     create: { width: w, height: h, channels: 3, background: light },
-  })
-    .composite([{ input: Buffer.from(svgOverlay(w, h, PALETTE[palette], label)) }])
-    .withExif(meta)
-    .jpeg({ quality: 82 })
-    .toFile(path);
+  }).composite([{ input: Buffer.from(svgOverlay(w, h, PALETTE[palette], label)) }]);
+  if (options.flat) {
+    // The unprocessed look: colour drained, shadows lifted, no punch.
+    image = image.modulate({ saturation: 0.3, brightness: 1.08 }).linear(0.75, 32);
+  }
+  await image.withExif(meta).jpeg({ quality: 82 }).toFile(path);
 }
 
 const target = process.argv[2] ?? 'all';
@@ -216,6 +238,13 @@ if (target === 'all' || target === 'gallery') {
   for (const [path, w, h, palette, label, meta] of GALLERY_IMAGES) {
     await writePlaceholder(path, w, h, palette, label, meta);
     console.log('wrote gallery image →', path);
+  }
+}
+
+if (target === 'all' || target === 'frames') {
+  for (const [path, w, h, palette, label, meta, options] of FRAMES) {
+    await writePlaceholder(path, w, h, palette, label, meta, options);
+    console.log("wrote camera's frame →", path);
   }
 }
 

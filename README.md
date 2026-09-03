@@ -16,7 +16,8 @@ The "why" behind this project lives in these, not in this file:
   architecture rules, git conventions
 - `specs/<NNN>-<slug>/` — the spec, plan, and tasks for each build
   phase (001 foundation, 002 identity/teardown, 003 block vocabulary,
-  004 galleries and image pages, 005 going live — deferred)
+  004 galleries and image pages, 005 going live — deferred, 006 the
+  rich image page)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
@@ -84,20 +85,20 @@ Three minutes apart. Captions take _inline markdown_.
 :::
 ```
 
-| Block       | Forms          | Attributes                                                                                         | Matted | Obsidian Live Preview |
-| ----------- | -------------- | -------------------------------------------------------------------------------------------------- | ------ | --------------------- |
-| `single`    | leaf/container | `src` `alt`                                                                                        | yes    | image (leaf)          |
-| `inset`     | leaf/container | `src` `alt`                                                                                        | yes    | image (leaf)          |
-| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                    | yes¹   | image (leaf)          |
-| `fullbleed` | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
-| `tall`      | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
-| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed` | yes²   | images (leaf)         |
-| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                            | yes²   | images (leaf)         |
-| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                         | yes    | raw text              |
-| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption               | no     | raw text              |
-| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                            | yes    | raw text              |
-| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                       | yes    | raw text              |
-| `sequence`  | reserved       | fails the build until its presentation is designed (`ROADMAP.md`)                                  | —      | —                     |
+| Block       | Forms          | Attributes                                                                                                                    | Matted | Obsidian Live Preview |
+| ----------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------- |
+| `single`    | leaf/container | `src` `alt`                                                                                                                   | yes    | image (leaf)          |
+| `inset`     | leaf/container | `src` `alt`                                                                                                                   | yes    | image (leaf)          |
+| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                                               | yes¹   | image (leaf)          |
+| `fullbleed` | leaf/container | `src` `alt`                                                                                                                   | no     | image (leaf)          |
+| `tall`      | leaf/container | `src` `alt`                                                                                                                   | no     | image (leaf)          |
+| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed`                            | yes²   | images (leaf)         |
+| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                                                       | yes²   | images (leaf)         |
+| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                                                    | yes    | raw text              |
+| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption                                          | no     | raw text              |
+| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                                                       | yes    | raw text              |
+| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                                                  | yes    | raw text              |
+| `sequence`  | reserved       | fails the build until its presentation is designed (`ROADMAP.md`; the image page's compare is a page section, not this block) | —      | —                     |
 
 ¹ the bled edge runs clean. ² dropped at `width="fullbleed"`.
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
@@ -130,7 +131,16 @@ page shows the image matted, its title, a wall label of exposure info
 read from the file's EXIF (camera, lens, focal length, aperture,
 shutter, ISO, capture date), the piece it came from, the galleries it
 sits in, and an optional caption. Every image in a piece links there;
-so does every gallery cell. Rules the build enforces: piece folders
+so does every gallery cell. Since spec 006 the page grows with what
+the sidecar carries, each section only when it exists: the image's
+own story (the sidecar body, ahead of the label), place and time at
+the label's head, "How it was made", a raw-to-finished compare
+against the camera's frame, the passage of the piece the image sits
+in, related frames from the same outing, and "The print" with an
+enquiry link. Every page has a neighbour line for the set the reader
+is stepping through (the gallery or piece they came from; arrow keys
+work), and a quiet view — click the photograph — that dims the ground
+and gives the frame the viewport. Rules the build enforces: piece folders
 must be slugs and file names URL-safe (letters, digits, `.`, `-`,
 `_`), an image directly in `pieces/` or beside a flat `pieces/foo.md`
 fails, a file nested in a sub-folder is ignored with a warning (a
@@ -139,10 +149,10 @@ extension are a collision, and a `draft: true` piece unpublishes its
 images with it. Moving or renaming an image changes its URL — there
 are no redirects yet.
 
-**Sidecar** — optional, frontmatter-only, `_<basename>.md` beside the
-image (the underscore keeps it out of the pieces collection). Every
-field is optional; label fields override the EXIF-derived value as
-written:
+**Sidecar** — optional, `_<basename>.md` beside the image (the
+underscore keeps it out of the pieces collection). Every field is
+optional; label fields override the EXIF-derived value as written;
+the body is the image's story:
 
 ```yaml
 ---
@@ -155,10 +165,27 @@ focalLength: 35 mm
 aperture: f/8
 shutter: 1/250 s
 iso: ISO 400
+place: The headlands above the cove # prose, never coordinates
+time: 06:40, forty minutes before sunrise
+format: Digital, full-frame # "How it was made": format, filters, support, processing
+filters: None
+support: Tripod
+processing: Single frame; shadows lifted on the ridge.
+edition: Open edition # "The print": edition, sizes, paper
+sizes: 12 × 18, 16 × 24 inches
+paper: Hahnemühle Photo Rag Baryta
 ---
+The story, in the photographer's words — ordinary markdown.
 ```
 
 A sidecar naming an image that doesn't exist fails the build.
+
+**The camera's frame** — `_<basename>.<ext>` beside the photograph
+(`_land-b.jpg` beside `land-b.jpg`) is its unprocessed frame, shown
+only as the "before" of that page's compare. Any raster with a
+leading underscore is private: no page, never in a gallery, and a
+piece that places one fails the build; a frame with no photograph
+beside it fails too. See `AUTHORING.md` for the export.
 
 **Gallery** — `src/content/galleries/<slug>.md`, a hand-curated,
 ordered list of image ids with one category; `cover` defaults to the
@@ -263,11 +290,12 @@ photo-pieces/
 ├── src/
 │   ├── consts.ts                 # site identity
 │   ├── content.config.ts         # pieces, galleries, imageMeta collections
-│   ├── content/pieces/           # one folder per piece + its images (+ _sidecars)
+│   ├── content/pieces/           # one folder per piece + its images (+ _sidecars, _camera's frames)
 │   ├── content/gallery-images/   # images that belong to no piece
 │   ├── content/galleries/        # one file per gallery
 │   ├── lib/pieces.ts             # the one published-pieces query
-│   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries)
+│   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, sets)
+│   ├── lib/gallery-layout.ts     # the equal-short-side packing knobs (galleries, related strips)
 │   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
