@@ -1,6 +1,7 @@
 # Spec: The Rich Image Detail Page
 
-**Status**: Draft — for photographer review (spec gate)
+**Status**: Approved (photographer, spec review 2026-09-02) — plan.md
+follows
 **Depends on**: 004 (the image registry, the image page at its
 baseline, sidecars, galleries). Feeds the future processing-showcase
 spec and the shop spec (`ROADMAP.md`).
@@ -115,12 +116,15 @@ carry all of them.
 The reader arrives from a gallery or a piece. The photograph fills the
 first viewport as today. Below the frame, a slim line names the set and
 offers previous and next; the arrow keys do the same. Below that: the
-category eyebrow and title, then the wall label with place and time at
+category eyebrow and title, then — if written — the photograph's story,
+directly under its title. Then the wall label with place and time at
 its head and the exposure rows after, the caption, and the piece and
-gallery links. Then, each only if written: the photograph's story; the
-record of how it was made; the raw-to-finished compare with its note;
-the passage of the piece the image sits in, quoted, with a link to read
-it in place; related frames; the print record with its enquiry link.
+gallery links. Then, each only if written: the record of how it was
+made; the raw-to-finished compare with its note; the passage of the
+piece the image sits in, quoted, with a link to read it in place;
+related frames; the print record with its enquiry link. A photograph
+with no story reads title, label, and onward — the same page with one
+section absent.
 
 ### Looking
 
@@ -154,12 +158,14 @@ subject.
 
 ## Design requirements
 
-- **One page, growing.** The 004 page is the floor. Sections join
-  below the label in a fixed reading order — story, how it was made,
-  raw to finished, context, print — separated by the label's hairline
-  rhythm, each with a short heading except the story, whose heading is
-  the photograph's title. The mock-up's "label first" order is the
-  default; see Open questions.
+- **One page, growing.** The 004 page is the floor. The story, when
+  there is one, comes first — directly under the title, before the
+  label (photographer: the story is primary, the settings secondary
+  though still important). The rest joins below the label in a fixed
+  reading order — how it was made, raw to finished, context, print —
+  separated by the label's hairline rhythm, each with a short heading.
+  The story has no heading of its own: the photograph's title, already
+  above it, is its heading.
 - **The label stays typographic** (brief): place and time are label
   rows, not a map, not a badge. Rows with sentence-length values (the
   processing note, the print record) stack in a single column rather
@@ -257,16 +263,18 @@ subject.
 - **Default set when arrival is unknown**: the newest gallery that
   holds the image, else the piece's order. (Static pages cannot know
   the referrer at build; the plan decides whether a lightweight
-  page-level enhancement can honour the actual route in.)
-
-## Open questions
-
-- **Label first or story first?** The mock-up offers both. Recommended:
-  label first, always — the wall label is the signature element and
-  reads the same on every page, and the story extends it; a story-first
-  page would look different from a story-less one. Decide at spec
-  review.
-- **The story's heading.** None (the title serves), or a small heading
-  such as "About this frame"? The mock-up has none.
-- **The enquiry action's wording**, and the print rows' names — the
-  photographer's own words (design brief: voice).
+  page-level enhancement can honour the actual route in.) Accepted by
+  the photographer at spec review.
+- **Story first** (photographer, spec review, over the recommendation
+  of label first): when a photograph has a story it sits directly
+  under the title, ahead of the label — the story is primary, the
+  settings secondary though still important. A photograph without a
+  story is the same page minus that section.
+- **No heading on the story** (photographer): the title already above
+  it is its heading.
+- **The mock-up's wording stands** for the print section ("The print";
+  Edition, Sizes, Paper; "Ask about a print") — the photographer will
+  retune to taste later, so the words live in one obvious place.
+- **The camera's frame's naming and location** are delegated to the
+  plan (photographer: "I'll let you decide how it should work for the
+  raw file").
