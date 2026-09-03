@@ -15,7 +15,11 @@ import {
   humanizeBasename,
   imageUrlFor,
   mergeOverrides,
+  nearest,
+  neighbours,
   orderLatestWork,
+  passageFor,
+  pieceOrder,
   sidecarImageId,
   validateGalleries,
 } from './image-meta.mjs';
@@ -66,6 +70,32 @@ export interface ImagePrint {
   paper?: string;
 }
 
+/**
+ * A set the reader can step through from an image (spec 006): a
+ * gallery in its curated order, or the piece's frames in the order the
+ * piece shows them. Neighbours are ids — resolve through `byId` — so
+ * the registry stays a tree, not a graph.
+ */
+export interface ImageSet {
+  kind: 'gallery' | 'piece';
+  /** The gallery's or piece's id. */
+  id: string;
+  title: string;
+  /** Site-root path; pages apply `withBase`. */
+  url: string;
+  /** 0-based position in the set. */
+  index: number;
+  count: number;
+  prev?: string;
+  next?: string;
+}
+
+/** The passage of the piece an image sits in — markdown source. */
+export interface ImagePassage {
+  prose?: string;
+  caption?: string;
+}
+
 export interface SiteImage {
   /** `<piece-folder>/<basename>` or `gallery/<basename>`. */
   id: string;
@@ -92,6 +122,13 @@ export interface SiteImage {
    *  raw-to-finished compare; null when there is none. Never an image
    *  of the site — no id, no page. */
   before: ImageMetadata | null;
+  /** Every set this image belongs to: its galleries newest first, then
+   *  its piece. `sets[0]` is the default the page shows. */
+  sets: ImageSet[];
+  /** Ids of the nearest other frames of the same outing (the piece
+   *  folder, in the piece's order) — up to six; none at the gallery root. */
+  related: string[];
+  passage: ImagePassage | null;
 }
 
 export interface ImageRegistry {
@@ -109,6 +146,9 @@ const discovered = import.meta.glob<{ default: ImageMetadata }>(
   '/src/content/{pieces,gallery-images}/**/*.{jpg,jpeg,png,webp,avif,tiff,JPG,JPEG,PNG,WEBP,AVIF,TIFF}',
   { eager: true },
 );
+
+/** The related strip's cap (spec 006): the nearest frames of the outing. */
+const RELATED_LIMIT = 6;
 
 let registry: Promise<ImageRegistry> | undefined;
 
@@ -280,6 +320,23 @@ async function buildRegistry(): Promise<ImageRegistry> {
   }
   const galleries = [...galleryEntries].sort(byNewest);
 
+  // Each published piece's frames in the piece's own order (spec 006):
+  // the set the reader steps through from a piece, and the pool the
+  // related strip draws on.
+  const orderByFolder = new Map<string, string[]>();
+  for (const file of files) {
+    if (known.get(file.id) !== 'published' || file.pieceSlug === null) continue;
+    if (!orderByFolder.has(file.folder)) orderByFolder.set(file.folder, []);
+    orderByFolder.get(file.folder)!.push(file.basename);
+  }
+  for (const [folder, basenames] of orderByFolder) {
+    const body = pieceById.get(folder)?.body ?? '';
+    orderByFolder.set(
+      folder,
+      pieceOrder(body, basenames).map((basename) => `${folder}/${basename}`),
+    );
+  }
+
   // The published set, with labels.
   const images = await Promise.all(
     files
@@ -293,6 +350,26 @@ async function buildRegistry(): Promise<ImageRegistry> {
         const label: ImageLabel = mergeOverrides(exposure, sidecar?.data);
         if (sidecar?.data.place) label.place = sidecar.data.place;
         if (sidecar?.data.time) label.time = sidecar.data.time;
+        const inGalleries = galleries.filter((gallery) => gallery.data.images.includes(file.id));
+        const sets: ImageSet[] = inGalleries.map((gallery) => ({
+          kind: 'gallery',
+          id: gallery.id,
+          title: gallery.data.title,
+          url: `/galleries/${gallery.id}/`,
+          count: gallery.data.images.length,
+          ...neighbours(gallery.data.images, file.id),
+        }));
+        const folderOrder = orderByFolder.get(file.folder) ?? [];
+        if (piece) {
+          sets.push({
+            kind: 'piece',
+            id: piece.id,
+            title: piece.data.title,
+            url: `/pieces/${piece.id}/`,
+            count: folderOrder.length,
+            ...neighbours(folderOrder, file.id),
+          });
+        }
         const title =
           sidecar?.data.title ??
           (piece ? firstAltFor(piece.body ?? '', file.basename) : undefined) ??
@@ -304,7 +381,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
           basename: file.basename,
           image: discovered[file.key].default,
           piece,
-          galleries: galleries.filter((gallery) => gallery.data.images.includes(file.id)),
+          galleries: inGalleries,
           sidecar,
           title,
           caption: sidecar?.data.caption,
@@ -313,6 +390,9 @@ async function buildRegistry(): Promise<ImageRegistry> {
           record: pick(sidecar?.data, ['format', 'filters', 'support', 'processing']),
           print: pick(sidecar?.data, ['edition', 'sizes', 'paper']),
           before: beforeByTarget.get(file.id) ?? null,
+          sets,
+          related: piece ? nearest(folderOrder, file.id, RELATED_LIMIT) : [],
+          passage: piece ? passageFor(piece.body ?? '', file.basename) : null,
         };
       }),
   );

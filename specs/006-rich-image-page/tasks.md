@@ -91,7 +91,7 @@ headers to confirm nothing was duplicated or dropped. -->
       path (reverted); a temporary `_land-a.png` beside a temporarily
       `draft: true` piece does not fail (reverted); the post-build GPS
       scan passes; 149+ tests green._
-- [ ] **T405** — Registry, part two: `sets` (every gallery holding the
+- [x] **T405** — Registry, part two: `sets` (every gallery holding the
       image, newest first, then the piece's `pieceOrder` set; each with
       index, count, prev and next **ids**), `related` (ids of the six
       nearest folder frames in piece order, private rasters excluded,
@@ -102,7 +102,9 @@ headers to confirm nothing was duplicated or dropped. -->
       folder's seven other frames in piece order with `_land-b`
       absent, `passage` = the "By half past…" paragraph with the wide
       block's caption; `gallery/dock-b` has sets from its galleries
-      only and no related; build green._
+      only and no related; build green. (Done: `land-b` is in Fog frames
+      only, so the multi-gallery case was read off `pano` — Fog frames
+      4 of 4 with no next, Editor's picks 6 of 6, the piece 6 of 8.)_
 
 ## Phase 2 — The page (review after the phase; visual gate at its end)
 
