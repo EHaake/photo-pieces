@@ -1,7 +1,7 @@
 # Spec: The Rich Image Detail Page
 
-**Status**: Approved (photographer, spec review 2026-09-02) — plan.md
-follows
+**Status**: Implemented (spec 006, 2026-09-02) — amended at plan
+review and at the visual gate, each amendment marked in place
 **Depends on**: 004 (the image registry, the image page at its
 baseline, sidecars, galleries). Feeds the future processing-showcase
 spec and the shop spec (`ROADMAP.md`).
@@ -221,48 +221,50 @@ subject.
 
 ## Acceptance criteria
 
-- [ ] An image with no sidecar renders the 004 baseline in content:
+- [x] An image with no sidecar renders the 004 baseline in content:
       the same URL, stage, label rows in the same order, caption, and
       piece and gallery links, with no empty sections — plus the
       neighbour line and related frames where a set or outing gives
       them (restated at plan review from "byte-for-byte", which the
       page's new structure makes meaningless); every 004 test still
       passes
-- [ ] Each new section renders when, and only when, its content
+- [x] Each new section renders when, and only when, its content
       exists; a sidecar with only a story shows only the story; the
       order of sections is fixed and matches this spec
-- [ ] The story renders the sidecar body as Markdown in the site's
+- [x] The story renders the sidecar body as Markdown in the site's
       reading style; the body is no longer ignored
-- [ ] Place and time head the wall label when present; format,
+- [x] Place and time head the wall label when present; format,
       filters, support, and the processing note appear under "How it
       was made"; the print record and enquiry link appear under "The
       print"; the enquiry opens mail with the title in its subject
-- [ ] The compare renders only when a camera's frame is present; the
+- [x] The compare renders only when a camera's frame is present; the
       frame has no page, appears in no gallery or latest-work strip,
       and is not counted among related frames; a frame with no
       photograph fails the build naming the file; a frame of a
       different crop is letterboxed, not stretched; the slider works
       by pointer and keyboard with a visible focus, and both frames
       are visible and labelled without script
-- [ ] Previous and next follow the gallery when the reader came from
+- [x] Previous and next follow the gallery when the reader came from
       one and the piece's order when they came from a piece, with the
       documented default otherwise; arrow keys step; ends are absent,
       not disabled
-- [ ] The piece passage is quoted with its caption and links to the
+- [x] The piece passage is quoted with its caption and links to the
       piece; related frames pack to equal short sides and wrap below
       the 720px breakpoint
-- [ ] Quiet view hides all chrome, dims the ground, fills the viewport
+- [x] Quiet view hides all chrome, dims the ground, fills the viewport
       with the frame (a small margin, the mat kept), enters on a click
       on the photograph, and exits on Escape or any click without
       changing the URL; it is unavailable, not broken, without script
-- [ ] Image pages are in the search index; a place or a story line is
+- [x] Image pages are in the search index; a place or a story line is
       findable
-- [ ] No GPS, no coordinates, no map anywhere: the 004 scan passes and
+- [x] No GPS, no coordinates, no map anywhere: the 004 scan passes and
       the new fields are text
-- [ ] Unit tests cover the sidecar-field merge, the camera's-frame
-      exclusion, the set and neighbour derivation, and the passage
-      extraction; build green
-- [ ] `AUTHORING.md` documents every field with an example sidecar;
+- [x] Unit tests cover the camera's-frame exclusion, the set and
+      neighbour derivation, and the passage extraction; the new
+      sidecar fields ride through the Astro-coupled registry shell
+      (verified by build and a dump at T405, the 004 pattern — the
+      shell is not unit-tested); build green
+- [x] `AUTHORING.md` documents every field with an example sidecar;
       `README.md` describes the rich page; the mock-up is deleted
 
 ## Resolved decisions

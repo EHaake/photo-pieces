@@ -8,32 +8,36 @@ attached.
   images. Deferred out of `specs/001-site-foundation` because it's a
   substantial feature in its own right (payments, fulfillment,
   licensing) that deserves its own spec once the core site exists.
-- **The rich image detail page** — the photographer's motivating
-  feature: an image page richer than any site builder offers — deep
-  metadata, the image's own story, potentially its own writing, and
-  eventually the print-sales entry point. Spec 004 (shipped) gives
-  every image a stable id and URL (`/images/<folder>/<basename>/`), an
-  image-first page with a baseline wall label (title, exposure info
-  from EXIF with sidecar overrides, piece and gallery links, caption),
-  and a metadata model to grow from: the sidecar's frontmatter is the
-  label today and its body is deliberately reserved for the image's
-  own writing. The rich version is spec 006, in progress: its shape was
-  chosen from a mock-up on the dev server (the photographer kept every
-  proposed section — writing, place and time, the capture record, a
-  raw-to-finished compare, context, print enquiry, quiet view — each
-  optional per image).
+- ~~**The rich image detail page**~~ — done in spec 006, on the
+  foundation spec 004 laid: the sidecar body is the image's story;
+  place, time, "How it was made", and "The print" (with an enquiry
+  link until the shop) are sidecar fields; a raw-to-finished compare
+  against a private camera's frame (`_<basename>.<ext>`); the passage
+  of the piece the image sits in; related frames of the outing; a
+  neighbour line and arrow keys through the gallery or piece the
+  reader came from; quiet view on a dimmed ground; image pages with
+  something to find in the search index. Every section optional per
+  image — the 004 page is the floor. Follow-ups it surfaced: set
+  selection needs a click on this site (a typed URL shows the default
+  set); the passage is the nearest earlier prose block, a heuristic;
+  one camera's frame per photograph (a sequence of frames is the
+  showcase's to design); the page's wording is a `const` block in the
+  page, retuned by hand; the print enquiry is `mailto:` until the shop
+  spec; galleries' `sizes`/srcset math and the related strip's now
+  share `gallery-layout.ts`, so a density change is one number.
 - **The processing showcase** — the photographer's own reason for
   building the site rather than using a builder: presenting
   post-processing as a semi-interactive, semi-educative showcase of how
   processing is core to the work and how creative and transformative it
   can be — ideas for workflow, and how specific techniques and
   approaches change an image, more than tool-specific step lists
-  (though those aren't ruled out). Spec 006 ships the seed: a single
-  raw-to-finished compare slider on the image page with a processing
-  note. The showcase itself needs its own spec and design exploration
-  once real processed work exists to test against: it could be part of
-  the image detail page, its own kind of piece, or spread across both.
-  Subsumes the `sequence` block's open interaction design below.
+  (though those aren't ruled out). Spec 006 shipped the seed: a single
+  raw-to-finished compare slider on the image page, fed by a private
+  camera's frame beside the photograph, with the processing note. The
+  showcase itself needs its own spec and design exploration once real
+  processed work exists to test against: it could be part of the image
+  detail page, its own kind of piece, or spread across both. Subsumes
+  the `sequence` block's open interaction design below.
 - ~~**Galleries and image pages**~~ — done in spec 004: the image
   registry, image pages, named galleries with a category (rows packed
   to equal short sides in editorial order — the photographer's rule
@@ -44,8 +48,9 @@ attached.
   URL with no redirect (fine while nothing is live — a redirect map
   becomes worth having once URLs are public); an image's page doesn't
   distinguish "referenced by the piece" from "in the folder", and an
-  image can belong to one piece only; image pages aren't in Pagefind's
-  index (only piece bodies are); and the post-build pruner
+  image can belong to one piece only; image pages were not in
+  Pagefind's index (spec 006 indexes the ones with something to find);
+  and the post-build pruner
   (`scripts/prune-unreferenced-originals.mjs`) exists because Astro
   leaves untouched originals in the output — worth an upstream issue,
   and a no-op if they fix it.
@@ -66,10 +71,10 @@ attached.
   project repo becomes a real need.
 - **The "sequence" block's final interaction design** — the underlying
   data (an ordered list of image + label pairs, for image-processing/
-  editing narratives) is reserved in the content model now. Spec 006
-  gives it a first presentation on the image page — a before/after
-  compare slider between the camera's frame and the finished
-  photograph. The fuller presentation — carousel, step-through,
+  editing narratives) is reserved in the content model now, and the
+  directive still fails the build. Spec 006's before/after compare on
+  the image page is a page section fed by a sidecar-side convention,
+  not this block. The block's presentation — carousel, step-through,
   multi-step narratives — belongs to the processing showcase entry
   above, once real processing-themed pieces exist to test it against.
 - **Internal piece-to-piece link rewriting** — links between pieces
