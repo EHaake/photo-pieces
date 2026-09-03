@@ -44,7 +44,7 @@ headers to confirm nothing was duplicated or dropped. -->
       referencing a private raster fails, message quoted); each new
       test shown to fail with its rule broken (report once, restore);
       149 tests + new green; build green._
-- [ ] **T402** — Pure rules, part two: `pieceOrder(body, basenames)`,
+- [x] **T402** — Pure rules, part two: `pieceOrder(body, basenames)`,
       `neighbours(list, id)`, `nearest(list, id, limit)`,
       `passageFor(body, basename)`, and `sectionsFor(image)` (the
       spec's section order, shared by the page). _Verify: vitest —

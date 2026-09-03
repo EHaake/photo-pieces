@@ -213,6 +213,174 @@ export function referencesImage(text, basename) {
   return false;
 }
 
+/**
+ * The frames of a piece folder in the piece's own order (spec 006): the
+ * order the body first references them, then the unreferenced ones by
+ * name. Drives the piece set (previous/next) and the related strip.
+ */
+export function pieceOrder(body, basenames) {
+  // Rank by reference order, not text offset: a pair's two slots share
+  // one offset, and left must still come before right.
+  const firstAt = new Map();
+  let rank = 0;
+  for (const ref of imageReferences(body)) {
+    rank += 1;
+    for (const basename of basenames) {
+      if (!firstAt.has(basename) && refersTo(ref.src, basename)) firstAt.set(basename, rank);
+    }
+  }
+  const referenced = [...basenames]
+    .filter((b) => firstAt.has(b))
+    .sort((a, b) => firstAt.get(a) - firstAt.get(b));
+  const unreferenced = [...basenames].filter((b) => !firstAt.has(b)).sort();
+  return [...referenced, ...unreferenced];
+}
+
+/**
+ * Where `id` sits in an ordered list and what surrounds it: `{ index,
+ * prev?, next? }`, with the ends simply absent. An id not in the list
+ * has index -1 and no neighbours.
+ */
+export function neighbours(list, id) {
+  const index = list.indexOf(id);
+  if (index < 0) return { index };
+  const out = { index };
+  if (index > 0) out.prev = list[index - 1];
+  if (index < list.length - 1) out.next = list[index + 1];
+  return out;
+}
+
+/**
+ * Up to `limit` other entries nearest to `id` in list order — half on
+ * each side where the list allows, the balance from the longer side at
+ * either end — in list order. Empty for an id not in the list.
+ */
+export function nearest(list, id, limit) {
+  const at = list.indexOf(id);
+  if (at < 0 || limit <= 0) return [];
+  let lo = at;
+  let hi = at;
+  let taken = 0;
+  // Grow outwards, alternating sides, until the cap or the list ends.
+  while (taken < limit && (lo > 0 || hi < list.length - 1)) {
+    if (lo > 0 && (taken % 2 === 0 || hi >= list.length - 1)) {
+      lo -= 1;
+      taken += 1;
+    } else if (hi < list.length - 1) {
+      hi += 1;
+      taken += 1;
+    }
+  }
+  return list.slice(lo, hi + 1).filter((other) => other !== id);
+}
+
+/**
+ * The passage of a piece an image sits in (spec 006): the nearest prose
+ * block before the body's first reference to the image, plus the
+ * caption of the container block that holds the reference, if any —
+ * both as markdown source. A prose block is one with no image reference
+ * and no directive; a heading doesn't count. Null when the body never
+ * references the image.
+ */
+export function passageFor(body, basename) {
+  const blocks = splitBlocks(body);
+  const hit = blocks.findIndex((block) => referencesImage(block.text, basename));
+  if (hit < 0) return null;
+  const out = {};
+  for (let i = hit - 1; i >= 0; i--) {
+    if (blocks[i].kind === 'prose') {
+      out.prose = blocks[i].text;
+      break;
+    }
+  }
+  if (blocks[hit].kind === 'container') {
+    const caption = blocks[hit].text
+      .split('\n')
+      .slice(1)
+      .filter((line) => {
+        const t = line.trim();
+        return t !== '' && t !== ':::' && !t.startsWith('![') && !t.startsWith('::');
+      })
+      .map((line) => line.trim())
+      .join(' ');
+    if (caption) out.caption = caption;
+  }
+  return out.prose || out.caption ? out : null;
+}
+
+// A piece body as blocks: container directives (`:::name … :::`, kept
+// whole so a caption after a blank line stays with its block), leaf
+// directives, image-bearing paragraphs, headings, and prose.
+function splitBlocks(body) {
+  const lines = String(body).split(/\r?\n/);
+  const blocks = [];
+  let current = [];
+  let inContainer = false;
+  const flush = () => {
+    const text = current.join('\n').trim();
+    if (text) blocks.push({ text, kind: kindOf(text) });
+    current = [];
+  };
+  for (const line of lines) {
+    const t = line.trim();
+    if (inContainer) {
+      current.push(line);
+      if (t === ':::') {
+        inContainer = false;
+        flush();
+      }
+      continue;
+    }
+    if (t.startsWith(':::')) {
+      flush();
+      current.push(line);
+      inContainer = true;
+      continue;
+    }
+    if (t === '') {
+      flush();
+      continue;
+    }
+    current.push(line);
+  }
+  flush();
+  return blocks;
+}
+
+function kindOf(text) {
+  if (text.startsWith(':::')) return 'container';
+  if (text.startsWith('::')) return 'leaf';
+  if (text.startsWith('#')) return 'heading';
+  if (/!\[/.test(text)) return 'image';
+  return 'prose';
+}
+
+/**
+ * The image page's sections, in the spec's reading order, for one
+ * image — the single statement of "renders when, and only when". The
+ * label is always present. The processing note has one home: it
+ * belongs to the compare when the camera's frame exists, and to the
+ * record otherwise, so a record of processing alone doesn't render a
+ * section beside the compare that already carries it.
+ */
+export function sectionsFor(image) {
+  const has = (value) => typeof value === 'string' && value.trim() !== '';
+  const record = image.record ?? {};
+  const print = image.print ?? {};
+  const recordShown =
+    [record.format, record.filters, record.support].some(has) ||
+    (!image.before && has(record.processing));
+  const sections = [];
+  if (image.hasStory) sections.push('story');
+  sections.push('label');
+  if (recordShown) sections.push('record');
+  if (image.before) sections.push('compare');
+  if (image.passage) sections.push('passage');
+  if (image.related?.length) sections.push('related');
+  if ([print.edition, print.sizes, print.paper].some(has)) sections.push('print');
+  return sections;
+}
+
 // Every image reference in document order, as `{ src, alt, index }`:
 // shorthand `![alt](./x.jpg)`, a directive's `src="./x.jpg" alt="…"`,
 // and the pair/triptych `left|center|right` slots with their `…Alt`.
