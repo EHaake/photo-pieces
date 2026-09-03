@@ -21,9 +21,10 @@ rich version, in the shape chosen from the mock-up reviewed on
 - **Place and time** — where and when, in the photographer's words.
 - **How it was made** — the capture record beyond exposure: format,
   filters, support, and a processing note.
-- **Raw to finished** — the reserved `sequence` block's first real
-  presentation: a compare slider between the camera's frame and the
-  finished photograph. The seed of the processing showcase.
+- **Raw to finished** — a compare slider between the camera's frame
+  and the finished photograph. The seed of the processing showcase; a
+  page section, not a directive — the reserved `sequence` block stays
+  reserved (corrected at plan review).
 - **Context** — the piece paragraph the image sits in, previous and
   next within the set the reader is moving through, related frames.
 - **The print** — edition, sizes, paper, and a way to ask.
@@ -49,8 +50,9 @@ carry all of them.
 3. **Processing made visible.** Where the photographer supplies the
    camera's frame alongside the finished photograph, the page shows the
    transformation as a compare slider the reader controls, with the
-   processing note beside it. This is the first shipped presentation of
-   the reserved `sequence` block; the broader showcase — techniques,
+   processing note beside it. This is a section of the image page fed
+   by the camera's frame, not a piece block: the reserved `sequence`
+   directive stays reserved. The broader showcase — techniques,
    workflow, multi-step narratives, possibly its own kind of piece — is
    its own future spec and must not be foreclosed by this one.
 4. **The photograph in context.** The page shows the passage of the
@@ -106,8 +108,11 @@ carry all of them.
   them. Which set applies is decided by how the reader arrived where
   that can be known statically, else by a stated default (see Resolved
   decisions).
-- **Related frames** — other images from the same folder as the
-  photograph, in the piece's order.
+- **Related frames** — the nearest other frames of the same outing:
+  up to six from the photograph's piece folder, in the piece's order.
+  A gallery-root image has no outing and no related frames (amended at
+  plan review — the flat gallery root would otherwise list every
+  fixture it holds).
 
 ## Key user flows
 
@@ -146,7 +151,9 @@ frames.
 In Obsidian, the photographer opens or creates the image's sidecar,
 adds any of the new fields to its frontmatter, and writes the story in
 its body as ordinary Markdown. To show the processing, they drop the
-camera's frame beside the photograph and name it in the sidecar. The
+camera's frame beside the photograph under the documented name — the
+site finds it, nothing to declare (amended at plan review: one
+convention, no sidecar field to drift from it). The
 dev server shows the page as it will publish; `git push` publishes it.
 An image with no sidecar needs nothing and renders the baseline.
 
@@ -199,17 +206,22 @@ subject.
   `AUTHORING.md` gains a sidecar template showing every field with an
   example.
 - The camera's frame follows one naming convention documented in
-  `AUTHORING.md`; a sidecar naming a frame that doesn't exist fails the
-  build with file and line, as gallery mistakes do.
+  `AUTHORING.md`; a frame whose photograph doesn't exist, a gallery
+  that lists a frame, or a piece that references one fails the build
+  naming the file, as gallery mistakes do.
 - No new directive; the Obsidian plugin is unaffected.
 - The mock-up (`src/pages/image-review/`) is deleted before this spec
   merges; its sample copy is never adopted as content.
 
 ## Acceptance criteria
 
-- [ ] An image with no sidecar renders byte-for-byte the 004 baseline
-      page, plus the neighbour line and related frames where a set or
-      folder gives them; every 004 test still passes
+- [ ] An image with no sidecar renders the 004 baseline in content:
+      the same URL, stage, label rows in the same order, caption, and
+      piece and gallery links, with no empty sections — plus the
+      neighbour line and related frames where a set or outing gives
+      them (restated at plan review from "byte-for-byte", which the
+      page's new structure makes meaningless); every 004 test still
+      passes
 - [ ] Each new section renders when, and only when, its content
       exists; a sidecar with only a story shows only the story; the
       order of sections is fixed and matches this spec
@@ -219,11 +231,13 @@ subject.
       filters, support, and the processing note appear under "How it
       was made"; the print record and enquiry link appear under "The
       print"; the enquiry opens mail with the title in its subject
-- [ ] The compare renders only when a camera's frame is named; the
+- [ ] The compare renders only when a camera's frame is present; the
       frame has no page, appears in no gallery or latest-work strip,
-      and is not counted among related frames; naming a missing frame
-      fails the build with file and line; the slider works by pointer
-      and keyboard, and both frames are visible without script
+      and is not counted among related frames; a frame with no
+      photograph fails the build naming the file; a frame of a
+      different crop is letterboxed, not stretched; the slider works
+      by pointer and keyboard with a visible focus, and both frames
+      are visible and labelled without script
 - [ ] Previous and next follow the gallery when the reader came from
       one and the piece's order when they came from a piece, with the
       documented default otherwise; arrow keys step; ends are absent,
