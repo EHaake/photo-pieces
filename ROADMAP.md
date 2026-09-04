@@ -65,9 +65,13 @@ attached.
   over it) and lets go when the words are spent; plain sticky
   positioning, no script; the hold lasts exactly as long as the
   writing outlasts the frame. Explored on branch `explore/held-block`
-  (`/held-demo/`, three shapes: beside, bled to the edge, below).
-  Becomes a directive in the vocabulary, its own spec, if the
-  photographer keeps it.
+  (`/held-demo/`): beside, bled to the edge, below, and — for the
+  frame too wide to hold beside words — the pause, where a panorama
+  stops the page, comes a little closer, and the lights go down, then
+  back up before the page moves on (CSS scroll-driven animations, no
+  script; degrades to the ordinary frame). The photographer kept the
+  idea (2026-09-02); becomes a directive in the vocabulary, its own
+  spec.
 - **The slow view** — a piece or gallery experienced one frame at a
   time: full viewport on the dimmed ground, the piece's words between
   frames, stepped by key or swipe. Every part exists (quiet view, sets,
