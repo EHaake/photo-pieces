@@ -37,24 +37,27 @@ headers to confirm nothing was duplicated or dropped. -->
       ratio); `tests/fixtures/square.jpg` from the generator. Tests
       per plan.md's strategy, each shown to fail with its rule broken.
       _Verify: vitest — the new cases green (`--ar: 1.6` for photo.jpg,
-      `frame-landscape` for the square, every allowed combination and
-      every must-fail case) and mutation-checked; 173 existing tests
+      `frame-landscape` for the square, the pause's `sizes` exactly
+      `(min-aspect-ratio: 8/5) 136vh, 90vw` on photo.jpg, every allowed
+      combination and every must-fail case) and mutation-checked; 173 existing tests
       green; build green._
 - [ ] **T502** — The passage by body kind: `BLOCK_BODIES` exported from
-      `image-meta.mjs`, a test that the transform's table agrees with
-      it (names and body kinds), `passageFor` taking a caption from
+      `image-meta.mjs`, `BLOCKS` exported from the transform, a test that
+      the two agree (names, and `body ?? 'none'` per descriptor), `passageFor` taking a caption from
       `caption` and `images+caption` bodies only. _Verify: vitest — the
       agreement test fails when a descriptor's body or the map is
-      changed (report once, restore); the existing `grid`/`strip`
-      caption cases stay green untouched; passage cases for `row`, `aside`, `held`
+      changed (report once, restore); the existing caption cases stay green untouched (`wide` and
+      `diptych` for `caption`, `strip` for `images+caption`) and a `grid`
+      case joins them; passage cases for `row`, `aside`, `held`
       (prose before, no caption) and a `pause` leaf, beside the
       existing caption cases; 173+ green; build green._
 - [ ] **T503** — Fixtures: the sampler's held left, held right with
       bleed, and pause, with sample prose marked as such and, around the
       pause, a paragraph with an inline link and a heading (the lights
       list's check); the fog
-      piece's ridgeline `wide` → `held` right with a new body of three
-      short fixture paragraphs absorbing the wide's caption line (the
+      piece's ridgeline `wide` → `held` right with a new body of five
+      fixture paragraphs absorbing the wide's caption line — enough to
+      outlast the frame at the laptop viewport (the
       diptych and its introducing paragraph stay where they are), and its panorama `strip` → `pause` with
       its alt kept verbatim ("The full sweep of coastline after the
       fog cleared" — it is the image page's title) and a new paragraph
@@ -63,7 +66,9 @@ headers to confirm nothing was duplicated or dropped. -->
       fog piece's image ids, pages, sidecar title, and galleries
       unchanged; `land-b`'s passage is its preceding paragraph alone
       and `pano`'s the paragraph before the pause (the T405-style dump,
-      deleted); 173+ tests green._
+      deleted); the fog's held frame confirmed to hold at 1440×900 —
+      its prose outlasts the frame (measured, not deferred to T506);
+      173+ tests green._
 - [ ] **T504** — The CSS: the tokens (`--hold-margin`, `--pause-scale`,
       `--pause-stretch`); `.piece-held` (grid, breakout, side, bleed,
       sticky figure sized from `--ar` and the hold height, the prose
@@ -99,7 +104,9 @@ headers to confirm nothing was duplicated or dropped. -->
       changed): each hold's frame at its resting place and share of
       the height, release when the prose's bottom meets the frame's,
       no hold where no column fits; the pause's arrival distance, park
-      at the centre, lights and words 0 → 1 → 0, the approach with the
+      at the centre, lights 0 → 1 → 0 with the words — the paragraph,
+      its inline link, and the heading beside the sampler's pause —
+      following (a link inherits its paragraph's colour), the approach with the
       margin surviving it, the header away and back; reduced motion
       emulated (approach off, dim on); the 003 and 006 geometry checks
       re-run. _Verify: the measurements recorded here; any amendment a

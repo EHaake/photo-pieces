@@ -128,18 +128,29 @@ exists (006).
 broken out to the content width like `wide` (the piece column is
 viewport-centered — the same breakout arithmetic); `side-right` swaps
 the columns; `bleed` widens to the viewport and runs the figure to the
-edge, the prose keeping its column. The figure is `position: sticky;
-top: var(--hold-margin)` with `width: 100%` and `max-width: calc((100svh
+edge, the prose keeping its column. The figure is sticky at the hold
+margin, `width: 100%`, and its width is capped from its own ratio and
+the hold's height:
 
-- 2 * var(--hold-margin) - 2 * var(--matte)) * var(--ar) + 2 *
-  var(--matte))`— the frame's width from its ratio and the hold's
-height, never from the image's`sizes`(the exploration's trap: a
-responsive image with`width: auto`takes its natural width from`sizes`); the image fills the figure at `width: 100%`. The prose
-column is `min(100%, 44ch)` at 1.05rem / 1.85, its first paragraph
-  meeting the top of the frame, **no trailing air** — the scene ends
-  where the prose ends, and the space around the block is margin, which
-  a sticky frame doesn't hold through (spec goal 3). Hence the hold's
-  scroll is exactly the prose's height beyond the frame's.
+```css
+.piece-held figure {
+  position: sticky;
+  top: var(--hold-margin);
+  width: 100%;
+  max-width: calc(
+    (100svh - 2 * var(--hold-margin) - 2 * var(--matte)) * var(--ar) + 2 * var(--matte)
+  );
+}
+```
+
+— never from the image's `sizes` (the exploration's trap: a responsive
+image with `width: auto` takes its natural width from `sizes`); the
+image fills the figure at `width: 100%`. The prose column is
+`min(100%, 44ch)` at 1.05rem / 1.85, its first paragraph meeting the
+top of the frame, **no trailing air** — the scene ends where the prose
+ends, and the space around the block is margin, which a sticky frame
+doesn't hold through (spec goal 3). Hence the hold's scroll is exactly
+the prose's height beyond the frame's.
 
 **No hold where no column fits.** `@media (orientation: portrait) and
 (min-width: 720px)`: `.piece-held.frame-landscape` collapses to one
@@ -167,8 +178,9 @@ the exploration mixed everything from `--color-text` and got away
 with it only because its demo prose was already at text colour; on
 the site that rule would snap every paragraph muted → text the
 instant a pause activated. At `--pause-lights: 0` every mixed element
-must compute to exactly its unmixed colour. Reduced motion: the
-approach off, the dim kept.
+must compute to exactly its unmixed colour. Inline links need no rule
+of their own: `a` is `color: inherit`, so a link follows its
+paragraph. Reduced motion: the approach off, the dim kept.
 
 **Mats.** The matte rule is an explicit list of block selectors, with
 a prose comment enumerating the matted and unmatted blocks; both gain `.piece-held figure > :is(a.image-link, img)` and
@@ -203,8 +215,9 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   with a paragraph before and after. Sample prose, marked.
 - `where-the-fog-lets-go`: the `:::wide{src="./land-b.jpg"}` block
   becomes `:::held{src="./land-b.jpg" alt="…" side="right"}` with a
-  **new body of three short fixture paragraphs** absorbing the wide's
-  caption line ("The ten minutes. Ridgeline out, ocean still
+  **new body of fixture prose long enough to outlast the frame at the
+  laptop viewport** — five paragraphs, the sampler's calibration for
+  the same shape — absorbing the wide's caption line ("The ten minutes. Ridgeline out, ocean still
   undecided.") — the one paragraph that follows the block today ends
   in the colon that introduces the diptych, so it must stay where it
   is, and one paragraph beside a frame would not outlast it (nothing
@@ -227,7 +240,10 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   fails as a flag; `side="up"` fails; an image in the body fails; a
   nested directive fails; a missing `alt` fails; `sizes` per shape.
   `pause` — the leaf renders `figure.piece-pause` with `--ar` and the
-  linked image inside `piece-pause-frame`; the container form fails
+  linked image inside `piece-pause-frame`, with `sizes` asserted as an
+  exact string on the 8×5 fixture — `(min-aspect-ratio: 8/5) 136vh,
+90vw` — so the integer ratio and the 85 × ratio arithmetic fail
+  loudly if changed; the container form fails
   naming the rule; `alt=""` keeps the frame unlinked as everywhere.
   Each new test shown to fail with its rule broken.
 - `image-meta.test.mjs`: `BLOCK_BODIES` agrees with the transform's
@@ -250,7 +266,8 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
 
 ```
 remark-pieces-blocks.mjs          held, pause; rawAr, classes(attrs, ratios),
-                                  attrs.flags, rejectBodyImages, proseClass
+                                  attrs.flags, rejectBodyImages, proseClass;
+                                  BLOCKS exported for the agreement test
 src/styles/global.css             tokens; .piece-held*, .piece-pause*, the
                                   lights, the header rule, the collapses
 src/pages/pieces/[slug].astro     the scenes script

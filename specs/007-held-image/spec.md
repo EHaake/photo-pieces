@@ -194,7 +194,9 @@ auto` a responsive image takes its natural width from `sizes`, and a
 - **Reduced motion**: the pause keeps its dim and drops the approach;
   the holds are unchanged (nothing animates in them).
 - **Without script**: a pause pins on the light ground with no dim and
-  no approach; the holds are pure CSS and unaffected.
+  no approach; the holds are pure CSS and unaffected, except that the
+  header-away rule is the script's, so without it the header behaves as
+  it does elsewhere.
 - **Mats, links, sizes**: as every block — the mat on the anchor, the
   anchor to the image's page, `sizes` matched to each shape's width.
 - **The exploration page is deleted** when the real blocks exist.
@@ -246,7 +248,8 @@ auto` a responsive image takes its natural width from `sizes`, and a
 - [ ] At each of the three viewports (16:10 laptop, phone, portrait
       desktop) every hold shape and the pause are measured: the frame
       at its resting place, its share of the height, the shape chosen
-      by orientation, the park line, the header away while held
+      by orientation, the pause's park at the centre, the header away while
+      held
 - [ ] Every 003 and 006 geometry check still holds; 173 tests green
       plus the new ones; build green with the post-build barriers
 - [ ] Fixtures render in the sampler and the fog piece; the exploration
