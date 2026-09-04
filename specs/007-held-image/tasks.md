@@ -42,16 +42,20 @@ headers to confirm nothing was duplicated or dropped. -->
       green; build green._
 - [ ] **T502** — The passage by body kind: `BLOCK_BODIES` exported from
       `image-meta.mjs`, a test that the transform's table agrees with
-      it (names and body kinds), `passageFor` taking a caption only
-      from a caption-bodied container. _Verify: vitest — the agreement
-      test fails when a descriptor's body or the map is changed
-      (report once, restore); passage cases for `row`, `aside`, `held`
+      it (names and body kinds), `passageFor` taking a caption from
+      `caption` and `images+caption` bodies only. _Verify: vitest — the
+      agreement test fails when a descriptor's body or the map is
+      changed (report once, restore); the existing `grid`/`strip`
+      caption cases stay green untouched; passage cases for `row`, `aside`, `held`
       (prose before, no caption) and a `pause` leaf, beside the
       existing caption cases; 173+ green; build green._
 - [ ] **T503** — Fixtures: the sampler's held left, held right with
-      bleed, and pause, with sample prose marked as such; the fog
-      piece's ridgeline `wide` → `held` right with the two following
-      paragraphs as its body, and its panorama `strip` → `pause` with
+      bleed, and pause, with sample prose marked as such and, around the
+      pause, a paragraph with an inline link and a heading (the lights
+      list's check); the fog
+      piece's ridgeline `wide` → `held` right with a new body of three
+      short fixture paragraphs absorbing the wide's caption line (the
+      diptych and its introducing paragraph stay where they are), and its panorama `strip` → `pause` with
       its alt kept verbatim ("The full sweep of coastline after the
       fog cleared" — it is the image page's title) and a new paragraph
       after it (not the strip's "Drag sideways" line, which is false of
@@ -76,7 +80,10 @@ headers to confirm nothing was duplicated or dropped. -->
       in computed style); the figure's max-width follows `--ar`; both
       new blocks matted; with `--pause-lights` forced to 0 and
       `data-pause-active` set by hand, every mixed element computes to
-      exactly its unmixed colour._
+      its unmixed colour — compared by parsed colour components against
+      a control element carrying the raw token, since `color-mix()` at
+      0% serializes in the mix space; the matte comment's block list
+      updated._
 - [ ] **T505** — The script on the piece page: pauses' progress into
       `--pause-t` and `--pause-lights`, holds' parked state,
       `data-pause-active` / `data-scene-active`, static frames skipped,

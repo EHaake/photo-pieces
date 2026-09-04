@@ -72,9 +72,8 @@ shorter.
    turns that into the dim and the approach (constitution: interactive
    blocks are enhancement over the transform's HTML). Without script
    the frame still pins, on the light ground.
-5. **The chrome stays out of the way.** During a pause, and while a
-   below-hold is parked, the header does not return on a scroll back
-   up.
+5. **The chrome stays out of the way.** During a pause, and while any
+   frame is held, the header does not return on a scroll back up.
 6. **Everything an image gets elsewhere.** Mats, a link to the image's
    page, responsive sizes per shape, alt text, the registry's rules.
 7. **Graceful everywhere.** Where no column fits beside the frame — a
@@ -122,8 +121,8 @@ shorter.
 ### Reading a held image
 
 The reader scrolls into a held scene. The frame reaches its resting
-place below the header and stays there while the paragraphs beside or
-beneath it pass. When the last paragraph has passed, the frame travels
+place a small margin below the top edge (the header is away while
+it is held) and stays there while the paragraphs beside it pass. When the last paragraph has passed, the frame travels
 away with the end of the scene and the piece resumes its ordinary
 rhythm. Scrolling back up reverses it exactly.
 
@@ -256,7 +255,7 @@ auto` a responsive image takes its natural width from `sizes`, and a
 
 ## Resolved decisions
 
-- **Kept from the exploration** (photographer, 2026-09-03): all three
+- **Kept from the exploration** (photographer, 2026-09-03): both
   held shapes and the pause; the margin; the header away during a
   pause.
 - **The pause is script-driven, one mechanism everywhere.** CSS

@@ -67,7 +67,10 @@ blocks:
 58vw, 94vw`; with `bleed` — `(min-width: 720px) 50vw, 94vw`; `pause`
   — from the ratio the probe already produced, as `strip` does: on a
   viewport wider than the frame's ratio the frame is height-limited,
-  so `(min-aspect-ratio: <ratio>/1) <round(85 × ratio)>vh, 90vw`.
+  so `(min-aspect-ratio: <width>/<height>) <round(85 × ratio)>vh, 90vw`,
+  the ratio written as the probe's integer dimensions (a decimal
+  ratio is legal in CSS Values 4 but not everywhere it should be, and
+  an unparseable condition fails silently).
   These are hints for the srcset choice only: the layout never sizes
   from them (see the CSS).
 - **`--ar` in two places, deliberately.** The wrapper's copy is what
@@ -94,11 +97,18 @@ The fix keeps one source of truth: `image-meta.mjs` exports
 `BLOCK_BODIES`, the map from block name to body kind (`caption`,
 `prose`, `images+caption`, or `none` for leaf-only and reserved
 blocks), and the transform's `BLOCKS` table is **asserted against it
-by a test** (every descriptor's `body` equals the map's entry, and the
-two name sets are equal) — the transform can't import the map
-directly without `image-meta.mjs` importing the transform back, so a
-test guards the drift instead. `passageFor` then reads a caption only
-from a caption-bodied container; a prose-bodied one contributes no
+by a test** (every descriptor's `body ?? 'none'` equals the map's
+entry — `pause` declares `body: 'none'` explicitly, the reserved
+`sequence` has no body and reads as `none` — and the two name sets are
+equal). The map lives in `image-meta.mjs` rather than the transform
+because `image-meta.mjs` must stay Astro-free (the transform imports
+`astro/assets/utils`; the registry and the tests import the pure
+module), and the transform already imports `image-meta.mjs`, so the
+map could be consumed from there too — a later task may do that; the
+test guards the drift either way. `passageFor` then reads a caption
+from bodies of kind `caption` **and** `images+caption` (a `strip`'s or
+`grid`'s caption line stays the passage's caption, as the existing
+tests assert); a `prose`-bodied one contributes no
 caption (its body is the piece's own prose, which the image page must
 not quote twice); a leaf reference (`::pause`, `::wide`) has no
 caption, as today. Tests cover `row`, `aside`, and `held` bodies.
@@ -160,8 +170,8 @@ instant a pause activated. At `--pause-lights: 0` every mixed element
 must compute to exactly its unmixed colour. Reduced motion: the
 approach off, the dim kept.
 
-**Mats.** The matte rule is an explicit list of block selectors; it
-gains `.piece-held figure > :is(a.image-link, img)` and
+**Mats.** The matte rule is an explicit list of block selectors, with
+a prose comment enumerating the matted and unmatted blocks; both gain `.piece-held figure > :is(a.image-link, img)` and
 `.piece-pause-frame > :is(a.image-link, img)` — nothing is matted for
 free.
 
@@ -192,8 +202,13 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   — a full-height vertical needs that many), and a `pause` (`pano`)
   with a paragraph before and after. Sample prose, marked.
 - `where-the-fog-lets-go`: the `:::wide{src="./land-b.jpg"}` block
-  becomes `:::held{src="./land-b.jpg" alt="…" side="right"}` with the
-  two paragraphs that follow it as its body; the `:::strip` of the
+  becomes `:::held{src="./land-b.jpg" alt="…" side="right"}` with a
+  **new body of three short fixture paragraphs** absorbing the wide's
+  caption line ("The ten minutes. Ridgeline out, ocean still
+  undecided.") — the one paragraph that follows the block today ends
+  in the colon that introduces the diptych, so it must stay where it
+  is, and one paragraph beside a frame would not outlast it (nothing
+  would hold, which defeats decision 3's reason for the fixture); the `:::strip` of the
   panorama becomes `::pause{src="./pano.jpg" alt="…"}` with its caption
   line as the paragraph after (spec decision 3). Its sidecar and
   galleries are unaffected (same files, same ids).
