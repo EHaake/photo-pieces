@@ -32,13 +32,16 @@ headers to confirm nothing was duplicated or dropped. -->
       with a `piece-pause-frame`); the descriptor generalizations —
       `rawAr`, `classes(attrs, ratios)` with `frame-landscape` /
       `frame-portrait`, `attrs.flags`, `rejectBodyImages`,
-      `proseClass`, `--ar` on the wrapper, `probeRatios` messages
-      naming the block; `sizing` per shape (the pause's from its
-      ratio); `tests/fixtures/square.jpg` from the generator. Tests
+      `proseClass`, `--ar` on the wrapper; `probeRatios` becomes
+      `probeDimensions` (orientation-corrected width and height, the
+      ratios derived at the call site, dims as `sizing`'s fourth
+      argument) with messages naming the block; `sizing` per shape
+      (the pause's from its raw pixel dimensions and ratio); `tests/fixtures/square.jpg` from the generator. Tests
       per plan.md's strategy, each shown to fail with its rule broken.
       _Verify: vitest — the new cases green (`--ar: 1.6` for photo.jpg,
       `frame-landscape` for the square, the pause's `sizes` exactly
-      `(min-aspect-ratio: 8/5) 136vh, 90vw` on photo.jpg, every allowed
+      `(min-aspect-ratio: 8/5) 136vh, 90vw` on photo.jpg (literally
+      8 × 5 pixels), every allowed
       combination and every must-fail case) and mutation-checked; 173 existing tests
       green; build green._
 - [ ] **T502** — The passage by body kind: `BLOCK_BODIES` exported from
