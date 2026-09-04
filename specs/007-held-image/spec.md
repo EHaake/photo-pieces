@@ -110,7 +110,7 @@ shorter.
   pause, which there are none of; the container form fails saying
   so). Attributes: `src`, `alt` (required).
 - **Site knobs** (CSS tokens or one module, not attributes): the hold's
-  top offset below the header; the held column's measure; the pause's
+  margin from the top edge (the pause's margin, decision 5); the held column's measure; the pause's
   margin (about five percent of the smaller screen dimension), its
   approach (five percent), its ramps (the first and last 28 percent of
   the pinned stretch), its ground (`--color-quiet`), and its length
@@ -149,8 +149,8 @@ does the other leaf blocks. The dev server shows the real thing.
 ## Design requirements
 
 - **Held, beside**: the frame in a column about three-fifths of the
-  content width, matted, its top resting a little below the header's
-  height; the prose in a column of about 44 characters at a slightly
+  content width, matted, its top resting a small margin below the top edge (the header is
+  away while it is held); the prose in a column of about 44 characters at a slightly
   larger reading size, its first paragraph meeting the top of the
   frame. `side` chooses the frame's side. `bleed` runs the frame to
   the viewport edge, the prose keeping its column on the other side —
@@ -216,9 +216,10 @@ auto` a responsive image takes its natural width from `sizes`, and a
 ## Acceptance criteria
 
 - [ ] `held` and `pause` are in the transform's descriptor table; the
-      vocabulary suite covers both: every attribute combination that
-      is allowed, and each that is not (`held` leaf form, `pause`
-      container form, `side="below"` with `bleed`, an image or a
+      vocabulary suite covers both: every allowed combination (`held`
+      with `side` left or right, each with and without `bleed`; the
+      `pause`), and each that is not (`held` leaf form, `pause`
+      container form, `side="up"`, `bleed` with a value, an image or a
       directive in a held body, a missing `alt`), each failing with
       file and line and a message naming the rule
 - [ ] The transform's HTML for a held image is a figure with the frame
