@@ -1,0 +1,474 @@
+---
+// TEMPORARY exploration (branch explore/held-block): the "held" image —
+// a durational block for pieces. The photograph stays fixed while a
+// few paragraphs pass BESIDE it, never over it; when the prose is spent
+// the scene releases and the page moves on. Plain sticky positioning,
+// no script. Two shapes (the "below" shape was dropped at review: text
+// passing under a frame "looks wrong"). Then the pause, for the frame
+// too wide to hold beside words: it arrives in the flow right after
+// the words, pins centered, and as the reader keeps scrolling the
+// lights go down and the frame comes closer, hold, and back. Sample
+// prose throughout, marked as such. Deleted once judged; the real
+// blocks would be directives in the vocabulary (spec 007).
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import landA from '../content/pieces/where-the-fog-lets-go/land-a.jpg';
+import landB from '../content/pieces/where-the-fog-lets-go/land-b.jpg';
+import portA from '../content/pieces/where-the-fog-lets-go/port-a.jpg';
+import pano from '../content/pieces/where-the-fog-lets-go/pano.jpg';
+import landC from '../content/pieces/where-the-fog-lets-go/land-c.jpg';
+
+const p = {
+  a1: 'I had been standing in the same place for an hour when the far bank first showed. Not all at once: a darker gray inside the gray, then a line where the water stopped and the trees began. I made this frame in the first minute and did not move the tripod for the next ten.',
+  a2: 'The exposure is long enough that the surface went to glass. That was not the plan. The plan was to hold the highlights in the fog, and the shutter that did it happened to still the water too. I have learned to let the second thing happen.',
+  a3: 'What I want you to see is the line. Not the trees, not the water: the place where one stops being the other, which on this morning was a decision the fog had not yet made. It moved while I watched. In the frame it is still moving.',
+  a5: 'A frame like this one asks for more than a glance, and a page can ask on its behalf. Nothing here moves except the words. The photograph holds its place until you have read them.',
+  a4: 'It is the frame the whole morning was waiting for, and the one I would print from that day.',
+  b1: 'The sea stack was behind me the whole time. I only turned when the light did, and by then it was lit top to bottom in a way that lasts about four minutes on a morning like this one.',
+  b2: 'Vertical frames are a commitment. You give up the horizon, the thing landscapes are supposed to be about, and you get height instead: the stack, the water at its foot, the sky it was cut from.',
+  b3: 'Look at the base. The tide is halfway out and the rock is wet where it was covered an hour ago. That wet band is the only thing in the frame that tells you the time.',
+  b4: 'I made four frames and kept this one, the second, for the water. In the first the foam had not settled; in the third the light had already begun to go. Four minutes is longer than it sounds and shorter than you want.',
+  b5: 'A vertical also asks something of the page. It wants height, and it wants the words to give it height: a column narrow enough that you read down, not across, at the pace the frame sets.',
+  b6: 'That is what this block is for. The photograph stays. You read. When you are done reading, it lets you go.',
+  b7: 'On a wide screen the frame takes the whole height, and a frame that tall needs many words to hold it. This paragraph exists so that it does.',
+  b8: 'If you are reading this the hold is still on. The frame has not moved. Somewhere below, the page is waiting to continue, and it will, the moment you get to the end of this sentence.',
+  d1: 'The panorama is the one frame the page cannot hold beside words: it is too wide to share a line with anything. So the page does something else with it. It stops.',
+  d2: 'Keep scrolling. The frame stays where it is, comes a little closer, and the lights go down. Nothing to read for a moment; only the photograph. Then the lights come back up, it settles, and the page goes on.',
+};
+---
+
+<BaseLayout title="The held image (exploration)" description="Temporary exploration page.">
+  <article class="demo">
+    <header class="page-head section">
+      <p class="eyebrow">Exploration</p>
+      <h1>The held image</h1>
+      <p class="lead">
+        A photograph that stays put while a few paragraphs pass beside it, and lets go when the
+        words are spent. The hold lasts exactly as long as the writing outlasts the frame. Two
+        shapes, then the pause for a panorama, then the ordinary rhythm again for contrast. Scroll
+        slowly. Sample prose.
+      </p>
+    </header>
+
+    <div class="section prose demo-prose">
+      <p>
+        The forecast said the fog would burn off by eight. The fog had not read the forecast. I
+        walked the headland trail in a gray that swallowed the ocean whole, tripod over my shoulder,
+        and told myself that gray is a color too.
+      </p>
+    </div>
+
+    {/* A — beside, image left, at content width */}
+    <p class="demo-tag section">A · beside, image left · content width</p>
+    <section class="scene scene-beside side-left frame-landscape" style="--ar: 1.5">
+      <figure class="scene-figure">
+        <Image
+          src={landB}
+          alt="The ridgeline emerging from fog"
+          layout="constrained"
+          width={1600}
+          sizes="(min-width: 720px) 58vw, 94vw"
+        />
+      </figure>
+      <div class="scene-prose prose">
+        <p>{p.a1}</p>
+        <p>{p.a2}</p>
+        <p>{p.a3}</p>
+        <p>{p.a5}</p>
+        <p>{p.a4}</p>
+      </div>
+    </section>
+
+    <div class="section prose demo-prose">
+      <p>
+        I worked fast. Two frames from the same spot, three minutes apart. The pair says more than
+        either alone, but that is a different block and a different day.
+      </p>
+    </div>
+
+    {/* B — beside, bled to the viewport edge, image right */}
+    <p class="demo-tag section">B · beside, bled to the edge, image right · the vertical</p>
+    <section class="scene scene-bleed side-right frame-portrait" style="--ar: 0.6667">
+      <figure class="scene-figure">
+        <Image
+          src={portA}
+          alt="A sea stack lit top to bottom"
+          layout="constrained"
+          width={1400}
+          sizes="(min-width: 720px) 50vw, 94vw"
+        />
+      </figure>
+      <div class="scene-prose prose">
+        <p>{p.b1}</p>
+        <p>{p.b2}</p>
+        <p>{p.b3}</p>
+        <p>{p.b4}</p>
+        <p>{p.b5}</p>
+        <p>{p.b6}</p>
+        <p>{p.b7}</p>
+        <p>{p.b8}</p>
+      </div>
+    </section>
+
+    {
+      /* The pause: the frame arrives in the flow right after the words, pins centered, then the lights */
+    }
+    <p class="demo-tag section">
+      the pause · the panorama arrives after the words, stops, comes closer, the lights go down
+    </p>
+    <div class="section prose demo-prose">
+      <p>{p.d1}</p>
+    </div>
+    <section class="scene scene-pause" style="--ar: 3" aria-label="The full sweep of coastline">
+      <figure class="pause-figure">
+        <Image
+          src={pano}
+          alt="The full sweep of coastline"
+          layout="constrained"
+          width={2320}
+          sizes="94vw"
+        />
+      </figure>
+    </section>
+    <div class="section prose demo-prose">
+      <p>{p.d2}</p>
+    </div>
+
+    {/* The ordinary rhythm again */}
+    <p class="demo-tag section">the ordinary rhythm again, for contrast</p>
+    <div class="section prose demo-prose">
+      <p>
+        The light that follows a marine layer has no equivalent. It arrives pre-softened, like the
+        whole sky became one enormous diffuser, and for a while every direction is the good
+        direction.
+      </p>
+      <figure class="demo-single">
+        <Image
+          src={landC}
+          alt="The cove while the fog held"
+          layout="constrained"
+          width={1400}
+          sizes="(min-width: 720px) 680px, 94vw"
+        />
+      </figure>
+      <p>
+        And then the parking lot, and the ordinary day. A held image is for the frame you want
+        someone to stay with; everything else can keep the pace it has.
+      </p>
+      <figure class="demo-single">
+        <Image
+          src={landA}
+          alt="The headland trail"
+          layout="constrained"
+          width={1400}
+          sizes="(min-width: 720px) 680px, 94vw"
+        />
+      </figure>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .demo-prose {
+    max-width: var(--prose-width);
+    margin-inline: auto;
+    padding-block: clamp(2rem, 4vw, 3.5rem);
+  }
+  .demo-prose p {
+    color: var(--color-text);
+  }
+  .demo-single {
+    width: fit-content;
+    max-width: 100%;
+    margin: calc(var(--baseline) * 2) auto;
+    padding: var(--matte);
+    background: var(--color-matte);
+  }
+  .demo-single img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  .demo-tag {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding-block: 0.5rem;
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    border-top: 1px dashed var(--color-accent);
+  }
+
+  /* ---- The hold ------------------------------------------------------
+     A grid of the figure and the prose; the figure sticks a small
+     margin below the top edge for as long as the prose column is
+     taller than it, then travels with the end of the scene. The hold's
+     length is therefore exactly the length of the writing — no timing,
+     no script. The header stays away while a frame is held (the page
+     script marks it), so the frame may use the whole height. */
+  .scene {
+    --hold-margin: clamp(0.75rem, 2vh, 1.25rem);
+    --hold-top: var(--hold-margin);
+    --hold-max: calc(100svh - var(--hold-top) - var(--hold-margin));
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: start;
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    /* Margins, not padding: a sticky frame holds through its scene's
+       padding, and the hold must end with the last line of the prose,
+       not after it (photographer, on the portrait desktop: the text
+       "keeps scrolling up for a while" past the frame). */
+    margin-block: clamp(2rem, 4vw, 3.5rem);
+    margin-inline: auto;
+    padding-block: 0;
+  }
+  /* The frame's width is the layout's decision, from the frame's own
+     ratio (--ar, which the transform knows) and the hold's height —
+     never from the image's `sizes` hint. The image fills the figure. */
+  .scene-figure {
+    position: sticky;
+    top: var(--hold-top);
+    width: 100%;
+    max-width: calc((var(--hold-max) - 2 * var(--matte)) * var(--ar, 1) + 2 * var(--matte));
+    margin: 0;
+    padding: var(--matte);
+    background: var(--color-matte);
+  }
+  .scene-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .scene-prose {
+    width: min(100%, 44ch);
+    justify-self: center;
+    /* The first line meets the top of the frame; no trailing air — the
+       scene ends where the prose ends, so the hold's scroll is exactly
+       the prose's length beyond the frame's height. */
+    padding-block: clamp(1rem, 3vh, 2rem) 0;
+  }
+  .scene-prose p {
+    color: var(--color-text);
+    font-size: 1.05rem;
+    line-height: 1.85;
+  }
+
+  /* Beside, at content width. */
+  .scene-beside {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+  .scene-beside.side-right {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+  .scene-beside.side-right .scene-figure {
+    order: 2;
+    justify-self: end;
+  }
+
+  /* Bled — the figure runs to one viewport edge, the prose keeps to its
+     column on the other side. */
+  .scene-bleed {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding-inline: 0 var(--page-pad);
+  }
+  .scene-bleed.side-right {
+    padding-inline: var(--page-pad) 0;
+  }
+  .scene-bleed.side-right .scene-figure {
+    order: 2;
+    justify-self: end;
+  }
+
+  /* Where a column cannot sit beside the frame there is no hold: the
+     frame is an ordinary figure and the words follow it in the flow
+     (the "text under a parked frame" shape was dropped — it looked
+     wrong on a portrait desktop). That is: a landscape frame on a
+     portrait viewport, and everything on a phone. A portrait frame on
+     a portrait desktop keeps its side — the height is plentiful. */
+  @media (orientation: portrait) and (min-width: 720px) {
+    .scene-beside.frame-landscape,
+    .scene-beside.frame-landscape.side-right,
+    .scene-bleed.frame-landscape,
+    .scene-bleed.frame-landscape.side-right {
+      grid-template-columns: minmax(0, 1fr);
+      width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+      padding-inline: 0;
+    }
+    .scene-beside.frame-landscape .scene-figure,
+    .scene-bleed.frame-landscape .scene-figure {
+      position: static;
+      order: 0;
+      max-width: 100%;
+    }
+    .scene-beside.frame-landscape .scene-prose,
+    .scene-bleed.frame-landscape .scene-prose {
+      padding-top: 0;
+    }
+  }
+  @media (max-width: 719.98px) {
+    .scene,
+    .scene-beside,
+    .scene-beside.side-right,
+    .scene-bleed,
+    .scene-bleed.side-right {
+      grid-template-columns: minmax(0, 1fr);
+      width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+      padding-inline: 0;
+    }
+    .scene-figure,
+    .scene-beside.side-right .scene-figure,
+    .scene-bleed.side-right .scene-figure {
+      position: static;
+      order: 0;
+      max-width: 100%;
+    }
+    .scene-prose {
+      padding-top: 0;
+    }
+  }
+
+  /* ---- The pause -----------------------------------------------------
+     The frame arrives in the flow right after the words, with an
+     ordinary figure's margin — no empty stage between the paragraph
+     and the frame. When its resting place reaches the centre of the
+     viewport it pins there; the scene is taller than the frame by the
+     pinned stretch, and the reader's progress through that stretch
+     (0 → 1 → 0: up over the first 28%, held, down over the last 28%)
+     drives the lights — the whole ground, and the words on it, mix
+     toward the quiet dark — and the frame's approach. Then it
+     releases and the next paragraph arrives. The frame's size is the
+     largest that fits the viewport inside the margin, with room for
+     the approach, from its ratio; the image fills it. */
+  .scene-pause {
+    --pause-t: 0;
+    --pause-pad: clamp(1.5rem, 5vmin, 4rem);
+    --pause-scale: 1.05;
+    /* 120svh of pinned scroll (the first cut's 160 read as too much). */
+    --pause-stretch: 120svh;
+    --frame-w: min(
+      calc((100vw - 2 * var(--pause-pad)) / var(--pause-scale)),
+      calc(
+        ((100svh - 2 * var(--pause-pad)) / var(--pause-scale) - 2 * var(--matte)) * var(--ar, 1) +
+          2 * var(--matte)
+      )
+    );
+    --frame-h: calc((var(--frame-w) - 2 * var(--matte)) / var(--ar, 1) + 2 * var(--matte));
+    display: block;
+    width: 100%;
+    height: calc(var(--frame-h) + var(--pause-stretch));
+    margin-block: calc(var(--baseline) * 1.5);
+    padding: 0;
+  }
+  .pause-figure {
+    position: sticky;
+    top: calc((100svh - var(--frame-h)) / 2);
+    width: var(--frame-w);
+    max-width: 100%;
+    margin: 0 auto;
+    padding: var(--matte);
+    background: var(--color-matte);
+    transform: scale(calc(1 + (var(--pause-scale) - 1) * var(--pause-t)));
+    transform-origin: center;
+    will-change: transform;
+  }
+  .pause-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* The lights: the page script mirrors the active pause's progress to
+     --pause-lights on <html>; the ground and the words follow it. */
+  :global(html[data-pause-active]),
+  :global(html[data-pause-active] body) {
+    background: color-mix(
+      in oklch,
+      var(--color-bg),
+      var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+    );
+  }
+  :global(html[data-pause-active]) .demo-prose p,
+  :global(html[data-pause-active]) .demo-tag {
+    color: color-mix(
+      in oklch,
+      var(--color-text),
+      var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+    );
+  }
+  :global(html[data-pause-active]) .demo-single {
+    background: color-mix(
+      in oklch,
+      var(--color-matte),
+      var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+    );
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pause-figure {
+      transform: none;
+    }
+  }
+
+  /* While a pause is active, or any frame is held, the header stays
+     out of the way whichever way the reader scrolls — its own
+     reveal-on-scroll-up would spoil the dark, or slide over the parked
+     frame. The page script sets the attribute; the header's transition
+     makes the hand-off smooth. */
+  :global(html[data-scene-active] .site-header) {
+    transform: translateY(-100%);
+  }
+</style>
+
+<script>
+  // The pause's progress and the held frames' state. One rect read per
+  // scene per scroll event, no rAF (scroll events already throttle to
+  // frames). Bound once per module; per-page setup in init().
+  const RAMP = 0.28;
+  const shape = (p: number) => {
+    const t = p < RAMP ? p / RAMP : p > 1 - RAMP ? (1 - p) / RAMP : 1;
+    return t * t * (3 - 2 * t); // smoothstep
+  };
+  const root = document.documentElement;
+  let pauses: HTMLElement[] = [];
+  let holds: HTMLElement[] = [];
+  const update = () => {
+    let sceneActive = false;
+    let pauseActive = false;
+    let lights = 0;
+    for (const scene of pauses) {
+      const fig = scene.querySelector<HTMLElement>('.pause-figure');
+      if (!fig || getComputedStyle(fig).position !== 'sticky') continue;
+      const r = scene.getBoundingClientRect();
+      const park = parseFloat(getComputedStyle(fig).top) || 0;
+      const stretch = r.height - fig.offsetHeight;
+      const p = stretch > 0 ? Math.min(1, Math.max(0, (park - r.top) / stretch)) : 0;
+      const t = shape(p);
+      scene.style.setProperty('--pause-t', t.toFixed(3));
+      lights = Math.max(lights, t);
+      if (p > 0 && p < 1) {
+        pauseActive = true;
+        sceneActive = true;
+      }
+    }
+    // A hold is "active" while its frame is parked: the scene's top has
+    // passed the park line and its bottom hasn't reached it. Static
+    // frames (no column beside them) never park.
+    for (const scene of holds) {
+      const fig = scene.querySelector<HTMLElement>('.scene-figure');
+      if (!fig || getComputedStyle(fig).position !== 'sticky') continue;
+      const r = scene.getBoundingClientRect();
+      const park = parseFloat(getComputedStyle(fig).top) || 0;
+      if (r.top < park && r.bottom > park + fig.offsetHeight) sceneActive = true;
+    }
+    root.style.setProperty('--pause-lights', lights.toFixed(3));
+    root.toggleAttribute('data-pause-active', pauseActive);
+    root.toggleAttribute('data-scene-active', sceneActive);
+  };
+  const init = () => {
+    pauses = [...document.querySelectorAll<HTMLElement>('.scene-pause')];
+    holds = [...document.querySelectorAll<HTMLElement>('.scene-beside, .scene-bleed')];
+    update();
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  document.addEventListener('astro:page-load', init);
+</script>
