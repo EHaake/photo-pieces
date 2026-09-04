@@ -59,10 +59,13 @@ shorter.
 
 2. **Words never cover the photograph.** Beside or beneath, in a
    column narrow enough to read down rather than across.
-3. **The hold is the writing's length.** A tall vertical beside three
-   short paragraphs never holds; that is the block's honesty, and
-   `AUTHORING.md` says so plainly rather than the site padding the
-   hold out.
+3. **The hold is the writing's length — exactly.** The frame lets go
+   as the last line passes beside it, never after (no trailing air in
+   the column, none in the scene: photographer, 2026-09-03, "the text
+   keeps scrolling up for a while" past the frame). A tall vertical
+   beside three short paragraphs never holds; that is the block's
+   honesty, and `AUTHORING.md` says so plainly rather than the site
+   padding the hold out.
 4. **The pause needs no words and no timer.** Its progress is the
    reader's own scrolling through the scene; a small page-level script
    turns that into the dim and the approach (constitution: interactive
