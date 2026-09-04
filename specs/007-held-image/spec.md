@@ -65,8 +65,9 @@ shorter.
    turns that into the dim and the approach (constitution: interactive
    blocks are enhancement over the transform's HTML). Without script
    the frame still pins, on the light ground.
-5. **The chrome stays out of the way.** During a pause the header does
-   not return on a scroll back up.
+5. **The chrome stays out of the way.** During a pause, and while a
+   below-hold is parked, the header does not return on a scroll back
+   up.
 6. **Everything an image gets elsewhere.** Mats, a link to the image's
    page, responsive sizes per shape, alt text, the registry's rules.
 7. **Graceful everywhere.** Narrow screens collapse every held shape to
@@ -145,19 +146,24 @@ does the other leaf blocks. The dev server shows the real thing.
   frame. `side` chooses the frame's side. `bleed` runs the frame to
   the viewport edge, the prose keeping its column on the other side —
   the most immersive shape.
-- **Held, below**: one column; the frame holds the top of the viewport
-  at about three-fifths of its height; the prose passes beneath.
-- **Narrow screens**: every held shape becomes below, the frame under
-  half the height, the words beneath.
+- **Held, below**: one column; the frame parks just under the top
+  edge of the viewport at under half its height (the exploration's
+  centered park left too little room beneath — photographer,
+  2026-09-03), and while it is parked the header stays away so the
+  frame can sit that high; the prose gets the rest of the screen
+  beneath it.
+- **Narrow screens**: every held shape becomes below, parked the same
+  way, the words beneath.
 - **The pause**: a scene tall enough to scroll through with a stage
   pinned to the viewport; a margin of about 5vmin around the frame,
   with room reserved so the approach never eats it; the approach is
   five percent; the lights go from the page ground to `--color-quiet`
   over the first 28 percent of the pinned stretch, hold, and return
   over the last 28 percent, on a smooth curve; the header stays away
-  for the pinned stretch. The pinned stretch is **about 1.2 screens
-  of scroll** (the exploration's 1.6 read as slightly too much); a
-  site knob, judged at the visual gate.
+  for the pinned stretch. The pinned stretch is **1.2 screens of
+  scroll** (the exploration's 1.6 read as slightly too much; the
+  exploration now runs at 1.2 for the photographer to confirm); a site
+  knob, judged at the visual gate.
 - **Reduced motion**: the pause keeps its dim and drops the approach;
   the holds are unchanged (nothing animates in them).
 - **Without script**: a pause pins on the light ground with no dim and
@@ -202,8 +208,9 @@ does the other leaf blocks. The dev server shows the real thing.
       of the pinned stretch, and to the page ground and scale 1 at
       both ends; the margin survives the approach; the header stays
       translated away on a scroll back up within the scene and
-      returns outside it; without script the frame pins on the light
-      ground; reduced motion drops the approach only
+      returns outside it, and the same while a below-hold is parked;
+      without script the frame pins on the light ground; reduced
+      motion drops the approach only
 - [ ] The pinned stretch is the site knob's value (about 1.2 screens)
       and is judged at the visual gate
 - [ ] Every 003 and 006 geometry check still holds; 173 tests green
