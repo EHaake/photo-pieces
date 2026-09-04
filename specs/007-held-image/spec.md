@@ -154,6 +154,32 @@ does the other leaf blocks. The dev server shows the real thing.
   beneath it.
 - **Narrow screens**: every held shape becomes below, parked the same
   way, the words beneath.
+- **Orientation, not width alone** (photographer, 2026-09-03: "the
+  designs really depend on the format"; a 16:10 laptop and a portrait
+  desktop each flattered the other's frames). Four rules, verified on
+  the exploration at 1440×900, 1080×1920, and 375×812:
+  1. A held frame rests a small margin from the top edge and may use
+     the whole height; the header stays away while any frame is held,
+     as during a pause. A portrait frame on a landscape screen is as
+     large as that screen allows — and its hold is only as long as the
+     words outlast it, which at full height is many words.
+  2. On a portrait viewport wider than a phone, shape follows the
+     frame: a landscape frame takes the below shape at the full width
+     (a 3:2 doubles in height); a portrait frame keeps its side, the
+     height being plentiful. The transform marks each frame's
+     orientation from the image's dimensions; no script.
+  3. Below parks by orientation: near the top edge on a landscape
+     viewport, about a fifth of the way down on a portrait one, so a
+     short frame doesn't hang off the top of a tall screen, and the
+     words still get more than half the height.
+  4. The geometry pass runs at three viewports — a 16:10 laptop, a
+     phone, and a portrait desktop — as a standing check.
+- **The frame's size is the layout's decision**, from the frame's own
+  ratio and the height available to it, never from the image's
+  responsive `sizes` hint (found on the exploration: with `width:
+auto` a responsive image takes its natural width from `sizes`, and a
+  3:2 was sized to a hint rather than the space). The image fills the
+  figure; the mat hugs it exactly.
 - **The pause**: a scene tall enough to scroll through with a stage
   pinned to the viewport; a margin of about 5vmin around the frame,
   with room reserved so the approach never eats it; the approach is
@@ -213,6 +239,10 @@ does the other leaf blocks. The dev server shows the real thing.
       motion drops the approach only
 - [ ] The pinned stretch is the site knob's value (about 1.2 screens)
       and is judged at the visual gate
+- [ ] At each of the three viewports (16:10 laptop, phone, portrait
+      desktop) every hold shape and the pause are measured: the frame
+      at its resting place, its share of the height, the shape chosen
+      by orientation, the park line, the header away while held
 - [ ] Every 003 and 006 geometry check still holds; 173 tests green
       plus the new ones; build green with the post-build barriers
 - [ ] Fixtures render in the sampler and the fog piece; the exploration
