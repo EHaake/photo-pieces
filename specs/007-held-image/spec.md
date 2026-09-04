@@ -1,6 +1,7 @@
 # Spec: The Held Image and the Pause
 
-**Status**: Draft — for photographer review (spec gate)
+**Status**: Approved (product owner, 2026-09-03) — plan.md and tasks.md
+follow, signed off by the skeptical-reviewer
 **Depends on**: 003 (the block vocabulary; `row` is the precedent for a
 container whose body is prose beside an image), 006 (the quiet ground
 token, the header's hide-on-scroll, page-level enhancement over the
@@ -269,17 +270,19 @@ auto` a responsive image takes its natural width from `sizes`, and a
 - **Site knobs, not attributes**, for margin, approach, ramps, ground,
   and length: every pause reads the same.
 
-## Open questions
+## Resolved at the spec gate (product owner, 2026-09-03)
 
-1. **The names.** `held` and `pause` are the working names. `hold`,
-   `stay`, or `still` would do as well; the photographer's words win.
-   (Attributes are now `side="left|right"` and `bleed` only.)
-2. **A caption after a pause?** The pause itself has no words; the
-   ordinary paragraph after it is where the words go in the
-   exploration. A caption line under the frame as it releases is
-   possible but unproven — recommend no.
-3. **Which fog-piece frames.** The spec proposes the wide `land-b` as
-   the held image and the panorama strip as the pause; the
-   photographer may prefer otherwise.
-4. **The pause's length.** About 1.2 screens of scroll is the
-   proposal; it is one number, judged at the gate.
+1. **Names**: `held` and `pause`.
+2. **No caption on a pause.** The words before and after it are the
+   ordinary paragraphs.
+3. **Fixtures**: Claude's call ("not every piece or pano needs it").
+   The vocabulary sampler gets both hold shapes and a pause; the fog
+   piece turns its wide ridgeline frame into a held image and its
+   panorama strip into a pause, so a real reading rhythm exists.
+4. **The pause's length**: 1.2 screens of pinned scroll.
+5. **A held frame keeps a margin.** Not the full screen: the hold's
+   top and bottom margin is the pause's margin, about 5vmin, so the
+   two blocks share one sense of air.
+6. **No hold where no column fits.** A landscape frame on a portrait
+   viewport, and everything on a phone, renders as an ordinary figure
+   with its words after it.
