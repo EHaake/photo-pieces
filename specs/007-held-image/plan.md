@@ -1,6 +1,7 @@
 # Plan: The Held Image and the Pause
 
-**Status**: Draft — pending the skeptical-reviewer's sign-off
+**Status**: Signed off (skeptical-reviewer, 2026-09-03, sixth pass) —
+awaiting the product owner's approval of the spec-conformance summary
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -72,7 +73,9 @@ blocks:
   decimal ratio is legal in CSS Values 4 but not everywhere it should
   be, and an unparseable condition fails silently; raw pixels need no
   reduction and can't be wrong). Both numbers are the pause's geometry — (100 − 2 × 5) ÷ 1.05 ≈ 85
-  for the height branch and ≈ 86 for the width branch, from the
+  for the height branch and ≈ 86 for the width branch (85.7 rounded
+  down where the hint is a height, up where it is a width — both
+  over-deliver, never under; the exact-string test pins the pair), from the
   margin's `5vmin` (true in the clamp's middle band; the ends
   over-deliver harmlessly) and the approach — and the hint uses `vh`
   where the CSS uses `svh`; a token

@@ -1,6 +1,7 @@
 # Tasks: The Held Image and the Pause
 
-**Status**: Draft — pending the skeptical-reviewer's sign-off
+**Status**: Signed off (skeptical-reviewer, 2026-09-03, sixth pass) —
+awaiting the product owner's approval of the spec-conformance summary
 **Implements**: plan.md in this directory
 
 Ordered, small, independently verifiable. Per the constitution: every
