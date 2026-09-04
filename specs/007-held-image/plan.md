@@ -65,8 +65,47 @@ blocks:
   untouched); `held` uses `piece-held-prose`.
 - **Sizing**: `held` — `(min-width: 1240px) 670px, (min-width: 720px)
 58vw, 94vw`; with `bleed` — `(min-width: 720px) 50vw, 94vw`; `pause`
-  — `94vw`. These are hints for the srcset choice only: the layout
-  never sizes from them (see the CSS).
+  — from the ratio the probe already produced, as `strip` does: on a
+  viewport wider than the frame's ratio the frame is height-limited,
+  so `(min-aspect-ratio: <ratio>/1) <round(85 × ratio)>vh, 90vw`.
+  These are hints for the srcset choice only: the layout never sizes
+  from them (see the CSS).
+- **`--ar` in two places, deliberately.** The wrapper's copy is what
+  the new CSS reads; the anchor keeps its copy because every linked
+  image on the site carries the same shape (the match-height rules
+  read it there), and both come from the one probe — no second
+  computation to drift.
+- **`probeRatios`' failure messages** name the block that asked
+  (`held`, `pause`, or `match="height"`), not the attribute a `held`
+  author never wrote.
+
+## What spec 006 needs from this (the passage)
+
+`passageFor` (`image-meta.mjs`) treats every non-image, non-directive
+line of a container block's body as the block's caption — right for
+the caption-bodied blocks, wrong for the prose-bodied ones (`row`,
+`aside`, and now `held`): converting the fog piece's `wide` to a
+`held` would have made its two body paragraphs the italic caption in
+"In the piece" on `land-b`'s image page (reviewer, sign-off). A
+pre-existing latent defect, masked until now because no fixture's
+first reference to an image was a prose-bodied container.
+
+The fix keeps one source of truth: `image-meta.mjs` exports
+`BLOCK_BODIES`, the map from block name to body kind (`caption`,
+`prose`, `images+caption`, or `none` for leaf-only and reserved
+blocks), and the transform's `BLOCKS` table is **asserted against it
+by a test** (every descriptor's `body` equals the map's entry, and the
+two name sets are equal) — the transform can't import the map
+directly without `image-meta.mjs` importing the transform back, so a
+test guards the drift instead. `passageFor` then reads a caption only
+from a caption-bodied container; a prose-bodied one contributes no
+caption (its body is the piece's own prose, which the image page must
+not quote twice); a leaf reference (`::pause`, `::wide`) has no
+caption, as today. Tests cover `row`, `aside`, and `held` bodies.
+Consequence for the fixtures: `land-b`'s passage becomes its
+preceding paragraph alone, and `pano`'s the paragraph before the
+pause — the Phase 0 report says so, since a reader of those image
+pages sees the difference.
 
 ## The CSS (`global.css`, piece-blocks section)
 
@@ -109,9 +148,22 @@ is `position: sticky; top: calc((100svh - var(--frame-h)) / 2)`,
 matted, `transform: scale(calc(1 + (var(--pause-scale) - 1) *
 var(--pause-t)))`. The lights: `html[data-pause-active]` and its `body`
 mix their background toward `--color-quiet` by `--pause-lights`
-(0–1, set on `<html>` by the script); under the same attribute `.prose
-p`, headings, captions, and mats mix the same way, so the words fade
-into the dark. Reduced motion: the approach off, the dim kept.
+(0–1, set on `<html>` by the script); under the same attribute the
+piece's prose, headings, captions, and mats mix the same way, so the
+words fade into the dark — **each rule mixing from that element's own
+token** (`--color-muted` for `.prose p` and captions, `--color-text`
+for headings, `--color-matte` for mats), never from a shared start:
+the exploration mixed everything from `--color-text` and got away
+with it only because its demo prose was already at text colour; on
+the site that rule would snap every paragraph muted → text the
+instant a pause activated. At `--pause-lights: 0` every mixed element
+must compute to exactly its unmixed colour. Reduced motion: the
+approach off, the dim kept.
+
+**Mats.** The matte rule is an explicit list of block selectors; it
+gains `.piece-held figure > :is(a.image-link, img)` and
+`.piece-pause-frame > :is(a.image-link, img)` — nothing is matted for
+free.
 
 **The header.** `html[data-scene-active] .site-header { transform:
 translateY(-100%) }` beside the existing `[data-hidden]` rule: the
@@ -150,16 +202,23 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
 
 - Vocabulary suite (`remark-pieces-vocabulary.test.mjs`): `held` —
   container renders the wrapper with `piece-held`, `side-left`,
-  `frame-landscape` (photo.jpg is 2.4:1) and `--ar: 2.4` on the
-  wrapper, the figure's anchor to the image page, `piece-held-prose`
+  `frame-landscape` (photo.jpg is 8×5, ratio 1.6 — the suite's `2.4`
+  is the diptych's normalized value) and `--ar: 1.6` on the wrapper, the figure's anchor to the image page, `piece-held-prose`
   around the body; `side="right"` and `{bleed}` classes;
-  `portrait.jpg` gives `frame-portrait`; the leaf form fails; `bleed="x"`
+  `portrait.jpg` gives `frame-portrait` and a new square fixture
+  (`tests/fixtures/square.jpg`, from `gen-placeholders.mjs`'s fixtures
+  target) gives `frame-landscape` — the documented boundary has a
+  test; the leaf form fails; `bleed="x"`
   fails as a flag; `side="up"` fails; an image in the body fails; a
   nested directive fails; a missing `alt` fails; `sizes` per shape.
   `pause` — the leaf renders `figure.piece-pause` with `--ar` and the
   linked image inside `piece-pause-frame`; the container form fails
   naming the rule; `alt=""` keeps the frame unlinked as everywhere.
   Each new test shown to fail with its rule broken.
+- `image-meta.test.mjs`: `BLOCK_BODIES` agrees with the transform's
+  table (names and body kinds); `passageFor` for a `row`, an `aside`,
+  and a `held` body (prose before, no caption) and for a `pause` leaf
+  (prose before, no caption), beside the existing caption cases.
 - Existing suites unchanged: 173 tests green.
 - Build with the fixtures; the post-build barriers.
 - Geometry pass at three viewports (1440×900, 1080×1920, 375×812) on
@@ -168,7 +227,9 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   the prose's bottom meets the frame's; no hold where no column fits;
   the pause's arrival distance, park at the centre, lights 0 → 1 → 0
   and the words' colour with them, the approach, the margin surviving
-  it, the header away and back; without script the pause pins light.
+  it, the header away and back; with reduced motion emulated the
+  approach is off and the dim stays; without script the pause pins
+  light.
 
 ## File structure
 
@@ -180,7 +241,9 @@ src/styles/global.css             tokens; .piece-held*, .piece-pause*, the
 src/pages/pieces/[slug].astro     the scenes script
 src/content/pieces/vocabulary-sampler/index.md
 src/content/pieces/where-the-fog-lets-go/index.md
-remark-pieces-vocabulary.test.mjs
+remark-pieces-vocabulary.test.mjs, image-meta.test.mjs
+src/lib/image-meta.mjs            BLOCK_BODIES; passageFor by body kind
+scripts/gen-placeholders.mjs      tests/fixtures/square.jpg
 obsidian-plugin/main.ts           pause: one (the leaf list)
 AUTHORING.md, README.md, DECISIONS.md, ROADMAP.md
 src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
@@ -198,6 +261,12 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
 - The lights mix the colours of the elements the rules name (`.prose`
   text, headings, captions, mats); a piece element outside that list
   would stay light on a dark ground. The sampler is the check.
+- A `held` or `pause` written inside a sidecar story (the image page
+  renders the story through the same pipeline) gets the CSS but not
+  the script, and the breakout arithmetic assumes the piece page's
+  viewport-centred column — the same standing limitation `wide` and
+  `fullbleed` have there. Not addressed here; `AUTHORING.md` says a
+  story is prose.
 
 ## Resolved decisions
 
@@ -206,6 +275,12 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
 - **Frames sized by ratio, never by `sizes`.** The exploration's trap.
 - **Margins, not padding, around scenes**, so holds end with the last
   line.
+- **The hold's top margin is the pause's** (`--hold-margin`, about
+  5vmin), per spec decision 5 — the exploration ran at a smaller
+  `clamp(0.75rem, 2vh, 1.25rem)`, so T506's measurements are judged
+  against the spec's rule, not the exploration's numbers.
+- **`passageFor` learns body kinds** (above) — a 006 correction this
+  spec's fixtures forced into the open.
 - **No hold where no column fits**; orientation classes from the
   transform, no script.
 - **The pause's words fade with the lights**, rather than staying dark
