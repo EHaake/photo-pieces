@@ -67,13 +67,15 @@ blocks:
 58vw, 94vw`; with `bleed` — `(min-width: 720px) 50vw, 94vw`; `pause`
   — from the ratio the probe already produced, as `strip` does: on a
   viewport wider than the frame's ratio the frame is height-limited,
-  so `(min-aspect-ratio: <width>/<height>) <round(85 × ratio)>vh, 90vw`,
+  so `(min-aspect-ratio: <width>/<height>) <round(85 × ratio)>vh, 86vw`,
   the condition written as the frame's **raw pixel dimensions** (a
   decimal ratio is legal in CSS Values 4 but not everywhere it should
   be, and an unparseable condition fails silently; raw pixels need no
-  reduction and can't be wrong). The `85` is the pause's geometry in
-  one number — (100 − 2 × 5) ÷ 1.05 ≈ 85, the margin's `5vmin` and the
-  approach — and the hint uses `vh` where the CSS uses `svh`; a token
+  reduction and can't be wrong). Both numbers are the pause's geometry — (100 − 2 × 5) ÷ 1.05 ≈ 85
+  for the height branch and ≈ 86 for the width branch, from the
+  margin's `5vmin` (true in the clamp's middle band; the ends
+  over-deliver harmlessly) and the approach — and the hint uses `vh`
+  where the CSS uses `svh`; a token
   change leaves the hint stale but safe, since the layout never sizes
   from it. This needs the probe to expose dimensions: `probeRatios`
   becomes `probeDimensions`, returning each image's orientation-
@@ -87,7 +89,7 @@ blocks:
   image on the site carries the same shape (the match-height rules
   read it there), and both come from the one probe — no second
   computation to drift.
-- **`probeRatios`' failure messages** name the block that asked
+- **`probeDimensions`' failure messages** name the block that asked
   (`held`, `pause`, or `match="height"`), not the attribute a `held`
   author never wrote.
 
@@ -221,7 +223,9 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
 - `vocabulary-sampler`: a `held` left at content width (`land-b`, five
   paragraphs), a `held` right with `bleed` (`port-a`, eight paragraphs
   — a full-height vertical needs that many), and a `pause` (`pano`)
-  with a paragraph before and after. Sample prose, marked.
+  with a paragraph before and after — the one after carrying an inline
+  link, and a heading following it, so the lights list's standing
+  limitation has something to check. Sample prose, marked.
 - `where-the-fog-lets-go`: the `:::wide{src="./land-b.jpg"}` block
   becomes `:::held{src="./land-b.jpg" alt="…" side="right"}` with a
   **new body of fixture prose long enough to outlast the frame at the
@@ -232,8 +236,10 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   is, and one paragraph beside a frame would not outlast it (nothing
   would hold, which defeats decision 3's reason for the fixture); the `:::strip` of the
   panorama becomes `::pause{src="./pano.jpg" alt="…"}` with a new
-  paragraph after it — not the strip's "Drag sideways" line, which is
-  false of a pause (spec decision 3). Its sidecar and
+  paragraph after it, in addition to the existing "By ten the light…"
+  paragraph — not the strip's "Drag sideways" line, which is false of
+  a pause (spec decision 3). The fog's hold is measured at T504, once
+  the CSS exists. Its sidecar and
   galleries are unaffected (same files, same ids).
 
 ## Testing strategy
@@ -252,7 +258,7 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   `pause` — the leaf renders `figure.piece-pause` with `--ar` and the
   linked image inside `piece-pause-frame`, with `sizes` asserted as an
   exact string on photo.jpg — which is literally 8 × 5 pixels, so the
-  raw-dimension condition reads `(min-aspect-ratio: 8/5) 136vh, 90vw`
+  raw-dimension condition reads `(min-aspect-ratio: 8/5) 136vh, 86vw`
   — so the dimension form and the 85 × ratio arithmetic fail loudly if
   changed; the container form fails
   naming the rule; `alt=""` keeps the frame unlinked as everywhere.
