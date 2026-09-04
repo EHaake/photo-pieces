@@ -16,17 +16,21 @@ than layout — a vocabulary for time, which the site did not have:
   paragraphs written for it pass beside it or beneath it, never over
   it, and lets go the moment the words are spent. The hold lasts
   exactly as long as the writing outlasts the frame: no timer, no
-  script, plain sticky positioning. Three shapes: beside at the
-  content width (the frame left or right), beside and bled to the
-  viewport edge, and below (the frame holds the top of the screen, the
-  words pass under it — the shape for wide frames and every shape on a
-  narrow screen).
-- **`pause`** — for the frame too wide to hold beside words. The page
-  stops: the photograph pins centered with a margin around it, comes a
-  little closer, and the lights go down to the quiet ground; it holds;
-  then the lights come back up, it settles, and the page moves on.
-  Nothing to read for a moment, only the photograph. The header stays
-  away for the whole of it, whichever way the reader scrolls.
+  script, plain sticky positioning. Two shapes: beside at the content
+  width (the frame left or right), and beside and bled to the viewport
+  edge. Where no column can sit beside the frame there is no hold —
+  the frame is an ordinary figure and the words follow it (the "words
+  passing under a parked frame" shape was tried and dropped: on a
+  portrait desktop it "looks wrong" — photographer, 2026-09-03).
+- **`pause`** — for the frame too wide to hold beside words. The
+  photograph arrives in the flow right after the words, as any figure
+  does; when it reaches the centre of the screen it stops, and as the
+  reader keeps scrolling the lights go down — the whole page, the
+  words on it fading into the dark — and the frame comes a little
+  closer; it holds; then the lights come back up, it settles, and the
+  page moves on. Nothing to read for a moment, only the photograph.
+  The header stays away for the whole of it, whichever way the reader
+  scrolls.
 
 The photographer kept both from the exploration ("honestly I love
 it"), asked for the margin and the header behaviour, and judged the
@@ -46,9 +50,8 @@ shorter.
    :::
    ```
 
-   with `side="left"` (default), `"right"`, or `"below"`, and a
-   `bleed` flag for the beside shapes that runs the frame to the
-   viewport edge. A pause is a leaf directive:
+   with `side="left"` (default) or `"right"`, and a `bleed` flag that
+   runs the frame to the viewport edge. A pause is a leaf directive:
 
    ```markdown
    ::pause{src="./pano.jpg" alt="The full sweep of coastline"}
@@ -70,10 +73,12 @@ shorter.
    up.
 6. **Everything an image gets elsewhere.** Mats, a link to the image's
    page, responsive sizes per shape, alt text, the registry's rules.
-7. **Graceful everywhere.** Narrow screens collapse every held shape to
-   below with the frame under half the height; reduced motion keeps
-   the pause's dim and drops the approach; the vocabulary stays closed
-   and the Obsidian plugin's approximation stands.
+7. **Graceful everywhere.** Where no column fits beside the frame — a
+   landscape frame on a portrait viewport, anything on a phone — the
+   block renders as an ordinary figure followed by its words, and
+   nothing is held; reduced motion keeps the pause's dim and drops
+   the approach; the vocabulary stays closed and the Obsidian plugin's
+   approximation stands.
 
 ## Non-goals
 
@@ -94,11 +99,9 @@ shorter.
 ## Entities
 
 - **`held`** — container form only (its body is the point). Attributes:
-  `src`, `alt` (required); `side` in `left | right | below` (default
-  `left`); `bleed` (flag; only with `left` or `right`; a `below` hold
-  with `bleed` fails naming the rule). Body: prose paragraphs only —
-  a directive or an image in the body fails the build, as nesting
-  does everywhere.
+  `src`, `alt` (required); `side` in `left | right` (default `left`);
+  `bleed` (flag). Body: prose paragraphs only — a directive or an
+  image in the body fails the build, as nesting does everywhere.
 - **`pause`** — leaf form only (a body would be words during the
   pause, which there are none of; the container form fails saying
   so). Attributes: `src`, `alt` (required).
@@ -122,12 +125,14 @@ rhythm. Scrolling back up reverses it exactly.
 
 ### Reading a pause
 
-The reader scrolls into a pause. The photograph reaches the top of the
-screen and pins, centered, with a margin around it. As the reader keeps
-scrolling, the ground darkens and the frame comes closer; it holds;
-then the ground lightens and the frame settles; then the scene
-releases and the piece goes on. The header is away for the whole of
-it. Escape does nothing here — it is not a mode, only a scene.
+The reader scrolls into a pause. The photograph arrives below the last
+paragraph as any figure does, with no empty stage between them, and
+travels up until it sits centred in the screen; there it stops. As the
+reader keeps scrolling, the whole page darkens — the words above fade
+into the dark with it — and the frame comes closer; it holds; then the
+page lightens and the frame settles; then it releases and the next
+paragraph arrives. The header is away for the whole of it. Escape does
+nothing here — it is not a mode, only a scene.
 
 ### Writing
 
@@ -146,33 +151,23 @@ does the other leaf blocks. The dev server shows the real thing.
   frame. `side` chooses the frame's side. `bleed` runs the frame to
   the viewport edge, the prose keeping its column on the other side —
   the most immersive shape.
-- **Held, below**: one column; the frame parks just under the top
-  edge of the viewport at under half its height (the exploration's
-  centered park left too little room beneath — photographer,
-  2026-09-03), and while it is parked the header stays away so the
-  frame can sit that high; the prose gets the rest of the screen
-  beneath it.
-- **Narrow screens**: every held shape becomes below, parked the same
-  way, the words beneath.
 - **Orientation, not width alone** (photographer, 2026-09-03: "the
   designs really depend on the format"; a 16:10 laptop and a portrait
-  desktop each flattered the other's frames). Four rules, verified on
+  desktop each flattered the other's frames). Three rules, verified on
   the exploration at 1440×900, 1080×1920, and 375×812:
   1. A held frame rests a small margin from the top edge and may use
      the whole height; the header stays away while any frame is held,
      as during a pause. A portrait frame on a landscape screen is as
      large as that screen allows — and its hold is only as long as the
      words outlast it, which at full height is many words.
-  2. On a portrait viewport wider than a phone, shape follows the
-     frame: a landscape frame takes the below shape at the full width
-     (a 3:2 doubles in height); a portrait frame keeps its side, the
-     height being plentiful. The transform marks each frame's
-     orientation from the image's dimensions; no script.
-  3. Below parks by orientation: near the top edge on a landscape
-     viewport, about a fifth of the way down on a portrait one, so a
-     short frame doesn't hang off the top of a tall screen, and the
-     words still get more than half the height.
-  4. The geometry pass runs at three viewports — a 16:10 laptop, a
+  2. A hold exists only where a column can sit beside the frame. On a
+     portrait viewport wider than a phone a landscape frame is not
+     held — it renders as an ordinary figure at the full width with
+     its words after it — while a portrait frame keeps its side, the
+     height being plentiful; on a phone nothing is held. The
+     transform marks each frame's orientation from the image's
+     dimensions; no script.
+  3. The geometry pass runs at three viewports — a 16:10 laptop, a
      phone, and a portrait desktop — as a standing check.
 - **The frame's size is the layout's decision**, from the frame's own
   ratio and the height available to it, never from the image's
@@ -180,13 +175,16 @@ does the other leaf blocks. The dev server shows the real thing.
 auto` a responsive image takes its natural width from `sizes`, and a
   3:2 was sized to a hint rather than the space). The image fills the
   figure; the mat hugs it exactly.
-- **The pause**: a scene tall enough to scroll through with a stage
-  pinned to the viewport; a margin of about 5vmin around the frame,
-  with room reserved so the approach never eats it; the approach is
-  five percent; the lights go from the page ground to `--color-quiet`
-  over the first 28 percent of the pinned stretch, hold, and return
-  over the last 28 percent, on a smooth curve; the header stays away
-  for the pinned stretch. The pinned stretch is **1.2 screens of
+- **The pause**: the frame in the flow with an ordinary figure's
+  margin to the words before and after it — no empty stage; the
+  largest frame that fits the viewport inside a margin of about 5vmin,
+  with room reserved so the approach never eats it; it pins at the
+  centre of the viewport, and the scene is taller than the frame by
+  the pinned stretch; the approach is five percent; the lights — the
+  whole page's ground, and the words on it — go from the page ground
+  to `--color-quiet` over the first 28 percent of the pinned stretch,
+  hold, and return over the last 28 percent, on a smooth curve; the
+  header stays away for the pinned stretch. The pinned stretch is **1.2 screens of
   scroll** (the exploration's 1.6 read as slightly too much; the
   exploration now runs at 1.2 for the photographer to confirm); a site
   knob, judged at the visual gate.
@@ -227,16 +225,18 @@ auto` a responsive image takes its natural width from `sizes`, and a
 - [ ] The holds are pure CSS: in the browser the frame's top stays at
       its resting offset while the prose passes (measured at several
       scroll positions) and travels away at the scene's end; a frame
-      taller than its prose does not hold; narrow screens collapse to
-      below with the frame under half the height
-- [ ] The pause pins with the margin; with script the ground computes
-      to `--color-quiet` and the frame to the approach at the middle
-      of the pinned stretch, and to the page ground and scale 1 at
-      both ends; the margin survives the approach; the header stays
-      translated away on a scroll back up within the scene and
-      returns outside it, and the same while a below-hold is parked;
-      without script the frame pins on the light ground; reduced
-      motion drops the approach only
+      taller than its prose does not hold; where no column fits (a
+      landscape frame on a portrait viewport, anything on a phone) the
+      frame is static at the full width with its words after it
+- [ ] The pause arrives an ordinary figure's margin below the last
+      paragraph and pins at the centre; with script the page's ground
+      and the words compute to `--color-quiet` and the frame to the
+      approach at the middle of the pinned stretch, and to the page
+      ground and scale 1 at both ends; the margin survives the
+      approach; the header stays translated away on a scroll back up
+      within the scene and returns outside it, and the same while any
+      frame is held; without script the frame pins on the light
+      ground; reduced motion drops the approach only
 - [ ] The pinned stretch is the site knob's value (about 1.2 screens)
       and is judged at the visual gate
 - [ ] At each of the three viewports (16:10 laptop, phone, portrait
@@ -270,6 +270,7 @@ auto` a responsive image takes its natural width from `sizes`, and a
 
 1. **The names.** `held` and `pause` are the working names. `hold`,
    `stay`, or `still` would do as well; the photographer's words win.
+   (Attributes are now `side="left|right"` and `bleed` only.)
 2. **A caption after a pause?** The pause itself has no words; the
    ordinary paragraph after it is where the words go in the
    exploration. A caption line under the frame as it releases is
