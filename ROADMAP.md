@@ -54,9 +54,57 @@ attached.
   (`scripts/prune-unreferenced-originals.mjs`) exists because Astro
   leaves untouched originals in the output — worth an upstream issue,
   and a no-op if they fix it.
-- **Homepage design pass** — the interim homepage (spec 002) stands
-  until a design pass decides what the front door shows: the latest-
-  work strip, the newest pieces, a hero. Waits on real content.
+- **The front door** — to be workshopped with the photographer
+  (decided 2026-09-02): the interim homepage (spec 002) stands until
+  then. The starting position: the homepage is the site's thesis —
+  one photograph, one sentence, the latest piece a scroll away — not
+  a grid of recent work, which would undo the argument the rest of
+  the site makes. The `LatestWork` strip is built and unplaced.
+- **The held image** — a durational block for pieces: the photograph
+  stays fixed while a few paragraphs pass beside or below it (never
+  over it) and lets go when the words are spent; plain sticky
+  positioning, no script; the hold lasts exactly as long as the
+  writing outlasts the frame. Explored on branch `explore/held-block`
+  (`/held-demo/`, three shapes: beside, bled to the edge, below).
+  Becomes a directive in the vocabulary, its own spec, if the
+  photographer keeps it.
+- **The slow view** — a piece or gallery experienced one frame at a
+  time: full viewport on the dimmed ground, the piece's words between
+  frames, stepped by key or swipe. Every part exists (quiet view, sets,
+  arrow keys, the passage); the anti-feed in its purest form.
+- **Cross-piece image references** — loosen "one piece owns an image"
+  (decided 2026-09-02): a block can place another piece's image, or a
+  gallery-root image, by id (`::single{id="…"}`), with the transform
+  resolving it and the image's page listing every piece it appears
+  in. Needed by the first retrospective piece; today that means
+  copies.
+- **A series entity** (under discussion) — between a piece and a
+  gallery: a body of work spanning years, with an essay, its pieces
+  in order, and its own curated set of frames; a page at
+  `/series/<slug>/`; pieces gain an optional `series`. The form that
+  rewards returning readers.
+- **Real photographs as fixtures, before more design** — every visual
+  decision so far (the warm ground, the mats, the quiet dark, the
+  packing) was judged on flat placeholder rectangles. Ten real exports
+  as fixtures, no writing needed, then re-judge the samplers.
+- **Reading typography pass for pieces** — measure, size, and rhythm
+  were inherited from a blog theme; immersive reading wants a slightly
+  narrower column, larger type, more air between blocks.
+- **Image loading choreography** — a large frame popping in
+  half-decoded breaks the spell: a fade on decode and a mat-coloured
+  placeholder.
+- **Output formats and a page-weight budget** — eight exports at two
+  megabytes is a sixteen-megabyte piece; AVIF output and a stated
+  budget per piece.
+- **A colophon** — one paragraph in the photographer's words about how
+  the site shows work (why the mats, why the quiet view), so the
+  design has its meaning without the pages explaining themselves.
+- **Browse by place** — a names-only index of the places sidecars
+  name; no coordinates, ever.
+- **Keyboard help** — arrow keys and Escape exist and nobody will
+  know: a line on the image page, or a small hint on first use.
+- **Standing tests for the image page's section order** — verified
+  once by script at spec 006's T406; should be a test.
 - **Comments** — not wanted for v1. Revisit if reader engagement makes
   the moderation overhead feel worth it.
 - **User accounts** — no identified need without comments or a shop;
