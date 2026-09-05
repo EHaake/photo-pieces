@@ -223,11 +223,12 @@ auto` a responsive image takes its natural width from `sizes`, and a
       container form, `side="up"`, `bleed` with a value, an image or a
       directive in a held body, a missing `alt`), each failing with
       file and line and a message naming the rule
-- [ ] The transform's HTML for a held image is a figure with the frame
-      and the prose as siblings carrying the shape classes; for a
-      pause a figure with a stage and the frame; both images linked to
-      their pages with the mat on the anchor and `--ar` where the CSS
-      needs it; `sizes` per shape
+- [ ] The transform's HTML for a held image is a block wrapper carrying
+      the shape classes, with the frame's figure and the prose as its
+      two children (the prose is the piece's own, so no figure wraps
+      it); for a pause a figure that is the scene, with the frame as
+      its one child; both images linked to their pages with the mat on
+      the anchor and `--ar` where the CSS needs it; `sizes` per shape
 - [ ] The holds are pure CSS: in the browser the frame's top stays at
       its resting offset while the prose passes (measured at several
       scroll positions) and travels away at the scene's end; a frame

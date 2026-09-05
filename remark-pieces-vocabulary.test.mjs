@@ -629,3 +629,183 @@ describe('image links (T310, spec 004)', () => {
     }
   });
 });
+
+describe('held and pause: the durational blocks (T501, spec 007)', () => {
+  const HELD =
+    ':::held{src="./photo.jpg" alt="ridge"}\nFirst paragraph beside the frame.\n\nSecond paragraph.\n:::';
+
+  it('held wraps: a div with side, orientation, and the raw --ar; figure and prose cells', async () => {
+    const { code } = await render(HELD);
+    expect(code).toContain(
+      '<div class="piece-block piece-held side-left frame-landscape" style="--ar: 1.6">',
+    );
+    // The figure's anchor to the image page carries the same raw ratio
+    // (not normalized to 1 — a single frame normalized says nothing).
+    expect(code).toMatch(
+      /<figure><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
+    );
+    expect(code).toMatch(
+      /<div class="piece-held-prose"><p>First paragraph beside the frame\.<\/p>\n?<p>Second paragraph\.<\/p><\/div>/,
+    );
+    expect(code).not.toContain('piece-row-prose');
+    expect(code).not.toContain('<figcaption');
+  });
+
+  it('side="right" and the {bleed} flag add their classes; sizes follow the shape', async () => {
+    const plain = await render(HELD);
+    expect(imageMarkers(plain.code)[0].sizes).toBe(
+      '(min-width: 1240px) 670px, (min-width: 720px) 58vw, 94vw',
+    );
+    const right = await render(':::held{src="./photo.jpg" alt="r" side="right"}\nText.\n:::');
+    expect(right.code).toContain('class="piece-block piece-held side-right frame-landscape"');
+    const bled = await render(':::held{src="./photo.jpg" alt="b" side="right" bleed}\nText.\n:::');
+    expect(bled.code).toContain('class="piece-block piece-held side-right bleed frame-landscape"');
+    expect(imageMarkers(bled.code)[0].sizes).toBe('(min-width: 720px) 50vw, 94vw');
+    // The fourth combination: bleed is independent of the side.
+    const bledLeft = await render(
+      ':::held{src="./photo.jpg" alt="b" side="left" bleed}\nText.\n:::',
+    );
+    expect(bledLeft.code).toContain(
+      'class="piece-block piece-held side-left bleed frame-landscape"',
+    );
+    expect(imageMarkers(bledLeft.code)[0].sizes).toBe('(min-width: 720px) 50vw, 94vw');
+  });
+
+  it('a portrait frame is frame-portrait; a square is frame-landscape (the boundary)', async () => {
+    const portrait = await render(':::held{src="./portrait.jpg" alt="p"}\nText.\n:::');
+    expect(portrait.code).toContain(
+      '<div class="piece-block piece-held side-left frame-portrait" style="--ar: 0.6667">',
+    );
+    // square.jpg is 200×200: a ratio of exactly 1 is width-starved on a
+    // portrait screen like a landscape, so it collapses with them.
+    const square = await render(':::held{src="./square.jpg" alt="s"}\nText.\n:::');
+    expect(square.code).toContain(
+      '<div class="piece-block piece-held side-left frame-landscape" style="--ar: 1">',
+    );
+  });
+
+  it('an EXIF-rotated camera portrait is frame-portrait by its rendered shape', async () => {
+    const { code } = await render(':::held{src="./rotated.jpg" alt="r"}\nText.\n:::');
+    expect(code).toContain('frame-portrait" style="--ar: 0.6667"');
+  });
+
+  it('alt="" keeps the frame unlinked and the --ar on the image itself', async () => {
+    const { code } = await render(':::held{src="./photo.jpg" alt=""}\nText.\n:::');
+    expect(code).not.toContain('image-link');
+    expect(code).toContain('style="--ar: 1.6"><figure><img');
+    expect(imageMarkers(code)[0].style).toBe('--ar: 1.6');
+  });
+
+  it('the leaf form fails pointing at the container form', async () => {
+    await expect(renderExpectingFailure('::held{src="./photo.jpg" alt="x"}')).rejects.toThrow(
+      /::held is written as a container/,
+    );
+  });
+
+  it('bleed with a value fails as a flag, naming the bare form', async () => {
+    await expect(
+      renderExpectingFailure(':::held{src="./photo.jpg" alt="x" bleed="left"}\nText.\n:::'),
+    ).rejects.toThrow(/bleed is a flag on held: write \{bleed\}, not bleed="left"/);
+  });
+
+  it('side is enum-checked', async () => {
+    await expect(
+      renderExpectingFailure(':::held{src="./photo.jpg" alt="x" side="up"}\nText.\n:::'),
+    ).rejects.toThrow(/invalid value "up" for side on held — allowed: left \| right/);
+  });
+
+  it('an image in the body fails — the body is prose', async () => {
+    await expect(
+      renderExpectingFailure(
+        ':::held{src="./photo.jpg" alt="x"}\nText.\n\n![another](./portrait.jpg)\n:::',
+      ),
+    ).rejects.toThrow(/a held image's body is prose — no images beside the frame/);
+  });
+
+  it('a nested block directive in the body fails', async () => {
+    await expect(
+      renderExpectingFailure(
+        ':::held{src="./photo.jpg" alt="x"}\nText.\n\n::single{src="./photo.jpg" alt="y"}\n:::',
+      ),
+    ).rejects.toThrow(/cannot be nested inside :::held/);
+  });
+
+  it('missing src and alt keep the family error contract', async () => {
+    await expect(renderExpectingFailure(':::held{alt="x"}\nText.\n:::')).rejects.toThrow(
+      /held requires a src attribute/,
+    );
+    await expect(renderExpectingFailure(':::held{src="./photo.jpg"}\nText.\n:::')).rejects.toThrow(
+      /held requires an alt attribute/,
+    );
+  });
+
+  it('pause renders a figure with the raw --ar and the linked image in its frame', async () => {
+    const { code } = await render('::pause{src="./photo.jpg" alt="sweep"}');
+    expect(code).toMatch(
+      /^<figure class="piece-block piece-pause" style="--ar: 1\.6"><div class="piece-pause-frame"><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_[^>]*><\/a><\/div><\/figure>/,
+    );
+    expect(code).not.toContain('<figcaption');
+  });
+
+  it("pause sizes come from the frame's raw pixel dimensions and its share × ratio", async () => {
+    // photo.jpg is literally 8 × 5 pixels: the condition is the raw pair;
+    // the share is (100 − 2 × 5) ÷ 1.05 = 85.71, so the height branch is
+    // 85.71 × 1.6 = 137.1 → 138vh (rounded up, never under) and the
+    // width branch 86vw.
+    const { code } = await render('::pause{src="./photo.jpg" alt="sweep"}');
+    expect(imageMarkers(code)[0]).toMatchObject({
+      layout: 'constrained',
+      sizes: '(min-aspect-ratio: 8/5) 138vh, 86vw',
+    });
+    // An EXIF-rotated frame measures as it renders (400 × 600, 0.6667):
+    // 85.71 × 0.6667 = 57.1 → 58vh.
+    const rotated = await render('::pause{src="./rotated.jpg" alt="r"}');
+    expect(imageMarkers(rotated.code)[0].sizes).toBe('(min-aspect-ratio: 400/600) 58vh, 86vw');
+  });
+
+  it('the container form fails naming the rule', async () => {
+    await expect(
+      renderExpectingFailure(':::pause{src="./photo.jpg" alt="x"}\nA caption.\n:::'),
+    ).rejects.toThrow(/the :::pause container form is not supported — use ::pause\{\.\.\.\}/);
+  });
+
+  it('alt="" keeps a pause unlinked, --ar on the image', async () => {
+    const { code } = await render('::pause{src="./photo.jpg" alt=""}');
+    expect(code).not.toContain('image-link');
+    expect(code).toContain('<div class="piece-pause-frame"><img');
+    expect(imageMarkers(code)[0].style).toBe('--ar: 1.6');
+  });
+
+  it('pause keeps the family error contract and the closed attribute set', async () => {
+    await expect(renderExpectingFailure('::pause{src="./photo.jpg"}')).rejects.toThrow(
+      /pause requires an alt attribute/,
+    );
+    await expect(
+      renderExpectingFailure('::pause{src="./photo.jpg" alt="x" side="left"}'),
+    ).rejects.toThrow(/unknown attribute "side" on pause — allowed: src, alt/);
+  });
+
+  it('the probe failure names the block that asked, not match="height"', async () => {
+    // No file path: the probe cannot resolve the image at all.
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await expect(processor.render('::pause{src="./photo.jpg" alt="x"}')).rejects.toThrow(
+        /pause needs piece-relative image files to measure/,
+      );
+      await expect(
+        processor.render(':::held{src="./photo.jpg" alt="x"}\nText.\n:::'),
+      ).rejects.toThrow(/held needs piece-relative image files to measure/);
+      await expect(
+        processor.render(
+          '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r" match="height"}',
+        ),
+      ).rejects.toThrow(/match="height" needs piece-relative image files to measure/);
+      // strip's probe used to blame match="height" too; it names itself now.
+      await expect(processor.render(':::strip\n![p](./photo.jpg)\n:::')).rejects.toThrow(
+        /strip needs piece-relative image files to measure/,
+      );
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});

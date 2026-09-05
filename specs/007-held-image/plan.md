@@ -65,22 +65,28 @@ blocks:
   (`block.proseClass`, default `piece-row-prose` so `row`'s CSS is
   untouched); `held` uses `piece-held-prose`.
 - **Sizing**: `held` — `(min-width: 1240px) 670px, (min-width: 720px)
-58vw, 94vw`; with `bleed` — `(min-width: 720px) 50vw, 94vw`; `pause`
+58vw, 94vw` (the exploration's grid; T504 measures the grid as drawn
+  and corrects these numbers, and this line, if they are wrong); with
+  `bleed` — `(min-width: 720px) 50vw, 94vw`; `pause`
   — from the ratio the probe already produced, as `strip` does: on a
   viewport wider than the frame's ratio the frame is height-limited,
-  so `(min-aspect-ratio: <width>/<height>) <round(85 × ratio)>vh, 86vw`,
+  so `(min-aspect-ratio: <width>/<height>) <ceil((100 − 2 × 5) ÷ 1.05 × ratio)>vh, 86vw`,
   the condition written as the frame's **raw pixel dimensions** (a
   decimal ratio is legal in CSS Values 4 but not everywhere it should
   be, and an unparseable condition fails silently; raw pixels need no
-  reduction and can't be wrong). Both numbers are the pause's geometry — (100 − 2 × 5) ÷ 1.05 ≈ 85
-  for the height branch and ≈ 86 for the width branch (85.7 rounded
-  down where the hint is a height, up where it is a width — both
-  over-deliver, never under; the exact-string test pins the pair), from the
+  reduction and can't be wrong). The share is the pause's geometry —
+  (100 − 2 × 5) ÷ 1.05 ≈ 85.7 of the limiting dimension, from the
   margin's `5vmin` (true in the clamp's middle band; the ends
-  over-deliver harmlessly) and the approach — and the hint uses `vh`
-  where the CSS uses `svh`; a token
-  change leaves the hint stale but safe, since the layout never sizes
-  from it. This needs the probe to expose dimensions: `probeRatios`
+  over-deliver harmlessly) and the approach — and **both branches round
+  up** (`Math.ceil` of the share × ratio, and of the share itself: 86),
+  so neither hint falls under the rendered width — the earlier
+  85/86 pair rounded the height branch down, 0.8% short in
+  arithmetic on a desktop (T501 review; Astro's candidate widths come
+  from a fixed ladder, so the pick itself likely never changed — the
+  value is honest now, that is all); the exact-string test pins the
+  pair.
+  The hint uses `vh` where the CSS uses `svh`; a token change leaves
+  the hint stale but safe, since the layout never sizes from it. This needs the probe to expose dimensions: `probeRatios`
   becomes `probeDimensions`, returning each image's orientation-
   corrected `{ width, height }`; the existing call site derives the
   ratios from it, and `sizing(attrs, i, ratios, dims)` gains the
@@ -93,8 +99,9 @@ blocks:
   read it there), and both come from the one probe — no second
   computation to drift.
 - **`probeDimensions`' failure messages** name the block that asked
-  (`held`, `pause`, or `match="height"`), not the attribute a `held`
-  author never wrote.
+  (`held`, `pause`, `strip` — which used to blame `match="height"` —
+  or `match="height"` for the pairs, declared on the descriptor as
+  `probeAsker`), not the attribute a `held` author never wrote.
 
 ## What spec 006 needs from this (the passage)
 
@@ -261,9 +268,9 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   `pause` — the leaf renders `figure.piece-pause` with `--ar` and the
   linked image inside `piece-pause-frame`, with `sizes` asserted as an
   exact string on photo.jpg — which is literally 8 × 5 pixels, so the
-  raw-dimension condition reads `(min-aspect-ratio: 8/5) 136vh, 86vw`
-  — so the dimension form and the 85 × ratio arithmetic fail loudly if
-  changed; the container form fails
+  raw-dimension condition reads `(min-aspect-ratio: 8/5) 138vh, 86vw`
+  — so the dimension form and the share × ratio arithmetic fail loudly
+  if changed; the container form fails
   naming the rule; `alt=""` keeps the frame unlinked as everywhere.
   Each new test shown to fail with its rule broken.
 - `image-meta.test.mjs`: `BLOCK_BODIES` agrees with the transform's

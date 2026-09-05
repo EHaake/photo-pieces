@@ -85,8 +85,10 @@ const TRAFALGAR_GPS = {
 
 // Test fixtures. gps.jpg is the subject of spec 004's unit-level leak
 // tests: full exposure EXIF plus GPS — the allowlist reader must never
-// surface the coordinates.
+// surface the coordinates. square.jpg (spec 007) sits on the held
+// image's orientation boundary: a ratio of exactly 1 is frame-landscape.
 const FIXTURES = [
+  ['tests/fixtures/square.jpg', 200, 200, 'slate', '1:1', {}],
   [
     'tests/fixtures/gps.jpg',
     600,

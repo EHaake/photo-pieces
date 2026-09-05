@@ -22,10 +22,23 @@ import {
 //
 // Each block is a descriptor (spec 003's block-descriptor model):
 //
-//   forms:  'leaf' | 'container' | 'both' | 'reserved'
-//   attrs:  { required: [...], optional: [...], enums: { name: [...] } }
-//   images: (attrs, fail) => [{ src, alt }]  — validates and extracts
-//   sizing: (attrs, imageIndex, ratios) => ({ layout, sizes })
+//   forms:   'leaf' | 'container' | 'both' | 'reserved'
+//   body:    'caption' | 'prose' | 'images+caption' | 'none' (leaf-only)
+//   attrs:   { required: [...], optional: [...], enums: { name: [...] },
+//              flags: [...] }  — a flag is valid only bare: {bleed}
+//   images:  (attrs, fail) => [{ src, alt }]  — validates and extracts
+//   classes: (attrs, ratios) => [...]  — ratios present when needsRatios
+//   sizing:  (attrs, imageIndex, ratios, dims) => ({ layout, sizes })
+//            — ratios and dims (orientation-corrected { width, height })
+//            come from the probe, present only when needsRatios
+//   needsRatios / emitsAr: (attrs) => boolean — probe the files; put
+//            --ar on each anchor (normalized so the smallest is 1, or the
+//            raw ratio — on the wrapper too — when rawAr is set; rawAr
+//            implies emitsAr)
+//   probeAsker: what the probe's failure names (default: the block)
+//   rejectBodyImages: the body is prose only — set to the message an
+//            image in it fails with
+//   proseClass: the split structure's prose cell class
 //
 // Which blocks are matted is a CSS decision (global.css's matte section),
 // not descriptor data — one source of truth.
@@ -59,7 +72,13 @@ import {
 // in global.css's piece-block section — keep them in step by hand.
 const COLLAPSE = '(min-width: 720px)';
 
-const BLOCKS = {
+// The pause frame's share of the viewport's limiting dimension, in
+// percent: the hold margin (5vmin, the clamp's middle band) off both
+// sides, then room for the approach (--pause-scale 1.05). Mirrors the
+// tokens in global.css — a token change leaves the hint stale but safe.
+const PAUSE_SHARE = (100 - 2 * 5) / 1.05;
+
+export const BLOCKS = {
   single: {
     // The directive form of the column-width image — exists so a single
     // can carry a caption; plain ![alt](./img.jpg) stays the captionless
@@ -186,6 +205,7 @@ const BLOCKS = {
     ],
     needsRatios: (attrs) => Boolean(attrs.match),
     emitsAr: (attrs) => Boolean(attrs.match),
+    probeAsker: 'match="height"',
     sizing: (attrs, i, ratios) =>
       pairSizing(attrs, i, ratios, { shares: 2, dominant: 453, companion: 227 }),
   },
@@ -221,6 +241,7 @@ const BLOCKS = {
     ],
     needsRatios: (attrs) => Boolean(attrs.match),
     emitsAr: (attrs) => Boolean(attrs.match),
+    probeAsker: 'match="height"',
     sizing: (attrs, i, ratios) => pairSizing(attrs, i, ratios, { shares: 3 }),
   },
 
@@ -298,6 +319,89 @@ const BLOCKS = {
     },
     classes: (attrs) => [`side-${attrs.side}`],
     sizing: () => ({ layout: 'constrained', sizes: `${COLLAPSE} 340px, 94vw` }),
+  },
+
+  held: {
+    // Spec 007: the frame stays fixed while the body's prose passes
+    // beside it (never over or under it) and lets go when the words are
+    // spent — pure CSS (sticky), sized from the real ratio, so the
+    // wrapper carries --ar and an orientation class: a landscape frame
+    // has no column beside it on a portrait screen and collapses to a
+    // static figure (a square counts as landscape — it is width-starved
+    // the same way). The body is prose only.
+    forms: 'container',
+    body: 'prose',
+    structure: 'split',
+    proseClass: 'piece-held-prose',
+    rejectBodyImages: "a held image's body is prose — no images beside the frame",
+    attrs: {
+      required: ['src', 'alt'],
+      optional: ['side', 'bleed'],
+      enums: { side: ['left', 'right'] },
+      flags: ['bleed'],
+    },
+    images(attrs, fail) {
+      if (!attrs.src) fail('held requires a src attribute');
+      if (attrs.alt === undefined)
+        fail('held requires an alt attribute (use alt="" only for a truly decorative image)');
+      return [{ src: attrs.src, alt: attrs.alt }];
+    },
+    classes: (attrs, ratios) => [
+      `side-${attrs.side ?? 'left'}`,
+      ...(attrs.bleed !== undefined ? ['bleed'] : []),
+      ratios[0] >= 1 ? 'frame-landscape' : 'frame-portrait',
+    ],
+    needsRatios: () => true,
+    emitsAr: () => true,
+    rawAr: true,
+    // Hints for the srcset choice only — the layout sizes the frame from
+    // --ar and the hold's height, never from these (global.css). The
+    // numbers assume the grid global.css draws: the frame's column 58%
+    // of the 1160px content width; bled, half the viewport — kept in
+    // step by hand, like COLLAPSE.
+    sizing: (attrs) => ({
+      layout: 'constrained',
+      sizes:
+        attrs.bleed !== undefined
+          ? `${COLLAPSE} 50vw, 94vw`
+          : `(min-width: 1240px) 670px, ${COLLAPSE} 58vw, 94vw`,
+    }),
+  },
+
+  pause: {
+    // Spec 007: a frame too wide to hold beside words. It arrives in the
+    // flow, pins at the centre of the viewport inside the hold margin,
+    // and the page's lights go down and up as the reader scrolls
+    // through it (the piece page's script drives the progress). Leaf
+    // only — there is nothing to read while the lights are down.
+    forms: 'leaf',
+    body: 'none',
+    structure: 'frame',
+    attrs: { required: ['src', 'alt'], optional: [], enums: {} },
+    images(attrs, fail) {
+      if (!attrs.src) fail('pause requires a src attribute');
+      if (attrs.alt === undefined)
+        fail('pause requires an alt attribute (use alt="" only for a truly decorative image)');
+      return [{ src: attrs.src, alt: attrs.alt }];
+    },
+    needsRatios: () => true,
+    emitsAr: () => true,
+    rawAr: true,
+    // The frame fills the viewport inside a 5vmin margin with room for
+    // the 1.05 approach: (100 − 2 × 5) ÷ 1.05 ≈ 85.7 of the limiting
+    // dimension. Where the viewport is wider than the frame's ratio the
+    // frame is height-limited, so its width is that share of the height
+    // × ratio; otherwise that share of the width. Both round UP so the
+    // hint never falls under the rendered width (the srcset picks the
+    // next size up from a hint; a short hint picks a soft image). The
+    // condition is written as the frame's raw pixel dimensions: a
+    // decimal ratio is not parseable everywhere, and an unparseable
+    // media condition fails silently. Hints for the srcset choice only —
+    // the CSS sizes the frame from --ar and the tokens.
+    sizing: (attrs, i, ratios, dims) => ({
+      layout: 'constrained',
+      sizes: `(min-aspect-ratio: ${dims[i].width}/${dims[i].height}) ${Math.ceil(PAUSE_SHARE * ratios[i])}vh, ${Math.ceil(PAUSE_SHARE)}vw`,
+    }),
   },
 
   sequence: {
@@ -396,7 +500,10 @@ export function remarkPiecesBlocks() {
         rejectLabel(node, failHere);
         rejectNestedBlocks(node, failHere);
         if (block.body === 'caption') caption = captionNode(node.children);
-        if (block.body === 'prose') bodyProse = node.children;
+        if (block.body === 'prose') {
+          if (block.rejectBodyImages) rejectBodyImages(node, block.rejectBodyImages, failHere);
+          bodyProse = node.children;
+        }
         if (block.body === 'images+caption') {
           const partitioned = partitionBody(node.children, node.name, failHere);
           bodyImages = partitioned.images;
@@ -443,20 +550,31 @@ export function remarkPiecesBlocks() {
       // the piece folder + basename, the same rule the registry uses.
       const pageUrls = images.map((image) => imagePageUrl(file, image.src, failHere));
 
-      // match="height": probe each image's dimensions (orientation-aware —
-      // Astro swaps width/height for EXIF orientations 5–8, so a camera
+      // Blocks that need the frames' shapes (match="height", strip, held,
+      // pause) probe each image's dimensions (orientation-aware — Astro
+      // swaps width/height for EXIF orientations 5–8, so a camera
       // portrait stored as rotated landscape gets the correct ratio).
-      // Emitted --ar values are normalized so the smallest is 1: flex-grow
-      // factors summing below 1 would under-fill the row.
+      // Emitted --ar values are normalized so the smallest is 1 —
+      // flex-grow factors summing below 1 would under-fill the row —
+      // unless the block asks for the raw ratio (a single frame
+      // normalized would always be 1; the hold sizes itself from the
+      // real shape).
       let ratios = null;
+      let dims = null;
       let normalized = null;
       if (block.needsRatios?.(attrs)) {
-        ratios = await probeRatios(images, file, failHere);
-        if (block.emitsAr?.(attrs)) {
-          const min = Math.min(...ratios);
+        dims = await probeDimensions(images, file, block.probeAsker ?? node.name, failHere);
+        ratios = dims.map(({ width, height }) => width / height);
+        if (block.rawAr || block.emitsAr?.(attrs)) {
+          const min = block.rawAr ? 1 : Math.min(...ratios);
           normalized = ratios.map((r) => r / min);
         }
       }
+      // The raw ratio also rides on the wrapper: custom properties
+      // inherit downward and the frame's width formula reads it there.
+      // The first image's — a rawAr block holds one frame (spec 007).
+      const wrapperStyle =
+        block.rawAr && normalized ? { style: `--ar: ${trimNumber(normalized[0])}` } : {};
 
       const imageNodes = images.map(({ src, alt }, imageIndex) => {
         const arStyle = normalized ? { style: `--ar: ${trimNumber(normalized[imageIndex])}` } : {};
@@ -464,7 +582,7 @@ export function remarkPiecesBlocks() {
           type: 'image',
           url: src,
           alt,
-          data: { hProperties: { ...block.sizing(attrs, imageIndex, ratios) } },
+          data: { hProperties: { ...block.sizing(attrs, imageIndex, ratios, dims) } },
         };
         // The anchor becomes the layout item, so --ar rides on it (the
         // CSS flexes the figure's direct child). An image with alt=""
@@ -477,7 +595,11 @@ export function remarkPiecesBlocks() {
         }
         return wrapInLink(image, url, arStyle);
       });
-      const className = ['piece-block', `piece-${node.name}`, ...(block.classes?.(attrs) ?? [])];
+      const className = [
+        'piece-block',
+        `piece-${node.name}`,
+        ...(block.classes?.(attrs, ratios) ?? []),
+      ];
 
       if (block.structure === 'unwrap') {
         // aside: the figure floats; the body prose must be SIBLINGS in the
@@ -489,16 +611,24 @@ export function remarkPiecesBlocks() {
       }
 
       if (block.structure === 'split') {
-        // row: figure and prose as the two cells of the wrapper.
+        // row, held: figure and prose as the two cells of the wrapper.
         node.children = [
           wrapNode('figure', [], imageNodes),
-          wrapNode('div', ['piece-row-prose'], bodyProse),
+          wrapNode('div', [block.proseClass ?? 'piece-row-prose'], bodyProse),
         ];
         node.data = {
           ...node.data,
           hName: 'div',
-          hProperties: { className },
+          hProperties: { className, ...wrapperStyle },
         };
+        continue;
+      }
+
+      if (block.structure === 'frame') {
+        // pause: the image in a frame the script and CSS pin and scale;
+        // the figure is the scene around it.
+        node.children = [wrapNode('div', [`piece-${node.name}-frame`], imageNodes)];
+        node.data = { ...node.data, hName: 'figure', hProperties: { className, ...wrapperStyle } };
         continue;
       }
 
@@ -520,7 +650,7 @@ export function remarkPiecesBlocks() {
       node.data = {
         ...node.data,
         hName: 'figure',
-        hProperties: { className },
+        hProperties: { className, ...wrapperStyle },
       };
     }
 
@@ -653,9 +783,12 @@ function partitionBody(children, name, fail) {
   return { images, caption: children.slice(i) };
 }
 
-async function probeRatios(images, file, fail) {
+// Each image's rendered { width, height } — orientation-corrected, so a
+// camera portrait stored rotated measures portrait. `asker` names what
+// needed the measurement in the failure (the block, or match="height").
+async function probeDimensions(images, file, asker, fail) {
   if (typeof file.path !== 'string') {
-    fail('match="height" needs piece-relative image files to measure');
+    fail(`${asker} needs piece-relative image files to measure`);
   }
   return Promise.all(
     images.map(async ({ src }) => {
@@ -664,9 +797,9 @@ async function probeRatios(images, file, fail) {
       try {
         meta = await imageMetadata(await readFile(path), src);
       } catch {
-        fail(`could not read image dimensions for ${src} (match="height" needs them)`);
+        fail(`could not read image dimensions for ${src} (${asker} needs them)`);
       }
-      return meta.width / meta.height;
+      return { width: meta.width, height: meta.height };
     }),
   );
 }
@@ -690,6 +823,12 @@ function rejectNestedBlocks(node, fail) {
     if (inner !== node) {
       fail(`a block directive (::${inner.name}) cannot be nested inside :::${node.name}`);
     }
+  });
+}
+
+function rejectBodyImages(node, message, fail) {
+  visit(node, 'image', () => {
+    fail(`${message} (:::${node.name})`);
   });
 }
 
@@ -717,6 +856,13 @@ function validateAttributes(block, name, attrs, fail) {
   for (const key of Object.keys(attrs)) {
     if (!allowed.has(key)) {
       fail(`unknown attribute "${key}" on ${name} — allowed: ${[...allowed].join(', ')}`);
+    }
+  }
+  // remark-directive parses a bare {flag} as flag: "" — a flag with a
+  // value is a mistake (bleed="left" on held reads as wide's enum).
+  for (const key of block.attrs.flags ?? []) {
+    if (attrs[key] !== undefined && attrs[key] !== '') {
+      fail(`${key} is a flag on ${name}: write {${key}}, not ${key}="${attrs[key]}"`);
     }
   }
   for (const [key, values] of Object.entries(block.attrs.enums)) {

@@ -27,13 +27,14 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: transform, passage, fixtures, CSS, script (reviewer after each task; the person's visual gate at its end)
 
-- [ ] **T501** — The transform: `held` (container, body prose, split
+- [x] **T501** — The transform: `held` (container, body prose, split
       structure, `src` `alt` `side=left|right` and the `bleed` flag,
       `piece-held-prose`) and `pause` (leaf, one image, `piece-pause`
       with a `piece-pause-frame`); the descriptor generalizations —
       `rawAr`, `classes(attrs, ratios)` with `frame-landscape` /
       `frame-portrait`, `attrs.flags`, `rejectBodyImages`,
-      `proseClass`, `--ar` on the wrapper; `probeRatios` becomes
+      `proseClass`, `probeAsker`, `--ar` on the wrapper; `BLOCKS`
+      exported (T502's agreement test consumes it); `probeRatios` becomes
       `probeDimensions` (orientation-corrected width and height, the
       ratios derived at the call site, dims as `sizing`'s fourth
       argument) with messages naming the block; `sizing` per shape
@@ -44,8 +45,8 @@ headers to confirm nothing was duplicated or dropped. -->
       per plan.md's strategy, each shown to fail with its rule broken.
       _Verify: vitest — the new cases green (`--ar: 1.6` for photo.jpg,
       `frame-landscape` for the square, the pause's `sizes` exactly
-      `(min-aspect-ratio: 8/5) 136vh, 86vw` on photo.jpg (literally
-      8 × 5 pixels), every allowed
+      `(min-aspect-ratio: 8/5) 138vh, 86vw` on photo.jpg (literally
+      8 × 5 pixels; the height branch rounds up — T501 review), every allowed
       combination and every must-fail case) and mutation-checked; 173 existing tests
       green; build green._
 - [ ] **T502** — The passage by body kind: `BLOCK_BODIES` exported from
@@ -96,7 +97,12 @@ headers to confirm nothing was duplicated or dropped. -->
       its unmixed colour — compared by parsed colour components against
       a control element carrying the raw token, since `color-mix()` at
       0% serializes in the mix space; the matte comment's block list
-      updated._
+      updated; the transform's held `sizes` assumptions (a 58% frame
+      column at content width, 670px at 1160px — the exploration's
+      grid) measured against the grid as drawn and corrected if wrong,
+      in the transform, its test, and plan.md's sizing line together,
+      with the reciprocal keep-in-step note in `global.css` (T501
+      review)._
 - [ ] **T505** — The script on the piece page: pauses' progress into
       `--pause-t` and `--pause-lights`, holds' parked state,
       `data-pause-active` / `data-scene-active`, static frames skipped,
@@ -146,7 +152,9 @@ headers to confirm nothing was duplicated or dropped. -->
 - [ ] **T509** — Delete `src/pages/held-demo.astro` and the exploration
       branch `explore/held-block`; update `ROADMAP.md` (the held image
       shipped with the shapes as they are — it still lists "below" and
-      a scroll-driven pause; follow-ups it surfaced); request the
+      a scroll-driven pause; follow-ups it surfaced; `CLAUDE.md`'s
+      closed-vocabulary list was amended at T501, in its own commit);
+      request the
       pre-merge whole-spec sweep and resolve its findings; build,
       tests, check, GPS scan, and format all green — actual output
       reported; mark the PR ready and merge with a merge commit.
