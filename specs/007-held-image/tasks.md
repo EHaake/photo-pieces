@@ -180,11 +180,15 @@ gives; prose 1139 tall; the same three-offset pattern. Fog held right
 scroll. T506a, the short body: prose 182 against a frame of 440, the
 scene 440 tall, the figure's top equal to the scene's top at all three
 offsets (145, −15, −155 — it moves with the page), the attribute never
-set. Pause (3:1): the frame in the flow 48px below the last paragraph
+set. Pause (pano.jpg, 2400 × 800 — 3:1 to the pixel; the 447 below
+against the formula's 446.2 is the generated variant's rounded
+intrinsic ratio): the frame in the flow 48px below the last paragraph
 (the block margin, no empty stage) and 48px above the next; 1271 × 447
 pinned at 227px = the centre; through the stretch the lights read
 0 → 0.501 → 1 → 1 → 0.498 → 0 → 0 at p = −0.2, 0.14, 0.28, 0.5, 0.86,
-1.0, 1.2, the two attributes on exactly for 0.14–0.86; at the middle the
+1.0, 1.2, the two attributes on at every sampled offset inside the
+stretch and off at both outside (the script's own condition is
+0 < p < 1 — the whole pinned stretch, not the ramps); at the middle the
 frame is scaled 1.05 to 1335 wide with 45px still clear on the left (the
 margin survives the approach), and the ground, the paragraph before, the
 paragraph after, its inline link, the heading after, the page head's
@@ -193,7 +197,11 @@ hairlines, every figcaption, and both new blocks' mats compute to the
 quiet colour; the header is translated away (bottom at 0) and focus into
 the nav mid-pause does not bring it back (the recorded override); after
 the stretch every colour is its token again, the frame travels with the
-scene's end, and a scroll up brings the header back. Without script,
+scene's end, and a scroll up brings the header back. The header rule
+is one unconditional `html[data-scene-active] .site-header` that never
+consults `data-hidden`, so the away state measured here (mid-pause,
+mid-hold at 1080, under focus) is the mechanism at every viewport and
+in both scroll directions. Without script,
 emulated by stripping what the script set while parked at the middle:
 the ground light, the words muted, the frame's transform identity and
 still sticky at 227px — the light pin. Reduced motion, emulated by
