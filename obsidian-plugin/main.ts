@@ -10,7 +10,7 @@ import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
 //
 // Mirrors the vocabulary in remark-pieces-blocks.mjs by convention. What
 // stays raw text on purpose: the `:::name … :::` container forms (captions),
-// grid, strip, aside, row — multi-line bodies are out of scope for this
+// grid, strip, aside, row, held — multi-line bodies are out of scope for this
 // plugin's regex approach. Raw text is honest: the site build is the
 // source of truth for what those render as.
 //
@@ -29,6 +29,7 @@ const LEAF_BLOCKS: Record<string, Extract> = {
   wide: one,
   tall: one,
   inset: one,
+  pause: one,
   diptych: (a) =>
     a.left && a.right
       ? [

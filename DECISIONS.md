@@ -250,11 +250,13 @@ is proven, while missing ones interrupt writing. Real writing may still
 surface a gap; additions have become cheap (a descriptor, CSS, tests).
 
 The Obsidian plugin's approximation widened accordingly and stays an
-approximation: it renders the leaf form of the seven standalone blocks
+approximation: it renders the leaf form of the seven standalone blocks (eight since
+spec 007's pause)
 (pairs and triptychs as side-by-side thumbnails), anchored to whole
 lines so it agrees with the pipeline about mid-paragraph directives,
 and no longer shows `alt` as a caption. Container forms — captions,
-grid, strip, aside, row — remain raw text in Live Preview: they need a
+grid, strip, aside, row, and since spec 007 held — remain raw text in
+Live Preview: they need a
 real parser, not a line regex, and raw text is honest about the build
 being the source of truth. Reading View stays out of scope.
 
@@ -397,3 +399,126 @@ can reach a file no page names.
 collection schemas aren't strict, none here are, and Obsidian writes
 properties of its own into frontmatter; a strict schema would fail the
 build on them. A wrong-typed known field is rejected with its name.
+
+## Spec 007: the held image and the pause
+
+Decisions from the exploration branch (`explore/held-block`, deleted
+at close-out) and the plan gate, recorded here because the shipped CSS
+only shows the outcome.
+
+**Words beside the frame, never over or under it.** Text over a
+photograph is a standing non-goal; the exploration also tried the
+words below a held frame, and the photographer's call on a portrait
+desktop settled it — beside, in a narrow column, or not held at all.
+That is why a hold exists only where a column fits.
+
+**Script-driven pause, CSS-only holds.** A hold is a sticky figure —
+no script, so it works everywhere and can't stutter. The pause's dim
+and approach need scroll progress, which CSS scroll-driven animations
+would give if Safari before 26 and older Firefox supported them; a
+small page-level script does it instead, and without script a pause
+still pins, on the light ground. Per the constitution, an interactive
+block is enhancement over the transform's HTML, never an island.
+
+**Frames sized by ratio, never by `sizes`.** The exploration's trap: a
+responsive image with `width: auto` takes its natural width from the
+`sizes` hint, so a 3:2 frame was sized by a media-query string instead
+of the space it had. The layout now computes every frame from `--ar`
+and the height available; `sizes` is a hint for the srcset choice
+alone, and the two are allowed to disagree.
+
+**The `sizes` hints are `calc()` in `vmin`, not a share of the
+screen.** A pause's margin is a clamp in `vmin`, not a percentage, so
+treating it as one made the hint fall 3.7% under at 1440×900 — and a
+short hint picks a soft image, since the srcset picks the next size up
+from what the hint asks. The hints are written `calc(95.24vw −
+9.52vmin)` and its height twin, coefficients rounded so the hint can
+never fall under (T504 review).
+
+**Margins, not padding, around a scene.** A hold ends with its last
+line: padding inside the scene would leave the frame parked over empty
+space after the words are spent, which the photographer named as the
+failure to avoid ("the text keeps scrolling up for a while"). Margins
+put the air outside the sticky context, so the release is exact.
+
+**No hold where no column fits.** A landscape frame on a portrait
+viewport, and anything on a phone, renders as an ordinary figure with
+its words after it. The orientation comes from the image's own pixels
+at build time — a class on the wrapper from the transform, no script
+and no measurement — so the decision is made before the page loads,
+and a square counts as landscape because it is width-starved the same
+way.
+
+**The hold's margin is the pause's.** One token (`--hold-margin`,
+about 5vmin) sets both, so a held frame and a pinned one sit the same
+distance from the edge and the page has one rhythm rather than two
+that nearly match.
+
+**The pause's words go down with the lights.** The alternative — dark
+text left on a darkening ground — was tried and read as a fault. Text,
+headings, captions, the page head's and the footer's text, and the
+hairlines all mix toward `--color-quiet` as the ground does, each from its own token, which means the rule is a
+list: an element outside it would stay light on the dark ground. A
+link in the text inherits its paragraph's colour and needs no rule;
+only the footer's and the page head's links are named. The words do
+not disappear into the ground, though — the ground stops short and
+the words go all the way — and the mats are not on the list: see the
+two entries below. The sampler carries a link and a heading after its
+pause as the standing check, read by eye.
+
+**The words anchor to the frame** (visual gate, 2026-09-04). On the
+exploration the paragraph before a pause scrolled away above the
+pinned frame and the next one arrived out of an empty space below; the
+photographer wants the words anchored to the frame. The transform
+moves the two neighbouring paragraphs into the stage, so they pin with
+it and stay above and below it for the whole pause — and only
+paragraphs: a heading, a list, an image, or another block beside a
+pause stays outside the scene, which keeps the rule one an author can
+predict from the source.
+
+**The dark is a depth, not the quiet ground** (visual gate).
+"The screen shouldn't go entirely black": the ground stops 85 percent
+of the way to `--color-quiet` (`--pause-depth`) and reads as a dark
+grey, while the words go all the way, so they sit a shade darker than
+the ground and stay faintly readable instead of dissolving into it.
+One knob sets how dark the ground gets, and the words' end colour
+stays the palette's own — no second scale to keep in step with it.
+
+**The mat stays** (visual gate). The mats used to mix toward the quiet
+colour with everything else, and the photographer's note was "the
+matte goes away". A white mat on a dark ground is what quiet view
+already does, so the mats are simply left out of the lights' list.
+
+**A pause needs room after it: half of what the stage leaves empty.**
+The sticky stage releases only when the scene's bottom reaches the
+stage's bottom, which needs about half the empty viewport's worth of
+document below the scene: a pause nearer than that to the end of a piece
+never lightens on a tall viewport, and the page ends with the lights
+part-way up (T506b measured exactly that on the sampler). An authoring
+rule rather than a mechanism — `AUTHORING.md` says leave words after a
+pause, and the sampler now carries closing paragraphs after its own.
+
+**A collapsed hold keeps the held reading size** (1.05rem / 1.85). On
+a phone, or a landscape frame on a portrait screen, the passage reads
+a little larger than its neighbours rather than changing size with the
+window — the block is the same block whether or not it holds.
+
+**The image page's passage reads captions by body kind.** A spec-006
+defect this spec's fixtures forced open: `passageFor` treated every
+non-image line of a container's body as a caption, so converting a
+`wide` to a `held` would have quoted two paragraphs of the piece's own
+prose as an italic caption on the image page. The body kinds now live
+in one map (`BLOCK_BODIES` in `image-meta.mjs`), a test asserts the
+transform's table against it, and only caption-bodied blocks
+contribute a caption — a `held`, `row`, or `aside` body never does.
+
+**The second visual gate (2026-09-05): a tall sits inside the screen; a
+fullbleed does not shrink.** On the laptop a 2:3 `tall` at 92vh was
+hard to centre while scrolling so the whole frame showed, so
+`--tall-max` is 85svh — the same share of the screen the pause's frame
+takes, so the site's verticals have one sense of air. The 3:2
+`fullbleed` is taller than a 16:10 screen and stays so: a fullbleed
+that shrank would not be full bleed, and the photographer's own
+leaning was to choose wider frames for it — so the fix is a rule in
+`AUTHORING.md` (a frame's shape picks its treatment) rather than a
+mechanism.

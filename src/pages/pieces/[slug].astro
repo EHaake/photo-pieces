@@ -54,6 +54,147 @@ const { Content } = await render(piece);
   </article>
 </BaseLayout>
 
+<script>
+  import { shape } from '../../lib/pause-shape';
+
+  // Spec 007, the durational blocks' one script. Holds are pure CSS;
+  // this only mirrors their state: a pause's progress through its
+  // pinned stretch into --pause-t on the scene (the approach) and the
+  // maximum into --pause-lights on <html> (the lights), plus
+  // data-pause-active and data-scene-active on <html> (the lights'
+  // rules and the header's rule). What pins is the stage, not the
+  // frame: the paragraph before and the paragraph after ride in it
+  // (T501a), so the park and the stretch are measured from the stage
+  // and the frame only carries the approach. The stage's centring
+  // needs its height, which no CSS length knows — a ResizeObserver
+  // per page keeps --stage-h on each scene equal to its stage's, so a
+  // font swap or a re-wrap re-centres; the value feeds the sticky
+  // `top` only, never a height, so there is no feedback loop. One
+  // rect read per scene per scroll event, no rAF — scroll events
+  // already throttle to frames; the writes come after the reads (the
+  // resize observer's callback is the one exception, noted there), and
+  // only when something changed.
+  // Bound once per module; per-page setup in init(), which looks only
+  // inside the piece's column — a block in a sidecar story (the image
+  // page) never gets the script, however the reader arrived. The
+  // router swaps <html>'s attributes on every navigation, so nothing
+  // leaks between pages; a page without scenes writes nothing.
+  const root = document.documentElement;
+  let pauses: HTMLElement[] = [];
+  let holds: HTMLElement[] = [];
+  let lastLights = '';
+  let stageSizes: ResizeObserver | null = null;
+
+  // The sticky element's resting offset, from its computed `top` (a px
+  // length for a positioned element). Not a number means the
+  // stylesheet isn't what the script expects: skip the scene rather
+  // than park it at 0.
+  const parkOf = (style: CSSStyleDeclaration) => {
+    const px = Number.parseFloat(style.top);
+    return Number.isFinite(px) ? px : null;
+  };
+
+  // The stage's measured height, on its scene for the sticky `top` —
+  // the border box, the same box the observer watches.
+  const measureStage = (stage: HTMLElement) => {
+    const scene = stage.closest<HTMLElement>('.piece-pause');
+    if (scene) scene.style.setProperty('--stage-h', `${stage.offsetHeight}px`);
+  };
+
+  const update = () => {
+    if (pauses.length === 0 && holds.length === 0) return;
+    let sceneActive = false;
+    let pauseActive = false;
+    let lights = 0;
+    const scenes: {
+      scene: HTMLElement;
+      frame: HTMLElement | null;
+      t: number;
+      active: boolean;
+    }[] = [];
+    for (const scene of pauses) {
+      const stage = scene.querySelector<HTMLElement>(':scope > .piece-pause-stage');
+      if (!stage) continue;
+      const style = getComputedStyle(stage);
+      // A stage that isn't sticky (a stylesheet failure) never pauses.
+      if (style.position !== 'sticky') continue;
+      const park = parkOf(style);
+      if (park === null) continue;
+      const rect = scene.getBoundingClientRect();
+      const stretch = rect.height - stage.offsetHeight;
+      const p = stretch > 0 ? Math.min(1, Math.max(0, (park - rect.top) / stretch)) : 0;
+      const t = shape(p);
+      const active = p > 0 && p < 1;
+      const frame = stage.querySelector<HTMLElement>(':scope > .piece-pause-frame');
+      scenes.push({ scene, frame, t, active });
+      lights = Math.max(lights, t);
+      if (active) {
+        pauseActive = true;
+        sceneActive = true;
+      }
+    }
+    // A hold is active while its frame is parked: the scene's top has
+    // passed the park line and its bottom hasn't reached the frame's.
+    // A static figure (no column beside it — the collapses) never parks.
+    for (const scene of holds) {
+      const figure = scene.querySelector<HTMLElement>(':scope > figure');
+      if (!figure) continue;
+      const style = getComputedStyle(figure);
+      if (style.position !== 'sticky') continue;
+      const park = parkOf(style);
+      if (park === null) continue;
+      const rect = scene.getBoundingClientRect();
+      if (rect.top < park && rect.bottom > park + figure.offsetHeight) sceneActive = true;
+    }
+    // The writes, after every read.
+    for (const { scene, frame, t, active } of scenes) {
+      scene.style.setProperty('--pause-t', t.toFixed(3));
+      // Promote the frame to its own layer only while it is moving.
+      if (frame) frame.style.willChange = active ? 'transform' : '';
+    }
+    const lightsValue = lights.toFixed(3);
+    if (lightsValue !== lastLights) {
+      root.style.setProperty('--pause-lights', lightsValue);
+      lastLights = lightsValue;
+    }
+    root.toggleAttribute('data-pause-active', pauseActive);
+    root.toggleAttribute('data-scene-active', sceneActive);
+  };
+
+  const init = () => {
+    const column = document.querySelector('.prose.piece-column');
+    pauses = column ? [...column.querySelectorAll<HTMLElement>('.piece-pause')] : [];
+    holds = column ? [...column.querySelectorAll<HTMLElement>('.piece-held')] : [];
+    // The router swapped <html> clean; start the cache clean too.
+    lastLights = '';
+    // The observer from the page before is watching stages the router
+    // has thrown away: drop it and watch this page's. Each stage is
+    // measured here too, so the first paint after the swap centres —
+    // the observer's own first callback comes a frame later.
+    // (Its callback is the one place a write precedes reads: --stage-h
+    // for each entry, then update() — one layout flush per rare batch.)
+    stageSizes?.disconnect();
+    stageSizes =
+      pauses.length > 0 && typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver((entries) => {
+            for (const entry of entries) measureStage(entry.target as HTMLElement);
+            update();
+          })
+        : null;
+    for (const scene of pauses) {
+      const stage = scene.querySelector<HTMLElement>(':scope > .piece-pause-stage');
+      if (!stage) continue;
+      measureStage(stage);
+      stageSizes?.observe(stage, { box: 'border-box' });
+    }
+    update();
+  };
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  document.addEventListener('astro:page-load', init);
+</script>
+
 <style>
   /* The reading column is viewport-centered — the layout contract
      .piece-fullbleed's edge-to-edge breakout depends on (see the piece

@@ -282,12 +282,42 @@ export function nearest(list, id, limit) {
 }
 
 /**
+ * What each block's container body is (spec 007): a caption, the
+ * piece's own prose, images then a caption, or nothing (leaf-only and
+ * reserved blocks). The transform's descriptor table is the vocabulary's
+ * source of truth; this map mirrors it here because this module must
+ * stay Astro-free, and a test asserts the two agree — names and kinds.
+ */
+export const BLOCK_BODIES = Object.freeze({
+  single: 'caption',
+  fullbleed: 'caption',
+  wide: 'caption',
+  tall: 'caption',
+  inset: 'caption',
+  diptych: 'caption',
+  triptych: 'caption',
+  grid: 'images+caption',
+  strip: 'images+caption',
+  aside: 'prose',
+  row: 'prose',
+  held: 'prose',
+  pause: 'none',
+  sequence: 'none',
+});
+
+// The body kinds whose non-image lines are a caption. A prose body is
+// the piece's own writing, which an image page must not quote twice.
+const CAPTION_BODIES = new Set(['caption', 'images+caption']);
+
+/**
  * The passage of a piece an image sits in (spec 006): the nearest prose
  * block before the body's first reference to the image, plus the
  * caption of the container block that holds the reference, if any —
  * both as markdown source. A prose block is one with no image reference
- * and no directive; a heading doesn't count. Null when the body never
- * references the image.
+ * and no directive; a heading doesn't count. Only a caption-bodied
+ * block contributes a caption (spec 007): a `row`, `aside`, or `held`
+ * body is prose beside the frame, not a caption. Null when the body
+ * never references the image.
  */
 export function passageFor(body, basename) {
   const blocks = splitBlocks(body);
@@ -300,7 +330,10 @@ export function passageFor(body, basename) {
       break;
     }
   }
-  if (blocks[hit].kind === 'container') {
+  if (
+    blocks[hit].kind === 'container' &&
+    CAPTION_BODIES.has(BLOCK_BODIES[blockName(blocks[hit].text)])
+  ) {
     const caption = blocks[hit].text
       .split('\n')
       .slice(1)
@@ -352,6 +385,11 @@ function splitBlocks(body) {
   }
   flush();
   return blocks;
+}
+
+// The directive's name from its opening line: `:::name{…}` or `:::name`.
+function blockName(text) {
+  return /^:::([A-Za-z][\w-]*)/.exec(text)?.[1] ?? '';
 }
 
 function kindOf(text) {

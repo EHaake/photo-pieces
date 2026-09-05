@@ -54,10 +54,11 @@ CMS or backend service for v1.
   and the page for an image links back to its piece where one exists.
 - **Closed block vocabulary**: image treatments inside a piece's body are
   limited to a defined set of directive-backed treatments — as of spec
-  003: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
-  strip, aside, row, with captions via the container form and
-  site-applied mattes; a `sequence` type is reserved but its
-  final presentation is undecided — see `ROADMAP.md`. Adding a new
+  007: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
+  strip, aside, row, and the two durational blocks, held and pause,
+  with captions via the container form and site-applied mattes; a
+  `sequence` type is reserved but its final presentation is undecided
+  — see `ROADMAP.md`. Adding a new
   treatment means deliberately adding a new directive + presentation
   contract — a handler in the remark transform (the vocabulary's single
   source of truth) plus the CSS that styles its output — not writing

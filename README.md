@@ -17,7 +17,7 @@ The "why" behind this project lives in these, not in this file:
 - `specs/<NNN>-<slug>/` — the spec, plan, and tasks for each build
   phase (001 foundation, 002 identity/teardown, 003 block vocabulary,
   004 galleries and image pages, 005 going live — deferred, 006 the
-  rich image page)
+  rich image page, 007 the held image and the pause)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
@@ -74,8 +74,9 @@ plain Markdown:
 ```
 
 Everything else in the closed block vocabulary uses directive syntax.
-A block is a leaf (`::name{...}` on its own line) or, to carry a
-caption, a container whose body is the caption:
+A block is a leaf (`::name{...}` on its own line) or a container
+whose body carries a caption — or, for `aside`, `row`, and `held`,
+the prose beside the frame:
 
 ```md
 ::wide{src="./photo-2.jpg" alt="The playa at dusk"}
@@ -98,6 +99,8 @@ Three minutes apart. Captions take _inline markdown_.
 | `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption                                          | no     | raw text              |
 | `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                                                       | yes    | raw text              |
 | `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                                                  | yes    | raw text              |
+| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays                              | yes    | raw text              |
+| `pause`     | leaf only      | `src` `alt`; no body — nothing to read                                                                                        | yes    | image (leaf)          |
 | `sequence`  | reserved       | fails the build until its presentation is designed (`ROADMAP.md`; the image page's compare is a page section, not this block) | —      | —                     |
 
 ¹ the bled edge runs clean. ² dropped at `width="fullbleed"`.
@@ -110,9 +113,10 @@ the `[label]` form fails, blocks can't nest, images must exist. The
 sampler piece (`src/content/pieces/vocabulary-sampler/`) shows every
 treatment rendered.
 
-**Current status**: the full spec-003 vocabulary above is implemented
-— transform, styling, mattes, unit tests, and the Obsidian plugin's
-leaf-form rendering — with images going through Astro's asset pipeline
+**Current status**: every block above except the reserved `sequence`
+is implemented — the spec-003 blocks and spec 007's two durational
+ones — transform, styling, mattes, unit tests, and the Obsidian
+plugin's leaf-form rendering — with images going through Astro's asset pipeline
 (hashed src, responsive srcset per treatment). Pieces render at
 `/pieces/<slug>/`, list at `/pieces/` (in the nav), and feed the
 homepage, RSS, and per-piece Open Graph images. Since spec 004 every
@@ -279,6 +283,7 @@ photo-pieces/
 ├── remark-pieces-blocks.test.mjs # legacy contracts (npm test)
 ├── remark-pieces-vocabulary.test.mjs # spec-003 vocabulary suite
 ├── image-meta.test.mjs, exif.test.mjs, galleries.test.mjs # spec-004 suites
+├── pause-shape.test.mjs          # spec-007: the pause's 0 → 1 → 0 shape
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
@@ -297,6 +302,7 @@ photo-pieces/
 │   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, sets)
 │   ├── lib/gallery-layout.ts     # the equal-short-side packing knobs (galleries, related strips)
 │   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
+│   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
 │   ├── components/               # PieceList, GalleryCards, LatestWork
