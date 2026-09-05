@@ -176,6 +176,9 @@ describe('standalone treatments: wide, tall, inset, fullbleed captions (T204)', 
     await expect(
       renderExpectingFailure('::wide{src="./photo.jpg" alt="x" bleed="up"}'),
     ).rejects.toThrow(/invalid value "up" for bleed on wide — allowed: left \| right/);
+    await expect(renderExpectingFailure('::wide{src="./photo.jpg" alt="x" bleed}')).rejects.toThrow(
+      /invalid value "" for bleed on wide/,
+    );
   });
 
   it('bleed is not accepted on other blocks', async () => {

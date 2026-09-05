@@ -397,3 +397,78 @@ can reach a file no page names.
 collection schemas aren't strict, none here are, and Obsidian writes
 properties of its own into frontmatter; a strict schema would fail the
 build on them. A wrong-typed known field is rejected with its name.
+
+## Spec 007: the held image and the pause
+
+Decisions from the exploration branch (`explore/held-block`, deleted
+at close-out) and the plan gate, recorded here because the shipped CSS
+only shows the outcome.
+
+**Words beside the frame, never over or under it.** Text over a
+photograph is a standing non-goal; the exploration also tried the
+words below a held frame, and the photographer's call on a portrait
+desktop settled it — beside, in a narrow column, or not held at all.
+That is why a hold exists only where a column fits.
+
+**Script-driven pause, CSS-only holds.** A hold is a sticky figure —
+no script, so it works everywhere and can't stutter. The pause's dim
+and approach need scroll progress, which CSS scroll-driven animations
+would give if Safari before 26 and older Firefox supported them; a
+small page-level script does it instead, and without script a pause
+still pins, on the light ground. Per the constitution, an interactive
+block is enhancement over the transform's HTML, never an island.
+
+**Frames sized by ratio, never by `sizes`.** The exploration's trap: a
+responsive image with `width: auto` takes its natural width from the
+`sizes` hint, so a 3:2 frame was sized by a media-query string instead
+of the space it had. The layout now computes every frame from `--ar`
+and the height available; `sizes` is a hint for the srcset choice
+alone, and the two are allowed to disagree.
+
+**The `sizes` hints are `calc()` in `vmin`, not a share of the
+screen.** A pause's margin is a clamp in `vmin`, not a percentage, so
+treating it as one made the hint fall 3.7% under at 1440×900 — and a
+short hint picks a soft image, since the srcset picks the next size up
+from what the hint asks. The hints are written `calc(95.24vw −
+9.52vmin)` and its height twin, coefficients rounded so the hint can
+never fall under (T504 review).
+
+**Margins, not padding, around a scene.** A hold ends with its last
+line: padding inside the scene would leave the frame parked over empty
+space after the words are spent, which the photographer named as the
+failure to avoid ("the text keeps scrolling up for a while"). Margins
+put the air outside the sticky context, so the release is exact.
+
+**No hold where no column fits.** A landscape frame on a portrait
+viewport, and anything on a phone, renders as an ordinary figure with
+its words after it. The orientation comes from the image's own pixels
+at build time — a class on the wrapper from the transform, no script
+and no measurement — so the decision is made before the page loads,
+and a square counts as landscape because it is width-starved the same
+way.
+
+**The hold's margin is the pause's.** One token (`--hold-margin`,
+about 5vmin) sets both, so a held frame and a pinned one sit the same
+distance from the edge and the page has one rhythm rather than two
+that nearly match.
+
+**The pause's words fade with the lights.** The alternative — dark
+text left on a darkening ground — was tried and read as a fault. Text,
+headings, captions, mats, links, and hairlines all mix toward
+`--color-quiet` together, which means the rule is a list: an element
+outside it would stay light on the dark ground. The sampler carries a
+link and a heading after its pause as the standing check.
+
+**A collapsed hold keeps the held reading size** (1.05rem / 1.85). On
+a phone, or a landscape frame on a portrait screen, the passage reads
+a little larger than its neighbours rather than changing size with the
+window — the block is the same block whether or not it holds.
+
+**The image page's passage reads captions by body kind.** A spec-006
+defect this spec's fixtures forced open: `passageFor` treated every
+non-image line of a container's body as a caption, so converting a
+`wide` to a `held` would have quoted two paragraphs of the piece's own
+prose as an italic caption on the image page. The body kinds now live
+in one map (`BLOCK_BODIES` in `image-meta.mjs`), a test asserts the
+transform's table against it, and only caption-bodied blocks
+contribute a caption — a `held`, `row`, or `aside` body never does.

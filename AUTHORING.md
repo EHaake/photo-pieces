@@ -42,13 +42,16 @@ Why this shape:
   repo machinery.
 - **Core Templates plugin:** point it at `templates/`, and keep a
   `piece.md` template there (skeleton below).
-- **Community plugins → Photo Pieces Blocks: enabled.** Renders the
-  leaf form of every standalone block (`::single`, `::fullbleed`,
-  `::wide`, `::tall`, `::inset`, `::diptych`, `::triptych`) as images
-  while writing. Container forms (captions), `grid`, `strip`, `aside`,
-  and `row` stay raw text — the site build is the truth for those.
-  Live Preview only — Reading view is intentionally out of scope (see
-  `DECISIONS.md`). Build/install instructions:
+- **Community plugins → Photo Pieces Blocks: enabled.** The plugin
+  renders leaves: a standalone block written in leaf form (`::single`,
+  `::fullbleed`, `::wide`, `::tall`, `::inset`, `::diptych`,
+  `::triptych`, `::pause`) shows its image while you write. Everything
+  else is raw text by construction — container forms (captions), and
+  the container-only `grid`, `strip`, `aside`, `row`, and `held` — and
+  the site build is the truth for those. A `::pause` previews as a
+  plain image: the pin, the dim, and the frame's approach are the
+  site's alone. Live Preview only — Reading view is intentionally out
+  of scope (see `DECISIONS.md`). Build/install instructions:
   `obsidian-plugin/README.md`.
 
 ## Piece template
@@ -194,6 +197,22 @@ vocabulary works here too (a diptych in a story is legal), though
 plain prose is the expectation.
 ```
 
+**A story is prose — no holds, no pauses.** The image page renders the
+story through the same pipeline, but not through the piece page's
+script, so a `pause` written in a sidecar never dims and a `held`
+frame never keeps the header away; the bled shapes assume the piece
+page's column besides. Write those two in a piece, where they work.
+
+The page also quotes **the passage** of the piece the image sits in:
+the nearest paragraph before the block that first places it, plus that
+block's caption where it has one. Only caption-bodied blocks
+contribute the caption — the container forms of `single`, `wide`,
+`tall`, `fullbleed`, `inset`, `diptych`, `triptych`, and the caption
+line of a `grid` or `strip`. The body of a `held`, `row`, or `aside`
+is the piece's own prose, not a caption, so it never appears on the
+image page. If you want words quoted there, write them as the block's
+caption, not beside the frame.
+
 The page's headings and row names ("How it was made", "Ask about a
 print"…) live in one block at the top of
 `src/pages/images/[...id].astro` — retune them there.
@@ -212,6 +231,79 @@ one prefix, deliberately: `_land-b.md` is _about_ `land-b.jpg`, and
 `_land-b.jpg` is _the raw of_ `land-b.jpg`. Strip location metadata
 from the frame's export as from any other (the build fails on GPS in
 the output either way).
+
+## The two blocks that take time
+
+Most blocks are a shape on the page. `held` and `pause` (spec 007)
+spend the reader's scrolling instead, and each asks something of the
+writing around it.
+
+### A held image
+
+A container whose body is the prose that passes beside the frame while
+the frame stays put:
+
+```markdown
+:::held{src="./land-b.jpg" alt="The ridgeline emerging" side="right"}
+The paragraphs that pass beside the frame.
+
+As many as the frame deserves.
+:::
+```
+
+`side` puts the frame on the `left` (the default) or the `right`, and
+the bare `bleed` flag runs it out to the viewport's edge with the
+prose keeping its column on the other side. The body is prose only —
+a markdown image or another directive inside it fails the build,
+because the body is the piece's own writing, not a caption.
+
+**Write enough for the frame, or don't hold it.** The frame lets go as
+the last line passes it and never after: the site will not pad a hold
+out with empty scroll, so the hold lasts exactly as long as the words
+outlast the frame. A tall vertical beside three short paragraphs holds
+for a moment and releases, which reads as a stutter rather than a
+hold. On a laptop screen a landscape frame takes about five paragraphs
+to outlast, a full-height vertical about eight — the sampler piece
+(`src/content/pieces/vocabulary-sampler/`) is the calibration. Count
+the paragraphs before deciding a photograph deserves a hold.
+
+**No hold where no column fits.** The frame is sized from its own ratio
+and the height it may use, so on a portrait viewport a landscape frame
+leaves no room for a reading column: there it renders as an ordinary
+figure at the full width with its words after it. A portrait frame
+keeps its column on a portrait screen, and on a phone nothing is held
+at all. Write the body so it reads as plain paragraphs too — that is
+what a phone reader gets.
+
+### A pause
+
+A leaf, one image, nothing else:
+
+```markdown
+::pause{src="./pano.jpg" alt="The full sweep of coastline"}
+```
+
+The frame arrives an ordinary figure's margin below the last
+paragraph, pins at the centre of the screen, and the page's lights go
+down and back up as the reader scrolls through it.
+
+**A pause has nothing to read.** No caption, no body — the container
+form fails the build saying so. Whatever needs saying goes in the
+paragraph before it or the paragraph after. A pause suits the frame
+too wide to hold beside words, and it costs the reader the frame's own
+height plus 1.2 screens of scrolling, so one or two in a piece is the
+dose.
+
+The header stays away for the whole of a pause and while any frame is
+held, and it stays away even if a keyboard reader tabs into the nav
+mid-scene — the links are focusable but off-screen until the scene
+releases. Known and accepted (spec 007); worth remembering if a piece
+is nothing but held frames end to end.
+
+Neither block takes tuning attributes beyond `side` and `bleed`. The
+hold's margin, the reading measure, the pause's length, how far the
+lights go down and how close the frame comes are site knobs, so every
+hold and every pause on the site reads the same.
 
 ## Curating a gallery
 
@@ -248,6 +340,12 @@ Learned by breaking them — each of these fails quietly if violated:
   a hint to add the blank line.
 - **Blocks don't nest.** A block directive inside another block's body
   fails the build.
+- **`bleed` is a flag on `held` and an enum on `wide`.** A held image
+  takes it bare — `{bleed}` — and bleeds on whichever side `side`
+  already gave the frame; `bleed="left"` there fails telling you to
+  drop the value. A `wide` takes the side as the value —
+  `bleed="left"` or `bleed="right"` — and a bare `{bleed}` there fails
+  as an invalid value, since it has no side to inherit.
 - **Images must live in the vault**, in the piece's own folder
   (`src/content/pieces/<slug>/`). Absolute OS paths (`~/Downloads/...`)
   resolve nowhere — not in Obsidian's preview, not in the build. The
@@ -266,6 +364,14 @@ vault but is not yet rewritten to its published URL
 `ROADMAP.md` and becomes necessary the day the first cross-piece link
 is written. Fine to write such links now; they just aren't live on the
 site yet.
+
+The one exception in the content as written: the paragraph after the
+vocabulary sampler's pause links to the sampler itself as a
+site-absolute URL (`/pieces/vocabulary-sampler/`). That link exists to
+prove a link fades with the pause's lights, which needs a link the
+built page actually renders — and the rewrite above doesn't exist
+yet. When it does, that link becomes a vault-relative one like every
+other.
 
 ## The writing loop
 
