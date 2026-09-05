@@ -60,18 +60,31 @@ attached.
   one photograph, one sentence, the latest piece a scroll away — not
   a grid of recent work, which would undo the argument the rest of
   the site makes. The `LatestWork` strip is built and unplaced.
-- **The held image** — a durational block for pieces: the photograph
-  stays fixed while a few paragraphs pass beside or below it (never
-  over it) and lets go when the words are spent; plain sticky
-  positioning, no script; the hold lasts exactly as long as the
-  writing outlasts the frame. Explored on branch `explore/held-block`
-  (`/held-demo/`): beside, bled to the edge, below, and — for the
-  frame too wide to hold beside words — the pause, where a panorama
-  stops the page, comes a little closer, and the lights go down, then
-  back up before the page moves on (CSS scroll-driven animations, no
-  script; degrades to the ordinary frame). The photographer kept the
-  idea (2026-09-02); becomes a directive in the vocabulary, its own
-  spec.
+- ~~**The held image**~~ — done in spec 007: two durational blocks.
+  `held` is a container whose body is the prose that passes beside a
+  frame that stays — the frame left or right, at the content width or
+  bled to the viewport edge, letting go the moment the words are spent
+  (plain sticky positioning, no script), and no hold at all where no
+  column fits beside it, where the frame is an ordinary figure and the
+  words follow. `pause` is the leaf for the frame too wide to hold
+  beside words: the frame pins at the centre of the screen with its
+  neighbouring paragraphs anchored above and below it, the ground goes
+  to a dark grey with the words a shade darker and still faintly
+  there, the mat keeps its own colour, and after 1.2 screens of pinned
+  scroll the lights come back up and the page moves on — script-driven,
+  degrading to the ordinary frame. Follow-ups it surfaced: a tall
+  pause frame on a short viewport can push an anchored paragraph
+  partly off-screen while pinned (a pause is for the wide frame); a
+  pause needs about half a screen of words after it to finish
+  releasing; a collapsed hold keeps the held reading size rather than
+  its neighbours'; the header's focus-reveal is knowingly overridden
+  while a scene is active, so a keyboard user tabbing into the nav
+  mid-pause focuses off-screen links; a `held` or `pause` written into
+  a sidecar story gets the CSS but not the script; the lights' list of
+  elements is enumerated, so anything outside it stays light on the
+  dark ground; and the sampler's site-absolute link after its pause is
+  the one exception to vault-relative links, until a link rewrite
+  exists.
 - **The slow view** — a piece or gallery experienced one frame at a
   time: full viewport on the dimmed ground, the piece's words between
   frames, stepped by key or swipe. Every part exists (quiet view, sets,

@@ -74,8 +74,9 @@ plain Markdown:
 ```
 
 Everything else in the closed block vocabulary uses directive syntax.
-A block is a leaf (`::name{...}` on its own line) or, to carry a
-caption, a container whose body is the caption:
+A block is a leaf (`::name{...}` on its own line) or a container
+whose body carries a caption — or, for `aside`, `row`, and `held`,
+the prose beside the frame:
 
 ```md
 ::wide{src="./photo-2.jpg" alt="The playa at dusk"}
