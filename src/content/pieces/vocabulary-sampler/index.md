@@ -4,7 +4,7 @@ publishDate: 2026-09-01
 categories: [landscape, street]
 description: >-
   Every block treatment, both forms, every attribute — the mechanical
-  reference for the spec-003 vocabulary. A fixture, not a piece.
+  reference for the block vocabulary. A fixture, not a piece.
 cover: ./land-a.jpg
 draft: false
 ---
@@ -168,3 +168,93 @@ stack on phones.
 :::row{src="./land-a.jpg" alt="A 3:2 placeholder" side="right"}
 Mirrored, image on the right.
 :::
+
+## Held
+
+The held image: the frame stays fixed at the top margin
+while the body's paragraphs pass beside it, and lets go exactly when
+the last line passes. The hold lasts as long as the writing outlasts
+the frame, so a body shorter than the frame never holds. A landscape
+frame has no column beside it on a portrait screen, and nothing holds
+on a phone — the frame is static there with its words after it.
+
+:::held{src="./land-b.jpg" alt="A 3:2 placeholder"}
+Sample prose, to give the hold something to hold. A held image at the
+content width, frame on the left, five paragraphs beside it — the
+calibration for a landscape frame on a laptop screen: enough words to
+outlast the frame, not so many the hold overstays.
+
+The frame is sized from its own ratio and the height it may use, never
+from the column: a 3:2 frame at the full hold height is wider than a
+2:3 at the same height, and the prose column keeps its 44-character
+measure either way.
+
+The first paragraph meets the top of the frame. The reading column is a
+narrow measure, so these paragraphs run longer on the page than they
+look in the source, which is the point — the scroll they add is the
+hold's length.
+
+Somewhere around here the prose passes the bottom of the frame. If the
+frame were taller than the words, nothing would hold; the frame would
+simply sit in the flow with the words beside it.
+
+The last line is the release. There is no air after it: the scene ends
+where the prose ends and the next block's margin begins, so the frame
+travels away with the final sentence rather than lingering.
+:::
+
+:::held{src="./port-a.jpg" alt="A 2:3 placeholder" side="right" bleed}
+Sample prose, for a held image bled to the right edge — the frame on
+the right, running to the viewport's edge, the prose keeping its
+column. A full-height vertical needs eight paragraphs to outlast it.
+
+A portrait frame uses the whole hold height on a landscape screen, so
+it is tall and narrow beside a column that is itself narrow. The words
+have further to travel.
+
+On a portrait screen the same frame keeps its side: there is a column
+beside a vertical frame there, which is exactly what a landscape frame
+lacks. The orientation class on the wrapper says which case this is,
+decided at build time from the image's own pixels.
+
+The bleed is a flag, not a side: it takes the side the frame already
+has and runs it out to the edge. The matte hugs the frame either way.
+
+The header goes away while a frame is held, whichever way the reader
+scrolls, so a scroll back up through the hold does not drop the site's
+chrome across the top of the picture.
+
+Nothing here moves by script. The hold is a sticky figure; the script
+on the piece page only marks that a frame is parked, which is what
+keeps the header away. The lights belong to a pause.
+
+This paragraph exists to lengthen the scene. So does the next. The
+release is where the words end, and eight paragraphs is what a
+full-height vertical takes at a laptop's viewport.
+
+The last paragraph. The frame lets go with this line and the section
+below begins at an ordinary block margin — no held stretch, no empty
+stage between the last word and the next thing.
+:::
+
+## Pause
+
+The pause: a frame too wide to hold beside words arrives an
+ordinary figure's margin below the last paragraph, pins at the centre,
+and the page's lights go down as the reader scrolls through it — the
+words above fade with the ground — then up again before the page moves
+on. The frame comes a little closer at the middle. Script-driven; with
+no script the frame pins on the light ground.
+
+::pause{src="./pano.jpg" alt="A 3:1 placeholder"}
+
+Sample prose after the pause, carrying an inline link to [the sampler
+itself](/pieces/vocabulary-sampler/) — the lights list's check: a link
+inherits its paragraph's colour, so it fades with the words rather than
+standing out on the dark ground.
+
+## After the pause
+
+A heading follows, for the same check: headings mix from their own
+token, so this one fades in step with the paragraphs rather than
+snapping to a different shade when the lights go down.

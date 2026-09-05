@@ -59,7 +59,7 @@ headers to confirm nothing was duplicated or dropped. -->
       case joins them; passage cases for `row`, `aside`, `held`
       (prose before, no caption) and a `pause` leaf, beside the
       existing caption cases; 173+ green; build green._
-- [ ] **T503** — Fixtures: the sampler's held left, held right with
+- [x] **T503** — Fixtures: the sampler's held left, held right with
       bleed, and pause, with sample prose marked as such and, around the
       pause, a paragraph with an inline link and a heading (the lights
       list's check); the fog
@@ -100,9 +100,13 @@ headers to confirm nothing was duplicated or dropped. -->
       updated; the transform's held `sizes` assumptions (a 58% frame
       column at content width, 670px at 1160px — the exploration's
       grid) measured against the grid as drawn and corrected if wrong,
-      in the transform, its test, and plan.md's sizing line together,
-      with the reciprocal keep-in-step note in `global.css` (T501
-      review)._
+      in the transform, its test, plan.md's sizing line, and the
+      sampler's sentence about the 44-character measure together, with
+      the reciprocal keep-in-step note in `global.css` — naming the
+      sampler's 44-character sentence too (T501, T503 reviews);
+      the sampler's two holds measured too — its prose calls five and
+      eight paragraphs the calibration, and the prose changes if the
+      measurement disagrees (T503 review)._
 - [ ] **T505** — The script on the piece page: pauses' progress into
       `--pause-t` and `--pause-lights`, holds' parked state,
       `data-pause-active` / `data-scene-active`, static frames skipped,
@@ -142,7 +146,9 @@ headers to confirm nothing was duplicated or dropped. -->
       a story is prose — no holds or pauses in a sidecar; the image
       page's passage quotes a caption from caption-bodied blocks only —
       a `held`, `row`, or `aside` body never appears there, T502
-      review);
+      review; the sampler's site-absolute link after its pause is the
+      one exception to the vault-relative practice, written so because
+      the rewrite doesn't exist yet, T503 review);
       `README.md`'s block table gains both rows; `DECISIONS.md` records
       the exploration's decisions (words beside, never over or under;
       script-driven pause; frames sized by ratio, not `sizes`; margins
@@ -156,7 +162,9 @@ headers to confirm nothing was duplicated or dropped. -->
       branch `explore/held-block`; update `ROADMAP.md` (the held image
       shipped with the shapes as they are — it still lists "below" and
       a scroll-driven pause; follow-ups it surfaced; `CLAUDE.md`'s
-      closed-vocabulary list was amended at T501, in its own commit);
+      closed-vocabulary list was amended at T501, in its own commit;
+      the fog-frames gallery's description still says "spec-003 demo
+      piece" — the same spec-number leak the sampler lost at T503);
       request the
       pre-merge whole-spec sweep and resolve its findings; build,
       tests, check, GPS scan, and format all green — actual output
