@@ -253,7 +253,7 @@ be a dark grey the words still show through (8), and the mat should
 stay (9). Plan sections: "Shape of the change", "The transform" (the
 stage), "The CSS" (the stage, `--pause-depth`, the mats), "The script".
 
-- [ ] **T501a** — The transform: a `pause` leaf's neighbouring plain
+- [x] **T501a** — The transform: a `pause` leaf's neighbouring plain
       paragraphs (an mdast `paragraph` with no `image` descendant, no
       `directiveLabel`, and no `data.pieceUnwrapped` mark — the aside's
       unwrap now sets that on the body nodes it splices in — immediately
@@ -403,6 +403,8 @@ treating the policy as settled. -->
 | Phase 1 fixes (sdd-implementer)   | opus             | 26,078                            | verified first try                                                                              |
 | Phase 1 re-review                 | reviewer default | 36,916                            | signed off                                                                                      |
 | visual-gate amendment sign-off ×4 | top tier         | 84,038 + 59,010 + 30,470 + 26,453 | fix and re-review ×3 (font-swap stale height; margin through sticky; wording), then signed off  |
+| T501a (sdd-implementer)           | opus             | 51,785                            | verified first try; seven mutations reported, each caught                                       |
+| T501a review                      | reviewer default | 52,962                            | signed off; two nits folded in by the orchestrator (class merge, a comment)                     |
 
 ## Handoff note
 

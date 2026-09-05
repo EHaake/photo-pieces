@@ -403,7 +403,9 @@ export const BLOCKS = {
     // flow, pins at the centre of the viewport inside the hold margin,
     // and the page's lights go down and up as the reader scrolls
     // through it (the piece page's script drives the progress). Leaf
-    // only — there is nothing to read while the lights are down.
+    // only — there is nothing to read while the lights are down; the
+    // leaf's neighbouring plain paragraphs ride in its stage, so the
+    // words stay anchored above and below the frame while it pins.
     forms: 'leaf',
     body: 'none',
     structure: 'frame',
@@ -639,6 +641,12 @@ export function remarkPiecesBlocks() {
         // column for text to wrap around it — so the container unwraps.
         const figure = wrapNode('figure', className, imageNodes);
         const index = parent.children.indexOf(node);
+        // Marked as the aside's own: once these paragraphs sit in the
+        // column they look like the piece's, and a following pause must
+        // not anchor them in its stage (spec 007, T501a).
+        for (const body of bodyProse) {
+          body.data = { ...body.data, pieceUnwrapped: true };
+        }
         parent.children.splice(index, 1, figure, ...bodyProse);
         continue;
       }
@@ -659,9 +667,35 @@ export function remarkPiecesBlocks() {
 
       if (block.structure === 'frame') {
         // pause: the image in a frame the script and CSS pin and scale;
-        // the figure is the scene around it.
-        node.children = [wrapNode('div', [`piece-${node.name}-frame`], imageNodes)];
-        node.data = { ...node.data, hName: 'figure', hProperties: { className, ...wrapperStyle } };
+        // the wrapper is the scene around it, and the stage inside is what
+        // pins — so the piece's own paragraph before and after the
+        // directive ride along with the frame, anchored to it (spec 007,
+        // visual gate decision 7). The wrapper is a div, not a figure,
+        // once the piece's prose lives inside it.
+        const frame = wrapNode('div', [`piece-${node.name}-frame`], imageNodes);
+        const index = parent.children.indexOf(node);
+        // The next neighbour first: removing the previous one shifts it.
+        const after = claimStageNeighbour(parent, index + 1, `piece-${node.name}-after`);
+        const before = claimStageNeighbour(parent, index - 1, `piece-${node.name}-before`);
+        node.children = [
+          wrapNode(
+            'div',
+            [`piece-${node.name}-stage`],
+            [...(before ? [before] : []), frame, ...(after ? [after] : [])],
+          ),
+        ];
+        node.data = {
+          ...node.data,
+          hName: 'div',
+          hProperties: {
+            className: [
+              ...className,
+              ...(before ? ['with-before'] : []),
+              ...(after ? ['with-after'] : []),
+            ],
+            ...wrapperStyle,
+          },
+        };
         continue;
       }
 
@@ -786,6 +820,30 @@ function wrapNode(hName, className, children, extraProps = {}) {
       ...(Object.keys(hProperties).length > 0 ? { hProperties } : {}),
     },
   };
+}
+
+function claimStageNeighbour(parent, index, className) {
+  // A pause anchors the piece's OWN paragraph: a plain mdast paragraph
+  // with no image in it (an image line is a block of its own), not
+  // prose an :::aside unwrapped into the column, and no directive label
+  // (defence in depth: rejectLabel fails every labelled container before
+  // this runs, so no test can reach that clause). Anything else — a
+  // heading, a list, another directive — stays put.
+  const candidate = index >= 0 ? parent.children[index] : undefined;
+  if (!candidate || candidate.type !== 'paragraph') return null;
+  if (candidate.data?.directiveLabel || candidate.data?.pieceUnwrapped) return null;
+  let hasImage = false;
+  visit(candidate, 'image', () => {
+    hasImage = true;
+  });
+  if (hasImage) return null;
+  parent.children.splice(index, 1);
+  const prior = candidate.data?.hProperties?.className ?? [];
+  candidate.data = {
+    ...candidate.data,
+    hProperties: { ...candidate.data?.hProperties, className: [...prior, className] },
+  };
+  return candidate;
 }
 
 function partitionBody(children, name, fail) {

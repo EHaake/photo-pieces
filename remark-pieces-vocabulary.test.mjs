@@ -755,11 +755,13 @@ describe('held and pause: the durational blocks (T501, spec 007)', () => {
     );
   });
 
-  it('pause renders a figure with the raw --ar and the linked image in its frame', async () => {
+  it('a pause with no neighbours: a div scene, a stage, the linked frame alone', async () => {
     const { code } = await render('::pause{src="./photo.jpg" alt="sweep"}');
     expect(code).toMatch(
-      /^<figure class="piece-block piece-pause" style="--ar: 1\.6"><div class="piece-pause-frame"><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_[^>]*><\/a><\/div><\/figure>/,
+      /^<div class="piece-block piece-pause" style="--ar: 1\.6"><div class="piece-pause-stage"><div class="piece-pause-frame"><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_[^>]*><\/a><\/div><\/div><\/div>/,
     );
+    expect(code).not.toContain('with-before');
+    expect(code).not.toContain('with-after');
     expect(code).not.toContain('<figcaption');
   });
 
@@ -791,8 +793,74 @@ describe('held and pause: the durational blocks (T501, spec 007)', () => {
   it('alt="" keeps a pause unlinked, --ar on the image', async () => {
     const { code } = await render('::pause{src="./photo.jpg" alt=""}');
     expect(code).not.toContain('image-link');
-    expect(code).toContain('<div class="piece-pause-frame"><img');
+    expect(code).toContain('<div class="piece-pause-stage"><div class="piece-pause-frame"><img');
     expect(imageMarkers(code)[0].style).toBe('--ar: 1.6');
+  });
+
+  it('the plain paragraphs either side move into the stage, inline markup intact', async () => {
+    const { code } = await render(
+      'Before *this* one.\n\n::pause{src="./photo.jpg" alt="sweep"}\n\nAfter [a link](https://example.com) here.',
+    );
+    expect(code).toContain('<div class="piece-block piece-pause with-before with-after"');
+    expect(code).toMatch(
+      /<div class="piece-pause-stage"><p class="piece-pause-before">Before <em>this<\/em> one\.<\/p>\n?<div class="piece-pause-frame">.*?<\/div>\n?<p class="piece-pause-after">After <a href="https:\/\/example\.com">a link<\/a> here\.<\/p><\/div>/s,
+    );
+    // Moved, not copied: neither paragraph is left in the column.
+    expect(code).not.toMatch(/<p>Before /);
+    expect(code).not.toMatch(/<p>After /);
+  });
+
+  it('a heading before and a list after stay outside the scene', async () => {
+    const { code } = await render(
+      '## A heading\n\n::pause{src="./photo.jpg" alt="sweep"}\n\n- an item\n- another',
+    );
+    expect(code).toContain('<div class="piece-block piece-pause" style="--ar: 1.6">');
+    expect(code).not.toContain('with-before');
+    expect(code).not.toContain('with-after');
+    expect(code).toMatch(/<h2[^>]*>[\s\S]*?<\/h2>\n?<div class="piece-block piece-pause"/);
+    expect(code).toMatch(/<\/div>\n?<ul>/);
+  });
+
+  it('an image paragraph before a pause stays outside — it is a block of its own', async () => {
+    const { code } = await render('![x](./portrait.jpg)\n\n::pause{src="./photo.jpg" alt="sweep"}');
+    expect(code).not.toContain('with-before');
+    expect(code).toMatch(/<p><a href="\/images\/fixtures\/portrait\/"/);
+    expect(code).toMatch(/<\/p>\n?<div class="piece-block piece-pause"/);
+  });
+
+  it('another block directive after a pause stays outside', async () => {
+    const { code } = await render(
+      '::pause{src="./photo.jpg" alt="sweep"}\n\n::single{src="./photo.jpg" alt="dawn"}',
+    );
+    expect(code).not.toContain('with-after');
+    expect(code).toContain('<div class="piece-block piece-pause" style="--ar: 1.6">');
+    expect(code).toMatch(/<\/div>\n?<figure class="piece-block piece-single">/);
+  });
+
+  it('two pauses with one paragraph between: the first claims it, the second takes nothing', async () => {
+    const { code } = await render(
+      '::pause{src="./photo.jpg" alt="one"}\n\nThe words between.\n\n::pause{src="./photo.jpg" alt="two"}',
+    );
+    const scenes = [...code.matchAll(/<div class="(piece-block piece-pause[^"]*)"/g)].map(
+      (m) => m[1],
+    );
+    expect(scenes).toEqual(['piece-block piece-pause with-after', 'piece-block piece-pause']);
+    expect(code).toContain('<p class="piece-pause-after">The words between.</p>');
+    expect(code).not.toContain('piece-pause-before');
+    // The second pause's stage holds its frame alone.
+    expect(code).toMatch(
+      /<div class="piece-block piece-pause" style="--ar: 1\.6"><div class="piece-pause-stage"><div class="piece-pause-frame">/,
+    );
+  });
+
+  it("an aside's unwrapped prose is not the piece's own — a pause after it anchors nothing", async () => {
+    const { code } = await render(
+      ':::aside{src="./photo.jpg" alt="a" side="left"}\nAside words.\n:::\n\n::pause{src="./photo.jpg" alt="sweep"}',
+    );
+    expect(code).not.toContain('with-before');
+    expect(code).toContain('<p>Aside words.</p>');
+    const scene = code.slice(code.indexOf('<div class="piece-block piece-pause'));
+    expect(scene).not.toContain('Aside words.');
   });
 
   it('pause keeps the family error contract and the closed attribute set', async () => {
