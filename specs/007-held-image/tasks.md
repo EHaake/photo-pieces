@@ -270,7 +270,7 @@ stage), "The CSS" (the stage, `--pause-depth`, the mats), "The script".
       a pause right after an aside leaves the aside's unwrapped prose;
       the existing pause tests updated for the `div`; `passageFor` cases
       untouched and green; mutation-checked; build green._
-- [ ] **T504a** — The CSS: `--pause-depth: 0.85` beside the other
+- [x] **T504a** — The CSS: `--pause-depth: 0.85` beside the other
       tokens, scaling the ground's mix only (html and body); the words'
       mixes unchanged (all the way); `--matte-fill` removed and the
       matte rule reading `--color-matte` plainly (the mats do not dim),
@@ -382,29 +382,31 @@ with the diff in a scratch file plus pointers into plan/spec (not a
 single bundle). Compare the spec's total against spec 006 before
 treating the policy as settled. -->
 
-| Task / invocation                 | Tier             | Tokens                            | Outcome / miss reason                                                                           |
-| --------------------------------- | ---------------- | --------------------------------- | ----------------------------------------------------------------------------------------------- |
-| plan/tasks sign-off (6 passes)    | reviewer default | —                                 | pre-policy; not logged                                                                          |
-| T501 (implementation)             | top tier         | —                                 | pre-policy: orchestrator implemented                                                            |
-| T501 review ×3                    | reviewer default | 98,327 + 64,311 + 32,169          | fix and re-review ×2, then signed off                                                           |
-| T502 (implementation)             | top tier         | —                                 | pre-policy                                                                                      |
-| T502 review                       | reviewer default | 52,260                            | signed off                                                                                      |
-| T503 (implementation)             | top tier         | —                                 | pre-policy                                                                                      |
-| T503 review ×2                    | reviewer default | 62,757 + 56,129                   | fix and re-review ×1, then signed off                                                           |
-| T504 (implementation)             | top tier         | —                                 | pre-policy                                                                                      |
-| T504 review ×2                    | reviewer default | 103,409 + 66,801                  | fix and re-review ×1 (three blocking hint/cascade findings)                                     |
-| T505 (implementation)             | top tier         | —                                 | pre-policy                                                                                      |
-| T505 review ×2                    | reviewer default | 72,243 + 50,281                   | fix and re-review ×1, then signed off                                                           |
-| T506 (measurement)                | top tier         | —                                 | pre-policy                                                                                      |
-| T506 review ×2                    | reviewer default | 96,435 + 47,934                   | fix and re-review ×1 (T506a), then signed off                                                   |
-| T507 (sdd-implementer)            | opus             | 18,785                            | verified first try; one mechanical comment addition, reported                                   |
-| T508 (sdd-implementer)            | opus             | 66,884                            | verified first try; two deviations reported (README spec list; a new AUTHORING section)         |
-| Phase 1 review                    | reviewer default | 66,930                            | fix and re-review: DECISIONS claimed a ROADMAP edit; the plugin's own README stale; three small |
-| Phase 1 fixes (sdd-implementer)   | opus             | 26,078                            | verified first try                                                                              |
-| Phase 1 re-review                 | reviewer default | 36,916                            | signed off                                                                                      |
-| visual-gate amendment sign-off ×4 | top tier         | 84,038 + 59,010 + 30,470 + 26,453 | fix and re-review ×3 (font-swap stale height; margin through sticky; wording), then signed off  |
-| T501a (sdd-implementer)           | opus             | 51,785                            | verified first try; seven mutations reported, each caught                                       |
-| T501a review                      | reviewer default | 52,962                            | signed off; two nits folded in by the orchestrator (class merge, a comment)                     |
+| Task / invocation                 | Tier             | Tokens                            | Outcome / miss reason                                                                                                                                                         |
+| --------------------------------- | ---------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| plan/tasks sign-off (6 passes)    | reviewer default | —                                 | pre-policy; not logged                                                                                                                                                        |
+| T501 (implementation)             | top tier         | —                                 | pre-policy: orchestrator implemented                                                                                                                                          |
+| T501 review ×3                    | reviewer default | 98,327 + 64,311 + 32,169          | fix and re-review ×2, then signed off                                                                                                                                         |
+| T502 (implementation)             | top tier         | —                                 | pre-policy                                                                                                                                                                    |
+| T502 review                       | reviewer default | 52,260                            | signed off                                                                                                                                                                    |
+| T503 (implementation)             | top tier         | —                                 | pre-policy                                                                                                                                                                    |
+| T503 review ×2                    | reviewer default | 62,757 + 56,129                   | fix and re-review ×1, then signed off                                                                                                                                         |
+| T504 (implementation)             | top tier         | —                                 | pre-policy                                                                                                                                                                    |
+| T504 review ×2                    | reviewer default | 103,409 + 66,801                  | fix and re-review ×1 (three blocking hint/cascade findings)                                                                                                                   |
+| T505 (implementation)             | top tier         | —                                 | pre-policy                                                                                                                                                                    |
+| T505 review ×2                    | reviewer default | 72,243 + 50,281                   | fix and re-review ×1, then signed off                                                                                                                                         |
+| T506 (measurement)                | top tier         | —                                 | pre-policy                                                                                                                                                                    |
+| T506 review ×2                    | reviewer default | 96,435 + 47,934                   | fix and re-review ×1 (T506a), then signed off                                                                                                                                 |
+| T507 (sdd-implementer)            | opus             | 18,785                            | verified first try; one mechanical comment addition, reported                                                                                                                 |
+| T508 (sdd-implementer)            | opus             | 66,884                            | verified first try; two deviations reported (README spec list; a new AUTHORING section)                                                                                       |
+| Phase 1 review                    | reviewer default | 66,930                            | fix and re-review: DECISIONS claimed a ROADMAP edit; the plugin's own README stale; three small                                                                               |
+| Phase 1 fixes (sdd-implementer)   | opus             | 26,078                            | verified first try                                                                                                                                                            |
+| Phase 1 re-review                 | reviewer default | 36,916                            | signed off                                                                                                                                                                    |
+| visual-gate amendment sign-off ×4 | top tier         | 84,038 + 59,010 + 30,470 + 26,453 | fix and re-review ×3 (font-swap stale height; margin through sticky; wording), then signed off                                                                                |
+| T501a (sdd-implementer)           | opus             | 51,785                            | verified first try; seven mutations reported, each caught                                                                                                                     |
+| T501a review                      | reviewer default | 52,962                            | signed off; two nits folded in by the orchestrator (class merge, a comment)                                                                                                   |
+| T504a (sdd-implementer)           | opus             | 41,082                            | verified first try (browser checks the orchestrator's: L 0.315 / 0.2, mats white, scene = stage + stretch, stages fit at all three viewports)                                 |
+| T504a review                      | reviewer default | 51,150                            | signed off in substance; its blocking arithmetic assumed a 3:2 pause — measured: both 3:1 fixtures fit; two tokens (--block-margin, --para-gap) folded in by the orchestrator |
 
 ## Handoff note
 

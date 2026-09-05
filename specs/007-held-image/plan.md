@@ -423,8 +423,10 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
   still sizes itself to the viewport inside the margin, so a tall
   pause frame on a short viewport can push an anchored paragraph
   partly off-screen while pinned. A pause is for the wide frame; the
-  fixtures' panoramas leave room at all three viewports (T506b
-  measures it).
+  fixtures' panoramas leave room at all three viewports (measured at
+  T504a: stages of 766 and 654px in 900, 644 and 532 in 1920, 602 and
+  406 in 812 — the T504a review's arithmetic for a 3:2 frame, 1035px
+  in 900, is the case this limitation names).
 - The lights mix the colours of the elements the rules name (`.prose`
   text, headings, captions, the piece's page head, the footer's
   text, links, and hairlines — not the mats, since decision 9); an element outside that list would
