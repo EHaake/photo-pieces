@@ -427,6 +427,13 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
   T504a: stages of 766 and 654px in 900, 644 and 532 in 1920, 602 and
   406 in 812 — the T504a review's arithmetic for a 3:2 frame, 1035px
   in 900, is the case this limitation names).
+- A pause needs about half a screen of content after it: the sticky
+  stage releases only when the scene's bottom reaches the stage's
+  bottom, which needs `(100svh − stage) / 2` of document below the
+  scene. A pause within that distance of the piece's end cannot finish
+  on a tall viewport — the page ends with the lights part-way up
+  (T506b: the sampler's, on the portrait desktop). An authoring rule,
+  not a mechanism: `AUTHORING.md` says leave words after a pause.
 - The lights mix the colours of the elements the rules name (`.prose`
   text, headings, captions, the piece's page head, the footer's
   text, links, and hairlines — not the mats, since decision 9); an element outside that list would
