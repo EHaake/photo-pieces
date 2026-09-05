@@ -45,8 +45,9 @@ headers to confirm nothing was duplicated or dropped. -->
       per plan.md's strategy, each shown to fail with its rule broken.
       _Verify: vitest — the new cases green (`--ar: 1.6` for photo.jpg,
       `frame-landscape` for the square, the pause's `sizes` exactly
-      `(min-aspect-ratio: 8/5) 138vh, 86vw` on photo.jpg (literally
-      8 × 5 pixels; the height branch rounds up — T501 review), every allowed
+      `(min-aspect-ratio: 8/5) calc(152.39vh - 15.23vmin), calc(95.24vw - 9.52vmin)`
+      on photo.jpg (literally 8 × 5 pixels; the margin is vmin, so the
+      hint is a calc — T504 review), every allowed
       combination and every must-fail case) and mutation-checked; 173 existing tests
       green; build green._
 - [x] **T502** — The passage by body kind: `BLOCK_BODIES` exported from
@@ -77,7 +78,7 @@ headers to confirm nothing was duplicated or dropped. -->
       and `pano`'s the paragraph before the pause (the T405-style dump,
       deleted); 173+ tests
       green (the fog's hold is measured at T504, once the CSS exists)._
-- [ ] **T504** — The CSS: the tokens (`--hold-margin`, `--pause-scale`,
+- [x] **T504** — The CSS: the tokens (`--hold-margin`, `--pause-scale`,
       `--pause-stretch`); `.piece-held` (grid, breakout, side, bleed,
       sticky figure sized from `--ar` and the hold height, the prose
       column with no trailing air, margins not padding); the
@@ -106,11 +107,15 @@ headers to confirm nothing was duplicated or dropped. -->
       sampler's 44-character sentence too (T501, T503 reviews);
       the sampler's two holds measured too — its prose calls five and
       eight paragraphs the calibration, and the prose changes if the
-      measurement disagrees (T503 review)._
+      measurement disagrees (T503 review). Record: the lights were
+      compared by serialized colour, not parsed components — the mix
+      at 0% serialized as the token's own oklch string, an exact match
+      (T504 review, deviation noted)._
 - [ ] **T505** — The script on the piece page: pauses' progress into
       `--pause-t` and `--pause-lights`, holds' parked state,
       `data-pause-active` / `data-scene-active`, static frames skipped,
-      init on `astro:page-load`. _Verify: on the sampler,
+      `will-change: transform` set on a pause's frame only while it is
+      active (T504 review), init on `astro:page-load`. _Verify: on the sampler,
       `window.scrollTo` to computed offsets through the pause (before
       the pin, 14%, 28%, 50%, 86%, 100%, after) gives `--pause-lights`
       0 → 0.5 → 1 → 1 → 0.5 → 0 → 0 and the two attributes on and off
@@ -121,11 +126,15 @@ headers to confirm nothing was duplicated or dropped. -->
       spec's rules (not the exploration's numbers — the hold margin
       changed): each hold's frame at its resting place and share of
       the height, release when the prose's bottom meets the frame's,
-      no hold where no column fits; the pause's arrival distance, park
+      no hold where no column fits — at 1080×1920 the fog's side-right
+      landscape hold with its figure before its prose, named (T504
+      review); the pause's arrival distance, park
       at the centre, lights 0 → 1 → 0 with the words — the paragraph,
       its inline link, and the heading beside the sampler's pause —
       following (a link inherits its paragraph's colour), the approach with the
-      margin surviving it, the header away and back; reduced motion
+      margin surviving it, the header away and back; the footer's
+      links and the page head looked at during a pause, not assumed
+      (T504 review); reduced motion
       emulated (approach off, dim on); the 003 and 006 geometry checks
       re-run. _Verify: the measurements recorded here; any amendment a
       sub-lettered task. This phase's end is the person's visual gate._

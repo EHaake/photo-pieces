@@ -65,26 +65,39 @@ blocks:
   (`block.proseClass`, default `piece-row-prose` so `row`'s CSS is
   untouched); `held` uses `piece-held-prose`.
 - **Sizing**: `held` — `(min-width: 1240px) 670px, (min-width: 720px)
-58vw, 94vw` (the exploration's grid; T504 measures the grid as drawn
-  and corrects these numbers, and this line, if they are wrong); with
-  `bleed` — `(min-width: 720px) 50vw, 94vw`; `pause`
-  — from the ratio the probe already produced, as `strip` does: on a
-  viewport wider than the frame's ratio the frame is height-limited,
-  so `(min-aspect-ratio: <width>/<height>) <ceil((100 − 2 × 5) ÷ 1.05 × ratio)>vh, 86vw`,
-  the condition written as the frame's **raw pixel dimensions** (a
+58vw, 94vw` (measured at T504 on the grid as drawn: the frame's
+  column is 643px at 1440×900 — 1.4 of 2.4 shares of the content width
+  less the gap — so the 670px hint over-delivers by 4% and is kept, a
+  hint must never fall under; the 58vw band over-delivers the same
+  way); with `bleed` — `(min-width: 720px) 50vw, 94vw`; and for a
+  **landscape frame** either string is prefixed with
+  `(orientation: portrait) and (min-width: 720px) 96vw` — the collapse
+  (below) renders it at the content width there, and without the
+  prefix the hint fell 40% under at 1080×1920 (T504 review; a portrait
+  frame keeps its column, so its hint has no prefix). `pause` — from
+  the ratio the probe already produced, as `strip` does, written as
+  the frame's geometry in the viewport: the margin is `5vmin` (the
+  clamp's middle band: below its floor the real margin is larger and
+  the hint over-delivers; above its cap — vmin past 1280px — the real
+  margin is smaller and the hint falls under, 0.66% at 2560×1440 and
+  about 2.4% at 3840×2160, inside Astro's width ladder), not a share
+  of the limiting dimension, so the hint is a `calc()`:
+  `(min-aspect-ratio: <width>/<height>) calc(<95.238 × ratio>vh − <9.524 × ratio>vmin), calc(95.24vw − 9.52vmin)`
+  — `(100vh − 10vmin) ÷ 1.05 × ratio` where the height limits the frame,
+  `(100vw − 10vmin) ÷ 1.05` where the width does — with the positive
+  coefficient rounded up and the subtracted one down, so the hint
+  never falls under (the earlier `<ceil(85.7 × ratio)>vh, 86vw` pair
+  treated the margin as a share and fell 3.7% under at the measured
+  1440×900 — T504 review; the height branch ignores the mat's two
+  edges — the true width is `2 × --matte × (1 − ratio)` less — which
+  over-delivers for a landscape frame and falls under by that much for
+  a portrait one, 2.1% at 2:3 on 1440×900, accepted: a pause is for
+  the wide frame).
+  The condition is written as the frame's **raw pixel dimensions** (a
   decimal ratio is legal in CSS Values 4 but not everywhere it should
   be, and an unparseable condition fails silently; raw pixels need no
-  reduction and can't be wrong). The share is the pause's geometry —
-  (100 − 2 × 5) ÷ 1.05 ≈ 85.7 of the limiting dimension, from the
-  margin's `5vmin` (true in the clamp's middle band; the ends
-  over-deliver harmlessly) and the approach — and **both branches round
-  up** (`Math.ceil` of the share × ratio, and of the share itself: 86),
-  so neither hint falls under the rendered width — the earlier
-  85/86 pair rounded the height branch down, 0.8% short in
-  arithmetic on a desktop (T501 review; Astro's candidate widths come
-  from a fixed ladder, so the pick itself likely never changed — the
-  value is honest now, that is all); the exact-string test pins the
-  pair.
+  reduction and can't be wrong). The exact-string tests pin both
+  strings.
   The hint uses `vh` where the CSS uses `svh`; a token change leaves
   the hint stale but safe, since the layout never sizes from it. This needs the probe to expose dimensions: `probeRatios`
   becomes `probeDimensions`, returning each image's orientation-
@@ -167,8 +180,10 @@ the hold's height:
 — never from the image's `sizes` (the exploration's trap: a responsive
 image with `width: auto` takes its natural width from `sizes`); the
 image fills the figure at `width: 100%`. The prose column is
-`min(100%, 44ch)` at 1.05rem / 1.85, its first paragraph meeting the
-top of the frame, **no trailing air** — the scene ends where the prose
+`min(100%, 44ch)` at 1.05rem / 1.85, its first paragraph starting at
+the top of the frame (a small optical offset below its edge — the
+exploration's value, which the visual gate confirms — and no paragraph
+margin), **no trailing air** — the scene ends where the prose
 ends, and the space around the block is margin, which a sticky frame
 doesn't hold through (spec goal 3). Hence the hold's scroll is exactly
 the prose's height beyond the frame's.
@@ -177,8 +192,11 @@ the prose's height beyond the frame's.
 (min-width: 720px)`: `.piece-held.frame-landscape` collapses to one
 column with a static, full-width figure and the prose after it;
 `frame-portrait` keeps its side. `@media (max-width: 719.98px)`: every
-held collapses the same way. The collapsed figure is an ordinary
-matted single.
+held collapses the same way — both resets name `side-right`'s figure
+explicitly, since its `order: 2` (0,2,1) out-specifies a bare reset
+and would put the words before the frame (T504 review; the row's
+collapse does the same). The collapsed figure is an ordinary matted
+single, the words after it.
 
 **The pause.** `.piece-pause` is a block `--frame-h + --pause-stretch`
 tall with an ordinary block margin (`.piece-block`'s), full width like
@@ -268,9 +286,9 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   `pause` — the leaf renders `figure.piece-pause` with `--ar` and the
   linked image inside `piece-pause-frame`, with `sizes` asserted as an
   exact string on photo.jpg — which is literally 8 × 5 pixels, so the
-  raw-dimension condition reads `(min-aspect-ratio: 8/5) 138vh, 86vw`
-  — so the dimension form and the share × ratio arithmetic fail loudly
-  if changed; the container form fails
+  raw-dimension condition reads `(min-aspect-ratio: 8/5) calc(152.39vh - 15.23vmin), calc(95.24vw - 9.52vmin)`
+  — so the dimension form and the geometry arithmetic fail loudly if
+  changed; the container form fails
   naming the rule; `alt=""` keeps the frame unlinked as everywhere.
   Each new test shown to fail with its rule broken.
 - `image-meta.test.mjs`: `BLOCK_BODIES` agrees with the transform's
@@ -318,8 +336,11 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
   Correct: it is the space that matters.
 - One frame per hold, one per pause; the showcase spec may generalize.
 - The lights mix the colours of the elements the rules name (`.prose`
-  text, headings, captions, mats); a piece element outside that list
-  would stay light on a dark ground. The sampler is the check.
+  text, headings, captions, mats, the piece's page head, the footer's
+  text, links, and hairlines); an element outside that list would
+  stay light on a dark ground — or, at text colour, vanish into it.
+  The sampler is the check, and T506 looks at the footer and the head
+  specifically.
 - A `held` or `pause` written inside a sidecar story (the image page
   renders the story through the same pipeline) gets the CSS but not
   the script, and the breakout arithmetic assumes the piece page's

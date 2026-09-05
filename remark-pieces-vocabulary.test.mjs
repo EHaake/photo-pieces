@@ -653,14 +653,18 @@ describe('held and pause: the durational blocks (T501, spec 007)', () => {
 
   it('side="right" and the {bleed} flag add their classes; sizes follow the shape', async () => {
     const plain = await render(HELD);
+    // A landscape frame collapses to the content width on a portrait
+    // viewport (no column beside it), so its hint says so first.
     expect(imageMarkers(plain.code)[0].sizes).toBe(
-      '(min-width: 1240px) 670px, (min-width: 720px) 58vw, 94vw',
+      '(orientation: portrait) and (min-width: 720px) 96vw, (min-width: 1240px) 670px, (min-width: 720px) 58vw, 94vw',
     );
     const right = await render(':::held{src="./photo.jpg" alt="r" side="right"}\nText.\n:::');
     expect(right.code).toContain('class="piece-block piece-held side-right frame-landscape"');
     const bled = await render(':::held{src="./photo.jpg" alt="b" side="right" bleed}\nText.\n:::');
     expect(bled.code).toContain('class="piece-block piece-held side-right bleed frame-landscape"');
-    expect(imageMarkers(bled.code)[0].sizes).toBe('(min-width: 720px) 50vw, 94vw');
+    expect(imageMarkers(bled.code)[0].sizes).toBe(
+      '(orientation: portrait) and (min-width: 720px) 96vw, (min-width: 720px) 50vw, 94vw',
+    );
     // The fourth combination: bleed is independent of the side.
     const bledLeft = await render(
       ':::held{src="./photo.jpg" alt="b" side="left" bleed}\nText.\n:::',
@@ -668,7 +672,9 @@ describe('held and pause: the durational blocks (T501, spec 007)', () => {
     expect(bledLeft.code).toContain(
       'class="piece-block piece-held side-left bleed frame-landscape"',
     );
-    expect(imageMarkers(bledLeft.code)[0].sizes).toBe('(min-width: 720px) 50vw, 94vw');
+    expect(imageMarkers(bledLeft.code)[0].sizes).toBe(
+      '(orientation: portrait) and (min-width: 720px) 96vw, (min-width: 720px) 50vw, 94vw',
+    );
   });
 
   it('a portrait frame is frame-portrait; a square is frame-landscape (the boundary)', async () => {
@@ -676,12 +682,19 @@ describe('held and pause: the durational blocks (T501, spec 007)', () => {
     expect(portrait.code).toContain(
       '<div class="piece-block piece-held side-left frame-portrait" style="--ar: 0.6667">',
     );
+    // A portrait frame keeps its column on a portrait viewport: no
+    // collapse branch in its hint.
+    expect(imageMarkers(portrait.code)[0].sizes).toBe(
+      '(min-width: 1240px) 670px, (min-width: 720px) 58vw, 94vw',
+    );
     // square.jpg is 200×200: a ratio of exactly 1 is width-starved on a
     // portrait screen like a landscape, so it collapses with them.
     const square = await render(':::held{src="./square.jpg" alt="s"}\nText.\n:::');
     expect(square.code).toContain(
       '<div class="piece-block piece-held side-left frame-landscape" style="--ar: 1">',
     );
+    // …and its hint collapses with the landscapes: one boundary, both uses.
+    expect(imageMarkers(square.code)[0].sizes).toMatch(/^\(orientation: portrait\) and /);
   });
 
   it('an EXIF-rotated camera portrait is frame-portrait by its rendered shape', async () => {
@@ -747,20 +760,23 @@ describe('held and pause: the durational blocks (T501, spec 007)', () => {
     expect(code).not.toContain('<figcaption');
   });
 
-  it("pause sizes come from the frame's raw pixel dimensions and its share × ratio", async () => {
-    // photo.jpg is literally 8 × 5 pixels: the condition is the raw pair;
-    // the share is (100 − 2 × 5) ÷ 1.05 = 85.71, so the height branch is
-    // 85.71 × 1.6 = 137.1 → 138vh (rounded up, never under) and the
-    // width branch 86vw.
+  it("pause sizes come from the frame's raw pixel dimensions and its geometry in vmin", async () => {
+    // photo.jpg is literally 8 × 5 pixels: the condition is the raw pair.
+    // The frame is (100 − 2 × 5vmin) ÷ 1.05 of the limiting dimension:
+    // height-limited, (95.238vh − 9.524vmin) × 1.6 = 152.38vh − 15.238vmin,
+    // rounded never to fall under (up, down) → 152.39vh − 15.23vmin;
+    // width-limited, 95.24vw − 9.52vmin.
     const { code } = await render('::pause{src="./photo.jpg" alt="sweep"}');
     expect(imageMarkers(code)[0]).toMatchObject({
       layout: 'constrained',
-      sizes: '(min-aspect-ratio: 8/5) 138vh, 86vw',
+      sizes: '(min-aspect-ratio: 8/5) calc(152.39vh - 15.23vmin), calc(95.24vw - 9.52vmin)',
     });
     // An EXIF-rotated frame measures as it renders (400 × 600, 0.6667):
-    // 85.71 × 0.6667 = 57.1 → 58vh.
+    // 95.238 × 0.6667 = 63.49 → 63.5vh; 9.524 × 0.6667 = 6.35 → 6.34vmin.
     const rotated = await render('::pause{src="./rotated.jpg" alt="r"}');
-    expect(imageMarkers(rotated.code)[0].sizes).toBe('(min-aspect-ratio: 400/600) 58vh, 86vw');
+    expect(imageMarkers(rotated.code)[0].sizes).toBe(
+      '(min-aspect-ratio: 400/600) calc(63.5vh - 6.34vmin), calc(95.24vw - 9.52vmin)',
+    );
   });
 
   it('the container form fails naming the rule', async () => {

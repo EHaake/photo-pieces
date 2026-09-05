@@ -39,6 +39,17 @@
   /* Sampler-review knobs for the tall and strip treatments. */
   --tall-max: 92vh;
   --strip-h: clamp(240px, 45vh, 420px);
+  /* The durational blocks (spec 007). --hold-margin is the held frame's
+     distance from the top edge AND the pause's margin all round (the
+     photographer's decision 5: one margin); --pause-scale the pause's
+     approach at the middle of its stretch; --pause-stretch the pinned
+     scroll a pause takes. The transform's pause `sizes` hint mirrors
+     the first two (PAUSE_SCALE and PAUSE_MARGIN_VMIN in
+     remark-pieces-blocks.mjs) — change these there too, or the hint
+     falls under and the srcset picks a soft image. */
+  --hold-margin: clamp(1.5rem, 5vmin, 4rem);
+  --pause-scale: 1.05;
+  --pause-stretch: 120svh;
 }
 
 /* Light-only by design: the photographer controls how the work is seen,
@@ -146,6 +157,15 @@ a:not(.brand, .button):hover {
    attribute) — chrome gets out of the way of the photographs while
    reading, per the brief's images-as-interface principle. */
 .site-header[data-hidden] {
+  transform: translateY(-100%);
+}
+
+/* Spec 007: while a pause is active, or any frame is held, the header
+   stays away whichever way the reader scrolls — its reveal-on-scroll-up
+   would spoil the dark, or slide over the parked frame. The piece
+   page's script sets the attribute; the header's transition makes the
+   hand-off smooth. */
+html[data-scene-active] .site-header {
   transform: translateY(-100%);
 }
 
@@ -1346,6 +1366,276 @@ pre code {
   }
 }
 
+/* ---- The held image (spec 007) ---------------------------------------
+   A grid of the frame and the prose, broken out to the content width
+   like `wide`. The figure sticks at --hold-margin below the top edge
+   for as long as the prose column is taller than it, then travels with
+   the end of the scene: the hold's length is exactly the length of the
+   writing — no timing, no script. The frame's width is the layout's
+   decision, from the frame's own ratio (--ar on the wrapper, from the
+   transform's probe) and the height it may use — never from the
+   image's `sizes` hint (a responsive image with width:auto takes its
+   natural width from `sizes`, the exploration's trap); the image fills
+   the figure. The header is away while a frame is held (the script
+   marks it), so the frame may use the whole height. */
+.piece-held {
+  --w: min(var(--content-width), 96vw);
+  display: grid;
+  /* The frame's column is 1.4 shares of 2.4 — 58% — which the
+     transform's held `sizes` hint assumes (670px at 1160px; 58vw
+     between the collapse and 1240px; measured 643px at 1440×900, so
+     the hint over-delivers by the gap), and the hint names the
+     portrait collapse below (96vw) first. Keep the two in step by
+     hand, and the sampler's sentence about the 44-character measure
+     with the prose rule below. */
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+  width: var(--w);
+  margin-inline: calc(50% - var(--w) / 2);
+  /* Margins, not padding: a sticky frame holds through its scene's
+     padding, and the hold must end with the last line of the prose,
+     not after it (the photographer, on the portrait desktop: the text
+     "keeps scrolling up for a while" past the frame). */
+  padding-block: 0;
+}
+
+.piece-held.side-right {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+}
+
+.piece-held.side-right figure {
+  order: 2;
+  justify-self: end;
+}
+
+.piece-held figure {
+  position: sticky;
+  top: var(--hold-margin);
+  width: 100%;
+  max-width: calc(
+    (100svh - 2 * var(--hold-margin) - 2 * var(--matte)) * var(--ar, 1) + 2 * var(--matte)
+  );
+  margin: 0;
+}
+
+/* The prose column: a reading measure beside the frame, starting at
+   the top of the frame — a small optical offset below its edge, the
+   exploration's value (the photographer kept the exploration; the
+   visual gate confirms it), and no paragraph margin — and no trailing
+   air: the scene ends where the
+   prose ends, so the hold's scroll is exactly the prose's length
+   beyond the frame's height. The reading size stays with the words
+   when the block collapses (below): the same passage should not
+   change size with the window. */
+.piece-held-prose {
+  width: min(100%, 44ch);
+  justify-self: center;
+  padding-block: clamp(1rem, 3vh, 2rem) 0;
+}
+
+.piece-held-prose p {
+  font-size: 1.05rem;
+  line-height: 1.85;
+}
+
+.piece-held-prose > :last-child {
+  margin-bottom: 0;
+}
+
+/* Bled: the frame runs to its viewport edge, the prose keeps to its
+   column on the other side. */
+.piece-held.bleed {
+  --w: 100vw;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  padding-inline: 0 var(--page-pad);
+}
+
+.piece-held.bleed.side-right {
+  padding-inline: var(--page-pad) 0;
+}
+
+/* Where no column can sit beside the frame there is no hold: the frame
+   is an ordinary matted figure and the words follow it in the flow
+   (the "text under a parked frame" shape was dropped — it looked wrong
+   on a portrait desktop). That is: a landscape frame (a square counts)
+   on a portrait viewport, and everything on a phone. A portrait frame
+   on a portrait desktop keeps its side — the height is plentiful. */
+@media (orientation: portrait) and (min-width: 720px) {
+  .piece-held.frame-landscape,
+  .piece-held.frame-landscape.side-right,
+  .piece-held.frame-landscape.bleed,
+  .piece-held.frame-landscape.bleed.side-right {
+    --w: min(var(--content-width), 96vw);
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 0;
+  }
+
+  /* Named with side-right too: without it the reset only ties
+     side-right's `order: 2` and wins on source order alone. */
+  .piece-held.frame-landscape figure,
+  .piece-held.frame-landscape.side-right figure {
+    position: static;
+    order: 0;
+    max-width: 100%;
+  }
+
+  .piece-held.frame-landscape .piece-held-prose {
+    width: min(100%, var(--prose-width));
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 719.98px) {
+  .piece-held,
+  .piece-held.side-right,
+  .piece-held.bleed,
+  .piece-held.bleed.side-right {
+    --w: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  /* side-right's `order: 2` (0,2,1) out-specifies a bare
+     `.piece-held figure` reset (0,1,1) whatever the source order and
+     would win — the words before the frame — so the reset names it
+     (the row's collapse does the same). */
+  .piece-held figure,
+  .piece-held.side-right figure {
+    position: static;
+    order: 0;
+    max-width: 100%;
+  }
+
+  .piece-held-prose {
+    width: 100%;
+    padding-top: 0;
+  }
+}
+
+/* ---- The pause (spec 007) --------------------------------------------
+   The frame arrives in the flow after the words with an ordinary
+   block's margin — no empty stage. When its resting place reaches the
+   centre of the viewport it pins there; the scene is taller than the
+   frame by --pause-stretch, and the reader's progress through that
+   stretch (0 → 1 → 0, shaped by the piece page's script into
+   --pause-t on the scene and --pause-lights on <html>) drives the
+   lights and the frame's approach. Then it releases and the next
+   paragraph arrives. The frame is the largest that fits the viewport
+   inside --hold-margin with room for the approach, from its ratio; the
+   image fills it. Without script the frame pins on the light ground. */
+.piece-pause {
+  --pause-t: 0;
+  --frame-w: min(
+    calc((100vw - 2 * var(--hold-margin)) / var(--pause-scale)),
+    calc(
+      ((100svh - 2 * var(--hold-margin)) / var(--pause-scale) - 2 * var(--matte)) * var(--ar, 1) +
+        2 * var(--matte)
+    )
+  );
+  --frame-h: calc((var(--frame-w) - 2 * var(--matte)) / var(--ar, 1) + 2 * var(--matte));
+  display: block;
+  width: 100vw;
+  height: calc(var(--frame-h) + var(--pause-stretch));
+  margin-inline: calc(50% - 50vw);
+  padding: 0;
+}
+
+.piece-pause-frame {
+  position: sticky;
+  top: calc((100svh - var(--frame-h)) / 2);
+  width: var(--frame-w);
+  max-width: 100%;
+  margin: 0 auto;
+  transform: scale(calc(1 + (var(--pause-scale) - 1) * var(--pause-t)));
+  transform-origin: center;
+  /* No standing will-change: the piece page's script promotes the
+     frame only while its pause is active. */
+}
+
+/* The lights. While a pause is active the ground, and the words on it,
+   mix toward the quiet dark by --pause-lights — each rule from ITS OWN
+   token (the prose is muted, headings are text, mats are matte), so at
+   0 every element computes to exactly its unmixed colour and nothing
+   snaps when a pause activates. A link inherits its paragraph's colour
+   and needs no rule. Elements outside this list stay light on the dark
+   ground — the sampler's pause is the check. */
+html[data-pause-active],
+html[data-pause-active] body {
+  background: color-mix(
+    in oklch,
+    var(--color-bg),
+    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+  );
+}
+
+html[data-pause-active] .prose :is(p, li),
+html[data-pause-active] .piece-block figcaption,
+html[data-pause-active] .site-footer,
+html[data-pause-active] .site-footer a {
+  color: color-mix(
+    in oklch,
+    var(--color-muted),
+    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+  );
+}
+
+html[data-pause-active] .prose :is(h1, h2, h3),
+html[data-pause-active] .page-head h1 {
+  color: color-mix(
+    in oklch,
+    var(--color-text),
+    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+  );
+}
+
+/* The piece's head is never within a viewport of a pause in the
+   fixtures, but nothing enforces that, so it follows too — its lead
+   and date from the muted token, its category line from the accent. */
+html[data-pause-active] .page-head :is(.lead, .entry-meta) {
+  color: color-mix(
+    in oklch,
+    var(--color-muted),
+    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+  );
+}
+
+html[data-pause-active] .page-head .eyebrow,
+html[data-pause-active] .page-head .eyebrow a {
+  color: color-mix(
+    in oklch,
+    var(--color-accent),
+    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+  );
+}
+
+/* The footer's hairlines — its top rule and the social links' boxes —
+   would stay bright on the dark ground: they mix from the line token. */
+html[data-pause-active] .site-footer,
+html[data-pause-active] .social-links a {
+  border-color: color-mix(
+    in oklch,
+    var(--color-line),
+    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+  );
+}
+
+/* The mats follow through the fill the matte rule below reads. */
+html[data-pause-active] {
+  --matte-fill: color-mix(
+    in oklch,
+    var(--color-matte),
+    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piece-pause-frame {
+    transform: none;
+  }
+}
+
 .piece-block figcaption {
   margin-top: calc(var(--baseline) / 3);
   font-family: var(--font-mono);
@@ -1359,12 +1649,14 @@ pre code {
    style per image — so gutters in multi-image blocks show the page
    between mats, and captions sit below the mats on the page (the wall
    label sits on the wall, not the mat). Matted: single (both forms),
-   inset, wide, diptych, triptych, grid, aside, row. Unmatted:
-   fullbleed, tall, strip, width="fullbleed" pairs, and half-bleed's
-   bled edge. Equal-heights note: the padding participates in the flex
-   basis floor, so match="height" stays exact with per-image mats.
-   Since spec 004 the mat sits on the image's link (the layout item);
-   a bare img — alt="" gets no link — carries it itself. */
+   inset, wide, diptych, triptych, grid, aside, row, held, pause.
+   Unmatted: fullbleed, tall, strip, width="fullbleed" pairs, and
+   half-bleed's bled edge. Equal-heights note: the padding participates
+   in the flex basis floor, so match="height" stays exact with per-image
+   mats. Since spec 004 the mat sits on the image's link (the layout
+   item); a bare img — alt="" gets no link — carries it itself. The fill
+   is --matte-fill where a pause has set it (the lights, above), else
+   the matte colour. */
 
 :is(
     .piece-single,
@@ -1374,12 +1666,14 @@ pre code {
     .piece-triptych,
     .piece-grid,
     .piece-aside,
-    .piece-row figure
+    .piece-row figure,
+    .piece-held figure,
+    .piece-pause-frame
   )
   > :is(a.image-link, img),
 :is(.prose, .piece-row-prose) > p > :is(a.image-link, img),
 :is(.prose, .piece-row-prose) > p > a:not(.image-link) > img {
-  background: var(--color-matte);
+  background: var(--matte-fill, var(--color-matte));
   padding: var(--matte);
 }
 

@@ -72,11 +72,31 @@ import {
 // in global.css's piece-block section — keep them in step by hand.
 const COLLAPSE = '(min-width: 720px)';
 
-// The pause frame's share of the viewport's limiting dimension, in
-// percent: the hold margin (5vmin, the clamp's middle band) off both
-// sides, then room for the approach (--pause-scale 1.05). Mirrors the
-// tokens in global.css — a token change leaves the hint stale but safe.
-const PAUSE_SHARE = (100 - 2 * 5) / 1.05;
+// The held image's orientation boundary, decided once for the class and
+// the `sizes` hint: a square counts as landscape (width-starved beside
+// a column on a portrait screen the same way).
+const isLandscape = (ratio) => ratio >= 1;
+
+// The pause frame's geometry, mirrored from global.css's tokens: the
+// hold margin (5vmin — the clamp's middle band) off both sides of the
+// limiting dimension, then room for the approach (--pause-scale 1.05).
+// So the frame is (100vw − 10vmin) ÷ 1.05 wide where the width limits
+// it, and (100vh − 10vmin) ÷ 1.05 × ratio where the height does — the
+// margin is vmin, not a share of the limiting dimension, which is why
+// the hint is a calc() and not a percentage (T504 review: a plain 86vw
+// fell 3.7% under at 1440×900). Coefficients rounded so the hint never
+// falls under: the positive term up, the subtracted term down.
+const PAUSE_SCALE = 1.05;
+const PAUSE_MARGIN_VMIN = 5;
+const roundUp = (n) => Number((Math.ceil(n * 100) / 100).toFixed(2));
+const roundDown = (n) => Number((Math.floor(n * 100) / 100).toFixed(2));
+// The frame's width as a calc() of the viewport, for a height-limited
+// frame of `ratio` (ratio = 1 gives the width-limited branch in vw).
+function pauseWidth(ratio, unit) {
+  const full = (100 / PAUSE_SCALE) * ratio;
+  const margin = ((2 * PAUSE_MARGIN_VMIN) / PAUSE_SCALE) * ratio;
+  return `calc(${roundUp(full)}${unit} - ${roundDown(margin)}vmin)`;
+}
 
 export const BLOCKS = {
   single: {
@@ -349,7 +369,7 @@ export const BLOCKS = {
     classes: (attrs, ratios) => [
       `side-${attrs.side ?? 'left'}`,
       ...(attrs.bleed !== undefined ? ['bleed'] : []),
-      ratios[0] >= 1 ? 'frame-landscape' : 'frame-portrait',
+      isLandscape(ratios[0]) ? 'frame-landscape' : 'frame-portrait',
     ],
     needsRatios: () => true,
     emitsAr: () => true,
@@ -357,15 +377,25 @@ export const BLOCKS = {
     // Hints for the srcset choice only — the layout sizes the frame from
     // --ar and the hold's height, never from these (global.css). The
     // numbers assume the grid global.css draws: the frame's column 58%
-    // of the 1160px content width; bled, half the viewport — kept in
-    // step by hand, like COLLAPSE.
-    sizing: (attrs) => ({
-      layout: 'constrained',
-      sizes:
-        attrs.bleed !== undefined
-          ? `${COLLAPSE} 50vw, 94vw`
-          : `(min-width: 1240px) 670px, ${COLLAPSE} 58vw, 94vw`,
-    }),
+    // of the 1160px content width (measured 643px at 1440×900 — the
+    // hint over-delivers by the gap); bled, half the viewport. Where no
+    // column fits, a landscape frame collapses to the full content
+    // width on a portrait viewport (global.css's collapse) — so its
+    // hint says so first, or it would fall 40% under there (T504
+    // review). Kept in step by hand, like COLLAPSE.
+    sizing: (attrs, i, ratios) => {
+      const collapsed = isLandscape(ratios[i])
+        ? `(orientation: portrait) and ${COLLAPSE} 96vw, `
+        : '';
+      return {
+        layout: 'constrained',
+        sizes:
+          collapsed +
+          (attrs.bleed !== undefined
+            ? `${COLLAPSE} 50vw, 94vw`
+            : `(min-width: 1240px) 670px, ${COLLAPSE} 58vw, 94vw`),
+      };
+    },
   },
 
   pause: {
@@ -387,20 +417,23 @@ export const BLOCKS = {
     needsRatios: () => true,
     emitsAr: () => true,
     rawAr: true,
-    // The frame fills the viewport inside a 5vmin margin with room for
-    // the 1.05 approach: (100 − 2 × 5) ÷ 1.05 ≈ 85.7 of the limiting
-    // dimension. Where the viewport is wider than the frame's ratio the
-    // frame is height-limited, so its width is that share of the height
-    // × ratio; otherwise that share of the width. Both round UP so the
-    // hint never falls under the rendered width (the srcset picks the
-    // next size up from a hint; a short hint picks a soft image). The
-    // condition is written as the frame's raw pixel dimensions: a
-    // decimal ratio is not parseable everywhere, and an unparseable
-    // media condition fails silently. Hints for the srcset choice only —
-    // the CSS sizes the frame from --ar and the tokens.
+    // Where the viewport is wider than the frame's ratio the frame is
+    // height-limited, so its width is the height branch × ratio;
+    // otherwise the width branch (pauseWidth above — exact in vmin,
+    // rounded never to fall under: the srcset picks the next size up
+    // from a hint, and a short hint picks a soft image). The condition
+    // is written as the frame's raw pixel dimensions: a decimal ratio
+    // is not parseable everywhere, and an unparseable media condition
+    // fails silently. The height branch ignores the mat's two edges:
+    // the true width is 2 × --matte × (1 − ratio) less, so the hint
+    // over-delivers for a landscape frame and falls under by that much
+    // for a portrait one — 2.1% at 2:3 on 1440×900 (accepted: a pause
+    // is for the wide frame).
+    // Hints for the srcset choice only — the CSS sizes the frame from
+    // --ar and the tokens.
     sizing: (attrs, i, ratios, dims) => ({
       layout: 'constrained',
-      sizes: `(min-aspect-ratio: ${dims[i].width}/${dims[i].height}) ${Math.ceil(PAUSE_SHARE * ratios[i])}vh, ${Math.ceil(PAUSE_SHARE)}vw`,
+      sizes: `(min-aspect-ratio: ${dims[i].width}/${dims[i].height}) ${pauseWidth(ratios[i], 'vh')}, ${pauseWidth(1, 'vw')}`,
     }),
   },
 
