@@ -54,6 +54,104 @@ const { Content } = await render(piece);
   </article>
 </BaseLayout>
 
+<script>
+  import { shape } from '../../lib/pause-shape';
+
+  // Spec 007, the durational blocks' one script. Holds are pure CSS;
+  // this only mirrors their state: a pause's progress through its
+  // pinned stretch into --pause-t on the scene (the approach) and the
+  // maximum into --pause-lights on <html> (the lights), plus
+  // data-pause-active and data-scene-active on <html> (the lights'
+  // rules and the header's rule). One rect read per scene per scroll
+  // event, no rAF — scroll events already throttle to frames; the
+  // writes come after the reads, and only when something changed.
+  // Bound once per module; per-page setup in init(), which looks only
+  // inside the piece's column — a block in a sidecar story (the image
+  // page) never gets the script, however the reader arrived. The
+  // router swaps <html>'s attributes on every navigation, so nothing
+  // leaks between pages; a page without scenes writes nothing.
+  const root = document.documentElement;
+  let pauses: HTMLElement[] = [];
+  let holds: HTMLElement[] = [];
+  let lastLights = '';
+
+  // The sticky element's resting offset, from its computed `top` (a px
+  // length for a positioned element). Not a number means the
+  // stylesheet isn't what the script expects: skip the scene rather
+  // than park it at 0.
+  const parkOf = (style: CSSStyleDeclaration) => {
+    const px = Number.parseFloat(style.top);
+    return Number.isFinite(px) ? px : null;
+  };
+
+  const update = () => {
+    if (pauses.length === 0 && holds.length === 0) return;
+    let sceneActive = false;
+    let pauseActive = false;
+    let lights = 0;
+    const scenes: { scene: HTMLElement; frame: HTMLElement; t: number; active: boolean }[] = [];
+    for (const scene of pauses) {
+      const frame = scene.querySelector<HTMLElement>(':scope > .piece-pause-frame');
+      if (!frame) continue;
+      const style = getComputedStyle(frame);
+      // A frame that isn't sticky (a stylesheet failure) never pauses.
+      if (style.position !== 'sticky') continue;
+      const park = parkOf(style);
+      if (park === null) continue;
+      const rect = scene.getBoundingClientRect();
+      const stretch = rect.height - frame.offsetHeight;
+      const p = stretch > 0 ? Math.min(1, Math.max(0, (park - rect.top) / stretch)) : 0;
+      const t = shape(p);
+      const active = p > 0 && p < 1;
+      scenes.push({ scene, frame, t, active });
+      lights = Math.max(lights, t);
+      if (active) {
+        pauseActive = true;
+        sceneActive = true;
+      }
+    }
+    // A hold is active while its frame is parked: the scene's top has
+    // passed the park line and its bottom hasn't reached the frame's.
+    // A static figure (no column beside it — the collapses) never parks.
+    for (const scene of holds) {
+      const figure = scene.querySelector<HTMLElement>(':scope > figure');
+      if (!figure) continue;
+      const style = getComputedStyle(figure);
+      if (style.position !== 'sticky') continue;
+      const park = parkOf(style);
+      if (park === null) continue;
+      const rect = scene.getBoundingClientRect();
+      if (rect.top < park && rect.bottom > park + figure.offsetHeight) sceneActive = true;
+    }
+    // The writes, after every read.
+    for (const { scene, frame, t, active } of scenes) {
+      scene.style.setProperty('--pause-t', t.toFixed(3));
+      // Promote the frame to its own layer only while it is moving.
+      frame.style.willChange = active ? 'transform' : '';
+    }
+    const lightsValue = lights.toFixed(3);
+    if (lightsValue !== lastLights) {
+      root.style.setProperty('--pause-lights', lightsValue);
+      lastLights = lightsValue;
+    }
+    root.toggleAttribute('data-pause-active', pauseActive);
+    root.toggleAttribute('data-scene-active', sceneActive);
+  };
+
+  const init = () => {
+    const column = document.querySelector('.prose.piece-column');
+    pauses = column ? [...column.querySelectorAll<HTMLElement>('.piece-pause')] : [];
+    holds = column ? [...column.querySelectorAll<HTMLElement>('.piece-held')] : [];
+    // The router swapped <html> clean; start the cache clean too.
+    lastLights = '';
+    update();
+  };
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  document.addEventListener('astro:page-load', init);
+</script>
+
 <style>
   /* The reading column is viewport-centered — the layout contract
      .piece-fullbleed's edge-to-edge breakout depends on (see the piece

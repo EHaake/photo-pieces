@@ -287,7 +287,7 @@ export const BLOCKS = {
     structure: 'scroll',
     attrs: { required: [], optional: [], enums: {} },
     needsRatios: () => true,
-    sizing: (attrs, i, ratios) => ({
+    sizing: (_attrs, i, ratios) => ({
       layout: 'constrained',
       sizes: `${Math.round(420 * (ratios?.[i] ?? 1.5))}px`,
     }),
@@ -431,7 +431,7 @@ export const BLOCKS = {
     // is for the wide frame).
     // Hints for the srcset choice only — the CSS sizes the frame from
     // --ar and the tokens.
-    sizing: (attrs, i, ratios, dims) => ({
+    sizing: (_attrs, i, ratios, dims) => ({
       layout: 'constrained',
       sizes: `(min-aspect-ratio: ${dims[i].width}/${dims[i].height}) ${pauseWidth(ratios[i], 'vh')}, ${pauseWidth(1, 'vw')}`,
     }),

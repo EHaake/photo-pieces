@@ -295,6 +295,12 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   table (names and body kinds); `passageFor` for a `row`, an `aside`,
   and a `held` body (prose before, no caption) and for a `pause` leaf
   (prose before, no caption), beside the existing caption cases.
+- `pause-shape.test.mjs`: the script's one piece of pure logic, the
+  0 → 1 → 0 shape with 28-percent smoothstep ramps, lives in
+  `src/lib/pause-shape.ts` so it can have a test — the ends, the held
+  middle, half-way at half a ramp, smooth not linear, monotone on each
+  ramp (T505a, from the T505 review). The rest of the script is
+  measurement, verified in the browser.
 - Existing suites unchanged: 173 tests green.
 - Build with the fixtures; the post-build barriers.
 - Geometry pass at three viewports (1440×900, 1080×1920, 375×812) on
@@ -318,7 +324,8 @@ src/styles/global.css             tokens; .piece-held*, .piece-pause*, the
 src/pages/pieces/[slug].astro     the scenes script
 src/content/pieces/vocabulary-sampler/index.md
 src/content/pieces/where-the-fog-lets-go/index.md
-remark-pieces-vocabulary.test.mjs, image-meta.test.mjs
+remark-pieces-vocabulary.test.mjs, image-meta.test.mjs, pause-shape.test.mjs
+src/lib/pause-shape.ts            shape(): the pause's 0 → 1 → 0 with 28% ramps (T505a)
 src/lib/image-meta.mjs            BLOCK_BODIES; passageFor by body kind
 scripts/gen-placeholders.mjs      tests/fixtures/square.jpg
 obsidian-plugin/main.ts           pause: one (the leaf list)
@@ -341,9 +348,17 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
   stay light on a dark ground — or, at text colour, vanish into it.
   The sampler is the check, and T506 looks at the footer and the head
   specifically.
+- While a scene is active the header's `data-scene-active` rule
+  out-specifies its `data-hidden` rule, so the base layout's
+  focus-reveal (focus entering the header brings it back) has no
+  visible effect: a keyboard user tabbing into the nav mid-pause
+  focuses links that are off-screen. The spec asks for the header to
+  be away for the whole of a pause; the affordance is overridden
+  knowingly (T505 review). T506 looks at it.
 - A `held` or `pause` written inside a sidecar story (the image page
   renders the story through the same pipeline) gets the CSS but not
-  the script, and the breakout arithmetic assumes the piece page's
+  the script: the script looks only inside the piece's column, so this
+  holds however the reader arrived (T505 review). Also, and the breakout arithmetic assumes the piece page's
   viewport-centred column — the same standing limitation `wide` and
   `fullbleed` have there. Not addressed here; `AUTHORING.md` says a
   story is prose.

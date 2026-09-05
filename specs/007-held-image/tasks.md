@@ -111,7 +111,7 @@ headers to confirm nothing was duplicated or dropped. -->
       compared by serialized colour, not parsed components — the mix
       at 0% serialized as the token's own oklch string, an exact match
       (T504 review, deviation noted)._
-- [ ] **T505** — The script on the piece page: pauses' progress into
+- [x] **T505** — The script on the piece page: pauses' progress into
       `--pause-t` and `--pause-lights`, holds' parked state,
       `data-pause-active` / `data-scene-active`, static frames skipped,
       `will-change: transform` set on a pause's frame only while it is
@@ -120,7 +120,19 @@ headers to confirm nothing was duplicated or dropped. -->
       the pin, 14%, 28%, 50%, 86%, 100%, after) gives `--pause-lights`
       0 → 0.5 → 1 → 1 → 0.5 → 0 → 0 and the two attributes on and off
       accordingly; a parked hold sets `data-scene-active`; a collapsed
-      (static) hold does not; `astro check` clean; build green._
+      (static) hold does not; `astro check` clean; build green.
+      Record: `astro check` reported two hints, both unused `attrs`
+      parameters in the transform (the pause's, from T501, and the
+      strip's, pre-existing) — both renamed `_attrs`, check clean; the
+      arithmetic was verified with scroll events dispatched by hand
+      (the pane is hidden and never ticks a real scroll), so the scroll
+      binding itself is exercised by the person at the visual gate
+      (T505 review)._
+- [x] **T505a** — `shape` extracted to `src/lib/pause-shape.ts` with a
+      unit test (`pause-shape.test.mjs`): the ends, the held middle,
+      half-way at half a ramp, smooth not linear, monotone on each
+      ramp — from the T505 review; the plan's testing strategy records
+      it. _Verify: vitest green; a `RAMP` or curve change fails it._
 - [ ] **T506** — Geometry pass at three viewports (1440×900, 1080×1920,
       375×812) on the sampler and the fog piece, judged against the
       spec's rules (not the exploration's numbers — the hold margin
@@ -134,7 +146,8 @@ headers to confirm nothing was duplicated or dropped. -->
       following (a link inherits its paragraph's colour), the approach with the
       margin surviving it, the header away and back; the footer's
       links and the page head looked at during a pause, not assumed
-      (T504 review); reduced motion
+      (T504 review); the header's focus-reveal overridden during a
+      scene, looked at (T505 review); reduced motion
       emulated (approach off, dim on); the 003 and 006 geometry checks
       re-run. _Verify: the measurements recorded here; any amendment a
       sub-lettered task. This phase's end is the person's visual gate._
