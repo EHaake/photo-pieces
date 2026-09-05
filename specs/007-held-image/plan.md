@@ -380,3 +380,8 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
   transform, no script.
 - **The pause's words fade with the lights**, rather than staying dark
   on a dark ground.
+- **A collapsed hold keeps the held reading size** (1.05rem / 1.85):
+  on a phone, or a landscape frame on a portrait screen, the passage
+  reads a little larger than its neighbours rather than changing size
+  with the window (T504, recorded at the T506 review; the visual gate
+  is where it gets judged).
