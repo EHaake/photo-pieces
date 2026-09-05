@@ -245,6 +245,84 @@ No amendment needed: every measurement matches the spec's rules as the
 plan states them. The scroll binding itself, and the hand-off's feel, are
 the person's at the visual gate — the one thing the pane cannot exercise.
 
+## Phase 0b — The visual gate's amendments (product owner, 2026-09-04; reviewer after each task)
+
+The photographer at the visual gate: the pause's words should stay
+anchored above and below the frame (spec decision 7), the dark should
+be a dark grey the words still show through (8), and the mat should
+stay (9). Plan sections: "Shape of the change", "The transform" (the
+stage), "The CSS" (the stage, `--pause-depth`, the mats), "The script".
+
+- [ ] **T501a** — The transform: a `pause` leaf's neighbouring plain
+      paragraphs (an mdast `paragraph` with no `image` descendant, no
+      `directiveLabel`, and no `data.pieceUnwrapped` mark — the aside's
+      unwrap now sets that on the body nodes it splices in — immediately
+      before / after in the parent) move into
+      `div.piece-pause > div.piece-pause-stage` as `p.piece-pause-before`
+      / `p.piece-pause-after` around the `piece-pause-frame`; the wrapper
+      becomes a `div` and gains `with-before` / `with-after`; anything
+      else beside the directive stays put. _Verify: vitest — the moved
+      paragraphs with inline markup intact and the wrapper classes; a
+      heading, a list, an image paragraph, and another block directive
+      beside a pause stay outside; a pause with no neighbours has a stage
+      with the frame alone and neither class; two pauses with one
+      paragraph between (the first claims it, the second takes nothing);
+      a pause right after an aside leaves the aside's unwrapped prose;
+      the existing pause tests updated for the `div`; `passageFor` cases
+      untouched and green; mutation-checked; build green._
+- [ ] **T504a** — The CSS: `--pause-depth: 0.85` beside the other
+      tokens, scaling the ground's mix only (html and body); the words'
+      mixes unchanged (all the way); `--matte-fill` removed and the
+      matte rule reading `--color-matte` plainly (the mats do not dim),
+      the matte comment and the pause section's header comment updated;
+      the scene at column width, `height: auto`, its `::after`
+      `--pause-stretch` tall; only the frame breaking out
+      (`width: var(--frame-w); margin-inline: calc(50% - var(--frame-w) / 2)`);
+      `.piece-pause-stage` the sticky element, `display: flow-root` so
+      its last child's margin stays inside it, centred by `--stage-h`
+      (fallback `--frame-h`); `.piece-pause-frame`'s `max-width: 100%`
+      removed so the frame can break out of the column; the anchored paragraphs plain
+      column paragraphs, their paragraph gap collapsing into the frame's
+      block margin; the scene's
+      outer margin the paragraph gap on a `with-before` / `with-after`
+      side and the block margin otherwise; `.piece-pause-frame` a plain
+      matted block carrying the approach. _Verify: build green; with
+      `data-pause-active` set and `--pause-lights` 1 by hand, the ground
+      computes to oklch L 0.315 (± 0.005) and a `.prose p` and an `h2`
+      to L 0.2, both mats to the matte colour; at 0 everything its
+      token; the scene's height equals the stage's plus the stretch with
+      `--stage-h` unset._
+- [ ] **T505c** — The script: the stage is the pinned element — park
+      from its computed `top`, stretch from the scene's height less the
+      stage's — a `ResizeObserver` per stage keeps `--stage-h` on the
+      scene equal to the stage's height and calls `update()` (disconnected
+      and re-created at init); `will-change` stays on the frame. _Verify: on the sampler
+      the lights sequence 0 → 0.5 → 1 → 1 → 0.5 → 0 → 0 through the
+      stage's stretch; `--stage-h` equals the stage's offsetHeight, and
+      again after the stage is forced to re-wrap (its width changed by
+      hand); `astro check` clean; 199+ tests._
+- [ ] **T506b** — Re-measure the pause at the three viewports: the
+      anchored paragraphs above and below the frame through the stretch
+      (their viewport tops constant while pinned), the stage centred,
+      the paragraphs inside the viewport at all three sizes for both
+      panoramas (if the sampler's stage exceeds 900px at the laptop,
+      that is a product question — shrink the frame or accept — for the
+      person), the frame's width equal to `--frame-w` at the laptop
+      (wider than the column), an anchored paragraph's width equal to a column
+      paragraph's, the gaps: paragraph → anchored paragraph the
+      paragraph gap, anchored paragraph → frame the block margin, the
+      ground at L 0.315 and the words at 0.2, the mats white, the
+      approach on the frame only, the release with the next paragraph
+      arriving at the paragraph gap; the T506 record amended. _Verify:
+      the measurements recorded here._
+- [ ] **T508a** — Docs and fixture prose: AUTHORING's pause paragraph
+      (the paragraph before and after travel with the frame; the dark
+      grey with the words a shade darker; the mat stays), README's pause
+      row if its wording changed, DECISIONS' spec-007 section (the
+      three gate decisions with their why, and the ground-only depth),
+      and the sampler's Pause section prose, which describes the old
+      behaviour. _Verify: Prettier clean; build green._
+
 ## Phase 1 — Plugin and docs (reviewer after the phase)
 
 - [x] **T507** — Obsidian plugin: `pause: one` in the leaf list, so
@@ -304,26 +382,27 @@ with the diff in a scratch file plus pointers into plan/spec (not a
 single bundle). Compare the spec's total against spec 006 before
 treating the policy as settled. -->
 
-| Task / invocation               | Tier             | Tokens                   | Outcome / miss reason                                                                           |
-| ------------------------------- | ---------------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
-| plan/tasks sign-off (6 passes)  | reviewer default | —                        | pre-policy; not logged                                                                          |
-| T501 (implementation)           | top tier         | —                        | pre-policy: orchestrator implemented                                                            |
-| T501 review ×3                  | reviewer default | 98,327 + 64,311 + 32,169 | fix and re-review ×2, then signed off                                                           |
-| T502 (implementation)           | top tier         | —                        | pre-policy                                                                                      |
-| T502 review                     | reviewer default | 52,260                   | signed off                                                                                      |
-| T503 (implementation)           | top tier         | —                        | pre-policy                                                                                      |
-| T503 review ×2                  | reviewer default | 62,757 + 56,129          | fix and re-review ×1, then signed off                                                           |
-| T504 (implementation)           | top tier         | —                        | pre-policy                                                                                      |
-| T504 review ×2                  | reviewer default | 103,409 + 66,801         | fix and re-review ×1 (three blocking hint/cascade findings)                                     |
-| T505 (implementation)           | top tier         | —                        | pre-policy                                                                                      |
-| T505 review ×2                  | reviewer default | 72,243 + 50,281          | fix and re-review ×1, then signed off                                                           |
-| T506 (measurement)              | top tier         | —                        | pre-policy                                                                                      |
-| T506 review ×2                  | reviewer default | 96,435 + 47,934          | fix and re-review ×1 (T506a), then signed off                                                   |
-| T507 (sdd-implementer)          | opus             | 18,785                   | verified first try; one mechanical comment addition, reported                                   |
-| T508 (sdd-implementer)          | opus             | 66,884                   | verified first try; two deviations reported (README spec list; a new AUTHORING section)         |
-| Phase 1 review                  | reviewer default | 66,930                   | fix and re-review: DECISIONS claimed a ROADMAP edit; the plugin's own README stale; three small |
-| Phase 1 fixes (sdd-implementer) | opus             | 26,078                   | verified first try                                                                              |
-| Phase 1 re-review               | reviewer default | 36,916                   | signed off                                                                                      |
+| Task / invocation                 | Tier             | Tokens                            | Outcome / miss reason                                                                           |
+| --------------------------------- | ---------------- | --------------------------------- | ----------------------------------------------------------------------------------------------- |
+| plan/tasks sign-off (6 passes)    | reviewer default | —                                 | pre-policy; not logged                                                                          |
+| T501 (implementation)             | top tier         | —                                 | pre-policy: orchestrator implemented                                                            |
+| T501 review ×3                    | reviewer default | 98,327 + 64,311 + 32,169          | fix and re-review ×2, then signed off                                                           |
+| T502 (implementation)             | top tier         | —                                 | pre-policy                                                                                      |
+| T502 review                       | reviewer default | 52,260                            | signed off                                                                                      |
+| T503 (implementation)             | top tier         | —                                 | pre-policy                                                                                      |
+| T503 review ×2                    | reviewer default | 62,757 + 56,129                   | fix and re-review ×1, then signed off                                                           |
+| T504 (implementation)             | top tier         | —                                 | pre-policy                                                                                      |
+| T504 review ×2                    | reviewer default | 103,409 + 66,801                  | fix and re-review ×1 (three blocking hint/cascade findings)                                     |
+| T505 (implementation)             | top tier         | —                                 | pre-policy                                                                                      |
+| T505 review ×2                    | reviewer default | 72,243 + 50,281                   | fix and re-review ×1, then signed off                                                           |
+| T506 (measurement)                | top tier         | —                                 | pre-policy                                                                                      |
+| T506 review ×2                    | reviewer default | 96,435 + 47,934                   | fix and re-review ×1 (T506a), then signed off                                                   |
+| T507 (sdd-implementer)            | opus             | 18,785                            | verified first try; one mechanical comment addition, reported                                   |
+| T508 (sdd-implementer)            | opus             | 66,884                            | verified first try; two deviations reported (README spec list; a new AUTHORING section)         |
+| Phase 1 review                    | reviewer default | 66,930                            | fix and re-review: DECISIONS claimed a ROADMAP edit; the plugin's own README stale; three small |
+| Phase 1 fixes (sdd-implementer)   | opus             | 26,078                            | verified first try                                                                              |
+| Phase 1 re-review                 | reviewer default | 36,916                            | signed off                                                                                      |
+| visual-gate amendment sign-off ×4 | top tier         | 84,038 + 59,010 + 30,470 + 26,453 | fix and re-review ×3 (font-swap stale height; margin through sticky; wording), then signed off  |
 
 ## Handoff note
 

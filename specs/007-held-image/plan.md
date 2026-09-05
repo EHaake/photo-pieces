@@ -21,8 +21,13 @@ measurement below; page and branch are deleted at close-out.
   with `--ar` on the wrapper, the figure with the matted, linked image,
   and `div.piece-held-prose` for the body.
 - **`pause`** — `forms: 'leaf'`, one image, no body; emits
-  `figure.piece-block.piece-pause` with `--ar` on it and the matted,
-  linked image inside a `div.piece-pause-frame`.
+  `div.piece-block.piece-pause` with `--ar` on it, holding a
+  `div.piece-pause-stage` with the paragraph before the directive
+  (when it is a plain paragraph), the matted, linked image inside a
+  `div.piece-pause-frame`, and the paragraph after (likewise) — the
+  stage is what pins, so the words stay anchored to the frame (visual
+  gate, decision 7). The wrapper is a `div`, not a `figure`, once
+  the piece's own prose lives inside it.
 - **CSS**: the hold (sticky figure sized from `--ar` and the hold
   height, the prose column beside it, side and bleed variants,
   orientation and phone collapses to a static figure), the pause (a
@@ -111,6 +116,30 @@ blocks:
   image on the site carries the same shape (the match-height rules
   read it there), and both come from the one probe — no second
   computation to drift.
+- **The pause's stage (T501a, from the visual gate).** After the
+  frame is built, the transform looks at the directive's siblings in
+  the parent: a previous sibling that is an mdast `paragraph` with no
+  `image` descendant, no `directiveLabel`, and not marked as unwrapped
+  prose is moved into the stage before the frame with class
+  `piece-pause-before`; a next sibling that qualifies the same way is
+  moved after it with `piece-pause-after`; the wrapper gains
+  `with-before` / `with-after` so the CSS can set the scene's outer
+  margins. Headings, lists, images, other blocks, and directives stay
+  where they are — then the stage is just the frame. Two edge cases
+  are pinned by tests: two pauses with one paragraph between them (the
+  first, in document order, claims it as its after-paragraph; the
+  second finds a directive beside it and takes nothing), and a pause
+  right after an `:::aside`, whose unwrapped body paragraphs are
+  spliced into the parent as plain paragraphs before the pause is
+  processed — the unwrap now marks them (`data.pieceUnwrapped`), and
+  the pause leaves them, so what it anchors is always the piece's own
+  paragraph — the same exclusion `passageFor` makes (it reads the
+  markdown source and skips containers; after an aside it reaches
+  further back to an earlier paragraph, while the stage anchors
+  nothing before). The moved paragraphs are ordinary
+  mdast nodes, so their inline links, emphasis, and shorthand handling
+  are untouched. `BLOCK_BODIES` is unchanged: the pause has no body;
+  the neighbours are the piece's, not the block's.
 - **`probeDimensions`' failure messages** name the block that asked
   (`held`, `pause`, `strip` — which used to blame `match="height"` —
   or `match="height"` for the pairs, declared on the descriptor as
@@ -198,21 +227,60 @@ and would put the words before the frame (T504 review; the row's
 collapse does the same). The collapsed figure is an ordinary matted
 single, the words after it.
 
-**The pause.** `.piece-pause` is a block `--frame-h + --pause-stretch`
-tall with an ordinary block margin (`.piece-block`'s), full width like
-`fullbleed`'s breakout; `--frame-w` is the largest frame that fits the
-viewport inside `--hold-margin` with room for the approach, from `--ar`
-(the exploration's formula, in `vw`/`svh` so it resolves without a
-container); `--frame-h` follows from the ratio. `.piece-pause-frame`
-is `position: sticky; top: calc((100svh - var(--frame-h)) / 2)`,
-matted, `transform: scale(calc(1 + (var(--pause-scale) - 1) *
-var(--pause-t)))`. The lights: `html[data-pause-active]` and its `body`
-mix their background toward `--color-quiet` by `--pause-lights`
-(0–1, set on `<html>` by the script); under the same attribute the
-piece's prose, headings, captions, and mats mix the same way, so the
-words fade into the dark — **each rule mixing from that element's own
-token** (`--color-muted` for `.prose p` and captions, `--color-text`
-for headings, `--color-matte` for mats), never from a shared start:
+**The pause.** `.piece-pause` is a block at the column's width with
+`.piece-block`'s margin, its height by layout: the stage, then a
+`::after` pseudo-element `--pause-stretch` tall — so the scene is
+always stage + stretch whatever the stage measures (the T501a
+sign-off: a height computed from a measured stage went stale when the
+body font swapped in). Only the frame breaks out: `--frame-w` is the
+largest frame that fits the viewport inside `--hold-margin` with room
+for the approach, from `--ar` (the exploration's formula, in
+`vw`/`svh`); `--frame-h` follows; the frame is `width: var(--frame-w);
+margin-inline: calc(50% - var(--frame-w) / 2)` like `width-wide`'s
+breakout, centred on the viewport-centred column. **The stage (T504a,
+visual gate decision 7)**: `.piece-pause-stage` is `position: sticky;
+display: flow-root` (sticky makes no block formatting context, so
+without it the stage's last child's bottom margin would collapse out
+of the stage and into the scene, lengthening the sticky range — the
+sign-off's catch); `top: calc((100svh - var(--stage-h, var(--frame-h))) / 2)` — the
+script keeps `--stage-h` on the scene equal to the stage's measured
+height (a `ResizeObserver` on the stage, so a font swap or a re-wrap
+updates it; the value feeds the centring only, never a height, so
+there is no feedback loop); without script the fallback centres the
+frame's height, which parks the stage low by half the difference
+between the stage's height and the frame's — an estimate, a couple of
+hundred pixels at the laptop for the sampler, measured nowhere — the
+light pin's tolerance. The anchored paragraphs are plain column
+paragraphs: no width of their own (they never leave the column); inside
+the stage the paragraph's `1em` gap collapses into the frame's block
+margin, so the frame sits a block margin from its words.
+The scene's outer margin follows the same rule: on a side where a
+paragraph rides (`with-before` / `with-after`) the scene's margin is
+the paragraph gap, so paragraph N → anchored paragraph reads as two
+paragraphs; where the stage is the frame alone it is the block
+margin. `.piece-pause-frame` is a plain matted block, centred,
+`transform: scale(calc(1 + (var(--pause-scale) - 1) * var(--pause-t)))`
+— the approach is the frame's alone; the words do not scale. The
+lights: `html[data-pause-active]` and its `body` mix their background
+toward `--color-quiet` by `--pause-lights × --pause-depth`
+(`--pause-depth: 0.85`, a token beside the other three — visual gate
+decision 8: the ground goes to a dark grey, oklch L 0.315 from the
+page's 0.968, not to the quiet ground's 0.2); under the same
+attribute the piece's prose, headings, captions, the page head, and
+the footer mix **all the way** toward `--color-quiet` by
+`--pause-lights` alone — the words reach L 0.2 and sit a shade darker
+than the 0.315 ground (about 1.4:1), faintly there; one knob means
+"how dark is the ground" (the sign-off's arithmetic: scaling the
+words' mix by the same depth would have moved them toward the ground,
+0.245 on 0.315, not away from it) — **each rule mixing from that
+element's own token** (`--color-muted` for `.prose p` and captions,
+`--color-text` for headings), never from a shared start. **The mats
+do not mix** (decision 9: "the matte goes away") — the matte rule
+reads `--color-matte` plainly again and `--matte-fill` is gone, the
+hold's mat included (it only ever mixed while a pause was active on
+the same screen, and the reason applies to any mat on the dark
+ground); a white mat on the dark grey is what quiet view already
+does. Before the gate the rule was:
 the exploration mixed everything from `--color-text` and got away
 with it only because its demo prose was already at text colour; on
 the site that rule would snap every paragraph muted → text the
@@ -236,9 +304,12 @@ whichever way the reader scrolls.
 A `<script>` in `src/pages/pieces/[slug].astro`, the exploration's
 logic: on `astro:page-load`, collect `.piece-pause` and `.piece-held`;
 on every scroll and resize compute each pause's progress through its
-pinned stretch (`(park - top) / (height - frameHeight)`, shaped up /
-hold / down with a smoothstep over 28 percent ramps) into `--pause-t`
-on the scene and the maximum into `--pause-lights` on `<html>`; a hold
+pinned stretch (`(park - top) / (height - stageHeight)`, the stage
+being the pinned element since T505c — its measured height kept on
+the scene as `--stage-h` by a `ResizeObserver` per stage, so a font
+swap or a re-wrap re-centres it (the value feeds the centring only); shaped up / hold / down with a smoothstep
+over 28 percent ramps) into `--pause-t` on the scene and the maximum
+into `--pause-lights` on `<html>`; a hold
 is active while its frame is sticky and parked; `data-pause-active`
 and `data-scene-active` on `<html>`. Static frames (a collapsed hold)
 never count. One rect read per scene per scroll event, no rAF (scroll
@@ -283,8 +354,12 @@ script: holds unchanged (pure CSS), a pause pins on the light ground.
   test; the leaf form fails; `bleed="x"`
   fails as a flag; `side="up"` fails; an image in the body fails; a
   nested directive fails; a missing `alt` fails; `sizes` per shape.
-  `pause` — the leaf renders `figure.piece-pause` with `--ar` and the
-  linked image inside `piece-pause-frame`, with `sizes` asserted as an
+  `pause` — the leaf renders `div.piece-pause` with `--ar`, a
+  `piece-pause-stage`, and the linked image inside `piece-pause-frame`;
+  a plain paragraph before and after the directive are moved into the
+  stage as `p.piece-pause-before` / `p.piece-pause-after` with their
+  inline markup intact, and a heading, a list, an image paragraph, or
+  another block beside it stays outside (T501a); with `sizes` asserted as an
   exact string on photo.jpg — which is literally 8 × 5 pixels, so the
   raw-dimension condition reads `(min-aspect-ratio: 8/5) calc(152.39vh - 15.23vmin), calc(95.24vw - 9.52vmin)`
   — so the dimension form and the geometry arithmetic fail loudly if
@@ -326,6 +401,8 @@ src/content/pieces/vocabulary-sampler/index.md
 src/content/pieces/where-the-fog-lets-go/index.md
 remark-pieces-vocabulary.test.mjs, image-meta.test.mjs, pause-shape.test.mjs
 src/lib/pause-shape.ts            shape(): the pause's 0 → 1 → 0 with 28% ramps (T505a)
+                                  (visual gate: the stage in the transform, --pause-depth
+                                  and the stage rules in the CSS, --stage-h in the script)
 src/lib/image-meta.mjs            BLOCK_BODIES; passageFor by body kind
 scripts/gen-placeholders.mjs      tests/fixtures/square.jpg
 obsidian-plugin/main.ts           pause: one (the leaf list)
@@ -342,9 +419,15 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
   narrow window on a landscape monitor behaves as a portrait one.
   Correct: it is the space that matters.
 - One frame per hold, one per pause; the showcase spec may generalize.
+- The pause's stage is the frame plus up to two paragraphs; the frame
+  still sizes itself to the viewport inside the margin, so a tall
+  pause frame on a short viewport can push an anchored paragraph
+  partly off-screen while pinned. A pause is for the wide frame; the
+  fixtures' panoramas leave room at all three viewports (T506b
+  measures it).
 - The lights mix the colours of the elements the rules name (`.prose`
-  text, headings, captions, mats, the piece's page head, the footer's
-  text, links, and hairlines); an element outside that list would
+  text, headings, captions, the piece's page head, the footer's
+  text, links, and hairlines — not the mats, since decision 9); an element outside that list would
   stay light on a dark ground — or, at text colour, vanish into it.
   The sampler is the check, and T506 looks at the footer and the head
   specifically.
@@ -379,9 +462,27 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
 - **No hold where no column fits**; orientation classes from the
   transform, no script.
 - **The pause's words fade with the lights**, rather than staying dark
-  on a dark ground.
+  on a dark ground — all the way to the quiet colour, a shade darker
+  than the ground, which stops at the depth (decision 8).
 - **A collapsed hold keeps the held reading size** (1.05rem / 1.85):
   on a phone, or a landscape frame on a portrait screen, the passage
   reads a little larger than its neighbours rather than changing size
   with the window (T504, recorded at the T506 review; the visual gate
   is where it gets judged).
+- **The words anchor to the frame** (visual gate decision 7): the
+  paragraph before and after a pause ride in the pinned stage, so the
+  reader never sees the words scroll away above or arrive out of an
+  empty space below; the transform moves the two neighbouring
+  paragraphs into the scene, and only paragraphs — a heading or
+  another block stays put.
+- **The dark is a depth, not the quiet ground** (decision 8):
+  `--pause-depth: 0.85` scales the ground's mix (L 0.968 → 0.315) while
+  the words go all the way to the quiet colour (L 0.2), a shade darker
+  than the ground and faintly readable — one knob for how dark the
+  ground gets; the mats do not mix at all (decision 9), as in quiet
+  view.
+- **The scene's height is by layout, the centring by measurement**:
+  the stage then a `--pause-stretch` pseudo-element, and `--stage-h`
+  from a `ResizeObserver` for the sticky `top` only — a measured
+  height fed into the scene's height went stale on the font swap
+  (sign-off).

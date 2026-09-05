@@ -14,8 +14,8 @@ Two new treatments in the closed vocabulary, both about pacing rather
 than layout — a vocabulary for time, which the site did not have:
 
 - **`held`** — a photograph that stays fixed in the viewport while the
-  paragraphs written for it pass beside it or beneath it, never over
-  it, and lets go the moment the words are spent. The hold lasts
+  paragraphs written for it pass beside it — never over it, never
+  beneath it — and lets go the moment the words are spent. The hold lasts
   exactly as long as the writing outlasts the frame: no timer, no
   script, plain sticky positioning. Two shapes: beside at the content
   width (the frame left or right), and beside and bled to the viewport
@@ -25,13 +25,16 @@ than layout — a vocabulary for time, which the site did not have:
   portrait desktop it "looks wrong" — photographer, 2026-09-03).
 - **`pause`** — for the frame too wide to hold beside words. The
   photograph arrives in the flow right after the words, as any figure
-  does; when it reaches the centre of the screen it stops, and as the
-  reader keeps scrolling the lights go down — the whole page, the
-  words on it fading into the dark — and the frame comes a little
-  closer; it holds; then the lights come back up, it settles, and the
-  page moves on. Nothing to read for a moment, only the photograph.
-  The header stays away for the whole of it, whichever way the reader
-  scrolls.
+  does, with the paragraph before it and the paragraph after it
+  travelling with it; when it reaches the centre of the screen it
+  stops, those two paragraphs anchored above and below it, and as the
+  reader keeps scrolling the lights go down — the whole page to a dark
+  grey, the words on it fading almost into it, still faintly there —
+  and the frame comes a little closer inside its mat, which stays its
+  own colour; it holds; then the lights come back up, it settles, and
+  the page moves on with the words. Nothing to read for a moment, only
+  the photograph. The header stays away for the whole of it, whichever
+  way the reader scrolls.
 
 The photographer kept both from the exploration ("honestly I love
 it"), asked for the margin and the header behaviour, and judged the
@@ -58,8 +61,9 @@ shorter.
    ::pause{src="./pano.jpg" alt="The full sweep of coastline"}
    ```
 
-2. **Words never cover the photograph.** Beside or beneath, in a
-   column narrow enough to read down rather than across.
+2. **Words never cover the photograph.** Beside it, in a column
+   narrow enough to read down rather than across (beneath was tried
+   and dropped — decision 6).
 3. **The hold is the writing's length — exactly.** The frame lets go
    as the last line passes beside it, never after (no trailing air in
    the column, none in the scene: photographer, 2026-09-03, "the text
@@ -112,7 +116,8 @@ shorter.
   margin from the top edge (the pause's margin, decision 5); the held column's measure; the pause's
   margin (about five percent of the smaller screen dimension), its
   approach (five percent), its ramps (the first and last 28 percent of
-  the pinned stretch), its ground (`--color-quiet`), and its length
+  the pinned stretch), its ground (a depth into `--color-quiet`, so
+  the dark is a dark grey the words still show through), and its length
   (the pinned scroll distance — shorter than the exploration's, see
   Design requirements).
 
@@ -130,12 +135,18 @@ rhythm. Scrolling back up reverses it exactly.
 
 The reader scrolls into a pause. The photograph arrives below the last
 paragraph as any figure does, with no empty stage between them, and
-travels up until it sits centred in the screen; there it stops. As the
-reader keeps scrolling, the whole page darkens — the words above fade
-into the dark with it — and the frame comes closer; it holds; then the
-page lightens and the frame settles; then it releases and the next
-paragraph arrives. The header is away for the whole of it. Escape does
-nothing here — it is not a mode, only a scene.
+travels up until it sits centred in the screen; there it stops, and
+the paragraph before it and the paragraph after it stop with it,
+anchored above and below the frame where they were (the visual gate,
+2026-09-04: the words used to scroll away above and arrive from an
+empty space below; the photographer wants them to stay put). As the
+reader keeps scrolling, the whole page goes to a dark grey — the words
+fade almost into it, still faintly readable, never gone — and the
+frame comes closer inside its mat, which keeps its own colour on the
+dark ground as it does in quiet view; it holds; then the page lightens
+and the frame settles; then it releases and the page moves on with the
+words. The header is away for the whole of it. Escape does nothing
+here — it is not a mode, only a scene.
 
 ### Writing
 
@@ -181,13 +192,22 @@ auto` a responsive image takes its natural width from `sizes`, and a
 - **The pause**: the frame in the flow with an ordinary figure's
   margin to the words before and after it — no empty stage; the
   largest frame that fits the viewport inside a margin of about 5vmin,
-  with room reserved so the approach never eats it; it pins at the
-  centre of the viewport, and the scene is taller than the frame by
-  the pinned stretch; the approach is five percent; the lights — the
-  whole page's ground, and the words on it — go from the page ground
-  to `--color-quiet` over the first 28 percent of the pinned stretch,
-  hold, and return over the last 28 percent, on a smooth curve; the
-  header stays away for the pinned stretch. The pinned stretch is **1.2 screens of
+  with room reserved so the approach never eats it; the frame and the
+  paragraph before and after it (when the neighbours are paragraphs)
+  form one stage that pins at the centre of the viewport, and the
+  scene is taller than the stage by the pinned stretch; the approach
+  is five percent, on the frame alone; the lights — the whole page's
+  ground, and the words on it, the anchored paragraphs included — go
+  from the page ground toward `--color-quiet` to a set depth (about
+  85 percent: a dark grey the words still faintly show through) over
+  the first 28 percent of the pinned stretch, hold, and return over
+  the last 28 percent, on a smooth curve — the ground to the depth,
+  the words all the way to `--color-quiet`, so they sit a shade darker
+  than the ground, faintly there; the mats do not dim; the header
+  stays away for the pinned stretch. The frame keeps its size; the
+  anchored words yield — on a short viewport with a tall frame a
+  paragraph may run partly off-screen while pinned. A pause is for the
+  wide frame, and the geometry pass measures the fixtures' room. The pinned stretch is **1.2 screens of
   scroll** (the exploration's 1.6 read as slightly too much; the
   exploration now runs at 1.2 for the photographer to confirm); a site
   knob, judged at the visual gate.
@@ -226,9 +246,13 @@ auto` a responsive image takes its natural width from `sizes`, and a
 - [ ] The transform's HTML for a held image is a block wrapper carrying
       the shape classes, with the frame's figure and the prose as its
       two children (the prose is the piece's own, so no figure wraps
-      it); for a pause a figure that is the scene, with the frame as
-      its one child; both images linked to their pages with the mat on
-      the anchor and `--ar` where the CSS needs it; `sizes` per shape
+      it); for a pause a block wrapper that is the scene, holding a
+      stage with the paragraph before, the frame, and the paragraph
+      after — each neighbour only when it is a plain paragraph of the
+      piece's own; a heading, a list, an image, or another block stays
+      outside; both images linked
+      to their pages with the mat on the anchor and `--ar` where the
+      CSS needs it; `sizes` per shape
 - [ ] The holds are pure CSS: in the browser the frame's top stays at
       its resting offset while the prose passes (measured at several
       scroll positions) and travels away at the scene's end; a frame
@@ -236,11 +260,14 @@ auto` a responsive image takes its natural width from `sizes`, and a
       landscape frame on a portrait viewport, anything on a phone) the
       frame is static at the full width with its words after it
 - [ ] The pause arrives an ordinary figure's margin below the last
-      paragraph and pins at the centre; with script the page's ground
-      and the words compute to `--color-quiet` and the frame to the
-      approach at the middle of the pinned stretch, and to the page
-      ground and scale 1 at both ends; the margin survives the
-      approach; the header stays translated away on a scroll back up
+      paragraph and pins at the centre with the paragraph before and
+      after it anchored above and below the frame through the pinned
+      stretch; with script the page's ground computes to the pause's
+      depth into `--color-quiet` and the words all the way to
+      `--color-quiet`, a shade darker than the ground and the frame to the approach
+      at the middle of the pinned stretch, and to the page ground and
+      scale 1 at both ends; the mats compute to the matte colour
+      throughout; the margin survives the approach; the header stays translated away on a scroll back up
       within the scene and returns outside it, and the same while any
       frame is held; without script the frame pins on the light
       ground; reduced motion drops the approach only
@@ -268,8 +295,9 @@ auto` a responsive image takes its natural width from `sizes`, and a
   browser scrolled straight past the first cut; one mechanism that
   works everywhere rather than two that drift. The pin itself is
   always CSS.
-- **Words beside or beneath, never over** — the photographer's
-  condition when the idea was first raised.
+- **Words beside, never over** — the photographer's condition when
+  the idea was first raised (beneath was in the first draft and went
+  at decision 6).
 - **The hold's length is the writing's.** No minimum, no padding out.
 - **Site knobs, not attributes**, for margin, approach, ramps, ground,
   and length: every pause reads the same.
@@ -290,3 +318,20 @@ auto` a responsive image takes its natural width from `sizes`, and a
 6. **No hold where no column fits.** A landscape frame on a portrait
    viewport, and everything on a phone, renders as an ordinary figure
    with its words after it.
+
+## Resolved at the visual gate (product owner, 2026-09-04)
+
+7. **The words anchor to the frame.** The paragraph before a pause and
+   the paragraph after it travel with the frame and stay put above and
+   below it through the pinned stretch — the photographer saw the words
+   scroll away above and arrive out of empty space below, and wants
+   them anchored.
+8. **The dark is a dark grey, not black.** The lights go to a depth
+   into `--color-quiet` (about 85 percent), so the ground is a dark grey
+   and the words still faintly show through it.
+9. **The mat stays.** The frame's mat keeps its own colour on the dark
+   ground, as in quiet view — it used to dim with the words, and "the
+   matte goes away".
+10. **The wording** "beside it or beneath it" in this spec's opening
+    corrected to match decision 6 and the built shapes: beside, never
+    over, never beneath.
