@@ -247,7 +247,7 @@ the person's at the visual gate — the one thing the pane cannot exercise.
 
 ## Phase 1 — Plugin and docs (reviewer after the phase)
 
-- [ ] **T507** — Obsidian plugin: `pause: one` in the leaf list, so
+- [x] **T507** — Obsidian plugin: `pause: one` in the leaf list, so
       Live Preview renders a pause as its image; `held` stays raw text
       like every container (`main.js` is gitignored — the author's
       local build). _Verify: `npm run build` in `obsidian-plugin/`
@@ -304,21 +304,22 @@ with the diff in a scratch file plus pointers into plan/spec (not a
 single bundle). Compare the spec's total against spec 006 before
 treating the policy as settled. -->
 
-| Task / invocation              | Tier             | Tokens                   | Outcome / miss reason                                       |
-| ------------------------------ | ---------------- | ------------------------ | ----------------------------------------------------------- |
-| plan/tasks sign-off (6 passes) | reviewer default | —                        | pre-policy; not logged                                      |
-| T501 (implementation)          | top tier         | —                        | pre-policy: orchestrator implemented                        |
-| T501 review ×3                 | reviewer default | 98,327 + 64,311 + 32,169 | fix and re-review ×2, then signed off                       |
-| T502 (implementation)          | top tier         | —                        | pre-policy                                                  |
-| T502 review                    | reviewer default | 52,260                   | signed off                                                  |
-| T503 (implementation)          | top tier         | —                        | pre-policy                                                  |
-| T503 review ×2                 | reviewer default | 62,757 + 56,129          | fix and re-review ×1, then signed off                       |
-| T504 (implementation)          | top tier         | —                        | pre-policy                                                  |
-| T504 review ×2                 | reviewer default | 103,409 + 66,801         | fix and re-review ×1 (three blocking hint/cascade findings) |
-| T505 (implementation)          | top tier         | —                        | pre-policy                                                  |
-| T505 review ×2                 | reviewer default | 72,243 + 50,281          | fix and re-review ×1, then signed off                       |
-| T506 (measurement)             | top tier         | —                        | pre-policy                                                  |
-| T506 review ×2                 | reviewer default | 96,435 + 47,934          | fix and re-review ×1 (T506a), then signed off               |
+| Task / invocation              | Tier             | Tokens                   | Outcome / miss reason                                         |
+| ------------------------------ | ---------------- | ------------------------ | ------------------------------------------------------------- |
+| plan/tasks sign-off (6 passes) | reviewer default | —                        | pre-policy; not logged                                        |
+| T501 (implementation)          | top tier         | —                        | pre-policy: orchestrator implemented                          |
+| T501 review ×3                 | reviewer default | 98,327 + 64,311 + 32,169 | fix and re-review ×2, then signed off                         |
+| T502 (implementation)          | top tier         | —                        | pre-policy                                                    |
+| T502 review                    | reviewer default | 52,260                   | signed off                                                    |
+| T503 (implementation)          | top tier         | —                        | pre-policy                                                    |
+| T503 review ×2                 | reviewer default | 62,757 + 56,129          | fix and re-review ×1, then signed off                         |
+| T504 (implementation)          | top tier         | —                        | pre-policy                                                    |
+| T504 review ×2                 | reviewer default | 103,409 + 66,801         | fix and re-review ×1 (three blocking hint/cascade findings)   |
+| T505 (implementation)          | top tier         | —                        | pre-policy                                                    |
+| T505 review ×2                 | reviewer default | 72,243 + 50,281          | fix and re-review ×1, then signed off                         |
+| T506 (measurement)             | top tier         | —                        | pre-policy                                                    |
+| T506 review ×2                 | reviewer default | 96,435 + 47,934          | fix and re-review ×1 (T506a), then signed off                 |
+| T507 (sdd-implementer)         | opus             | 18,785                   | verified first try; one mechanical comment addition, reported |
 
 ## Handoff note
 
