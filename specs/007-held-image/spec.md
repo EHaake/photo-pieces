@@ -1,7 +1,9 @@
 # Spec: The Held Image and the Pause
 
-**Status**: Approved (product owner, 2026-09-03) — plan.md and tasks.md
-follow, signed off by the skeptical-reviewer
+**Status**: Implemented (2026-09-05) — approved by the product owner
+2026-09-03, amended at the visual gate 2026-09-04 (decisions 7–10) and
+attested on both screens 2026-09-05; every acceptance criterion below
+has its record in tasks.md
 **Depends on**: 003 (the block vocabulary; `row` is the precedent for a
 container whose body is prose beside an image), 006 (the quiet ground
 token, the header's hide-on-scroll, page-level enhancement over the
@@ -107,8 +109,9 @@ shorter.
 
 - **`held`** — container form only (its body is the point). Attributes:
   `src`, `alt` (required); `side` in `left | right` (default `left`);
-  `bleed` (flag). Body: prose paragraphs only — a directive or an
-  image in the body fails the build, as nesting does everywhere.
+  `bleed` (flag). Body: prose — a directive or an image in the body
+  fails the build, as nesting does everywhere (a heading or a list in
+  it passes; the rule rejects frames, not text).
 - **`pause`** — leaf form only (a body would be words during the
   pause, which there are none of; the container form fails saying
   so). Attributes: `src`, `alt` (required).
@@ -208,9 +211,9 @@ auto` a responsive image takes its natural width from `sizes`, and a
   anchored words yield — on a short viewport with a tall frame a
   paragraph may run partly off-screen while pinned. A pause is for the
   wide frame, and the geometry pass measures the fixtures' room. The pinned stretch is **1.2 screens of
-  scroll** (the exploration's 1.6 read as slightly too much; the
-  exploration now runs at 1.2 for the photographer to confirm); a site
-  knob, judged at the visual gate.
+  scroll** (the exploration's 1.6 read as slightly too much); a site
+  knob, confirmed at the visual gate (2026-09-04: "the hold and pause
+  feels about right").
 - **Reduced motion**: the pause keeps its dim and drops the approach;
   the holds are unchanged (nothing animates in them).
 - **Without script**: a pause pins on the light ground with no dim and
@@ -236,14 +239,14 @@ auto` a responsive image takes its natural width from `sizes`, and a
 
 ## Acceptance criteria
 
-- [ ] `held` and `pause` are in the transform's descriptor table; the
+- [x] `held` and `pause` are in the transform's descriptor table; the
       vocabulary suite covers both: every allowed combination (`held`
       with `side` left or right, each with and without `bleed`; the
       `pause`), and each that is not (`held` leaf form, `pause`
       container form, `side="up"`, `bleed` with a value, an image or a
       directive in a held body, a missing `alt`), each failing with
       file and line and a message naming the rule
-- [ ] The transform's HTML for a held image is a block wrapper carrying
+- [x] The transform's HTML for a held image is a block wrapper carrying
       the shape classes, with the frame's figure and the prose as its
       two children (the prose is the piece's own, so no figure wraps
       it); for a pause a block wrapper that is the scene, holding a
@@ -253,13 +256,13 @@ auto` a responsive image takes its natural width from `sizes`, and a
       outside; both images linked
       to their pages with the mat on the anchor and `--ar` where the
       CSS needs it; `sizes` per shape
-- [ ] The holds are pure CSS: in the browser the frame's top stays at
+- [x] The holds are pure CSS: in the browser the frame's top stays at
       its resting offset while the prose passes (measured at several
       scroll positions) and travels away at the scene's end; a frame
       taller than its prose does not hold; where no column fits (a
       landscape frame on a portrait viewport, anything on a phone) the
       frame is static at the full width with its words after it
-- [ ] The pause arrives an ordinary figure's margin below the last
+- [x] The pause arrives an ordinary figure's margin below the last
       paragraph and pins at the centre with the paragraph before and
       after it anchored above and below the frame through the pinned
       stretch; with script the page's ground computes to the pause's
@@ -271,16 +274,16 @@ auto` a responsive image takes its natural width from `sizes`, and a
       within the scene and returns outside it, and the same while any
       frame is held; without script the frame pins on the light
       ground; reduced motion drops the approach only
-- [ ] The pinned stretch is the site knob's value (about 1.2 screens)
+- [x] The pinned stretch is the site knob's value (about 1.2 screens)
       and is judged at the visual gate
-- [ ] At each of the three viewports (16:10 laptop, phone, portrait
+- [x] At each of the three viewports (16:10 laptop, phone, portrait
       desktop) every hold shape and the pause are measured: the frame
       at its resting place, its share of the height, the shape chosen
       by orientation, the pause's park at the centre, the header away while
       held
-- [ ] Every 003 and 006 geometry check still holds; 173 tests green
+- [x] Every 003 and 006 geometry check still holds; 173 tests green
       plus the new ones; build green with the post-build barriers
-- [ ] Fixtures render in the sampler and the fog piece; the exploration
+- [x] Fixtures render in the sampler and the fog piece; the exploration
       page and branch are gone; `AUTHORING.md`, `README.md`, and
       `DECISIONS.md` updated
 

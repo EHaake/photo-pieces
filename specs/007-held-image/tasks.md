@@ -1,7 +1,7 @@
 # Tasks: The Held Image and the Pause
 
-**Status**: Signed off (skeptical-reviewer, 2026-09-03, sixth pass) —
-awaiting the product owner's approval of the spec-conformance summary
+**Status**: Implemented (2026-09-05) — every task checked; T509 closes at
+the merge
 **Implements**: plan.md in this directory
 
 Ordered, small, independently verifiable. Per the constitution: every
@@ -468,6 +468,11 @@ treating the policy as settled. -->
 | T508a (sdd-implementer)           | opus             | 44,136                            | verified first try; the review found the anchored intro too long for the phone and two mechanism sentences wrong — fixed by the orchestrator (prose)                                          |
 | T508a review ×4                   | reviewer default | 66,531 + 26,322 + 29,901 + 31,164 | fix and re-review ×3 (stage overflow on the phone; "half a screen"; a backwards cause; the release condition), then signed off                                                                |
 | T509a (orchestrator)              | top tier         | —                                 | a one-line token retune and a doc rule; not dispatched                                                                                                                                        |
+| T509 file edits (sdd-implementer) | opus             | 30,333                            | verified first try                                                                                                                                                                            |
+| pre-merge sweep                   | top tier         | 159,315                           | fix and re-review: three blocking (an AUTHORING sentence contradicting spec goal 3; the close-out record; ROADMAP's plugin list) and ten smaller — the orchestrator made the edits            |
+| **Implementer runs, total**       | opus             | **309,333**                       | eight dispatches, every one verified first try; no escape-hatch miss                                                                                                                          |
+| **Reviewer invocations, total**   | mixed            | **1,559,166**                     | of which pre-policy Phase 0: 803,056; sign-offs and the sweep at the top tier: 359,286                                                                                                        |
+| Comparison against spec 006       | —                | —                                 | deferred: 006 logged no tokens and Phase 0 here was implemented at the top tier before the policy; the first full-policy spec is the one to compare                                           |
 
 ## Handoff note
 

@@ -1,7 +1,8 @@
 # Plan: The Held Image and the Pause
 
-**Status**: Signed off (skeptical-reviewer, 2026-09-03, sixth pass) —
-awaiting the product owner's approval of the spec-conformance summary
+**Status**: Implemented (2026-09-05) — signed off by the skeptical-reviewer
+2026-09-03 (sixth pass), amended and re-signed at the visual gate
+2026-09-04 (four passes)
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -33,11 +34,13 @@ measurement below; page and branch are deleted at close-out.
   orientation and phone collapses to a static figure), the pause (a
   scene taller than its frame by the pinned stretch, the frame pinned
   at the centre, ground and words mixing toward `--color-quiet` by
-  `--pause-lights`, the approach), the header rule, and three knobs as
-  tokens.
+  `--pause-lights`, the approach), the header rule, and the knobs as
+  tokens (three at the spec gate, `--pause-depth` from the visual gate,
+  and `--block-margin` / `--para-gap` folded in at T504a).
 - **Script** (`src/pages/pieces/[slug].astro`): the pause's progress
   and the "held" state, as on the exploration.
-- **`sequence`** stays reserved; `row` and `aside` are untouched.
+- **`sequence`** stays reserved; `row` is untouched, and `aside` only
+  marks the prose it unwraps (T501a) so a pause leaves it alone.
 
 ## The transform (`remark-pieces-blocks.mjs`)
 
@@ -399,6 +402,7 @@ src/styles/global.css             tokens; .piece-held*, .piece-pause*, the
 src/pages/pieces/[slug].astro     the scenes script
 src/content/pieces/vocabulary-sampler/index.md
 src/content/pieces/where-the-fog-lets-go/index.md
+src/content/galleries/fog-frames.md   a stale description (T509)
 remark-pieces-vocabulary.test.mjs, image-meta.test.mjs, pause-shape.test.mjs
 src/lib/pause-shape.ts            shape(): the pause's 0 → 1 → 0 with 28% ramps (T505a)
                                   (visual gate: the stage in the transform, --pause-depth

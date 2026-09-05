@@ -283,6 +283,7 @@ photo-pieces/
 ├── remark-pieces-blocks.test.mjs # legacy contracts (npm test)
 ├── remark-pieces-vocabulary.test.mjs # spec-003 vocabulary suite
 ├── image-meta.test.mjs, exif.test.mjs, galleries.test.mjs # spec-004 suites
+├── pause-shape.test.mjs          # spec-007: the pause's 0 → 1 → 0 shape
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
@@ -301,6 +302,7 @@ photo-pieces/
 │   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, sets)
 │   ├── lib/gallery-layout.ts     # the equal-short-side packing knobs (galleries, related strips)
 │   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
+│   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
 │   ├── components/               # PieceList, GalleryCards, LatestWork

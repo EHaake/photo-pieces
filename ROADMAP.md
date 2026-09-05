@@ -72,7 +72,7 @@ attached.
   to a dark grey with the words a shade darker and still faintly
   there, the mat keeps its own colour, and after 1.2 screens of pinned
   scroll the lights come back up and the page moves on — script-driven,
-  degrading to the ordinary frame. Follow-ups it surfaced: a tall
+  degrading without script to a pin on the light ground. Follow-ups it surfaced: a tall
   pause frame on a short viewport can push an anchored paragraph
   partly off-screen while pinned (a pause is for the wide frame); a pause needs about half of the screen its stage leaves empty in
   words after it, or it cannot finish; a collapsed hold keeps the held reading size rather than
@@ -152,9 +152,9 @@ attached.
   rendered `fullbleed` directives as images in Live Preview, the mode
   actually used while writing. The bar was set at seeing the photo
   instead of raw directive text, not matching the real site's styling —
-  see `DECISIONS.md` for that scoping. As of spec 003 the plugin
+  see `DECISIONS.md` for that scoping. As of spec 007 the plugin
   renders the leaf form of every standalone block (single, fullbleed,
-  wide, tall, inset, diptych, triptych). What remains: Reading View is
+  wide, tall, inset, diptych, triptych, pause). What remains: Reading View is
   intentionally not handled, and container forms stay raw text (see
   the vocabulary entry below).
 - **Contact form** — wanted (decided at spec 002 review), deferred to
@@ -167,7 +167,7 @@ attached.
   prescribed (the photographer's call: better to have the vocabulary
   ready before writing than to interrupt writing to build it — see
   `DECISIONS.md`). What remains: Obsidian Live Preview for container
-  forms (captions, grid, strip, aside, row), which needs a real parser
+  forms (captions, grid, strip, aside, row, held), which needs a real parser
   rather than the plugin's line regex.
 - ~~**Dark mode removal**~~ — done in spec 002 (T104/T105): palette,
   toggle, and `prefers-color-scheme` handling all removed; the accent

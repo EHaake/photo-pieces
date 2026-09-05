@@ -65,7 +65,8 @@ Viewport edge to edge; the caption returns to the column.
 ::tall{src="./port-b.jpg" alt="A 2:3 placeholder"}
 
 :::tall{src="./port-a.jpg" alt="A 2:3 placeholder"}
-Capped at viewport height — the vertical counterpart to fullbleed.
+Capped below the viewport's height — the vertical counterpart to
+fullbleed.
 :::
 
 ## Diptych
@@ -184,10 +185,11 @@ content width, frame on the left, five paragraphs beside it — the
 calibration for a landscape frame on a laptop screen: enough words to
 outlast the frame, not so many the hold overstays.
 
-The frame is sized from its own ratio and the height it may use, never
-from the column: a 3:2 frame at the full hold height is wider than a
-2:3 at the same height, and the prose column keeps its 44-character
-measure either way.
+The frame is sized from its own ratio and the space it has — the
+column or the hold height, whichever is tighter — never from the
+image's own size hint: on this screen the column governs this 3:2,
+while a 2:3 beside its words runs to the full hold height, and the
+prose column keeps its 44-character measure either way.
 
 The first paragraph meets the top of the frame. The reading column is a
 narrow measure, so these paragraphs run longer on the page than they

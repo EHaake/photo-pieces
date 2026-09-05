@@ -250,7 +250,8 @@ is proven, while missing ones interrupt writing. Real writing may still
 surface a gap; additions have become cheap (a descriptor, CSS, tests).
 
 The Obsidian plugin's approximation widened accordingly and stays an
-approximation: it renders the leaf form of the seven standalone blocks
+approximation: it renders the leaf form of the seven standalone blocks (eight since
+spec 007's pause)
 (pairs and triptychs as side-by-side thumbnails), anchored to whole
 lines so it agrees with the pipeline about mid-paragraph directives,
 and no longer shows `alt` as a caption. Container forms — captions,
@@ -509,3 +510,14 @@ prose as an italic caption on the image page. The body kinds now live
 in one map (`BLOCK_BODIES` in `image-meta.mjs`), a test asserts the
 transform's table against it, and only caption-bodied blocks
 contribute a caption — a `held`, `row`, or `aside` body never does.
+
+**The second visual gate (2026-09-05): a tall sits inside the screen; a
+fullbleed does not shrink.** On the laptop a 2:3 `tall` at 92vh was
+hard to centre while scrolling so the whole frame showed, so
+`--tall-max` is 85svh — the same share of the screen the pause's frame
+takes, so the site's verticals have one sense of air. The 3:2
+`fullbleed` is taller than a 16:10 screen and stays so: a fullbleed
+that shrank would not be full bleed, and the photographer's own
+leaning was to choose wider frames for it — so the fix is a rule in
+`AUTHORING.md` (a frame's shape picks its treatment) rather than a
+mechanism.
