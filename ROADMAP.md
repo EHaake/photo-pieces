@@ -74,9 +74,8 @@ attached.
   scroll the lights come back up and the page moves on — script-driven,
   degrading to the ordinary frame. Follow-ups it surfaced: a tall
   pause frame on a short viewport can push an anchored paragraph
-  partly off-screen while pinned (a pause is for the wide frame); a
-  pause needs about half a screen of words after it to finish
-  releasing; a collapsed hold keeps the held reading size rather than
+  partly off-screen while pinned (a pause is for the wide frame); a pause needs about half of the screen its stage leaves empty in
+  words after it, or it cannot finish; a collapsed hold keeps the held reading size rather than
   its neighbours'; the header's focus-reveal is knowingly overridden
   while a scene is active, so a keyboard user tabbing into the nav
   mid-pause focuses off-screen links; a `held` or `pause` written into
