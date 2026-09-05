@@ -285,14 +285,40 @@ A leaf, one image, nothing else:
 
 The frame arrives an ordinary figure's margin below the last
 paragraph, pins at the centre of the screen, and the page's lights go
-down and back up as the reader scrolls through it.
+down and back up as the reader scrolls through it. The page's ground
+goes to a dark grey rather than to black, with the words a shade
+darker still — faintly there the whole way, never gone — and the
+frame's mat keeps its own colour on the dark ground, as it does in
+quiet view.
+
+**The paragraph before and the paragraph after travel with the
+frame.** They pin when it pins and stay anchored above and below it
+for the whole pause, so the words the reader was in never scroll away
+and the next ones never arrive out of an empty space. Write them as
+ordinary paragraphs — they are the piece's own prose, not captions,
+and the image page still quotes the one before as the frame's passage.
+Only a plain paragraph travels: a heading, a list, a markdown image,
+or another block next to a pause stays outside the scene and behaves
+as it always does. Put the words you want anchored immediately either
+side of the directive, with nothing between.
 
 **A pause has nothing to read.** No caption, no body — the container
 form fails the build saying so. Whatever needs saying goes in the
-paragraph before it or the paragraph after. A pause suits the frame
-too wide to hold beside words, and it costs the reader the frame's own
-height plus 1.2 screens of scrolling, so one or two in a piece is the
-dose.
+paragraph before it or the paragraph after, which are the two that
+travel with it. A pause suits the frame too wide to hold beside words,
+and it costs the reader the stage's height — the frame and its two
+paragraphs — plus 1.2 screens of scrolling, so one or two in a piece
+is the dose.
+
+**Leave words after a pause.** The pause finishes when the end of
+its scene catches up with the pinned stage, which takes about half of
+the screen the stage leaves empty in document below the scene — more
+on a taller screen. So leave at least a few paragraphs after the
+directive, and never end a piece with a pause. Too close to the end
+and the page runs out first: on a tall screen the pause never
+lightens, and the piece ends with the lights part-way up. The sampler
+piece carries closing paragraphs after its pause for exactly this
+reason.
 
 The header stays away for the whole of a pause and while any frame is
 held, and it stays away even if a keyboard reader tabs into the nav

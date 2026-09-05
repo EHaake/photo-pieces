@@ -358,7 +358,7 @@ stage), "The CSS" (the stage, `--pause-depth`, the mats), "The script".
       approach on the frame only, the release with the next paragraph
       arriving at the paragraph gap; the T506 record amended. _Verify:
       the measurements recorded here._
-- [ ] **T508a** — Docs and fixture prose: AUTHORING's pause paragraph
+- [x] **T508a** — Docs and fixture prose: AUTHORING's pause paragraph
       (the paragraph before and after travel with the frame; the dark
       grey with the words a shade darker; the mat stays), README's pause
       row if its wording changed, DECISIONS' spec-007 section (the
@@ -453,6 +453,8 @@ treating the policy as settled. -->
 | T505c (sdd-implementer)           | opus             | 30,250                            | verified first try; the observer's firing measured by the orchestrator once a screenshot forced the hidden pane to render (766 → 990 → 766)                                                   |
 | T505c review                      | reviewer default | 34,948                            | fix and re-review (the observer unmeasured) — closed by that measurement; four notes folded in by the orchestrator                                                                            |
 | T506b (orchestrator, measurement) | top tier         | —                                 | measured; one finding: a pause needs about half a screen of content after it to release on a tall viewport (the sampler's, on the portrait desktop, does not) — to T508a and the phase report |
+| T508a (sdd-implementer)           | opus             | 44,136                            | verified first try; the review found the anchored intro too long for the phone and two mechanism sentences wrong — fixed by the orchestrator (prose)                                          |
+| T508a review ×4                   | reviewer default | 66,531 + 26,322 + 29,901 + 31,164 | fix and re-review ×3 (stage overflow on the phone; "half a screen"; a backwards cause; the release condition), then signed off                                                                |
 
 ## Handoff note
 

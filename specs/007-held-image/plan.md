@@ -424,9 +424,12 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
   pause frame on a short viewport can push an anchored paragraph
   partly off-screen while pinned. A pause is for the wide frame; the
   fixtures' panoramas leave room at all three viewports (measured at
-  T504a: stages of 766 and 654px in 900, 644 and 532 in 1920, 602 and
-  406 in 812 — the T504a review's arithmetic for a 3:2 frame, 1035px
-  in 900, is the case this limitation names).
+  T508a, after the sampler's anchored intro was written: stages of 794
+  and 654px in 900, 672 and 532 in 1920, 714 and 406 in 812 — the
+  sampler's is the larger, and an earlier draft of its intro put it at
+  826 in 812, so the anchored paragraph's length is part of the
+  fixture's calibration; the T504a review's arithmetic for a 3:2
+  frame, 1035px in 900, is the case this limitation names).
 - A pause needs about half a screen of content after it: the sticky
   stage releases only when the scene's bottom reaches the stage's
   bottom, which needs `(100svh − stage) / 2` of document below the
@@ -436,7 +439,7 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
   not a mechanism: `AUTHORING.md` says leave words after a pause.
 - The lights mix the colours of the elements the rules name (`.prose`
   text, headings, captions, the piece's page head, the footer's
-  text, links, and hairlines — not the mats, since decision 9); an element outside that list would
+  text, links, and hairlines — not the mats, since the spec's visual-gate decision 9); an element outside that list would
   stay light on a dark ground — or, at text colour, vanish into it.
   The sampler is the check, and T506 looks at the footer and the head
   specifically.

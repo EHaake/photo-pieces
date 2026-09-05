@@ -452,12 +452,49 @@ about 5vmin) sets both, so a held frame and a pinned one sit the same
 distance from the edge and the page has one rhythm rather than two
 that nearly match.
 
-**The pause's words fade with the lights.** The alternative — dark
+**The pause's words go down with the lights.** The alternative — dark
 text left on a darkening ground — was tried and read as a fault. Text,
-headings, captions, mats, links, and hairlines all mix toward
-`--color-quiet` together, which means the rule is a list: an element
-outside it would stay light on the dark ground. The sampler carries a
-link and a heading after its pause as the standing check.
+headings, captions, the page head's and the footer's text, and the
+hairlines all mix toward `--color-quiet` as the ground does, each from its own token, which means the rule is a
+list: an element outside it would stay light on the dark ground. A
+link in the text inherits its paragraph's colour and needs no rule;
+only the footer's and the page head's links are named. The words do
+not disappear into the ground, though — the ground stops short and
+the words go all the way — and the mats are not on the list: see the
+two entries below. The sampler carries a link and a heading after its
+pause as the standing check, read by eye.
+
+**The words anchor to the frame** (visual gate, 2026-09-04). On the
+exploration the paragraph before a pause scrolled away above the
+pinned frame and the next one arrived out of an empty space below; the
+photographer wants the words anchored to the frame. The transform
+moves the two neighbouring paragraphs into the stage, so they pin with
+it and stay above and below it for the whole pause — and only
+paragraphs: a heading, a list, an image, or another block beside a
+pause stays outside the scene, which keeps the rule one an author can
+predict from the source.
+
+**The dark is a depth, not the quiet ground** (visual gate).
+"The screen shouldn't go entirely black": the ground stops 85 percent
+of the way to `--color-quiet` (`--pause-depth`) and reads as a dark
+grey, while the words go all the way, so they sit a shade darker than
+the ground and stay faintly readable instead of dissolving into it.
+One knob sets how dark the ground gets, and the words' end colour
+stays the palette's own — no second scale to keep in step with it.
+
+**The mat stays** (visual gate). The mats used to mix toward the quiet
+colour with everything else, and the photographer's note was "the
+matte goes away". A white mat on a dark ground is what quiet view
+already does, so the mats are simply left out of the lights' list.
+
+**A pause needs room after it: half of what the stage leaves empty.**
+The sticky stage releases only when the scene's bottom reaches the
+stage's bottom, which needs about half the empty viewport's worth of
+document below the scene: a pause nearer than that to the end of a piece
+never lightens on a tall viewport, and the page ends with the lights
+part-way up (T506b measured exactly that on the sampler). An authoring
+rule rather than a mechanism — `AUTHORING.md` says leave words after a
+pause, and the sampler now carries closing paragraphs after its own.
 
 **A collapsed hold keeps the held reading size** (1.05rem / 1.85). On
 a phone, or a landscape frame on a portrait screen, the passage reads
