@@ -255,7 +255,8 @@ spec 007's pause)
 (pairs and triptychs as side-by-side thumbnails), anchored to whole
 lines so it agrees with the pipeline about mid-paragraph directives,
 and no longer shows `alt` as a caption. Container forms — captions,
-grid, strip, aside, row — remain raw text in Live Preview: they need a
+grid, strip, aside, row, and since spec 007 held — remain raw text in
+Live Preview: they need a
 real parser, not a line regex, and raw text is honest about the build
 being the source of truth. Reading View stays out of scope.
 
