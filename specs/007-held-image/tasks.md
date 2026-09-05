@@ -406,7 +406,7 @@ stage), "The CSS" (the stage, `--pause-depth`, the mats), "The script".
       shrank would not be full bleed). _Verify: the sampler's tall
       figure at 1440×900 no taller than 85svh plus its mat; Prettier,
       build, tests green._
-- [ ] **T509** — Delete `src/pages/held-demo.astro` and the exploration
+- [x] **T509** — Delete `src/pages/held-demo.astro` and the exploration
       branch `explore/held-block`; update `ROADMAP.md` (the held image
       shipped with the shapes as they are — it still lists "below" and
       a scroll-driven pause; follow-ups it surfaced; `CLAUDE.md`'s
@@ -470,8 +470,9 @@ treating the policy as settled. -->
 | T509a (orchestrator)              | top tier         | —                                 | a one-line token retune and a doc rule; not dispatched                                                                                                                                        |
 | T509 file edits (sdd-implementer) | opus             | 30,333                            | verified first try                                                                                                                                                                            |
 | pre-merge sweep                   | top tier         | 159,315                           | fix and re-review: three blocking (an AUTHORING sentence contradicting spec goal 3; the close-out record; ROADMAP's plugin list) and ten smaller — the orchestrator made the edits            |
+| pre-merge sweep re-check          | top tier         | 51,847                            | signed off; nothing between the branch and the merge                                                                                                                                          |
 | **Implementer runs, total**       | opus             | **309,333**                       | eight dispatches, every one verified first try; no escape-hatch miss                                                                                                                          |
-| **Reviewer invocations, total**   | mixed            | **1,559,166**                     | of which pre-policy Phase 0: 803,056; sign-offs and the sweep at the top tier: 359,286                                                                                                        |
+| **Reviewer invocations, total**   | mixed            | **1,611,013**                     | of which pre-policy Phase 0: 803,056; sign-offs, the sweep, and its re-check at the top tier: 411,133                                                                                         |
 | Comparison against spec 006       | —                | —                                 | deferred: 006 logged no tokens and Phase 0 here was implemented at the top tier before the policy; the first full-policy spec is the one to compare                                           |
 
 ## Handoff note
