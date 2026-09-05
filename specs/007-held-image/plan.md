@@ -358,7 +358,7 @@ src/pages/held-demo.astro         deleted at close-out (with explore/held-block)
 - A `held` or `pause` written inside a sidecar story (the image page
   renders the story through the same pipeline) gets the CSS but not
   the script: the script looks only inside the piece's column, so this
-  holds however the reader arrived (T505 review). Also, and the breakout arithmetic assumes the piece page's
+  holds however the reader arrived (T505 review). Also, the breakout arithmetic assumes the piece page's
   viewport-centred column — the same standing limitation `wide` and
   `fullbleed` have there. Not addressed here; `AUTHORING.md` says a
   story is prose.

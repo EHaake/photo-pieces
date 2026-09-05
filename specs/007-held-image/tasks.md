@@ -133,7 +133,7 @@ headers to confirm nothing was duplicated or dropped. -->
       half-way at half a ramp, smooth not linear, monotone on each
       ramp — from the T505 review; the plan's testing strategy records
       it. _Verify: vitest green; a `RAMP` or curve change fails it._
-- [ ] **T506** — Geometry pass at three viewports (1440×900, 1080×1920,
+- [x] **T506** — Geometry pass at three viewports (1440×900, 1080×1920,
       375×812) on the sampler and the fog piece, judged against the
       spec's rules (not the exploration's numbers — the hold margin
       changed): each hold's frame at its resting place and share of
@@ -151,6 +151,80 @@ headers to confirm nothing was duplicated or dropped. -->
       emulated (approach off, dim on); the 003 and 006 geometry checks
       re-run. _Verify: the measurements recorded here; any amendment a
       sub-lettered task. This phase's end is the person's visual gate._
+
+      **Record (T506).** Measured in the Chromium pane with images
+          forced eager, transitions disabled, and scroll events dispatched
+          by hand (the pane is hidden); the matte resolved to 16.8px at
+          1440 wide, `--hold-margin` to 45px at 1440×900, 53.25px at
+          1080×1920, 24px at 375×812.
+
+          _1440×900 (the laptop)._ Sampler held left (3:2): sticky at 45px,
+          frame 643 × 440 (the column governs; the height cap would allow
+          1198), prose 431 wide × 809 tall = the scene's height (no trailing
+          air); the frame's top at 45px through two offsets inside the
+          hold and at −155px with the scene's bottom exactly at the frame's
+          bottom after it — release when the prose's bottom meets the
+          frame's. Held right bleed (2:3): frame 551 × 810, the full hold
+          height, height-capped exactly as the formula gives; prose 1139
+          tall; same three-offset pattern. Fog held right (3:2): 643 × 440
+          against 778 of prose — holds, with 337px of hold scroll. Pause
+          (3:1): scene 1425 wide at left 0 (100vw less the scrollbar), the
+          frame in the flow 48px below the last paragraph (`.piece-block`'s
+          margin, no empty stage) and 48px above the next; frame 1271 × 447
+          pinned at 227px = the centre; through the stretch the lights read
+          0 → 0.501 → 1 → 1 → 0.498 → 0 → 0 at p = −0.2, 0.14, 0.28, 0.5,
+          0.86, 1.0, 1.2, with `data-pause-active` and `data-scene-active`
+          exactly for 0.14–0.86; at the middle the frame is scaled 1.05 to
+          1335 wide with 45px still clear on the left (the margin survives
+          the approach), the ground, the paragraph before, the paragraph
+          after, its inline link, the heading after, the page head's
+          title and category link, the footer's text and links all compute
+          to `--color-quiet`; the header is translated away (bottom at 0)
+          and focus into the nav mid-pause does not bring it back (the
+          known override); after the stretch every colour is its token
+          again, the frame travels with the scene's end, and a scroll up
+          brings the header back. Without the script's value (`--pause-t`
+          unset) the frame's transform is identity and it stays sticky —
+          the light pin. The reduced-motion block contains exactly
+          `.piece-pause-frame { transform: none }`, and all seven lights
+          rules sit outside it: the approach off, the dim kept (emulated by
+          inspection — the pane cannot set the media feature).
+
+          _1080×1920 (the portrait desktop)._ Sampler held left (3:2):
+          collapsed — static, one 1022px column, figure first, prose 666
+          (68ch) centred, never active. Held right bleed (2:3): keeps its
+          side — sticky at 53px, frame 495 × 728 (the half-viewport column
+          governs), prose 1144 tall, holds and releases as at the laptop,
+          `data-scene-active` on inside and off after. Fog held right
+          (3:2): collapsed with its figure before its prose (the named
+          case), the prose column at left 200 = the piece's own paragraph
+          column. Pause: frame 913 × 324 = (1065 − 106.5) ÷ 1.05, width-
+          limited, pinned at 798px = the centre, 76px clear at the sides.
+
+          _375×812 (the phone)._ Every hold static and figure-first at 343px
+          (the column), prose at the held reading size (16.8px, kept by
+          design); the pause pins sticky with the frame 327 wide at the
+          middle (311 at rest), 24px clear on both sides, the lights dim
+          the ground and the words on a phone too, the header away; the
+          fog's likewise.
+
+          _003 re-run at 1440×900._ Fullbleed 1425 (the viewport), wide
+          1160, half-bleed 1045, match-height pair 306 = 306, triptych
+          207 × 3, strip band 405 (≤ 420), row columns 340px + rest, single
+          matted 16.8px, fullbleed unmatted, aside floated; at 375 the row
+          collapses figure-first. _006 re-run on land-b's page._ Built
+          sections in the spec's order (story, label, record, compare,
+          passage, related, print); the passage is the paragraph before
+          the held block with no caption element — and the same on pano's
+          page, whose passage is the paragraph before the pause (it ends in
+          a colon, reported to the product owner); quiet view on a click
+          fills the viewport (1259 × 839 of 1440 × 900) on the quiet
+          ground and Escape restores it; no scene attribute or
+          `--pause-lights` on the image page.
+
+          No amendment needed: every measurement matches the spec's rules
+          as the plan states them. The scroll binding itself, and the
+          hand-off's feel, are the person's at the visual gate.
 
 ## Phase 1 — Plugin and docs (reviewer after the phase)
 
