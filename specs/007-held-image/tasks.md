@@ -292,7 +292,7 @@ stage), "The CSS" (the stage, `--pause-depth`, the mats), "The script".
       to L 0.2, both mats to the matte colour; at 0 everything its
       token; the scene's height equals the stage's plus the stretch with
       `--stage-h` unset._
-- [ ] **T505c** — The script: the stage is the pinned element — park
+- [x] **T505c** — The script: the stage is the pinned element — park
       from its computed `top`, stretch from the scene's height less the
       stage's — a `ResizeObserver` per stage keeps `--stage-h` on the
       scene equal to the stage's height and calls `update()` (disconnected
@@ -407,6 +407,8 @@ treating the policy as settled. -->
 | T501a review                      | reviewer default | 52,962                            | signed off; two nits folded in by the orchestrator (class merge, a comment)                                                                                                   |
 | T504a (sdd-implementer)           | opus             | 41,082                            | verified first try (browser checks the orchestrator's: L 0.315 / 0.2, mats white, scene = stage + stretch, stages fit at all three viewports)                                 |
 | T504a review                      | reviewer default | 51,150                            | signed off in substance; its blocking arithmetic assumed a 3:2 pause — measured: both 3:1 fixtures fit; two tokens (--block-margin, --para-gap) folded in by the orchestrator |
+| T505c (sdd-implementer)           | opus             | 30,250                            | verified first try; the observer's firing measured by the orchestrator once a screenshot forced the hidden pane to render (766 → 990 → 766)                                   |
+| T505c review                      | reviewer default | 34,948                            | fix and re-review (the observer unmeasured) — closed by that measurement; four notes folded in by the orchestrator                                                            |
 
 ## Handoff note
 
