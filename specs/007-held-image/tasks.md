@@ -394,6 +394,18 @@ stage), "The CSS" (the stage, `--pause-depth`, the mats), "The script".
 
 ## Phase 2 — Close-out (reviewer sweep, then merge)
 
+- [x] **T509a** — The second visual gate's two spec-003 notes
+      (product owner, 2026-09-05, on the laptop): `--tall-max` 92vh →
+      85svh, so a 2:3 `tall` can be centred on a 16:10 screen while
+      scrolling (the pause's share, one sense of air); and an AUTHORING
+      rule that a frame's shape picks its treatment — `fullbleed` never
+      scales down, so a 3:2 runs taller than a 16:10 laptop; choose
+      `fullbleed` for frames wider than the screens that matter and
+      `wide` for a 3:2 to be seen whole. No mechanism change to
+      `fullbleed` (the photographer's own leaning; a fullbleed that
+      shrank would not be full bleed). _Verify: the sampler's tall
+      figure at 1440×900 no taller than 85svh plus its mat; Prettier,
+      build, tests green._
 - [ ] **T509** — Delete `src/pages/held-demo.astro` and the exploration
       branch `explore/held-block`; update `ROADMAP.md` (the held image
       shipped with the shapes as they are — it still lists "below" and
@@ -455,6 +467,7 @@ treating the policy as settled. -->
 | T506b (orchestrator, measurement) | top tier         | —                                 | measured; one finding: a pause needs about half a screen of content after it to release on a tall viewport (the sampler's, on the portrait desktop, does not) — to T508a and the phase report |
 | T508a (sdd-implementer)           | opus             | 44,136                            | verified first try; the review found the anchored intro too long for the phone and two mechanism sentences wrong — fixed by the orchestrator (prose)                                          |
 | T508a review ×4                   | reviewer default | 66,531 + 26,322 + 29,901 + 31,164 | fix and re-review ×3 (stage overflow on the phone; "half a screen"; a backwards cause; the release condition), then signed off                                                                |
+| T509a (orchestrator)              | top tier         | —                                 | a one-line token retune and a doc rule; not dispatched                                                                                                                                        |
 
 ## Handoff note
 

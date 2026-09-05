@@ -348,6 +348,16 @@ delete it.
 
 ## Hard-won syntax rules
 
+**A frame's shape picks its treatment.** `fullbleed` never scales
+down: it runs edge to edge and its height follows the frame's ratio,
+so a 3:2 frame is taller than a 16:10 laptop screen and the reader
+scrolls through it. Use `fullbleed` for frames wider than the screens
+you care about — 16:9 and panoramas — and `wide` for a 3:2 that
+should be seen whole. A `tall` caps at about 85 percent of the
+viewport's height, so a vertical can be centred on the screen while
+scrolling; a `held` vertical uses the whole hold height beside its
+words instead.
+
 Learned by breaking them — each of these fails quietly if violated:
 
 - **`---` must be the literal first line of the file** or frontmatter

@@ -42,8 +42,14 @@
      behind a single matted frame, entered and left on purpose, never a
      site-wide mode (the light-only decision of spec 002 stands). */
   --color-quiet: oklch(0.2 0.008 95);
-  /* Sampler-review knobs for the tall and strip treatments. */
-  --tall-max: 92vh;
+  /* Sampler-review knobs for the tall and strip treatments. --tall-max
+     was 92vh; at the second visual gate (2026-09-05, a 16:10 laptop) a
+     2:3 tall was "difficult while scrolling to centre such that the
+     entire image can be seen", so it now sits inside the screen with
+     the pause's room to spare — the same share the pause's frame
+     takes, (100 − 2 × 5) ÷ 1.05 ≈ 85, so the two verticals on the site
+     have one sense of air. */
+  --tall-max: 85svh;
   --strip-h: clamp(240px, 45vh, 420px);
   /* The durational blocks (spec 007). --hold-margin is the held frame's
      distance from the top edge AND the pause's margin all round (the
