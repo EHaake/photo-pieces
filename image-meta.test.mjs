@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { BLOCKS } from './remark-pieces-blocks.mjs';
 import {
+  BLOCK_BODIES,
   classifyContentImage,
   findIdCollisions,
   firstAltFor,
@@ -397,6 +399,67 @@ describe('the passage an image sits in (T402)', () => {
     expect(passageFor(body, 'land-b').caption).toBe('The ten minutes.');
     expect(passageFor(body, 'square')).toBeNull();
     expect(passageFor('', 'land-a')).toBeNull();
+  });
+});
+
+describe('the passage by body kind (T502, spec 007)', () => {
+  it("BLOCK_BODIES agrees with the transform's descriptor table — names and kinds", () => {
+    // One source of truth: the transform's descriptors declare their
+    // body; this module (Astro-free, so it can't import them) mirrors
+    // the declaration. Every descriptor's `body ?? 'none'` must equal
+    // the map's entry, and the two name sets must be equal.
+    const fromTransform = Object.fromEntries(
+      Object.entries(BLOCKS).map(([name, block]) => [name, block.body ?? 'none']),
+    );
+    expect(BLOCK_BODIES).toEqual(fromTransform);
+    expect(Object.keys(BLOCK_BODIES).sort()).toEqual(Object.keys(BLOCKS).sort());
+    // And the kinds stay within the four the descriptor model documents:
+    // a fifth kind added in step on both sides would otherwise fall
+    // silently into passageFor's "no caption" default.
+    for (const kind of Object.values(BLOCK_BODIES)) {
+      expect(['caption', 'prose', 'images+caption', 'none']).toContain(kind);
+    }
+  });
+
+  it("a grid's caption line is its caption, like a strip's", () => {
+    const body = [
+      'Four corners:',
+      ':::grid\n![a](./g-a.jpg)\n![b](./g-b.jpg)\n\nThe same morning, four ways.\n:::',
+    ].join('\n\n');
+    expect(passageFor(body, 'g-b')).toEqual({
+      prose: 'Four corners:',
+      caption: 'The same morning, four ways.',
+    });
+  });
+
+  it('a prose-bodied block (row, aside, held) gives the prose before it and no caption', () => {
+    const body = [
+      'Before the row.',
+      ':::row{src="./r.jpg" alt="r" side="left"}\nWords beside the row.\n\nMore words.\n:::',
+      'Before the aside.',
+      ':::aside{src="./a.jpg" alt="a" side="right"}\nWords wrapping the aside.\n:::',
+      'Before the held frame.',
+      ':::held{src="./h.jpg" alt="h" side="right" bleed}\nFirst paragraph beside the frame.\n\nSecond paragraph beside the frame.\n:::',
+    ].join('\n\n');
+    expect(passageFor(body, 'r')).toEqual({ prose: 'Before the row.' });
+    expect(passageFor(body, 'a')).toEqual({ prose: 'Before the aside.' });
+    expect(passageFor(body, 'h')).toEqual({ prose: 'Before the held frame.' });
+  });
+
+  it('a prose-bodied block with nothing before it has no passage at all', () => {
+    // Its own body must not be quoted as a caption in the absence of
+    // prose — the whole point of the body-kind rule.
+    const body = ':::held{src="./h.jpg" alt="h"}\nOnly the body.\n:::';
+    expect(passageFor(body, 'h')).toBeNull();
+  });
+
+  it('a pause leaf gives the paragraph before it and no caption', () => {
+    const body = [
+      'The paragraph before the pause.',
+      '::pause{src="./pano.jpg" alt="The full sweep"}',
+      'The paragraph after.',
+    ].join('\n\n');
+    expect(passageFor(body, 'pano')).toEqual({ prose: 'The paragraph before the pause.' });
   });
 });
 

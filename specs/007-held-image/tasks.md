@@ -49,7 +49,7 @@ headers to confirm nothing was duplicated or dropped. -->
       8 × 5 pixels; the height branch rounds up — T501 review), every allowed
       combination and every must-fail case) and mutation-checked; 173 existing tests
       green; build green._
-- [ ] **T502** — The passage by body kind: `BLOCK_BODIES` exported from
+- [x] **T502** — The passage by body kind: `BLOCK_BODIES` exported from
       `image-meta.mjs`, `BLOCKS` exported from the transform, a test that
       the two agree (names, and `body ?? 'none'` per descriptor), `passageFor` taking a caption from
       `caption` and `images+caption` bodies only. _Verify: vitest — the
@@ -139,7 +139,10 @@ headers to confirm nothing was duplicated or dropped. -->
       the pause's nothing-to-read rule, no hold where no column fits,
       `held` in the Obsidian raw-text list, and in "Hard-won syntax
       rules" that `bleed` is a flag on `held` and an enum on `wide`;
-      a story is prose — no holds or pauses in a sidecar);
+      a story is prose — no holds or pauses in a sidecar; the image
+      page's passage quotes a caption from caption-bodied blocks only —
+      a `held`, `row`, or `aside` body never appears there, T502
+      review);
       `README.md`'s block table gains both rows; `DECISIONS.md` records
       the exploration's decisions (words beside, never over or under;
       script-driven pause; frames sized by ratio, not `sizes`; margins
