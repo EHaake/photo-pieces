@@ -22,7 +22,8 @@ The vault is a **parent** of the repo, not the content folder itself:
 
 Why this shape:
 
-- **Astro only reads its configured content directory**, so nothing outside `src/content/` can leak into the built site.
+- **Astro only reads its configured content directory**, so nothing
+  outside `src/content/` can leak into the built site.
 - **Private notes live outside the repo entirely** — shoot planning,
   location scouting, gear research, journal fragments. They can never
   be committed by accident because git never sees them. No `.gitignore`
@@ -328,12 +329,13 @@ because the body is the piece's own writing, not a caption.
 **Write enough for the frame, or don't hold it.** The frame lets go as
 the last line passes it and never after: the site will not pad a hold
 out with empty scroll, so the hold lasts exactly as long as the words
-outlast the frame. A frame taller than its prose does not hold at all — the row is only
-as tall as the frame, so there is nothing to stick through — it sits in
-the flow with the words beside it. On a laptop screen a landscape frame takes about five paragraphs
-to outlast, a full-height vertical about eight — the sampler piece
-(`src/content/pieces/vocabulary-sampler/`) is the calibration. Count
-the paragraphs before deciding a photograph deserves a hold.
+outlast the frame. A frame taller than its prose does not hold at all —
+the row is only as tall as the frame, so there is nothing to stick
+through — it sits in the flow with the words beside it. On a laptop
+screen a landscape frame takes about five paragraphs to outlast, a
+full-height vertical about eight — the sampler piece
+(`src/content/pieces/vocabulary-sampler/`) is the calibration. Count the
+paragraphs before deciding a photograph deserves a hold.
 
 **No hold where no column fits.** The frame is sized from its own ratio
 and the height it may use, so on a portrait viewport a landscape frame

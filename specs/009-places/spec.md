@@ -1,12 +1,13 @@
 # Spec: Places
 
 **Status**: Implemented (2026-09-06) — approved by the product owner
-with the three open decisions decided as drafted; every acceptance criterion met on the fixtures and the recorded runs; T706 closes at the merge
-**Depends on**: 004 (the image registry: every accepted raster in a
-piece folder has a stable id and a page), 006 (the image page's sets
-and arrows, the wall label's place and time), 008 (a piece's frames
-are known in the piece's order; the registry knows every piece that
-places a photograph).
+with the three open decisions decided as drafted; every acceptance
+criterion met on the fixtures and the recorded runs; T706 closes at the
+merge **Depends on**: 004 (the image registry: every accepted raster in
+a piece folder has a stable id and a page), 006 (the image page's sets
+and arrows, the wall label's place and time), 008 (a piece's frames are
+known in the piece's order; the registry knows every piece that places a
+photograph).
 
 ## Summary
 

@@ -240,16 +240,16 @@ photographer returns to: a title, an optional description, cover, and
 `draft`, and a body that is the writing about the place. The file name
 is the slug and the URL. A frame names its place in its sidecar with
 `at: <slug>`, or a piece names one default for its whole folder with
-`at: <slug>` in its frontmatter — the frame's own line wins, and
-`at: none` opts a frame out of the default. `/places/<slug>/` shows
-the writing and then every published frame at the place, grouped by
-the piece it lives in, outings oldest first, so the page grows as
-pieces are published; `/places/` lists the places as cards and is in
-the nav after Galleries. An `at:` naming a place that does not exist
-fails the build, listing the places that do, as does a place `cover`
-that is not one of its frames once the place publishes; a draft or
-still-empty place is a note and builds no page. Gallery-root
-photographs are not grouped under a place — their `at:` is checked and then ignored with a warning.
+`at: <slug>` in its frontmatter — the frame's own line wins, and `at:
+none` opts a frame out of the default. `/places/<slug>/` shows the
+writing and then every published frame at the place, grouped by the
+piece it lives in, outings oldest first, so the page grows as pieces are
+published; `/places/` lists the places as cards and is in the nav after
+Galleries. An `at:` naming a place that does not exist fails the build,
+listing the places that do, as does a place `cover` that is not one of
+its frames once the place publishes; a draft or still-empty place is a
+note and builds no page. Gallery-root photographs are not grouped under
+a place — their `at:` is checked and then ignored with a warning.
 
 **GPS is never published.** The EXIF reader asks for an allowlist of
 exposure tags with GPS parsing off, its output is asserted against a

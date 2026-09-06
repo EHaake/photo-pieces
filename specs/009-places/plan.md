@@ -1,8 +1,9 @@
 # Plan: Places
 
 **Status**: Implemented (2026-09-06) — signed off by the
-skeptical-reviewer at the top tier on the fourth pass, then executed T701–T705 with each review's findings resolved and the sweep's fixed; T706 closes at the merge
-**Implements**: spec.md in this directory
+skeptical-reviewer at the top tier on the fourth pass, then executed
+T701–T705 with each review's findings resolved and the sweep's fixed;
+T706 closes at the merge **Implements**: spec.md in this directory
 
 ## Shape of the change
 
@@ -30,12 +31,13 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   `placeNameProblem(name)` in `image-meta.mjs`, tested in T701 and
   called by the registry, so neither needs a build to prove it.
 - **A frame's place** (`placeOf(at, pieceDefault)`, pure, in
-  `image-meta.mjs`): the sidecar's `at` if it is a slug; `null` if it
-  is `none`; else the piece's `at`; else `null`. Blank strings count
-  as unset, and a piece whose `at` is `none` has no default — Obsidian
-  will offer `none` on a piece, since the property is shared, and it
-  means there what it means on a sidecar (re-review: second look). This is the spec's "a frame's own line always wins" in one
-  function, and the only place the precedence is written.
+  `image-meta.mjs`): the sidecar's `at` if it is a slug; `null` if it is
+  `none`; else the piece's `at`; else `null`. Blank strings count as
+  unset, and a piece whose `at` is `none` has no default — Obsidian will
+  offer `none` on a piece, since the property is shared, and it means
+  there what it means on a sidecar (re-review: second look). This is the
+  spec's "a frame's own line always wins" in one function, and the only
+  place the precedence is written.
 - **The slug rule**: every `at:` other than `none`, on every piece,
   draft or not, and on every sidecar, must name a declared
   place, draft or not. A typo in a draft is still a typo, and the
@@ -68,15 +70,16 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   one, may name a cover from a piece not yet published and gets the
   note, not a failure, as the spec says (sign-off: second look). Default:
   the first frame of the most recent outing.
-- **The registry** (`images.ts`) reads the `places` collection, runs
-  the slug rule, resolves each published piece-folder frame's place,
-  builds `SitePlace` objects before the images (they hold ids only, so
-  the images can point at them without a cycle), and gives each image
-  `place: SitePlace | null` and, when it has one, a set
-  of kind `place` — its id the slug, its title and url the place's,
-  count, prev, and next from the place's frames — after its piece sets — last, so the page's default set
-  stays the gallery or the piece as today. `ImageRegistry.places` is
-  the published places, most recent outing first, ties by title.
+- **The registry** (`images.ts`) reads the `places` collection, runs the
+  slug rule, resolves each published piece-folder frame's place, builds
+  `SitePlace` objects before the images (they hold ids only, so the
+  images can point at them without a cycle), and gives each image
+  `place: SitePlace | null` and, when it has one, a set of kind `place`
+  — its id the slug, its title and url the place's, count, prev, and
+  next from the place's frames — after its piece sets — last, so the
+  page's default set stays the gallery or the piece as today.
+  `ImageRegistry.places` is the published places, most recent outing
+  first, ties by title.
 - **The set key** (`image-set.ts`): `SetKind` gains `'place'`, and
   `ImageSet.kind` in `images.ts` is typed as `SetKind` rather than a
   second hand-written union (sign-off: the two must gain the kind in
@@ -167,17 +170,16 @@ the gallery-root warning:
 - `image-meta.test.mjs`, a `describe('places (T701, spec 009)')`:
   `placeOf` (own slug wins over a default; `none` under a default is
   null; no line takes the default; a `none` default is no default;
-  nothing is null; blanks are unset);
-  `placeProblems` (unknown slug lists the places sorted; the no-places
-  wording; a known slug and `none` are no problem; every problem
-  returned at once); `groupByPlace` (a borrowed id is never counted
-  under the borrower; a frame at another place lands under its own
-  piece in the other place; outings in the order given; the piece's
-  order kept within an outing; a place with no frame absent);
-  `placeSummary` ("1 outing · 1 frame · 2026", "2 outings · 7 frames ·
-  2019–2026"); `placeNameProblem` (a slug passes; `Sombrio Beach`,
-  `sombrio.beach`, and `none` each get their message). Each mutation-checked: the rule broken, the test named
-  as failing.
+  nothing is null; blanks are unset); `placeProblems` (unknown slug
+  lists the places sorted; the no-places wording; a known slug and
+  `none` are no problem; every problem returned at once); `groupByPlace`
+  (a borrowed id is never counted under the borrower; a frame at another
+  place lands under its own piece in the other place; outings in the
+  order given; the piece's order kept within an outing; a place with no
+  frame absent); `placeSummary` ("1 outing · 1 frame · 2026", "2 outings
+  · 7 frames · 2019–2026"); `placeNameProblem` (a slug passes; `Sombrio
+Beach`, `sombrio.beach`, and `none` each get their message). Each
+  mutation-checked: the rule broken, the test named as failing.
 - `image-set.test.mjs` (new): `setKeyFromPath` maps `/places/x/` to
   `place:x`, keeps the two existing kinds, and returns null for
   `/images/…`; `setKey('place', 'x')`. The module is TypeScript;
