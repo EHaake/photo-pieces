@@ -1,6 +1,8 @@
 # Tasks: Cross-piece image references
 
-**Status**: Draft — for the skeptical-reviewer's sign-off
+**Status**: Signed off (skeptical-reviewer, top tier, 2026-09-05, second
+pass) — awaiting the product owner's approval of the spec-conformance
+summary
 **Implements**: plan.md in this directory
 
 Ordered, small, independently verifiable. Per the constitution: every
@@ -93,9 +95,8 @@ ids, known, homeOf)` returning the plan's draft-rule messages;
 
 ## Phase 1 — The row, the plugin, the docs (reviewer after the phase)
 
-- [ ] **T605** — `PieceList.astro`: the row as one anchor; `global.css`:
-      `a.note-row { background: none }` as the gallery card has, hover
-      the card's colour shift and nothing else. _Verify: in the browser
+- [ ] **T605** — `PieceList.astro`: the row as one anchor; `global.css`: `a.note-row { background-image: none }` (the row keeps its
+      own ground), hover the card's colour shift and nothing else. _Verify: in the browser
       the image, the date line, and the description each navigate to the
       piece (a click, then `read_page`); at rest the row's computed
       colours and the title's background (no underline) equal the previous
@@ -117,9 +118,10 @@ ids, known, homeOf)` returning the plan's draft-rule messages;
       table's note on image paths; the "images live directly in the piece
       folder" sentence), `DECISIONS.md` (a "Spec 008" section: a path not
       an id; one page one home; the arrows follow the reader; the registry
-      owns the draft rule; the row as an anchor), `ROADMAP.md` (the entry
-      struck as done, with follow-ups: renames now break references in
-      other pieces too; the passage stays the home's). _Verify: Prettier
+      owns the draft rule; the row as an anchor), `ROADMAP.md` (the entry struck as done, with follow-ups: renames now
+      break references in other pieces too; the passage stays the home's);
+      DECISIONS also records that the cover's id comes from Astro's
+      internal `fsPath`, read directly and guarded by a throw. _Verify: Prettier
       clean; the AUTHORING examples build when pasted into a temporary
       piece (reverted)._
 
@@ -141,8 +143,9 @@ if it is ever on (it is off). Compare the total against spec 007's
 (implementer 309,333 over eight dispatches; reviewer 1,611,013, of
 which pre-policy Phase 0 803,056). -->
 
-| Task / invocation | Tier | Tokens | Outcome / miss reason |
-| ----------------- | ---- | ------ | --------------------- |
+| Task / invocation      | Tier     | Tokens           | Outcome / miss reason                                                                                                           |
+| ---------------------- | -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| plan/tasks sign-off ×2 | top tier | 152,642 + 56,418 | fix and re-review ×1 (the long self-shape; the cover's classification; the row as the card; the plugin's rule), then signed off |
 
 ---
 

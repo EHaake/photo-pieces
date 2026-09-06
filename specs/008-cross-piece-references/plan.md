@@ -1,7 +1,8 @@
 # Plan: Cross-piece image references
 
-**Status**: Draft — for the skeptical-reviewer's sign-off at the top
-tier, then the product owner's spec-conformance summary
+**Status**: Signed off (skeptical-reviewer, top tier, 2026-09-05, second
+pass) — awaiting the product owner's approval of the spec-conformance
+summary
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -80,10 +81,13 @@ new frontmatter, no new collection, the same ids and URLs.
   or the gallery root). The rule runs before any set is built, so a
   refused id never reaches a neighbour link. A draft piece is skipped,
   as its images are. **The cover's id** comes from
-  `piece.data.cover.fsPath` (Astro's `ImageMetadata` carries the
-  source path in dev and at build — the server environment's proxy
-  returns it; T603 confirms and throws, not skips, if it is ever
-  absent) through `classifyContentImage`, which knows nested files and
+  `piece.data.cover.fsPath`, read directly off the entry (Astro's
+  `ImageMetadata` carries the source path in dev and at build — the
+  server environment's proxy returns it by name; the field is
+  non-enumerable and `@internal`, so a spread, a clone, or
+  `JSON.stringify` of the cover loses it silently, and T603 confirms it
+  and throws, not skips, if it is ever absent — a decision DECISIONS
+  records) through `classifyContentImage`, which knows nested files and
   private frames: a private cover is refused with the cover hint as
   today; a cover that is not a site image (a sub-folder, a
   non-photograph format) is allowed as it is today and simply counts
@@ -102,9 +106,11 @@ new frontmatter, no new collection, the same ids and URLs.
   becomes `<a class="note-row" href=…>`, the `h3` loses its inner
   anchor, the `Image` and both paragraphs stay inside — flow content
   in an anchor with no interactive descendants, valid HTML. It is
-  treated exactly as the gallery card is: `a.note-row { background:
-none }` drops the theme's underline gradient (as `.gallery-card`
-  does), and on hover the anchor's colour goes to the theme's
+  treated exactly as the gallery card is: `a.note-row { background-image:
+none }` drops the theme's underline gradient and nothing else (the
+  row keeps its own `background: var(--color-bg)`, so the at-rest
+  measurement compares like with like; the card uses `background:
+none` because it has no ground of its own), and on hover the anchor's colour goes to the theme's
   hover colour, which the title inherits while `.meta` and the
   description keep their own colours — no underline, since the card
   has none (the first draft added one; dropped at sign-off to match
@@ -131,10 +137,15 @@ none }` drops the theme's underline gradient (as `.gallery-card`
 site accepts — a piece places its own images as ./<file>, another
 piece's as ../<slug>/<file>, and a gallery-root image as
 ../../gallery-images/<file>`.
-- Draft or unknown target (registry): `[images] <borrower-slug>
-places <id> (from <home-slug> | the gallery root), which is not a
-published image — publish <home-slug> first, or place a photograph
-that has a page`.
+- Draft target (registry): `[images] <borrower-slug> places <id> from
+<home-slug>, which is a draft — publish <home-slug> first, or place a
+photograph that has a page`.
+- Unowned target: `[images] <borrower-slug> places <id>, but
+src/content/pieces/<folder>/ has no index.md — it is not a piece yet`.
+- Unknown id (a file the registry does not list — a non-photograph
+  format, or nothing there): `[images] <borrower-slug> places <id>, which
+is not an image this site pages`. A gallery-root image is either
+  published or unknown; it has no draft state.
 - Private frame: unchanged (the file-part check).
 - Missing file: unchanged (`image not found: <src> (relative to the
 piece's folder)`).
@@ -196,7 +207,7 @@ src/lib/images.ts                 framesByPiece, sets for every placing piece,
                                   appearances, the draft rule, cover by fsPath
 src/pages/images/[...id].astro    the "Also in" line; WORDING.alsoIn
 src/components/PieceList.astro    the row as one anchor
-src/styles/global.css             a.note-row and the title's hover underline
+src/styles/global.css             a.note-row: background-image none, the card's hover colour
 obsidian-plugin/main.ts           explicit relative-path resolution
 scripts/gen-placeholders.mjs      tests/pieces/{alpha,beta}/photo.jpg,
                                   tests/gallery-images/photo.jpg
