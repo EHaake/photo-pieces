@@ -15,6 +15,10 @@ const pieces = defineCollection({
       categories: z.array(z.enum(CATEGORIES)).min(1),
       description: z.string(),
       cover: image().optional(),
+      // Spec 009: the piece's default place for its own folder's frames —
+      // a declared place's slug, which the image registry checks, or
+      // `none` for no default. A frame's own `at:` always wins.
+      at: z.string().optional(),
       draft: z.boolean().default(false),
     }),
 });
@@ -76,6 +80,9 @@ const imageMeta = defineCollection({
     // the sidecar is the image's story.
     place: z.string().optional(),
     time: z.string().optional(),
+    // Spec 009: this frame's place — a declared place's slug, or `none`
+    // for no place. Wins over the piece's `at:`; the registry checks it.
+    at: z.string().optional(),
     format: z.string().optional(),
     filters: z.string().optional(),
     support: z.string().optional(),
@@ -86,4 +93,25 @@ const imageMeta = defineCollection({
   }),
 });
 
-export const collections = { pieces, galleries, imageMeta };
+// Places (spec 009): the coast, the trail, the room a photograph was
+// made at — one file per place, its name the URL segment every `at:`
+// line names, so the id is the file name verbatim (`generateId`, as
+// `imageMeta` does). The registry (src/lib/images.ts) checks that the
+// id is a usable slug, that `cover` is one of the place's own frames,
+// and that every `at:` on a piece or a sidecar names a declared place;
+// this schema covers shape only. The body is the place's writing.
+const places = defineCollection({
+  loader: glob({
+    pattern: '**/[^_]*.md',
+    base: './src/content/places',
+    generateId: ({ entry }) => entry.replace(/\.md$/, ''),
+  }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    cover: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { pieces, galleries, imageMeta, places };

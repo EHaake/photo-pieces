@@ -6,6 +6,7 @@ description: >-
   A slow morning on the headlands, waiting for the marine layer to
   decide. Fixture demo — invented prose, placeholder images.
 cover: ./land-a.jpg
+at: the-headlands
 draft: false
 ---
 
