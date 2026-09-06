@@ -27,7 +27,7 @@ import {
   galleryCell,
   relatedFlowStyle,
 } from '../../lib/gallery-layout';
-import { setKey } from '../../lib/image-set';
+import { setKey, type SetKind } from '../../lib/image-set';
 import { sectionsFor } from '../../lib/image-meta.mjs';
 import { getImageRegistry } from '../../lib/images';
 import { plainText, renderMarkdown } from '../../lib/markdown';
@@ -83,7 +83,7 @@ const WORDING = {
     subject: 'Print enquiry',
   },
   quiet: 'Quiet view',
-  neighbours: { inGallery: 'In', fromPiece: 'From' },
+  neighbours: { inGallery: 'In', fromPiece: 'From', atPlace: 'At' },
 };
 
 const { image } = Astro.props;
@@ -121,21 +121,38 @@ const og = await getImage(ogImageOptions(image.image));
 // The wall label: only what exists. Order is the label's reading order;
 // place and time head it (spec 006). Exposure rows are kept out of the
 // search index — they are tokens, not text to find.
-type Row = { term: string; value: string; findable: boolean };
-const labelRows: Row[] = (
-  [
-    ['place', label.place, true],
-    ['time', label.time, true],
-    ['camera', label.camera, false],
-    ['lens', label.lens, false],
-    ['focalLength', label.focalLength, false],
-    ['aperture', label.aperture, false],
-    ['shutter', label.shutter, false],
-    ['iso', label.iso, false],
-    ['date', label.date ? formatDate(label.date) : undefined, false],
-  ] as const
-).flatMap(([key, value, findable]) =>
-  value ? [{ term: WORDING.label[key], value, findable }] : [],
+type Row = { term: string; value: string; findable: boolean; href?: string; after?: string };
+// The place row (spec 009): the place's title as a link to its page,
+// the sidecar's free text after it; the free text alone when the frame
+// names no place, and no row when it has neither.
+const placeRow: Row[] = image.place
+  ? [
+      {
+        term: WORDING.label.place,
+        value: image.place.title,
+        href: image.place.url,
+        after: label.place,
+        findable: true,
+      },
+    ]
+  : label.place
+    ? [{ term: WORDING.label.place, value: label.place, findable: true }]
+    : [];
+const labelRows: Row[] = placeRow.concat(
+  (
+    [
+      ['time', label.time, true],
+      ['camera', label.camera, false],
+      ['lens', label.lens, false],
+      ['focalLength', label.focalLength, false],
+      ['aperture', label.aperture, false],
+      ['shutter', label.shutter, false],
+      ['iso', label.iso, false],
+      ['date', label.date ? formatDate(label.date) : undefined, false],
+    ] as const
+  ).flatMap(([key, value, findable]) =>
+    value ? [{ term: WORDING.label[key], value, findable }] : [],
+  ),
 );
 
 // "How it was made": the processing note lives with the compare when
@@ -174,7 +191,13 @@ const related = image.related.flatMap((id) => {
 });
 
 // Neighbours: one nav per set, the default (sets[0]) visible; the
-// script shows the set the reader came through when it knows it.
+// script shows the set the reader came through when it knows it. The
+// line's first word is the set's kind: "In", "From", "At".
+const neighbourWording: Record<SetKind, string> = {
+  gallery: WORDING.neighbours.inGallery,
+  piece: WORDING.neighbours.fromPiece,
+  place: WORDING.neighbours.atPlace,
+};
 const sets = image.sets.map((set) => ({
   ...set,
   key: setKey(set.kind, set.id),
@@ -184,7 +207,8 @@ const sets = image.sets.map((set) => ({
 
 // The search index takes pages with something to find: a story, a
 // caption, or a place. Label-only pages would only swamp the pieces.
-const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place);
+const indexed =
+  image.hasStory || Boolean(image.caption) || Boolean(label.place) || Boolean(image.place);
 ---
 
 <BaseLayout title={image.title} description={description} ogType="article" image={og.src}>
@@ -228,8 +252,8 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
             )}
           </span>
           <span class="frame-nav-where">
-            {set.kind === 'gallery' ? WORDING.neighbours.inGallery : WORDING.neighbours.fromPiece}{' '}
-            <a href={withBase(set.url)}>{set.title}</a> · {set.index + 1} of {set.count}
+            {neighbourWording[set.kind]} <a href={withBase(set.url)}>{set.title}</a> ·{' '}
+            {set.index + 1} of {set.count}
           </span>
           <span class="frame-nav-next">
             {set.nextImage && (
@@ -273,10 +297,13 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
         {
           labelRows.length > 0 && (
             <dl class="wall-label">
-              {labelRows.map(({ term, value, findable }) => (
+              {labelRows.map(({ term, value, findable, href, after }) => (
                 <div data-pagefind-ignore={findable ? undefined : true}>
                   <dt>{term}</dt>
-                  <dd>{value}</dd>
+                  <dd>
+                    {href ? <a href={withBase(href)}>{value}</a> : value}
+                    {after && ` · ${after}`}
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -553,6 +580,15 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
     margin: 0;
     font-family: var(--font-display);
     font-size: 1rem;
+  }
+
+  /* The place's link in the label, in the way-back lines' accent — the
+     theme's underline gradient applies on its own. */
+  .wall-label dd a {
+    color: var(--color-accent);
+  }
+  .wall-label dd a:hover {
+    color: var(--color-accent-hover);
   }
 
   /* Record and print: sentence-length values stack in one column
