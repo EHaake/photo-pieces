@@ -2,6 +2,7 @@ import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import remarkDirective from 'remark-directive';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { remarkPiecesBlocks } from './remark-pieces-blocks.mjs';
+import { IMAGE_EXTENSIONS } from './src/lib/image-meta.mjs';
 
 // Spec 003's vocabulary suite — companion to remark-pieces-blocks.test.mjs,
 // which holds the 001/002-era contracts and stays untouched. Same harness:
@@ -577,12 +578,17 @@ describe('image links (T310, spec 004)', () => {
     expect(imageMarkers(code)[0].style).toBe('--ar: 2.4');
   });
 
-  it('a src into a sub-folder or a sibling folder fails naming the rule', async () => {
+  it('a src into a sub-folder fails naming the rule; a sibling folder is a shape the site accepts', async () => {
     await expect(
       renderExpectingFailure('::single{src="./detail/photo.jpg" alt="x"}'),
-    ).rejects.toThrow(/points outside the piece's own folder/);
-    await expect(renderExpectingFailure('![x](../other/photo.jpg)')).rejects.toThrow(
-      /points outside the piece's own folder/,
+    ).rejects.toThrow(/is not a path this site accepts/);
+    // Changed on purpose at T602 (spec 008): `../<slug>/<file>` is now a
+    // borrowed image, not a broken rule — so from this harness's folder
+    // it fails on the file, which tests/other/ has not got.
+    await expect(
+      renderExpectingFailure('::single{src="../other/photo.jpg" alt="x"}'),
+    ).rejects.toThrow(
+      /image not found: \.\.\/other\/photo\.jpg \(relative to the piece's folder\)/,
     );
   });
 
@@ -894,5 +900,149 @@ describe('held and pause: the durational blocks (T501, spec 007)', () => {
     } finally {
       spy.mockRestore();
     }
+  });
+});
+
+describe('cross-piece references (T602, spec 008)', () => {
+  // A second virtual piece: tests/pieces/alpha/index.md, beside the real
+  // 8 x 5 fixtures alpha/photo.jpg, beta/photo.jpg (with beta's private
+  // frame and a .tif), and tests/gallery-images/photo.jpg. alpha's own
+  // frame is the same shape as beta's, so a borrowed frame's sizing can
+  // be compared against a local one's directly.
+  const alphaURL = new URL('./tests/pieces/alpha/index.md', import.meta.url);
+  const render = (content) => processor.render(content, { fileURL: alphaURL });
+  const renderExpectingFailure = async (content) => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      return await render(content);
+    } finally {
+      spy.mockRestore();
+    }
+  };
+
+  const links = (code) =>
+    [...code.matchAll(/<a href="([^"]*)" class="image-link"(?: style="([^"]*)")?>/g)].map((m) => ({
+      href: m[1],
+      style: m[2],
+    }));
+  const sizesOf = (code) => imageMarkers(code).map((m) => m.sizes);
+
+  // The one message the parser gives every wrong shape.
+  const shapeMessage = (src) =>
+    `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, another piece's as ../<slug>/<file>, and a gallery-root image as ../../gallery-images/<file>`;
+
+  it("a borrowed src in single links to the other piece's page, sized as a local one", async () => {
+    const borrowed = await render('::single{src="../beta/photo.jpg" alt="dawn"}');
+    const local = await render('::single{src="./photo.jpg" alt="dawn"}');
+    expect(links(borrowed.code)).toEqual([{ href: '/images/beta/photo/', style: undefined }]);
+    expect(links(local.code)).toEqual([{ href: '/images/alpha/photo/', style: undefined }]);
+    expect(sizesOf(borrowed.code)[0]).toContain('680px');
+    expect(sizesOf(borrowed.code)).toEqual(sizesOf(local.code));
+    // The image inside is still the optimizer's, borrowed path and all.
+    expect(borrowed.code).toMatch(
+      /<a href="\/images\/beta\/photo\/" class="image-link"><img[^>]*__ASTRO_IMAGE_/,
+    );
+    expect(imageMarkers(borrowed.code)[0].src).toBe('../beta/photo.jpg');
+  });
+
+  it('a borrowed diptych slot and a borrowed grid body line are wrapped like local ones', async () => {
+    const pair = await render(
+      '::diptych{left="../beta/photo.jpg" right="./photo.jpg" leftAlt="l" rightAlt="r"}',
+    );
+    const localPair = await render(
+      '::diptych{left="./photo.jpg" right="./photo.jpg" leftAlt="l" rightAlt="r"}',
+    );
+    expect(links(pair.code).map((l) => l.href)).toEqual([
+      '/images/beta/photo/',
+      '/images/alpha/photo/',
+    ]);
+    expect(sizesOf(pair.code)[0]).toContain('vw');
+    expect(sizesOf(pair.code)).toEqual(sizesOf(localPair.code));
+
+    const grid = await render(':::grid\n![a](../beta/photo.jpg)\n![b](./photo.jpg)\n:::');
+    const localGrid = await render(':::grid\n![a](./photo.jpg)\n![b](./photo.jpg)\n:::');
+    expect(links(grid.code).map((l) => l.href)).toEqual([
+      '/images/beta/photo/',
+      '/images/alpha/photo/',
+    ]);
+    expect(sizesOf(grid.code)[0]).toContain('340px');
+    expect(sizesOf(grid.code)).toEqual(sizesOf(localGrid.code));
+  });
+
+  it('a borrowed held and a gallery-root pause keep the local --ar and sizes', async () => {
+    const held = await render(':::held{src="../beta/photo.jpg" alt="ridge"}\nText.\n:::');
+    const localHeld = await render(':::held{src="./photo.jpg" alt="ridge"}\nText.\n:::');
+    expect(links(held.code)).toEqual([{ href: '/images/beta/photo/', style: '--ar: 1.6' }]);
+    expect(held.code).toContain(
+      '<div class="piece-block piece-held side-left frame-landscape" style="--ar: 1.6">',
+    );
+    expect(sizesOf(held.code)[0]).toContain('(orientation: portrait)');
+    expect(sizesOf(held.code)).toEqual(sizesOf(localHeld.code));
+    expect(anchorStyles(held.code)).toEqual(anchorStyles(localHeld.code));
+
+    const pause = await render('::pause{src="../../gallery-images/photo.jpg" alt="sweep"}');
+    const localPause = await render('::pause{src="./photo.jpg" alt="sweep"}');
+    expect(links(pause.code)).toEqual([{ href: '/images/gallery/photo/', style: '--ar: 1.6' }]);
+    expect(sizesOf(pause.code)[0]).toBe(
+      '(min-aspect-ratio: 8/5) calc(152.39vh - 15.23vmin), calc(95.24vw - 9.52vmin)',
+    );
+    expect(sizesOf(pause.code)).toEqual(sizesOf(localPause.code));
+    expect(anchorStyles(pause.code)).toEqual(anchorStyles(localPause.code));
+  });
+
+  it('the shorthand borrows from the gallery root', async () => {
+    const { code } = await render('Text.\n\n![x](../../gallery-images/photo.jpg)\n');
+    expect(code).toMatch(/<p><a href="\/images\/gallery\/photo\/" class="image-link"><img/);
+  });
+
+  it("the four wrong shapes fail with the parser's message", async () => {
+    for (const src of [
+      './sub/photo.jpg',
+      '../../../photo.jpg',
+      '../gallery-images/photo.jpg',
+      '../beta/sub/photo.jpg',
+    ]) {
+      await expect(renderExpectingFailure(`::single{src="${src}" alt="x"}`)).rejects.toThrow(
+        shapeMessage(src),
+      );
+      await expect(renderExpectingFailure(`![x](${src})`)).rejects.toThrow(shapeMessage(src));
+    }
+  });
+
+  it("the long way round to the piece's own folder fails pointing at ./", async () => {
+    await expect(
+      renderExpectingFailure('::single{src="../alpha/photo.jpg" alt="x"}'),
+    ).rejects.toThrow(
+      `image src "../alpha/photo.jpg" is the piece's own folder — write ./photo.jpg`,
+    );
+    await expect(renderExpectingFailure('![x](../alpha/photo.jpg)')).rejects.toThrow(
+      "is the piece's own folder — write ./photo.jpg",
+    );
+  });
+
+  it('a borrowed non-photograph fails — it would mint the id of the raster beside it', async () => {
+    // tests/pieces/beta/photo.tif is a real TIFF on disk, so the failure
+    // is the borrowing rule, not the missing-file check.
+    await expect(
+      renderExpectingFailure('::single{src="../beta/photo.tif" alt="x"}'),
+    ).rejects.toThrow(
+      `borrowed image "../beta/photo.tif" is not a photograph this site pages — a piece may borrow only an accepted raster (${IMAGE_EXTENSIONS.join(', ')})`,
+    );
+    // A local non-photograph is unchanged: allowed, and simply unlinked.
+    const svg = await render('![x](./diagram.svg)');
+    expect(links(svg.code)).toEqual([]);
+    // …and it is still there, unlinked — not silently dropped.
+    expect(imageMarkers(svg.code)).toHaveLength(1);
+  });
+
+  it("a borrowed private frame fails even where the private rule stands alone (alt='')", async () => {
+    await expect(renderExpectingFailure('![](../beta/_photo.jpg)')).rejects.toThrow(
+      `"../beta/_photo.jpg" is private — the camera's frame of "photo", not an image of the site: place "photo.jpg" here and the frame shows on its page`,
+    );
+  });
+
+  it('an empty src and a bare .. fail now, where they rendered unlinked before', async () => {
+    await expect(renderExpectingFailure('![alt]()')).rejects.toThrow(shapeMessage(''));
+    await expect(renderExpectingFailure('![alt](..)')).rejects.toThrow(shapeMessage('..'));
   });
 });

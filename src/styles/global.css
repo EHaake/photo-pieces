@@ -864,6 +864,15 @@ pre code {
   grid-template-columns: 1fr;
 }
 
+/* Spec 008: the row is one anchor, treated as the gallery card is. The
+   theme's a:not(.brand, .button) rule paints the underline gradient as a
+   background-image, which on hover would stretch across the whole row —
+   drop just that, so the row keeps its own background and hover changes
+   only the colour. */
+a.note-row {
+  background-image: none;
+}
+
 .empty-state.compact {
   padding-block: calc(var(--baseline) * 1.25);
   border-block: var(--hairline);

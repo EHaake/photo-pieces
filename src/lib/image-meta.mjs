@@ -114,6 +114,77 @@ export function imageUrlFor(id) {
 }
 
 /**
+ * The shape of an image `src` written in a piece body (spec 008) — the
+ * single definition the transform, the scanner, and the registry share:
+ *
+ *   local   — `./<file>` or `<file>`         (the piece's own folder)
+ *   piece   — `../<slug>/<file>`             (another piece's folder)
+ *   gallery — `../../gallery-images/<file>`  (the gallery root)
+ *
+ * Returns `{ kind, folder, file, basename, ext }`, where `folder` is the
+ * folder segment of the image's id: the other piece's slug, `gallery`
+ * for the gallery root, and null for a local src — whose folder only the
+ * caller knows. Any other path — a sub-folder, a deeper `../`, the
+ * wrong depth to the gallery root, a bare `..` — comes back as `invalid`
+ * with the `message` the transform fails the build with.
+ *
+ * Shape only: the accepted extensions, the private-frame rule
+ * (`_<basename>`), and whether the file is there at all stay where they
+ * are today (`parseImagePath`, and the transform's `rejectPrivateSrc`
+ * and `checkSrcExists`). Remote and root-absolute srcs are Astro's
+ * business rather than this rule's, so they come back as `external` for
+ * a caller to skip — the same three guards the transform's checks open
+ * with today. The long shape into the piece's *own* folder
+ * (`../<own-slug>/<file>`) parses as `piece`: only the transform knows
+ * which folder is its own, and it refuses it there.
+ */
+export function parseReference(src) {
+  if (typeof src !== 'string' || URL.canParse(src) || src.startsWith('/')) {
+    return { kind: 'external', folder: null, file: null, basename: null, ext: null };
+  }
+  const parts = src.split('/');
+  if (parts[0] === '.') parts.shift();
+  const file = parts.at(-1);
+  // `.`, `..`, and a trailing slash name a folder, not an image.
+  const named = file !== undefined && file !== '' && file !== '.' && file !== '..';
+  if (named) {
+    if (parts.length === 1) return referenceParts('local', null, file);
+    // `../gallery-images/<file>` is the gallery root written at the
+    // wrong depth, not a sibling piece — the plan calls it invalid.
+    if (
+      parts.length === 3 &&
+      parts[0] === '..' &&
+      parts[1] !== GALLERY_ROOT &&
+      SLUG.test(parts[1])
+    ) {
+      return referenceParts('piece', parts[1], file);
+    }
+    if (parts.length === 4 && parts[0] === '..' && parts[1] === '..' && parts[2] === GALLERY_ROOT) {
+      return referenceParts('gallery', GALLERY_FOLDER, file);
+    }
+  }
+  return {
+    kind: 'invalid',
+    folder: null,
+    file: null,
+    basename: null,
+    ext: null,
+    message: `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, another piece's as ../<slug>/<file>, and a gallery-root image as ../../${GALLERY_ROOT}/<file>`,
+  };
+}
+
+function referenceParts(kind, folder, file) {
+  const dot = file.lastIndexOf('.');
+  return {
+    kind,
+    folder,
+    file,
+    basename: dot > 0 ? file.slice(0, dot) : file,
+    ext: dot > 0 ? file.slice(dot + 1).toLowerCase() : '',
+  };
+}
+
+/**
  * Registry-side classification of a discovered file under
  * `src/content/`: which root it lives in, the owning piece's slug (or
  * null for the gallery root), and whether it is nested deeper than an
@@ -221,26 +292,77 @@ export function referencesImage(text, basename) {
 }
 
 /**
- * The frames of a piece folder in the piece's own order (spec 006): the
- * order the body first references them, then the unreferenced ones by
- * name. Drives the piece set (previous/next) and the related strip.
+ * The frames a piece places, as image ids in the piece's own order
+ * (spec 008): the order the body first references them — its own images
+ * as `<folder>/<basename>`, a borrowed one as `<slug>/<basename>` or
+ * `gallery/<basename>` — then the folder's unreferenced files by
+ * name. `folder` is the piece's own folder segment and
+ * `basenames` the images that live in it.
+ *
+ * A frame referenced twice appears once, at its first reference; so does
+ * one written both ways (`./x.jpg` and the long `../<own-slug>/x.jpg`,
+ * which the transform refuses but which must not double a frame here).
+ * A local reference to a file that isn't in the folder is ignored — it
+ * has no id, and the transform has already failed the build over it.
  */
-export function pieceOrder(body, basenames) {
+export function pieceFrames(body, folder, basenames) {
+  const own = new Set(basenames);
   // Rank by reference order, not text offset: a pair's two slots share
   // one offset, and left must still come before right.
   const firstAt = new Map();
   let rank = 0;
   for (const ref of imageReferences(body)) {
     rank += 1;
-    for (const basename of basenames) {
-      if (!firstAt.has(basename) && refersTo(ref.src, basename)) firstAt.set(basename, rank);
-    }
+    const id = frameIdFor(ref.shape, folder, own);
+    if (id && !firstAt.has(id)) firstAt.set(id, rank);
   }
-  const referenced = [...basenames]
-    .filter((b) => firstAt.has(b))
-    .sort((a, b) => firstAt.get(a) - firstAt.get(b));
-  const unreferenced = [...basenames].filter((b) => !firstAt.has(b)).sort();
+  const referenced = [...firstAt.keys()].sort((a, b) => firstAt.get(a) - firstAt.get(b));
+  const unreferenced = [...basenames]
+    .filter((b) => !firstAt.has(`${folder}/${b}`))
+    .sort()
+    .map((b) => `${folder}/${b}`);
   return [...referenced, ...unreferenced];
+}
+
+// The id a parsed reference names, or null when it names no frame of
+// this piece: a local src for a file the folder doesn't have, a src
+// whose extension is not an accepted raster (the rule `refersTo`
+// applies — a borrowed image must be a photograph this site pages, and
+// the transform refuses any other src), an invalid shape, or a
+// remote/root-absolute src.
+function frameIdFor(shape, folder, own) {
+  if (shape.kind === 'local') {
+    return IMAGE_EXTENSIONS.includes(shape.ext) && own.has(shape.basename)
+      ? `${folder}/${shape.basename}`
+      : null;
+  }
+  if (shape.kind === 'piece' || shape.kind === 'gallery') {
+    return IMAGE_EXTENSIONS.includes(shape.ext) ? `${shape.folder}/${shape.basename}` : null;
+  }
+  return null;
+}
+
+/**
+ * The borrowed image ids a body places (spec 008) — another piece's or
+ * the gallery root's — deduplicated, in document order. The registry
+ * checks these against the images it knows (see `referenceProblems`).
+ * A borrowed image must be a photograph this site pages, so a src whose
+ * extension is not an accepted raster mints no id here — it names no
+ * image, and the transform has already refused it.
+ */
+export function crossReferences(body) {
+  const ids = [];
+  const seen = new Set();
+  for (const ref of imageReferences(body)) {
+    const { kind, folder, basename, ext } = ref.shape;
+    if (kind !== 'piece' && kind !== 'gallery') continue;
+    if (!IMAGE_EXTENSIONS.includes(ext)) continue;
+    const id = `${folder}/${basename}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+  }
+  return ids;
 }
 
 /**
@@ -426,9 +548,12 @@ export function sectionsFor(image) {
   return sections;
 }
 
-// Every image reference in document order, as `{ src, alt, index }`:
+// Every image reference in document order, as `{ src, alt, index, shape }`:
 // shorthand `![alt](./x.jpg)`, a directive's `src="./x.jpg" alt="…"`,
 // and the pair/triptych `left|center|right` slots with their `…Alt`.
+// `shape` is the src parsed by `parseReference` — local, borrowed, or
+// neither — while `refersTo` stays local-only, so the title, the
+// passage, and the story remain a frame's home's (spec 008).
 function* imageReferences(text) {
   const refs = /!\[([^\]]*)\]\(\s*<?([^)\s>]+)>?[^)]*\)|\{([^}]*)\}/g;
   for (const match of String(text).matchAll(refs)) {
@@ -438,11 +563,16 @@ function* imageReferences(text) {
       for (const key of ['src', 'left', 'center', 'right']) {
         if (attrs[key]) {
           const alt = key === 'src' ? attrs.alt : attrs[`${key}Alt`];
-          yield { src: attrs[key], alt, index: match.index };
+          yield { src: attrs[key], alt, index: match.index, shape: parseReference(attrs[key]) };
         }
       }
     } else {
-      yield { src: shorthandSrc, alt: shorthandAlt, index: match.index };
+      yield {
+        src: shorthandSrc,
+        alt: shorthandAlt,
+        index: match.index,
+        shape: parseReference(shorthandSrc),
+      };
     }
   }
 }
@@ -598,6 +728,45 @@ export function formatGalleryProblems(problems) {
       (p) => `${p.filePath}${p.line ? `:${p.line}` : ''} — gallery "${p.galleryId}": ${p.reason}`,
     )
     .join('\n');
+}
+
+/**
+ * The draft rule for borrowed images (spec 008): a published piece may
+ * only place a photograph that has a page. `borrower` is the borrowing
+ * piece's slug, `ids` the ids it places (from `crossReferences`, plus
+ * its cover), `known` the registry's map of every discovered id to
+ * 'published' | 'draft' | 'unowned'. The home piece an id names is the
+ * folder segment of the id itself, by the identity rule at the top of
+ * this file, so it is derived here rather than passed in. Returns one
+ * message per problem, in the order the ids came, empty when there are
+ * none — the caller fails the build with all of them.
+ */
+export function referenceProblems(borrower, ids, known) {
+  const problems = [];
+  for (const id of ids) {
+    const status = known.get(id);
+    if (status === 'published') continue;
+    if (status === undefined) {
+      problems.push(`[images] ${borrower} places ${id}, which is not an image this site pages`);
+    } else if (status === 'draft') {
+      const home = homeSlugOf(id);
+      problems.push(
+        `[images] ${borrower} places ${id} from ${home}, which is a draft — publish ${home} first, or place a photograph that has a page`,
+      );
+    } else {
+      problems.push(
+        `[images] ${borrower} places ${id}, but src/content/pieces/${id.split('/')[0]}/ has no index.md — it is not a piece yet`,
+      );
+    }
+  }
+  return problems;
+}
+
+/** An id's home piece slug — its folder by the id rule at the top of this
+ *  file — or null for `gallery/...`, which belongs to no piece. */
+export function homeSlugOf(id) {
+  const folder = String(id).split('/')[0];
+  return folder === GALLERY_FOLDER ? null : folder;
 }
 
 /**

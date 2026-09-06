@@ -8,7 +8,7 @@
 //   node scripts/gen-placeholders.mjs            # everything
 //   node scripts/gen-placeholders.mjs pieces     # the fixture pieces only
 //   node scripts/gen-placeholders.mjs gallery    # src/content/gallery-images only
-//   node scripts/gen-placeholders.mjs fixtures   # tests/fixtures only
+//   node scripts/gen-placeholders.mjs fixtures   # the tests/ fixtures only
 //
 // Idempotent: rewrites every placeholder in place.
 import { mkdir } from 'node:fs/promises';
@@ -87,8 +87,19 @@ const TRAFALGAR_GPS = {
 // tests: full exposure EXIF plus GPS — the allowlist reader must never
 // surface the coordinates. square.jpg (spec 007) sits on the held
 // image's orientation boundary: a ratio of exactly 1 is frame-landscape.
+// The transform's harness pieces (spec 008) are 8 x 5 like the
+// hand-made tests/fixtures/photo.jpg, so a borrowed frame's sizes and
+// --ar can be compared against a local one's: alpha is the virtual
+// piece that borrows, beta the piece it borrows from (with a private
+// frame and a .tif that is not a raster this site pages), and
+// tests/gallery-images the gallery root.
 const FIXTURES = [
   ['tests/fixtures/square.jpg', 200, 200, 'slate', '1:1', {}],
+  ['tests/pieces/alpha/photo.jpg', 8, 5, 'sage', '', {}],
+  ['tests/pieces/beta/photo.jpg', 8, 5, 'sage', '', {}],
+  ['tests/pieces/beta/_photo.jpg', 8, 5, 'fog', '', {}],
+  ['tests/pieces/beta/photo.tif', 8, 5, 'sage', '', {}],
+  ['tests/gallery-images/photo.jpg', 8, 5, 'slate', '', {}],
   [
     'tests/fixtures/gps.jpg',
     600,
@@ -222,7 +233,12 @@ async function writePlaceholder(path, w, h, palette, label, meta, options = {}) 
     // The unprocessed look: colour drained, shadows lifted, no punch.
     image = image.modulate({ saturation: 0.3, brightness: 1.08 }).linear(0.75, 32);
   }
-  await image.withExif(meta).jpeg({ quality: 82 }).toFile(path);
+  // The output format follows the extension: every placeholder is a
+  // jpeg but the borrowed-non-raster fixture, which has to be a real
+  // .tif on disk for the transform to refuse it by shape, not by
+  // absence.
+  image = image.withExif(meta);
+  await (/\.tiff?$/.test(path) ? image.tiff() : image.jpeg({ quality: 82 })).toFile(path);
 }
 
 const target = process.argv[2] ?? 'all';

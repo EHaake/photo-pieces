@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { basename as folderOf, dirname, resolve } from 'node:path';
 import { imageMetadata } from 'astro/assets/utils';
 import { visit } from 'unist-util-visit';
 import {
@@ -9,6 +9,7 @@ import {
   imageIdFor,
   imageUrlFor,
   isPrivateRaster,
+  parseReference,
   privateMessage,
   privateTargetOf,
 } from './src/lib/image-meta.mjs';
@@ -577,7 +578,7 @@ export function remarkPiecesBlocks() {
         images = block.images(attrs, failHere);
       }
       for (const image of images) {
-        rejectNestedSrc(image.src, failHere);
+        checkReferenceShape(file, image.src, failHere);
         rejectPrivateSrc(image.src, failHere);
         checkSrcExists(file, node, image.src);
       }
@@ -727,7 +728,7 @@ export function remarkPiecesBlocks() {
     visit(tree, 'image', (node, index, parent) => {
       if (!parent || parent.type === 'link') return;
       const failHere = (message) => fail(file, node, message);
-      rejectNestedSrc(node.url, failHere);
+      checkReferenceShape(file, node.url, failHere);
       rejectPrivateSrc(node.url, failHere);
       const url = node.alt === '' ? null : imagePageUrl(file, node.url, failHere);
       if (!url) return;
@@ -746,15 +747,43 @@ function wrapInLink(imageNode, url, extraProps = {}) {
   };
 }
 
-// Images live directly in the piece's folder — that is what gives them
-// an id and a page. A src into a sub-folder (or out to a sibling piece)
-// would resolve, but to an image that has no page or someone else's.
-function rejectNestedSrc(src, fail) {
-  if (typeof src !== 'string' || URL.canParse(src) || src.startsWith('/')) return;
-  const rel = src.startsWith('./') ? src.slice(2) : src;
-  if (rel.includes('/')) {
+// An image lives in one folder — its own piece's, or the gallery root —
+// and that is what gives it an id and a page. A piece may place its own
+// images (`./<file>`) or borrow one from that other home (spec 008):
+// `../<slug>/<file>`, `../../gallery-images/<file>`. `parseReference` is
+// the single definition of those shapes; the transform adds the two
+// rules only it can check.
+function checkReferenceShape(file, src, fail) {
+  const shape = parseReference(src);
+  // Remote and root-absolute srcs are Astro's business, as before; a
+  // local src is the rule as it always was.
+  if (shape.kind === 'external' || shape.kind === 'local') return;
+  if (shape.kind === 'invalid') {
+    fail(shape.message);
+    return;
+  }
+  // The long way round to the piece's own folder would build to the same
+  // id and the same place in the frames list, but the alt and passage
+  // lookups read local references only, so the frame would lose the alt
+  // the piece wrote (its page's title falling back to the humanized
+  // filename, absent a sidecar) and its passage.
+  // (A piece kind only: a gallery reference's folder is the id's
+  // `gallery` sentinel, not a path segment.)
+  if (
+    shape.kind === 'piece' &&
+    typeof file.path === 'string' &&
+    shape.folder === folderOf(dirname(file.path))
+  ) {
+    fail(`image src "${src}" is the piece's own folder — write ./${shape.file}`);
+    return;
+  }
+  // A borrowed non-raster would mint the id of the accepted raster
+  // beside it (`../beta/land-a.tif` → `beta/land-a`) and seat a frame
+  // linking to another file's page. A local non-raster (an svg diagram)
+  // stays allowed and unlinked.
+  if (!IMAGE_EXTENSIONS.includes(shape.ext)) {
     fail(
-      `image src "${src}" points outside the piece's own folder — images live directly in the piece folder (each one gets a page there)`,
+      `borrowed image "${src}" is not a photograph this site pages — a piece may borrow only an accepted raster (${IMAGE_EXTENSIONS.join(', ')})`,
     );
   }
 }
@@ -765,17 +794,19 @@ function rejectNestedSrc(src, fail) {
 // photograph the site presents), whatever the alt — so this runs before
 // the alt="" exemption, not inside imagePageUrl.
 function rejectPrivateSrc(src, fail) {
-  if (typeof src !== 'string' || URL.canParse(src) || src.startsWith('/')) return;
-  const file = src.startsWith('./') ? src.slice(2) : src;
-  const dot = file.lastIndexOf('.');
-  const basename = dot > 0 ? file.slice(0, dot) : file;
-  const ext = dot > 0 ? file.slice(dot + 1).toLowerCase() : '';
-  if (IMAGE_EXTENSIONS.includes(ext) && isPrivateRaster(basename)) {
+  // The basename comes from the parser (spec 008): a borrowed
+  // `../beta/_land-b.jpg` must be caught too, and stripping a leading
+  // `./` was only ever enough while every `/` was refused. A src with no
+  // basename is remote, root-absolute, or a shape checkReferenceShape
+  // has already failed.
+  const { basename: name, ext } = parseReference(src);
+  if (!name) return;
+  if (IMAGE_EXTENSIONS.includes(ext) && isPrivateRaster(name)) {
     fail(
       privateMessage(
         src,
-        basename,
-        `place "${privateTargetOf(basename)}.${ext}" here and the frame shows on its page`,
+        name,
+        `place "${privateTargetOf(name)}.${ext}" here and the frame shows on its page`,
       ),
     );
   }

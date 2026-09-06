@@ -17,7 +17,8 @@ The "why" behind this project lives in these, not in this file:
 - `specs/<NNN>-<slug>/` — the spec, plan, and tasks for each build
   phase (001 foundation, 002 identity/teardown, 003 block vocabulary,
   004 galleries and image pages, 005 going live — deferred, 006 the
-  rich image page, 007 the held image and the pause)
+  rich image page, 007 the held image and the pause, 008 cross-piece
+  image references)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
@@ -107,11 +108,18 @@ Three minutes apart. Captions take _inline markdown_.
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
 `single` — same rendered result. Every image carries its own flat
 matte, applied by the site's CSS (never bake mattes into files).
-Rules the build enforces loudly: alt is required on every image
-(`alt=""` only for decorative), unknown blocks and attributes fail,
-the `[label]` form fails, blocks can't nest, images must exist. The
-sampler piece (`src/content/pieces/vocabulary-sampler/`) shows every
-treatment rendered.
+An image's `src` is `./<file>` for the piece's own photograph,
+`../<slug>/<file>` for another piece's, or
+`../../gallery-images/<file>` for one at the gallery root (spec 008) —
+the same three shapes in every block, in the shorthand, and in
+`cover`. A borrowed photograph keeps its home page, which lists every
+other published piece that places it; a published piece may not borrow
+from a draft one. Rules the build enforces loudly: alt is required on
+every image (`alt=""` only for decorative), unknown blocks and
+attributes fail, the `[label]` form fails, blocks can't nest, images
+must exist, borrowed drafts fail. The sampler piece
+(`src/content/pieces/vocabulary-sampler/`) shows every treatment
+rendered.
 
 **Current status**: every block above except the reserved `sequence`
 is implemented — the spec-003 blocks and spec 007's two durational
@@ -135,8 +143,12 @@ page shows the image matted, its title, a wall label of exposure info
 read from the file's EXIF (camera, lens, focal length, aperture,
 shutter, ISO, capture date), the piece it came from, the galleries it
 sits in, and an optional caption. Every image in a piece links there;
-so does every gallery cell. Since spec 006 the page grows with what
-the sidecar carries, each section only when it exists: the image's
+so does every gallery cell. A piece is not limited to the photographs
+in its own folder: since spec 008 it may place another piece's or a
+gallery-root one by path, and that photograph's page stays its home
+folder's, naming the borrowing pieces under "Also in". Since spec 006
+the page grows with what the sidecar carries, each section only when
+it exists: the image's
 own story (the sidecar body, ahead of the label), place and time at
 the label's head, "How it was made", a raw-to-finished compare
 against the camera's frame, the passage of the piece the image sits

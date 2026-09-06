@@ -522,3 +522,81 @@ that shrank would not be full bleed, and the photographer's own
 leaning was to choose wider frames for it — so the fix is a rule in
 `AUTHORING.md` (a frame's shape picks its treatment) rather than a
 mechanism.
+
+## Spec 008: cross-piece image references
+
+Why a piece may now place a photograph it does not own, and what the
+loosened rule still protects.
+
+**A path, not an id.** The roadmap sketched `::single{id="…"}`. A
+relative path won instead: it is what Obsidian previews in Live
+Preview, it is what the build can check against the disk, and it means
+a local and a borrowed image are written the same way — one syntax,
+`./<file>` / `../<slug>/<file>` / `../../gallery-images/<file>`, with
+the site deriving the id from the resolved path.
+
+**One page, one home.** A borrowed photograph keeps the id, URL,
+passage, related frames, categories, and title of the folder it lives
+in; its page gains an "Also in" line naming the pieces that place it.
+The alternatives were a page per placement, which duplicates a
+photograph the site is built to give one address, or moving the file,
+which breaks the URL it already had.
+
+**The arrows follow the reader.** Each piece that places a photograph
+gets its own set — that piece's frames, in that piece's order, the
+borrowed one in its place — and the set key from spec 006 picks the
+one the reader arrived through. A single merged set would have walked
+the reader out of the piece they were reading.
+
+**The registry enforces the draft rule, not the transform.** Only the
+registry knows whether a piece is published, and the check sits beside
+the ownership and gallery checks it already runs. The cost is that
+`astro dev` shows a borrowed draft image until the next build refuses
+it, which is the same shape as the registry's other build-time rules.
+
+**The row as an anchor, treated as the gallery card is.** The pieces
+row became one link because the gallery card already was one, so the
+row is given the card's treatment literally: the look at rest is
+unchanged, the whole area is the click target, and hover shifts the
+title's colour with no underline the card doesn't have.
+
+**The cover's id comes from Astro's internal `fsPath`.** The built
+`src` is content-hashed, so the only way back to the source file is
+`ImageMetadata.fsPath`, read directly off the collection entry. The
+field is non-enumerable and marked `@internal`: a spread, a clone, or
+a `JSON.stringify` of the cover drops it silently. The registry
+therefore reads it in place and throws — not skips — when it is
+absent, so an Astro upgrade that stops carrying it fails the build
+loudly instead of quietly forgetting every borrowed cover.
+
+**The published-pieces order gained an id tie-break.**
+`byNewestPublished` in `src/lib/pieces.ts` sorts by `publishDate`
+descending and then by id, so pieces published on the same day have
+one order everywhere.
+The registry's "Also in" list and appearance order and the site's
+piece lists then agree by construction rather than by whatever order
+the content loader happened to return (T603).
+
+**The long self-reference is refused.** `../<own-slug>/<file>` would
+resolve to a piece's own image — the same id, the same place in the
+frames list — but the lookups that read a frame's alt and its passage
+from the body stay local-only, so a frame written the long way would
+lose the alt the piece wrote for it, its page falling back, absent a
+sidecar title, to the humanized filename, and lose its passage. The transform
+knows the file's folder and says so: write `./<file>`. One way to
+write a local image.
+
+**A borrowed non-raster is refused.** `../beta/land-a.tif` would mint
+the id `beta/land-a` — the registered `land-a.jpg`'s — pass the draft
+rule, and seat a frame linking to another file's page. A borrowed
+`src` must be one of the accepted rasters; a local non-raster (an svg
+diagram) stays allowed and unlinked as before.
+
+**The image page's way-back links take the accent colour.** Not in
+the spec: at the Phase 0 gate the product owner found that "From the
+piece The vocabulary sampler" read as plain text until hovered, since
+the theme's links inherit their colour and the line is muted. Every
+link under that line's class — the piece, the galleries, "Read it in
+place", the print link — now takes the accent at rest and the theme's
+hover colour on hover, for every photograph, borrowed or not; recorded
+as spec 008's decision 8.

@@ -5,7 +5,7 @@ categories: [landscape, street]
 description: >-
   Every block treatment, both forms, every attribute — the mechanical
   reference for the block vocabulary. A fixture, not a piece.
-cover: ./land-a.jpg
+cover: ../where-the-fog-lets-go/land-c.jpg
 draft: false
 ---
 
@@ -280,3 +280,26 @@ And a third, so the margin is comfortable rather than exact: a taller
 window asks for more room below the pause than the last measurement
 did, and a fixture that only just clears its own rule is a fixture
 waiting to fail.
+
+## Borrowed
+
+A piece may place a photograph that lives in another piece's folder, or
+at the gallery root, by writing the path Obsidian already understands —
+`../where-the-fog-lets-go/land-b.jpg`, `../../gallery-images/dock-a.jpg`.
+The ridgeline keeps its home: its page, its passage, and the frames
+related to it are the fog piece's, not this sampler's. That page lists
+this sampler under "Also in", and the arrows follow the reader — step
+into the ridgeline from here and they walk the sampler's frames, from
+the fog piece they walk the fog's.
+
+::single{src="../where-the-fog-lets-go/land-b.jpg" alt="The ridgeline emerging from fog, water still hidden"}
+
+Sample prose between the two borrowings: the frame above belongs to a
+piece, the one below to no piece at all. A gallery-root image has no
+"From the piece" line to show — only its appearances — and the
+shorthand borrows it the same way the directive does:
+
+![A dock at the water's edge](../../gallery-images/dock-a.jpg)
+
+The cover of this sampler is borrowed too — the fog piece's cove frame
+— so the pieces index shows a photograph this piece does not own.

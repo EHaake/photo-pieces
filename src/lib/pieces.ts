@@ -14,10 +14,18 @@ import { getCollection, type CollectionEntry } from 'astro:content';
  * consumer's output).
  */
 export async function getPublishedPieces() {
-  return (await getCollection('pieces', isPublished)).sort(
-    (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
-  );
+  return (await getCollection('pieces', isPublished)).sort(byNewestPublished);
 }
+
+/** The one piece ordering — newest first by publishDate, ties settled by
+ *  id so lists are stable across builds. Shared with the image registry
+ *  (spec 008), whose sets and appearances must agree with the site's
+ *  order by construction rather than by a second copy of this rule. */
+export const byNewestPublished = (
+  a: CollectionEntry<'pieces'>,
+  b: CollectionEntry<'pieces'>,
+): number =>
+  b.data.publishDate.valueOf() - a.data.publishDate.valueOf() || a.id.localeCompare(b.id);
 
 /** The one definition of "published" — shared with the image registry,
  *  which unpublishes a piece's images by the same rule (spec 004). */

@@ -18,7 +18,7 @@ const { pieces } = Astro.props;
   pieces.length > 0 ? (
     <div class="note-list">
       {pieces.map((piece) => (
-        <article class="note-row">
+        <a class="note-row" href={withBase(`/pieces/${piece.id}/`)}>
           {piece.data.cover && (
             <Image src={piece.data.cover} alt="" width={320} height={220} loading="lazy" />
           )}
@@ -26,12 +26,10 @@ const { pieces } = Astro.props;
             <p class="meta">
               {formatDate(piece.data.publishDate, 'short')} · {piece.data.categories.join(' / ')}
             </p>
-            <h3>
-              <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
-            </h3>
+            <h3>{piece.data.title}</h3>
             <p>{piece.data.description}</p>
           </div>
-        </article>
+        </a>
       ))}
     </div>
   ) : (

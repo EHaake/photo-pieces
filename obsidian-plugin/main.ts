@@ -17,9 +17,43 @@ import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
 // The regex is anchored to a whole line (`m` flag): a directive typed
 // mid-paragraph does NOT render here, because the real pipeline does not
 // treat it as a block either.
+//
+// A `src` with a folder in it is resolved from the note's own folder,
+// exactly as the site build resolves it, with no name-based fallback: a
+// wrong path shows "image not found" here too, rather than a same-named
+// file from some other folder.
 
 type Image = { src: string; alt: string };
 type Extract = (attrs: Record<string, string>) => Image[] | null;
+
+type Resolved =
+  | { kind: 'name' } // bare name: Obsidian's own linkpath lookup
+  | { kind: 'path'; path: string } // vault-relative path, resolved here
+  | { kind: 'unreachable' }; // climbs above the vault root: nothing can match
+
+/** Where a `src` points, seen from the note at `sourcePath`. A src with a
+ *  folder in it is resolved the way the site build resolves it — never by
+ *  name — so a wrong path is not found rather than found elsewhere. */
+export function resolveRelative(src: string, sourcePath: string): Resolved {
+  const rest = src.replace(/^\.\//, '');
+  if (!rest.includes('/')) return { kind: 'name' };
+
+  const lastSlash = sourcePath.lastIndexOf('/');
+  const folder = lastSlash === -1 ? '' : sourcePath.slice(0, lastSlash);
+
+  const out: string[] = [];
+  for (const segment of (folder ? `${folder}/${rest}` : rest).split('/')) {
+    if (segment === '' || segment === '.') continue;
+    if (segment === '..') {
+      if (out.length === 0) return { kind: 'unreachable' };
+      out.pop();
+      continue;
+    }
+    out.push(segment);
+  }
+  if (out.length === 0) return { kind: 'unreachable' };
+  return { kind: 'path', path: out.join('/') };
+}
 
 const one: Extract = (a) => (a.src ? [{ src: a.src, alt: a.alt ?? '' }] : null);
 
@@ -87,10 +121,16 @@ class BlockWidget extends WidgetType {
     if (this.images.length > 1) wrapper.addClass('photo-pieces-preview-row');
 
     for (const { src, alt } of this.images) {
-      const file = this.plugin.app.metadataCache.getFirstLinkpathDest(
-        src.replace(/^\.\//, ''),
-        this.sourcePath,
-      );
+      const resolved = resolveRelative(src, this.sourcePath);
+      const file =
+        resolved.kind === 'name'
+          ? this.plugin.app.metadataCache.getFirstLinkpathDest(
+              src.replace(/^\.\//, ''),
+              this.sourcePath,
+            )
+          : resolved.kind === 'path'
+            ? this.plugin.app.vault.getAbstractFileByPath(resolved.path)
+            : null;
       if (!(file instanceof TFile)) {
         const missing = document.createElement('div');
         missing.addClass('photo-pieces-missing');

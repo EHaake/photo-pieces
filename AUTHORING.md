@@ -126,20 +126,66 @@ the piece's text references it. Consequences worth internalizing:
 - **Don't park alternates in the folder.** An unreferenced frame is
   still published with a page. Keep contact-sheet material in `notes/`
   or the archive; move a frame into the folder when it's chosen.
-- **No sub-folders.** Images live directly in the piece folder; a
-  `detail/` folder is ignored with a build warning, and a directive
-  pointing into one fails the build.
+- **No sub-folders.** A piece's own images live directly in its
+  folder; a `detail/` folder is ignored with a build warning, and a
+  directive pointing into one fails the build. A piece may also
+  _place_ another piece's photograph, or one from the gallery root, by
+  path — see "Borrowing a photograph" below.
 - **File names are URLs.** `land-b.jpg` becomes `/images/<slug>/land-b/`.
-  Renaming or moving an image changes its URL (no redirects yet —
-  nothing is live), so name frames before publishing, not after.
+  Renaming or moving an image — or renaming the folder — changes its
+  URL (no redirects yet — nothing is live), so name frames before
+  publishing, not after. Since spec 008 a rename also breaks every
+  reference to that photograph from another piece; the build fails
+  naming each missing file until they are updated.
 - **`draft: true` hides the images too.** A gallery that lists one of
-  them fails the build until the piece is published.
+  them fails the build until the piece is published, and so does a
+  published piece that places one — the message names both pieces. A
+  draft piece may place anything.
 - **The folder name must be a slug** (`lowercase-with-hyphens`), as
   they all are already — the build says so, with the fix, if not.
 - **An underscore makes a file private.** `_land-b.jpg` beside
   `land-b.jpg` is that photograph's camera's frame (spec 006): it gets
   no page, can't be listed in a gallery, and a piece that places it
   fails the build. See "The camera's frame" below.
+
+### Borrowing a photograph
+
+A piece writes its own images as `./<file>`. Since spec 008 two more
+shapes reach out of the folder:
+
+```md
+::single{src="../where-the-fog-lets-go/land-b.jpg" alt="The ridgeline emerging from fog"}
+
+![A dock at the water's edge](../../gallery-images/dock-a.jpg)
+```
+
+`../<other-piece-slug>/<file>` is another piece's photograph;
+`../../gallery-images/<file>` is one from the gallery root. Both work
+everywhere an image is written — every block, the `diptych` and
+`triptych` slots, `grid` and `strip` bodies, `held`, `pause`, the
+plain `![alt](…)` shorthand, and the `cover` field in frontmatter.
+Obsidian previews them as it previews any image, because the path is
+real.
+
+The photograph keeps its home. Its id, its page's URL, "From the
+piece", the quoted passage, the related frames, the categories, and
+the title stay the home folder's — nothing moves and nothing is
+duplicated. The alt written in the borrowing piece is used for that
+image element and nowhere else.
+
+The photograph's page says where else it appears: below "From the
+piece" — or in its place, for a gallery-root photograph — an "Also
+in" line links every other published piece that places it, newest
+first.
+The arrows follow the reader: arriving from a borrowing piece they
+step through that piece's frames with the borrowed one in its place;
+arriving from the home piece or a gallery, as before. A piece that
+borrows a photograph only as its `cover` is named under "Also in" but
+gets no arrows for it — a cover has no place in the reading order.
+
+The sampler's "Borrowed" section
+(`src/content/pieces/vocabulary-sampler/`) is the standing example,
+its borrowed cover included.
 
 ## Metadata: EXIF, then a sidecar
 
@@ -382,11 +428,26 @@ Learned by breaking them — each of these fails quietly if violated:
   drop the value. A `wide` takes the side as the value —
   `bleed="left"` or `bleed="right"` — and a bare `{bleed}` there fails
   as an invalid value, since it has no side to inherit.
-- **Images must live in the vault**, in the piece's own folder
-  (`src/content/pieces/<slug>/`). Absolute OS paths (`~/Downloads/...`)
-  resolve nowhere — not in Obsidian's preview, not in the build. The
-  plugin's dashed "not found" box is telling the truth about what
-  production would do.
+- **Images must live in the vault**, written as one of three paths:
+  the piece's own image as `./<file>`, another piece's as
+  `../<slug>/<file>`, a gallery-root one as
+  `../../gallery-images/<file>` ("Borrowing a photograph" above). Any
+  other relative shape — a sub-folder, a further level up, a home-dir
+  path (`~/Downloads/...`), which resolves nowhere in Obsidian's
+  preview either — fails the build with a message naming those three;
+  so does the long way of writing your own image
+  (`../<own-slug>/<file>`), refused with the hint to write `./<file>`.
+  A remote `https://…` src (any `scheme:` src) and a root-absolute
+  `/…` one are left to Astro, unchecked by this rule and without a
+  page. Only an accepted raster
+  can be borrowed, so a `.tif` beside a `.jpg` is refused rather than
+  quietly taking the jpg's page, and a borrowed path that points at
+  nothing fails with the same missing-file message a local image gets.
+  The plugin resolves a path with a folder in it from the note's
+  folder, as the build resolves it, so a wrong `../` path shows the
+  dashed "not found" box instead of a same-named file from somewhere
+  else; it checks the path's existence, not its shape, so the build
+  is still the judge of which shapes are allowed.
 
 ## Linking practice
 
