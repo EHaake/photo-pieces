@@ -49,7 +49,7 @@ headers to confirm nothing was duplicated or dropped. -->
       then), `byOldestPublished` is verified only by the fixtures, and
       `placeSummary`'s year sort and its no-dates branch are defensive and
       untested (outings arrive oldest first; every outing has a date)._
-- [ ] **T702** — The schemas, the registry, the fixtures.
+- [x] **T702** — The schemas, the registry, the fixtures.
       `content.config.ts`: the `places` collection (`generateId` = file
       name; title, description?, cover?, draft), `at?` on pieces and on
       sidecars. `images.ts`: read places; refuse an id `placeNameProblem` refuses; the slug
@@ -81,6 +81,28 @@ headers to confirm nothing was duplicated or dropped. -->
       task — the schemas, the registry, the fixtures, the runs — kept
       whole because the fixtures are what make the registry checkable;
       the escape hatch is likelier here than elsewhere._
+
+The T702 record. Verified first try: build 74 pages, check 0 errors,
+252 tests, Prettier clean. The dump below is the orchestrator's own run
+of the temporary endpoint (`src/pages/dump-places.json.ts`, deleted
+after; `dist/dump-places.json` absent on the final run), verbatim,
+one line per place and per frame:
+
+```json
+{"slug":"the-jetty","outings":[{"piece":"where-the-fog-lets-go","frames":["where-the-fog-lets-go/land-c"]},{"piece":"first-light-at-the-jetty","frames":["first-light-at-the-jetty/jetty-dawn"]}],"frames":["where-the-fog-lets-go/land-c","first-light-at-the-jetty/jetty-dawn"],"cover":"first-light-at-the-jetty/jetty-dawn","latest":"2026-08-30T00:00:00.000Z","summary":"2 outings · 2 frames · 2026"}
+{"slug":"the-headlands","outings":[{"piece":"where-the-fog-lets-go","frames":["where-the-fog-lets-go/land-a","where-the-fog-lets-go/land-b","where-the-fog-lets-go/port-b","where-the-fog-lets-go/port-a","where-the-fog-lets-go/port-45","where-the-fog-lets-go/square"]}],"frames":["where-the-fog-lets-go/land-a","where-the-fog-lets-go/land-b","where-the-fog-lets-go/port-b","where-the-fog-lets-go/port-a","where-the-fog-lets-go/port-45","where-the-fog-lets-go/square"],"cover":"where-the-fog-lets-go/land-a","latest":"2026-08-28T00:00:00.000Z","summary":"1 outing · 6 frames · 2026"}
+{"where-the-fog-lets-go/land-c":{"place":"the-jetty","sets":["gallery:fog-frames 3/4 prev=where-the-fog-lets-go/land-b next=where-the-fog-lets-go/pano","piece:where-the-fog-lets-go 3/8 prev=where-the-fog-lets-go/land-b next=where-the-fog-lets-go/port-b","place:the-jetty 1/2 prev=undefined next=first-light-at-the-jetty/jetty-dawn"]}}
+{"where-the-fog-lets-go/pano":{"place":null,"sets":["gallery:fog-frames 4/4 prev=where-the-fog-lets-go/land-c next=undefined","gallery:editors-picks 6/6 prev=gallery/dock-b next=undefined","piece:where-the-fog-lets-go 6/8 prev=where-the-fog-lets-go/port-a next=where-the-fog-lets-go/port-45"]}}
+{"where-the-fog-lets-go/land-b":{"place":"the-headlands","sets":["gallery:fog-frames 2/4 prev=where-the-fog-lets-go/land-a next=where-the-fog-lets-go/land-c","piece:where-the-fog-lets-go 2/8 prev=where-the-fog-lets-go/land-a next=where-the-fog-lets-go/land-c","piece:vocabulary-sampler 9/10 prev=vocabulary-sampler/pano next=gallery/dock-a","place:the-headlands 2/6 prev=where-the-fog-lets-go/land-a next=where-the-fog-lets-go/port-b"]}}
+{"vocabulary-sampler/land-b":{"place":null,"sets":["piece:vocabulary-sampler 2/10 prev=vocabulary-sampler/land-a next=vocabulary-sampler/land-c"]}}
+{"first-light-at-the-jetty/jetty-dawn":{"place":"the-jetty","sets":["piece:first-light-at-the-jetty 1/1 prev=undefined next=undefined","place:the-jetty 2/2 prev=where-the-fog-lets-go/land-c next=undefined"]}}
+{"gallery/dock-a":{"place":null,"sets":["gallery:editors-picks 3/6 prev=market-day-camera-low/land-c next=market-day-camera-low/port-45","piece:vocabulary-sampler 10/10 prev=where-the-fog-lets-go/land-b next=undefined"]}}
+```
+
+The runs (the implementer's six, each restored after, its messages
+verbatim; runs 6 and 7 re-run by the orchestrator): (1) the fog piece's
+`at: the-headland` — `[places] src/content/pieces/where-the-fog-lets-go/index.md: no place named "the-headland" — the places are: the-headlands, the-jetty`, build exit 1; (2) `_jetty-dawn.md` `at: nowhere` — the same message with the sidecar's path; (3) `places/empty.md` with `cover: where-the-fog-lets-go/land-a` — `[places] note: empty has no published frame yet — no page until a photograph names it`, build exit 0, no cover failure; (4) a draft copy of the fog folder naming the headlands — build exit 0, no `[places]` line, the dump unchanged; (5) `the-jetty.md` `cover: where-the-fog-lets-go/land-a` — `[places] src/content/places/the-jetty.md: cover "where-the-fog-lets-go/land-a" is not one of this place's frames`, build exit 1; (6) `the-jetty.md` `draft: true` — `[places] note: the-jetty is a draft — no page, and its frames show no place`, build exit 0, the dump's places `['the-headlands']`, land-c `place: null` with sets `gallery:fog-frames 3/4` and `piece:where-the-fog-lets-go 3/8` only, jetty-dawn `place: null` with `piece:first-light-at-the-jetty 1/1` only; (7, added at review) `_dock-b.md` `at: the-jetty` at the gallery root — `[places] src/content/gallery-images/_dock-b.md: gallery-root photographs are not grouped under a place — the line is ignored`, build exit 0. The review's blocking finding was the record, not the code: the review bundle had summarized the dump in prose, and the record now carries the file's bytes from the orchestrator's re-run. Notes left open: no run puts a typo on a draft piece (the code passes every piece unfiltered); blank `at` values are filtered inside `placeProblems` rather than before the call, one copy of the rule.
+
 - [ ] **T703** — The pages and the nav. `CoverCards.astro` from
       `GalleryCards.astro`'s markup and styles, `GalleryCards` a wrapper;
       `src/pages/places/index.astro`; `src/pages/places/[slug].astro` per
@@ -157,6 +179,8 @@ implementer 490,854 over nine dispatches; reviewer 905,152 all tiers. -->
 | plan/tasks sign-off ×4 | top tier         | 85,833 + 53,976 + 39,525 + 16,578 | fix and re-review ×3 (the cards diff unsatisfiable raw — Astro's per-file scoped-style hash; the draft-place criterion unverified; then the docs' commit target and a leftover testing bullet; then the slug rule contradicting the precedence on a piece's `none`), then signed off. Packet note for T701: the `placeProblems` test must feed a piece value and a sidecar value through the same check, so the piece's `none` is verified, not inferred |
 | T701 (sdd-implementer) | opus             | 53,735                            | verified first try; 24 mutations caught; the `ImageSet.kind` retype correctly left to T702                                                                                                                                                                                                                                                                                                                                                               |
 | T701 review            | reviewer default | 41,967                            | signed off; three notes carried to T702's packet                                                                                                                                                                                                                                                                                                                                                                                                         |
+| T702 (sdd-implementer) | opus             | 69,247                            | verified first try; the dump and six runs reported with the JSON verbatim                                                                                                                                                                                                                                                                                                                                                                                |
+| T702 review            | reviewer default | 49,709                            | fix and re-review: the review bundle's prose summary of the dump (the orchestrator's, not the implementer's) — fixed by the orchestrator's own re-run recorded verbatim, plus a seventh run for the gallery-root warning                                                                                                                                                                                                                                 |
 
 ---
 
