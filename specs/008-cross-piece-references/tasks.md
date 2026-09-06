@@ -43,7 +43,7 @@ basenames)` returning ids in document order with unreferenced local
       has no piece yet), an unknown id, and a published one (no problem);
       the scanner-based helpers unchanged on a body that borrows; each new
       test mutation-checked; 205 existing green._
-- [ ] **T602** — The transform: `parseReference` in place of
+- [x] **T602** — The transform: `parseReference` in place of
       `rejectNestedSrc`; the generator's fixtures target writes
       `tests/pieces/alpha/photo.jpg`, `tests/pieces/beta/photo.jpg`,
       `tests/gallery-images/photo.jpg` (8 × 5); the vocabulary suite gains
@@ -96,6 +96,12 @@ basenames)` returning ids in document order with unreferenced local
       index showing the borrowed cover; this phase's end is the person's
       gate._
 
+<!-- Follow-up surfaced at T602 (recorded, not owed by this spec): the
+transform's "image not found" check runs only in the block loop, so a
+mistyped shorthand path — `![x](../bta/photo.jpg)` — still surfaces as
+Astro's opaque import error. Borrowed paths make that typo likelier;
+a later spec can extend `checkSrcExists` to the shorthand visit. -->
+
 ## Phase 1 — The row, the plugin, the docs (reviewer after the phase)
 
 - [ ] **T605** — `PieceList.astro`: the row as one anchor; `global.css`: `a.note-row { background-image: none }` (the row keeps its
@@ -146,11 +152,13 @@ if it is ever on (it is off). Compare the total against spec 007's
 (implementer 309,333 over eight dispatches; reviewer 1,611,013, of
 which pre-policy Phase 0 803,056). -->
 
-| Task / invocation         | Tier             | Tokens           | Outcome / miss reason                                                                                                           |
-| ------------------------- | ---------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| plan/tasks sign-off ×2    | top tier         | 152,642 + 56,418 | fix and re-review ×1 (the long self-shape; the cover's classification; the row as the card; the plugin's rule), then signed off |
-| T601 (sdd-implementer) ×2 | opus             | 82,989 + 48,314  | verified first try, then the review's five fixes — verified first try; twenty then nine mutations caught                        |
-| T601 review ×2            | reviewer default | 46,209 + 38,067  | fix and re-review ×1 (a borrowed non-raster minting a real id — the plan now refuses it), then signed off                       |
+| Task / invocation         | Tier             | Tokens           | Outcome / miss reason                                                                                                                                                        |
+| ------------------------- | ---------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| plan/tasks sign-off ×2    | top tier         | 152,642 + 56,418 | fix and re-review ×1 (the long self-shape; the cover's classification; the row as the card; the plugin's rule), then signed off                                              |
+| T601 (sdd-implementer) ×2 | opus             | 82,989 + 48,314  | verified first try, then the review's five fixes — verified first try; twenty then nine mutations caught                                                                     |
+| T601 review ×2            | reviewer default | 46,209 + 38,067  | fix and re-review ×1 (a borrowed non-raster minting a real id — the plan now refuses it), then signed off                                                                    |
+| T602 (sdd-implementer)    | opus             | 89,028           | verified first try; six mutations caught; the generator learned to write a real TIFF                                                                                         |
+| T602 review               | reviewer default | 49,474           | signed off; four notes folded in by the orchestrator (the own-folder rule for piece refs only; returns after fail; a positive svg assertion; the list from IMAGE_EXTENSIONS) |
 
 ---
 
