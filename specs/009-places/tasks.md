@@ -4,6 +4,8 @@
 top tier; pending the product owner's approval of the spec-conformance
 summary before T701 starts
 **Implements**: plan.md in this directory
+**Foundational phases**: 0 — per-task reviewer cadence; Phases 1 and 2
+are per-phase (Phase 2's review is the pre-merge sweep).
 
 Ordered, small, independently verifiable. Per the constitution: every
 implementation task ends with the verification command's actual output
