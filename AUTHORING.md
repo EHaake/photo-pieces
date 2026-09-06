@@ -460,9 +460,10 @@ each headed by the piece's title as a link and its date, with that
 piece's own frames at the place in the piece's order, packed as a
 gallery. That is the whole act of adding photographs: publish a
 piece whose frames name the place, and the page grows. A borrowed
-photograph stays with its home piece, never counted twice. `/places/` lists the places as cards, most
-recent outing first, and Places is in the nav after Galleries. On a
-photograph's page the label's place is the place's title as a link,
+photograph stays with its home piece, never counted twice.
+`/places/` lists the places as cards, most recent outing first, and
+Places is in the nav after Galleries. On a photograph's page the
+label's place is the place's title as a link,
 with the sidecar's free text after it where there is any, and arrows
 from a place step through that place's frames.
 
@@ -471,10 +472,10 @@ piece or a sidecar, draft or not — and lists the places that do; it
 refuses a `cover` that is not one of the place's frames, once the
 place publishes. A draft place and a place with no published frame
 yet get a note, not a failure: no page, no card, and their frames
-show no place, so a place can be declared ahead of its first outing. A gallery-root photograph cannot
-join a place — the page groups by piece and it has none — so its
-`at:` is checked for the slug and then ignored with a warning naming
-the file.
+show no place, so a place can be declared ahead of its first outing.
+A gallery-root photograph cannot join a place — the page groups by
+piece and it has none — so its `at:` is checked for the slug and
+then ignored with a warning naming the file.
 
 ## Hard-won syntax rules
 
