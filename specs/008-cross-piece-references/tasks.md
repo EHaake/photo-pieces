@@ -31,14 +31,17 @@ headers to confirm nothing was duplicated or dropped. -->
 basenames)` returning ids in document order with unreferenced local
       files after, `crossReferences(body)`, and `referenceProblems(borrower,
 ids, known, homeOf)` returning the plan's draft-rule messages;
-      `pieceOrder` removed once nothing calls it. `firstAltFor`,
+      `pieceOrder` kept until T603 (the registry still calls it), its
+      tests migrated to `pieceFrames` with ids. `firstAltFor`,
       `referencesImage`, and `passageFor` unchanged in behaviour. _Verify:
       vitest — the three accepted shapes and every invalid one with its
-      message; `pieceFrames` interleaved, a repeat once, unreferenced
-      after; `referenceProblems` for a draft target, an unowned one, an
-      unknown id, and a published one (no problem); the scanner-based
-      helpers unchanged on a body that borrows; each new test
-      mutation-checked; 205 existing green._
+      message; `pieceFrames` interleaved, a repeat once (a local frame
+      referenced twice, and the same id by the long self-shape), unreferenced
+      after; `referenceProblems` for a draft target (its message names the
+      home piece to publish), an unowned one (its message says the folder
+      has no piece yet), an unknown id, and a published one (no problem);
+      the scanner-based helpers unchanged on a body that borrows; each new
+      test mutation-checked; 205 existing green._
 - [ ] **T602** — The transform: `parseReference` in place of
       `rejectNestedSrc`; the generator's fixtures target writes
       `tests/pieces/alpha/photo.jpg`, `tests/pieces/beta/photo.jpg`,
@@ -47,19 +50,28 @@ ids, known, homeOf)` returning the plan's draft-rule messages;
       borrowed `src` in `single`, a `diptych` slot, a `grid` body, `held`,
       `pause`, and the shorthand — each linking to `/images/beta/photo/`
       or `/images/gallery/photo/` with `sizes` and `--ar` equal to the
-      local case — and the four invalid shapes plus a borrowed private
-      frame failing by name. _Verify: vitest green, mutation-checked;
-      build green._
+      local case — the four invalid shapes and the long self-shape
+      (`../alpha/photo.jpg` from `alpha`) failing by name, and a borrowed
+      private frame failing in the one place `rejectPrivateSrc` stands
+      alone: the shorthand with an empty alt, `![](../beta/_photo.jpg)`.
+      The existing test "a src into a sub-folder or a sibling folder
+      fails naming the rule" changes on purpose: the sub-folder still
+      fails, the sibling shape is now valid (and, in the old harness,
+      "image not found") — named here, not silently rewritten. _Verify:
+      vitest green, mutation-checked; build green._
 - [ ] **T603** — The registry and the image page: `framesByPiece` from
       `pieceFrames`; a piece set on the image's page for every published
       piece whose frames include it (home after the galleries, then
       appearances newest first); related frames filtered to the home
-      folder; `image.appearances` from bodies and covers; the draft rule
-      via `referenceProblems` throwing with the message; the cover's id
-      from `fsPath` (replacing the basename-only private check; T603
-      first confirms `fsPath` is populated for a collection's `image()`
-      at build and in dev — if not, stop and return, since the cover's
-      folder is unrecoverable from a hashed `src`);
+      folder; `image.appearances` from bodies and covers, newest first by
+      `publishDate` with ties by id; the draft rule via `referenceProblems`
+      throwing with the message, run before any set is built; `pieceOrder`
+      deleted; the "Also in" paragraph with `data-pagefind-ignore`; the cover's id
+      from `fsPath` through `classifyContentImage` (a private cover
+      refused with the cover hint as today; a nested or non-photograph
+      cover allowed and no appearance; T603 first confirms `fsPath` is
+      populated for a collection's `image()` at build and in dev — the
+      plan says why it is — and throws, not skips, if absent);
       `WORDING.alsoIn` and the "Also in" paragraph. _Verify: build green;
       a temporary published piece borrowing a temporary draft piece's
       image fails the build with the message naming both (then both
@@ -81,19 +93,24 @@ ids, known, homeOf)` returning the plan's draft-rule messages;
 
 ## Phase 1 — The row, the plugin, the docs (reviewer after the phase)
 
-- [ ] **T605** — `PieceList.astro`: the row as one anchor with the title
-      in a span; `global.css`: `a.note-row` without the link background,
-      the title's underline on the row's hover and focus. _Verify: in the
-      browser the image, the date line, and the description each navigate
-      to the piece (a click, then `read_page`); the row's computed colours
-      and the title's underline state at rest equal the previous markup's;
+- [ ] **T605** — `PieceList.astro`: the row as one anchor; `global.css`:
+      `a.note-row { background: none }` as the gallery card has, hover
+      the card's colour shift and nothing else. _Verify: in the browser
+      the image, the date line, and the description each navigate to the
+      piece (a click, then `read_page`); at rest the row's computed
+      colours and the title's background (no underline) equal the previous
+      markup's, measured before and after; on hover the title's colour
+      equals a hovered gallery card title's and `.meta` keeps its own;
       `:focus-visible` draws the ring; the homepage feed and `/pieces/`
       both._
-- [ ] **T606** — The Obsidian plugin resolves `src` relative to the note
-      explicitly (join, normalize, `getAbstractFileByPath`), falling back
-      to `getFirstLinkpathDest`. _Verify: `npm run build` in
-      `obsidian-plugin/`; the product owner sees a `../` frame preview in
-      Live Preview at the gate._
+- [ ] **T606** — The Obsidian plugin resolves a `src` containing `/`
+      explicitly (join with the note's folder, normalize,
+      `getAbstractFileByPath`), with no name-based fallback for such
+      paths; a bare name keeps `getFirstLinkpathDest`. _Verify: `npm run
+  build` in `obsidian-plugin/`; the product owner sees the sampler's
+      two borrowed frames in Live Preview at the gate, and a wrong `../`
+      path shows the plugin's "image not found" line rather than a
+      same-named file from another folder._
 - [ ] **T607** — Docs: `AUTHORING.md` (the two path shapes, one home, what
       the page shows, the draft rule, covers, in "A piece folder is public
       territory" and "Hard-won syntax rules"), `README.md` (the block

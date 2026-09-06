@@ -25,7 +25,14 @@ new frontmatter, no new collection, the same ids and URLs.
   `src`s are outside the rule as today (Astro's, not the registry's).
   The parser returns `{ kind, folder, file, basename, ext }` where
   `folder` is the id's folder: the piece's slug, or `gallery` for the
-  gallery root, or `null` for local (the caller's own folder).
+  gallery root, or `null` for local (the caller's own folder). **The
+  long shape into the piece's own folder** (`../<own-slug>/<file>`) is
+  refused by the transform, which knows its folder from the file's
+  path: "this is the piece's own folder — write ./<file>" (sign-off:
+  accepted, it would pass the build and give a wrong page — the scanner
+  stays local-only, so the title and passage would miss it, and the
+  frames would list it twice). `pieceFrames` dedupes by id as well,
+  defensively.
 - **The transform** replaces `rejectNestedSrc` with `parseReference`:
   invalid fails with the parser's message; `checkSrcExists` and
   `rejectPrivateSrc` run on every kind as today (the private check on
@@ -45,15 +52,19 @@ new frontmatter, no new collection, the same ids and URLs.
   the piece's frames as **ids** in document order — local references
   as `<folder>/<basename>`, borrowed ones as `<slug>/<basename>` or
   `gallery/<basename>` — then the folder's unreferenced files sorted,
-  as `pieceOrder` does today (which it replaces; a borrowed frame
-  referenced twice appears once, at its first reference). A pure
+  as `pieceOrder` does today (which it replaces at T603, once the
+  registry calls the new function; T601 adds `pieceFrames` beside it
+  and migrates `pieceOrder`'s tests to ids); any frame referenced
+  twice appears once, at its first reference. A pure
   `crossReferences(body)` returns the borrowed ids a body places, for
   the registry's checks.
 - **The registry** (`images.ts`): the piece's frames are
   `pieceFrames(...)` — `orderByFolder` becomes `framesByPiece`, ids —
   and the piece set on an image's page is built for **every**
   published piece whose frames include the id: the home first (after
-  the galleries, as today), then the appearances newest first, each
+  the galleries, as today), then the appearances newest first —
+  `publishDate` descending, the order `getPublishedPieces` already
+  uses, ties by id — each
   `{ kind: 'piece', id, title, url, count, prev, next }` with
   neighbours from that piece's frames. The 006 set-key mechanism
   (`piece:<slug>`) then selects the borrowing piece's set with no new
@@ -62,17 +73,26 @@ new frontmatter, no new collection, the same ids and URLs.
   (`image.appearances`): every published piece other than the home
   whose body or cover places the id, newest first. **The draft rule**:
   for every published piece, every borrowed id in its body and its
-  cover must be a published image; an id that exists but is `draft`
-  or `unowned`, or that does not exist at all (a file that is not in
-  the registry — a non-photograph format, say), fails the build with
-  a message naming the borrowing piece, the id, and the home piece
-  (or "the gallery root"). A draft piece is skipped, as its images are.
-  The cover's id comes from `piece.data.cover.fsPath` (Astro's
-  `ImageMetadata` carries the source path) through `parseImagePath`,
-  which also replaces the current basename-only private check.
+  cover must be a published image; an id that exists but is `draft` or `unowned`, or that does not exist at all (a file that is
+  not in the registry — a non-photograph format, say), fails the build
+  with a message naming the borrowing piece, the id, and the home
+  piece (or, for an unowned folder, that the folder has no piece yet;
+  or the gallery root). The rule runs before any set is built, so a
+  refused id never reaches a neighbour link. A draft piece is skipped,
+  as its images are. **The cover's id** comes from
+  `piece.data.cover.fsPath` (Astro's `ImageMetadata` carries the
+  source path in dev and at build — the server environment's proxy
+  returns it; T603 confirms and throws, not skips, if it is ever
+  absent) through `classifyContentImage`, which knows nested files and
+  private frames: a private cover is refused with the cover hint as
+  today; a cover that is not a site image (a sub-folder, a
+  non-photograph format) is allowed as it is today and simply counts
+  as no appearance; a cover that is a site image counts as an
+  appearance and obeys the draft rule.
 - **The image page** renders `WORDING.alsoIn` ("Also in") with the
-  appearances as links, in an `image-from` paragraph after "From the
-  piece" (or where it would be); nothing when there are none. The
+  appearances as links, in an `image-from` paragraph (with
+  `data-pagefind-ignore`, like its siblings) after "From the piece"
+  (or where it would be); nothing when there are none. The
   eyebrow's categories, the passage, the related strip, the record,
   the compare: the home's, untouched.
 - **Covers** need no schema change: `image()` resolves `../` paths
@@ -80,19 +100,30 @@ new frontmatter, no new collection, the same ids and URLs.
   whatever the cover is.
 - **The pieces row** (`PieceList.astro`): the `<article class="note-row">`
   becomes `<a class="note-row" href=…>`, the `h3` loses its inner
-  anchor (its text in a `span`), the `Image` and both paragraphs stay
-  inside. CSS: `a.note-row` drops the theme's link background and
-  keeps its text colours (`color: inherit` on the anchor already
-  applies), and on `:hover` / `:focus-visible` the title's span takes
-  the underline the theme gives a hovered link (`background-size:
-100% 1px`), so the row reads exactly as it did at rest and the
-  title still announces itself as the link. The row is used by the
+  anchor, the `Image` and both paragraphs stay inside — flow content
+  in an anchor with no interactive descendants, valid HTML. It is
+  treated exactly as the gallery card is: `a.note-row { background:
+none }` drops the theme's underline gradient (as `.gallery-card`
+  does), and on hover the anchor's colour goes to the theme's
+  hover colour, which the title inherits while `.meta` and the
+  description keep their own colours — no underline, since the card
+  has none (the first draft added one; dropped at sign-off to match
+  the card literally). At rest nothing changes. The anchor's
+  accessible name becomes the row's text (date, categories, title,
+  description), the same shape as the card's. The row is used by the
   homepage feed and `/pieces/` alike, so both change at once.
-- **The Obsidian plugin** resolves `src` explicitly: the note's folder
-  joined with the path and normalized, then `getAbstractFileByPath`;
-  `getFirstLinkpathDest` stays as the fallback for the bare-name case
-  it handles today. A `../` path then previews whether or not
-  Obsidian's link resolution would have found it.
+- **The Obsidian plugin** resolves a `src` that contains a `/`
+  explicitly — the note's folder joined with the path and normalized,
+  then `getAbstractFileByPath` — with no name-based fallback for such
+  paths (Obsidian's best-match lookup would preview a same-named file
+  from another folder where the build says "image not found"; every
+  fixture piece has a `land-a.jpg`). A bare name keeps
+  `getFirstLinkpathDest` as today. This is the build's rule in the
+  editor, whatever Obsidian's own link resolution does with `../`. The
+  vault root is `~/photo-brain/` with the repo inside it (AUTHORING's
+  layout), so `../../gallery-images/` from a piece folder is
+  `photo-pieces/src/content/gallery-images/`, inside the vault and
+  reachable.
 
 ## Failure messages
 
@@ -187,6 +218,9 @@ AUTHORING.md, README.md, DECISIONS.md, ROADMAP.md
   the richer paragraph; decision 2.
 - The draft rule is the registry's (build time), so `astro dev` shows
   a borrowed draft image until the next build refuses it.
+- A gallery-root photograph in no gallery, placed by one piece, gets
+  that piece's set as its default arrows — a nav it never had before.
+  Acceptable: it is where the reader came from.
 - `pieceFrames` puts a borrowed frame where its first reference is;
   a frame borrowed twice in one piece is one step in the arrows.
 
@@ -201,5 +235,8 @@ AUTHORING.md, README.md, DECISIONS.md, ROADMAP.md
   the registry knows a piece's status, and the check belongs beside the
   existing ownership and gallery checks.
 - **The cover's id from `fsPath`**, since the built `src` is hashed.
-- **The row as an anchor, the title still the visible link**: the
-  look at rest does not change; the click target does.
+- **The row as an anchor, treated as the gallery card is**: the
+  look at rest does not change; the click target does; hover matches
+  the card (colour, no underline).
+- **The long self-reference is refused**, not tolerated: one way to
+  write a local image.
