@@ -119,11 +119,24 @@ attached.
   counts as a placement (a build failure if its target has no page, a
   phantom "Also in" if it does) — strip fences in the scanner when
   the first gear-notes piece quotes one.
-- **A series entity** (under discussion) — between a piece and a
-  gallery: a body of work spanning years, with an essay, its pieces
-  in order, and its own curated set of frames; a page at
-  `/series/<slug>/`; pieces gain an optional `series`. The form that
-  rewards returning readers.
+- **Places** (decided in outline 2026-09-06, replacing the earlier
+  "series entity" — a project spanning years assumes an intent the
+  work does not have; a place returned to over years is what it has).
+  A hybrid of a piece and a gallery: a place is declared once as its
+  own file (`src/content/places/<slug>.md`, a title and the writing),
+  and a piece names it with one frontmatter line, `place: <slug>`,
+  per outing, with a per-frame override in the sidecar for the
+  exceptions. The build refuses a slug with no file and lists the
+  places that exist, so a second spelling cannot arise by accident;
+  Obsidian's property autocomplete offers the used values for free.
+  The page at `/places/<slug>/` carries the writing, then the outings
+  oldest first, each a group of its frames linking to the piece — it
+  grows on its own each time an outing names the place. Never by GPS
+  (the constitution) and not by the free-text wall-label `place`,
+  which stays prose. Open: where places sit in the nav beside
+  galleries; whether a place has a cover and a set of its own for the
+  arrows. The retrospective piece needs nothing new since spec 008 and
+  is the test that earns this spec.
 - **Real photographs as fixtures, before more design** — every visual
   decision so far (the warm ground, the mats, the quiet dark, the
   packing) was judged on flat placeholder rectangles. Ten real exports
