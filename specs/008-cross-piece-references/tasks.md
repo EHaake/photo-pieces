@@ -117,7 +117,7 @@ a later spec can extend `checkSrcExists` to the shorthand visit. -->
 
 ## Phase 1 — The row, the plugin, the docs (reviewer after the phase)
 
-- [ ] **T605** — `PieceList.astro`: the row as one anchor; `global.css`: `a.note-row { background-image: none }` (the row keeps its
+- [x] **T605** — `PieceList.astro`: the row as one anchor; `global.css`: `a.note-row { background-image: none }` (the row keeps its
       own ground), hover the card's colour shift and nothing else. _Verify: in the browser
       the image, the date line, and the description each navigate to the
       piece (a click, then `read_page`); at rest the row's computed
@@ -125,7 +125,15 @@ a later spec can extend `checkSrcExists` to the shorthand visit. -->
       markup's, measured before and after; on hover the title's colour
       equals a hovered gallery card title's and `.meta` keeps its own;
       `:focus-visible` draws the ring; the homepage feed and `/pieces/`
-      both._
+      both. Record: measured before and after on `/pieces/` at 1440×900 —
+      at rest the row's ground, text, title, date line, description,
+      and image border read identically (the title's hidden underline
+      gradient gone, its visible state unchanged); hovering the image
+      turned the title the accent's hover colour with the date line and
+      description unmoved and no underline; clicks on the image, the
+      date line, and the description each landed on the piece; Tab
+      reached the row and drew the site's ring around it; the homepage
+      and a category page carry the same anchors with no inner links._
 - [ ] **T606** — The Obsidian plugin resolves a `src` containing `/`
       explicitly (join with the note's folder, normalize,
       `getAbstractFileByPath`), with no name-based fallback for such
@@ -178,6 +186,7 @@ which pre-policy Phase 0 803,056). -->
 | T603 review ×2            | reviewer default | 64,730 + 57,064  | fix and re-review ×2 (fsPath in dev unconfirmed; the proofs not re-run after the fixes) — both closed by the orchestrator's own runs                                         |
 | T604 (sdd-implementer)    | opus             | 33,632           | verified first try                                                                                                                                                           |
 | T604 review               | reviewer default | 28,506           | signed off pending the browser set-key check, which passed; two prose notes folded in by the orchestrator                                                                    |
+| T605 (sdd-implementer)    | opus             | 21,511           | verified first try; the browser checks run by the orchestrator                                                                                                               |
 
 ---
 
