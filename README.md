@@ -18,7 +18,7 @@ The "why" behind this project lives in these, not in this file:
   phase (001 foundation, 002 identity/teardown, 003 block vocabulary,
   004 galleries and image pages, 005 going live — deferred, 006 the
   rich image page, 007 the held image and the pause, 008 cross-piece
-  image references)
+  image references, 009 places)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
@@ -150,13 +150,15 @@ folder's, naming the borrowing pieces under "Also in". Since spec 006
 the page grows with what the sidecar carries, each section only when
 it exists: the image's
 own story (the sidecar body, ahead of the label), place and time at
-the label's head, "How it was made", a raw-to-finished compare
-against the camera's frame, the passage of the piece the image sits
-in, related frames from the same outing, and "The print" with an
-enquiry link. Every page has a neighbour line for the set the reader
-is stepping through (the gallery or piece they came from; arrow keys
-work), and a quiet view — click the photograph — that dims the ground
-and gives the frame the viewport. Rules the build enforces: piece folders
+the label's head — the place being the declared place's title as a
+link, then the sidecar's free text, when the frame names one — "How
+it was made", a raw-to-finished compare against the camera's frame,
+the passage of the piece the image sits in, related frames from the
+same outing, and "The print" with an enquiry link. Every page has a
+neighbour line for the set the reader is stepping through (the
+gallery, piece, or place they came from; arrow keys work), and a
+quiet view — click the photograph — that dims the ground and gives
+the frame the viewport. Rules the build enforces: piece folders
 must be slugs and file names URL-safe (letters, digits, `.`, `-`,
 `_`), an image directly in `pieces/` or beside a flat `pieces/foo.md`
 fails, a file nested in a sub-folder is ignored with a warning (a
@@ -182,6 +184,7 @@ aperture: f/8
 shutter: 1/250 s
 iso: ISO 400
 place: The headlands above the cove # prose, never coordinates
+at: the-headlands # a declared place's slug; `none` opts out of the piece's default
 time: 06:40, forty minutes before sunrise
 format: Digital, full-frame # "How it was made": format, filters, support, processing
 filters: None
@@ -231,6 +234,22 @@ missing, duplicate, or draft-owned id in a gallery fails the build
 with the file and line. `src/components/LatestWork.astro` renders the
 newest curated images as a strip and is not placed on any page yet
 (the homepage design pass will place it).
+
+**Place** — `src/content/places/<slug>.md` (spec 009), somewhere the
+photographer returns to: a title, an optional description, cover, and
+`draft`, and a body that is the writing about the place. The file name
+is the slug and the URL. A frame names its place in its sidecar with
+`at: <slug>`, or a piece names one default for its whole folder with
+`at: <slug>` in its frontmatter — the frame's own line wins, and
+`at: none` opts a frame out of the default. `/places/<slug>/` shows
+the writing and then every published frame at the place, grouped by
+the piece it lives in, outings oldest first, so the page grows as
+pieces are published; `/places/` lists the places as cards and is in
+the nav after Galleries. An `at:` naming a place that does not exist
+fails the build, listing the places that do, as does a place `cover`
+that is not one of its frames once the place publishes; a draft or
+still-empty place is a note and builds no page. Gallery-root
+photographs are not grouped under a place — their `at:` is checked and then ignored with a warning.
 
 **GPS is never published.** The EXIF reader asks for an allowlist of
 exposure tags with GPS parsing off, its output is asserted against a
@@ -295,6 +314,7 @@ photo-pieces/
 ├── remark-pieces-blocks.test.mjs # legacy contracts (npm test)
 ├── remark-pieces-vocabulary.test.mjs # spec-003 vocabulary suite
 ├── image-meta.test.mjs, exif.test.mjs, galleries.test.mjs # spec-004 suites
+├── image-set.test.mjs            # the set key: gallery, piece, place
 ├── pause-shape.test.mjs          # spec-007: the pause's 0 → 1 → 0 shape
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
@@ -306,19 +326,20 @@ photo-pieces/
 ├── design/brief.md
 ├── src/
 │   ├── consts.ts                 # site identity
-│   ├── content.config.ts         # pieces, galleries, imageMeta collections
+│   ├── content.config.ts         # pieces, galleries, imageMeta, places collections
 │   ├── content/pieces/           # one folder per piece + its images (+ _sidecars, _camera's frames)
 │   ├── content/gallery-images/   # images that belong to no piece
 │   ├── content/galleries/        # one file per gallery
+│   ├── content/places/           # one file per place
 │   ├── lib/pieces.ts             # the one published-pieces query
-│   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, sets)
+│   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, places, sets)
 │   ├── lib/gallery-layout.ts     # the equal-short-side packing knobs (galleries, related strips)
 │   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
 │   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
-│   ├── components/               # PieceList, GalleryCards, LatestWork
-│   ├── pages/                    # index, pieces/, galleries/, images/, categories/, about, contact, search, 404
+│   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), LatestWork
+│   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
 │   └── styles/global.css
 ```
 

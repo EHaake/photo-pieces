@@ -43,8 +43,8 @@ photographer gives.
    one place says `at: <slug>` once in its frontmatter, and every
    frame in its folder that names no place of its own is taken to be
    there. A frame's own `at:` always wins; `at: none` keeps a frame out
-   of its piece's default. A piece that sets no default never touches
-   Places, whatever its frames say.
+   of its piece's default. A piece that sets no default imposes none:
+   its frames are wherever their own lines say.
 4. **Grown automatically.** A place's page lists every published frame
    at it, grouped by the piece the frame lives in — its outing — with
    outings oldest first, each a group headed by the piece's title and
