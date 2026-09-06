@@ -106,8 +106,8 @@ ids, known, homeOf)` returning the plan's draft-rule messages;
 - [ ] **T606** — The Obsidian plugin resolves a `src` containing `/`
       explicitly (join with the note's folder, normalize,
       `getAbstractFileByPath`), with no name-based fallback for such
-      paths; a bare name keeps `getFirstLinkpathDest`. _Verify: `npm run
-  build` in `obsidian-plugin/`; the product owner sees the sampler's
+      paths; a bare name keeps `getFirstLinkpathDest`. _Verify: the plugin's build
+      (`npm run build` in `obsidian-plugin/`) succeeds; the product owner sees the sampler's
       two borrowed frames in Live Preview at the gate, and a wrong `../`
       path shows the plugin's "image not found" line rather than a
       same-named file from another folder._
