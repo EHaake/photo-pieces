@@ -90,7 +90,7 @@ basenames)` returning ids in document order with unreferenced local
       cover's draft check rides in `referenceProblems`; the shared
       comparator gave every published-pieces list an id tie-break it
       lacked (recorded at T607)._
-- [ ] **T604** — Fixtures: the sampler's "Borrowed" section (a `::single`
+- [x] **T604** — Fixtures: the sampler's "Borrowed" section (a `::single`
       of `../where-the-fog-lets-go/land-b.jpg`, a shorthand of
       `../../gallery-images/dock-a.jpg`, sample prose saying what they
       are) and its cover `../where-the-fog-lets-go/land-c.jpg`. _Verify:
@@ -102,7 +102,12 @@ basenames)` returning ids in document order with unreferenced local
       on `land-b`'s page with `land-b` in the sampler's order — checked
       in the built HTML and in the browser via the set key); the pieces
       index showing the borrowed cover; this phase's end is the person's
-      gate._
+      gate. Record: in the browser, a click on the borrowed ridgeline
+      from the sampler stored `piece:vocabulary-sampler` and the image
+      page showed the sampler's arrows, "9 of 10", the fog's and the
+      gallery's navs hidden; the built pages read as listed; the
+      borrowed frames sit last in the sampler's set (placed in its last
+      section) and the fog's set stayed 8._
 
 <!-- Follow-up surfaced at T602 (recorded, not owed by this spec): the
 transform's "image not found" check runs only in the block loop, so a
@@ -171,6 +176,8 @@ which pre-policy Phase 0 803,056). -->
 | T602 review               | reviewer default | 49,474           | signed off; four notes folded in by the orchestrator (the own-folder rule for piece refs only; returns after fail; a positive svg assertion; the list from IMAGE_EXTENSIONS) |
 | T603 (sdd-implementer) ×2 | opus             | 77,054 + 47,750  | verified first try, then the review's four fixes — verified first try                                                                                                        |
 | T603 review ×2            | reviewer default | 64,730 + 57,064  | fix and re-review ×2 (fsPath in dev unconfirmed; the proofs not re-run after the fixes) — both closed by the orchestrator's own runs                                         |
+| T604 (sdd-implementer)    | opus             | 33,632           | verified first try                                                                                                                                                           |
+| T604 review               | reviewer default | 28,506           | signed off pending the browser set-key check, which passed; two prose notes folded in by the orchestrator                                                                    |
 
 ---
 

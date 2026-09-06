@@ -76,7 +76,10 @@ new frontmatter, no new collection, the same ids and URLs.
   `publishDate` descending, the order `getPublishedPieces` already
   uses, ties by id — each
   `{ kind: 'piece', id, title, url, count, prev, next }` with
-  neighbours from that piece's frames. The 006 set-key mechanism
+  neighbours from that piece's frames. A piece that places a photograph
+  only as its cover is an appearance but has no set for it: a set is
+  the piece's body order, and a cover has no position in it (T604's
+  fixture is the first cover-only borrow). The 006 set-key mechanism
   (`piece:<slug>`) then selects the borrowing piece's set with no new
   case. **Related frames** stay the outing's: the home piece's frames
   filtered to the home folder, nearest six. **Appearances**
