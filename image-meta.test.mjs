@@ -3,6 +3,7 @@ import { BLOCKS } from './remark-pieces-blocks.mjs';
 import {
   BLOCK_BODIES,
   classifyContentImage,
+  crossReferences,
   findIdCollisions,
   firstAltFor,
   formatCollision,
@@ -13,9 +14,12 @@ import {
   nearest,
   neighbours,
   parseImagePath,
+  parseReference,
   passageFor,
+  pieceFrames,
   pieceOrder,
   privateTargetOf,
+  referenceProblems,
   referencesImage,
   sectionsFor,
 } from './src/lib/image-meta.mjs';
@@ -303,6 +307,18 @@ describe('piece order (T402)', () => {
 
   it('is first-reference order, then the unreferenced by name', () => {
     const basenames = ['square', 'port-b', 'land-c', 'pano', 'land-b', 'land-a', 'port-a'];
+    expect(pieceFrames(body, 'a-piece', basenames)).toEqual([
+      'a-piece/land-a',
+      'a-piece/land-b',
+      'a-piece/land-c',
+      'a-piece/port-b',
+      'a-piece/pano',
+      'a-piece/port-a',
+      'a-piece/square',
+    ]);
+    // The registry still calls `pieceOrder` until T603 replaces it with
+    // `pieceFrames` and deletes it; this one assertion keeps it honest
+    // until then.
     expect(pieceOrder(body, basenames)).toEqual([
       'land-a',
       'land-b',
@@ -315,8 +331,8 @@ describe('piece order (T402)', () => {
   });
 
   it('a body with no references is name order; no frames is empty', () => {
-    expect(pieceOrder('Just words.', ['b', 'a'])).toEqual(['a', 'b']);
-    expect(pieceOrder(body, [])).toEqual([]);
+    expect(pieceFrames('Just words.', 'a-piece', ['b', 'a'])).toEqual(['a-piece/a', 'a-piece/b']);
+    expect(pieceFrames(body, 'a-piece', [])).toEqual([]);
   });
 });
 
@@ -506,5 +522,189 @@ describe('the sections a page renders (T402)', () => {
     const note = { ...empty, record: { processing: 'Lifted the shadows.' } };
     expect(sectionsFor(note)).toEqual(['label', 'record']);
     expect(sectionsFor({ ...note, before: { src: 'x' } })).toEqual(['label', 'compare']);
+  });
+});
+
+// Spec 008 — cross-piece references: a src may leave the piece's folder
+// for another piece's or the gallery root, and the frame keeps its home.
+
+describe('cross-piece references (T601, spec 008)', () => {
+  const notAccepted = (src) =>
+    `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, another piece's as ../<slug>/<file>, and a gallery-root image as ../../gallery-images/<file>`;
+
+  it('the three accepted shapes give their kind, folder, and file parts', () => {
+    expect(parseReference('./land-b.jpg')).toEqual({
+      kind: 'local',
+      folder: null,
+      file: 'land-b.jpg',
+      basename: 'land-b',
+      ext: 'jpg',
+    });
+    expect(parseReference('land-b.JPG')).toEqual({
+      kind: 'local',
+      folder: null,
+      file: 'land-b.JPG',
+      basename: 'land-b',
+      ext: 'jpg',
+    });
+    expect(parseReference('../where-the-fog-lets-go/land-b.jpg')).toEqual({
+      kind: 'piece',
+      folder: 'where-the-fog-lets-go',
+      file: 'land-b.jpg',
+      basename: 'land-b',
+      ext: 'jpg',
+    });
+    expect(parseReference('../../gallery-images/dock-a.jpg')).toEqual({
+      kind: 'gallery',
+      folder: 'gallery',
+      file: 'dock-a.jpg',
+      basename: 'dock-a',
+      ext: 'jpg',
+    });
+  });
+
+  it('every other shape is invalid, with the message naming all three shapes', () => {
+    for (const src of [
+      './detail/land-a.jpg',
+      'detail/land-a.jpg',
+      '../beta/detail/land-a.jpg',
+      '../../../land-a.jpg',
+      '../gallery-images/dock-a.jpg',
+      '../../elsewhere/dock-a.jpg',
+      '../../x.jpg',
+      '../Beta/land-a.jpg',
+      '..',
+      '../beta/',
+    ]) {
+      expect(parseReference(src).kind, src).toBe('invalid');
+      expect(parseReference(src).message, src).toBe(notAccepted(src));
+    }
+  });
+
+  it('a remote or root-absolute src is not this rule to judge', () => {
+    expect(parseReference('https://example.com/land-a.jpg').kind).toBe('external');
+    expect(parseReference('/land-a.jpg').kind).toBe('external');
+  });
+
+  it('a non-string src is external too — there is no path here to judge', () => {
+    expect(parseReference(undefined).kind).toBe('external');
+    expect(parseReference(null).kind).toBe('external');
+  });
+
+  it('a piece frames its own images, borrowed ones in place, unreferenced after', () => {
+    const body = [
+      'Opening prose.',
+      '![First](./land-a.jpg)',
+      '::single{src="../where-the-fog-lets-go/land-b.jpg" alt="Borrowed"}',
+      ':::wide{src="../../gallery-images/dock-a.jpg" alt="From the root"}\nCaption.\n:::',
+      '![Not in this folder](./ghost.jpg)',
+      '![Again](./land-a.jpg)',
+    ].join('\n\n');
+    expect(pieceFrames(body, 'a-piece', ['square', 'land-a', 'pano'])).toEqual([
+      'a-piece/land-a',
+      'where-the-fog-lets-go/land-b',
+      'gallery/dock-a',
+      'a-piece/pano',
+      'a-piece/square',
+    ]);
+  });
+
+  it('a local src that is not an accepted raster seats no frame of its own', () => {
+    // `land-a` lives in this folder as a jpg, but the body names an
+    // `.svg`: that file is not an image the site pages, so it seats
+    // nothing — `a-piece/land-a` may only appear in the unreferenced
+    // tail, behind the borrowed frame the body really does place.
+    const body = ['![Vector](./land-a.svg)', '![Borrowed](../beta/port-b.jpg)'].join('\n\n');
+    expect(pieceFrames(body, 'a-piece', ['land-a'])).toEqual(['beta/port-b', 'a-piece/land-a']);
+  });
+
+  it("a pair's slots keep their order, and a frame written twice keeps its first place", () => {
+    const body = [
+      '::diptych{left="./land-c.jpg" right="../beta/port-b.jpg" leftAlt="l" rightAlt="r"}',
+      '![Again](./land-c.jpg)',
+      '::single{src="../beta/port-b.jpg" alt="Again"}',
+    ].join('\n\n');
+    expect(pieceFrames(body, 'a-piece', ['land-c'])).toEqual(['a-piece/land-c', 'beta/port-b']);
+  });
+
+  it("the long shape into the piece's own folder is the same frame as the local one", () => {
+    // The transform refuses this shape (only it knows its own folder);
+    // here it must not double the frame, whichever comes first.
+    const localFirst = '![Its own](./x.jpg)\n\n::single{src="../own/x.jpg" alt="The long way"}';
+    const longFirst = '::single{src="../own/x.jpg" alt="The long way"}\n\n![Its own](./x.jpg)';
+    expect(pieceFrames(localFirst, 'own', ['x'])).toEqual(['own/x']);
+    expect(pieceFrames(longFirst, 'own', ['x'])).toEqual(['own/x']);
+  });
+
+  it('the borrowed ids a body places, deduplicated, in document order', () => {
+    const body = [
+      '![Local](./land-a.jpg)',
+      '::single{src="../../gallery-images/dock-a.jpg" alt="g"}',
+      ':::diptych{left="../beta/port-b.jpg" right="./land-c.jpg"}\nCap.\n:::',
+      '![Again](../../gallery-images/dock-a.jpg)',
+      '![Wrong](./detail/land-d.jpg)',
+    ].join('\n\n');
+    expect(crossReferences(body)).toEqual(['gallery/dock-a', 'beta/port-b']);
+    expect(crossReferences('Just words.')).toEqual([]);
+  });
+
+  it('a borrowed file the site does not page is no reference at all', () => {
+    expect(crossReferences('::single{src="../beta/diagram.svg" alt="d"}')).toEqual([]);
+  });
+
+  it('a borrowed src that is not an accepted raster seats no frame and borrows nothing', () => {
+    // `beta/land-a` is a photograph the site pages — as a jpg. A `.tif`
+    // of that basename is not it, and not a raster this site accepts,
+    // so it mints no id in either direction.
+    const body = '::single{src="../beta/land-a.tif" alt="Not a photograph"}';
+    expect(pieceFrames(body, 'a-piece', ['land-c'])).toEqual(['a-piece/land-c']);
+    expect(crossReferences(body)).toEqual([]);
+  });
+
+  const known = new Map([
+    ['where-the-fog-lets-go/land-b', 'published'],
+    ['gallery/dock-a', 'published'],
+    ['a-draft/land-a', 'draft'],
+    ['no-piece/land-a', 'unowned'],
+  ]);
+
+  it('a draft target fails, naming the home piece to publish first', () => {
+    expect(referenceProblems('the-sampler', ['a-draft/land-a'], known)).toEqual([
+      '[images] the-sampler places a-draft/land-a from a-draft, which is a draft — publish a-draft first, or place a photograph that has a page',
+    ]);
+  });
+
+  it('a folder with no index.md is not a piece yet', () => {
+    expect(referenceProblems('the-sampler', ['no-piece/land-a'], known)).toEqual([
+      '[images] the-sampler places no-piece/land-a, but src/content/pieces/no-piece/ has no index.md — it is not a piece yet',
+    ]);
+  });
+
+  it('an id the registry does not list is not an image this site pages', () => {
+    expect(referenceProblems('the-sampler', ['beta/diagram'], known)).toEqual([
+      '[images] the-sampler places beta/diagram, which is not an image this site pages',
+    ]);
+  });
+
+  it('a published image, in a piece folder or the gallery root, is no problem', () => {
+    expect(
+      referenceProblems('the-sampler', ['where-the-fog-lets-go/land-b', 'gallery/dock-a'], known),
+    ).toEqual([]);
+    expect(referenceProblems('the-sampler', [], known)).toEqual([]);
+  });
+
+  it("a borrowed frame's alt is never a local title, and its src is not a local reference", () => {
+    const body = [
+      'The retrospective opens.',
+      '::single{src="../where-the-fog-lets-go/land-b.jpg" alt="The bank"}',
+      'Then its own frame.',
+      '![Its own](./land-b.jpg)',
+    ].join('\n\n');
+    expect(firstAltFor(body, 'land-b')).toBe('Its own');
+    expect(passageFor(body, 'land-b')).toEqual({ prose: 'Then its own frame.' });
+    expect(referencesImage('![The bank](../where-the-fog-lets-go/land-b.jpg)', 'land-b')).toBe(
+      false,
+    );
+    expect(referencesImage('![Dock](../../gallery-images/dock-a.jpg)', 'dock-a')).toBe(false);
   });
 });

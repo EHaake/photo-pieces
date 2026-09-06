@@ -27,12 +27,11 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the parser, the transform, the registry, the fixtures (reviewer after each task; the person's gate at its end)
 
-- [ ] **T601** — `image-meta.mjs`: `parseReference(src)` (local /
+- [x] **T601** — `image-meta.mjs`: `parseReference(src)` (local /
       piece / gallery / invalid with the plan's message), `imageReferences`
       yielding each reference's parsed shape, `pieceFrames(body, folder,
 basenames)` returning ids in document order with unreferenced local
-      files after, `crossReferences(body)`, and `referenceProblems(borrower,
-ids, known, homeOf)` returning the plan's draft-rule messages;
+      files after, `crossReferences(body)`, and `referenceProblems(borrower, ids, known)` returning the plan's draft-rule messages;
       `pieceOrder` kept until T603 (the registry still calls it), its
       tests migrated to `pieceFrames` with ids. `firstAltFor`,
       `referencesImage`, and `passageFor` unchanged in behaviour. _Verify:
@@ -53,8 +52,12 @@ ids, known, homeOf)` returning the plan's draft-rule messages;
       `pause`, and the shorthand — each linking to `/images/beta/photo/`
       or `/images/gallery/photo/` with `sizes` and `--ar` equal to the
       local case — the four invalid shapes and the long self-shape
-      (`../alpha/photo.jpg` from `alpha`) failing by name, and a borrowed
-      private frame failing in the one place `rejectPrivateSrc` stands
+      (`../alpha/photo.jpg` from `alpha`) failing by name, a borrowed
+      non-raster (`../beta/photo.tif`, a real fixture file beside the
+      jpg) failing as not a photograph this site pages, the stricter
+      parser's new failures named (`![alt]()` and `![alt](..)` fail now
+      where they rendered unlinked before), and a borrowed private frame
+      failing in the one place `rejectPrivateSrc` stands
       alone: the shorthand with an empty alt, `![](../beta/_photo.jpg)`.
       The existing test "a src into a sub-folder or a sibling folder
       fails naming the rule" changes on purpose: the sub-folder still
@@ -143,9 +146,11 @@ if it is ever on (it is off). Compare the total against spec 007's
 (implementer 309,333 over eight dispatches; reviewer 1,611,013, of
 which pre-policy Phase 0 803,056). -->
 
-| Task / invocation      | Tier     | Tokens           | Outcome / miss reason                                                                                                           |
-| ---------------------- | -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| plan/tasks sign-off ×2 | top tier | 152,642 + 56,418 | fix and re-review ×1 (the long self-shape; the cover's classification; the row as the card; the plugin's rule), then signed off |
+| Task / invocation         | Tier             | Tokens           | Outcome / miss reason                                                                                                           |
+| ------------------------- | ---------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| plan/tasks sign-off ×2    | top tier         | 152,642 + 56,418 | fix and re-review ×1 (the long self-shape; the cover's classification; the row as the card; the plugin's rule), then signed off |
+| T601 (sdd-implementer) ×2 | opus             | 82,989 + 48,314  | verified first try, then the review's five fixes — verified first try; twenty then nine mutations caught                        |
+| T601 review ×2            | reviewer default | 46,209 + 38,067  | fix and re-review ×1 (a borrowed non-raster minting a real id — the plan now refuses it), then signed off                       |
 
 ---
 

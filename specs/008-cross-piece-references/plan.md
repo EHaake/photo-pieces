@@ -32,8 +32,18 @@ new frontmatter, no new collection, the same ids and URLs.
   path: "this is the piece's own folder — write ./<file>" (sign-off:
   accepted, it would pass the build and give a wrong page — the scanner
   stays local-only, so the title and passage would miss it, and the
-  frames would list it twice). `pieceFrames` dedupes by id as well,
-  defensively.
+  frames would list it twice). `pieceFrames` dedupes by id as well, defensively. **A borrowed
+  image must be a photograph this site pages**: a borrowed `src` whose
+  extension is not one of the registry's accepted rasters is refused by
+  the transform (T601's review: `../beta/land-a.tif` would otherwise
+  mint the id `beta/land-a` — the registered `land-a.jpg`'s — pass the
+  draft rule, and seat a frame that links to another file's page), and
+  the pure helpers never mint an id for one; a local non-raster (an svg
+  diagram) stays allowed and unlinked as today. And since the parser's
+  slug rule accepts the name `gallery-images`, the piece branch excludes
+  it explicitly so the wrong-depth shape stays invalid — a piece whose
+  folder is literally `gallery-images` could never be borrowed from,
+  which is fine.
 - **The transform** replaces `rejectNestedSrc` with `parseReference`:
   invalid fails with the parser's message; `checkSrcExists` and
   `rejectPrivateSrc` run on every kind as today (the private check on
@@ -56,9 +66,8 @@ new frontmatter, no new collection, the same ids and URLs.
   as `pieceOrder` does today (which it replaces at T603, once the
   registry calls the new function; T601 adds `pieceFrames` beside it
   and migrates `pieceOrder`'s tests to ids); any frame referenced
-  twice appears once, at its first reference. A pure
-  `crossReferences(body)` returns the borrowed ids a body places, for
-  the registry's checks.
+  twice appears once, at its first reference. A pure `crossReferences(body)` returns the borrowed ids a body
+  places — accepted rasters only — for the registry's checks.
 - **The registry** (`images.ts`): the piece's frames are
   `pieceFrames(...)` — `orderByFolder` becomes `framesByPiece`, ids —
   and the piece set on an image's page is built for **every**
@@ -146,7 +155,15 @@ src/content/pieces/<folder>/ has no index.md — it is not a piece yet`.
   format, or nothing there): `[images] <borrower-slug> places <id>, which
 is not an image this site pages`. A gallery-root image is either
   published or unknown; it has no draft state.
-- Private frame: unchanged (the file-part check).
+- Borrowed non-raster (transform): `borrowed image "<src>" is not a
+photograph this site pages — a piece may borrow only an accepted
+raster (<the accepted extensions>)`.
+- Private frame: the same message as today, but the check must be fed
+  the parsed basename (`parseReference(src).basename`): today it strips
+  only a leading `./`, which was safe while every `/` was refused —
+  `../beta/_land-a.jpg` would slip past it otherwise (T601 review). The
+  transform tests the accepted-extension rule with the shared
+  `IMAGE_EXTENSIONS` list, the one source of the list.
 - Missing file: unchanged (`image not found: <src> (relative to the
 piece's folder)`).
 
@@ -171,8 +188,7 @@ piece's folder)`).
   `--ar` identical to the local case; the four invalid shapes and the
   private frame fail naming the rule.
 - The registry's rules are pure where they can be: `pieceFrames`,
-  `crossReferences`, and a `referenceProblems(borrower, ids, known,
-homeOf)` that returns the messages — tested in `galleries.test.mjs`'s
+  `crossReferences`, and a `referenceProblems(borrower, ids, known)` that returns the messages (the home derived from the id's folder — the id rule makes it so) — tested in `galleries.test.mjs`'s
   style beside `validateGalleries`. The Astro-coupled wiring (sets,
   appearances, the cover's `fsPath`) is verified at build with the
   fixtures and, for the draft rule, a temporary draft piece borrowed
