@@ -33,7 +33,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the rules, the registry, the pages (reviewer after each task; the person's gate at its end)
 
-- [ ] **T701** — The pure rules. `image-meta.mjs`: `placeOf` (a `none`
+- [x] **T701** — The pure rules. `image-meta.mjs`: `placeOf` (a `none`
       default is no default), `placeNameProblem(name)` (not a slug, or
       `none`, with the plan's messages), `placeProblems(refs, placeSlugs)`
       returning the plan's messages, `groupByPlace(framesByPiece, placeOfId, pieceOrder)`
@@ -43,7 +43,12 @@ headers to confirm nothing was duplicated or dropped. -->
       `places (T701, spec 009)` group in `image-meta.test.mjs` per the
       plan's list, and a new `image-set.test.mjs` for the key and the path;
       each new test mutation-checked with the test named that each mutation
-      fails; 230 existing green; `astro check` green._
+      fails; 230 existing green; `astro check` green. Record: verified first try, 252 tests (230 + 22), 24 mutations
+      each caught; the review signed off with notes for T702 — type
+      `ImageSet.kind` as `SetKind` (the two unions agree by luck until
+      then), `byOldestPublished` is verified only by the fixtures, and
+      `placeSummary`'s year sort and its no-dates branch are defensive and
+      untested (outings arrive oldest first; every outing has a date)._
 - [ ] **T702** — The schemas, the registry, the fixtures.
       `content.config.ts`: the `places` collection (`generateId` = file
       name; title, description?, cover?, draft), `at?` on pieces and on
@@ -147,9 +152,11 @@ reviewer invocations alike — any escape-hatch miss, and the third tier
 if it is ever on (it is off). Compare against spec 008's totals:
 implementer 490,854 over nine dispatches; reviewer 905,152 all tiers. -->
 
-| Task / invocation      | Tier     | Tokens                            | Outcome / miss reason                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ---------------------- | -------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| plan/tasks sign-off ×4 | top tier | 85,833 + 53,976 + 39,525 + 16,578 | fix and re-review ×3 (the cards diff unsatisfiable raw — Astro's per-file scoped-style hash; the draft-place criterion unverified; then the docs' commit target and a leftover testing bullet; then the slug rule contradicting the precedence on a piece's `none`), then signed off. Packet note for T701: the `placeProblems` test must feed a piece value and a sidecar value through the same check, so the piece's `none` is verified, not inferred |
+| Task / invocation      | Tier             | Tokens                            | Outcome / miss reason                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------- | ---------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| plan/tasks sign-off ×4 | top tier         | 85,833 + 53,976 + 39,525 + 16,578 | fix and re-review ×3 (the cards diff unsatisfiable raw — Astro's per-file scoped-style hash; the draft-place criterion unverified; then the docs' commit target and a leftover testing bullet; then the slug rule contradicting the precedence on a piece's `none`), then signed off. Packet note for T701: the `placeProblems` test must feed a piece value and a sidecar value through the same check, so the piece's `none` is verified, not inferred |
+| T701 (sdd-implementer) | opus             | 53,735                            | verified first try; 24 mutations caught; the `ImageSet.kind` retype correctly left to T702                                                                                                                                                                                                                                                                                                                                                               |
+| T701 review            | reviewer default | 41,967                            | signed off; three notes carried to T702's packet                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ---
 
