@@ -22,6 +22,12 @@ so it is no longer displayed under the image. Missing images show a
 dashed "not found" box, which is telling the truth about what the
 build would do (it fails).
 
+A `src` that names a folder — `../other-piece/x.jpg`,
+`../../gallery-images/x.jpg` — is resolved from the note's own folder
+the way the site build resolves it, so a wrong path shows "not found"
+rather than a same-named file from another folder. A bare `./x.jpg`
+still uses Obsidian's own lookup.
+
 ## Build and install
 
 `main.js` is a build artifact and is not committed. Build it, then copy

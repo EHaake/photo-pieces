@@ -134,14 +134,21 @@ a later spec can extend `checkSrcExists` to the shorthand visit. -->
       date line, and the description each landed on the piece; Tab
       reached the row and drew the site's ring around it; the homepage
       and a category page carry the same anchors with no inner links._
-- [ ] **T606** — The Obsidian plugin resolves a `src` containing `/`
+- [x] **T606** — The Obsidian plugin resolves a `src` containing `/`
       explicitly (join with the note's folder, normalize,
       `getAbstractFileByPath`), with no name-based fallback for such
       paths; a bare name keeps `getFirstLinkpathDest`. _Verify: the plugin's build
       (`npm run build` in `obsidian-plugin/`) succeeds; the product owner sees the sampler's
       two borrowed frames in Live Preview at the gate, and a wrong `../`
       path shows the plugin's "image not found" line rather than a
-      same-named file from another folder._
+      same-named file from another folder. Record: `resolveRelative` is a
+      pure exported function (name / path / unreachable); the plugin
+      built clean (tsc + esbuild) and the orchestrator's twelve-case
+      check of the resolver passed, `../..` resolving to a folder that
+      the file check turns into "not found"; the vault is not at
+      `~/photo-brain/` on this machine, so the rebuilt `main.js` is
+      installed by the product owner per the plugin README, and the Live
+      Preview check is his at the gate._
 - [ ] **T607** — Docs: `AUTHORING.md` (the two path shapes, one home, what
       the page shows, the draft rule, covers, in "A piece folder is public
       territory" and "Hard-won syntax rules"), `README.md` (the block
@@ -187,6 +194,7 @@ which pre-policy Phase 0 803,056). -->
 | T604 (sdd-implementer)    | opus             | 33,632           | verified first try                                                                                                                                                           |
 | T604 review               | reviewer default | 28,506           | signed off pending the browser set-key check, which passed; two prose notes folded in by the orchestrator                                                                    |
 | T605 (sdd-implementer)    | opus             | 21,511           | verified first try; the browser checks run by the orchestrator                                                                                                               |
+| T606 (sdd-implementer)    | opus             | 27,693           | verified first try; the resolver re-checked by the orchestrator                                                                                                              |
 
 ---
 
