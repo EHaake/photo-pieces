@@ -52,6 +52,16 @@ CMS or backend service for v1.
   from the registry — each tagged with a category. An image belongs to
   at most one piece, by folder; galleries reference images, not pieces,
   and the page for an image links back to its piece where one exists.
+  **Places** (spec 009) are a third kind: a `places` collection of
+  files _declared_ once (a title, a description, an optional cover,
+  the writing), then _grown_ by the registry — a photograph names its
+  place in its sidecar (`at: <slug>`, or `at: none`), a piece may set
+  one default for its folder with the same line, and the build refuses
+  a slug with no file, listing the places that exist. A place's page
+  groups its published frames by the piece they live in, outings
+  oldest first, own-folder frames only; a place is never inferred from
+  camera metadata, and never from the sidecar's free-text `place`,
+  which stays prose for the wall label.
 - **Closed block vocabulary**: image treatments inside a piece's body are
   limited to a defined set of directive-backed treatments — as of spec
   007: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
