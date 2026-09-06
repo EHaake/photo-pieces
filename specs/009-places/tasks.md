@@ -1,6 +1,6 @@
 # Tasks: Places
 
-**Status**: Implemented (2026-09-06) — every task through T705 checked; T706 closes at the merge
+**Status**: Implemented (2026-09-06) — every task checked; merged
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 — per-task reviewer cadence; Phases 1 and 2
 are per-phase (Phase 2's review is the pre-merge sweep).
@@ -217,7 +217,7 @@ none`, what the page shows, that a place grows on its own, gallery-root
 
 ## Phase 2 — Close-out (reviewer sweep, then merge)
 
-- [ ] **T706** — `ROADMAP.md`: the Places entry struck with the
+- [x] **T706** — `ROADMAP.md`: the Places entry struck with the
       follow-ups the plan names (images in a place's writing; gallery-root
       frames in a place; renaming a place). `DECISIONS.md`: a spec 009
       section (the frame as the unit with the piece default as shortcut,
@@ -256,24 +256,20 @@ implementer 490,854 over nine dispatches; reviewer 905,152 all tiers. -->
 | Phase 1 review                                | reviewer default | 40,699                            | fix and re-review (one blocking sentence copied from the spec; six notes) — fixes by the orchestrator directly, doc lines only                                                                                                                                                                                                                                                                                                                           |
 | Phase 1 re-review                             | reviewer default | 31,662                            | signed off; two wording notes folded in, the spec's rationale moved out of Goal 3 for DECISIONS                                                                                                                                                                                                                                                                                                                                                          |
 | T706 sweep                                    | reviewer default | 101,826                           | fix and re-review: four blocking — two were the reviewer's stale copy of CLAUDE.md (its session-start snapshot predates the amendment that puts the sweep at the default tier and scopes the orchestrator's re-run to foundational phases; the constitution at HEAD agrees with tasks.md, and T706's own line was the stale one, fixed); run 4 re-run with the dump; DECISIONS' byte-identity sentence corrected — plus nine notes, six folded in        |
+| T706 sweep re-review | reviewer default | 39,759 | signed off; the totals' count corrected in place, the open items written above, run 8's rule recorded in DECISIONS |
 
 ---
 
 **Totals.** Implementer (opus): 275,282 tokens over five dispatches
 (T701–T705), every one verified first try, no escape hatch, no tier
 miss; two fixes were the orchestrator's own (doc lines at the Phase 1
-review; a fixture as T704a). Reviewer at its default tier: 364,196 over
-eight invocations (four per-task reviews, two re-reviews, the Phase 1
-review and re-review, the sweep). Top tier: 195,912 (the four sign-off
-passes). Reviewer all tiers 560,108 — against spec 008's 905,152, with
-an implementer total of 275,282 against 008's 490,854. The amended
+review; a fixture as T704a). Reviewer at its default tier: 403,955 over ten invocations (four per-task reviews, two re-reviews, the Phase 1 review and re-review, the sweep and its re-review). Top tier: 195,912 (the four sign-off passes). Reviewer all tiers 599,867 — against spec 008's 905,152, with an implementer total of 275,282 against 008's 490,854. The amended
 policy held: bundles kept every dispatch and review inside its task,
 the loop cap was never exceeded, and every reviewer finding that
 mattered was a record or document claim, closed by a run. Two lessons
 for the next spec: put the implementer's evidence in the review bundle
 verbatim (the T702 review blocked on the orchestrator's summary of it),
-and the reviewer's CLAUDE.md is its session-start copy, so a
-constitution amended mid-session must be quoted to it.
+and the reviewer's CLAUDE.md is its session-start copy, so a constitution amended mid-session must be quoted to it. Left open at the merge, for the record: `byOldestPublished`'s id tie-break is asserted in a comment and verified only by two differently dated fixtures — `pieces.ts` imports `getCollection` from `astro:content`, which the current Vitest config does not resolve (an alias or a mock would; not an impossibility); `placeSummary`'s year sort and its no-dates branch are defensive and untested; `.wall-label dd a` also matches the record's and the print's lists, whose values are plain strings; the constitution's Architecture paragraph does not yet describe places (an amendment for the product owner); and the sweep's fixes left some paragraphs on single long lines, which Prettier's `proseWrap: preserve` neither flags nor fixes.
 
 ## Handoff note
 

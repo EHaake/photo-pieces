@@ -457,14 +457,14 @@ that nearly match.
 **The pause's words go down with the lights.** The alternative — dark
 text left on a darkening ground — was tried and read as a fault. Text,
 headings, captions, the page head's and the footer's text, and the
-hairlines all mix toward `--color-quiet` as the ground does, each from its own token, which means the rule is a
-list: an element outside it would stay light on the dark ground. A
-link in the text inherits its paragraph's colour and needs no rule;
-only the footer's and the page head's links are named. The words do
-not disappear into the ground, though — the ground stops short and
-the words go all the way — and the mats are not on the list: see the
-two entries below. The sampler carries a link and a heading after its
-pause as the standing check, read by eye.
+hairlines all mix toward `--color-quiet` as the ground does, each from
+its own token, which means the rule is a list: an element outside it
+would stay light on the dark ground. A link in the text inherits its
+paragraph's colour and needs no rule; only the footer's and the page
+head's links are named. The words do not disappear into the ground,
+though — the ground stops short and the words go all the way — and the
+mats are not on the list: see the two entries below. The sampler carries
+a link and a heading after its pause as the standing check, read by eye.
 
 **The words anchor to the frame** (visual gate, 2026-09-04). On the
 exploration the paragraph before a pause scrolled away above the
@@ -617,17 +617,20 @@ third goal first said such a piece "never touches Places", which read
 as the opposite and was corrected at Phase 1's review).
 
 **One property name, `at`, on both files, and `none` accepted on
-either.** The field's name was left to the orchestrator. `at` reads
-as the label does — "at Sombrio" — pairs with `at: none`, and cannot
-be mistaken for the sidecar's free-text `place`. The piece's line was
+either.** The field's name was left to the orchestrator. `at` reads as
+the label does — "at Sombrio" — pairs with `at: none`, and cannot be
+mistaken for the sidecar's free-text `place`. The piece's line was
 drafted as `place:` and renamed at the plan's sign-off: Obsidian's
 property autocomplete is keyed by property name across the vault, so
 `place:` on pieces (slugs) beside `place:` on sidecars (prose) would
 have offered each the other's values. With one name for the slug
 everywhere, `at` suggests slugs and `place` suggests prose. Since the
-property is shared, Obsidian offers `none` on a piece too, and it
-means there what it means on a frame: no place. A place may not be
-named `none`.
+property is shared, Obsidian offers `none` on a piece too, and it means
+there what it means on a frame: no place. A place may not be named
+`none`. The slug rule checks every piece and every sidecar, drafts
+included — a typo in a draft is still a typo, and the sidecar orphan
+rule already works that way — while the grouping reads published pieces
+only, so a draft's frames join no place until it publishes.
 
 **Outings oldest first**, so ten years read as ten years, though every
 other list on the site is newest first; the index of places is most
@@ -644,5 +647,12 @@ name a cover from a piece not yet published and gets the build's note,
 not a failure, as the spec promises.
 
 **The card treatment became one component.** `GalleryCards` gave its
-markup and styles to `CoverCards`, which galleries and places share;
-the galleries index and the category page show no delta attributable to the refactor once Astro's per-file scoped-style hash is normalized — two deltas excepted and explained: the nav's new Places item, which the same task adds to every page, and the order of two inlined scoped sheets on the galleries index, since moving a `<style>` into a nested component puts the deeper import's sheet first. That reordering is harmless while the two sheets never match one element, and the plan records it for the next such move.
+markup and styles to `CoverCards`, which galleries and places share; the
+galleries index and the category page show no delta attributable to the
+refactor once Astro's per-file scoped-style hash is normalized — two
+deltas excepted and explained: the nav's new Places item, which the same
+task adds to every page, and the order of two inlined scoped sheets on
+the galleries index, since moving a `<style>` into a nested component
+puts the deeper import's sheet first. That reordering is harmless while
+the two sheets never match one element, and the plan records it for the
+next such move.
