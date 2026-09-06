@@ -1,0 +1,78 @@
+---
+// Cover cards (spec 009): the one card treatment the site's index pages
+// share — cover, title, a meta line — laid out in the plain grid's own
+// columns. Was GalleryCards.astro's markup and styles (spec 004); moved
+// here when the places index needed the same card, with GalleryCards
+// left as the wrapper that builds a gallery's cards. The mat sits on a
+// span (not the img) for the same reason piece images carry theirs on
+// the anchor. `href` is a site-root path; this component applies the
+// configured base.
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { withBase } from '../lib/url';
+
+interface Props {
+  cards: { href: string; cover: ImageMetadata; title: string; meta: string }[];
+}
+
+const { cards } = Astro.props;
+---
+
+<ul class="gallery-grid gallery-cards">
+  {
+    cards.map((card) => (
+      <li>
+        <a href={withBase(card.href)} class="gallery-card">
+          <span class="image-link">
+            <Image
+              src={card.cover}
+              alt=""
+              layout="constrained"
+              width={800}
+              sizes="(min-width: 1160px) 373px, (min-width: 720px) 47vw, 94vw"
+              loading="lazy"
+            />
+          </span>
+          <span class="gallery-card-title">{card.title}</span>
+          <span class="meta">{card.meta}</span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .gallery-cards {
+    align-items: start;
+  }
+
+  .gallery-card {
+    display: grid;
+    gap: calc(var(--baseline) * 0.5);
+    color: inherit;
+    background: none;
+  }
+
+  .gallery-card .image-link {
+    display: block;
+    padding: var(--matte);
+    background: var(--color-matte);
+  }
+
+  .gallery-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .gallery-card-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+    line-height: 1.25;
+  }
+
+  .gallery-card .meta {
+    margin: 0;
+  }
+</style>

@@ -14,7 +14,8 @@ The vault is a **parent** of the repo, not the content folder itself:
 │   └── src/content/
 │       ├── pieces/             <- published pieces live here
 │       ├── gallery-images/     <- images that belong to no piece
-│       └── galleries/          <- one file per gallery
+│       ├── galleries/          <- one file per gallery
+│       └── places/             <- one file per place (spec 009)
 ├── notes/                      <- private second-brain material
 └── templates/                  <- Obsidian template files
 ```
@@ -22,7 +23,7 @@ The vault is a **parent** of the repo, not the content folder itself:
 Why this shape:
 
 - **Astro only reads its configured content directory**, so nothing
-  outside `src/content/pieces/` can leak into the built site.
+  outside `src/content/` can leak into the built site.
 - **Private notes live outside the repo entirely** — shoot planning,
   location scouting, gear research, journal fragments. They can never
   be committed by accident because git never sees them. No `.gitignore`
@@ -67,13 +68,16 @@ publishDate:
 categories: []
 description:
 cover:
+at:
 draft: true
 ---
 ```
 
 `categories` values: `landscape`, `street`, `portrait`, `event`.
+`at`: the slug of a declared place — the default for every frame in
+the folder that names none — see "Places" below.
 
-Two more skeletons worth keeping in `templates/` (spec 004 — the
+Three more skeletons worth keeping in `templates/` (spec 004 — the
 field reference is in `README.md`):
 
 ```markdown
@@ -88,6 +92,7 @@ aperture:
 shutter:
 iso:
 place:
+at:
 time:
 format:
 filters:
@@ -115,7 +120,20 @@ images:
 ---
 ```
 
-saved in `src/content/galleries/`.
+saved in `src/content/galleries/`, and
+
+```markdown
+---
+title:
+description:
+cover:
+draft: true
+---
+
+Why you keep going back.
+```
+
+saved in `src/content/places/` (spec 009 — "Places" below).
 
 ## A piece folder is public territory
 
@@ -227,6 +245,7 @@ aperture: f/8
 shutter: 1/250 s
 iso: ISO 400
 place: The headlands above the cove # prose, never coordinates
+at: the-headlands # the declared place's slug — the wall label links to it; `none` opts out of the piece's default
 time: 06:40 — forty minutes before sunrise, late November
 format: Digital, full-frame # "How it was made", with the three below
 filters: None
@@ -242,6 +261,10 @@ words, rendered under the title ahead of the wall label. The block
 vocabulary works here too (a diptych in a story is legal), though
 plain prose is the expectation.
 ```
+
+`place` and `at` are two properties, not one: `place` is the prose the
+label shows, `at` is the slug of a declared place, which the label
+links to — see "Places" below.
 
 **A story is prose — no holds, no pauses.** The image page renders the
 story through the same pipeline, but not through the piece page's
@@ -306,12 +329,13 @@ because the body is the piece's own writing, not a caption.
 **Write enough for the frame, or don't hold it.** The frame lets go as
 the last line passes it and never after: the site will not pad a hold
 out with empty scroll, so the hold lasts exactly as long as the words
-outlast the frame. A frame taller than its prose does not hold at all — the row is only
-as tall as the frame, so there is nothing to stick through — it sits in
-the flow with the words beside it. On a laptop screen a landscape frame takes about five paragraphs
-to outlast, a full-height vertical about eight — the sampler piece
-(`src/content/pieces/vocabulary-sampler/`) is the calibration. Count
-the paragraphs before deciding a photograph deserves a hold.
+outlast the frame. A frame taller than its prose does not hold at all —
+the row is only as tall as the frame, so there is nothing to stick
+through — it sits in the flow with the words beside it. On a laptop
+screen a landscape frame takes about five paragraphs to outlast, a
+full-height vertical about eight — the sampler piece
+(`src/content/pieces/vocabulary-sampler/`) is the calibration. Count the
+paragraphs before deciding a photograph deserves a hold.
 
 **No hold where no column fits.** The frame is sized from its own ratio
 and the height it may use, so on a portrait viewport a landscape frame
@@ -391,6 +415,68 @@ by design. The build refuses a missing, duplicate, or draft-owned id
 and names the file and line. Images that belong to no piece go in
 `gallery-images/`, flat, and have no draft flag: to unpublish one,
 delete it.
+
+## Places
+
+A place is somewhere you keep going back to: declared once, then grown
+by the photographs that name it. One file in `src/content/places/`
+— a title, an optional description, an optional cover (the id of one
+of the place's own frames), an optional `draft`, and a body that is
+your writing about the place. The file name is the slug and the URL,
+so it is lowercase letters, digits, and hyphens only; `none` is
+refused, because that is the word for no place. The writing is prose:
+no photograph lives beside a place file, and the place's photographs
+are the frames below it.
+
+A frame says where it was made in its sidecar, `at: <slug>`. A piece
+shot entirely in one place says it once instead, `at: <slug>` in its
+frontmatter, and every frame in its folder that names no place of its
+own is taken to be there; a frame's own line always wins, and
+`at: none` keeps a frame out of its piece's default. A piece that sets
+no default imposes none: its frames are wherever their own lines
+say, and a frame that says nothing is at no place (`at: none` on a
+piece means the same as leaving the line out — Obsidian will offer
+the value there, since the property is shared). `at` is a
+slug wherever it is written — on a piece and on a sidecar alike —
+while the sidecar's `place` stays prose for the wall label; they are
+two properties, so Obsidian's autocomplete offers each its own values
+and keeps them apart.
+
+```
+# the piece: src/content/pieces/where-the-fog-lets-go/index.md
+at: the-headlands # the default for every frame in the folder
+
+# a frame that was elsewhere: _pano.md
+at: none # shot on the drive home
+place: The road home, from the car window # the label shows the text alone
+
+# a frame at another place: _land-c.md
+at: the-jetty # its own line wins over the piece's default
+```
+
+`/places/<slug>/` shows the title, the description, a summary line
+("N outings · M frames · 2019–2026", the years being the outings'
+publish years), your writing, and then the outings — oldest first,
+each headed by the piece's title as a link and its date, with that
+piece's own frames at the place in the piece's order, packed as a
+gallery. That is the whole act of adding photographs: publish a
+piece whose frames name the place, and the page grows. A borrowed
+photograph stays with its home piece, never counted twice.
+`/places/` lists the places as cards, most recent outing first, and
+Places is in the nav after Galleries. On a photograph's page the
+label's place is the place's title as a link,
+with the sidecar's free text after it where there is any, and arrows
+from a place step through that place's frames.
+
+The build refuses an `at:` naming a place that does not exist — on a
+piece or a sidecar, draft or not — and lists the places that do; it
+refuses a `cover` that is not one of the place's frames, once the
+place publishes. A draft place and a place with no published frame
+yet get a note, not a failure: no page, no card, and their frames
+show no place, so a place can be declared ahead of its first outing.
+A gallery-root photograph cannot join a place — the page groups by
+piece and it has none — so its `at:` is checked for the slug and
+then ignored with a warning naming the file.
 
 ## Hard-won syntax rules
 

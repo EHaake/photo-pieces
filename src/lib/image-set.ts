@@ -11,16 +11,19 @@ export const IMAGE_SET_KEY = 'image-set';
 /** sessionStorage key for quiet view's persistence between image pages. */
 export const IMAGE_QUIET_KEY = 'image-quiet';
 
-export type SetKind = 'gallery' | 'piece';
+export type SetKind = 'gallery' | 'piece' | 'place';
 
-/** `gallery:fog-frames`, `piece:where-the-fog-lets-go`. */
+/** `gallery:fog-frames`, `piece:where-the-fog-lets-go`, `place:sombrio-beach`. */
 export function setKey(kind: SetKind, id: string): string {
   return `${kind}:${id}`;
 }
 
-/** The set a page is, from its path (`/galleries/<slug>/` or
- *  `/pieces/<slug>/`, base prefix allowed), else null. */
+/** The set a page is, from its path (`/galleries/<slug>/`,
+ *  `/pieces/<slug>/`, or `/places/<slug>/`, base prefix allowed), else
+ *  null. */
 export function setKeyFromPath(pathname: string): string | null {
-  const m = pathname.match(/\/(galleries|pieces)\/([^/]+)\/?$/);
-  return m ? setKey(m[1] === 'galleries' ? 'gallery' : 'piece', m[2]) : null;
+  const m = pathname.match(/\/(galleries|pieces|places)\/([^/]+)\/?$/);
+  return m ? setKey(KINDS[m[1] as keyof typeof KINDS], m[2]) : null;
 }
+
+const KINDS = { galleries: 'gallery', pieces: 'piece', places: 'place' } as const;

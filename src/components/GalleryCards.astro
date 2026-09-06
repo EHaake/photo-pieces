@@ -1,13 +1,13 @@
 ---
 // Gallery cards (spec 004): the galleries index and the category pages
-// share this one treatment — cover, title, count — laid out in the
-// plain grid's own columns. The mat sits on a span (not the img) for
-// the same reason piece images carry theirs on the anchor.
-import { Image } from 'astro:assets';
+// share this one treatment — cover, title, count. Since spec 009 the
+// markup and its styles live in CoverCards.astro, which the places
+// index uses too; this component is the wrapper that turns galleries
+// into that component's cards, and its two consumers keep their props.
 import type { CollectionEntry } from 'astro:content';
+import CoverCards from './CoverCards.astro';
 import { formatDate } from '../i18n';
 import { getImageRegistry } from '../lib/images';
-import { withBase } from '../lib/url';
 
 interface Props {
   galleries: CollectionEntry<'galleries'>[];
@@ -15,70 +15,19 @@ interface Props {
 
 const { galleries } = Astro.props;
 const registry = await getImageRegistry();
+
+const cards = galleries.map((gallery) => {
+  const count = gallery.data.images.length;
+  return {
+    href: `/galleries/${gallery.id}/`,
+    // Every id was validated by the registry; the lookup can't miss.
+    cover: registry.byId.get(gallery.data.cover)!.image,
+    title: gallery.data.title,
+    meta:
+      `${count} ${count === 1 ? 'image' : 'images'}` +
+      (gallery.data.date ? ` · ${formatDate(gallery.data.date, 'short')}` : ''),
+  };
+});
 ---
 
-<ul class="gallery-grid gallery-cards">
-  {
-    galleries.map((gallery) => {
-      const cover = registry.byId.get(gallery.data.cover)!;
-      const count = gallery.data.images.length;
-      return (
-        <li>
-          <a href={withBase(`/galleries/${gallery.id}/`)} class="gallery-card">
-            <span class="image-link">
-              <Image
-                src={cover.image}
-                alt=""
-                layout="constrained"
-                width={800}
-                sizes="(min-width: 1160px) 373px, (min-width: 720px) 47vw, 94vw"
-                loading="lazy"
-              />
-            </span>
-            <span class="gallery-card-title">{gallery.data.title}</span>
-            <span class="meta">
-              {count} {count === 1 ? 'image' : 'images'}
-              {gallery.data.date && ` · ${formatDate(gallery.data.date, 'short')}`}
-            </span>
-          </a>
-        </li>
-      );
-    })
-  }
-</ul>
-
-<style>
-  .gallery-cards {
-    align-items: start;
-  }
-
-  .gallery-card {
-    display: grid;
-    gap: calc(var(--baseline) * 0.5);
-    color: inherit;
-    background: none;
-  }
-
-  .gallery-card .image-link {
-    display: block;
-    padding: var(--matte);
-    background: var(--color-matte);
-  }
-
-  .gallery-card img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  .gallery-card-title {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 1.1rem;
-    line-height: 1.25;
-  }
-
-  .gallery-card .meta {
-    margin: 0;
-  }
-</style>
+<CoverCards cards={cards} />

@@ -1,0 +1,31 @@
+---
+// The places index (spec 009): every published place as a card, most
+// recent outing first — the registry's own order.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CoverCards from '../../components/CoverCards.astro';
+import { getImageRegistry } from '../../lib/images';
+
+const registry = await getImageRegistry();
+
+// Every place's cover is one of its own frames; the registry validated it.
+const cards = registry.places.map((place) => ({
+  href: place.url,
+  cover: registry.byId.get(place.cover)!.image,
+  title: place.title,
+  meta: place.summary,
+}));
+---
+
+<BaseLayout
+  title="Places"
+  description="Places returned to over the years — each page grows with every outing there."
+>
+  <section class="page-head section">
+    <p class="eyebrow">Index</p>
+    <h1>Places</h1>
+  </section>
+
+  <div class="section">
+    <CoverCards cards={cards} />
+  </div>
+</BaseLayout>

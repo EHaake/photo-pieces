@@ -1,0 +1,127 @@
+---
+// A place page (spec 009): the gallery page's shape, grown over time —
+// the place's own writing, then one section per outing there, oldest
+// first, each heading a link to the piece that outing was published as
+// and each frame a link to its own page. The rows pack exactly as a
+// gallery's do (see .gallery-flow in global.css).
+import { Image, getImage } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../i18n';
+import { galleryCell, galleryFlowStyle } from '../../lib/gallery-layout';
+import { getImageRegistry } from '../../lib/images';
+import { ogImageOptions } from '../../lib/og';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const registry = await getImageRegistry();
+  return registry.places.map((place) => ({
+    params: { slug: place.slug },
+    props: { place },
+  }));
+}
+
+const { place } = Astro.props;
+const registry = await getImageRegistry();
+
+// Every id came from the registry; the lookups can't miss.
+const outings = place.outings.map((outing) => ({
+  piece: outing.piece,
+  cells: outing.frames.map((id) => {
+    const image = registry.byId.get(id)!;
+    return { image, ...galleryCell(image.image) };
+  }),
+}));
+
+const cover = registry.byId.get(place.cover)!;
+const og = await getImage(ogImageOptions(cover.image));
+
+// The writing is optional — a place file may be a title and a cover.
+const hasWriting = (place.entry.body ?? '').trim().length > 0;
+const { Content } = await render(place.entry);
+---
+
+<BaseLayout
+  title={place.title}
+  description={place.entry.data.description ?? place.summary}
+  image={og.src}
+>
+  <article data-pagefind-body>
+    <header class="page-head section">
+      <p class="eyebrow">Place</p>
+      <h1>{place.title}</h1>
+      {place.entry.data.description && <p class="lead">{place.entry.data.description}</p>}
+      <div class="entry-meta">{place.summary}</div>
+    </header>
+
+    {
+      hasWriting && (
+        <div class="section">
+          <div class="prose">
+            <Content />
+          </div>
+        </div>
+      )
+    }
+
+    {
+      outings.map(({ piece, cells }) => (
+        <section class="section outing" aria-labelledby={`outing-${piece.id}`} data-pagefind-ignore>
+          <h2 id={`outing-${piece.id}`} class="outing-title">
+            <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
+          </h2>
+          <div class="entry-meta">
+            <time datetime={piece.data.publishDate.toISOString()}>
+              {formatDate(piece.data.publishDate)}
+            </time>
+          </div>
+          <ul class="gallery-flow" style={galleryFlowStyle}>
+            {cells.map(({ image, ar, width, sizes }) => (
+              <li style={`--ar: ${ar}`}>
+                <a href={withBase(image.url)} class="image-link">
+                  <Image
+                    src={image.image}
+                    alt={image.title}
+                    layout="constrained"
+                    width={width}
+                    sizes={sizes}
+                    loading="lazy"
+                  />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  /* Titles are short here; the lead can run to the prose width. */
+  .lead {
+    max-width: var(--prose-width);
+  }
+
+  /* One outing after another reads as a list of visits: a hairline
+     between them, as the galleries index sets between its groups. */
+  .outing + .outing {
+    border-top: var(--hairline);
+  }
+
+  .outing-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.25;
+  }
+
+  .outing .entry-meta {
+    margin-top: calc(var(--baseline) * 0.25);
+  }
+
+  .outing .gallery-flow {
+    margin-top: calc(var(--baseline) * 1);
+  }
+</style>

@@ -4,7 +4,7 @@ caption: >-
   The first minute the far bank showed through — the frame the whole
   morning was waiting for. *Fixture sidecar*: a title and a caption,
   no label overrides, so the wall label is entirely EXIF-derived.
-place: The headlands above the cove, north Pacific coast
+place: above the cove, north Pacific coast
 time: 06:40 — forty minutes before sunrise, late November
 format: Digital, full-frame
 filters: None

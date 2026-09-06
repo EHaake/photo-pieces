@@ -55,12 +55,14 @@ attached.
   leaves untouched originals in the output — worth an upstream issue,
   and a no-op if they fix it.
 - **A galleries overhaul** — noted by the photographer at the spec 007
-  close-out (2026-09-05), for a spec of its own: the gallery grid feels
-  too constrained by the prose column's width — it should be able to
-  run wider on the page than the text does, closer to the content
-  width — and the spacing between the images wants retuning. Both are
-  knobs of `gallery-layout.ts` and the `.gallery-grid` rules today;
-  the spec decides the widths and the gaps by looking, on both of the
+  close-out (2026-09-05), for a spec of its own (since spec 009 the
+  place pages share the gallery's packing knobs and rows, so the
+  overhaul moves them too): the gallery grid feels too constrained by
+  the prose column's width — it should be able to run wider on the page
+  than the text does, closer to the content width — and the spacing
+  between the images wants retuning. Both are knobs of
+  `gallery-layout.ts` and the `.gallery-grid` rules today; the spec
+  decides the widths and the gaps by looking, on both of the
   photographer's screens, and folds in whatever the real photographs
   (below) teach about density.
 - **The front door** — to be workshopped with the photographer
@@ -78,21 +80,22 @@ attached.
   words follow. `pause` is the leaf for the frame too wide to hold
   beside words: the frame pins at the centre of the screen with its
   neighbouring paragraphs anchored above and below it, the ground goes
-  to a dark grey with the words a shade darker and still faintly
-  there, the mat keeps its own colour, and after 1.2 screens of pinned
-  scroll the lights come back up and the page moves on — script-driven,
-  degrading without script to a pin on the light ground. Follow-ups it surfaced: a tall
-  pause frame on a short viewport can push an anchored paragraph
-  partly off-screen while pinned (a pause is for the wide frame); a pause needs about half of the screen its stage leaves empty in
-  words after it, or it cannot finish; a collapsed hold keeps the held reading size rather than
-  its neighbours'; the header's focus-reveal is knowingly overridden
-  while a scene is active, so a keyboard user tabbing into the nav
-  mid-pause focuses off-screen links; a `held` or `pause` written into
-  a sidecar story gets the CSS but not the script; the lights' list of
-  elements is enumerated, so anything outside it stays light on the
-  dark ground; and the sampler's site-absolute link after its pause is
-  the one exception to vault-relative links, until a link rewrite
-  exists.
+  to a dark grey with the words a shade darker and still faintly there,
+  the mat keeps its own colour, and after 1.2 screens of pinned scroll
+  the lights come back up and the page moves on — script-driven,
+  degrading without script to a pin on the light ground. Follow-ups it
+  surfaced: a tall pause frame on a short viewport can push an anchored
+  paragraph partly off-screen while pinned (a pause is for the wide
+  frame); a pause needs about half of the screen its stage leaves empty
+  in words after it, or it cannot finish; a collapsed hold keeps the
+  held reading size rather than its neighbours'; the header's
+  focus-reveal is knowingly overridden while a scene is active, so a
+  keyboard user tabbing into the nav mid-pause focuses off-screen links;
+  a `held` or `pause` written into a sidecar story gets the CSS but not
+  the script; the lights' list of elements is enumerated, so anything
+  outside it stays light on the dark ground; and the sampler's
+  site-absolute link after its pause is the one exception to
+  vault-relative links, until a link rewrite exists.
 - **The slow view** — a piece or gallery experienced one frame at a
   time: full viewport on the dimmed ground, the piece's words between
   frames, stepped by key or swipe. Every part exists (quiet view, sets,
@@ -119,24 +122,27 @@ attached.
   counts as a placement (a build failure if its target has no page, a
   phantom "Also in" if it does) — strip fences in the scanner when
   the first gear-notes piece quotes one.
-- **Places** (decided in outline 2026-09-06, replacing the earlier
-  "series entity" — a project spanning years assumes an intent the
-  work does not have; a place returned to over years is what it has).
-  A hybrid of a piece and a gallery: a place is declared once as its
-  own file (`src/content/places/<slug>.md`, a title and the writing),
-  and a piece names it with one frontmatter line, `place: <slug>`,
-  per outing, with a per-frame override in the sidecar for the
-  exceptions. The build refuses a slug with no file and lists the
-  places that exist, so a second spelling cannot arise by accident;
-  Obsidian's property autocomplete offers the used values for free.
-  The page at `/places/<slug>/` carries the writing, then the outings
-  oldest first, each a group of its frames linking to the piece — it
-  grows on its own each time an outing names the place. Never by GPS
-  (the constitution) and not by the free-text wall-label `place`,
-  which stays prose. Open: where places sit in the nav beside
-  galleries; whether a place has a cover and a set of its own for the
-  arrows. The retrospective piece needs nothing new since spec 008 and
-  is the test that earns this spec.
+- ~~**Places**~~ — shipped as spec 009 (2026-09-06), reframed from the
+  earlier "series entity": a place is declared once as its own file
+  (`src/content/places/<slug>.md`, a title, an optional description and
+  cover, and the writing), and the photograph is the unit that names it
+  — `at: <slug>` in a frame's sidecar, with a piece's own `at:` as an
+  optional default for its folder and `at: none` to opt a frame out. The
+  build refuses a slug with no file and lists the places that exist. The
+  page at `/places/<slug>/` carries the writing, then the outings oldest
+  first, each the piece's own frames at the place in the piece's order,
+  packed as a gallery; `/places/` lists cards, and Places sits in the
+  nav after Galleries. The wall label's place is the place's title as a
+  link, and the arrows step through a place's frames when the reader
+  arrives from it. Never by GPS and never by the free-text `place`,
+  which stays prose. Follow-ups it leaves: a place's writing is prose
+  only — no photograph lives beside a place file, so images in a place's
+  body need a reference shape of their own; gallery-root photographs
+  cannot join a place (the page groups by piece and they have none — a
+  group for frames without a piece is the obvious extension, and their
+  `at:` is warned about and ignored until then); and renaming a place is
+  renaming its file, which breaks every `at:` naming it until updated,
+  as the redirect-map item above already notes for images.
 - **Real photographs as fixtures, before more design** — every visual
   decision so far (the warm ground, the mats, the quiet dark, the
   packing) was judged on flat placeholder rectangles. Ten real exports
@@ -175,10 +181,11 @@ attached.
   data (an ordered list of image + label pairs, for image-processing/
   editing narratives) is reserved in the content model now, and the
   directive still fails the build. Spec 006's before/after compare on
-  the image page is a page section fed by a file-naming convention
-  (the private camera's frame beside the photograph), not this block. The block's presentation — carousel, step-through,
-  multi-step narratives — belongs to the processing showcase entry
-  above, once real processing-themed pieces exist to test it against.
+  the image page is a page section fed by a file-naming convention (the
+  private camera's frame beside the photograph), not this block. The
+  block's presentation — carousel, step-through, multi-step narratives —
+  belongs to the processing showcase entry above, once real
+  processing-themed pieces exist to test it against.
 - **Internal piece-to-piece link rewriting** — links between pieces
   authored as vault-relative markdown links (which is what Obsidian's
   `[[` autocomplete inserts, and what feeds its graph/backlinks) need a

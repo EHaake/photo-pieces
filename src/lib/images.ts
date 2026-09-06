@@ -4,7 +4,8 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { readExposure } from './exif.mjs';
-import { byNewestPublished, isPublished } from './pieces';
+import type { SetKind } from './image-set';
+import { byNewestPublished, byOldestPublished, isPublished } from './pieces';
 import {
   classifyContentImage,
   crossReferences,
@@ -13,6 +14,7 @@ import {
   formatCollision,
   formatExposure,
   formatGalleryProblems,
+  groupByPlace,
   homeSlugOf,
   humanizeBasename,
   ImageIdError,
@@ -24,6 +26,10 @@ import {
   orderLatestWork,
   passageFor,
   pieceFrames,
+  placeNameProblem,
+  placeOf,
+  placeProblems,
+  placeSummary,
   privateMessage,
   referenceProblems,
   sidecarImageId,
@@ -78,12 +84,14 @@ export interface ImagePrint {
 
 /**
  * A set the reader can step through from an image (spec 006): a
- * gallery in its curated order, or the piece's frames in the order the
- * piece shows them. Neighbours are ids — resolve through `byId` — so
- * the registry stays a tree, not a graph.
+ * gallery in its curated order, the piece's frames in the order the
+ * piece shows them, or, since spec 009, the place's frames. Neighbours
+ * are ids — resolve through `byId` — so the registry stays a tree, not
+ * a graph. The kind is `SetKind` (image-set.ts), the one definition the
+ * layout's click handler and the image page's script also read.
  */
 export interface ImageSet {
-  kind: 'gallery' | 'piece';
+  kind: SetKind;
   /** The gallery's or piece's id. */
   id: string;
   title: string;
@@ -102,6 +110,31 @@ export interface ImagePassage {
   caption?: string;
 }
 
+/**
+ * A place that publishes (spec 009): its writing, its outings — the
+ * published pieces with at least one frame at it, oldest first, each
+ * outing's frames in that piece's own order — and the card's summary.
+ * Frames are ids only, so an image can point at its place without a
+ * cycle. A draft place, or one with no published frame, is not here.
+ */
+export interface SitePlace {
+  slug: string;
+  entry: CollectionEntry<'places'>;
+  title: string;
+  /** `/places/<slug>/` (site-root; pages apply withBase). */
+  url: string;
+  /** Oldest first; each outing's frames in the piece's order, own-folder only. */
+  outings: { piece: CollectionEntry<'pieces'>; frames: string[] }[];
+  /** The outings' frames concatenated — the set the arrows step through. */
+  frames: string[];
+  /** An id among `frames`: the declared cover, else the most recent outing's first frame. */
+  cover: string;
+  /** The most recent outing's publishDate — the index's order. */
+  latest: Date;
+  /** "N outings · M frames · 2019–2026" (placeSummary). */
+  summary: string;
+}
+
 export interface SiteImage {
   /** `<piece-folder>/<basename>` or `gallery/<basename>`. */
   id: string;
@@ -116,6 +149,9 @@ export interface SiteImage {
   /** Galleries that include this image, newest first. */
   galleries: CollectionEntry<'galleries'>[];
   sidecar: CollectionEntry<'imageMeta'> | null;
+  /** The place this frame is at (spec 009) — null when it names none,
+   *  when its place is a draft, or at the gallery root. */
+  place: SitePlace | null;
   /** Sidecar title → first alt in the piece body → humanized filename. */
   title: string;
   caption?: string;
@@ -147,6 +183,8 @@ export interface ImageRegistry {
   byId: Map<string, SiteImage>;
   /** Every gallery, newest first (undated last). */
   galleries: CollectionEntry<'galleries'>[];
+  /** Every published place (spec 009), most recent outing first, ties by title. */
+  places: SitePlace[];
   /** The n newest curated images — see orderLatestWork. */
   latest(limit: number): SiteImage[];
 }
@@ -197,6 +235,22 @@ type Classified = { path: string; root: string; pieceSlug: string | null } & (
 async function buildRegistry(): Promise<ImageRegistry> {
   const pieces = await getCollection('pieces');
   const pieceById = new Map(pieces.map((piece) => [piece.id, piece]));
+
+  // Places (spec 009): a place file's name is its URL segment and the
+  // value every `at:` line names, so nothing may sit between the two —
+  // the id must be a slug, and never `none`. All bad names at once.
+  const placeEntries = await getCollection('places');
+  const placeNameProblems = placeEntries.flatMap((entry) => {
+    const problem = placeNameProblem(
+      entry.id,
+      entry.filePath ?? `src/content/places/${entry.id}.md`,
+    );
+    return problem ? [problem] : [];
+  });
+  if (placeNameProblems.length) {
+    throw new Error(placeNameProblems.join('\n'));
+  }
+  const placeById = new Map(placeEntries.map((entry) => [entry.id, entry]));
 
   // Discovery: classify every file, drop nested ones with a warning,
   // set private rasters (camera's frames, spec 006) aside for their
@@ -349,7 +403,8 @@ async function buildRegistry(): Promise<ImageRegistry> {
   // not — a sidecar on a draft piece's image is fine, a typo is not).
   const sidecars = new Map<string, CollectionEntry<'imageMeta'>>();
   const orphans: string[] = [];
-  for (const entry of await getCollection('imageMeta')) {
+  const sidecarEntries = await getCollection('imageMeta');
+  for (const entry of sidecarEntries) {
     const imageId = sidecarImageId(entry.id);
     if (!known.has(imageId)) {
       orphans.push(
@@ -363,6 +418,26 @@ async function buildRegistry(): Promise<ImageRegistry> {
     throw new Error(
       `[images] orphan sidecar${orphans.length > 1 ? 's' : ''}:\n${orphans.join('\n')}`,
     );
+  }
+
+  // The slug rule (spec 009): every `at:` other than `none`, on any
+  // piece — draft or not, a typo in a draft is still a typo — and on
+  // any sidecar, must name a declared place, draft or not. All at once.
+  const slugProblems = placeProblems(
+    [
+      ...pieces.map((piece) => ({
+        file: piece.filePath ?? piece.id,
+        slug: (piece.data.at ?? '').trim(),
+      })),
+      ...sidecarEntries.map((entry) => ({
+        file: entry.filePath ?? entry.id,
+        slug: (entry.data.at ?? '').trim(),
+      })),
+    ],
+    placeById.keys(),
+  );
+  if (slugProblems.length) {
+    throw new Error(slugProblems.join('\n'));
   }
 
   // Galleries: validated with file + line against everything known.
@@ -427,6 +502,89 @@ async function buildRegistry(): Promise<ImageRegistry> {
   if (borrowProblems.length) {
     throw new Error(borrowProblems.join('\n'));
   }
+
+  // Where each published frame was made (spec 009): its sidecar's `at`,
+  // else its piece's default — `placeOf` is the only copy of that
+  // precedence. A draft place resolves to no place, so the frame's label
+  // shows the free text alone and links nowhere; the note names it below.
+  // A gallery-root frame has no piece to group under, so a place page
+  // could never show it: the line is checked for its slug and ignored.
+  const placeOfId = new Map<string, string | null>();
+  for (const file of files) {
+    if (known.get(file.id) !== 'published') continue;
+    const sidecar = sidecars.get(file.id) ?? null;
+    if (file.pieceSlug === null) {
+      if (placeOf(sidecar?.data.at, undefined) !== null) {
+        console.warn(
+          `[places] ${sidecar!.filePath ?? sidecar!.id}: gallery-root photographs are not grouped under a place — the line is ignored`,
+        );
+      }
+      continue;
+    }
+    const slug = placeOf(sidecar?.data.at, pieceById.get(file.pieceSlug)?.data.at);
+    placeOfId.set(file.id, slug && !placeById.get(slug)?.data.draft ? slug : null);
+  }
+
+  // The outings: for each published piece oldest first, its own-folder
+  // frames in the piece's order, bucketed by place. A place publishes
+  // when it has an outing and is not a draft; otherwise the build says
+  // so and builds nothing for it. The cover, checked only on a place
+  // that publishes, must be one of its frames — a place declared ahead
+  // of its first outing may name a frame not yet published.
+  const publishedOldestFirst = pieces.filter(isPublished).sort(byOldestPublished);
+  const dateByPiece = new Map(
+    publishedOldestFirst.map((piece) => [piece.id, piece.data.publishDate]),
+  );
+  const grouped = groupByPlace(
+    framesByPiece,
+    placeOfId,
+    publishedOldestFirst.map((piece) => piece.id),
+  );
+  const coverProblems: string[] = [];
+  const sitePlaces: SitePlace[] = [];
+  for (const entry of placeEntries) {
+    if (entry.data.draft) {
+      console.warn(`[places] note: ${entry.id} is a draft — no page, and its frames show no place`);
+      continue;
+    }
+    const group = grouped.get(entry.id);
+    if (!group) {
+      console.warn(
+        `[places] note: ${entry.id} has no published frame yet — no page until a photograph names it`,
+      );
+      continue;
+    }
+    const outings = group.outings.map((outing: { piece: string; frames: string[] }) => ({
+      piece: pieceById.get(outing.piece)!,
+      frames: outing.frames,
+    }));
+    const newest = outings.at(-1)!;
+    const cover = entry.data.cover;
+    if (cover !== undefined && !group.frames.includes(cover)) {
+      coverProblems.push(
+        `[places] ${entry.filePath ?? `src/content/places/${entry.id}.md`}: cover "${cover}" is not one of this place's frames`,
+      );
+      continue;
+    }
+    sitePlaces.push({
+      slug: entry.id,
+      entry,
+      title: entry.data.title,
+      url: `/places/${entry.id}/`,
+      outings,
+      frames: group.frames,
+      cover: cover ?? newest.frames[0],
+      latest: newest.piece.data.publishDate,
+      summary: placeSummary(group.outings, dateByPiece),
+    });
+  }
+  if (coverProblems.length) {
+    throw new Error(coverProblems.join('\n'));
+  }
+  const places = sitePlaces.sort(
+    (a, b) => b.latest.valueOf() - a.latest.valueOf() || a.title.localeCompare(b.title),
+  );
+  const placeBySlug = new Map(places.map((place) => [place.slug, place]));
 
   // Who shows what (spec 008). `framePieces` drives the sets — a piece
   // whose frames hold the image gives the reader arrows through that
@@ -493,6 +651,20 @@ async function buildRegistry(): Promise<ImageRegistry> {
             ...neighbours(frames, file.id),
           });
         }
+        // The place, last of the sets (spec 009): the default set stays
+        // the gallery or the piece, and the arrows step through the
+        // place's frames only for a reader who arrived from its page.
+        const place = placeBySlug.get(placeOfId.get(file.id) ?? '') ?? null;
+        if (place) {
+          sets.push({
+            kind: 'place',
+            id: place.slug,
+            title: place.title,
+            url: place.url,
+            count: place.frames.length,
+            ...neighbours(place.frames, file.id),
+          });
+        }
         const title =
           sidecar?.data.title ??
           (piece ? firstAltFor(piece.body ?? '', file.basename) : undefined) ??
@@ -506,6 +678,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
           piece,
           galleries: inGalleries,
           sidecar,
+          place,
           title,
           caption: sidecar?.data.caption,
           label,
@@ -545,6 +718,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
     images,
     byId,
     galleries,
+    places,
     latest: (limit) =>
       orderLatestWork(galleryLists, captureDates, limit).map((id: string) => byId.get(id)!),
   };
