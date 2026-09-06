@@ -158,7 +158,8 @@ The pieces row becomes one link, as the gallery card is.
       build naming both pieces; a draft piece placing a published one
       builds
 - [ ] A piece's cover may be a reference of either shape, with the
-      same draft rule, and the piece's lists and share image use it
+      same draft rule; the piece's lists use it and the photograph's
+      page counts the piece among its appearances
 - [ ] The fixtures show it: one published piece places a photograph
       from another piece and one from the gallery root, and the three
       image pages read as this spec says
