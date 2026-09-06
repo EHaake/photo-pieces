@@ -143,6 +143,30 @@ attached.
   `at:` is warned about and ignored until then); and renaming a place is
   renaming its file, which breaks every `at:` naming it until updated,
   as the redirect-map item above already notes for images.
+- **Gear** — raised by the photographer at the spec 009 close-out
+  (2026-09-06), in two parts, the first a design conversation before
+  any spec. (1) What a gear section is: the photographer intends to
+  write about the cameras, lenses, tripods, and accessories they use —
+  a profile or a review of each, possibly several pieces about one
+  item over time — and the shape is open: gear as a declared-once
+  file with its own page, like a place (`src/content/gear/<slug>.md`,
+  the writing plus the frames made with it, gathered by the
+  registry), or gear as ordinary pieces tagged to an item, or both,
+  the profile gathering the pieces. (2) The links: the image page's
+  technical section already names the camera and lens from EXIF and,
+  from the sidecar, filters and support; each of those rows becomes a
+  link to its gear page where one exists, and stays plain text where
+  none does — the same rule places use for the label's place. What
+  the conversation has to settle: how a row finds its gear (the EXIF
+  strings a camera writes — `Make`, `Model`, `LensModel` — are exact
+  but ugly, so a gear file would declare the strings it answers to,
+  and a sidecar's `camera:` or `lens:` override would need a slug of
+  its own the way `at:` sits beside `place`); whether filters and
+  support, prose today, take slugs too; whether an item's page lists
+  every frame made with it (a body of work by lens, which the
+  registry could derive as it derives a place's outings) or only the
+  writing; and how several pieces about one item relate to its page.
+  Never a link that leads nowhere: no gear file, no link.
 - **Real photographs as fixtures, before more design** — every visual
   decision so far (the warm ground, the mats, the quiet dark, the
   packing) was judged on flat placeholder rectangles. Ten real exports
