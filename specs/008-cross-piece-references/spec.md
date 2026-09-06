@@ -1,8 +1,7 @@
 # Spec: Cross-piece image references
 
-**Status**: Draft (product owner's decisions 2026-09-05) — plan.md and
-tasks.md follow, for the skeptical-reviewer's sign-off and the product
-owner's spec-conformance summary
+**Status**: Approved (product owner, 2026-09-05, on the spec-conformance
+summary) — plan.md and tasks.md signed off by the skeptical-reviewer
 **Depends on**: 004 (the image registry: every accepted raster in a
 piece folder or the gallery root has a stable id and a page), 006 (the
 image page's sets, passage, and related frames), 007 (every placed
