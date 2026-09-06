@@ -1,7 +1,8 @@
 # Spec: Places
 
-**Status**: Draft (2026-09-06) — written in the design conversation;
-awaiting the product owner's approval
+**Status**: Approved (2026-09-06) — written in the design conversation;
+approved by the product owner with the three open decisions decided as
+drafted
 **Depends on**: 004 (the image registry: every accepted raster in a
 piece folder has a stable id and a page), 006 (the image page's sets
 and arrows, the wall label's place and time), 008 (a piece's frames
@@ -209,14 +210,12 @@ photographer gives.
   default, because the outing shot entirely at one place — the case
   Places exists for — would otherwise need one sidecar per frame all
   saying the same thing.
-
-## Open decisions (for the product owner)
-
-1. **The exception field's name.** The sidecar already has a free-text
-   `place` for the wall label, so the declaration cannot reuse it. The
-   draft says `at:` — `at: <slug>` and `at: none`. Alternatives: `in:`,
-   or `placeSlug:`.
-2. **Oldest first.** The draft orders a place's outings oldest first so
-   the years read as years; the site's other lists are newest first.
-3. **Places in the nav.** The draft adds Places beside Galleries. The
-   alternative is a section on the galleries index, no nav change.
+- **The sidecar field is `at`** (2026-09-06, left to the orchestrator).
+  It reads as the label does — "at Sombrio" — pairs with `at: none`,
+  and cannot be mistaken for the free-text `place` beside it. `in` and
+  `placeSlug` were the alternatives.
+- **Outings oldest first** on a place page (2026-09-06, product
+  owner), so the years read as years; the site's other lists stay
+  newest first.
+- **Places in the nav** beside Galleries (2026-09-06, product owner),
+  rather than a section on the galleries index.
