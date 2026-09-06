@@ -152,29 +152,34 @@ further, and whenever something unexpected bears on spec adherence.
 
 ## Model policy
 
-<!-- Decided once, alongside the involvement level. Adjust the tier
-names as models change; the roles don't. -->
-
 - **Decisions run at the best available tier**: the spec conversation,
   plan and task drafting, Step 1 triage, orchestration of
   implementation, and the `skeptical-reviewer` when it's judging a
-  decision — plan/tasks sign-off, the pre-merge sweep, and reviews of
-  routine-but-real decisions — via a per-call model override up from
-  its default.
+  decision — plan/tasks sign-off and reviews of routine-but-real
+  decisions — via a per-call model override up from its default.
 - **The `skeptical-reviewer` runs one tier down by default** (its
   definition says `opus`) for per-task reviews in foundational phases,
-  which are narrow checks of a diff against its plan section. Each
-  per-task review gets a single bundle file assembled with shell —
-  diff, task line, plan section, acceptance criteria — and reads
-  nothing else.
+  per-phase reviews in mechanical ones, and the pre-merge sweep. Each
+  review gets a single bundle file assembled with shell — diff, task
+  lines, plan sections, acceptance criteria; for the sweep, the
+  documents and the spec's full diff — and reads nothing else.
+- **Review loop cap**: one review and at most one re-review per task.
+  The re-review sees the findings and the fix diff only. Blocking
+  means it would fail an acceptance criterion or a test, or contradicts
+  `plan.md` or `CLAUDE.md`; nothing else blocks. Anything open after
+  the re-review goes to the tier log and the sweep.
 - **Implementation runs one tier down**, in the `sdd-implementer`
   subagent, one task per dispatch, sequentially. The orchestrating
-  session triages each task, dispatches routine ones with a packet
-  (task line, plan section, acceptance criteria, files, the pattern
-  file to copy), and on return verifies by running — build and tests
-  re-run by the orchestrator itself, the `skeptical-reviewer` on
-  foundational tasks — not by re-reading the diff. Only the
-  orchestrator edits `tasks.md` or commits.
+  session triages each task, dispatches routine ones on a task bundle
+  assembled with shell (task line, plan section, acceptance criteria,
+  files, the pattern file to copy), and on return verifies with the
+  verification command below — re-run by the orchestrator in
+  foundational phases, taken from the implementer's verbatim output in
+  mechanical ones — never by re-reading the diff. Only the orchestrator
+  edits `tasks.md` or commits.
+- **Fresh orchestrator session at each phase pause**, resuming from
+  the first unchecked task, so the top-tier context doesn't accumulate
+  the whole spec.
 - **Escape hatch**: two failed verifications on one task, or a "stopped
   on a judgment call" the orchestrator considers well-specified, and
   the orchestrator does that task itself at the top tier, noting the
@@ -217,17 +222,25 @@ plan in that feature's directory. When resuming a session, check
 
 ## Verification
 
-After any implementation task, Claude Code must:
+The verification command for this project is:
 
-1. Build the project (`astro build`).
-2. Run the test suite, where one exists for what changed.
-3. Report the actual pass/fail output, not a paraphrase.
+    sh scripts/verify.sh
 
-A task is not complete until steps 1–2 are green. Do not weaken, skip, or
-delete a test to make it pass — if a test seems wrong, flag it and ask.
-When the task was dispatched to the `sdd-implementer`, its report is not
-a substitute for this: the orchestrator re-runs steps 1–2 itself before
-committing.
+(`sh scripts/verify.sh tests` runs Vitest alone, for a task that
+changes a pure rule and nothing a build renders.) It builds, runs
+`astro check`, and runs the tests, printing the counts and every
+flagged line — the full logs go to a temp folder it names — and on a
+failure the last forty lines. Green: `BUILD EXIT 0`, `CHECK EXIT 0`,
+`TEST EXIT 0`, and no failed tests.
+
+After any implementation task, Claude Code must run that command and
+report its actual output, not a paraphrase.
+
+A task is not complete until that output is green. Do not weaken, skip,
+or delete a test to make it pass — if a test seems wrong, flag it and
+ask. When the task was dispatched to the `sdd-implementer`, its verbatim
+output is the verification in mechanical phases; in foundational phases
+the orchestrator re-runs the command itself before committing.
 
 ## Git conventions
 
