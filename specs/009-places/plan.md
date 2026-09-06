@@ -177,9 +177,9 @@ the gallery-root warning:
   place lands under its own piece in the other place; outings in the
   order given; the piece's order kept within an outing; a place with no
   frame absent); `placeSummary` ("1 outing · 1 frame · 2026", "2 outings
-  · 7 frames · 2019–2026"); `placeNameProblem` (a slug passes; `Sombrio
-Beach`, `sombrio.beach`, and `none` each get their message). Each
-  mutation-checked: the rule broken, the test named as failing.
+  · 7 frames · 2019–2026"); `placeNameProblem` (a slug passes;
+  `Sombrio Beach`, `sombrio.beach`, and `none` each get their message).
+  Each mutation-checked: the rule broken, the test named as failing.
 - `image-set.test.mjs` (new): `setKeyFromPath` maps `/places/x/` to
   `place:x`, keeps the two existing kinds, and returns null for
   `/images/…`; `setKey('place', 'x')`. The module is TypeScript;

@@ -39,29 +39,31 @@ attached.
   detail page, its own kind of piece, or spread across both. Subsumes
   the `sequence` block's open interaction design below.
 - ~~**Galleries and image pages**~~ — done in spec 004: the image
-  registry, image pages, named galleries with a category (rows packed to
-  equal short sides in editorial order — the photographer's rule from
-  the sampler review, `DECISIONS.md`), the galleries index, category
-  pages, every piece image linking to its page, and the GPS barriers.
-  Follow-ups it surfaced: the homepage design pass places the
+  registry, image pages, named galleries with a category (rows packed
+  to equal short sides in editorial order — the photographer's rule
+  from the sampler review, `DECISIONS.md`), the galleries index,
+  category pages, every piece image linking to its page, and the GPS
+  barriers. Follow-ups it surfaced: the homepage design pass places the
   `LatestWork` strip (built, unplaced); renaming an image changes its
   URL with no redirect (fine while nothing is live — a redirect map
   becomes worth having once URLs are public); an image's page doesn't
   distinguish "referenced by the piece" from "in the folder", and an
-  image can belong to one piece only; image pages were not in Pagefind's
-  index (spec 006 indexes the ones with something to find); and the
-  post-build pruner (`scripts/prune-unreferenced-originals.mjs`) exists
-  because Astro leaves untouched originals in the output — worth an
-  upstream issue, and a no-op if they fix it. - **A galleries overhaul**
-  — noted by the photographer at the spec 007 close-out (2026-09-05),
-  for a spec of its own (since spec 009 the place pages share the
-  gallery's packing knobs and rows, so the overhaul moves them too): the
-  gallery grid feels too constrained by the prose column's width — it
-  should be able to run wider on the page than the text does, closer to
-  the content width — and the spacing between the images wants retuning.
-  Both are knobs of `gallery-layout.ts` and the `.gallery-grid` rules
-  today; the spec decides the widths and the gaps by looking, on both of
-  the photographer's screens, and folds in whatever the real photographs
+  image can belong to one piece only; image pages were not in
+  Pagefind's index (spec 006 indexes the ones with something to find);
+  and the post-build pruner
+  (`scripts/prune-unreferenced-originals.mjs`) exists because Astro
+  leaves untouched originals in the output — worth an upstream issue,
+  and a no-op if they fix it.
+- **A galleries overhaul** — noted by the photographer at the spec 007
+  close-out (2026-09-05), for a spec of its own (since spec 009 the
+  place pages share the gallery's packing knobs and rows, so the
+  overhaul moves them too): the gallery grid feels too constrained by
+  the prose column's width — it should be able to run wider on the page
+  than the text does, closer to the content width — and the spacing
+  between the images wants retuning. Both are knobs of
+  `gallery-layout.ts` and the `.gallery-grid` rules today; the spec
+  decides the widths and the gaps by looking, on both of the
+  photographer's screens, and folds in whatever the real photographs
   (below) teach about density.
 - **The front door** — to be workshopped with the photographer
   (decided 2026-09-02): the interim homepage (spec 002) stands until

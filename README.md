@@ -240,8 +240,8 @@ photographer returns to: a title, an optional description, cover, and
 `draft`, and a body that is the writing about the place. The file name
 is the slug and the URL. A frame names its place in its sidecar with
 `at: <slug>`, or a piece names one default for its whole folder with
-`at: <slug>` in its frontmatter — the frame's own line wins, and `at:
-none` opts a frame out of the default. `/places/<slug>/` shows the
+`at: <slug>` in its frontmatter — the frame's own line wins, and
+`at: none` opts a frame out of the default. `/places/<slug>/` shows the
 writing and then every published frame at the place, grouped by the
 piece it lives in, outings oldest first, so the page grows as pieces are
 published; `/places/` lists the places as cards and is in the nav after
