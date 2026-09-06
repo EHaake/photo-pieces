@@ -578,10 +578,13 @@ piece lists then agree by construction rather than by whatever order
 the content loader happened to return (T603).
 
 **The long self-reference is refused.** `../<own-slug>/<file>` would
-resolve to a piece's own image, but the scanner stays local-only, so
-the piece's title and passage would miss the frame and the frames list
-would carry it twice. The transform knows the file's folder and says
-so: write `./<file>`. One way to write a local image.
+resolve to a piece's own image — the same id, the same place in the
+frames list — but the lookups that read a frame's alt and its passage
+from the body stay local-only, so a frame written the long way would
+lose the alt the piece wrote for it, its page falling back, absent a
+sidecar title, to the humanized filename, and lose its passage. The transform
+knows the file's folder and says so: write `./<file>`. One way to
+write a local image.
 
 **A borrowed non-raster is refused.** `../beta/land-a.tif` would mint
 the id `beta/land-a` — the registered `land-a.jpg`'s — pass the draft

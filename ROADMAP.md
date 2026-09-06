@@ -109,7 +109,8 @@ attached.
   now breaks every reference to it from another piece as well as its
   own URL, so the redirect-map item above stands; the
   passage on an image's page stays the home piece's even when the
-  borrowing piece has the richer paragraph (decision 2, `DECISIONS.md`);
+  borrowing piece has the richer paragraph ("One page, one home" in
+  `DECISIONS.md`);
   and a missing file written as the plain `![alt](…)` shorthand still
   fails with Astro's opaque error rather than the transform's — the
   check can be extended to the shorthand in a later spec.

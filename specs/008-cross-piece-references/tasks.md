@@ -171,6 +171,29 @@ a later spec can extend `checkSrcExists` to the shorthand visit. -->
       raster" rather than listing extensions, since `tiff` is accepted
       and `tif` is not._
 
+Phase 1 notes. (a) At the Phase 0 gate the product owner asked that the
+image page's "From the piece" / "Also in" / "In the gallery" titles
+read as links without a mouse-over; they and the same class's "Read it
+in place" and print links now take the accent colour, the hover colour
+restored by a scoped `:hover` rule after the phase review predicted, and
+the orchestrator measured, that the scoped rule was outranking the
+theme's. Recorded here because the plan's image-page section says the
+chrome stays untouched. (b) The phase review's two blocking findings
+were doc claims: AUTHORING said every other shape fails the build
+(remote and root-absolute srcs are left to Astro — now said), and
+DECISIONS said the long self-reference would double the frames list (it
+would not; `pieceFrames` dedups — the true cost is the local-only title,
+alt, and passage lookups, now said). Also folded in: the plugin README
+states that borrowing needs the vault root at or above the repo root;
+AUTHORING's plugin sentence claims resolution only, not shape checking;
+ROADMAP cites a DECISIONS heading, not a number. Checked and left:
+`.note-row` has its ground from the shared rule at global.css ~792 (the
+review's excerpt stopped short of it); nothing in `src/` consumes
+`.note-row h3 a`; the DECISIONS claim that `astro dev` shows a borrowed
+draft image was observed (the fog piece toggled to draft: the sampler
+page 200 with the borrowed frame, the image page 500, both restored on
+revert).
+
 ## Phase 2 — Close-out (reviewer sweep, then merge)
 
 - [ ] **T608** — The pre-merge whole-spec sweep at the top tier and its
@@ -203,6 +226,8 @@ which pre-policy Phase 0 803,056). -->
 | T605 (sdd-implementer)    | opus             | 21,511           | verified first try; the browser checks run by the orchestrator                                                                                                               |
 | T606 (sdd-implementer)    | opus             | 27,693           | verified first try; the resolver re-checked by the orchestrator                                                                                                              |
 | T607 (sdd-implementer)    | opus             | 62,883           | verified first try; the docs read against the shipped behaviour by the orchestrator                                                                                          |
+| Phase 1 review            | reviewer default | 81,566           | fix and re-review (two doc claims); the hover prediction confirmed by measurement and fixed                                                                                  |
+| Phase 1 re-review ×2      | reviewer default | 58,985 + 27,998  | fix and re-review ×1 (the DECISIONS sentence overstated again: the title falls back to the humanized filename), then signed off with two precision notes folded in           |
 
 ---
 

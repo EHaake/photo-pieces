@@ -26,7 +26,11 @@ A `src` that names a folder — `../other-piece/x.jpg`,
 `../../gallery-images/x.jpg` — is resolved from the note's own folder
 the way the site build resolves it, so a wrong path shows "not found"
 rather than a same-named file from another folder. A bare `./x.jpg`
-still uses Obsidian's own lookup.
+still uses Obsidian's own lookup. Borrowing from the gallery root
+needs the vault root at or above `src/content/` (the layout in
+`AUTHORING.md` puts it at the repo root): a vault opened at `src/content/pieces/` cannot reach
+`../../gallery-images/`, and the plugin shows "not found" for a path
+the build accepts.
 
 ## Build and install
 

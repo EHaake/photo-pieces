@@ -432,18 +432,22 @@ Learned by breaking them — each of these fails quietly if violated:
   the piece's own image as `./<file>`, another piece's as
   `../<slug>/<file>`, a gallery-root one as
   `../../gallery-images/<file>` ("Borrowing a photograph" above). Any
-  other shape — a sub-folder, a further level up, an absolute OS path
-  (`~/Downloads/...`), which resolves nowhere in Obsidian's preview
-  either — fails the build with a message naming those three; so does
-  the long way of writing your own image (`../<own-slug>/<file>`),
-  refused with the hint to write `./<file>`. Only an accepted raster
+  other relative shape — a sub-folder, a further level up, a home-dir
+  path (`~/Downloads/...`), which resolves nowhere in Obsidian's
+  preview either — fails the build with a message naming those three;
+  so does the long way of writing your own image
+  (`../<own-slug>/<file>`), refused with the hint to write `./<file>`.
+  A remote `https://…` src (any `scheme:` src) and a root-absolute
+  `/…` one are left to Astro, unchecked by this rule and without a
+  page. Only an accepted raster
   can be borrowed, so a `.tif` beside a `.jpg` is refused rather than
   quietly taking the jpg's page, and a borrowed path that points at
   nothing fails with the same missing-file message a local image gets.
   The plugin resolves a path with a folder in it from the note's
-  folder exactly as the build does, so a wrong `../` path shows the
+  folder, as the build resolves it, so a wrong `../` path shows the
   dashed "not found" box instead of a same-named file from somewhere
-  else — the box is telling the truth about what production would do.
+  else; it checks the path's existence, not its shape, so the build
+  is still the judge of which shapes are allowed.
 
 ## Linking practice
 
