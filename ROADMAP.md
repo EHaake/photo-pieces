@@ -97,12 +97,22 @@ attached.
   time: full viewport on the dimmed ground, the piece's words between
   frames, stepped by key or swipe. Every part exists (quiet view, sets,
   arrow keys, the passage); the anti-feed in its purest form.
-- **Cross-piece image references** — loosen "one piece owns an image"
-  (decided 2026-09-02): a block can place another piece's image, or a
-  gallery-root image, by id (`::single{id="…"}`), with the transform
-  resolving it and the image's page listing every piece it appears
-  in. Needed by the first retrospective piece; today that means
-  copies.
+- ~~**Cross-piece image references**~~ — done in spec 008, by path
+  rather than by the id the entry sketched: a piece places another
+  piece's photograph as `../<slug>/<file>` and a gallery-root one as
+  `../../gallery-images/<file>`, in every block, the shorthand, and
+  `cover`. The photograph keeps its home page, which gains an "Also
+  in" line naming every other published piece that places it; the
+  arrows follow the piece the reader came from; a published piece may
+  not borrow from a draft one. The pieces row became one link, as the
+  gallery card is. Follow-ups it leaves: renaming a folder or a file
+  now breaks every reference to it from another piece as well as its
+  own URL, so the redirect-map item above stands; the
+  passage on an image's page stays the home piece's even when the
+  borrowing piece has the richer paragraph (decision 2, `DECISIONS.md`);
+  and a missing file written as the plain `![alt](…)` shorthand still
+  fails with Astro's opaque error rather than the transform's — the
+  check can be extended to the shorthand in a later spec.
 - **A series entity** (under discussion) — between a piece and a
   gallery: a body of work spanning years, with an essay, its pieces
   in order, and its own curated set of frames; a page at

@@ -149,7 +149,7 @@ a later spec can extend `checkSrcExists` to the shorthand visit. -->
       `~/photo-brain/` on this machine, so the rebuilt `main.js` is
       installed by the product owner per the plugin README, and the Live
       Preview check is his at the gate._
-- [ ] **T607** — Docs: `AUTHORING.md` (the two path shapes, one home, what
+- [x] **T607** — Docs: `AUTHORING.md` (the two path shapes, one home, what
       the page shows, the draft rule, covers, in "A piece folder is public
       territory" and "Hard-won syntax rules"), `README.md` (the block
       table's note on image paths; the "images live directly in the piece
@@ -162,7 +162,14 @@ a later spec can extend `checkSrcExists` to the shorthand visit. -->
       the published-pieces order gained an id tie-break so the registry's
       appearance order and the site's lists agree by construction (T603). _Verify: Prettier
       clean; the AUTHORING examples build when pasted into a temporary
-      piece (reverted)._
+      piece (reverted). Record: the four docs Prettier-stable across two
+      runs; the AUTHORING examples built in a temporary piece (75 pages,
+      the temp piece named under "Also in" on `land-b`, `dock-a`, and
+      `land-c`), reverted, 74 pages again; the README sentence the task
+      named lives in AUTHORING, so README's "Images, galleries, and image
+      pages" opening was amended instead; the docs say "an accepted
+      raster" rather than listing extensions, since `tiff` is accepted
+      and `tif` is not._
 
 ## Phase 2 — Close-out (reviewer sweep, then merge)
 
@@ -195,6 +202,7 @@ which pre-policy Phase 0 803,056). -->
 | T604 review               | reviewer default | 28,506           | signed off pending the browser set-key check, which passed; two prose notes folded in by the orchestrator                                                                    |
 | T605 (sdd-implementer)    | opus             | 21,511           | verified first try; the browser checks run by the orchestrator                                                                                                               |
 | T606 (sdd-implementer)    | opus             | 27,693           | verified first try; the resolver re-checked by the orchestrator                                                                                                              |
+| T607 (sdd-implementer)    | opus             | 62,883           | verified first try; the docs read against the shipped behaviour by the orchestrator                                                                                          |
 
 ---
 
