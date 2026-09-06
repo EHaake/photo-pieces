@@ -26,8 +26,10 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the rules, the registry, the pages (reviewer after each task; the person's gate at its end)
 
-- [ ] **T701** — The pure rules. `image-meta.mjs`: `placeOf`, `placeProblems(refs, placeSlugs)` returning the plan's
-      messages, `groupByPlace(framesByPiece, placeOfId, pieceOrder)`
+- [ ] **T701** — The pure rules. `image-meta.mjs`: `placeOf` (a `none`
+      default is no default), `placeNameProblem(name)` (not a slug, or
+      `none`, with the plan's messages), `placeProblems(refs, placeSlugs)`
+      returning the plan's messages, `groupByPlace(framesByPiece, placeOfId, pieceOrder)`
       returning each place's outings and flat frames, `placeSummary` returning the card line. `pieces.ts`: `byOldestPublished` beside
       `byNewestPublished`. `image-set.ts`: `SetKind` gains `'place'`;
       `setKeyFromPath` matches `/places/<slug>/`. _Verify: vitest — the
@@ -38,7 +40,7 @@ headers to confirm nothing was duplicated or dropped. -->
 - [ ] **T702** — The schemas, the registry, the fixtures.
       `content.config.ts`: the `places` collection (`generateId` = file
       name; title, description?, cover?, draft), `at?` on pieces and on
-      sidecars. `images.ts`: read places; refuse a non-slug id and the name `none`; the slug
+      sidecars. `images.ts`: read places; refuse an id `placeNameProblem` refuses; the slug
       rule over every piece and sidecar (drafts included), all problems in
       one throw; resolve each published piece-folder frame's place via
       `placeOf` (a draft place resolves to none, with the note; a
@@ -58,8 +60,9 @@ headers to confirm nothing was duplicated or dropped. -->
       jetty with two outings oldest first, land-c's sets ending in
       `place:the-jetty` with next = jetty-dawn, pano and the sampler's
       frames with no place; the six temporary runs (unknown slug on a
-      piece, unknown `at:`, an empty place, a draft copy of the fog piece,
-      a cover that is not a frame, `the-jetty.md` as a draft — its note,
+      piece, unknown `at:`, an empty place that also declares a cover — the
+      note and no cover failure, a draft copy of the fog piece, a cover
+      that is not a frame on a publishing place, `the-jetty.md` as a draft — its note,
       no page, no card, land-c with no place and no place set) each with
       their actual message or note recorded here and the files restored;
       vitest 230+ green; `astro check` green. This is the spec's largest
@@ -75,9 +78,11 @@ headers to confirm nothing was duplicated or dropped. -->
       `NAV_ITEMS` gains Places after Galleries. _Verify: build green;
       `dist/galleries/index.html` and `dist/categories/landscape/index.html`
       identical before and after once `data-astro-cid-[a-z0-9]+` and the
-      hashed CSS link are normalized to placeholders (the scoped-style
-      hash is per file, so a raw diff cannot be clean — the plan says why;
-      the normalized diff recorded); `/places/` and the two
+      hashed CSS link are normalized to placeholders, and the page's CSS
+      (the linked files, or the inline sheet if Astro inlined it — say
+      which) identical under the same normalization (the scoped-style hash
+      is per file, so a raw diff cannot be clean — the plan says why; both
+      normalized diffs recorded); `/places/` and the two
       place pages read as the plan's fixture paragraph says (titles,
       order, counts, every frame a link to its page, every heading a link
       to its piece); geometry at 1440×900, 1080×1920, 375×812 measured in
@@ -117,10 +122,9 @@ none`, what the page shows, that a place grows on its own, gallery-root
       frames in a place; renaming a place). `DECISIONS.md`: a spec 009
       section (the frame as the unit with the piece default as shortcut,
       `at` on both files and the autocomplete reason, oldest first, Places
-      in the nav, the cover check's home). Both commit straight to `main`,
-      as the repo-wide docs have since spec 001 (the constitution's rule
-      keeps implementation off `main`; ROADMAP's Places entry went there
-      the same way). Then the pre-merge whole-spec sweep at the top tier and its
+      in the nav, the cover check's home). Both ride this spec branch
+      and merge with the PR, as spec 008's close-out docs did, so the
+      sweep's diff against `main` contains them. Then the pre-merge whole-spec sweep at the top tier and its
       findings resolved; the spec's acceptance criteria checked against
       their records; build, tests, check, GPS scan, and format green with
       actual output; the PR marked ready and merged with a merge commit.

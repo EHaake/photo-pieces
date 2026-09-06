@@ -25,12 +25,16 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   a slug (`[a-z0-9-]+`, the rule piece folders already obey): the file
   name is the URL segment and the value every `at:` line
   must match, so nothing may sit between the two. The name `none` is
-  refused too: it is the sidecar's word for "no place", and a place so
-  named could never be reached by an `at:` line.
+  refused too: it is the word for "no place", and a place so named
+  could never be reached by an `at:` line. Both refusals are one pure
+  `placeNameProblem(name)` in `image-meta.mjs`, tested in T701 and
+  called by the registry, so neither needs a build to prove it.
 - **A frame's place** (`placeOf(at, pieceDefault)`, pure, in
   `image-meta.mjs`): the sidecar's `at` if it is a slug; `null` if it
   is `none`; else the piece's `at`; else `null`. Blank strings count
-  as unset. This is the spec's "a frame's own line always wins" in one
+  as unset, and a piece whose `at` is `none` has no default — Obsidian
+  will offer `none` on a piece, since the property is shared, and it
+  means there what it means on a sidecar (re-review: second look). This is the spec's "a frame's own line always wins" in one
   function, and the only place the precedence is written.
 - **The slug rule**: every `at:` on every piece, draft or not, and
   every `at:` other than `none` on every sidecar, must name a declared
@@ -106,9 +110,10 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   and the content-hashed CSS file name (sign-off: blocking). T703
   therefore compares the built HTML of `/galleries/` and
   `/categories/landscape/` after normalizing `data-astro-cid-[a-z0-9]+`
-  and the `/_astro/*.<hash>.css` link to placeholders — identical then,
-  or the refactor changed something real. The place card's meta is the
-  summary line.
+  and the `/_astro/*.<hash>.css` link to placeholders, and the page's
+  CSS (linked or inlined) the same way — identical then, or the
+  refactor changed something real, in the markup or in a rule. The
+  place card's meta is the summary line.
 - **The nav** (`consts.ts`): `{ href: '/places/', label: 'Places' }`
   after Galleries. Six items; T703 checks the header at the three
   viewports for wrapping.
@@ -134,10 +139,12 @@ one per problem, all in one throw:
 [places] src/content/pieces/<slug>/index.md: no place named "<slug>" — none is declared yet: add src/content/places/<slug>.md
 ```
 
-A place file whose name is not a slug; a cover that is not a frame:
+A place file whose name is not a slug, or is `none`; a cover that is
+not a frame:
 
 ```
 [places] src/content/places/<file>: a place's file name is its URL — lowercase letters, digits, and hyphens only
+[places] src/content/places/none.md: "none" is the word for no place — a place needs another name
 [places] src/content/places/<slug>.md: cover "<id>" is not one of this place's frames
 ```
 
@@ -162,7 +169,8 @@ the gallery-root warning:
   piece in the other place; outings in the order given; the piece's
   order kept within an outing; a place with no frame absent);
   `placeSummary` ("1 outing · 1 frame · 2026", "2 outings · 7 frames ·
-  2019–2026"). Each mutation-checked: the rule broken, the test named
+  2019–2026"); `placeNameProblem` (a slug passes; `Sombrio Beach`,
+  `sombrio.beach`, and `none` each get their message). Each mutation-checked: the rule broken, the test named
   as failing.
 - `image-set.test.mjs` (new): `setKeyFromPath` maps `/places/x/` to
   `place:x`, keeps the two existing kinds, and returns null for
@@ -178,8 +186,10 @@ the gallery-root warning:
   below and six temporary runs recorded in `tasks.md` with their
   actual output, each file restored after: a piece naming
   `the-headland` (the message lists `the-headlands, the-jetty`); a
-  sidecar `at: nowhere`; an empty `src/content/places/empty.md` (the
-  note, and no `/places/empty/` in `dist/`); a draft copy of the fog
+  sidecar `at: nowhere`; an empty `src/content/places/empty.md` that
+  also declares `cover: where-the-fog-lets-go/land-a` (the note, no
+  `/places/empty/` in `dist/`, and no cover failure — the check skips
+  a place that publishes nothing); a draft copy of the fog
   piece naming `the-headlands` (its frames absent from the place); a
   cover naming a frame the place does not hold (the message); and
   `the-jetty.md` marked `draft: true` (the draft note; no
@@ -216,8 +226,14 @@ the gallery-root warning:
   pack as the gallery's do, the outing headings clear the rows, the
   nav's six items do not wrap onto the brand at any of the three (or
   wrap cleanly if they do at 375, measured, not assumed).
-- `/galleries/` and `/categories/landscape/` built HTML identical
-  before and after the cards refactor (`diff` on `dist/`).
+- `/galleries/` and `/categories/landscape/` built output identical
+  before and after the cards refactor once normalized: the HTML with
+  `data-astro-cid-[a-z0-9]+` and the hashed CSS link replaced by
+  placeholders, and the page's CSS — the linked `/_astro/*.css` files,
+  or the inline `<style>` if Astro inlined them (it inlines small
+  sheets by default; the run says which case it was) — with the same
+  cid normalization, so a rule dropped in the move shows as well as a
+  changed element.
 - Existing suites green (230); build with the barriers; `astro check`;
   Prettier.
 
@@ -226,7 +242,7 @@ the gallery-root warning:
 ```
 src/content.config.ts               places collection; at: on pieces and on sidecars
 src/content/places/                 the-headlands.md, the-jetty.md (fixtures)
-src/lib/image-meta.mjs              placeOf, placeProblems, groupByPlace, placeSummary
+src/lib/image-meta.mjs              placeOf, placeNameProblem, placeProblems, groupByPlace, placeSummary
 src/lib/pieces.ts                   byOldestPublished
 src/lib/image-set.ts                'place' kind; /places/ in setKeyFromPath
 src/lib/images.ts                   SitePlace, registry.places, image.place, the place set
