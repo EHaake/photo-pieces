@@ -190,7 +190,7 @@ print's lists, whose values are plain strings today.
 
 ## Phase 1 — The docs (reviewer after the phase)
 
-- [ ] **T705** — Docs: `AUTHORING.md` gains a "Places" section
+- [x] **T705** — Docs: `AUTHORING.md` gains a "Places" section
       (declaring a place, `at:` on a frame, the piece default and `at:
 none`, what the page shows, that a place grows on its own, gallery-root
       frames excluded), a place template beside the piece and sidecar
@@ -199,7 +199,23 @@ none`, what the page shows, that a place grows on its own, gallery-root
       the sidecar's `place` is prose; `README.md`'s content model, the image-page paragraph, the
       nav sentence, and the structure listing mention places. _Verify:
       every claim read against the built pages by the orchestrator; Prettier
-      clean; build green._
+      clean; build green. Record: verified first try (build 77 pages, Pagefind 16 —
+      pano's page joins the index with its free-text place — check 0,
+      252 tests, Prettier clean); the orchestrator read every claim
+      against Phase 0's behaviour and added `places/` to AUTHORING's
+      vault-layout diagram. The phase review blocked on one sentence
+      copied from spec Goal 3 — "a piece that sets no default never
+      touches Places" — which reads as the opposite of the shipped rule
+      (the jetty piece sets no default and appears through its frame's
+      own line); the docs and the spec now say a piece that sets no
+      default imposes none. Six notes fixed by the orchestrator directly
+      (the skeleton count, the template comment, the cover refusal's
+      "once the place publishes" in README, `at: none` on a piece
+      documented, the example fence untagged, three over-long lines
+      rewrapped). Left to the sweep: the spec's correction is recorded
+      here and belongs in DECISIONS with the `at` entry (T706); Prettier
+      does not enforce prose width (`proseWrap` is `preserve`), so long
+      lines are hand-kept._
 
 ## Phase 2 — Close-out (reviewer sweep, then merge)
 
@@ -239,15 +255,20 @@ implementer 490,854 over nine dispatches; reviewer 905,152 all tiers. -->
 | T703 review                                   | reviewer default | 41,612                            | signed off; the two comparison deltas recorded, the sheet-order artifact added to plan.md, a bodiless place run by the orchestrator                                                                                                                                                                                                                                                                                                                      |
 | T704 (sdd-implementer)                        | opus             | 47,303                            | verified first try; the built-page evidence and the temporary run verbatim; the browser checks run by the orchestrator                                                                                                                                                                                                                                                                                                                                   |
 | T704 review                                   | reviewer default | 29,136                            | signed off; the fixture gap closed as T704a by the orchestrator                                                                                                                                                                                                                                                                                                                                                                                          |
+| T705 (sdd-implementer)                        | opus             | 50,241                            | verified first try; no ungrounded claim in its report                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Phase 1 review                                | reviewer default | 40,699                            | fix and re-review (one blocking sentence copied from the spec; six notes) — fixes by the orchestrator directly, doc lines only                                                                                                                                                                                                                                                                                                                           |
+| Phase 1 re-review                             | reviewer default | 31,662                            | signed off; two wording notes folded in, the spec's rationale moved out of Goal 3 for DECISIONS                                                                                                                                                                                                                                                                                                                                                          |
 
 ---
 
 ## Handoff note
 
-**Phase 0 is complete (2026-09-06)**: T701–T704a checked, each reviewed
-and signed off; the person's gate is next. The next session begins at
-T705 (Phase 1, the docs; its bundle is the orchestrator's to assemble
-fresh), reviewer after the phase; then T706.
+**Phases 0 and 1 are complete (2026-09-06)**: T701–T705 checked, each
+reviewed and signed off; Phase 0 attested by the product owner, Phase
+1's gate is next. The next session begins at T706 (Phase 2, the
+close-out: ROADMAP and DECISIONS on this branch, then the sweep at the
+reviewer's default tier on the documents plus `git diff main...HEAD`,
+then the merge).
 
 > Read `CLAUDE.md` and `specs/009-places/{spec,plan,tasks}.md`, then
 > begin at the first unchecked task as the orchestrator under the model
