@@ -121,7 +121,8 @@ none`, what the page shows, that a place grows on its own, gallery-root
       follow-ups the plan names (images in a place's writing; gallery-root
       frames in a place; renaming a place). `DECISIONS.md`: a spec 009
       section (the frame as the unit with the piece default as shortcut,
-      `at` on both files and the autocomplete reason, oldest first, Places
+      `at` on both files with `none` accepted on either and the autocomplete
+      reason, oldest first, Places
       in the nav, the cover check's home). Both ride this spec branch
       and merge with the PR, as spec 008's close-out docs did, so the
       sweep's diff against `main` contains them. Then the pre-merge whole-spec sweep at the top tier and its

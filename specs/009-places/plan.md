@@ -36,8 +36,8 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   will offer `none` on a piece, since the property is shared, and it
   means there what it means on a sidecar (re-review: second look). This is the spec's "a frame's own line always wins" in one
   function, and the only place the precedence is written.
-- **The slug rule**: every `at:` on every piece, draft or not, and
-  every `at:` other than `none` on every sidecar, must name a declared
+- **The slug rule**: every `at:` other than `none`, on every piece,
+  draft or not, and on every sidecar, must name a declared
   place, draft or not. A typo in a draft is still a typo, and the
   sidecar orphan rule already checks drafts' sidecars. Unknown slugs
   fail the build all at once, each message listing the declared places.
@@ -161,7 +161,8 @@ the gallery-root warning:
 
 - `image-meta.test.mjs`, a `describe('places (T701, spec 009)')`:
   `placeOf` (own slug wins over a default; `none` under a default is
-  null; no line takes the default; nothing is null; blanks are unset);
+  null; no line takes the default; a `none` default is no default;
+  nothing is null; blanks are unset);
   `placeProblems` (unknown slug lists the places sorted; the no-places
   wording; a known slug and `none` are no problem; every problem
   returned at once); `groupByPlace` (a borrowed id is never counted
