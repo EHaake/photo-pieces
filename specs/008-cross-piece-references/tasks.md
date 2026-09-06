@@ -64,7 +64,7 @@ basenames)` returning ids in document order with unreferenced local
       fails, the sibling shape is now valid (and, in the old harness,
       "image not found") — named here, not silently rewritten. _Verify:
       vitest green, mutation-checked; build green._
-- [ ] **T603** — The registry and the image page: `framesByPiece` from
+- [x] **T603** — The registry and the image page: `framesByPiece` from
       `pieceFrames`; a piece set on the image's page for every published
       piece whose frames include it (home after the galleries, then
       appearances newest first); related frames filtered to the home
@@ -80,8 +80,16 @@ basenames)` returning ids in document order with unreferenced local
       `WORDING.alsoIn` and the "Also in" paragraph. _Verify: build green;
       a temporary published piece borrowing a temporary draft piece's
       image fails the build with the message naming both (then both
-      deleted, `git status` clean of them); `astro check` clean; the pure
-      parts' tests from T601 green._
+      deleted, `git status` clean of them); `astro check` clean; the pure parts' tests from T601 green.
+      Record: `fsPath` confirmed in dev on a cold store and after the
+      store's round trip (every page 200, no server error) and at build;
+      the draft-rule proofs re-run on the reviewed code — the body
+      borrow and the cover borrow each fail with the plan's draft
+      message naming both pieces, and with the draft published the cover
+      is an appearance and no set; the private refusal never moved, the
+      cover's draft check rides in `referenceProblems`; the shared
+      comparator gave every published-pieces list an id tie-break it
+      lacked (recorded at T607)._
 - [ ] **T604** — Fixtures: the sampler's "Borrowed" section (a `::single`
       of `../where-the-fog-lets-go/land-b.jpg`, a shorthand of
       `../../gallery-images/dock-a.jpg`, sample prose saying what they
@@ -130,7 +138,9 @@ a later spec can extend `checkSrcExists` to the shorthand visit. -->
       owns the draft rule; the row as an anchor), `ROADMAP.md` (the entry struck as done, with follow-ups: renames now
       break references in other pieces too; the passage stays the home's);
       DECISIONS also records that the cover's id comes from Astro's
-      internal `fsPath`, read directly and guarded by a throw. _Verify: Prettier
+      internal `fsPath`, read directly and guarded by a throw, and that
+      the published-pieces order gained an id tie-break so the registry's
+      appearance order and the site's lists agree by construction (T603). _Verify: Prettier
       clean; the AUTHORING examples build when pasted into a temporary
       piece (reverted)._
 
@@ -159,6 +169,8 @@ which pre-policy Phase 0 803,056). -->
 | T601 review ×2            | reviewer default | 46,209 + 38,067  | fix and re-review ×1 (a borrowed non-raster minting a real id — the plan now refuses it), then signed off                                                                    |
 | T602 (sdd-implementer)    | opus             | 89,028           | verified first try; six mutations caught; the generator learned to write a real TIFF                                                                                         |
 | T602 review               | reviewer default | 49,474           | signed off; four notes folded in by the orchestrator (the own-folder rule for piece refs only; returns after fail; a positive svg assertion; the list from IMAGE_EXTENSIONS) |
+| T603 (sdd-implementer) ×2 | opus             | 77,054 + 47,750  | verified first try, then the review's four fixes — verified first try                                                                                                        |
+| T603 review ×2            | reviewer default | 64,730 + 57,064  | fix and re-review ×2 (fsPath in dev unconfirmed; the proofs not re-run after the fixes) — both closed by the orchestrator's own runs                                         |
 
 ---
 

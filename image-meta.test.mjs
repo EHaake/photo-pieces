@@ -17,7 +17,6 @@ import {
   parseReference,
   passageFor,
   pieceFrames,
-  pieceOrder,
   privateTargetOf,
   referenceProblems,
   referencesImage,
@@ -315,18 +314,6 @@ describe('piece order (T402)', () => {
       'a-piece/pano',
       'a-piece/port-a',
       'a-piece/square',
-    ]);
-    // The registry still calls `pieceOrder` until T603 replaces it with
-    // `pieceFrames` and deletes it; this one assertion keeps it honest
-    // until then.
-    expect(pieceOrder(body, basenames)).toEqual([
-      'land-a',
-      'land-b',
-      'land-c',
-      'port-b',
-      'pano',
-      'port-a',
-      'square',
     ]);
   });
 

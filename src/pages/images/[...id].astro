@@ -54,6 +54,7 @@ const WORDING = {
     date: 'Date',
   },
   fromPiece: 'From the piece',
+  alsoIn: 'Also in',
   inGallery: 'In the gallery',
   inGalleries: 'In the galleries',
   record: {
@@ -286,6 +287,19 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
           piece && (
             <p class="image-from" data-pagefind-ignore>
               {WORDING.fromPiece} <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
+            </p>
+          )
+        }
+        {
+          image.appearances.length > 0 && (
+            <p class="image-from" data-pagefind-ignore>
+              {WORDING.alsoIn}{' '}
+              {image.appearances.map((appearance, index) => (
+                <>
+                  <a href={withBase(`/pieces/${appearance.id}/`)}>{appearance.data.title}</a>
+                  {index < image.appearances.length - 1 ? ', ' : ''}
+                </>
+              ))}
             </p>
           )
         }

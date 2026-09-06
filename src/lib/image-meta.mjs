@@ -292,34 +292,11 @@ export function referencesImage(text, basename) {
 }
 
 /**
- * The frames of a piece folder in the piece's own order (spec 006): the
- * order the body first references them, then the unreferenced ones by
- * name. Drives the piece set (previous/next) and the related strip.
- */
-export function pieceOrder(body, basenames) {
-  // Rank by reference order, not text offset: a pair's two slots share
-  // one offset, and left must still come before right.
-  const firstAt = new Map();
-  let rank = 0;
-  for (const ref of imageReferences(body)) {
-    rank += 1;
-    for (const basename of basenames) {
-      if (!firstAt.has(basename) && refersTo(ref.src, basename)) firstAt.set(basename, rank);
-    }
-  }
-  const referenced = [...basenames]
-    .filter((b) => firstAt.has(b))
-    .sort((a, b) => firstAt.get(a) - firstAt.get(b));
-  const unreferenced = [...basenames].filter((b) => !firstAt.has(b)).sort();
-  return [...referenced, ...unreferenced];
-}
-
-/**
  * The frames a piece places, as image ids in the piece's own order
  * (spec 008): the order the body first references them — its own images
  * as `<folder>/<basename>`, a borrowed one as `<slug>/<basename>` or
- * `gallery/<basename>` — then the folder's unreferenced files by name,
- * as `pieceOrder` does. `folder` is the piece's own folder segment and
+ * `gallery/<basename>` — then the folder's unreferenced files by
+ * name. `folder` is the piece's own folder segment and
  * `basenames` the images that live in it.
  *
  * A frame referenced twice appears once, at its first reference; so does
@@ -330,8 +307,8 @@ export function pieceOrder(body, basenames) {
  */
 export function pieceFrames(body, folder, basenames) {
   const own = new Set(basenames);
-  // Rank by reference order, not text offset, for the same reason
-  // `pieceOrder` does: a pair's two slots share one offset.
+  // Rank by reference order, not text offset: a pair's two slots share
+  // one offset, and left must still come before right.
   const firstAt = new Map();
   let rank = 0;
   for (const ref of imageReferences(body)) {
@@ -785,9 +762,9 @@ export function referenceProblems(borrower, ids, known) {
   return problems;
 }
 
-// An id's home piece: its folder, unless that folder is the gallery
-// root's segment — a gallery-root image belongs to no piece.
-function homeSlugOf(id) {
+/** An id's home piece slug — its folder by the id rule at the top of this
+ *  file — or null for `gallery/...`, which belongs to no piece. */
+export function homeSlugOf(id) {
   const folder = String(id).split('/')[0];
   return folder === GALLERY_FOLDER ? null : folder;
 }

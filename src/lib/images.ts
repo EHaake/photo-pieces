@@ -4,15 +4,18 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { readExposure } from './exif.mjs';
-import { isPublished } from './pieces';
+import { byNewestPublished, isPublished } from './pieces';
 import {
   classifyContentImage,
+  crossReferences,
   findIdCollisions,
   firstAltFor,
   formatCollision,
   formatExposure,
   formatGalleryProblems,
+  homeSlugOf,
   humanizeBasename,
+  ImageIdError,
   imageUrlFor,
   isPrivateRaster,
   mergeOverrides,
@@ -20,8 +23,9 @@ import {
   neighbours,
   orderLatestWork,
   passageFor,
-  pieceOrder,
+  pieceFrames,
   privateMessage,
+  referenceProblems,
   sidecarImageId,
   validateGalleries,
 } from './image-meta.mjs';
@@ -125,8 +129,13 @@ export interface SiteImage {
    *  of the site — no id, no page. */
   before: ImageMetadata | null;
   /** Every set this image belongs to: its galleries newest first, then
-   *  its piece. `sets[0]` is the default the page shows. */
+   *  its home piece, then each other piece that places it, newest first
+   *  (spec 008). `sets[0]` is the default the page shows. */
   sets: ImageSet[];
+  /** The published pieces other than the home that place this image —
+   *  in their body or as their cover — newest first (spec 008). Empty
+   *  when only the home shows it. */
+  appearances: CollectionEntry<'pieces'>[];
   /** Ids of the nearest other frames of the same outing (the piece
    *  folder, in the piece's order) — up to six; none at the gallery root. */
   related: string[];
@@ -221,16 +230,58 @@ async function buildRegistry(): Promise<ImageRegistry> {
     });
   }
 
-  // A piece's `cover` is a reference too: a camera's frame there would
-  // present the raw as the piece's face on every list. Body references
-  // are the transform's to refuse; this is the frontmatter half.
+  // A piece's `cover` is a reference too, and since spec 008 it may be
+  // another piece's or the gallery root's image — so the registry needs
+  // its id, not just its filename. The built `src` is hashed; the id
+  // comes from the source path Astro's ImageMetadata carries, read
+  // straight off the entry (the field is `@internal` and
+  // non-enumerable, so a spread, a clone, or a JSON round-trip loses it
+  // silently — and its absence is a build failure, not a shrug). Body
+  // references are the transform's to refuse; this is the frontmatter
+  // half: a camera's frame here would present the raw as the piece's
+  // face on every list. A cover that is not an image of the site — a
+  // sub-folder, a non-photograph format, a file outside the content
+  // root — is Astro's business to render and counts as no appearance.
+  const coverIdByPiece = new Map<string, string>();
   for (const piece of pieces) {
-    const coverFile = piece.data.cover?.src.split('/').pop()?.split('?')[0] ?? '';
-    if (isPrivateRaster(coverFile)) {
+    const cover = piece.data.cover as (ImageMetadata & { fsPath?: string }) | undefined;
+    if (!cover) continue;
+    const where = piece.filePath ?? piece.id;
+    if (cover.fsPath === undefined) {
       throw new Error(
-        `[images] ${piece.filePath ?? piece.id}: ${privateMessage(coverFile, coverFile.replace(/\..*$/, ''), 'choose the photograph itself as the cover')}`,
+        `[images] ${where}: the cover's source path is unavailable (Astro's ImageMetadata.fsPath) — the registry cannot tell whose photograph it is`,
       );
     }
+    // The private rule is applied to the file name first, before any
+    // classification: `classifyContentImage` answers `nested` before it
+    // looks at the basename, so a camera's frame in a sub-folder would
+    // otherwise slip past the refusal on a technicality of path shape.
+    const coverFile = cover.fsPath.split('/').at(-1)!;
+    const dot = coverFile.lastIndexOf('.');
+    const coverBasename = dot > 0 ? coverFile.slice(0, dot) : coverFile;
+    if (isPrivateRaster(coverBasename)) {
+      throw new Error(
+        `[images] ${where}: ${privateMessage(coverFile, coverBasename, 'choose the photograph itself as the cover')}`,
+      );
+    }
+    let info: Classified;
+    try {
+      info = classifyContentImage(cover.fsPath) as Classified;
+    } catch (error) {
+      // An ImageIdError here — a file outside the content root, a format
+      // the site doesn't page, a name that can't be a URL segment — means
+      // the cover is not an image of the site: Astro's to render, and no
+      // appearance. Anything else thrown is a real fault, not a verdict.
+      if (error instanceof ImageIdError) continue;
+      throw error;
+    }
+    if (info.nested) continue;
+    if (info.private) {
+      throw new Error(
+        `[images] ${where}: ${privateMessage(info.file, info.basename, 'choose the photograph itself as the cover')}`,
+      );
+    }
+    coverIdByPiece.set(piece.id, info.id);
   }
 
   const collisions = findIdCollisions(files.map((f) => f.key));
@@ -334,21 +385,64 @@ async function buildRegistry(): Promise<ImageRegistry> {
   }
   const galleries = [...galleryEntries].sort(byNewest);
 
-  // Each published piece's frames in the piece's own order (spec 006):
-  // the set the reader steps through from a piece, and the pool the
-  // related strip draws on.
-  const orderByFolder = new Map<string, string[]>();
+  // Each published piece's frames in the piece's own order (spec 006,
+  // ids since 008): the images it places — its own, where the body
+  // first shows them, with a borrowed one in its place, then its
+  // folder's unreferenced files. This is the set a reader steps through
+  // from that piece and the pool its related strips draw on.
+  const ownBasenames = new Map<string, string[]>();
   for (const file of files) {
     if (known.get(file.id) !== 'published' || file.pieceSlug === null) continue;
-    if (!orderByFolder.has(file.folder)) orderByFolder.set(file.folder, []);
-    orderByFolder.get(file.folder)!.push(file.basename);
+    if (!ownBasenames.has(file.pieceSlug)) ownBasenames.set(file.pieceSlug, []);
+    ownBasenames.get(file.pieceSlug)!.push(file.basename);
   }
-  for (const [folder, basenames] of orderByFolder) {
-    const body = pieceById.get(folder)?.body ?? '';
-    orderByFolder.set(
-      folder,
-      pieceOrder(body, basenames).map((basename) => `${folder}/${basename}`),
+  const framesByPiece = new Map<string, string[]>();
+  for (const piece of pieces) {
+    if (!isPublished(piece)) continue;
+    framesByPiece.set(
+      piece.id,
+      pieceFrames(piece.body ?? '', piece.id, ownBasenames.get(piece.id) ?? []),
     );
+  }
+
+  // The draft rule (spec 008): every image a published piece borrows —
+  // in its body or as its cover — must be a photograph with a page of
+  // its own. Checked before any set is built, so a refused id never
+  // reaches a neighbour link; a draft piece is skipped, as its images
+  // are. A piece's own folder needs no check: it is published with the
+  // piece.
+  const borrowProblems: string[] = [];
+  for (const piece of pieces) {
+    if (!isPublished(piece)) continue;
+    const borrowed = crossReferences(piece.body ?? '');
+    const coverId = coverIdByPiece.get(piece.id);
+    // A cover from elsewhere is a borrowed image too — unless the body
+    // already placed it, since `crossReferences` deduplicates and the
+    // cover must not undo that with a second copy.
+    if (coverId && homeSlugOf(coverId) !== piece.id && !borrowed.includes(coverId)) {
+      borrowed.push(coverId);
+    }
+    borrowProblems.push(...referenceProblems(piece.id, borrowed, known));
+  }
+  if (borrowProblems.length) {
+    throw new Error(borrowProblems.join('\n'));
+  }
+
+  // Who shows what (spec 008). `framePieces` drives the sets — a piece
+  // whose frames hold the image gives the reader arrows through that
+  // piece's order — and `appearancePieces` the "Also in" line, which
+  // counts a cover too even though a cover is no frame. Both are newest
+  // first — `byNewestPublished`, the very comparator getPublishedPieces
+  // sorts with — because the loop that fills them is.
+  const framePieces = new Map<string, CollectionEntry<'pieces'>[]>();
+  const appearancePieces = new Map<string, CollectionEntry<'pieces'>[]>();
+  for (const piece of pieces.filter(isPublished).sort(byNewestPublished)) {
+    const frames = framesByPiece.get(piece.id) ?? [];
+    for (const id of frames) push(framePieces, id, piece);
+    const shown = new Set(frames);
+    const coverId = coverIdByPiece.get(piece.id);
+    if (coverId) shown.add(coverId);
+    for (const id of shown) push(appearancePieces, id, piece);
   }
 
   // The published set, with labels.
@@ -372,15 +466,31 @@ async function buildRegistry(): Promise<ImageRegistry> {
           count: gallery.data.images.length,
           ...neighbours(gallery.data.images, file.id),
         }));
-        const folderOrder = orderByFolder.get(file.folder) ?? [];
+        const homeFrames = piece ? (framesByPiece.get(piece.id) ?? []) : [];
         if (piece) {
           sets.push({
             kind: 'piece',
             id: piece.id,
             title: piece.data.title,
             url: `/pieces/${piece.id}/`,
-            count: folderOrder.length,
-            ...neighbours(folderOrder, file.id),
+            count: homeFrames.length,
+            ...neighbours(homeFrames, file.id),
+          });
+        }
+        // Then the pieces that borrow it, newest first: from each, the
+        // arrows step through that piece's frames (spec 008).
+        const borrowers = (framePieces.get(file.id) ?? []).filter(
+          (other) => other.id !== piece?.id,
+        );
+        for (const other of borrowers) {
+          const frames = framesByPiece.get(other.id) ?? [];
+          sets.push({
+            kind: 'piece',
+            id: other.id,
+            title: other.data.title,
+            url: `/pieces/${other.id}/`,
+            count: frames.length,
+            ...neighbours(frames, file.id),
           });
         }
         const title =
@@ -404,7 +514,18 @@ async function buildRegistry(): Promise<ImageRegistry> {
           print: pick(sidecar?.data, ['edition', 'sizes', 'paper']),
           before: beforeByTarget.get(file.id) ?? null,
           sets,
-          related: piece ? nearest(folderOrder, file.id, RELATED_LIMIT) : [],
+          appearances: (appearancePieces.get(file.id) ?? []).filter(
+            (other) => other.id !== piece?.id,
+          ),
+          // The outing's frames, not the borrowers': the home piece's
+          // own folder, in the home's order (spec 008).
+          related: piece
+            ? nearest(
+                homeFrames.filter((id) => id.startsWith(`${file.folder}/`)),
+                file.id,
+                RELATED_LIMIT,
+              )
+            : [],
           passage: piece ? passageFor(piece.body ?? '', file.basename) : null,
         };
       }),
@@ -441,6 +562,13 @@ function pick<K extends string>(
     if (typeof value === 'string' && value.trim() !== '') out[key] = value.trim();
   }
   return out;
+}
+
+// Append to a map of lists, creating the list on first use.
+function push<T>(map: Map<string, T[]>, key: string, value: T): void {
+  const list = map.get(key);
+  if (list) list.push(value);
+  else map.set(key, [value]);
 }
 
 function byNewest(a: CollectionEntry<'galleries'>, b: CollectionEntry<'galleries'>): number {
