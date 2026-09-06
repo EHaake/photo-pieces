@@ -1,7 +1,8 @@
 # Tasks: Places
 
-**Status**: Draft (2026-09-06) — pending the skeptical-reviewer's
-sign-off at the top tier
+**Status**: Signed off (2026-09-06) by the skeptical-reviewer at the
+top tier; pending the product owner's approval of the spec-conformance
+summary before T701 starts
 **Implements**: plan.md in this directory
 
 Ordered, small, independently verifiable. Per the constitution: every
@@ -140,8 +141,9 @@ reviewer invocations alike — any escape-hatch miss, and the third tier
 if it is ever on (it is off). Compare against spec 008's totals:
 implementer 490,854 over nine dispatches; reviewer 905,152 all tiers. -->
 
-| Task / invocation | Tier | Tokens | Outcome / miss reason |
-| ----------------- | ---- | ------ | --------------------- |
+| Task / invocation      | Tier     | Tokens                            | Outcome / miss reason                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------- | -------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| plan/tasks sign-off ×4 | top tier | 85,833 + 53,976 + 39,525 + 16,578 | fix and re-review ×3 (the cards diff unsatisfiable raw — Astro's per-file scoped-style hash; the draft-place criterion unverified; then the docs' commit target and a leftover testing bullet; then the slug rule contradicting the precedence on a piece's `none`), then signed off. Packet note for T701: the `placeProblems` test must feed a piece value and a sidecar value through the same check, so the piece's `none` is verified, not inferred |
 
 ---
 

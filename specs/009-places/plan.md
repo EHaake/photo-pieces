@@ -1,7 +1,9 @@
 # Plan: Places
 
-**Status**: Draft (2026-09-06) — drafted against the codebase; pending
-the skeptical-reviewer's sign-off at the top tier
+**Status**: Signed off (2026-09-06) — drafted against the codebase;
+signed off by the skeptical-reviewer at the top tier on the fourth
+pass (two blocking findings and seven notes fixed across the passes);
+pending the product owner's approval of the spec-conformance summary
 **Implements**: spec.md in this directory
 
 ## Shape of the change
