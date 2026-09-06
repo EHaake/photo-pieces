@@ -151,7 +151,7 @@ hairline is a `border-top`, not the galleries index's `border-bottom`,
 by the plan's word, and it sits 79px above the second heading at
 1440 (section top 1395, h2 1474).
 
-- [ ] **T704** — The image page. The label's place row as a link to
+- [x] **T704** — The image page. The label's place row as a link to
       the place with the free text after `·`; `neighbours.atPlace`;
       `indexed` counts a place. _Verify: build green; in the browser,
       land-b's label row is a link to `/places/the-headlands/` followed by
@@ -163,6 +163,28 @@ by the plan's word, and it sits 79px above the second heading at
       simply land-b with the fog piece's `at:` line removed in a
       temporary run) shows the text alone; vitest green; `astro check`
       green._
+
+The T704 record. Verified first try: build 77 pages, Pagefind 15 (the
+seven newly placed image pages join the index, as the plan's index rule
+says), check 0 errors, 252 tests, Prettier clean. Built pages: land-b's
+Place row `<a href="/places/the-headlands/">The headlands</a> · above
+the cove, north Pacific coast`; jetty-dawn's the link alone; the
+sampler's land-b and the gallery root's dock-b with no place link; the
+place navs "At The headlands · 2 of 6", "At The jetty · 1 of 2" (next
+jetty-dawn), "At The jetty · 2 of 2"; the temporary run without the fog
+piece's `at:` showed land-b's free text alone and the registry's
+empty-place note. Browser, on the dev server: from `/places/the-jetty/` clicking land-c lands on `/images/where-the-fog-lets-go/land-c/` with `sessionStorage` `image-set` = `place:the-jetty`, the visible frame-nav `data-set="place:the-jetty"` reading "At The jetty · 1 of 2" with next `/images/first-light-at-the-jetty/jetty-dawn/`; the label's place link `href="/places/the-jetty/"` measures `oklch(0.36 0.075 185)` (the accent) with the underline gradient at `0px 1px` at rest and, hovered, `oklch(0.3168 0.066 185)` (the accent-hover) with `100% 1px`; from `/pieces/where-the-fog-lets-go/` the same click stores `piece:where-the-fog-lets-go` and the visible line reads "From Where the fog lets go · 3 of 8". The review signed off with two
+notes: the free-text-alone state had no permanent fixture (closed by
+T704a below), and `.wall-label dd a` also matches the record's and the
+print's lists, whose values are plain strings today.
+
+- [x] **T704a** — Added at T704's review: the fog piece's `_pano.md`
+      gains a free-text `place` beside its `at: none`, so the label's
+      text-alone state is pinned by a fixture rather than a temporary
+      run. _Verify: pano's built page carries `Place` → "The road home,
+      from the car window" with no place link — grep'd on the build:
+      the row present, `href="/places/the-` absent; build, check, and
+      252 tests green._
 
 ## Phase 1 — The docs (reviewer after the phase)
 
@@ -212,10 +234,17 @@ implementer 490,854 over nine dispatches; reviewer 905,152 all tiers. -->
 | T702 re-review         | reviewer default | 27,585                            | signed off; open to the sweep: run 4's dump is the implementer's prose                                                                                                                                                                                                                                                                                                                                                                                   |
 | T703 (sdd-implementer) | opus             | 54,756                            | verified first try; the normalized comparison and the built-page greps reported verbatim                                                                                                                                                                                                                                                                                                                                                                 |
 | T703 review            | reviewer default | 41,612                            | signed off; the two comparison deltas recorded, the sheet-order artifact added to plan.md, a bodiless place run by the orchestrator                                                                                                                                                                                                                                                                                                                      |
+| T704 (sdd-implementer) | opus             | 47,303                            | verified first try; the built-page evidence and the temporary run verbatim; the browser checks run by the orchestrator                                                                                                                                                                                                                                                                                                                                   |
+| T704 review            | reviewer default | 29,136                            | signed off; the fixture gap closed as T704a by the orchestrator                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ---
 
 ## Handoff note
+
+**Phase 0 is complete (2026-09-06)**: T701–T704a checked, each reviewed
+and signed off; the person's gate is next. The next session begins at
+T705 (Phase 1, the docs; its bundle is the orchestrator's to assemble
+fresh), reviewer after the phase; then T706.
 
 > Read `CLAUDE.md` and `specs/009-places/{spec,plan,tasks}.md`, then
 > begin at the first unchecked task as the orchestrator under the model
