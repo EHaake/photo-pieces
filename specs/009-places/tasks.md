@@ -1,8 +1,7 @@
 # Tasks: Places
 
-**Status**: In progress (2026-09-06) — signed off by the
-skeptical-reviewer at the top tier and approved by the product owner;
-Phase 0 complete and attested, Phase 1 under way
+**Status**: Implemented (2026-09-06) — every task checked; T706 closes
+at the merge
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 — per-task reviewer cadence; Phases 1 and 2
 are per-phase (Phase 2's review is the pre-merge sweep).

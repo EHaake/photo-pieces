@@ -1,8 +1,8 @@
 # Spec: Places
 
-**Status**: Approved (2026-09-06) — written in the design conversation;
-approved by the product owner with the three open decisions decided as
-drafted
+**Status**: Implemented (2026-09-06) — approved by the product owner
+with the three open decisions decided as drafted; every acceptance
+criterion met on the fixtures; T706 closes at the merge
 **Depends on**: 004 (the image registry: every accepted raster in a
 piece folder has a stable id and a page), 006 (the image page's sets
 and arrows, the wall label's place and time), 008 (a piece's frames
@@ -169,34 +169,34 @@ photographer gives.
 
 ## Acceptance criteria
 
-- [ ] A place file with a title and a body, named by frames in two
+- [x] A place file with a title and a body, named by frames in two
       published pieces, builds `/places/<slug>/` with the writing and
       the two outings oldest first, each heading linking to the piece
       and each frame linking to its page; the frames are the named
       ones from the pieces' own folders, in the pieces' order
-- [ ] A sidecar `at:` or a piece `at:` naming a slug with no place
+- [x] A sidecar `at:` or a piece `at:` naming a slug with no place
       file fails the build with a message naming the slug and listing
       the declared places
-- [ ] Under a piece default, a frame with no `at:` is at the piece's
+- [x] Under a piece default, a frame with no `at:` is at the piece's
       place; `at: none` removes it; `at: <other>` puts it at the other
       place under its own piece's heading; in a piece with no default,
       only frames with their own `at:` appear anywhere; a borrowed
       frame in a piece's body is never counted under the borrower
-- [ ] A draft piece's frames are absent from the place; a place with
+- [x] A draft piece's frames are absent from the place; a place with
       no published frame, or with `draft: true`, has no page and no
       card, and the build prints a note naming it
-- [ ] `/places/` lists every published place as a card with cover,
+- [x] `/places/` lists every published place as a card with cover,
       title, outing and frame counts, and the years; the nav shows
       Places
-- [ ] The image page of a frame in a place shows the place's title as
+- [x] The image page of a frame in a place shows the place's title as
       a link where the wall label shows place, followed by the sidecar's
       free text when present; arriving from the place page the arrows
       step through the place's frames in the place's order
-- [ ] The fixtures show it: one declared place, one fixture piece
+- [x] The fixtures show it: one declared place, one fixture piece
       naming it as a default with an `at: none` frame and an
       `at: <other>` frame, and one fixture piece with no default and
       a single `at:` frame; the pages read as this spec says
-- [ ] The whole test suite green; the build with its barriers green;
+- [x] The whole test suite green; the build with its barriers green;
       docs updated
 
 ## Decided

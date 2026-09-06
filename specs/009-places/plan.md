@@ -1,9 +1,9 @@
 # Plan: Places
 
-**Status**: Signed off (2026-09-06) — drafted against the codebase;
-signed off by the skeptical-reviewer at the top tier on the fourth
-pass (two blocking findings and seven notes fixed across the passes);
-pending the product owner's approval of the spec-conformance summary
+**Status**: Implemented (2026-09-06) — signed off by the
+skeptical-reviewer at the top tier on the fourth pass, then executed
+T701–T705 with each review's findings resolved; T706 closes at the
+merge
 **Implements**: spec.md in this directory
 
 ## Shape of the change
