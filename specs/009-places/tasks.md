@@ -37,17 +37,19 @@ headers to confirm nothing was duplicated or dropped. -->
       fails; 230 existing green; `astro check` green._
 - [ ] **T702** — The schemas, the registry, the fixtures.
       `content.config.ts`: the `places` collection (`generateId` = file
-      name; title, description?, cover?, draft), `place?` on pieces, `at?`
-      on sidecars. `images.ts`: read places; refuse a non-slug id; the slug
+      name; title, description?, cover?, draft), `at?` on pieces and on
+      sidecars. `images.ts`: read places; refuse a non-slug id and the name `none`; the slug
       rule over every piece and sidecar (drafts included), all problems in
       one throw; resolve each published piece-folder frame's place via
       `placeOf` (a draft place resolves to none, with the note; a
       gallery-root `at:` ignored with the warning); `groupByPlace`;
       `SitePlace` (slug, entry, title, url, outings, frames, cover — checked
-      against the frames, default the most recent outing's first — latest,
+      against the frames on a publishing place only, default the most
+      recent outing's first — latest,
       years, summary); `registry.places` most recent outing first, ties by
-      title; `image.place`; the place set last in `sets`. Fixtures per the
-      plan: the two place files, the fog piece's `place:` and its three
+      title; `image.place`; `ImageSet.kind` typed as `SetKind`; the place set
+      last in `sets`. Fixtures per the plan: the two place files, the fog
+      piece's `at:` and its three
       sidecars (`_pano.md` none, `_land-c.md` the-jetty, `_land-b.md`'s
       free text shortened), the jetty piece's `_jetty-dawn.md`. _Verify:
       build green; a temporary route dumping `registry.places` and each
@@ -55,11 +57,15 @@ headers to confirm nothing was duplicated or dropped. -->
       headlands with one outing of six frames in the plan's order, the
       jetty with two outings oldest first, land-c's sets ending in
       `place:the-jetty` with next = jetty-dawn, pano and the sampler's
-      frames with no place; the five temporary runs (unknown slug on a
+      frames with no place; the six temporary runs (unknown slug on a
       piece, unknown `at:`, an empty place, a draft copy of the fog piece,
-      a cover that is not a frame) each with their actual message or note
-      recorded here and the files removed; vitest 230+ green; `astro check`
-      green._
+      a cover that is not a frame, `the-jetty.md` as a draft — its note,
+      no page, no card, land-c with no place and no place set) each with
+      their actual message or note recorded here and the files restored;
+      vitest 230+ green; `astro check` green. This is the spec's largest
+      task — the schemas, the registry, the fixtures, the runs — kept
+      whole because the fixtures are what make the registry checkable;
+      the escape hatch is likelier here than elsewhere._
 - [ ] **T703** — The pages and the nav. `CoverCards.astro` from
       `GalleryCards.astro`'s markup and styles, `GalleryCards` a wrapper;
       `src/pages/places/index.astro`; `src/pages/places/[slug].astro` per
@@ -68,7 +74,10 @@ headers to confirm nothing was duplicated or dropped. -->
       `data-pagefind-body` with the outings ignored, the OG cover);
       `NAV_ITEMS` gains Places after Galleries. _Verify: build green;
       `dist/galleries/index.html` and `dist/categories/landscape/index.html`
-      identical before and after (diff recorded); `/places/` and the two
+      identical before and after once `data-astro-cid-[a-z0-9]+` and the
+      hashed CSS link are normalized to placeholders (the scoped-style
+      hash is per file, so a raw diff cannot be clean — the plan says why;
+      the normalized diff recorded); `/places/` and the two
       place pages read as the plan's fixture paragraph says (titles,
       order, counts, every frame a link to its page, every heading a link
       to its piece); geometry at 1440×900, 1080×1920, 375×812 measured in
@@ -84,7 +93,7 @@ headers to confirm nothing was duplicated or dropped. -->
       and from the fog piece the same page shows the piece's line — both
       read from the DOM after navigation; a frame with free text and no
       place (the gallery root's dock-b, if given one temporarily, or
-      simply land-b with the fixture's `place:` line removed in a
+      simply land-b with the fog piece's `at:` line removed in a
       temporary run) shows the text alone; vitest green; `astro check`
       green._
 
@@ -94,9 +103,9 @@ headers to confirm nothing was duplicated or dropped. -->
       (declaring a place, `at:` on a frame, the piece default and `at:
 none`, what the page shows, that a place grows on its own, gallery-root
       frames excluded), a place template beside the piece and sidecar
-      templates, `place:` in the piece template and `at:` in the sidecar
-      template, and the sidecar field note that `at` is a slug while `place`
-      is prose; `README.md`'s content model, the image-page paragraph, the
+      templates, `at:` in the piece template and in the sidecar template,
+      and the field note that `at` is a slug wherever it is written while
+      the sidecar's `place` is prose; `README.md`'s content model, the image-page paragraph, the
       nav sentence, and the structure listing mention places. _Verify:
       every claim read against the built pages by the orchestrator; Prettier
       clean; build green._
@@ -107,8 +116,11 @@ none`, what the page shows, that a place grows on its own, gallery-root
       follow-ups the plan names (images in a place's writing; gallery-root
       frames in a place; renaming a place). `DECISIONS.md`: a spec 009
       section (the frame as the unit with the piece default as shortcut,
-      `at`, oldest first, Places in the nav, the cover check's home). Both
-      on `main`. Then the pre-merge whole-spec sweep at the top tier and its
+      `at` on both files and the autocomplete reason, oldest first, Places
+      in the nav, the cover check's home). Both commit straight to `main`,
+      as the repo-wide docs have since spec 001 (the constitution's rule
+      keeps implementation off `main`; ROADMAP's Places entry went there
+      the same way). Then the pre-merge whole-spec sweep at the top tier and its
       findings resolved; the spec's acceptance criteria checked against
       their records; build, tests, check, GPS scan, and format green with
       actual output; the PR marked ready and merged with a merge commit.

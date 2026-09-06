@@ -8,7 +8,7 @@ the skeptical-reviewer's sign-off at the top tier
 
 A fourth content collection, `places`, beside pieces, galleries, and
 sidecars; two optional frontmatter lines, `at:` on a sidecar and
-`place:` on a piece; and a derived structure in the image registry —
+`at:` on a piece; and a derived structure in the image registry —
 the place's outings — that two new pages and the image page read. The
 registry already knows, for every published piece, the frames it
 places in the piece's order (`framesByPiece`, ids since spec 008) and
@@ -23,14 +23,16 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   The collection's id is the file name verbatim (`generateId`, as the
   sidecar collection does), and the registry refuses an id that is not
   a slug (`[a-z0-9-]+`, the rule piece folders already obey): the file
-  name is the URL segment and the value every `at:` and `place:` line
-  must match, so nothing may sit between the two.
+  name is the URL segment and the value every `at:` line
+  must match, so nothing may sit between the two. The name `none` is
+  refused too: it is the sidecar's word for "no place", and a place so
+  named could never be reached by an `at:` line.
 - **A frame's place** (`placeOf(at, pieceDefault)`, pure, in
   `image-meta.mjs`): the sidecar's `at` if it is a slug; `null` if it
-  is `none`; else the piece's `place`; else `null`. Blank strings count
+  is `none`; else the piece's `at`; else `null`. Blank strings count
   as unset. This is the spec's "a frame's own line always wins" in one
   function, and the only place the precedence is written.
-- **The slug rule**: every `place:` on every piece, draft or not, and
+- **The slug rule**: every `at:` on every piece, draft or not, and
   every `at:` other than `none` on every sidecar, must name a declared
   place, draft or not. A typo in a draft is still a typo, and the
   sidecar orphan rule already checks drafts' sidecars. Unknown slugs
@@ -57,8 +59,11 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
 - **The place's cover**: `cover` must be one of the place's frames,
   checked by the registry once the frames are known (the galleries'
   cover check is in the schema because a gallery's list is authored;
-  a place's is derived). Default: the first frame of the most recent
-  outing.
+  a place's is derived). The check runs only on a place that
+  publishes: a place declared ahead of its first outing, or a draft
+  one, may name a cover from a piece not yet published and gets the
+  note, not a failure, as the spec says (sign-off: second look). Default:
+  the first frame of the most recent outing.
 - **The registry** (`images.ts`) reads the `places` collection, runs
   the slug rule, resolves each published piece-folder frame's place,
   builds `SitePlace` objects before the images (they hold ids only, so
@@ -68,7 +73,10 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   count, prev, and next from the place's frames — after its piece sets — last, so the page's default set
   stays the gallery or the piece as today. `ImageRegistry.places` is
   the published places, most recent outing first, ties by title.
-- **The set key** (`image-set.ts`): `SetKind` gains `'place'`;
+- **The set key** (`image-set.ts`): `SetKind` gains `'place'`, and
+  `ImageSet.kind` in `images.ts` is typed as `SetKind` rather than a
+  second hand-written union (sign-off: the two must gain the kind in
+  step or `astro check` fails, so make them one fact);
   `setKeyFromPath` matches `/places/<slug>/` to `place:<slug>`. The
   layout's click handler and the image page's script need no change:
   they write and read whatever key the module derives.
@@ -91,9 +99,16 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   `CoverCards.astro` that takes `{ href, cover, title, meta }[]`, and
   `GalleryCards` becomes the wrapper that builds those from galleries —
   its two consumers (the galleries index, the category page) keep
-  their props and their output byte for byte, which T703 checks by
-  diffing the built HTML of `/galleries/` before and after. The place
-  card's meta is the summary line.
+  their props and their rendered output. Not byte for byte: Astro's
+  scoped-style attribute (`data-astro-cid-<hash>`) is a hash of the
+  component's path, so moving the markup and its `<style>` into a new
+  file changes every card element's attribute, the compiled selectors,
+  and the content-hashed CSS file name (sign-off: blocking). T703
+  therefore compares the built HTML of `/galleries/` and
+  `/categories/landscape/` after normalizing `data-astro-cid-[a-z0-9]+`
+  and the `/_astro/*.<hash>.css` link to placeholders — identical then,
+  or the refactor changed something real. The place card's meta is the
+  summary line.
 - **The nav** (`consts.ts`): `{ href: '/places/', label: 'Places' }`
   after Galleries. Six items; T703 checks the header at the three
   viewports for wrapping.
@@ -104,9 +119,10 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   third neighbour wording, `neighbours.atPlace: 'At'`, beside `'In'`
   and `'From'`, so the line reads "At The jetty · 1 of 2". `indexed`
   counts a place as something to find, as it counts the free text.
-- **Pieces are untouched**: no page reads `place` except through the
-  registry. Obsidian's property autocomplete offers used values for
-  `place` and `at` alike.
+- **Pieces are untouched**: no page reads a piece's `at` except
+  through the registry. Obsidian's property autocomplete offers the
+  used values for `at` — slugs, on pieces and sidecars alike — and the
+  free-text `place` stays its own property with its own prose values.
 
 ## Failure messages and notes
 
@@ -159,17 +175,21 @@ the gallery-root warning:
   fixtures — the jetty place's two outings, 2026-08-28 before
   2026-08-30.
 - The registry is verified at build, as always, with the fixtures
-  below and four temporary runs recorded in `tasks.md` with their
-  actual output, each file deleted after: a piece naming
+  below and six temporary runs recorded in `tasks.md` with their
+  actual output, each file restored after: a piece naming
   `the-headland` (the message lists `the-headlands, the-jetty`); a
   sidecar `at: nowhere`; an empty `src/content/places/empty.md` (the
   note, and no `/places/empty/` in `dist/`); a draft copy of the fog
-  piece naming `the-headlands` (its frames absent from the place). And
-  a cover naming a frame the place does not hold (the message).
+  piece naming `the-headlands` (its frames absent from the place); a
+  cover naming a frame the place does not hold (the message); and
+  `the-jetty.md` marked `draft: true` (the draft note; no
+  `/places/the-jetty/` in `dist/`; no card for it on `/places/`;
+  land-c's `place` null and no `place:` set in its sets — the draft
+  half of the spec's fourth criterion, which no other run covers).
 - Fixtures: `src/content/places/the-headlands.md` (title, description,
   two paragraphs of fixture prose) and `the-jetty.md` (title, one
   paragraph, `cover: first-light-at-the-jetty/jetty-dawn`). The fog
-  piece gains `place: the-headlands`; new sidecars `_pano.md` with
+  piece gains `at: the-headlands`; new sidecars `_pano.md` with
   `at: none` and `_land-c.md` with `at: the-jetty`; the existing
   `_land-b.md`'s free-text `place` shortens to "above the cove, north
   Pacific coast" so the label reads "The headlands · above the cove…".
@@ -204,7 +224,7 @@ the gallery-root warning:
 ## File structure
 
 ```
-src/content.config.ts               places collection; place: on pieces; at: on sidecars
+src/content.config.ts               places collection; at: on pieces and on sidecars
 src/content/places/                 the-headlands.md, the-jetty.md (fixtures)
 src/lib/image-meta.mjs              placeOf, placeProblems, groupByPlace, placeSummary
 src/lib/pieces.ts                   byOldestPublished
@@ -215,7 +235,7 @@ src/pages/places/index.astro        the index
 src/components/CoverCards.astro     the card, generic; GalleryCards.astro wraps it
 src/consts.ts                       Places in NAV_ITEMS
 src/pages/images/[...id].astro      the label's place link; neighbours.atPlace
-src/content/pieces/where-the-fog-lets-go/   place:, _pano.md, _land-c.md, _land-b.md
+src/content/pieces/where-the-fog-lets-go/   at:, _pano.md, _land-c.md, _land-b.md
 src/content/pieces/first-light-at-the-jetty/_jetty-dawn.md
 image-meta.test.mjs, image-set.test.mjs
 AUTHORING.md, README.md, DECISIONS.md, ROADMAP.md
@@ -232,7 +252,8 @@ AUTHORING.md, README.md, DECISIONS.md, ROADMAP.md
 - **Gallery-root photographs** cannot join a place (spec non-goal);
   the registry says so when a sidecar tries.
 - **Renaming a place** is renaming its file, which breaks every `at:`
-  and `place:` naming it until updated — the slug rule names each.
+  naming it, on sidecars and pieces, until updated — the slug rule
+  names each.
 - **The dev server** caches the registry for the life of the process:
   a new place, a changed `at:`, or a changed default needs a restart,
   as any registry change does today.
@@ -257,7 +278,12 @@ AUTHORING.md, README.md, DECISIONS.md, ROADMAP.md
 - **The cover check in the registry**, not the schema: a place's
   frames are derived, and only the registry knows them.
 - **One card component** rather than a copy: the galleries index and
-  the category page keep their output, checked by diff.
+  the category page keep their output, checked by a diff normalized
+  for Astro's per-file scoped-style hash.
+- **`at` on the piece too**, not `place:`: one property name for the
+  slug wherever it is written, so Obsidian's autocomplete never mixes
+  slugs with the sidecar's prose `place` (sign-off: second look; the
+  spec's Decided section records it).
 - **Oldest first by the mirror comparator** beside the site's newest
   first, not by reversing a sorted list (which would reverse the tie
   order too).

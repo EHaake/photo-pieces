@@ -40,7 +40,7 @@ photographer gives.
    declared place; the build refuses an unknown one and lists the
    places that exist.
 3. **A piece may set a default.** A piece whose frames were made in
-   one place says `place: <slug>` once in its frontmatter, and every
+   one place says `at: <slug>` once in its frontmatter, and every
    frame in its folder that names no place of its own is taken to be
    there. A frame's own `at:` always wins; `at: none` keeps a frame out
    of its piece's default. A piece that sets no default never touches
@@ -91,7 +91,7 @@ photographer gives.
   optional `description`, optional `cover` (the id of one of the
   place's frames), optional `draft`, and a body — the writing.
 - **A frame's place**: its sidecar's `at: <slug>`; failing that, its
-  piece's `place: <slug>`; failing that, none. `at: none` is the
+  piece's `at: <slug>`; failing that, none. `at: none` is the
   explicit "none" under a piece default.
 - **An outing at a place**: a published piece one or more of whose own
   folder's frames are at the place. Its frames at the place are those
@@ -107,9 +107,9 @@ photographer gives.
   keep going back. Nothing appears on the site until a frame names
   it; the build notes the empty place.
 - **An outing in one place.** Writing a piece shot entirely at Sombrio,
-  the photographer adds `place: sombrio` to its frontmatter and no
+  the photographer adds `at: sombrio` to its frontmatter and no
   sidecar needs a line. Obsidian offers the values already used for
-  `place` across the vault. The build refuses `place: sombrio-beach`
+  `at` across the vault. The build refuses `at: sombrio-beach`
   with "no place named sombrio-beach — the places are: sombrio, …".
   On publish, the place's page and card exist and show the outing.
 - **A piece that ranges.** A piece with frames from three places sets
@@ -162,7 +162,7 @@ photographer gives.
 - `AUTHORING.md` explains declaring a place, naming it on a frame, the
   piece default and `at: none`, what the page shows, and that a place
   grows on its own; the sidecar template gains the optional `at:` line
-  and the piece template the optional `place:` line.
+  and the piece template the optional `at:` line.
 - `README.md`'s content model mentions places.
 - The Obsidian plugin needs no change (both lines are frontmatter,
   which Obsidian's property autocomplete already handles).
@@ -174,7 +174,7 @@ photographer gives.
       the two outings oldest first, each heading linking to the piece
       and each frame linking to its page; the frames are the named
       ones from the pieces' own folders, in the pieces' order
-- [ ] A sidecar `at:` or a piece `place:` naming a slug with no place
+- [ ] A sidecar `at:` or a piece `at:` naming a slug with no place
       file fails the build with a message naming the slug and listing
       the declared places
 - [ ] Under a piece default, a frame with no `at:` is at the piece's
@@ -210,9 +210,14 @@ photographer gives.
   default, because the outing shot entirely at one place — the case
   Places exists for — would otherwise need one sidecar per frame all
   saying the same thing.
-- **The sidecar field is `at`** (2026-09-06, left to the orchestrator).
-  It reads as the label does — "at Sombrio" — pairs with `at: none`,
-  and cannot be mistaken for the free-text `place` beside it. `in` and
+- **The field is `at`, on the sidecar and on the piece alike**
+  (2026-09-06, left to the orchestrator; the piece's line was drafted
+  as `place:` and renamed at the plan's sign-off). It reads as the
+  label does — "at Sombrio" — pairs with `at: none`, and cannot be
+  mistaken for the free-text `place` beside it. One name on both files
+  means Obsidian's property autocomplete, which is keyed by property
+  name across the vault, offers slugs for `at` everywhere and prose for
+  `place` everywhere, instead of mixing the two under `place`. `in` and
   `placeSlug` were the alternatives.
 - **Outings oldest first** on a place page (2026-09-06, product
   owner), so the years read as years; the site's other lists stay
