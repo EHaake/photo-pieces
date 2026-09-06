@@ -171,6 +171,32 @@ attached.
   decision so far (the warm ground, the mats, the quiet dark, the
   packing) was judged on flat placeholder rectangles. Ten real exports
   as fixtures, no writing needed, then re-judge the samplers.
+- **A way back from a category** — noted by the photographer at the
+  spec 009 close-out (2026-09-06). The pieces index carries a category
+  row under its title (Landscape, Street, Portrait, Event), a quick
+  filter; but a category page's own head is only the eyebrow and the
+  name, with no row and no "All", so the only way back to the full
+  list is the nav or the browser. The fix wants the same row on the
+  category page with the current category marked and an "All" that
+  returns to `/pieces/` — and, since the category page lists galleries
+  first, probably the same row on the galleries index. Small enough
+  for a fix-sized branch; folds into the front door workshop if that
+  comes first.
+- **The header's proportion on a laptop** — noted by the photographer
+  at the spec 009 close-out (2026-09-06), as an open design question,
+  not a demand to shrink it: opening a piece on a laptop, the header
+  and title take nearly the whole screen and the reading starts below
+  the fold. Measured at 1440×900 on the fog piece: the site header is
+  74px, the page head runs 74–560 (a 52px title, the lead, the date,
+  the accent rule, with 78px of padding above and below), and the first
+  paragraph begins at 638 of 900 — so the first frame, at 755, is off
+  the screen and about a third of it reads. The photographer likes the
+  header's air and does not want it cramped; the question is whether
+  the padding and the gap before the prose can come down without the
+  title looking small, and whether the answer differs on the portrait
+  monitor, where the same head is a fifth of the screen. Decide by
+  looking, on both screens, alongside the reading typography pass
+  below, which owns the same measures.
 - **Reading typography pass for pieces** — measure, size, and rhythm
   were inherited from a blog theme; immersive reading wants a slightly
   narrower column, larger type, more air between blocks.
