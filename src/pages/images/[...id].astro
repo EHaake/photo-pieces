@@ -574,6 +574,12 @@ const indexed = image.hasStory || Boolean(image.caption) || Boolean(label.place)
     font-family: var(--font-mono);
     font-size: 0.8rem;
   }
+  /* The line is muted and the theme's links inherit their colour, so a
+     piece or gallery title read as plain text until hovered. The accent
+     marks it as a way back; hover keeps the theme's underline. */
+  .image-from a {
+    color: var(--color-accent);
+  }
 
   /* Neighbours: a slim mono line under the stage, one per set, the
      default visible. Titles truncate rather than wrap. */
