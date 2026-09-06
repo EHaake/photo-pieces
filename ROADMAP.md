@@ -54,6 +54,15 @@ attached.
   (`scripts/prune-unreferenced-originals.mjs`) exists because Astro
   leaves untouched originals in the output — worth an upstream issue,
   and a no-op if they fix it.
+- **A galleries overhaul** — noted by the photographer at the spec 007
+  close-out (2026-09-05), for a spec of its own: the gallery grid feels
+  too constrained by the prose column's width — it should be able to
+  run wider on the page than the text does, closer to the content
+  width — and the spacing between the images wants retuning. Both are
+  knobs of `gallery-layout.ts` and the `.gallery-grid` rules today;
+  the spec decides the widths and the gaps by looking, on both of the
+  photographer's screens, and folds in whatever the real photographs
+  (below) teach about density.
 - **The front door** — to be workshopped with the photographer
   (decided 2026-09-02): the interim homepage (spec 002) stands until
   then. The starting position: the homepage is the site's thesis —
