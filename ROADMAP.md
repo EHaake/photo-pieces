@@ -183,8 +183,9 @@ attached.
 - **A colophon** — one paragraph in the photographer's words about how
   the site shows work (why the mats, why the quiet view), so the
   design has its meaning without the pages explaining themselves.
-- **Browse by place** — a names-only index of the places sidecars
-  name; no coordinates, ever.
+- ~~**Browse by place**~~ — subsumed by spec 009's `/places/`, an
+  index of declared places rather than of the sidecars' free-text
+  names; no coordinates, ever, still.
 - **Keyboard help** — arrow keys and Escape exist and nobody will
   know: a line on the image page, or a small hint on first use.
 - **Standing tests for the image page's section order** — verified
