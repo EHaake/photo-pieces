@@ -113,9 +113,14 @@ Nothing about ids, URLs, galleries, or the pieces' own pages changes.
   therefore compares the built HTML of `/galleries/` and
   `/categories/landscape/` after normalizing `data-astro-cid-[a-z0-9]+`
   and the `/_astro/*.<hash>.css` link to placeholders, and the page's
-  CSS (linked or inlined) the same way — identical then, or the
-  refactor changed something real, in the markup or in a rule. The
-  place card's meta is the summary line.
+  CSS (linked or inlined) the same way — no delta attributable to the
+  refactor then, the nav's new item excepted (the same task adds it to
+  every page). One more artifact of moving a `<style>` into a nested
+  component, found at T703: Astro emits the deeper import's inlined
+  sheet first, so the order of two scoped sheets in a page's `<style>`
+  can swap. Harmless while the two never match one element, as here;
+  a future move of a sheet whose rules overlap a sibling's would change
+  the cascade silently. The place card's meta is the summary line.
 - **The nav** (`consts.ts`): `{ href: '/places/', label: 'Places' }`
   after Galleries. Six items; T703 checks the header at the three
   viewports for wrapping.

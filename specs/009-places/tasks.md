@@ -104,7 +104,7 @@ The runs (the implementer's six, each restored after, its messages
 verbatim; runs 6 and 7 re-run by the orchestrator): (1) the fog piece's
 `at: the-headland` — `[places] src/content/pieces/where-the-fog-lets-go/index.md: no place named "the-headland" — the places are: the-headlands, the-jetty`, build exit 1; (2) `_jetty-dawn.md` `at: nowhere` — the same message with the sidecar's path; (3) `places/empty.md` with `cover: where-the-fog-lets-go/land-a` — `[places] note: empty has no published frame yet — no page until a photograph names it`, build exit 0, no cover failure; (4) a draft copy of the fog folder naming the headlands — build exit 0, no `[places]` line, the dump unchanged (the implementer's run, prose only — left to the sweep to re-run or accept on the fixture); (5) `the-jetty.md` `cover: where-the-fog-lets-go/land-a` — `[places] src/content/places/the-jetty.md: cover "where-the-fog-lets-go/land-a" is not one of this place's frames`, build exit 1; (6) `the-jetty.md` `draft: true` — `[places] note: the-jetty is a draft — no page, and its frames show no place`, build exit 0, the dump's places `['the-headlands']`, land-c `place: null` with sets `gallery:fog-frames 3/4` and `piece:where-the-fog-lets-go 3/8` only, jetty-dawn `place: null` with `piece:first-light-at-the-jetty 1/1` only; (7, added at review) `_dock-b.md` `at: the-jetty` at the gallery root — `[places] src/content/gallery-images/_dock-b.md: gallery-root photographs are not grouped under a place — the line is ignored`, build exit 0. The review's blocking finding was the record, not the code: the review bundle had summarized the dump in prose, and the record now carries the file's bytes from the orchestrator's re-run. Notes left open: no run puts a typo on a draft piece (the code passes every piece unfiltered); blank `at` values are filtered inside `placeProblems` rather than before the call, one copy of the rule.
 
-- [ ] **T703** — The pages and the nav. `CoverCards.astro` from
+- [x] **T703** — The pages and the nav. `CoverCards.astro` from
       `GalleryCards.astro`'s markup and styles, `GalleryCards` a wrapper;
       `src/pages/places/index.astro`; `src/pages/places/[slug].astro` per
       the plan (header, summary line, the writing when present, the
@@ -124,6 +124,33 @@ verbatim; runs 6 and 7 re-run by the orchestrator): (1) the fog piece's
       the browser — rows packed, headings clear of rows, the nav's six
       items — with the numbers recorded; Pagefind indexes the place pages
       (count in the postbuild output); `astro check` green._
+
+The T703 record. Verified first try: build 77 pages, Pagefind 8 (was
+6), check 0 errors, 252 tests, Prettier clean; `ls dist/places/` →
+`index.html the-headlands the-jetty` and nothing else. The normalized
+comparison (linked `/_astro/BaseLayout.….css` identical after cid
+normalization; the HTML normalized for cids and the css link) is not
+literally clean, and the two deltas are accepted: the nav's new
+`<a href="/places/">Places</a>` on both pages (this task's own change,
+on every page), and on `/galleries/` alone the two inlined scoped
+sheets in swapped order — the card sheet now arrives through a nested
+import and Astro emits the deeper import's sheet first; every rule
+byte-identical after normalization, and the two selector families
+(`.gallery-card*`, `.gallery-group*`) never match one element, so the
+order carries nothing (plan.md now says so). The built-page checks read
+as the plan's fixture paragraph says (six frames in order on the
+headlands with no pano and no land-c; two outings oldest first on the
+jetty with dates and the OG image; the jetty card first on the index;
+six nav items in order). Geometry, measured in the browser on the dev server (document coordinates, px): 1440×900 — the nav's six items on one row (tops all 20, right edge 1019 of 1440; brand 133–343); the headlands' h2 bottom 960, first row top 1005; rows [2 cells h392 spanning 133–1293], [2 cells h545 at 133–900 beside 1 cell h460 at 918–1293 — equal short sides, portraits beside a landscape, as the gallery packs], [1 cell h412 centred 507–918]; the jetty's second outing carries the 1px hairline, h2 bottoms 860/1524 before row tops 905/1569; the index's two cards side by side 133–507 and 525–900. 1080×1920 — nav one row (tops 20, right edge 828); h2 bottom 837, first row 882; rows [2×h338, 32–1033], [2×h467 beside 1×h395], [1×h404 centred]; hairline on the second outing; cards 32–524 and 542–1033. 375×812 — the header wraps the nav under the brand (brand 20–50, nav one row at top 66 from 16 to 350, header 0–119), document width 375 with no horizontal overflow; one frame per row at 16–359 (heights 234, 234, 507, 506, 425, 343); h2 bottom 1010, first row 1055; the jetty's rows 839 and 1256 under h2 bottoms 794 and 1211, hairline on the second; the index's cards stacked 400–696 and 714–1010. Viewport reset to the pane's size after. A bodiless place, run by the
+orchestrator (the-jetty's body stripped, restored after): the page
+builds with no `.prose` block and its outings intact. The review signed
+off with notes: `render()` runs unconditionally and only `<Content />`
+is gated (equivalent); the `.lead` scoped width duplicates the theme's
+global rule as the gallery page's does — left to the sweep; the outing
+hairline is a `border-top`, not the galleries index's `border-bottom`,
+by the plan's word, and it sits 79px above the second heading at
+1440 (section top 1395, h2 1474).
+
 - [ ] **T704** — The image page. The label's place row as a link to
       the place with the free text after `·`; `neighbours.atPlace`;
       `indexed` counts a place. _Verify: build green; in the browser,
@@ -183,6 +210,8 @@ implementer 490,854 over nine dispatches; reviewer 905,152 all tiers. -->
 | T702 (sdd-implementer) | opus             | 69,247                            | verified first try; the dump and six runs reported with the JSON verbatim                                                                                                                                                                                                                                                                                                                                                                                |
 | T702 review            | reviewer default | 49,709                            | fix and re-review: the review bundle's prose summary of the dump (the orchestrator's, not the implementer's) — fixed by the orchestrator's own re-run recorded verbatim, plus a seventh run for the gallery-root warning                                                                                                                                                                                                                                 |
 | T702 re-review         | reviewer default | 27,585                            | signed off; open to the sweep: run 4's dump is the implementer's prose                                                                                                                                                                                                                                                                                                                                                                                   |
+| T703 (sdd-implementer) | opus             | 54,756                            | verified first try; the normalized comparison and the built-page greps reported verbatim                                                                                                                                                                                                                                                                                                                                                                 |
+| T703 review            | reviewer default | 41,612                            | signed off; the two comparison deltas recorded, the sheet-order artifact added to plan.md, a bodiless place run by the orchestrator                                                                                                                                                                                                                                                                                                                      |
 
 ---
 
