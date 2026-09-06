@@ -591,3 +591,12 @@ the id `beta/land-a` — the registered `land-a.jpg`'s — pass the draft
 rule, and seat a frame linking to another file's page. A borrowed
 `src` must be one of the accepted rasters; a local non-raster (an svg
 diagram) stays allowed and unlinked as before.
+
+**The image page's way-back links take the accent colour.** Not in
+the spec: at the Phase 0 gate the product owner found that "From the
+piece The vocabulary sampler" read as plain text until hovered, since
+the theme's links inherit their colour and the line is muted. Every
+link under that line's class — the piece, the galleries, "Read it in
+place", the print link — now takes the accent at rest and the theme's
+hover colour on hover, for every photograph, borrowed or not; recorded
+as spec 008's decision 8.

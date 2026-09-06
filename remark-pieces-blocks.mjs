@@ -762,10 +762,11 @@ function checkReferenceShape(file, src, fail) {
     fail(shape.message);
     return;
   }
-  // The long way round to the piece's own folder would build, but the
-  // page would be wrong: the scanner reads local references only, so the
-  // frame's title and passage would miss it and the piece's frames would
-  // list it twice.
+  // The long way round to the piece's own folder would build to the same
+  // id and the same place in the frames list, but the alt and passage
+  // lookups read local references only, so the frame would lose the alt
+  // the piece wrote (its page's title falling back to the humanized
+  // filename, absent a sidecar) and its passage.
   // (A piece kind only: a gallery reference's folder is the id's
   // `gallery` sentinel, not a path segment.)
   if (

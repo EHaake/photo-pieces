@@ -113,7 +113,12 @@ attached.
   `DECISIONS.md`);
   and a missing file written as the plain `![alt](…)` shorthand still
   fails with Astro's opaque error rather than the transform's — the
-  check can be extended to the shorthand in a later spec.
+  check can be extended to the shorthand in a later spec; and the
+  registry's scanner reads the raw body, fenced code included, so a
+  borrowed reference quoted in a code block of a published piece
+  counts as a placement (a build failure if its target has no page, a
+  phantom "Also in" if it does) — strip fences in the scanner when
+  the first gear-notes piece quotes one.
 - **A series entity** (under discussion) — between a piece and a
   gallery: a body of work spanning years, with an essay, its pieces
   in order, and its own curated set of frames; a page at

@@ -1,7 +1,9 @@
 # Spec: Cross-piece image references
 
-**Status**: Approved (product owner, 2026-09-05, on the spec-conformance
-summary) — plan.md and tasks.md signed off by the skeptical-reviewer
+**Status**: Implemented (2026-09-05) — approved by the product owner
+2026-09-05 on the spec-conformance summary, attested in the browser at
+the Phase 0 and Phase 1 gates the same day; every acceptance criterion
+below has its record in tasks.md
 **Depends on**: 004 (the image registry: every accepted raster in a
 piece folder or the gallery root has a stable id and a page), 006 (the
 image page's sets, passage, and related frames), 007 (every placed
@@ -140,32 +142,32 @@ The pieces row becomes one link, as the gallery card is.
 
 ## Acceptance criteria
 
-- [ ] A reference of either shape builds in every block and the
+- [x] A reference of either shape builds in every block and the
       shorthand, links to the home page, and gets the same `sizes` and
       mat as a local image would; the four wrong shapes (a sub-folder,
       three levels up, a path that resolves outside `pieces/` and
       `gallery-images/`, a private frame) fail naming the rule
-- [ ] The photograph's page is unchanged in its home's terms and gains
+- [x] The photograph's page is unchanged in its home's terms and gains
       the "Also in" line listing every published piece that places it
       other than its home, newest first, absent when there are none; a
       gallery-root photograph placed by a piece shows the line without
       "From the piece"
-- [ ] From the borrowing piece the arrows step through that piece's
+- [x] From the borrowing piece the arrows step through that piece's
       frames with the borrowed one in its place; from the home piece or
       a gallery, as before
-- [ ] A published piece placing a draft piece's photograph fails the
+- [x] A published piece placing a draft piece's photograph fails the
       build naming both pieces; a draft piece placing a published one
       builds
-- [ ] A piece's cover may be a reference of either shape, with the
+- [x] A piece's cover may be a reference of either shape, with the
       same draft rule; the piece's lists use it and the photograph's
       page counts the piece among its appearances
-- [ ] The fixtures show it: one published piece places a photograph
+- [x] The fixtures show it: one published piece places a photograph
       from another piece and one from the gallery root, and the three
       image pages read as this spec says
-- [ ] On the pieces index and the homepage feed, the photograph, the
+- [x] On the pieces index and the homepage feed, the photograph, the
       date line, the title, and the description of each row all lead to
       the piece; the row looks as it did at rest
-- [ ] The whole test suite green; the build with its barriers green;
+- [x] The whole test suite green; the build with its barriers green;
       docs updated
 
 ## Resolved decisions (product owner, 2026-09-05)
@@ -182,3 +184,7 @@ The pieces row becomes one link, as the gallery card is.
 6. **Covers may be borrowed.**
 7. **The pieces row becomes one link**, matching the gallery card — a
    noticed inconsistency, fixed here rather than in a spec of its own.
+8. **The image page's way-back links take the accent colour** (product
+   owner, Phase 0 gate, 2026-09-05): "From the piece", "Also in", "In
+   the gallery", "Read it in place", and the print link read as links
+   before a mouse-over, for every photograph, borrowed or not.

@@ -1,8 +1,7 @@
 # Tasks: Cross-piece image references
 
-**Status**: Signed off (skeptical-reviewer, top tier, 2026-09-05, second
-pass) — awaiting the product owner's approval of the spec-conformance
-summary
+**Status**: Implemented (2026-09-05) — every task checked; T608 closes
+at the merge
 **Implements**: plan.md in this directory
 
 Ordered, small, independently verifiable. Per the constitution: every
@@ -147,8 +146,9 @@ a later spec can extend `checkSrcExists` to the shorthand visit. -->
       check of the resolver passed, `../..` resolving to a folder that
       the file check turns into "not found"; the vault is not at
       `~/photo-brain/` on this machine, so the rebuilt `main.js` is
-      installed by the product owner per the plugin README, and the Live
-      Preview check is his at the gate._
+      installed by the product owner per the plugin README; at the Phase 1
+      gate (2026-09-05) they attested the Live Preview check — the
+      sampler's two borrowed frames shown, a typo path "not found"._
 - [x] **T607** — Docs: `AUTHORING.md` (the two path shapes, one home, what
       the page shows, the draft rule, covers, in "A piece folder is public
       territory" and "Hard-won syntax rules"), `README.md` (the block
@@ -192,15 +192,25 @@ review's excerpt stopped short of it); nothing in `src/` consumes
 `.note-row h3 a`; the DECISIONS claim that `astro dev` shows a borrowed
 draft image was observed (the fog piece toggled to draft: the sampler
 page 200 with the borrowed frame, the image page 500, both restored on
-revert).
+revert). (c) The product owner attested the phase in the browser and in
+Obsidian on 2026-09-05 ("Checks passed") and released Phase 2.
 
 ## Phase 2 — Close-out (reviewer sweep, then merge)
 
-- [ ] **T608** — The pre-merge whole-spec sweep at the top tier and its
+- [x] **T608** — The pre-merge whole-spec sweep at the top tier and its
       findings resolved; the spec's acceptance criteria checked against
       their records; build, tests, check, GPS scan, and format green with
       actual output; the PR marked ready and merged with a merge commit.
-      _Verify: main green after the merge._
+      _Verify: main green after the merge. Record: the sweep at the top
+      tier found the code sound and every acceptance criterion met, and
+      blocked on the record — the boxes and statuses, a comment still
+      claiming the long self-shape doubles the frames list — plus notes
+      (the scanner reads fenced code, now a ROADMAP follow-up; the
+      accent links, now decision 8; plan.md's `galleries.test.mjs` entry, a file spec 008 never touched);
+      the re-reviews caught the same claim surviving in plan.md, the statuses running ahead of the merge, and a plan sentence placing the tests beside `validateGalleries`, all fixed. Green on HEAD:
+      build 74 pages, Pagefind 6 pages, 34 unreferenced originals pruned,
+      631 images scanned with no GPS, astro check 0/0/0, 230 tests,
+      Prettier clean. The merge follows this commit._
 
 ---
 
@@ -212,22 +222,40 @@ if it is ever on (it is off). Compare the total against spec 007's
 (implementer 309,333 over eight dispatches; reviewer 1,611,013, of
 which pre-policy Phase 0 803,056). -->
 
-| Task / invocation         | Tier             | Tokens           | Outcome / miss reason                                                                                                                                                        |
-| ------------------------- | ---------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| plan/tasks sign-off ×2    | top tier         | 152,642 + 56,418 | fix and re-review ×1 (the long self-shape; the cover's classification; the row as the card; the plugin's rule), then signed off                                              |
-| T601 (sdd-implementer) ×2 | opus             | 82,989 + 48,314  | verified first try, then the review's five fixes — verified first try; twenty then nine mutations caught                                                                     |
-| T601 review ×2            | reviewer default | 46,209 + 38,067  | fix and re-review ×1 (a borrowed non-raster minting a real id — the plan now refuses it), then signed off                                                                    |
-| T602 (sdd-implementer)    | opus             | 89,028           | verified first try; six mutations caught; the generator learned to write a real TIFF                                                                                         |
-| T602 review               | reviewer default | 49,474           | signed off; four notes folded in by the orchestrator (the own-folder rule for piece refs only; returns after fail; a positive svg assertion; the list from IMAGE_EXTENSIONS) |
-| T603 (sdd-implementer) ×2 | opus             | 77,054 + 47,750  | verified first try, then the review's four fixes — verified first try                                                                                                        |
-| T603 review ×2            | reviewer default | 64,730 + 57,064  | fix and re-review ×2 (fsPath in dev unconfirmed; the proofs not re-run after the fixes) — both closed by the orchestrator's own runs                                         |
-| T604 (sdd-implementer)    | opus             | 33,632           | verified first try                                                                                                                                                           |
-| T604 review               | reviewer default | 28,506           | signed off pending the browser set-key check, which passed; two prose notes folded in by the orchestrator                                                                    |
-| T605 (sdd-implementer)    | opus             | 21,511           | verified first try; the browser checks run by the orchestrator                                                                                                               |
-| T606 (sdd-implementer)    | opus             | 27,693           | verified first try; the resolver re-checked by the orchestrator                                                                                                              |
-| T607 (sdd-implementer)    | opus             | 62,883           | verified first try; the docs read against the shipped behaviour by the orchestrator                                                                                          |
-| Phase 1 review            | reviewer default | 81,566           | fix and re-review (two doc claims); the hover prediction confirmed by measurement and fixed                                                                                  |
-| Phase 1 re-review ×2      | reviewer default | 58,985 + 27,998  | fix and re-review ×1 (the DECISIONS sentence overstated again: the title falls back to the humanized filename), then signed off with two precision notes folded in           |
+| Task / invocation         | Tier             | Tokens                   | Outcome / miss reason                                                                                                                                                        |
+| ------------------------- | ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| plan/tasks sign-off ×2    | top tier         | 152,642 + 56,418         | fix and re-review ×1 (the long self-shape; the cover's classification; the row as the card; the plugin's rule), then signed off                                              |
+| T601 (sdd-implementer) ×2 | opus             | 82,989 + 48,314          | verified first try, then the review's five fixes — verified first try; twenty then nine mutations caught                                                                     |
+| T601 review ×2            | reviewer default | 46,209 + 38,067          | fix and re-review ×1 (a borrowed non-raster minting a real id — the plan now refuses it), then signed off                                                                    |
+| T602 (sdd-implementer)    | opus             | 89,028                   | verified first try; six mutations caught; the generator learned to write a real TIFF                                                                                         |
+| T602 review               | reviewer default | 49,474                   | signed off; four notes folded in by the orchestrator (the own-folder rule for piece refs only; returns after fail; a positive svg assertion; the list from IMAGE_EXTENSIONS) |
+| T603 (sdd-implementer) ×2 | opus             | 77,054 + 47,750          | verified first try, then the review's four fixes — verified first try                                                                                                        |
+| T603 review ×2            | reviewer default | 64,730 + 57,064          | fix and re-review ×2 (fsPath in dev unconfirmed; the proofs not re-run after the fixes) — both closed by the orchestrator's own runs                                         |
+| T604 (sdd-implementer)    | opus             | 33,632                   | verified first try                                                                                                                                                           |
+| T604 review               | reviewer default | 28,506                   | signed off pending the browser set-key check, which passed; two prose notes folded in by the orchestrator                                                                    |
+| T605 (sdd-implementer)    | opus             | 21,511                   | verified first try; the browser checks run by the orchestrator                                                                                                               |
+| T606 (sdd-implementer)    | opus             | 27,693                   | verified first try; the resolver re-checked by the orchestrator                                                                                                              |
+| T607 (sdd-implementer)    | opus             | 62,883                   | verified first try; the docs read against the shipped behaviour by the orchestrator                                                                                          |
+| Phase 1 review            | reviewer default | 81,566                   | fix and re-review (two doc claims); the hover prediction confirmed by measurement and fixed                                                                                  |
+| Phase 1 re-review ×2      | reviewer default | 58,985 + 27,998          | fix and re-review ×1 (the DECISIONS sentence overstated again: the title falls back to the humanized filename), then signed off with two precision notes folded in           |
+| T608 sweep                | top tier         | 117,931                  | fix and re-review (the record: boxes, statuses, one comment); the code and every criterion judged met                                                                        |
+| T608 re-review ×3         | top tier         | 65,518 + 32,373 + 27,671 | fix and re-review ×2 (the claim surviving in plan.md and statuses ahead of the merge; then a plan sentence placing the tests beside `validateGalleries`), then signed off    |
+
+**Totals.** Implementer (opus): 490,854 tokens over nine dispatches,
+every one verified first try, the escape hatch never used, no tier
+miss — against spec 007's 309,333 over eight (this spec's tasks were
+larger: the parser, the transform, and the registry each carried a
+fix round from review). Reviewer at its default tier: 452,599 over
+nine invocations (per-task reviews and the Phase 1 review). Top tier:
+452,553 (the sign-off 209,060, the sweep 117,931, its re-reviews
+125,562). Reviewer all tiers 905,152 — against 007's 1,611,013, of
+which the policy-era part was 807,957. The policy held: nothing the
+implementer returned needed the orchestrator to redo it, and every
+reviewer finding that mattered was a doc or record claim or a CSS
+cascade prediction, each closed by a measurement or a run. Third tier
+stays off: the tasks with an automated verify and a pattern file
+(T605, T606) were the cheapest dispatches here, which is the case
+for turning it on once a third spec confirms the shape.
 
 ---
 

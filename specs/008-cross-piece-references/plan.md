@@ -1,8 +1,9 @@
 # Plan: Cross-piece image references
 
-**Status**: Signed off (skeptical-reviewer, top tier, 2026-09-05, second
-pass) — awaiting the product owner's approval of the spec-conformance
-summary
+**Status**: Implemented (2026-09-05) — signed off by the
+skeptical-reviewer at the top tier (2026-09-05, second pass), then
+executed T601–T607 with the pre-merge sweep's findings resolved; T608
+closes at the merge
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -30,9 +31,7 @@ new frontmatter, no new collection, the same ids and URLs.
   long shape into the piece's own folder** (`../<own-slug>/<file>`) is
   refused by the transform, which knows its folder from the file's
   path: "this is the piece's own folder — write ./<file>" (sign-off:
-  accepted, it would pass the build and give a wrong page — the scanner
-  stays local-only, so the title and passage would miss it, and the
-  frames would list it twice). `pieceFrames` dedupes by id as well, defensively. **A borrowed
+  accepted, it would pass the build and give a wrong page — the alt and passage lookups read local references only, so the frame would keep its id and its place but lose the alt the piece wrote and its passage). `pieceFrames` dedupes by id as well, defensively. **A borrowed
   image must be a photograph this site pages**: a borrowed `src` whose
   extension is not one of the registry's accepted rasters is refused by
   the transform (T601's review: `../beta/land-a.tif` would otherwise
@@ -191,8 +190,7 @@ piece's folder)`).
   `--ar` identical to the local case; the four invalid shapes and the
   private frame fail naming the rule.
 - The registry's rules are pure where they can be: `pieceFrames`,
-  `crossReferences`, and a `referenceProblems(borrower, ids, known)` that returns the messages (the home derived from the id's folder — the id rule makes it so) — tested in `galleries.test.mjs`'s
-  style beside `validateGalleries`. The Astro-coupled wiring (sets,
+  `crossReferences`, and a `referenceProblems(borrower, ids, known)` that returns the messages (the home derived from the id's folder — the id rule makes it so) — tested in `image-meta.test.mjs` beside `parseReference`, in `galleries.test.mjs`'s style (the plan had placed them beside `validateGalleries`). The Astro-coupled wiring (sets,
   appearances, the cover's `fsPath`) is verified at build with the
   fixtures and, for the draft rule, a temporary draft piece borrowed
   from a published one (the build must fail with the message; deleted
@@ -231,7 +229,7 @@ obsidian-plugin/main.ts           explicit relative-path resolution
 scripts/gen-placeholders.mjs      tests/pieces/{alpha,beta}/photo.jpg,
                                   tests/gallery-images/photo.jpg
 src/content/pieces/vocabulary-sampler/index.md   the Borrowed section, the cover
-image-meta.test.mjs, remark-pieces-vocabulary.test.mjs, galleries.test.mjs
+image-meta.test.mjs, remark-pieces-vocabulary.test.mjs
 AUTHORING.md, README.md, DECISIONS.md, ROADMAP.md
 ```
 
