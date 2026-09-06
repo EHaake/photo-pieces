@@ -6,15 +6,21 @@ summary before T701 starts
 **Implements**: plan.md in this directory
 
 Ordered, small, independently verifiable. Per the constitution: every
-implementation task ends with an actual build and test run reported,
-not summarized; the existing 230-test suite stays green through every
-task. Cadence (product owner, under the model policy): the orchestrating
-session triages each task and dispatches routine ones to the
-`sdd-implementer` with a packet; it re-runs build and tests itself on
-return; the `skeptical-reviewer` reviews each Phase 0 task from a
-shell-assembled bundle, and each later phase as a whole; the person is
-paused for after each phase and whenever something unexpected bears on
-spec adherence.
+implementation task ends with the verification command's actual output
+(`sh scripts/verify.sh`) reported, not summarized; the existing
+230-test suite stays green through every task. Cadence (product owner,
+under the model policy as amended 2026-09-06): the orchestrating session
+triages each task and dispatches routine ones to the `sdd-implementer`
+on a task bundle assembled with shell, telling it not to read plan.md,
+spec.md, or tasks.md in full; in Phase 0 it re-runs the verification
+command itself and has the `skeptical-reviewer` review each task from a
+staged, shell-assembled bundle — one review and at most one re-review
+per task, anything still open logged and left to the sweep; in later
+phases the implementer's verbatim output is the verification and the
+reviewer checks the phase as a whole; the sweep runs at the reviewer's
+default tier on the documents plus `git diff main...HEAD`; a fresh
+orchestrator session starts each phase; the person is paused for after
+each phase and whenever something unexpected bears on spec adherence.
 
 Task ids: 009 = T7xx.
 
@@ -150,14 +156,19 @@ implementer 490,854 over nine dispatches; reviewer 905,152 all tiers. -->
 ## Handoff note
 
 > Read `CLAUDE.md` and `specs/009-places/{spec,plan,tasks}.md`, then
-> begin at T701 as the orchestrator under the model policy: triage,
-> dispatch routine tasks to the `sdd-implementer` with a packet (the
-> task line, the plan section, the acceptance criteria, the files, the
-> pattern file), verify by running build and tests yourself, the
-> `skeptical-reviewer` on each Phase 0 task from a shell-assembled
-> bundle and on each later phase as a whole, commit, check the box, log
-> the tier and tokens. Involvement level is product owner: pause after
-> each phase and whenever something unexpected bears on spec adherence.
+> begin at the first unchecked task as the orchestrator under the model
+> policy: triage; dispatch each routine task to the `sdd-implementer` on
+> a task bundle assembled with shell (the task line, the plan sections,
+> the acceptance criteria, the files, the pattern file, the signatures,
+> any recorded finding), telling it not to read plan.md, spec.md, or
+> tasks.md in full; verify with `sh scripts/verify.sh` only — re-run by
+> you in Phase 0, taken from the implementer's verbatim output after;
+> stage, then bundle the diff for the `skeptical-reviewer` (each Phase 0
+> task; each later phase as a whole), one review and at most one
+> re-review per task, the rest logged; commit, check the box, log the
+> tier and tokens. Involvement level is product owner: pause after each
+> phase and whenever something unexpected bears on spec adherence, and
+> start a fresh session for the next phase.
 
 Every pause produces a report in this shape, in this order:
 
