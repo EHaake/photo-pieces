@@ -7,6 +7,7 @@ import {
   findIdCollisions,
   firstAltFor,
   formatCollision,
+  groupByPlace,
   humanizeBasename,
   imageIdFor,
   imageUrlFor,
@@ -17,6 +18,10 @@ import {
   parseReference,
   passageFor,
   pieceFrames,
+  placeNameProblem,
+  placeOf,
+  placeProblems,
+  placeSummary,
   privateTargetOf,
   referenceProblems,
   referencesImage,
@@ -693,5 +698,201 @@ describe('cross-piece references (T601, spec 008)', () => {
       false,
     );
     expect(referencesImage('![Dock](../../gallery-images/dock-a.jpg)', 'dock-a')).toBe(false);
+  });
+});
+
+describe('places (T701, spec 009)', () => {
+  it("a frame's own line always wins over its piece's default", () => {
+    expect(placeOf('sombrio-beach', 'jetty')).toBe('sombrio-beach');
+  });
+
+  it('`none` under a default puts the frame at no place', () => {
+    expect(placeOf('none', 'jetty')).toBe(null);
+  });
+
+  it('a frame with no line of its own takes the piece default', () => {
+    expect(placeOf(undefined, 'jetty')).toBe('jetty');
+  });
+
+  it('a piece default of `none` is no default — the word means the same on a piece', () => {
+    expect(placeOf(undefined, 'none')).toBe(null);
+    expect(placeOf('', 'none')).toBe(null);
+  });
+
+  it('a frame with no line and no default is at no place', () => {
+    expect(placeOf(undefined, undefined)).toBe(null);
+    expect(placeOf(null, null)).toBe(null);
+  });
+
+  it('blanks are unset, on the frame and on the piece, and values are trimmed', () => {
+    expect(placeOf('   ', 'jetty')).toBe('jetty');
+    expect(placeOf('  sombrio-beach  ', '')).toBe('sombrio-beach');
+    expect(placeOf('  ', '   ')).toBe(null);
+  });
+
+  it("a place file's name is a slug, or it is not a URL", () => {
+    expect(placeNameProblem('sombrio-beach', 'src/content/places/sombrio-beach.md')).toBe(null);
+    expect(placeNameProblem('Sombrio Beach', 'src/content/places/Sombrio Beach.md')).toBe(
+      "[places] src/content/places/Sombrio Beach.md: a place's file name is its URL — lowercase letters, digits, and hyphens only",
+    );
+    expect(placeNameProblem('sombrio.beach', 'src/content/places/sombrio.beach.md')).toBe(
+      "[places] src/content/places/sombrio.beach.md: a place's file name is its URL — lowercase letters, digits, and hyphens only",
+    );
+  });
+
+  it('`none` is the word for no place, so no place may be named it', () => {
+    expect(placeNameProblem('none', 'src/content/places/none.md')).toBe(
+      '[places] src/content/places/none.md: "none" is the word for no place — a place needs another name',
+    );
+  });
+
+  it('an unknown slug names the file and lists the declared places, sorted', () => {
+    expect(
+      placeProblems(
+        [{ file: 'src/content/pieces/alpha/index.md', slug: 'jety' }],
+        ['sombrio-beach', 'jetty', 'botanical-beach'],
+      ),
+    ).toEqual([
+      '[places] src/content/pieces/alpha/index.md: no place named "jety" — the places are: botanical-beach, jetty, sombrio-beach',
+    ]);
+  });
+
+  it('with no place declared at all, the message says how to declare one', () => {
+    expect(
+      placeProblems([{ file: 'src/content/pieces/alpha/_land-a.md', slug: 'jetty' }], []),
+    ).toEqual([
+      '[places] src/content/pieces/alpha/_land-a.md: no place named "jetty" — none is declared yet: add src/content/places/jetty.md',
+    ]);
+  });
+
+  it('a known slug and `none` are no problem, on a piece or on a sidecar', () => {
+    expect(
+      placeProblems(
+        [
+          { file: 'src/content/pieces/alpha/index.md', slug: 'none' },
+          { file: 'src/content/pieces/alpha/_land-a.md', slug: 'jetty' },
+          { file: 'src/content/pieces/alpha/_land-b.md', slug: 'none' },
+          { file: 'src/content/pieces/beta/index.md', slug: '' },
+        ],
+        ['jetty'],
+      ),
+    ).toEqual([]);
+  });
+
+  it('every problem comes back at once, in the order the refs came', () => {
+    expect(
+      placeProblems(
+        [
+          { file: 'src/content/pieces/alpha/index.md', slug: 'jety' },
+          { file: 'src/content/pieces/alpha/_land-a.md', slug: 'jetty' },
+          { file: 'src/content/pieces/beta/_port-b.md', slug: 'sombrio' },
+        ],
+        ['jetty', 'sombrio-beach'],
+      ),
+    ).toEqual([
+      '[places] src/content/pieces/alpha/index.md: no place named "jety" — the places are: jetty, sombrio-beach',
+      '[places] src/content/pieces/beta/_port-b.md: no place named "sombrio" — the places are: jetty, sombrio-beach',
+    ]);
+  });
+
+  it('a borrowed frame is never counted under the borrower', () => {
+    const grouped = groupByPlace(
+      new Map([
+        ['alpha', ['alpha/land-a', 'beta/port-b', 'gallery/dock-a']],
+        ['beta', ['beta/port-b']],
+      ]),
+      new Map([
+        ['alpha/land-a', 'jetty'],
+        ['beta/port-b', 'jetty'],
+        ['gallery/dock-a', 'jetty'],
+      ]),
+      ['alpha', 'beta'],
+    );
+    expect(grouped.get('jetty')).toEqual({
+      outings: [
+        { piece: 'alpha', frames: ['alpha/land-a'] },
+        { piece: 'beta', frames: ['beta/port-b'] },
+      ],
+      frames: ['alpha/land-a', 'beta/port-b'],
+    });
+  });
+
+  it('a frame at another place lands under its own piece in that other place', () => {
+    const grouped = groupByPlace(
+      new Map([['alpha', ['alpha/land-a', 'alpha/land-b']]]),
+      new Map([
+        ['alpha/land-a', 'jetty'],
+        ['alpha/land-b', 'sombrio-beach'],
+      ]),
+      ['alpha'],
+    );
+    expect(grouped.get('sombrio-beach')).toEqual({
+      outings: [{ piece: 'alpha', frames: ['alpha/land-b'] }],
+      frames: ['alpha/land-b'],
+    });
+    expect(grouped.get('jetty').frames).toEqual(['alpha/land-a']);
+  });
+
+  it('outings follow the piece order given, oldest first', () => {
+    const framesByPiece = new Map([
+      ['alpha', ['alpha/land-a']],
+      ['beta', ['beta/port-b']],
+    ]);
+    const placeOfId = new Map([
+      ['alpha/land-a', 'jetty'],
+      ['beta/port-b', 'jetty'],
+    ]);
+    expect(groupByPlace(framesByPiece, placeOfId, ['beta', 'alpha']).get('jetty').outings).toEqual([
+      { piece: 'beta', frames: ['beta/port-b'] },
+      { piece: 'alpha', frames: ['alpha/land-a'] },
+    ]);
+    expect(groupByPlace(framesByPiece, placeOfId, ['beta', 'alpha']).get('jetty').frames).toEqual([
+      'beta/port-b',
+      'alpha/land-a',
+    ]);
+  });
+
+  it("within an outing the piece's own order is kept", () => {
+    const grouped = groupByPlace(
+      new Map([['alpha', ['alpha/pano', 'alpha/land-a', 'alpha/square']]]),
+      new Map([
+        ['alpha/pano', 'jetty'],
+        ['alpha/land-a', 'jetty'],
+        ['alpha/square', 'jetty'],
+      ]),
+      ['alpha'],
+    );
+    const order = ['alpha/pano', 'alpha/land-a', 'alpha/square'];
+    expect(grouped.get('jetty').outings[0].frames).toEqual(order);
+    expect(grouped.get('jetty').frames).toEqual(order);
+  });
+
+  it('a place with no frame is absent, and a piece with no frames contributes nothing', () => {
+    const grouped = groupByPlace(
+      new Map([['alpha', ['alpha/land-a']]]),
+      new Map([['alpha/land-a', null]]),
+      ['alpha', 'ghost'],
+    );
+    expect(grouped.has('jetty')).toBe(false);
+    expect([...grouped.keys()]).toEqual([]);
+  });
+
+  it("the card line counts outings and frames, and names the place's years", () => {
+    const dates = new Map([
+      ['alpha', new Date(Date.UTC(2019, 4, 2))],
+      ['beta', new Date(Date.UTC(2026, 7, 30))],
+    ]);
+    expect(placeSummary([{ piece: 'beta', frames: ['beta/port-b'] }], dates)).toBe(
+      '1 outing · 1 frame · 2026',
+    );
+    expect(
+      placeSummary(
+        [
+          { piece: 'alpha', frames: ['alpha/a', 'alpha/b', 'alpha/c', 'alpha/d'] },
+          { piece: 'beta', frames: ['beta/a', 'beta/b', 'beta/c'] },
+        ],
+        dates,
+      ),
+    ).toBe('2 outings · 7 frames · 2019–2026');
   });
 });

@@ -27,6 +27,15 @@ export const byNewestPublished = (
 ): number =>
   b.data.publishDate.valueOf() - a.data.publishDate.valueOf() || a.id.localeCompare(b.id);
 
+/** The mirror of `byNewestPublished` — oldest first, the same tie order by
+ *  id — kept beside it so the two cannot disagree. A place's outings read
+ *  oldest first (spec 009). */
+export const byOldestPublished = (
+  a: CollectionEntry<'pieces'>,
+  b: CollectionEntry<'pieces'>,
+): number =>
+  a.data.publishDate.valueOf() - b.data.publishDate.valueOf() || a.id.localeCompare(b.id);
+
 /** The one definition of "published" — shared with the image registry,
  *  which unpublishes a piece's images by the same rule (spec 004). */
 export function isPublished(piece: CollectionEntry<'pieces'>): boolean {

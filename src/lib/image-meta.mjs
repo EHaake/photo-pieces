@@ -770,6 +770,128 @@ export function homeSlugOf(id) {
 }
 
 /**
+ * Places (spec 009). A frame's place, the slug rules, and the grouping
+ * a place page is — pure, so the registry and the tests share one copy
+ * of the precedence rather than each writing it out.
+ */
+
+/** The word a piece or a sidecar uses for "no place" — never a slug. */
+export const PLACE_NONE = 'none';
+
+/**
+ * A frame's place: its sidecar's `at` when that names a place, null
+ * when the sidecar says `none`, else the piece's default, else null.
+ * Blanks are unset, and a piece whose `at` is `none` has no default —
+ * the word means on a piece what it means on a sidecar. This is the
+ * spec's "a frame's own line always wins", and the only place the
+ * precedence is written.
+ */
+export function placeOf(at, pieceDefault) {
+  const own = cleanString(at);
+  if (own) return own === PLACE_NONE ? null : own;
+  const fallback = cleanString(pieceDefault);
+  return !fallback || fallback === PLACE_NONE ? null : fallback;
+}
+
+/**
+ * A place file's name is its URL: `name` is the file's id (the file
+ * name without `.md`), `file` its path for the message. Returns the
+ * message, or null when the name is a usable slug.
+ */
+export function placeNameProblem(name, file) {
+  const id = String(name ?? '');
+  if (!SLUG.test(id)) {
+    return `[places] ${file}: a place's file name is its URL — lowercase letters, digits, and hyphens only`;
+  }
+  if (id === PLACE_NONE) {
+    return `[places] ${file}: "${PLACE_NONE}" is the word for no place — a place needs another name`;
+  }
+  return null;
+}
+
+/**
+ * The slug rule: every `at:` other than `none`, on a piece or a sidecar,
+ * draft or not, must name a declared place. `refs` is `[{ file, slug }]`
+ * — every `at:` the registry found, already trimmed — and `placeSlugs`
+ * an iterable of the declared place ids, drafts included. Returns one
+ * message per problem in the order of `refs`, empty when there are none,
+ * so the caller fails the build with all of them at once.
+ */
+export function placeProblems(refs, placeSlugs) {
+  const declared = [...placeSlugs];
+  const known = new Set(declared);
+  const listed = [...declared].sort().join(', ');
+  const problems = [];
+  for (const { file, slug } of refs) {
+    if (!slug || slug === PLACE_NONE || known.has(slug)) continue;
+    problems.push(
+      declared.length > 0
+        ? `[places] ${file}: no place named "${slug}" — the places are: ${listed}`
+        : `[places] ${file}: no place named "${slug}" — none is declared yet: add src/content/places/${slug}.md`,
+    );
+  }
+  return problems;
+}
+
+/**
+ * A place's outings and its frames. `framesByPiece` maps a piece slug
+ * to its frames in the piece's order (borrowed ids included — that is
+ * what the registry holds), `placeOfId` an image id to its resolved
+ * place or null, `pieceOrder` the published piece slugs oldest first.
+ * Only a piece's own-folder frames count, so a borrowed frame is never
+ * counted under the borrower; an outing exists only where the piece has
+ * at least one frame at the place, and a place's frames are its outings'
+ * frames concatenated — the set the arrows step through. A place with no
+ * frame is absent.
+ */
+export function groupByPlace(framesByPiece, placeOfId, pieceOrder) {
+  const places = new Map();
+  for (const piece of pieceOrder) {
+    const outing = new Map();
+    for (const id of framesByPiece.get(piece) ?? []) {
+      if (homeSlugOf(id) !== piece) continue;
+      const place = placeOfId.get(id);
+      if (!place) continue;
+      const frames = outing.get(place) ?? [];
+      frames.push(id);
+      outing.set(place, frames);
+    }
+    for (const [place, frames] of outing) {
+      const entry = places.get(place) ?? { outings: [], frames: [] };
+      entry.outings.push({ piece, frames });
+      entry.frames.push(...frames);
+      places.set(place, entry);
+    }
+  }
+  return places;
+}
+
+/**
+ * A place card's meta line — "2 outings · 7 frames · 2019–2026", with
+ * singulars and one year when the outings share one. `outings` is what
+ * `groupByPlace` returns; `dateByPiece` maps a piece slug to its
+ * publish date, read as UTC like every date the site prints.
+ */
+export function placeSummary(outings, dateByPiece) {
+  const frames = outings.reduce((total, outing) => total + outing.frames.length, 0);
+  const years = outings
+    .map((outing) => dateByPiece.get(outing.piece))
+    .filter((date) => date instanceof Date && !Number.isNaN(date.valueOf()))
+    .map((date) => date.getUTCFullYear())
+    .sort((a, b) => a - b);
+  const parts = [
+    `${outings.length} ${outings.length === 1 ? 'outing' : 'outings'}`,
+    `${frames} ${frames === 1 ? 'frame' : 'frames'}`,
+  ];
+  if (years.length > 0) {
+    const first = years[0];
+    const last = years.at(-1);
+    parts.push(first === last ? `${first}` : `${first}–${last}`);
+  }
+  return parts.join(' · ');
+}
+
+/**
  * Latest-work ordering: galleries newest first, each gallery's images
  * in the photographer's order, de-duplicated across galleries. A
  * gallery with no date is placed by its newest image's capture date —
