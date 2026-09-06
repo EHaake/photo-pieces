@@ -333,7 +333,7 @@ photo-pieces/
 │   ├── content/places/           # one file per place
 │   ├── lib/pieces.ts             # the one published-pieces query
 │   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, places, sets)
-│   ├── lib/gallery-layout.ts     # the equal-short-side packing knobs (galleries, related strips)
+│   ├── lib/gallery-layout.ts     # the equal-short-side packing knobs (galleries, place pages, related strips)
 │   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
 │   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader

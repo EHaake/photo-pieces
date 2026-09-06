@@ -1,9 +1,7 @@
 # Plan: Places
 
 **Status**: Implemented (2026-09-06) — signed off by the
-skeptical-reviewer at the top tier on the fourth pass, then executed
-T701–T705 with each review's findings resolved; T706 closes at the
-merge
+skeptical-reviewer at the top tier on the fourth pass, then executed T701–T705 with each review's findings resolved and the sweep's fixed; T706 closes at the merge
 **Implements**: spec.md in this directory
 
 ## Shape of the change

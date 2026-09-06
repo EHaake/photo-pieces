@@ -645,8 +645,4 @@ not a failure, as the spec promises.
 
 **The card treatment became one component.** `GalleryCards` gave its
 markup and styles to `CoverCards`, which galleries and places share;
-the galleries index and the category page render the same bytes once
-Astro's per-file scoped-style hash is normalized. Moving a `<style>`
-into a nested component also reorders the page's inlined scoped
-sheets (the deeper import's first) — harmless while the two never
-match one element, and recorded in the plan for the next such move.
+the galleries index and the category page show no delta attributable to the refactor once Astro's per-file scoped-style hash is normalized — two deltas excepted and explained: the nav's new Places item, which the same task adds to every page, and the order of two inlined scoped sheets on the galleries index, since moving a `<style>` into a nested component puts the deeper import's sheet first. That reordering is harmless while the two sheets never match one element, and the plan records it for the next such move.

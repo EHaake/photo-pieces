@@ -22,8 +22,7 @@ The vault is a **parent** of the repo, not the content folder itself:
 
 Why this shape:
 
-- **Astro only reads its configured content directory**, so nothing
-  outside `src/content/pieces/` can leak into the built site.
+- **Astro only reads its configured content directory**, so nothing outside `src/content/` can leak into the built site.
 - **Private notes live outside the repo entirely** — shoot planning,
   location scouting, gear research, journal fragments. They can never
   be committed by accident because git never sees them. No `.gitignore`

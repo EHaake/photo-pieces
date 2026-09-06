@@ -1,7 +1,6 @@
 # Tasks: Places
 
-**Status**: Implemented (2026-09-06) — every task checked; T706 closes
-at the merge
+**Status**: Implemented (2026-09-06) — every task through T705 checked; T706 closes at the merge
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 — per-task reviewer cadence; Phases 1 and 2
 are per-phase (Phase 2's review is the pre-merge sweep).
@@ -103,7 +102,7 @@ pretty-printed under a `places`/`frames` wrapper; nothing dropped):
 
 The runs (the implementer's six, each restored after, its messages
 verbatim; runs 6 and 7 re-run by the orchestrator): (1) the fog piece's
-`at: the-headland` — `[places] src/content/pieces/where-the-fog-lets-go/index.md: no place named "the-headland" — the places are: the-headlands, the-jetty`, build exit 1; (2) `_jetty-dawn.md` `at: nowhere` — the same message with the sidecar's path; (3) `places/empty.md` with `cover: where-the-fog-lets-go/land-a` — `[places] note: empty has no published frame yet — no page until a photograph names it`, build exit 0, no cover failure; (4) a draft copy of the fog folder naming the headlands — build exit 0, no `[places]` line, the dump unchanged (the implementer's run, prose only — left to the sweep to re-run or accept on the fixture); (5) `the-jetty.md` `cover: where-the-fog-lets-go/land-a` — `[places] src/content/places/the-jetty.md: cover "where-the-fog-lets-go/land-a" is not one of this place's frames`, build exit 1; (6) `the-jetty.md` `draft: true` — `[places] note: the-jetty is a draft — no page, and its frames show no place`, build exit 0, the dump's places `['the-headlands']`, land-c `place: null` with sets `gallery:fog-frames 3/4` and `piece:where-the-fog-lets-go 3/8` only, jetty-dawn `place: null` with `piece:first-light-at-the-jetty 1/1` only; (7, added at review) `_dock-b.md` `at: the-jetty` at the gallery root — `[places] src/content/gallery-images/_dock-b.md: gallery-root photographs are not grouped under a place — the line is ignored`, build exit 0. The review's blocking finding was the record, not the code: the review bundle had summarized the dump in prose, and the record now carries the file's bytes from the orchestrator's re-run. Notes left open: no run puts a typo on a draft piece (the code passes every piece unfiltered); blank `at` values are filtered inside `placeProblems` rather than before the call, one copy of the rule.
+`at: the-headland` — `[places] src/content/pieces/where-the-fog-lets-go/index.md: no place named "the-headland" — the places are: the-headlands, the-jetty`, build exit 1; (2) `_jetty-dawn.md` `at: nowhere` — the same message with the sidecar's path; (3) `places/empty.md` with `cover: where-the-fog-lets-go/land-a` — `[places] note: empty has no published frame yet — no page until a photograph names it`, build exit 0, no cover failure; (4) a draft copy of the fog folder naming the headlands — re-run by the orchestrator at the sweep with the dump endpoint: build exit 0, no `[places]` line, no `dist/images/fog-draft/` page, and the dump byte-identical to the baseline's places — the jetty's two outings and the headlands' one outing of six frames, `"summary": "1 outing · 6 frames · 2026"` — so the draft copy's frames joined no place; (5) `the-jetty.md` `cover: where-the-fog-lets-go/land-a` — `[places] src/content/places/the-jetty.md: cover "where-the-fog-lets-go/land-a" is not one of this place's frames`, build exit 1; (6) `the-jetty.md` `draft: true` — `[places] note: the-jetty is a draft — no page, and its frames show no place`, build exit 0, the dump's places `['the-headlands']`, land-c `place: null` with sets `gallery:fog-frames 3/4` and `piece:where-the-fog-lets-go 3/8` only, jetty-dawn `place: null` with `piece:first-light-at-the-jetty 1/1` only; (7, added at review) `_dock-b.md` `at: the-jetty` at the gallery root — `[places] src/content/gallery-images/_dock-b.md: gallery-root photographs are not grouped under a place — the line is ignored`, build exit 0; (8, added at the sweep) the same draft copy with `at: the-headland` — `[places] src/content/pieces/fog-draft/index.md: no place named "the-headland" — the places are: the-headlands, the-jetty`, build exit 1, so the slug rule runs on a draft piece. The review's blocking finding was the record, not the code: the review bundle had summarized the dump in prose, and the record now carries the file's bytes from the orchestrator's re-run. Notes left open: blank `at` values are filtered inside `placeProblems` rather than before the call, one copy of the rule.
 
 - [x] **T703** — The pages and the nav. `CoverCards.astro` from
       `GalleryCards.astro`'s markup and styles, `GalleryCards` a wrapper;
@@ -226,8 +225,7 @@ none`, what the page shows, that a place grows on its own, gallery-root
       reason, oldest first, Places
       in the nav, the cover check's home). Both ride this spec branch
       and merge with the PR, as spec 008's close-out docs did, so the
-      sweep's diff against `main` contains them. Then the pre-merge whole-spec sweep at the top tier and its
-      findings resolved; the spec's acceptance criteria checked against
+      sweep's diff against `main` contains them. Then the pre-merge whole-spec sweep at the reviewer's default tier (the constitution's tier for it since the 2026-09-06 amendment) and its findings resolved; the spec's acceptance criteria checked against
       their records; build, tests, check, GPS scan, and format green with
       actual output; the PR marked ready and merged with a merge commit.
       _Verify: main green after the merge._
@@ -257,8 +255,25 @@ implementer 490,854 over nine dispatches; reviewer 905,152 all tiers. -->
 | T705 (sdd-implementer)                        | opus             | 50,241                            | verified first try; no ungrounded claim in its report                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Phase 1 review                                | reviewer default | 40,699                            | fix and re-review (one blocking sentence copied from the spec; six notes) — fixes by the orchestrator directly, doc lines only                                                                                                                                                                                                                                                                                                                           |
 | Phase 1 re-review                             | reviewer default | 31,662                            | signed off; two wording notes folded in, the spec's rationale moved out of Goal 3 for DECISIONS                                                                                                                                                                                                                                                                                                                                                          |
+| T706 sweep                                    | reviewer default | 101,826                           | fix and re-review: four blocking — two were the reviewer's stale copy of CLAUDE.md (its session-start snapshot predates the amendment that puts the sweep at the default tier and scopes the orchestrator's re-run to foundational phases; the constitution at HEAD agrees with tasks.md, and T706's own line was the stale one, fixed); run 4 re-run with the dump; DECISIONS' byte-identity sentence corrected — plus nine notes, six folded in        |
 
 ---
+
+**Totals.** Implementer (opus): 275,282 tokens over five dispatches
+(T701–T705), every one verified first try, no escape hatch, no tier
+miss; two fixes were the orchestrator's own (doc lines at the Phase 1
+review; a fixture as T704a). Reviewer at its default tier: 364,196 over
+eight invocations (four per-task reviews, two re-reviews, the Phase 1
+review and re-review, the sweep). Top tier: 195,912 (the four sign-off
+passes). Reviewer all tiers 560,108 — against spec 008's 905,152, with
+an implementer total of 275,282 against 008's 490,854. The amended
+policy held: bundles kept every dispatch and review inside its task,
+the loop cap was never exceeded, and every reviewer finding that
+mattered was a record or document claim, closed by a run. Two lessons
+for the next spec: put the implementer's evidence in the review bundle
+verbatim (the T702 review blocked on the orchestrator's summary of it),
+and the reviewer's CLAUDE.md is its session-start copy, so a
+constitution amended mid-session must be quoted to it.
 
 ## Handoff note
 

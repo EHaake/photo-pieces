@@ -54,8 +54,7 @@ attached.
   (`scripts/prune-unreferenced-originals.mjs`) exists because Astro
   leaves untouched originals in the output — worth an upstream issue,
   and a no-op if they fix it.
-- **A galleries overhaul** — noted by the photographer at the spec 007
-  close-out (2026-09-05), for a spec of its own: the gallery grid feels
+- **A galleries overhaul** — noted by the photographer at the spec 007 close-out (2026-09-05), for a spec of its own (since spec 009 the place pages share the gallery's packing knobs and rows, so the overhaul moves them too): the gallery grid feels
   too constrained by the prose column's width — it should be able to
   run wider on the page than the text does, closer to the content
   width — and the spacing between the images wants retuning. Both are
@@ -121,8 +120,7 @@ attached.
   the first gear-notes piece quotes one.
 - ~~**Places**~~ — shipped as spec 009 (2026-09-06), reframed from the
   earlier "series entity": a place is declared once as its own file
-  (`src/content/places/<slug>.md`, a title, a description, an optional
-  cover, and the writing), and the photograph is the unit that names
+  (`src/content/places/<slug>.md`, a title, an optional description and cover, and the writing), and the photograph is the unit that names
   it — `at: <slug>` in a frame's sidecar, with a piece's own `at:` as
   an optional default for its folder and `at: none` to opt a frame
   out. The build refuses a slug with no file and lists the places that
