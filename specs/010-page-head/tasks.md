@@ -406,6 +406,113 @@ The five notes left open, for the pre-merge sweep:
    (collapses away; the geometry matched exactly), so "copied" is
    near-verbatim rather than verbatim.
 
+### Phase 0 review and the superseding baseline for the two pages the row changed
+
+The `skeptical-reviewer` reviewed Phase 0 as a whole (T803 having been
+reviewed on its own) and raised **one blocking finding, B1**: T802 adds
+the row to `/galleries/` and to every category page, which changes those
+two pages' head height — and both the T801 baseline and the spec's third
+acceptance criterion ("the pieces, galleries, and places indexes, the
+category pages, About, and Contact measure the same as before") still
+read as though nothing there had moved. T804 is specified to compare
+against T801's rows, and for those two pages T801's `head`, `nextFirst`
+and `head→` are pre-row numbers that will not reproduce.
+
+The plan already anticipated the geometry (T804's verify says
+`head.bottom` on those two pages is "greater by the row's height plus
+the `h1`'s `margin-bottom`", recorded rather than asserted) — the
+reviewer's bundle did not carry T804's text — but the anticipation was
+not a measurement, and the baseline T804 compares against was still the
+pre-row one. **Measured now, post-T802, and superseding T801's rows for
+these two pages only:**
+
+| viewport  | page                     | head            | pad           | gap  | nextFirst | row             | vs T801 head.bottom |
+| --------- | ------------------------ | --------------- | ------------- | ---- | --------- | --------------- | ------------------- |
+| 1440×900  | `/galleries/`            | 73.78 – 407.50  | 78.375/78.375 | 48   | 461.61    | 281.13 – 297.13 | 365.11 → **+42.39** |
+| 1440×900  | `/categories/landscape/` | 73.78 – 407.50  | 78.375/78.375 | 48   | 461.61    | 281.13 – 297.13 | 365.11 → **+42.39** |
+| 1080×1920 | `/galleries/`            | 73.78 – 357.53  | 58.575/58.575 | 42.6 | 406.23    | 250.97 – 266.97 | 315.14 → **+42.39** |
+| 1080×1920 | `/categories/landscape/` | 73.78 – 357.53  | 58.575/58.575 | 42.6 | 406.23    | 250.97 – 266.97 | 315.14 → **+42.39** |
+| 375×812   | `/galleries/`            | 119.38 – 386.34 | 56/56         | 32   | 424.45    | 282.34 – 298.34 | 343.95 → **+42.39** |
+| 375×812   | `/categories/landscape/` | 119.38 – 386.34 | 56/56         | 32   | 424.45    | 282.34 – 298.34 | 343.95 → **+42.39** |
+
+The growth is **42.39** at every viewport — the row's height (16) plus
+the `h1`'s `margin-bottom`, which `getComputedStyle` prints as `26.4px`
+and which resolves to 26.39 (the 0.01 is the rounding in that string,
+not a discrepancy in the measurement) — exactly the plan's prediction, and
+it lands both pages on `/pieces/`'s own head bottom — 407.50 / 357.53 /
+386.34 — which is what "the pieces index's row exactly" should produce.
+**`pad` and `gap` are unchanged on both pages at all three viewports**:
+the head's air, which is what this spec's second half touches, did not
+move; only the row was added, which is what its first half requires.
+T804 measures those two pages against **this** table, not T801's.
+
+The other four baselined pages (`/pieces/`, `/about/`, `/contact/`,
+`/places/`) are still byte-identical to their T801 files after the
+hashed CSS link is normalized — re-confirmed here.
+
+The two superseding files are saved beside the originals as
+`galleries.index.post-T802.html` and
+`categories-landscape.index.post-T802.html`, `sha256`:
+
+```
+3743b828e616dde0e408cfbbc08d1ba1d038c5cc87addda397dcf59cb93d6970  galleries.index.post-T802.html
+f537c1dd6280ab504add7549dea05b041fb0d5ebede4f6980a783e681a88f221  categories-landscape.index.post-T802.html
+```
+
+These two hashes are **provenance, not a comparison target**: they pin
+which build the geometry above came from. Phase 1 tightens the head-air
+tokens and the CSS bundle's hash moves, so these bytes will change by
+design — unlike the four unchanged pages' hashes, which are a real
+byte-identity check T804 repeats. Only the geometry table transfers to
+T804.
+
+**The wording of the third acceptance criterion** is the product
+owner's to settle, and goes to him at the Phase 0 pause: read
+literally it contradicts the first criterion, which requires the row on
+exactly these pages. The reading the work follows is that "measure the
+same as before" is about the head's air — `pad` and `gap` — and not
+about the row the spec deliberately adds; on that reading both criteria
+hold, and the numbers above are the evidence.
+
+**One non-blocking finding fixed rather than logged** (S1, dispatched to
+the implementer, not done by hand): the marking rule wrote
+`text-decoration: underline 1px`, and thickness inside the
+`text-decoration` shorthand is CSS Level 4 (Chrome 87+, Safari 26.2+) —
+where it is unsupported the whole declaration is dropped at parse time,
+so the current category would lose the accent underline entirely and
+`text-decoration-color` would have nothing to color. It is now
+`text-decoration-line: underline` + `text-decoration-thickness: 1px`,
+with a comment. **A deviation from the plan**, which quotes the
+shorthand verbatim; it preserves the plan's stated intent (text colour
+and an accent underline) and degrades to a plain accent underline
+instead of to nothing. `dist/pieces/index.html` is still identical to
+the baseline after normalizing the CSS link (both sides
+`c8d6c79c493ec6a997ffcfdd00a013e0f392ec5612c1af3fb95d711be212ebe7`);
+verify green (`BUILD/CHECK/TEST EXIT 0`, 255 passed).
+
+The four other notes go to the pre-merge sweep:
+
+- **S2**: the third `categoryRow` test's name claims the labels are
+  `categoryLabel`'s, but its assertion evaluates `categoryLabel` on both
+  sides, so that half is self-referential and none of the four
+  mutations touches the label mapping. The guarantee does exist in the
+  suite (test 1 pins the four literal labels), so the constitution's
+  "must be able to fail for the reason its name gives" is not breached
+  by the suite as a whole; discharging the name costs one more mutation.
+- **S3**: `CategoryRow.astro`'s rendering contract (`withBase` on each
+  href, a null href as `<span aria-current="page">`, the `' · '`
+  separators, and the no-`<style>` rule the byte-identity rests on) has
+  no standing check — each was verified once by grep on the build.
+- **S4**: the sampler applies its candidate values at every viewport
+  while the shipped tokens are to be tightened for a landscape screen
+  only; this is what makes the gate usable on the portrait monitor, but
+  T804's record should name which viewport each accepted number was
+  chosen at.
+- **S5**: a category page now carries two `aria-current="page"`
+  elements, the site nav's and the row's. Valid ARIA — the attribute is
+  scoped per set of navigation links — noted so no later assertion
+  assumes uniqueness.
+
 **The gate record** (written by the orchestrator at the Phase 0 pause,
 before Phase 1 starts): the candidate the photographer named — `a`,
 `b`, a mix, or a fourth value, as two token values — and whether the
@@ -503,6 +610,9 @@ tier over four sign-off passes). -->
 | T803 the mechanism + the sampler (`sdd-implementer`) | step-down           | 71,663                 | done first pass; one forced deviation (getStaticPaths scope)                                                                                                                                                                                                                                                                                                                                              |
 | T803 per-task review (`skeptical-reviewer`)          | step-down (default) | 66,152                 | no blocking findings, signed off; 7 second-look notes, 2 fixed, 5 to the sweep                                                                                                                                                                                                                                                                                                                            |
 | T803 banner fixes, notes 4 and 7 (`sdd-implementer`) | step-down           | 36,498                 | dispatched rather than done by hand; both bear on the gate                                                                                                                                                                                                                                                                                                                                                |
+| Phase 0 review (`skeptical-reviewer`)                | step-down (default) | 70,518                 | 1 blocking (B1, the superseding baseline), fixed; 5 second-look notes, 1 fixed, 4 to the sweep                                                                                                                                                                                                                                                                                                            |
+| S1 marking-rule longhands (`sdd-implementer`)        | step-down           | 32,727                 | dispatched rather than done by hand; a recorded deviation from the plan's verbatim shorthand                                                                                                                                                                                                                                                                                                              |
+| Phase 0 re-review (`skeptical-reviewer`)             | step-down (default) | 23,652                 | B1 discharged, S1 sound; signed off, two record corrections applied                                                                                                                                                                                                                                                                                                                                       |
 | plan/tasks sign-off ×2 (planner-drafted)             | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
 
 <!-- Totals, written at the merge: implementer over its dispatches;

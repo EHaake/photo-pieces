@@ -855,7 +855,12 @@ pre code {
    the text decoration instead. */
 .category-row [aria-current='page'] {
   color: var(--color-text);
-  text-decoration: underline 1px;
+  /* Longhands, not the `underline 1px` shorthand: thickness inside the
+     shorthand is CSS Level 4, and where it is unsupported the whole
+     declaration is dropped at parse time — no underline at all, and
+     nothing for text-decoration-color to color. */
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
   text-decoration-color: var(--color-accent);
   text-underline-offset: 0.2em;
 }
