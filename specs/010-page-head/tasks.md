@@ -740,17 +740,17 @@ TEST EXIT 0
 
 Each claim checked against the record it rests on:
 
-| README's claim                                                                                                                    | checked against                                                                                                                                       |
-| --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/galleries/` carries the row under its title, each category a link, nothing marked                                               | T802's built `dist/galleries/index.html`: four links, no `All`, no `aria-current` in the row                                                          |
-| a category page's head carries the row with `All` first, back to `/pieces/`, the current category marked rather than linked       | T802's built `dist/categories/landscape/index.html`: `<a href="/pieces/">All</a>` then `<span aria-current="page">Landscape</span>` then three links  |
-| its "Galleries" and "Pieces" headings link to the two indexes                                                                     | the same file's two `h2.eyebrow > a`, to `/galleries/` and `/pieces/`                                                                                 |
-| one component, `CategoryRow.astro`, fed by `categoryRow()` in `categories.ts`, shared with `/pieces/`, which keeps the row it had | T802's diff, and `dist/pieces/index.html` byte-identical to the T801 baseline                                                                         |
-| the three reading pages share one head, `reading-head`, spaced by the two named tokens                                            | T803's class additions and T804's measured `pad`/`gap` of 48 on all three                                                                             |
-| both start at `.section`'s clamp and tighten to `3rem` from 720px up                                                              | T804's `global.css` diff; measured 48/48 at 1440 and 1080                                                                                             |
-| **width alone, so a portrait monitor gets the tighter head too**                                                                  | the gate record, and T804's measured 48 at 1080×1920                                                                                                  |
-| below that the phone keeps today's air                                                                                            | T804's measured 56/56, gap 56 at 375×812, equal to T801                                                                                               |
-| `pages/dev/` holds dev-only fixtures; `postbuild` fails if any reach `dist/`                                                      | T803's negative control (guard removed → `BUILD PIPE EXIT 1` naming the four paths) and every build's `[check-no-dev-routes] no dev routes in dist/.` |
+| README's claim                                                                                                                    | checked against                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/galleries/` carries the row under its title, each category a link, nothing marked                                               | T802's built `dist/galleries/index.html`: four links, no `All`, no `aria-current` in the row                                                                                           |
+| a category page's head carries the row with `All` first, back to `/pieces/`, the current category marked rather than linked       | T802's built `dist/categories/landscape/index.html`: `<a href="/pieces/">All</a>` then `<span aria-current="page">Landscape</span>` then three links                                   |
+| its "Galleries" and "Pieces" headings link to the two indexes                                                                     | the same file's two `h2.eyebrow > a`, to `/galleries/` and `/pieces/`                                                                                                                  |
+| one component, `CategoryRow.astro`, fed by `categoryRow()` in `categories.ts`, shared with `/pieces/`, which keeps the row it had | T802's diff, and `dist/pieces/index.html` identical to the T801 baseline once the hashed CSS link is normalized (byte-identity was a T802-time fact; T804 moved the stylesheet's hash) |
+| the three reading pages share one head, `reading-head`, spaced by the two named tokens                                            | T803's class additions and T804's measured `pad`/`gap` of 48 on all three                                                                                                              |
+| both start at `.section`'s clamp and tighten to `3rem` from 720px up                                                              | T804's `global.css` diff; measured 48/48 at 1440 and 1080                                                                                                                              |
+| **width alone, so a portrait monitor gets the tighter head too**                                                                  | the gate record, and T804's measured 48 at 1080×1920                                                                                                                                   |
+| below that the phone keeps today's air                                                                                            | T804's measured 56/56, gap 56 at 375×812, equal to T801                                                                                                                                |
+| `pages/dev/` holds dev-only fixtures; `postbuild` fails if any reach `dist/`                                                      | T803's negative control (guard removed → `BUILD PIPE EXIT 1` naming the four paths) and every build's `[check-no-dev-routes] no dev routes in dist/.`                                  |
 
 _Two deviations, both accepted_:
 
@@ -775,6 +775,57 @@ third out would have been the inconsistency.
 _Noted for the next docs task_: `README.md` wraps prose near 72
 columns by hand and **Prettier does not enforce it** — "Prettier clean"
 alone does not catch an over-long line.
+
+### Phase 1 review
+
+The `skeptical-reviewer` reviewed Phase 1 (T804 and T805) at its default
+tier: **no blocking findings, signed off** on the first pass, so no
+re-review. It confirmed by grep, not only by measurement, that the two
+tokens are read in exactly two rules and that `reading-head` is applied
+on exactly three page templates plus the sampler — so "none of the six
+unchanged pages carries it" is verifiable rather than inferred — and
+that the sampler's `current` genuinely previews the shipped value. It
+also confirmed Phase 0's open note 1 is discharged: tightening the
+tokens is what makes the sibling rule observable on the gallery and
+place pages, where before it was indistinguishable from `.section`'s
+own value.
+
+One note was a factual slip in the T805 record and is **corrected
+above**: `dist/pieces/index.html` is identical to the baseline once the
+hashed CSS link is normalized; the stronger "byte-identical" was true at
+T802 and stopped being true when T804 moved the stylesheet's hash.
+
+Five notes go to the pre-merge sweep, in addition to Phase 0's four:
+
+- **P1-1**: nothing in the suite fails if the `@media (min-width: 720px)`
+  block is deleted or retuned — the shipped values and criterion 3 rest
+  on a one-time probe, not on instrumentation. A unit assertion that
+  `global.css` declares both tokens at `3rem` inside a `min-width: 720px`
+  query would make a silent retune loud. T806 decides and records either
+  way, beside the same question for `check-no-dev-routes.mjs`
+  (Phase 0's note 3).
+- **P1-2**: `720` now appears in a fourth place. `global.css`'s
+  collapse-breakpoint comment says the number is "shared with the
+  transform's `COLLAPSE` constant and every `sizes` string. Keep the
+  three in step by hand" — the head's query uses the same number for an
+  independent reason (the phone boundary), and a future retune of the
+  collapse breakpoint would face an undocumented choice about whether
+  the head moves with it. One clause in the head's comment settles it.
+- **P1-3**: the criterion-3 reading (that "measure the same as before"
+  is about the head's air, not the row criterion 1 adds) currently lives
+  only in the gate record. It resolves an apparent contradiction between
+  two acceptance criteria and belongs in `DECISIONS.md`, where the sweep
+  and later readers will find it. **T806 carries this.**
+- **P1-4**: the `.outing`-first place page — a place with no writing —
+  is not merely unmeasured but untested: it would silently take a
+  different gap with no build error and no failing test. Both places in
+  the content have writing today.
+- **P1-5**: the claim that `/galleries/` and `/categories/landscape/`
+  keep T801's `pad` and `gap` traces through the post-T802 table rather
+  than through Phase 1's own bundle; the sweep confirms the T801 leg.
+  (Corroborating, from the reviewer: the gap measured there — 48 / 42.6
+  / 32 — tracks a `4vw` clamp, not the reading token's 48/48/56, which
+  is independent evidence the tokens do not reach those pages.)
 
 ## Phase 2 — Close-out (reviewer sweep, then merge)
 
@@ -826,6 +877,7 @@ tier over four sign-off passes). -->
 | Phase 0 re-review (`skeptical-reviewer`)             | step-down (default) | 23,652                 | B1 discharged, S1 sound; signed off, two record corrections applied                                                                                                                                                                                                                                                                                                                                       |
 | T804 the chosen values (`sdd-implementer`)           | step-down           | 23,642                 | done first pass; no deviations                                                                                                                                                                                                                                                                                                                                                                            |
 | T805 the docs (`sdd-implementer`)                    | step-down           | 35,483 + 19,100        | done first pass, plus a one-line follow-up for the barrier's structure-listing entry                                                                                                                                                                                                                                                                                                                      |
+| Phase 1 review (`skeptical-reviewer`)                | step-down (default) | 51,121                 | no blocking findings, signed off first pass; 1 record correction, 5 notes to the sweep                                                                                                                                                                                                                                                                                                                    |
 | plan/tasks sign-off ×2 (planner-drafted)             | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
 
 <!-- Totals, written at the merge: implementer over its dispatches;
