@@ -679,12 +679,22 @@ tiers, against 009's; what held and what to carry to the next spec. -->
 
 ## Handoff note
 
-**Nothing is implemented.** The next session begins at T801 (Phase 0):
-the baseline is the orchestrator's own measurement and build, taken
-before any code changes; T802 and T803 are dispatched; T803's
-verification is re-run by the orchestrator and reviewed on its own;
-the Phase 0 pause is the visual gate, and Phase 1 does not start until
-the gate record above is written.
+**Phase 0 is complete, reviewed, and pushed** (T801–T803, plus the
+phase review's B1 fix and the S1 marking-rule fix). **The gate has
+happened**: the record above names candidate `a` (3rem / 3rem), on the
+portrait monitor as well as the laptop, with his fold at
+`innerHeight` 778. The next session begins at **T804** (Phase 1).
+
+Two things the gate changed for T804, both already in the record above:
+the override is `@media (min-width: 720px)`, not the plan's
+landscape-scoped default, so at 1080×1920 the three reading pages
+**take** the tightened value rather than measuring equal to T801 — the
+target there is the sampler's `prose.top` **512.94** — and only 375×812
+measures equal to T801. At 1440×900 the fog's `prose.top` target is
+**547.19** (±2), with `lead` 383.72 and the fourth line 659.19 inside
+his 778 fold. The six other pages measure against T801, except
+`/galleries/` and `/categories/landscape/`, which measure against the
+post-T802 table in the Phase 0 review section.
 
 > Read `CLAUDE.md` and `specs/010-page-head/{spec,plan,tasks}.md`, then
 > begin at the first unchecked task as the orchestrator under the model
