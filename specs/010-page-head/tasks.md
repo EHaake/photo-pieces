@@ -513,6 +513,62 @@ The four other notes go to the pre-merge sweep:
   scoped per set of navigation links — noted so no later assertion
   assumes uniqueness.
 
+<!-- The gate record's instructions, as drafted, are kept below the record itself. -->
+
+**The gate record** (the visual gate, 2026-09-07; the photographer on
+his laptop and his portrait monitor, from the sampler at
+`/dev/page-head/`):
+
+- **The candidate: `a`** — `--head-pad-reading: 3rem` and
+  `--head-gap-reading: 3rem` (48px each), ~60% of today's air. Named
+  without a mix and without a fourth value, so T804 writes the two
+  token lines exactly as the sampler previewed them and its
+  regression number is T803's measured **547.19** for `a` at 1440×900
+  (±2px).
+- **The portrait monitor takes it too** ("it looks good on the vertical
+  monitor as well"). So T804's override is
+  `@media (min-width: 720px)`, the plan's alternative — **not**
+  `(orientation: landscape) and (min-width: 720px)`. The phone at
+  375×812 is below the breakpoint and stays at today's value either
+  way, as the spec requires. Consequence for T804's verification: at
+  1080×1920 the three reading pages no longer measure equal to T801 —
+  they take the tightened value, and the number to hold them to is the
+  sampler's at that width, not T801's; only 375×812 measures equal to
+  T801.
+- **His laptop's fold: `innerHeight` 778** (not the emulated 900 the
+  sampler previewed under). This is the number T804 measures the
+  criterion against. `a` clears it with room: at 1440×900 the lead ends
+  at **383.72** and the fourth line of prose at **659.19**, both inside
+  778, so "the lead and at least the first four lines visible without
+  scrolling" holds at his real fold and not merely at an emulated one.
+  Since he named `a` rather than a mix or a fourth value, the
+  sign-off reviewer's caveat does not apply — the value he chose is the
+  value the sampler showed him.
+- **The sampler's `a` at 1080×1920**, measured at the gate because the
+  portrait monitor now takes the value and T804 needs a target there:
+  `pad` 48/48, `gap` 48, head 73.78 – 464.94, `lead` 352.34,
+  `prose.top` **512.94**, fourth line 624.94 (T801's 1080 numbers for
+  the fog piece were 58.575/58.575, head 73.78 – 486.06, `prose.top`
+  544.63). That is the number T804 holds the fog piece to at 1080,
+  ±2px.
+- **No remark on the row.**
+
+**The third acceptance criterion's wording** — left to the orchestrator
+by the product owner at this pause, so, decided here: criterion 3's
+"the pieces, galleries, and places indexes, the category pages, About,
+and Contact measure the same as before" means **the head's air** —
+`pad` and `gap` — and not the row that criterion 1 deliberately adds to
+two of those pages. Read any other way the two criteria contradict each
+other outright. `spec.md` is not edited (it is the product owner's, and
+approved); this record is the reading, and the evidence for it is
+already in the section above: on `/galleries/` and
+`/categories/landscape/` `pad` and `gap` are unchanged at all three
+viewports, and the whole of the 42.39px growth is the row plus the
+`h1`'s margin. T804 attests criterion 3 on that reading.
+
+<details>
+<summary>What the gate record was asked to capture (as drafted)</summary>
+
 **The gate record** (written by the orchestrator at the Phase 0 pause,
 before Phase 1 starts): the candidate the photographer named — `a`,
 `b`, a mix, or a fourth value, as two token values — and whether the
@@ -524,6 +580,8 @@ Phase 0 report that T804 checks it against that fold rather than
 against the emulated 900 the sampler previewed it under — a miss
 there is the criterion doing its job, not a T804 bug (the sign-off
 reviewer's note).
+
+</details>
 
 ## Phase 1 — The values and the docs (reviewer after the phase; the person's pause at its end)
 
