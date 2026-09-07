@@ -1,7 +1,7 @@
 # Spec: The page head
 
-**Status**: Draft (2026-09-06) — written in the design conversation;
-awaiting the product owner's approval
+**Status**: Approved (2026-09-07) — written in the design conversation,
+signed off by the product owner
 **Depends on**: 004 (the category pages and the galleries index), 009
 (the place page shares the head).
 
