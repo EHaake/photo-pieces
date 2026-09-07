@@ -704,7 +704,7 @@ exists; noted for the sweep.
 
 _Deviations_: none.
 
-- [ ] **T805** — Docs: `README.md`'s galleries-and-categories sentences
+- [x] **T805** — Docs: `README.md`'s galleries-and-categories sentences
       (the paragraph that begins "`/galleries/` groups galleries by
       category") say that the galleries index carries the category row
       under its title and that a category page's head carries it with
@@ -717,6 +717,64 @@ _Deviations_: none.
       build refuses to emit. _Verify: every claim read against the built
       pages and the gate record by the orchestrator; Prettier clean;
       build green._
+
+**T805 record** (dispatched to the `sdd-implementer`; every claim read
+against the built pages and the gate record by the orchestrator).
+
+`npx prettier --check README.md` → `All matched files use Prettier code
+style!`. `sh scripts/verify.sh`:
+
+```
+13:52:19 [build] 77 page(s) built in 1.25s
+[prune-originals] 34 emitted originals in dist/_astro/: pruned 34 unreferenced, kept 0 referenced.
+[check-no-gps] 637 images scanned in dist/ — no GPS metadata.
+[check-no-dev-routes] no dev routes in dist/.
+BUILD EXIT 0
+## astro check
+- 0 errors - 0 warnings - 0 hints CHECK EXIT 0
+## vitest
+ Test Files  9 passed (9)
+      Tests  255 passed (255)
+TEST EXIT 0
+```
+
+Each claim checked against the record it rests on:
+
+| README's claim                                                                                                                    | checked against                                                                                                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/galleries/` carries the row under its title, each category a link, nothing marked                                               | T802's built `dist/galleries/index.html`: four links, no `All`, no `aria-current` in the row                                                          |
+| a category page's head carries the row with `All` first, back to `/pieces/`, the current category marked rather than linked       | T802's built `dist/categories/landscape/index.html`: `<a href="/pieces/">All</a>` then `<span aria-current="page">Landscape</span>` then three links  |
+| its "Galleries" and "Pieces" headings link to the two indexes                                                                     | the same file's two `h2.eyebrow > a`, to `/galleries/` and `/pieces/`                                                                                 |
+| one component, `CategoryRow.astro`, fed by `categoryRow()` in `categories.ts`, shared with `/pieces/`, which keeps the row it had | T802's diff, and `dist/pieces/index.html` byte-identical to the T801 baseline                                                                         |
+| the three reading pages share one head, `reading-head`, spaced by the two named tokens                                            | T803's class additions and T804's measured `pad`/`gap` of 48 on all three                                                                             |
+| both start at `.section`'s clamp and tighten to `3rem` from 720px up                                                              | T804's `global.css` diff; measured 48/48 at 1440 and 1080                                                                                             |
+| **width alone, so a portrait monitor gets the tighter head too**                                                                  | the gate record, and T804's measured 48 at 1080×1920                                                                                                  |
+| below that the phone keeps today's air                                                                                            | T804's measured 56/56, gap 56 at 375×812, equal to T801                                                                                               |
+| `pages/dev/` holds dev-only fixtures; `postbuild` fails if any reach `dist/`                                                      | T803's negative control (guard removed → `BUILD PIPE EXIT 1` naming the four paths) and every build's `[check-no-dev-routes] no dev routes in dist/.` |
+
+_Two deviations, both accepted_:
+
+1. **The head's paragraph went under "Customization → Appearance"**,
+   not under "the reading pages' description" as the task line says —
+   the README has no section by that name, and Appearance is where the
+   other `global.css` knobs (accent, fonts, light-only) live, so the
+   two tokens sit with their siblings.
+2. **The task line says "landscape only unless the gate said
+   otherwise"**; the gate said otherwise, so the README documents a
+   plain 720px width query. This is the task's own escape clause, not
+   a judgment call.
+
+_One addition beyond the task line_, dispatched as a follow-up:
+`scripts/check-no-dev-routes.mjs` added to the structure listing's
+scripts block beside `prune-unreferenced-originals.mjs` and
+`check-no-gps.mjs`. The task named `CategoryRow.astro` and `pages/dev/`
+only, but the barrier's two siblings are already listed there and the
+README's own convention is to list each `postbuild` script; leaving the
+third out would have been the inconsistency.
+
+_Noted for the next docs task_: `README.md` wraps prose near 72
+columns by hand and **Prettier does not enforce it** — "Prettier clean"
+alone does not catch an over-long line.
 
 ## Phase 2 — Close-out (reviewer sweep, then merge)
 
@@ -767,6 +825,7 @@ tier over four sign-off passes). -->
 | S1 marking-rule longhands (`sdd-implementer`)        | step-down           | 32,727                 | dispatched rather than done by hand; a recorded deviation from the plan's verbatim shorthand                                                                                                                                                                                                                                                                                                              |
 | Phase 0 re-review (`skeptical-reviewer`)             | step-down (default) | 23,652                 | B1 discharged, S1 sound; signed off, two record corrections applied                                                                                                                                                                                                                                                                                                                                       |
 | T804 the chosen values (`sdd-implementer`)           | step-down           | 23,642                 | done first pass; no deviations                                                                                                                                                                                                                                                                                                                                                                            |
+| T805 the docs (`sdd-implementer`)                    | step-down           | 35,483 + 19,100        | done first pass, plus a one-line follow-up for the barrier's structure-listing entry                                                                                                                                                                                                                                                                                                                      |
 | plan/tasks sign-off ×2 (planner-drafted)             | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
 
 <!-- Totals, written at the merge: implementer over its dispatches;
