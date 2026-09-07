@@ -43,7 +43,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the baseline, the row, the mechanism and the sampler (reviewer after the phase, T803 on its own; the gate at its end)
 
-- [ ] **T801** — The baseline, before any code changes (the
+- [x] **T801** — The baseline, before any code changes (the
       orchestrator, not dispatched). The plan's probe on the nine pages
       at 1440×900, 1080×1920, and 375×812 — the fog piece, the
       `fog-frames` gallery, `/places/the-headlands/`, `/pieces/`,
@@ -61,6 +61,92 @@ headers to confirm nothing was duplicated or dropped. -->
       number that replaces the plan's ≈ 327 in the candidates'
       predictions; the six baseline
       files' `sha256sum` recorded with the folder's path._
+
+**T801 record** (the baseline, before any code change; the plan's probe
+on the dev server, fonts loaded, `scrollY` 0; px as reported, rounded
+to two decimals). `pad`/`gap` are the computed values;
+`head` is `[top, bottom]`; `→head` is `head.top − headerBottom`;
+`head→` is `nextFirst − head.bottom`.
+
+_1440×900_ (`headerBottom` 73.78 on all nine)
+
+| page                     | head           | pad           | gap    | nextFirst | →head | head→ | row             | lead   | prose top / 4th |
+| ------------------------ | -------------- | ------------- | ------ | --------- | ----- | ----- | --------------- | ------ | --------------- |
+| piece (fog)              | 73.78 – 559.94 | 78.375/78.375 | 78.375 | 638.31    | 0     | 78.38 | —               | 414.09 | 638.31 / 750.31 |
+| gallery `fog-frames`     | 73.78 – 540.64 | 78.375/78.375 | 78.375 | 619.02    | 0     | 78.38 | —               | 394.80 | — / —           |
+| place `the-headlands`    | 73.78 – 502.75 | 78.375/78.375 | 78.375 | 581.13    | 0     | 78.38 | —               | 356.91 | 581.13 / 693.13 |
+| `/pieces/`               | 73.78 – 407.50 | 78.375/78.375 | 78.375 | 486.88    | 0     | 79.38 | 281.13 – 297.13 | —      | — / —           |
+| `/galleries/`            | 73.78 – 365.11 | 78.375/78.375 | 48     | 419.22    | 0     | 54.11 | —               | —      | — / —           |
+| `/places/`               | 73.78 – 365.11 | 78.375/78.375 | 78.375 | 443.48    | 0     | 78.38 | —               | —      | — / —           |
+| `/categories/landscape/` | 73.78 – 365.11 | 78.375/78.375 | 48     | 419.22    | 0     | 54.11 | —               | —      | — / —           |
+| `/about/`                | 73.78 – 429.39 | 78.375/78.375 | 78.375 | 507.77    | 0     | 78.38 | —               | 319.02 | — / —           |
+| `/contact/`              | 73.78 – 365.11 | 78.375/78.375 | 78.375 | 443.48    | 0     | 78.38 | —               | —      | — / —           |
+
+_1080×1920_ (`headerBottom` 73.78 on all nine; `pad` 58.575/58.575 on all nine)
+
+| page                     | head           | gap    | nextFirst | head→ | row             | lead   | prose top / 4th |
+| ------------------------ | -------------- | ------ | --------- | ----- | --------------- | ------ | --------------- |
+| piece (fog)              | 73.78 – 486.06 | 58.575 | 544.63    | 58.56 | —               | 362.91 | 544.63 / 656.63 |
+| gallery `fog-frames`     | 73.78 – 471.77 | 58.575 | 530.33    | 58.56 | —               | 348.61 | — / —           |
+| place `the-headlands`    | 73.78 – 439.22 | 58.575 | 497.78    | 58.56 | —               | 316.06 | 497.78 / 609.78 |
+| `/pieces/`               | 73.78 – 357.53 | 58.575 | 417.09    | 59.56 | 250.97 – 266.97 | —      | — / —           |
+| `/galleries/`            | 73.78 – 315.14 | 42.6   | 363.84    | 48.70 | —               | —      | — / —           |
+| `/places/`               | 73.78 – 315.14 | 58.575 | 373.70    | 58.56 | —               | —      | — / —           |
+| `/categories/landscape/` | 73.78 – 315.14 | 42.6   | 363.84    | 48.70 | —               | —      | — / —           |
+| `/about/`                | 73.78 – 374.08 | 58.575 | 432.64    | 58.56 | —               | 283.52 | — / —           |
+| `/contact/`              | 73.78 – 315.14 | 58.575 | 373.70    | 58.56 | —               | —      | — / —           |
+
+_375×812_ (`headerBottom` 119.375 on all nine; `pad` 56/56 on all nine)
+
+| page                     | head            | gap | nextFirst | head→ | row             | lead   | prose top / 4th |
+| ------------------------ | --------------- | --- | --------- | ----- | --------------- | ------ | --------------- |
+| piece (fog)              | 119.38 – 533.13 | 56  | 589.13    | 56.00 | —               | 412.53 | 589.13 / 701.13 |
+| gallery `fog-frames`     | 119.38 – 565.67 | 56  | 621.67    | 56.00 | —               | 445.08 | — / —           |
+| place `the-headlands`    | 119.38 – 533.13 | 56  | 589.13    | 56.00 | —               | 412.53 | 589.13 / 701.13 |
+| `/pieces/`               | 119.38 – 386.34 | 56  | 443.34    | 57.00 | 282.34 – 298.34 | —      | — / —           |
+| `/galleries/`            | 119.38 – 343.95 | 32  | 382.06    | 38.11 | —               | —      | — / —           |
+| `/places/`               | 119.38 – 343.95 | 56  | 399.95    | 56.00 | —               | —      | — / —           |
+| `/categories/landscape/` | 119.38 – 343.95 | 32  | 382.06    | 38.11 | —               | —      | — / —           |
+| `/about/`                | 119.38 – 467.98 | 56  | 523.98    | 56.00 | —               | 379.98 | — / —           |
+| `/contact/`              | 119.38 – 343.95 | 56  | 399.95    | 56.00 | —               | —      | — / —           |
+
+Against the spec's numbers at 1440×900 on the fog piece: header bottom
+73.78 (spec 74), head 73.78 – 559.94 (spec 74 – 560), first paragraph
+638.31 (spec ≈ 638). No disagreement to record.
+
+**The head's content height** (fog, 1440×900):
+`559.9375 − 73.78125 − 78.375 − 78.375 − 1 = 328.41`, so **328**
+replaces the plan's ≈ 327 in the candidates' predictions. With it the
+predicted first-paragraph tops are
+`73.78 + 2·pad + 328.41 + gap`: `a` (48/48) ≈ **546.6**, `b` (32/32)
+≈ **498.6** (the plan's ≈ 545 and ≈ 497, +1.6).
+
+Two notes, recorded not reconciled: on `/galleries/` and
+`/categories/landscape/` the head's next sibling is not a `.section`
+(its `gap` is 48 / 42.6 / 32, not the section clamp) — those two pages'
+`gap` and `head→` numbers are that sibling's own padding, and T804
+compares them to these, not to the clamp. On `/pieces/` `head→` is 1px
+greater than on the other pages with the same `gap` (79.38 vs 78.38 at
+1440, 59.56 vs 58.56 at 1080, 57.00 vs 56.00 at 375); the measured
+value, not the clamp, is what T804 matches.
+
+**The built-HTML baseline**: `npm run build` green
+(`[prune-originals] 34 emitted originals … pruned 34`,
+`[check-no-gps] 637 images scanned in dist/ — no GPS metadata.`), six
+files copied to
+`${TMPDIR:-/tmp}/photo-pieces-verify/baseline-010/`
+(resolved: `/var/folders/lg/gnmg3pvx3wb_gx4012x5jxd40000gn/T/photo-pieces-verify/baseline-010`),
+`sha256`:
+
+```
+28d77b0af3798825eec83d8271665c5ed8e72e996ed65502681cd4439c3af35d  about.index.html
+83e6a3fbe42ab9b9d9eaefdde80de7c8198a3dead5e1f495d5250cc56626ea46  categories-landscape.index.html
+3a40a01d39ef4f57fab17c94149a426919d5fff40a671f21ac453fd08177b407  contact.index.html
+6bfcea0e8219a9e1ced5f6a2aec58419f9d3bc2ac08238c397bdf0138982f153  galleries.index.html
+72b702b8e7fa47e2973b063ed86ebce7a7472a6394cf58d27981db4441f3c358  pieces.index.html
+8cc80821c16318f3b4dbb80c322b95734c2529493175520c37f87dc5684e082a  places.index.html
+```
+
 - [ ] **T802** — The row and the headings. `categories.ts`:
       `categoryRow(current?: Category): { label: string; href: string | null }[]`
       per the plan (All → `/pieces/` first only when `current` is given;
@@ -222,10 +308,11 @@ implementer 275,282 over five dispatches; reviewer 599,867 all tiers
 (403,955 at the default tier over ten invocations, 195,912 at the top
 tier over four sign-off passes). -->
 
-| Task / invocation                        | Tier     | Tokens           | Outcome / miss reason                                                                                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------------------- | -------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Planning: draft (`sdd-planner`)          | top tier | 139,477          | drafted first pass                                                                                                                                                                                                                                                                                                                                                                                        |
-| plan/tasks sign-off ×2 (planner-drafted) | top tier | 102,587 + 24,650 | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
+| Task / invocation                            | Tier                | Tokens                 | Outcome / miss reason                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------------- | ------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Planning: draft (`sdd-planner`)              | top tier            | 139,477                | drafted first pass                                                                                                                                                                                                                                                                                                                                                                                        |
+| T801 baseline (orchestrator, not dispatched) | step-down (session) | — (orchestrator turns) | 27 probe results + built-HTML baseline recorded; no code change                                                                                                                                                                                                                                                                                                                                           |
+| plan/tasks sign-off ×2 (planner-drafted)     | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
 
 <!-- Totals, written at the merge: implementer over its dispatches;
 reviewer at its default tier over its invocations; top tier; all
