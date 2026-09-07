@@ -238,7 +238,7 @@ _Deviation, mechanical_: `pieces/index.astro` also lost its now-unused
 was their only user and `astro check` fails on unused imports here. The
 task named the nav, not the imports; the built page is unchanged.
 
-- [ ] **T803** (`review: per-task`) — The mechanism, inert, and the
+- [x] **T803** (`review: per-task`) — The mechanism, inert, and the
       sampler. `global.css`: `--head-pad-reading` and
       `--head-gap-reading` in `:root` at `.section`'s clamp with the
       plan's comment; `.reading-head { padding-block }` and
@@ -278,6 +278,133 @@ task named the nav, not the imports; the built page is unchanged.
       `prose.fourth ≤ 900`; the banner's numbers equal the probe's;
       `/dev/page-head/` shows three labelled heads stacked, one
       paragraph under each. Numbers recorded here._
+
+**T803 record** (dispatched to the `sdd-implementer`; `review: per-task`,
+so the verification below is the orchestrator's own re-run and the
+`skeptical-reviewer` reviewed the task on its own).
+
+`sh scripts/verify.sh` (orchestrator, after the reviewer's two banner
+fixes):
+
+```
+## build (full log: …/photo-pieces-verify/build.log)
+13:03:24 [build] 77 page(s) built in 2.22s
+  Indexed 16 pages
+[prune-originals] 34 emitted originals in dist/_astro/: pruned 34 unreferenced, kept 0 referenced.
+[check-no-gps] 637 images scanned in dist/ — no GPS metadata.
+[check-no-dev-routes] no dev routes in dist/.
+BUILD EXIT 0
+## astro check
+- 0 errors - 0 warnings - 0 hints CHECK EXIT 0
+## vitest (full log: …/photo-pieces-verify/test.log)
+ Test Files  9 passed (9)
+      Tests  255 passed (255)
+TEST EXIT 0
+```
+
+_The absence checks_ (implementer, verbatim): `test ! -e dist/dev` →
+`absent`; `grep -r "page-head sampler" dist` → no match (exit 1);
+`grep -c "/dev/" dist/sitemap-0.xml` → `0`; no build-log line naming
+`dev/page-head`.
+
+_The barrier's negative control_ — the `DEV` guard deleted, `npm run build`:
+
+```
+[check-no-gps] 637 images scanned in dist/ — no GPS metadata.
+[check-no-dev-routes] dist/dev/ exists — a dev-only route was built: dist/dev/page-head/a/index.html, dist/dev/page-head/b/index.html, dist/dev/page-head/current/index.html, dist/dev/page-head/index.html
+BUILD PIPE EXIT 1
+```
+
+Guard restored, the polluted `dist/` removed, the verify run above is
+post-restore.
+
+_The three reading pages, measured now against T801_ — every number
+equal, at all three viewports, so the mechanism is inert:
+
+| viewport  | page    | head            | pad           | gap    | prose.top / nextFirst | vs T801 |
+| --------- | ------- | --------------- | ------------- | ------ | --------------------- | ------- |
+| 1440×900  | piece   | 73.78 – 559.94  | 78.375/78.375 | 78.375 | 638.31                | equal   |
+| 1440×900  | gallery | 73.78 – 540.64  | 78.375/78.375 | 78.375 | 619.02                | equal   |
+| 1440×900  | place   | 73.78 – 502.75  | 78.375/78.375 | 78.375 | 581.13                | equal   |
+| 1080×1920 | piece   | 73.78 – 486.06  | 58.575/58.575 | 58.575 | 544.63                | equal   |
+| 1080×1920 | gallery | 73.78 – 471.77  | 58.575/58.575 | 58.575 | 530.33                | equal   |
+| 1080×1920 | place   | 73.78 – 439.22  | 58.575/58.575 | 58.575 | 497.78                | equal   |
+| 375×812   | piece   | 119.38 – 533.13 | 56/56         | 56     | 589.13                | equal   |
+| 375×812   | gallery | 119.38 – 565.67 | 56/56         | 56     | 621.67                | equal   |
+| 375×812   | place   | 119.38 – 533.13 | 56/56         | 56     | 589.13                | equal   |
+
+_The sampler at 1440×900_:
+
+| page                      | pad    | gap    | prose.top | 4th line | lead bottom | `.piece-column` left / width |
+| ------------------------- | ------ | ------ | --------- | -------- | ----------- | ---------------------------- |
+| `/dev/page-head/current/` | 78.375 | 78.375 | 638.31    | 750.31   | 414.09      | 379.578 / 665.844            |
+| the fog piece's own page  | 78.375 | 78.375 | 638.31    | 750.31   | 414.09      | 379.578 / 665.844            |
+| `/dev/page-head/a/`       | 48/48  | 48     | 547.19    | 659.19   | 383.72      | 379.578 / 665.844            |
+| `/dev/page-head/b/`       | 32/32  | 32     | 499.19    | 611.19   | 367.72      | 379.578 / 665.844            |
+
+`current` equals the piece page **vertically and horizontally** — the
+copied `.piece-column` rule landed, which is what the sign-off's B1
+finding asked for. Against the plan's predictions with T801's measured
+content height (328): `a` ≈ 546.6 predicted / **547.19** actual, `b`
+≈ 498.6 / **499.19** — +0.6 each. The three first-paragraph tops are
+638 / 547 / 499, visibly apart, and every candidate's fourth line
+(750 / 659 / 611) clears 900.
+
+_The banners' live numbers equal the probe's_ on all three:
+`current — pad 78px / gap 78px … innerHeight 900, prose p top 638,
+fourth line 750 (lh 28), lead bottom 414, lead + 4 lines: yes`;
+`a — pad 3rem / gap 3rem … 547 / 659 / 384 / yes`;
+`b — pad 2rem / gap 2rem … 499 / 611 / 368 / yes`.
+
+_`/dev/page-head/`_ (stacked): three heads, `pad` 78.375 / 48 / 32,
+each followed by a sibling `.section` holding exactly one paragraph,
+all three `.piece-column` at `left` 379.578; labels
+"current — the tokens as they are", "a — pad 3rem / gap 3rem",
+"b — pad 2rem / gap 2rem".
+
+_Deviation, forced_: `CANDIDATES` is declared inside `getStaticPaths()`
+and handed to the component as a prop rather than as a module-level
+const. Astro runs `getStaticPaths` in an isolated scope where nothing
+from the frontmatter but its imports is visible; the guard-removed
+negative control is what caught it (`CANDIDATES is not defined`). One
+definition, one file; the plan's intent holds.
+
+_The review_ (`skeptical-reviewer`, default tier, one invocation, no
+re-review needed): **no blocking findings, signed off.** Seven
+second-look notes. Two were fixed before the gate because they bear on
+the gate itself, and were dispatched to the implementer rather than
+done by hand: the banner's verdict line mixed document and viewport
+coordinates (correct at `scrollY` 0, where every recorded number was
+read, but wrong after a scroll-then-resize on the photographer's own
+screen), and `current`'s banner printed "the tokens as they are" where
+`a` and `b` print their values — it now prints `pad 78px / gap 78px`,
+resolved at runtime, so the three screens compare at a glance. The
+numbers above were re-measured after both fixes.
+
+The five notes left open, for the pre-merge sweep:
+
+1. **Inertness cannot be told from a miss by measurement alone** while
+   the tokens equal `.section`'s clamp — the gallery's and the place's
+   sibling rule is currently evidenced by reading the markup, not by
+   instrumentation. T804 settles it: with the tokens tightened, measure
+   `padding-block-start` on the gallery page and the place page, and on
+   a place with no writing if one exists (the only path where the gap
+   lands on `.outing`).
+2. **Three copies of `.section`'s clamp** kept in step by hand
+   (`global.css` `:root` ×2 and `.section`); the file comment is the
+   only guard. T806 names the coupling in `DECISIONS.md`.
+3. **`check-no-dev-routes.mjs` has no test** — its failure path rests
+   on the one-time negative control above. This matches the existing
+   precedent exactly (`check-no-gps.mjs`, `prune-unreferenced-originals.mjs`
+   and `gen-placeholders.mjs` have none either, and `vitest.config.ts`
+   picks up nothing under `scripts/`), so it is not a constitution
+   contradiction; T806 records the decision either way.
+4. **The head's twenty lines are duplicated twice inside the sampler**
+   (the stacked view and the full page) — the plan sanctioned copying
+   from the piece page, not the internal repeat.
+5. **The `<time>` element's whitespace** differs from the piece page's
+   (collapses away; the geometry matched exactly), so "copied" is
+   near-verbatim rather than verbatim.
 
 **The gate record** (written by the orchestrator at the Phase 0 pause,
 before Phase 1 starts): the candidate the photographer named — `a`,
@@ -368,12 +495,15 @@ implementer 275,282 over five dispatches; reviewer 599,867 all tiers
 (403,955 at the default tier over ten invocations, 195,912 at the top
 tier over four sign-off passes). -->
 
-| Task / invocation                                 | Tier                | Tokens                 | Outcome / miss reason                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------------------------------- | ------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Planning: draft (`sdd-planner`)                   | top tier            | 139,477                | drafted first pass                                                                                                                                                                                                                                                                                                                                                                                        |
-| T801 baseline (orchestrator, not dispatched)      | step-down (session) | — (orchestrator turns) | 27 probe results + built-HTML baseline recorded; no code change                                                                                                                                                                                                                                                                                                                                           |
-| T802 the row and the headings (`sdd-implementer`) | step-down           | 36,777                 | done first pass; one mechanical deviation (unused imports dropped)                                                                                                                                                                                                                                                                                                                                        |
-| plan/tasks sign-off ×2 (planner-drafted)          | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
+| Task / invocation                                    | Tier                | Tokens                 | Outcome / miss reason                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------------------------- | ------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Planning: draft (`sdd-planner`)                      | top tier            | 139,477                | drafted first pass                                                                                                                                                                                                                                                                                                                                                                                        |
+| T801 baseline (orchestrator, not dispatched)         | step-down (session) | — (orchestrator turns) | 27 probe results + built-HTML baseline recorded; no code change                                                                                                                                                                                                                                                                                                                                           |
+| T802 the row and the headings (`sdd-implementer`)    | step-down           | 36,777                 | done first pass; one mechanical deviation (unused imports dropped)                                                                                                                                                                                                                                                                                                                                        |
+| T803 the mechanism + the sampler (`sdd-implementer`) | step-down           | 71,663                 | done first pass; one forced deviation (getStaticPaths scope)                                                                                                                                                                                                                                                                                                                                              |
+| T803 per-task review (`skeptical-reviewer`)          | step-down (default) | 66,152                 | no blocking findings, signed off; 7 second-look notes, 2 fixed, 5 to the sweep                                                                                                                                                                                                                                                                                                                            |
+| T803 banner fixes, notes 4 and 7 (`sdd-implementer`) | step-down           | 36,498                 | dispatched rather than done by hand; both bear on the gate                                                                                                                                                                                                                                                                                                                                                |
+| plan/tasks sign-off ×2 (planner-drafted)             | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
 
 <!-- Totals, written at the merge: implementer over its dispatches;
 reviewer at its default tier over its invocations; top tier; all

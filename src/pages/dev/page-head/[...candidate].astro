@@ -1,0 +1,271 @@
+---
+// The page-head sampler (spec 010, T803) — a DEV-ONLY fixture.
+//
+// getStaticPaths() returns [] unless import.meta.env.DEV, so `astro dev`
+// serves these pages and `astro build` emits nothing under dist/dev/.
+// scripts/check-no-dev-routes.mjs is the standing check on that.
+//
+// Paths: /dev/page-head/ (the three heads stacked, one paragraph under
+// each) and /dev/page-head/<id>/ (the fog piece in full under one
+// candidate, so the fold is real on the photographer's own screen).
+// Each candidate's tokens ride on a wrapper that holds the head and the
+// following .section as siblings — .reading-head + .section is what
+// carries the gap, so they must stay adjacent inside the wrapper.
+//
+// The head markup below is a copy of pieces/[slug].astro's (the head is
+// twenty lines and extracting it would move that page's scoped
+// .piece-column rule; a fixture may copy). Because that rule is scoped
+// to the piece page, this file declares its own — same two declarations
+// — and wraps the head's content and the body in it exactly as the
+// piece page does. Without it the fixture would lay out left-aligned
+// and a vertical-only probe could not tell the difference.
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getPublishedPieces } from '../../../lib/pieces';
+import { withBase } from '../../../lib/url';
+import { formatDate } from '../../../i18n';
+import { categoryLabel } from '../../../lib/categories';
+
+type Candidate = { id: string; pad: string | null; gap: string | null };
+
+const tokens = (candidate: Candidate) =>
+  candidate.pad && candidate.gap
+    ? `--head-pad-reading: ${candidate.pad}; --head-gap-reading: ${candidate.gap}`
+    : undefined;
+
+const values = (candidate: Candidate) =>
+  candidate.pad && candidate.gap
+    ? `pad ${candidate.pad} / gap ${candidate.gap}`
+    : 'the tokens as they are';
+
+export async function getStaticPaths() {
+  if (!import.meta.env.DEV) return [];
+  const piece = (await getPublishedPieces()).find((entry) => entry.id === 'where-the-fog-lets-go');
+  if (!piece) return [];
+  // The candidates the visual gate compares: two knobs, three sets.
+  // `current` sets no tokens at all, so it always shows the site's own.
+  // Declared inside getStaticPaths and handed to the component as a
+  // prop rather than sitting beside the helpers above: Astro runs
+  // getStaticPaths in an isolated scope where nothing from the module
+  // but its imports exists, and a module-level const read here is
+  // "not defined" at build time. Still one definition.
+  const CANDIDATES: Candidate[] = [
+    { id: 'current', pad: null, gap: null },
+    { id: 'a', pad: '3rem', gap: '3rem' },
+    { id: 'b', pad: '2rem', gap: '2rem' },
+  ];
+  return [
+    { params: { candidate: undefined }, props: { piece, candidate: null, candidates: CANDIDATES } },
+    ...CANDIDATES.map((candidate) => ({
+      params: { candidate: candidate.id },
+      props: { piece, candidate, candidates: CANDIDATES },
+    })),
+  ];
+}
+
+const { piece, candidate, candidates } = Astro.props;
+const { Content } = await render(piece);
+
+// The fog piece's first paragraph — piece.body up to the first blank
+// line; it is plain prose, so it needs no rendering.
+const firstParagraph = (piece.body ?? '')
+  .trim()
+  .split(/\n\s*\n/)[0]
+  .replace(/\s*\n\s*/g, ' ');
+
+const title = candidate ? `page-head sampler — ${candidate.id}` : 'page-head sampler';
+---
+
+<BaseLayout title={title} description="Dev-only fixture for the reading pages' head (spec 010).">
+  {
+    candidate ? (
+      <article>
+        <div class="sampler-candidate" style={tokens(candidate)}>
+          <header class="page-head section reading-head">
+            <div class="piece-column">
+              <p class="eyebrow">
+                <span>
+                  {piece.data.categories.map((category, index) => (
+                    <>
+                      {index > 0 && ' / '}
+                      <a href={withBase(`/categories/${category}/`)}>{categoryLabel(category)}</a>
+                    </>
+                  ))}
+                </span>
+              </p>
+              <h1>{piece.data.title}</h1>
+              <p class="lead">{piece.data.description}</p>
+              <div class="entry-meta">
+                <time datetime={piece.data.publishDate.toISOString()}>
+                  {formatDate(piece.data.publishDate)}
+                </time>
+              </div>
+            </div>
+          </header>
+
+          <div class="section">
+            <div class="prose piece-column">
+              <Content />
+            </div>
+          </div>
+        </div>
+
+        <aside class="sampler-banner meta">
+          <p class="sampler-banner-head">
+            <strong>{candidate.id}</strong> —{' '}
+            <span id="sampler-values" data-live={candidate.pad ? undefined : 'true'}>
+              {values(candidate)}
+            </span>
+          </p>
+          <p>
+            {candidates
+              .filter((other) => other.id !== candidate.id)
+              .map((other) => (
+                <>
+                  <a href={withBase(`/dev/page-head/${other.id}/`)}>{other.id}</a>{' '}
+                </>
+              ))}
+            <a href={withBase('/dev/page-head/')}>stacked</a>
+          </p>
+          <pre id="sampler-numbers">measuring…</pre>
+        </aside>
+      </article>
+    ) : (
+      <article>
+        {candidates.map((each) => (
+          <section class="sampler-candidate" style={tokens(each)}>
+            <p class="sampler-label meta">
+              {each.id} — {values(each)}
+            </p>
+            <header class="page-head section reading-head">
+              <div class="piece-column">
+                <p class="eyebrow">
+                  <span>
+                    {piece.data.categories.map((category, index) => (
+                      <>
+                        {index > 0 && ' / '}
+                        <a href={withBase(`/categories/${category}/`)}>{categoryLabel(category)}</a>
+                      </>
+                    ))}
+                  </span>
+                </p>
+                <h1>{piece.data.title}</h1>
+                <p class="lead">{piece.data.description}</p>
+                <div class="entry-meta">
+                  <time datetime={piece.data.publishDate.toISOString()}>
+                    {formatDate(piece.data.publishDate)}
+                  </time>
+                </div>
+              </div>
+            </header>
+
+            <div class="section">
+              <div class="prose piece-column">
+                <p>{firstParagraph}</p>
+              </div>
+            </div>
+          </section>
+        ))}
+      </article>
+    )
+  }
+</BaseLayout>
+
+<script is:inline>
+  // The banner's live numbers: the same quantities the gate's probe
+  // reads, so the two can be compared. Viewport coordinates throughout —
+  // the rect as it comes, against window.innerHeight, which is a
+  // viewport quantity too; at scrollY 0, where the gate's numbers were
+  // read, these are the document coordinates as well. Re-read at
+  // document.fonts.ready and on resize — a font swap moves every one of
+  // them, and the head's tokens are clamps a resize re-resolves. No
+  // banner (the stacked index) means nothing to fill, so the script does
+  // nothing there.
+  (() => {
+    const read = () => {
+      const out = document.getElementById('sampler-numbers');
+      const p = document.querySelector('.prose p');
+      const lead = document.querySelector('.reading-head .lead');
+      if (!out || !p) return;
+      const top = p.getBoundingClientRect().top;
+      const lh = Number.parseFloat(getComputedStyle(p).lineHeight) || 0;
+      const fourth = top + 4 * lh;
+      const leadBottom = lead ? lead.getBoundingClientRect().bottom : 0;
+      const h = window.innerHeight;
+      const fits = leadBottom <= h && fourth <= h;
+      out.textContent = [
+        'innerHeight:    ' + Math.round(h),
+        'prose p top:    ' + Math.round(top),
+        'fourth line:    ' + Math.round(fourth) + ' (lh ' + Math.round(lh) + ')',
+        'lead bottom:    ' + Math.round(leadBottom),
+        'lead + 4 lines: ' + (fits ? 'yes' : 'no'),
+      ].join('\n');
+    };
+    // `current` sets no tokens, so its two values are only knowable at
+    // runtime: --head-pad-reading is the head's own padding-block-start
+    // and --head-gap-reading the following .section's (global.css), so
+    // the head carries both. They are clamps, so the banner prints what
+    // they resolve to on this screen rather than the clamp text, which
+    // would not compare against a's `pad 3rem / gap 3rem` at a glance.
+    // `a` and `b` keep the label the page rendered.
+    const label = () => {
+      const el = document.getElementById('sampler-values');
+      if (!el || !el.dataset.live) return;
+      const head = document.querySelector('.reading-head');
+      const body = head && head.nextElementSibling;
+      if (!body) return;
+      const pad = (node) =>
+        Math.round(Number.parseFloat(getComputedStyle(node).paddingBlockStart) || 0) + 'px';
+      el.textContent = 'pad ' + pad(head) + ' / gap ' + pad(body);
+    };
+    const update = () => {
+      read();
+      label();
+    };
+    update();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(update);
+    window.addEventListener('resize', update);
+    document.addEventListener('astro:page-load', update);
+  })();
+</script>
+
+<style>
+  /* The piece page's scoped .piece-column rule, copied (see the note at
+     the top): its elements carry that page's cid, not this fixture's. */
+  .piece-column {
+    max-width: var(--prose-width);
+    margin-inline: auto;
+  }
+
+  .sampler-label {
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    margin-inline: auto;
+    padding-top: 2rem;
+  }
+
+  .sampler-banner {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 200;
+    padding: 0.6rem 0.8rem;
+    border: var(--hairline);
+    background: var(--color-surface);
+  }
+
+  .sampler-banner p {
+    margin: 0 0 0.35rem;
+  }
+
+  .sampler-banner-head {
+    color: var(--color-text);
+  }
+
+  .sampler-banner pre {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: var(--color-text);
+  }
+</style>

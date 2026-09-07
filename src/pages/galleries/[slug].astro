@@ -39,7 +39,7 @@ const cells = images.map((image) => ({ image, ...galleryCell(image.image) }));
 
 <BaseLayout title={gallery.data.title} description={description} image={og.src}>
   <article>
-    <header class="page-head section">
+    <header class="page-head section reading-head">
       <p class="eyebrow">
         <a href={withBase(`/categories/${gallery.data.category}/`)}>
           {categoryLabel(gallery.data.category)}

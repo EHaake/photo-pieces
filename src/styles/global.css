@@ -65,6 +65,12 @@
   --pause-scale: 1.05;
   --pause-stretch: 120svh;
   --pause-depth: 0.85;
+  /* The reading pages' head (spec 010): the padding above and below
+     the head, and the gap before the body. Declared at .section's
+     value (keep the clamp in step with .section by hand), then
+     tightened below for a landscape screen only — the gate's values. */
+  --head-pad-reading: clamp(3.5rem, 5.5vw, 5.5rem);
+  --head-gap-reading: clamp(3.5rem, 5.5vw, 5.5rem);
 }
 
 /* Light-only by design: the photographer controls how the work is seen,
@@ -270,6 +276,19 @@ html[data-scene-active] .site-header {
   height: 1px;
   margin-top: calc(var(--baseline) * 1.25);
   background: var(--color-accent);
+}
+
+/* The three reading pages' head (spec 010) — the piece, the gallery,
+   the place. .section and .page-head keep their own declarations, so a
+   page without this class computes exactly what it computed before;
+   these two rules are later in source at equal specificity (the head)
+   and out-specify .section (the gap). */
+.reading-head {
+  padding-block: var(--head-pad-reading);
+}
+
+.reading-head + .section {
+  padding-block-start: var(--head-gap-reading);
 }
 
 .eyebrow {
