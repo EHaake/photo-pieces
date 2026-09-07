@@ -26,7 +26,9 @@ pnpm-debug.log*
 
 # editor / agent local state
 .codex/
-.claude/
+.claude/*
+# ...except the SDD model/effort settings, which are part of the constitution
+!.claude/settings.json
 
 # Obsidian plugin build artifact (see obsidian-plugin/README.md)
 obsidian-plugin/main.js
