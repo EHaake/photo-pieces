@@ -831,6 +831,16 @@ pre code {
   font-size: 0.76rem;
 }
 
+/* The category row's current item (spec 010): a span, not a link, so it
+   cannot take the site nav's gradient underline — it names the accent on
+   the text decoration instead. */
+.category-row [aria-current='page'] {
+  color: var(--color-text);
+  text-decoration: underline 1px;
+  text-decoration-color: var(--color-accent);
+  text-underline-offset: 0.2em;
+}
+
 .tag-list {
   display: flex;
   flex-wrap: wrap;

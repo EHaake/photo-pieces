@@ -147,7 +147,7 @@ files copied to
 8cc80821c16318f3b4dbb80c322b95734c2529493175520c37f87dc5684e082a  places.index.html
 ```
 
-- [ ] **T802** — The row and the headings. `categories.ts`:
+- [x] **T802** — The row and the headings. `categories.ts`:
       `categoryRow(current?: Category): { label: string; href: string | null }[]`
       per the plan (All → `/pieces/` first only when `current` is given;
       the current item `href: null`; `CATEGORIES` order; `categoryLabel`
@@ -178,6 +178,66 @@ files copied to
       `dist/galleries/index.html` the nav after the `<h1>` with four
       links, no `All`, no `aria-current` — all grepped on the build and
       recorded verbatim._
+
+**T802 record** (dispatched to the `sdd-implementer`; its verbatim
+output is the verification). `sh scripts/verify.sh`:
+
+```
+## build (full log: …/photo-pieces-verify/build.log)
+12:43:01 [build] 77 page(s) built in 1.25s
+  Indexed 16 pages
+[prune-originals] 34 emitted originals in dist/_astro/: pruned 34 unreferenced, kept 0 referenced.
+[check-no-gps] 637 images scanned in dist/ — no GPS metadata.
+BUILD EXIT 0
+## astro check
+- 0 errors - 0 warnings - 0 hints CHECK EXIT 0
+## vitest (full log: …/photo-pieces-verify/test.log)
+ Test Files  9 passed (9)
+      Tests  255 passed (255)
+TEST EXIT 0
+```
+
+252 → 255: the three new tests in `categories.test.mjs`.
+
+_`dist/pieces/index.html` against the baseline_: **byte-identical**
+once the hashed CSS link is normalized — the whitespace-collapse step
+was not needed (`RAW IDENTICAL`), so there is no diff to record. The
+no-`<style>` rule held.
+
+_`dist/categories/landscape/index.html`_, the head and the two
+headings:
+
+```
+<section class="page-head section" data-astro-cid-bt5tsl34><p class="eyebrow" data-astro-cid-bt5tsl34>Category</p><h1 data-astro-cid-bt5tsl34>Landscape</h1><nav class="meta category-row" aria-label="Browse by category"><a href="/pieces/">All</a> · <span aria-current="page">Landscape</span> · <a href="/categories/street/">Street</a> · <a href="/categories/portrait/">Portrait</a> · <a href="/categories/event/">Event</a></nav></section>
+<h2 id="category-galleries" class="eyebrow" data-astro-cid-bt5tsl34><a href="/galleries/" data-astro-cid-bt5tsl34>Galleries</a></h2>
+<h2 id="category-pieces" class="eyebrow" data-astro-cid-bt5tsl34><a href="/pieces/" data-astro-cid-bt5tsl34>Pieces</a></h2>
+```
+
+_`dist/galleries/index.html`_:
+
+```
+<section class="page-head section" data-astro-cid-u7zljvsj><p class="eyebrow" data-astro-cid-u7zljvsj>Index</p><h1 data-astro-cid-u7zljvsj>Galleries</h1><nav class="meta category-row" aria-label="Browse by category"><a href="/categories/landscape/">Landscape</a> · <a href="/categories/street/">Street</a> · <a href="/categories/portrait/">Portrait</a> · <a href="/categories/event/">Event</a></nav></section>
+```
+
+Four links, no `All`, no `aria-current` inside the row. (Noted for
+later greps: the site nav emits its own `aria-current="page"` on every
+page, so a bare `grep -c aria-current` on a built page is never 0.)
+
+_The mutation checks_ — each mutation made, vitest run, mutation
+reverted; the restored file re-runs 3 passed:
+
+| mutation                                                                                    | tests that failed                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **All always**: `...(current ? [{label:'All',href:'/pieces/'}] : []),` → the item unguarded | "without a current category the row is the four categories, each a link, and no All"; "the labels are categoryLabel's and the order is CATEGORIES'" (2 failed \| 1 passed) |
+| **All never**: the spread deleted                                                           | "with a current category All leads to the pieces index and the current item is not a link" (1 failed \| 2 passed)                                                          |
+| **the current left as a link**: `href: category === current ? null : …` → always the href   | "with a current category All leads to the pieces index and the current item is not a link" (1 failed \| 2 passed)                                                          |
+| **the order reversed**: `CATEGORIES.map(` → `[...CATEGORIES].reverse().map(`                | all three (3 failed)                                                                                                                                                       |
+
+_Deviation, mechanical_: `pieces/index.astro` also lost its now-unused
+`CATEGORIES`, `categoryLabel`, and `withBase` imports — the inline nav
+was their only user and `astro check` fails on unused imports here. The
+task named the nav, not the imports; the built page is unchanged.
+
 - [ ] **T803** (`review: per-task`) — The mechanism, inert, and the
       sampler. `global.css`: `--head-pad-reading` and
       `--head-gap-reading` in `:root` at `.section`'s clamp with the
@@ -308,11 +368,12 @@ implementer 275,282 over five dispatches; reviewer 599,867 all tiers
 (403,955 at the default tier over ten invocations, 195,912 at the top
 tier over four sign-off passes). -->
 
-| Task / invocation                            | Tier                | Tokens                 | Outcome / miss reason                                                                                                                                                                                                                                                                                                                                                                                     |
-| -------------------------------------------- | ------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Planning: draft (`sdd-planner`)              | top tier            | 139,477                | drafted first pass                                                                                                                                                                                                                                                                                                                                                                                        |
-| T801 baseline (orchestrator, not dispatched) | step-down (session) | — (orchestrator turns) | 27 probe results + built-HTML baseline recorded; no code change                                                                                                                                                                                                                                                                                                                                           |
-| plan/tasks sign-off ×2 (planner-drafted)     | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
+| Task / invocation                                 | Tier                | Tokens                 | Outcome / miss reason                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------- | ------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Planning: draft (`sdd-planner`)                   | top tier            | 139,477                | drafted first pass                                                                                                                                                                                                                                                                                                                                                                                        |
+| T801 baseline (orchestrator, not dispatched)      | step-down (session) | — (orchestrator turns) | 27 probe results + built-HTML baseline recorded; no code change                                                                                                                                                                                                                                                                                                                                           |
+| T802 the row and the headings (`sdd-implementer`) | step-down           | 36,777                 | done first pass; one mechanical deviation (unused imports dropped)                                                                                                                                                                                                                                                                                                                                        |
+| plan/tasks sign-off ×2 (planner-drafted)          | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
 
 <!-- Totals, written at the merge: implementer over its dispatches;
 reviewer at its default tier over its invocations; top tier; all

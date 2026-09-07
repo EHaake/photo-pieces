@@ -5,9 +5,11 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import GalleryCards from '../../components/GalleryCards.astro';
 import PieceList from '../../components/PieceList.astro';
+import CategoryRow from '../../components/CategoryRow.astro';
 import { CATEGORIES, categoryLabel } from '../../lib/categories';
 import { getImageRegistry } from '../../lib/images';
 import { getPublishedPieces } from '../../lib/pieces';
+import { withBase } from '../../lib/url';
 
 export function getStaticPaths() {
   return CATEGORIES.map((category) => ({ params: { category }, props: { category } }));
@@ -26,13 +28,14 @@ const label = categoryLabel(category);
   <section class="page-head section">
     <p class="eyebrow">Category</p>
     <h1>{label}</h1>
+    <CategoryRow current={category} />
   </section>
 
   {
     galleries.length > 0 && (
       <section class="section category-group" aria-labelledby="category-galleries">
         <h2 id="category-galleries" class="eyebrow">
-          Galleries
+          <a href={withBase('/galleries/')}>Galleries</a>
         </h2>
         <GalleryCards galleries={galleries} />
       </section>
@@ -43,7 +46,7 @@ const label = categoryLabel(category);
     pieces.length > 0 && (
       <section class="section category-group" aria-labelledby="category-pieces">
         <h2 id="category-pieces" class="eyebrow">
-          Pieces
+          <a href={withBase('/pieces/')}>Pieces</a>
         </h2>
         <PieceList pieces={pieces} />
       </section>
