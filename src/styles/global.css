@@ -68,7 +68,7 @@
   /* The reading pages' head (spec 010): the padding above and below
      the head, and the gap before the body. Declared at .section's
      value (keep the clamp in step with .section by hand), then
-     tightened below for a landscape screen only — the gate's values. */
+     tightened below at 720px and up — the gate's values. */
   --head-pad-reading: clamp(3.5rem, 5.5vw, 5.5rem);
   --head-gap-reading: clamp(3.5rem, 5.5vw, 5.5rem);
 }
@@ -289,6 +289,18 @@ html[data-scene-active] .site-header {
 
 .reading-head + .section {
   padding-block-start: var(--head-gap-reading);
+}
+
+/* The gate, 2026-09-07: the photographer chose candidate `a` — 3rem
+   above and below the head, 3rem before the body — and took it on the
+   portrait monitor as well as the laptop, so this is a plain width
+   query and not the landscape one. Below 720px (the phone) the head
+   keeps .section's clamp, which is what it has today. */
+@media (min-width: 720px) {
+  :root {
+    --head-pad-reading: 3rem;
+    --head-gap-reading: 3rem;
+  }
 }
 
 .eyebrow {

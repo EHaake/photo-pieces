@@ -585,7 +585,7 @@ reviewer's note).
 
 ## Phase 1 — The values and the docs (reviewer after the phase; the person's pause at its end)
 
-- [ ] **T804** — The chosen values. `global.css`: the two tokens
+- [x] **T804** — The chosen values. `global.css`: the two tokens
       overridden inside `@media (orientation: landscape) and (min-width: 720px)`
       — or `(min-width: 720px)` if the gate chose the portrait monitor
       too — at the gate record's values, with a comment naming the
@@ -609,6 +609,101 @@ reviewer's note).
       equal; `dist/{pieces,about,contact,places}/index.html`
       identical to the baseline after normalizing the CSS link (and
       whitespace for `/pieces/`). Every number recorded here._
+
+**T804 record** (dispatched to the `sdd-implementer`; its verbatim
+output is the verification, and the geometry below is the
+orchestrator's own probe).
+
+`sh scripts/verify.sh`:
+
+```
+## build (full log: …/photo-pieces-verify/build.log)
+13:44:59 [build] 77 page(s) built in 1.43s
+  Indexed 16 pages
+[prune-originals] 34 emitted originals in dist/_astro/: pruned 34 unreferenced, kept 0 referenced.
+[check-no-gps] 637 images scanned in dist/ — no GPS metadata.
+[check-no-dev-routes] no dev routes in dist/.
+BUILD EXIT 0
+## astro check
+- 0 errors - 0 warnings - 0 hints CHECK EXIT 0
+## vitest (full log: …/photo-pieces-verify/test.log)
+ Test Files  9 passed (9)
+      Tests  255 passed (255)
+TEST EXIT 0
+```
+
+The change is `@media (min-width: 720px) { :root { --head-pad-reading:
+3rem; --head-gap-reading: 3rem } }` after the `.reading-head` rules,
+with a comment naming the gate's date and candidate, plus one word
+corrected in the `:root` comment ("tightened below for a landscape
+screen only" → "tightened below at 720px and up", since the gate took
+the portrait monitor). The sampler's `CANDIDATES` is untouched, so
+`current` now previews the shipped value. `global.css` is the only file
+this task changed.
+
+_The three reading pages, at the chosen values_:
+
+| viewport  | page        | head            | pad   | gap | prose.top / nextFirst | lead   |
+| --------- | ----------- | --------------- | ----- | --- | --------------------- | ------ |
+| 1440×900  | piece (fog) | 73.78 – 499.19  | 48/48 | 48  | **547.19**            | 383.72 |
+| 1440×900  | gallery     | 73.78 – 479.89  | 48/48 | 48  | 527.89                | 364.42 |
+| 1440×900  | place       | 73.78 – 442.00  | 48/48 | 48  | 490.00                | 326.53 |
+| 1080×1920 | piece (fog) | 73.78 – 464.94  | 48/48 | 48  | **512.94**            | 352.34 |
+| 1080×1920 | gallery     | 73.78 – 450.64  | 48/48 | 48  | 498.64                | —      |
+| 1080×1920 | place       | 73.78 – 418.09  | 48/48 | 48  | 466.09                | —      |
+| 375×812   | piece (fog) | 119.38 – 533.13 | 56/56 | 56  | 589.13                | —      |
+| 375×812   | gallery     | 119.38 – 565.67 | 56/56 | 56  | 621.67                | —      |
+| 375×812   | place       | 119.38 – 533.13 | 56/56 | 56  | 589.13                | —      |
+
+**The fog's `prose.top` at 1440×900 is 547.19 — exactly T803's number
+for candidate `a`** (0.00 of the ±2 allowed), and at 1080×1920 it is
+**512.94**, exactly the gate record's sampler number for `a` at that
+width. **The criterion at the photographer's real fold (778)**: the
+lead ends at 383.72 and the fourth line of prose at 659.19, both
+inside 778 — so the lead and the first four lines are visible without
+scrolling on his laptop, not merely at an emulated 900. At 375×812 all
+three pages measure **equal to T801** (56/56, 56), the phone being
+below the 720px breakpoint.
+
+_The six pages that stay_ — `pad`, `gap`, `headerBottom → head.top`
+(0 on all, `headerBottom` 73.78 / 73.78 / 119.38 by viewport) and
+`head.bottom → nextFirst`:
+
+| page                     | 1440×900                               | 1080×1920                       | 375×812                 | vs        |
+| ------------------------ | -------------------------------------- | ------------------------------- | ----------------------- | --------- |
+| `/pieces/`               | 78.375/78.375, gap 78.375, head→ 79.38 | 58.575, gap 58.575, head→ 59.56 | 56, gap 56, head→ 57.00 | T801      |
+| `/places/`               | 78.375/78.375, gap 78.375, head→ 78.38 | 58.575, gap 58.575, head→ 58.56 | 56, gap 56, head→ 56.00 | T801      |
+| `/about/`                | 78.375/78.375, gap 78.375, head→ 78.38 | 58.575, gap 58.575, head→ 58.56 | 56, gap 56, head→ 56.00 | T801      |
+| `/contact/`              | 78.375/78.375, gap 78.375, head→ 78.38 | 58.575, gap 58.575, head→ 58.56 | 56, gap 56, head→ 56.00 | T801      |
+| `/galleries/`            | 78.375/78.375, gap 48, head→ 54.11     | 58.575, gap 42.6, head→ 48.70   | 56, gap 32, head→ 38.11 | post-T802 |
+| `/categories/landscape/` | 78.375/78.375, gap 48, head→ 54.11     | 58.575, gap 42.6, head→ 48.70   | 56, gap 32, head→ 38.11 | post-T802 |
+
+Every one equal. `head` itself is equal to T801 on the four (365.11 /
+407.50 / 429.39 / 365.11 at 1440, and so on) and equal to the
+post-T802 table on `/galleries/` and `/categories/landscape/` (407.50 /
+357.53 / 386.34) — the row's 42.39, unchanged by this task, as it must
+be: **the tokens reach only `.reading-head`, and none of these six
+pages carries it.**
+
+`dist/{pieces,about,contact,places}/index.html` identical to the T801
+baseline after normalizing the hashed CSS link (orchestrator's own
+`shasum`, first 16: `92fd6e812a563481`, `8a65f38132784340`,
+`6282b45e0d294ed6`, `f8fe60d5894956f5` on both sides).
+
+_Phase 0's open note 1 is discharged here_ — with the tokens tightened,
+the sibling rule is now measurable rather than inferred: the gallery
+page's and the place page's `.reading-head + .section` both compute
+`padding-block-start: 48px` at 1440 and 1080 (and `.section`'s own 56
+at 375), so both rules demonstrably fire on all three reading pages,
+not just on the piece. The `.outing`-first path — a place with no
+writing — is **not** exercised: both places in the content have
+writing, so `head.nextElementSibling` is the writing `div.section` on
+each (`/places/the-jetty/` checked too: `pad` 48/48, `gap` 48, next
+sibling `section`). The path stays unmeasured until such a place
+exists; noted for the sweep.
+
+_Deviations_: none.
+
 - [ ] **T805** — Docs: `README.md`'s galleries-and-categories sentences
       (the paragraph that begins "`/galleries/` groups galleries by
       category") say that the galleries index carries the category row
@@ -671,6 +766,7 @@ tier over four sign-off passes). -->
 | Phase 0 review (`skeptical-reviewer`)                | step-down (default) | 70,518                 | 1 blocking (B1, the superseding baseline), fixed; 5 second-look notes, 1 fixed, 4 to the sweep                                                                                                                                                                                                                                                                                                            |
 | S1 marking-rule longhands (`sdd-implementer`)        | step-down           | 32,727                 | dispatched rather than done by hand; a recorded deviation from the plan's verbatim shorthand                                                                                                                                                                                                                                                                                                              |
 | Phase 0 re-review (`skeptical-reviewer`)             | step-down (default) | 23,652                 | B1 discharged, S1 sound; signed off, two record corrections applied                                                                                                                                                                                                                                                                                                                                       |
+| T804 the chosen values (`sdd-implementer`)           | step-down           | 23,642                 | done first pass; no deviations                                                                                                                                                                                                                                                                                                                                                                            |
 | plan/tasks sign-off ×2 (planner-drafted)             | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
 
 <!-- Totals, written at the merge: implementer over its dispatches;
