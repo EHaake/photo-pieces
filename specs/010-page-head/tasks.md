@@ -829,7 +829,7 @@ Five notes go to the pre-merge sweep, in addition to Phase 0's four:
 
 ## Phase 2 — Close-out (two guards, the docs, the reviewer sweep, then merge)
 
-- [ ] **T807** — Two standing guards, added at the product owner's
+- [x] **T807** — Two standing guards, added at the product owner's
       request at the Phase 1 pause (2026-09-07), closing the sweep notes
       that asked for them: **P1-1** (nothing fails if the shipped head
       values are deleted or retuned) and **Phase 0's note 3**
@@ -850,6 +850,67 @@ Five notes go to the pre-merge sweep, in addition to Phase 0's four:
       changed to something else; the query's breakpoint changed; the
       barrier's `dev` path check made to always pass — and the test named
       that each mutation fails, with the actual output recorded here._
+
+**T807 record** (dispatched to the `sdd-implementer`; its verbatim
+output is the verification).
+
+```
+21:54:48 [build] 77 page(s) built in 1.47s
+[prune-originals] 34 emitted originals in dist/_astro/: pruned 34 unreferenced, kept 0 referenced.
+[check-no-gps] 637 images scanned in dist/ — no GPS metadata.
+[check-no-dev-routes] no dev routes in dist/.
+BUILD EXIT 0
+## astro check
+- 0 errors - 0 warnings - 0 hints CHECK EXIT 0
+## vitest
+ Test Files  10 passed (10)
+      Tests  260 passed (260)
+TEST EXIT 0
+```
+
+`page-head.test.mjs` (new, root level): three tests parse
+`src/styles/global.css` — the head tokens at `3rem` in a `:root` inside
+the overriding media block, that block being
+`@media (min-width: 720px)`, and outside it `:root` declaring both at
+`.section`'s clamp — and two run `scripts/check-no-dev-routes.mjs` as a
+child process against a `mkdtemp` fixture, one directory containing
+`dev/page-head/index.html` (exit 1, the path named in stderr) and one
+without (exit 0, the "no dev routes" line). No source file changed:
+the tests describe what T803 and T804 already shipped.
+
+_The mutation checks_ — each mutation made, vitest run, reverted:
+
+| mutation                                                                                 | the test that failed                                                                                                       |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| the media block's value retuned, `--head-pad-reading: 3rem` → `2rem`                     | "both head tokens tighten to 3rem, in a :root inside the media block that overrides them" (`expected '2rem' to be '3rem'`) |
+| the breakpoint changed, `(min-width: 720px)` → `800px`                                   | "the block that tightens them is @media (min-width: 720px)"                                                                |
+| the barrier's dev-path check made to always pass, `if (built.length > 0)` → `if (false)` | "a built dev route fails with a non-zero exit and names the path" (`expected +0 to be 1`)                                  |
+| the `:root` base drifted from `.section`'s clamp, `--head-gap-reading` → `4rem`          | "outside the query :root declares both head tokens at .section's clamp"                                                    |
+| the barrier's success wording, `no dev routes in` → `no dev pages in`                    | "a directory with no dev/ exits 0 and reports no dev routes"                                                               |
+
+Each mutation fails exactly the test whose name names the behavior it
+breaks, and only that one (`1 failed | 4 passed` every time).
+
+_Deviation_: **the suite reads 260, not the 257 this task's Verify line
+predicted.** The task's own mutation list needs three separately-named
+failing tests and guard (b) is two cases, so five tests is the coarsest
+granularity that still satisfies the constitution's "fail for the reason
+the name gives"; folding assertions together to hit 257 would have cost
+exactly that. 255 + 5 = 260, and nothing else in the suite changed.
+
+_One design choice worth the record_: the third test pins the `:root`
+base to `.section`'s **actual** `padding-block` value rather than
+hardcoding the clamp string a second time. The stylesheet's comment says
+to keep the two in step by hand, so equality with `.section` is the
+invariant; a joint retune of both still passes, a drift between them
+fails (mutation 4). That also **closes the standing risk in Phase 0's
+note 2** — the three copies of the clamp are no longer kept in step by
+the comment alone.
+
+_A pattern for later_: there was no child-process test in this suite
+before. `page-head.test.mjs`'s `run(dir)` helper is now the pattern if a
+later spec wants `check-no-gps.mjs`'s or
+`prune-unreferenced-originals.mjs`'s failure paths guarded too.
 
 - [ ] **T806** — `ROADMAP.md`: "A way back from a category" and "The
       header's proportion on a laptop" struck, with the follow-ups the
@@ -900,6 +961,7 @@ tier over four sign-off passes). -->
 | T804 the chosen values (`sdd-implementer`)           | step-down           | 23,642                 | done first pass; no deviations                                                                                                                                                                                                                                                                                                                                                                            |
 | T805 the docs (`sdd-implementer`)                    | step-down           | 35,483 + 19,100        | done first pass, plus a one-line follow-up for the barrier's structure-listing entry                                                                                                                                                                                                                                                                                                                      |
 | Phase 1 review (`skeptical-reviewer`)                | step-down (default) | 51,121                 | no blocking findings, signed off first pass; 1 record correction, 5 notes to the sweep                                                                                                                                                                                                                                                                                                                    |
+| T807 the two guards (`sdd-implementer`)              | step-down           | 33,926                 | done first pass; suite 255 → 260 rather than the predicted 257, for test granularity                                                                                                                                                                                                                                                                                                                      |
 | plan/tasks sign-off ×2 (planner-drafted)             | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
 
 <!-- Totals, written at the merge: implementer over its dispatches;
