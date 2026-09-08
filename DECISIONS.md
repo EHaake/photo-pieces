@@ -656,3 +656,104 @@ the galleries index, since moving a `<style>` into a nested component
 puts the deeper import's sheet first. That reordering is harmless while
 the two sheets never match one element, and the plan records it for the
 next such move.
+
+## Spec 010: the page head
+
+**"All" goes to the pieces index, and the section headings are each
+kind's way back.** The spec left both the destination and the headings
+to the orchestrator. A category page lists galleries first, then
+pieces, so "All" alone would answer only half the question: it means
+"show me everything", and the site being static, it cannot remember
+which kind the reader was filtering. The two `h2` headings became
+links — Galleries to `/galleries/`, Pieces to `/pieces/` — so "show
+me all of this kind" has its own answer, and a reader who filtered
+galleries returns to galleries rather than to the full list of
+pieces.
+
+**One row component, no scoped style, the current item marked the
+nav's way.** `CategoryRow.astro` is rendered by three pages and
+carries no `<style>` block on purpose: a scoped block would have
+stamped a `data-astro-cid-*` attribute on every element it wraps, and
+the pieces index's built HTML was to stay identical — it is, once the
+hashed stylesheet link is normalized. The caveat is not the row's: a
+later task in this same spec added the head's two tokens to
+`global.css`, which changed that sheet's content hash and so its
+`href`. Every other byte matches. The current category is a `<span
+aria-current="page">` marked by text colour and an accent underline,
+as closely as a non-link can take the site nav's own marking, rather
+than by bold: the row is mono at 0.76rem, and bold mono at that size
+reads as a different word instead of the same word emphasized. The
+underline is written as `text-decoration-line` plus
+`text-decoration-thickness` longhands and not the `underline 1px`
+shorthand, because thickness inside the shorthand is CSS Level 4 — an
+older browser drops the whole declaration and loses the underline
+entirely, where the longhands lose only the thickness.
+
+**A class and two tokens, not a change to `.section`.** The reading
+pages opt in with `reading-head`; every other page is untouched by
+construction, and was measured at three viewports to prove it. The
+override is scoped to `min-width: 720px`, by width alone: the plan's
+default was landscape-only, but at the gate the photographer took the
+tighter head on his portrait monitor as well as the laptop, and width
+alone gives it to him there while leaving the phone below the
+breakpoint. Note that `720` is now a fourth use of that number in
+`global.css`, sharing a value with the collapse breakpoint but
+independent of it — a later change to one is not a change to the
+other.
+
+**The sampler is kept as a dev-only route behind a build barrier**,
+not deleted after the gate: the reading typography pass wants the same
+fixture, three candidates side by side on real pages. It is kept
+behind a barrier rather than on trust in the `DEV` guard alone because
+an empty `getStaticPaths` has regressed before — Astro 5.1.2 emitted
+such routes anyway (withastro/astro#12891, fixed in #12906) — and the
+cost of the barrier is one `if`, in exchange for proof on every build
+rather than a promise.
+
+**The spec's four-lines criterion is a floor; the first-paragraph top
+is the number.** At 1440×900 today's head already showed the lead and
+four lines, so the criterion could not tell the candidates apart. What
+the gate actually judged was where the reading starts, and the chosen
+candidate's measured first-paragraph top is the regression number: 547
+at 1440×900, down from 638. The gate was judged against the
+photographer's real fold — an `innerHeight` of 778 in his browser —
+not against an emulated 900.
+
+**The third acceptance criterion reads as being about the head's
+air.** Criterion 3 says the galleries index and the category pages
+"measure the same as before", while criterion 1 requires putting the
+category row on exactly those pages; read literally, the two
+contradict each other. The reading taken, and measured, is that
+criterion 3 governs the head's padding and gap — unchanged on those
+pages at all three viewports — and not the row the spec deliberately
+adds. `spec.md` was left unedited: it is the product owner's, and it
+is approved.
+
+**Two one-time checks became tests, because a claim the project
+makes should be able to fail out loud.** At the Phase 1 pause
+(2026-09-07) the product owner found two of this spec's claims
+resting on inspection alone. The head's values are a visual-gate
+decision that lives only in CSS: deleting the `@media (min-width:
+720px)` block, or retuning it, would have failed nothing in the
+suite. The dev-route barrier's failure path had been exercised
+exactly once, by hand, by removing the `DEV` guard and watching the
+build stop. Both are now instrumented rather than left inspected:
+`page-head.test.mjs` parses `global.css` for the two tokens, their
+`3rem` override and its `720px` breakpoint, and runs the barrier as
+a child process against a temporary fixture directory — once
+containing a dev route, once not. The general point outlasts the
+spec: a claim a project makes in its own docs should be able to fail
+out loud. The guard has a limit worth naming, though:
+`page-head.test.mjs` pins the values the stylesheet declares, not the
+wiring that reads them. Nothing in the suite fails if the
+`reading-head` class were dropped from one of the three page
+templates, or if the two `.reading-head` rules were deleted — the
+tokens would be declared and unread, and every test would still pass.
+So the claim that the three reading pages share one head still rests
+on the one-time measurement; a built-HTML assertion — the class
+present on each of the three pages — is what would close it. One
+detail of the test carries its own reason — the `:root` base
+declarations are pinned to `.section`'s own `padding-block` value
+rather than to a second copy of the clamp string, so the "keep these
+in step by hand" coupling the stylesheet comment asks for is now
+enforced by a test and not by the comment alone.

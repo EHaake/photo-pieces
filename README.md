@@ -228,12 +228,19 @@ A gallery page packs its images into rows in that order so every
 image in a row renders at the same short side (a panorama takes a
 whole row; nothing is cropped or reordered — `DECISIONS.md` has the
 reasoning). `/galleries/` groups galleries by category and is in the
-nav; `/categories/<category>/` lists a category's galleries then its
-pieces and is reached from category labels, never from the nav. A
-missing, duplicate, or draft-owned id in a gallery fails the build
-with the file and line. `src/components/LatestWork.astro` renders the
-newest curated images as a strip and is not placed on any page yet
-(the homepage design pass will place it).
+nav, with the category row under its title — each category a link to
+its own page, nothing marked. `/categories/<category>/` lists a
+category's galleries then its pieces and is reached from category
+labels, never from the nav; its head carries the same row with `All`
+first, back to `/pieces/`, the category you're on marked rather than
+linked, and its "Galleries" and "Pieces" headings link to the two
+indexes. The row is one component, `src/components/CategoryRow.astro`,
+fed by `categoryRow()` in `src/lib/categories.ts` and shared with
+`/pieces/`, which keeps the row it already had. A missing, duplicate,
+or draft-owned id in a gallery fails the build with the file and line.
+`src/components/LatestWork.astro` renders the newest curated images as
+a strip and is not placed on any page yet (the homepage design pass
+will place it).
 
 **Place** — `src/content/places/<slug>.md` (spec 009), somewhere the
 photographer returns to: a title, an optional description, cover, and
@@ -294,6 +301,13 @@ Light-only, by decision, and fully so since spec 002: no dark palette,
 no toggle, no `prefers-color-scheme` behavior. The reasoning is in
 `design/brief.md` — the photographer controls how the work is seen.
 
+The three reading pages — piece, gallery, and place — share one head,
+marked `reading-head` and spaced by `--head-pad-reading` (above and
+below it) and `--head-gap-reading` (before the body) in
+`src/styles/global.css`. Both start at `.section`'s clamp and tighten
+to `3rem` from 720px up — width alone, so a portrait monitor gets the
+tighter head too — while below that the phone keeps today's air.
+
 ## Also inherited from the base theme
 
 Working, worth not losing track of: static full-text search at
@@ -320,6 +334,7 @@ photo-pieces/
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
 ├── scripts/check-no-gps.mjs      # postbuild: no GPS in any built image
+├── scripts/check-no-dev-routes.mjs # postbuild: no dev-only routes in dist/
 ├── obsidian-plugin/              # Live Preview rendering (see its README)
 ├── CLAUDE.md, ROADMAP.md, DECISIONS.md, AUTHORING.md
 ├── specs/                        # spec.md, plan.md, tasks.md per spec
@@ -338,8 +353,9 @@ photo-pieces/
 │   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
-│   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), LatestWork
+│   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), LatestWork, CategoryRow
 │   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
+│   ├── pages/dev/                # dev-only fixtures (the page-head sampler); postbuild fails if any reach dist/
 │   └── styles/global.css
 ```
 

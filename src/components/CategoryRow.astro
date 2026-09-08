@@ -1,0 +1,33 @@
+---
+// The category link row (spec 010): the pieces index's row, moved here
+// so the galleries index and a category page carry the same one. Without
+// `current` it is the four categories; with it, "All" leads and the
+// current category is marked rather than linked. No `<style>` block on
+// purpose — a scoped style would stamp a `data-astro-cid-*` on every
+// element and change the pieces index's built HTML (the 009 cards
+// lesson); the marking rule lives in `global.css` beside `.meta`.
+import { categoryRow, type Category } from '../lib/categories';
+import { withBase } from '../lib/url';
+
+interface Props {
+  current?: Category;
+}
+
+const { current } = Astro.props;
+const items = categoryRow(current);
+---
+
+<nav class="meta category-row" aria-label="Browse by category">
+  {
+    items.map((item, index) => (
+      <>
+        {index > 0 && ' · '}
+        {item.href === null ? (
+          <span aria-current="page">{item.label}</span>
+        ) : (
+          <a href={withBase(item.href)}>{item.label}</a>
+        )}
+      </>
+    ))
+  }
+</nav>

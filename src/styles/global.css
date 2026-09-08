@@ -65,6 +65,12 @@
   --pause-scale: 1.05;
   --pause-stretch: 120svh;
   --pause-depth: 0.85;
+  /* The reading pages' head (spec 010): the padding above and below
+     the head, and the gap before the body. Declared at .section's
+     value (keep the clamp in step with .section by hand), then
+     tightened below at 720px and up — the gate's values. */
+  --head-pad-reading: clamp(3.5rem, 5.5vw, 5.5rem);
+  --head-gap-reading: clamp(3.5rem, 5.5vw, 5.5rem);
 }
 
 /* Light-only by design: the photographer controls how the work is seen,
@@ -270,6 +276,35 @@ html[data-scene-active] .site-header {
   height: 1px;
   margin-top: calc(var(--baseline) * 1.25);
   background: var(--color-accent);
+}
+
+/* The three reading pages' head (spec 010) — the piece, the gallery,
+   the place. .section and .page-head keep their own declarations, so a
+   page without this class computes exactly what it computed before;
+   these two rules are later in source at equal specificity (the head)
+   and out-specify .section (the gap). */
+.reading-head {
+  padding-block: var(--head-pad-reading);
+}
+
+.reading-head + .section {
+  padding-block-start: var(--head-gap-reading);
+}
+
+/* The gate, 2026-09-07: the photographer chose candidate `a` — 3rem
+   above and below the head, 3rem before the body — and took it on the
+   portrait monitor as well as the laptop, so this is a plain width
+   query and not the landscape one. Below 720px (the phone) the head
+   keeps .section's clamp, which is what it has today. This 720 is the
+   head's own phone/desktop boundary and is independent of the collapse
+   breakpoint further down that shares the number — retuning that one
+   (and the two constants kept in step with it) is not a change to this
+   query. */
+@media (min-width: 720px) {
+  :root {
+    --head-pad-reading: 3rem;
+    --head-gap-reading: 3rem;
+  }
 }
 
 .eyebrow {
@@ -829,6 +864,21 @@ pre code {
   color: var(--color-accent);
   font-family: var(--font-mono);
   font-size: 0.76rem;
+}
+
+/* The category row's current item (spec 010): a span, not a link, so it
+   cannot take the site nav's gradient underline — it names the accent on
+   the text decoration instead. */
+.category-row [aria-current='page'] {
+  color: var(--color-text);
+  /* Longhands, not the `underline 1px` shorthand: thickness inside the
+     shorthand is CSS Level 4, and where it is unsupported the whole
+     declaration is dropped at parse time — no underline at all, and
+     nothing for text-decoration-color to color. */
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--color-accent);
+  text-underline-offset: 0.2em;
 }
 
 .tag-list {
