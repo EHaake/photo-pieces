@@ -817,9 +817,14 @@ Five notes go to the pre-merge sweep, in addition to Phase 0's four:
   two acceptance criteria and belongs in `DECISIONS.md`, where the sweep
   and later readers will find it. **T806 carries this.**
 - **P1-4**: the `.outing`-first place page — a place with no writing —
-  is not merely unmeasured but untested: it would silently take a
-  different gap with no build error and no failing test. Both places in
-  the content have writing today.
+  is unmeasured. **Corrected at the sweep**, which read the CSS rather
+  than assuming: the first outing is
+  `<section class="section outing">`, which _does_ match
+  `.reading-head + .section`, and neither `global.css` nor the page's
+  scoped style declares `padding-block` on `.outing` — so that path
+  takes the same 3rem gap. The accurate claim is only that it has never
+  been measured, because no such place exists in the content; the
+  earlier "would silently take a different gap" was wrong.
 - **P1-5**: the claim that `/galleries/` and `/categories/landscape/`
   keep T801's `pad` and `gap` traces through the post-T802 table rather
   than through Phase 1's own bundle; the sweep confirms the T801 leg.
@@ -912,7 +917,7 @@ before. `page-head.test.mjs`'s `run(dir)` helper is now the pattern if a
 later spec wants `check-no-gps.mjs`'s or
 `prune-unreferenced-originals.mjs`'s failure paths guarded too.
 
-- [ ] **T806** — `ROADMAP.md`: "A way back from a category" and "The
+- [x] **T806** — `ROADMAP.md`: "A way back from a category" and "The
       header's proportion on a laptop" struck, with the follow-ups the
       plan names (the title, the lead's measure, and the body column to
       the reading typography pass, which the sampler now serves; a
@@ -938,6 +943,69 @@ later spec wants `check-no-gps.mjs`'s or
 
 ---
 
+### The pre-merge sweep
+
+The `skeptical-reviewer` swept the whole spec at its default tier, on
+`spec.md`, `plan.md`, `tasks.md`, the carried notes, the final
+verification, and `git diff main...HEAD`: **no blocking findings,
+signed off** on the first pass, so no re-review.
+
+**P1-5 confirmed, three ways.** `/galleries/` and `/categories/landscape/`
+keep **T801's own** `pad` and `gap`, not merely the post-T802 table's:
+every figure in T804's six-pages table for those two pages (78.375 /
+48 / 54.11; 58.575 / 42.6 / 48.70; 56 / 32 / 38.11) appears in T801's
+rows unchanged — the post-T802 table supersedes only `head`,
+`nextFirst` and `row`, which moved by the row's 42.39, which is the
+criterion-1 change and not head air. Structurally, the two tokens are
+read in exactly two rules and `reading-head` sits on exactly three page
+templates plus the sampler, and there is exactly one top-level `:root`
+besides the one inside the query, so nothing can leak. And the measured
+gap on those pages comes from `.gallery-group`'s own
+`clamp(2rem, 4vw, 3rem)` — 48 / 42.6 / 32 at the three viewports — a
+different clamp from the reading token's 48/48/56, so the equality is
+independently sourced rather than a coincidence of values.
+
+**Three notes fixed before the merge**, dispatched rather than done by
+hand:
+
+- `DECISIONS.md` carried the "byte for byte" overclaim about the pieces
+  index that had already been corrected once in the T805 record — the
+  durable document now says "identical once the hashed stylesheet link
+  is normalized", with the reason.
+- The seventh decision read as though both one-time checks were now
+  fully instrumented. It now names the guard's limit: `page-head.test.mjs`
+  pins the values the stylesheet **declares**, not the **wiring** —
+  nothing fails if `reading-head` were dropped from a template or the
+  two `.reading-head` rules deleted, so "the three reading pages share
+  one head" still rests on the one-time measurement, and a built-HTML
+  assertion is what would close it.
+- `categories.test.mjs`'s third test (carried note S2) is renamed
+  **"the row's order is CATEGORIES' own, not a hard-coded list"** and
+  now compares hrefs against `CATEGORIES` rather than computing
+  `categoryLabel` on both sides. The labels stay pinned
+  non-self-referentially by tests 1 and 2, which assert the literals.
+  Mutation-checked: `CATEGORIES.map(` → `[...CATEGORIES].reverse().map(`
+  fails it at `categories.test.mjs:42`.
+
+**Five notes left open, deliberately, and where they live:**
+
+- **The wiring has no standing guard** (above) — recorded in
+  `DECISIONS.md` as a known limit rather than tracked as work.
+- **The sampler duplicates the head's twenty lines internally** (Phase
+  0 note 4) and **its `<time>` whitespace differs** from the piece
+  page's (note 5) — both cosmetic, in a dev-only fixture the reading
+  typography pass will edit next.
+- **`CategoryRow.astro`'s rendering contract has no standing check**
+  (S3) — each part was verified once by grep on the build.
+- **The sampler applies candidate values at every viewport** (S4) —
+  which is what made the gate usable on the portrait monitor.
+- **`plan.md` does not mention T807**, which postdates its sign-off and
+  was authorized by the product owner at the Phase 1 pause; the
+  authorization is recorded in T807's task line and in `DECISIONS.md`.
+- **The README's structure listing omits the two root-level test
+  files** — pre-existing drift (`og.test.mjs` is missing too), not
+  introduced here.
+
 ## Tier log (the fourth spec under the model policy)
 
 <!-- Token usage from each subagent return — implementer runs and
@@ -962,11 +1030,48 @@ tier over four sign-off passes). -->
 | T805 the docs (`sdd-implementer`)                    | step-down           | 35,483 + 19,100        | done first pass, plus a one-line follow-up for the barrier's structure-listing entry                                                                                                                                                                                                                                                                                                                      |
 | Phase 1 review (`skeptical-reviewer`)                | step-down (default) | 51,121                 | no blocking findings, signed off first pass; 1 record correction, 5 notes to the sweep                                                                                                                                                                                                                                                                                                                    |
 | T807 the two guards (`sdd-implementer`)              | step-down           | 33,926                 | done first pass; suite 255 → 260 rather than the predicted 257, for test granularity                                                                                                                                                                                                                                                                                                                      |
+| T806 docs: roadmap + decisions (`sdd-implementer`)   | step-down           | 40,333 + 34,475        | done, plus a correction dispatch: it wrote that the photographer took the tightest candidate; he took the middle one                                                                                                                                                                                                                                                                                      |
+| Pre-merge sweep (`skeptical-reviewer`)               | step-down (default) | 122,515                | no blocking findings, signed off first pass; P1-5 confirmed three ways; 3 notes fixed, 6 left open                                                                                                                                                                                                                                                                                                        |
+| Sweep fixes (`sdd-implementer`)                      | step-down           | 35,169                 | the DECISIONS overclaim, the guard's honest limit, and S2's test name                                                                                                                                                                                                                                                                                                                                     |
 | plan/tasks sign-off ×2 (planner-drafted)             | top tier            | 102,587 + 24,650       | fix and re-review ×1 (B1: the sampler copied the piece head's markup but not the piece page's scoped `.piece-column` rule, so the gate would have judged a left-aligned head that the vertical-only probe could not tell from the real one), then signed off. Packet note for T803: the sampler declares that rule in its own `<style>` and its Verify compares `left` and `width` against the piece page |
 
-<!-- Totals, written at the merge: implementer over its dispatches;
-reviewer at its default tier over its invocations; top tier; all
-tiers, against 009's; what held and what to carry to the next spec. -->
+**Totals, written at the merge.**
+
+|                                  | 010                                | 009             |
+| -------------------------------- | ---------------------------------- | --------------- |
+| Implementer                      | **399,793** over **11** dispatches | 275,282 over 5  |
+| Reviewer, default tier           | **333,958** over **5** invocations | 403,955 over 10 |
+| Reviewer, top tier (sign-off)    | **127,237** over **2** passes      | 195,912 over 4  |
+| Reviewer, all tiers              | **461,195**                        | 599,867         |
+| Planner (top tier, one dispatch) | **139,477**                        | —               |
+
+**What held.** The reviewer cost fell by 23% against 009 even though
+this spec ran five review invocations to 009's ten — the bundles did
+it: every review read one shell-assembled file and nothing else, and
+the two that could have been expensive (the per-task T803 review and
+the sweep) were the two that found the most. Sign-off took two passes
+rather than four. The escape hatch was never used: no task failed
+verification twice, and the orchestrator implemented nothing.
+
+**What cost more, and why it was worth it.** Implementer spend rose
+45% over 11 dispatches to 009's 5, but six of those eleven were small
+corrective dispatches — the banner fixes, the marking longhands, the
+README follow-up, the roadmap correction, the sweep fixes — each one a
+review finding or a verification miss going back to an implementer
+rather than being done by hand. That is the constitution's rule
+working as intended, and each was 19k–36k, an order cheaper than a
+review invocation.
+
+**To carry to the next spec.** Three of the eleven dispatches existed
+only because a bundle under-specified something the orchestrator
+already knew: the gate had settled the media query before T804's
+bundle was written, and the T806 bundle didn't name which candidate
+was chosen, which is exactly the fact the implementer then got wrong.
+Bundles should carry the decisions that postdate the plan, not just
+the plan. And the geometry work — 27 probe results at T801, 27 more at
+T804 — was the orchestrator's own and cost far more turns than any
+dispatch; a probe script run once per viewport would have collapsed
+most of it.
 
 ## Handoff note
 

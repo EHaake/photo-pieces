@@ -674,17 +674,20 @@ pieces.
 nav's way.** `CategoryRow.astro` is rendered by three pages and
 carries no `<style>` block on purpose: a scoped block would have
 stamped a `data-astro-cid-*` attribute on every element it wraps, and
-the pieces index's built HTML was to stay identical — it did, byte for
-byte. The current category is a `<span aria-current="page">` marked by
-text colour and an accent underline, as closely as a non-link can take
-the site nav's own marking, rather than by bold: the row is mono at
-0.76rem, and bold mono at that size reads as a different word instead
-of the same word emphasized. The underline is written as
-`text-decoration-line` plus `text-decoration-thickness` longhands and
-not the `underline 1px` shorthand, because thickness inside the
-shorthand is CSS Level 4 — an older browser drops the whole
-declaration and loses the underline entirely, where the longhands lose
-only the thickness.
+the pieces index's built HTML was to stay identical — it is, once the
+hashed stylesheet link is normalized. The caveat is not the row's: a
+later task in this same spec added the head's two tokens to
+`global.css`, which changed that sheet's content hash and so its
+`href`. Every other byte matches. The current category is a `<span
+aria-current="page">` marked by text colour and an accent underline,
+as closely as a non-link can take the site nav's own marking, rather
+than by bold: the row is mono at 0.76rem, and bold mono at that size
+reads as a different word instead of the same word emphasized. The
+underline is written as `text-decoration-line` plus
+`text-decoration-thickness` longhands and not the `underline 1px`
+shorthand, because thickness inside the shorthand is CSS Level 4 — an
+older browser drops the whole declaration and loses the underline
+entirely, where the longhands lose only the thickness.
 
 **A class and two tokens, not a change to `.section`.** The reading
 pages opt in with `reading-head`; every other page is untouched by
@@ -740,9 +743,17 @@ build stop. Both are now instrumented rather than left inspected:
 a child process against a temporary fixture directory — once
 containing a dev route, once not. The general point outlasts the
 spec: a claim a project makes in its own docs should be able to fail
-out loud. One detail of the test carries its own reason — the
-`:root` base declarations are pinned to `.section`'s own
-`padding-block` value rather than to a second copy of the clamp
-string, so the "keep these in step by hand" coupling the stylesheet
-comment asks for is now enforced by a test and not by the comment
-alone.
+out loud. The guard has a limit worth naming, though:
+`page-head.test.mjs` pins the values the stylesheet declares, not the
+wiring that reads them. Nothing in the suite fails if the
+`reading-head` class were dropped from one of the three page
+templates, or if the two `.reading-head` rules were deleted — the
+tokens would be declared and unread, and every test would still pass.
+So the claim that the three reading pages share one head still rests
+on the one-time measurement; a built-HTML assertion — the class
+present on each of the three pages — is what would close it. One
+detail of the test carries its own reason — the `:root` base
+declarations are pinned to `.section`'s own `padding-block` value
+rather than to a second copy of the clamp string, so the "keep these
+in step by hand" coupling the stylesheet comment asks for is now
+enforced by a test and not by the comment alone.

@@ -1,7 +1,8 @@
 # Spec: The page head
 
-**Status**: Approved (2026-09-07) — written in the design conversation,
-signed off by the product owner
+**Status**: Delivered (2026-09-07) — approved as written in the design
+conversation, signed off by the product owner; every acceptance
+criterion checked against its record in `tasks.md` at the close-out
 **Depends on**: 004 (the category pages and the galleries index), 009
 (the place page shares the head).
 
@@ -116,23 +117,23 @@ the row.
 
 ## Acceptance criteria
 
-- [ ] A category page's head carries the row with "All" first, the
+- [x] A category page's head carries the row with "All" first, the
       current category marked and not a link, the others linking to
       their category pages, and "All" linking to `/pieces/`; the
       pieces index's row is unchanged and has no "All"; the galleries
       index has the row without "All"
-- [ ] On a category page the "Galleries" heading links to `/galleries/`
+- [x] On a category page the "Galleries" heading links to `/galleries/`
       and the "Pieces" heading to `/pieces/`
-- [ ] At 1440×900 the fog piece's page shows the lead and at least the
+- [x] At 1440×900 the fog piece's page shows the lead and at least the
       first four lines of prose without scrolling, measured; the
       gallery page and the place page use the same tightened head; the
       pieces, galleries, and places indexes, the category pages, About,
       and Contact measure the same as before
-- [ ] At 1080×1920 and 375×812 the piece head measures no tighter than
+- [x] At 1080×1920 and 375×812 the piece head measures no tighter than
       the photographer accepted at the gate (the portrait monitor
       unchanged unless the gate chose otherwise; the phone unchanged)
-- [ ] The sampler existed for the gate and is gone from the built site
-- [ ] The whole test suite green; the build with its barriers green;
+- [x] The sampler existed for the gate and is gone from the built site
+- [x] The whole test suite green; the build with its barriers green;
       docs updated
 
 ## Decided

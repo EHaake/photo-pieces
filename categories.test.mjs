@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CATEGORIES, categoryLabel, categoryRow } from './src/lib/categories.ts';
+import { CATEGORIES, categoryRow } from './src/lib/categories.ts';
 
 // The category row (spec 010): three pages render it and only one of
 // them marks a current category, so the rule for what the row contains
@@ -37,8 +37,10 @@ describe('the category row (T802, spec 010)', () => {
     ]);
   });
 
-  it("the labels are categoryLabel's and the order is CATEGORIES'", () => {
+  it("the row's order is CATEGORIES' own, not a hard-coded list", () => {
     const row = categoryRow();
-    expect(row.map((item) => item.label)).toEqual(CATEGORIES.map(categoryLabel));
+    expect(row.map((item) => item.href)).toEqual(
+      CATEGORIES.map((category) => `/categories/${category}/`),
+    );
   });
 });
