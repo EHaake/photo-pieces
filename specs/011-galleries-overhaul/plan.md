@@ -1,6 +1,7 @@
 # Plan: The galleries overhaul
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-07) — by the `skeptical-reviewer`; no
+blocking findings, four non-blocking second-look notes folded in.
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -20,8 +21,10 @@ is committed before the photographer names a set.
 The mechanism is built **inert** (the width knob defaults to the content
 width, the gap to its present value), exactly as spec 010 built its head
 tokens at `.section`'s value: the galleries and places render
-byte-for-geometry identically until the gate, which is what lets the
-mechanism land, be exercised by the sampler, and only then take values.
+geometrically identically until the gate — within the scrollbar-width
+overshoot the site's wide-block idiom already accepts, see Known
+limitations — which is what lets the mechanism land, be exercised by
+the sampler, and only then take values.
 
 - **The knobs — one source, three numbers** (`src/lib/gallery-layout.ts`).
   Today the file exports `GALLERY_SHORT_PX` (280, density) and

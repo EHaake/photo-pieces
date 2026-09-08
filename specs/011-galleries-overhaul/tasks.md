@@ -1,6 +1,7 @@
 # Tasks: The galleries overhaul
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-07) — by the `skeptical-reviewer`; no
+blocking findings, four non-blocking second-look notes folded in.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T900–T903) — reviewed as a phase, except
 T900 (the real-photograph fixtures and the GPS barrier proven against
@@ -56,10 +57,13 @@ headers to confirm nothing was duplicated or dropped. -->
       page renders on the dev server with its wall label
       (camera/lens/exposure where the EXIF carries it); a naive
       `node -e "import('exifr').then(m => m.default.parse('<file>')).then(o => console.log(Object.keys(o||{}).filter(k => /gps|latitude|longitude/i.test(k))))"`
-      over the supplied files reports at least one with GPS keys (else
-      the barrier has nothing real to catch — recorded here; if none do,
-      note it and the barrier is proven only against the synthetic
-      fixture); the `exif.test.mjs` allowlist assertions still green.
+      over the supplied files reports at least one with GPS keys; if
+      none of the supplied exports carry GPS, the orchestrator adds one
+      genuinely GPS-bearing real raster as an extra fixture, so the
+      barrier is proven on a real file and the spec's "first time on
+      real files" intent is met — T901's synthetic `gps.jpg` stays the
+      standing falsifiable anchor either way; the `exif.test.mjs`
+      allowlist assertions still green.
       The count of exports added and the naive-GPS result recorded here._
 
 - [ ] **T901** — The GPS barrier as a standing test. `gps-barrier.test.mjs`
@@ -144,6 +148,13 @@ question and goes back to him. The values are not in this plan. -->
 
 ## Phase 1 — The chosen values and the docs (reviewer after the phase; the person's pause at its end)
 
+<!-- T904 is the load-bearing visible change (all three knobs, both index
+card grids, the geometric checks for ACs 2–5) under per-phase review, not
+per-task. That is the right set — T900 and T902 are the contracts later
+tasks inherit — but the phase review must treat T904's recorded numbers
+as the substance of the review, not a formality (sign-off note 4). -->
+
+
 - [ ] **T904** — The gate's values. `src/lib/gallery-layout.ts`:
       `GALLERY_WIDTH`, `GALLERY_GAP`, and `GALLERY_SHORT_PX` set to the
       gate record's values, with a comment naming the gate's date and the
@@ -199,8 +210,12 @@ question and goes back to him. The values are not in this plan. -->
       wide/fullbleed breakout idiom reused for the gallery width and why
       (viewport-centred, body already clips the `vw` overshoot, one knob
       for all three width forms); width and gap kept in `gallery-layout.ts`
-      beside density for one-source bookkeeping though only density feeds
-      the srcset; the GPS barrier given a standing child-process test and
+      beside density for one-source bookkeeping though only density (and
+      the stretch cap) feeds the srcset — AC3's "srcset ceilings track the
+      new width and density" is read as density (and stretch), never
+      width, since a wider page must never fetch a larger image, the
+      approved spec.md left unedited (the spec 010 precedent for an
+      imprecise AC); the GPS barrier given a standing child-process test and
       proven against real exports for the first time; whether the index
       card grids follow the pages (the gate's outcome). Both ride this
       spec branch and merge with the PR, so the sweep's diff against
@@ -236,6 +251,7 @@ run at the implementation tier, the override dropped. -->
 | Task / invocation              | Tier                | Tokens             | Outcome / miss reason |
 | ------------------------------ | ------------------- | ------------------ | --------------------- |
 | Planning: draft (`sdd-planner`)| implementation (fallback) | 148,300 | drafted first pass |
+| Sign-off: plan/tasks (`skeptical-reviewer`) | implementation (fallback) | 48,861 | signed off; 4 non-blocking notes folded in |
 
 **Totals, written at the merge.**
 
