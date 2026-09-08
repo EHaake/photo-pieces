@@ -827,7 +827,29 @@ Five notes go to the pre-merge sweep, in addition to Phase 0's four:
   / 32 — tracks a `4vw` clamp, not the reading token's 48/48/56, which
   is independent evidence the tokens do not reach those pages.)
 
-## Phase 2 — Close-out (reviewer sweep, then merge)
+## Phase 2 — Close-out (two guards, the docs, the reviewer sweep, then merge)
+
+- [ ] **T807** — Two standing guards, added at the product owner's
+      request at the Phase 1 pause (2026-09-07), closing the sweep notes
+      that asked for them: **P1-1** (nothing fails if the shipped head
+      values are deleted or retuned) and **Phase 0's note 3**
+      (`check-no-dev-routes.mjs`'s failure path rests on a one-time
+      negative control). `page-head.test.mjs` (new; `categories.test.mjs`
+      is the pattern for a root-level suite): (a) read
+      `src/styles/global.css` and assert it declares both
+      `--head-pad-reading` and `--head-gap-reading` at `3rem` inside a
+      `@media (min-width: 720px)` block, and that both are declared in
+      `:root` at `.section`'s clamp outside it; (b) run
+      `scripts/check-no-dev-routes.mjs` as a child process against a
+      temporary fixture directory — once containing `dev/page-head/index.html`,
+      asserting a non-zero exit and the message naming the path, and once
+      without it, asserting exit 0 and the "no dev routes" line. The
+      barrier takes an optional `[dir]` argument, so no `dist/` is
+      touched. _Verify: `sh scripts/verify.sh` green with the suite at
+      257; each new test mutation-checked — the media query's value
+      changed to something else; the query's breakpoint changed; the
+      barrier's `dev` path check made to always pass — and the test named
+      that each mutation fails, with the actual output recorded here._
 
 - [ ] **T806** — `ROADMAP.md`: "A way back from a category" and "The
       header's proportion on a laptop" struck, with the follow-ups the
