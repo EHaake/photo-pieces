@@ -45,7 +45,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the fixtures, the barrier's proof, the knobs, and the sampler (reviewer after the phase, T900 and T902 on their own; the gate at its end)
 
-- [ ] **T900** (`review: per-task`) — The real photographs, and the GPS
+- [x] **T900** (`review: per-task`) — The real photographs, and the GPS
       barrier proven against them. The photographer supplies about ten
       real camera exports into `src/content/gallery-images/` and/or an
       existing published piece's folder (his to add; the orchestrator
@@ -65,6 +65,21 @@ headers to confirm nothing was duplicated or dropped. -->
       standing falsifiable anchor either way; the `exif.test.mjs`
       allowlist assertions still green.
       The count of exports added and the naive-GPS result recorded here._
+      _**Recorded:** 10 real exports added to `src/content/gallery-images/`
+      (cozy-brook, latourelle-glow, latourelle-gold, lower-falls-spring,
+      multnomah-gold, mystic-falls, rainbow-falls, those-fall-feelings,
+      two-medicine-twilight, water-and-ice; Sony A7RIV/A7RV + Pentax K-1,
+      full EXIF). Naive `exifr.parse` (no `gps:false`): mystic-falls carries
+      GPS (GPSLatitude/Longitude/Altitude + latitude/longitude), the other
+      nine clean — so the barrier is proven against a real GPS-bearing
+      export, no extra fixture needed. `sh scripts/verify.sh` green:
+      `BUILD EXIT 0` (87 pages, 16 indexed), `[check-no-gps] 766 images
+      scanned in dist/ — no GPS metadata.`, `CHECK EXIT 0`,
+      `TEST EXIT 0` (260 tests, 10 files — `exif.test.mjs` allowlist green).
+      Each of the ten has a page at `dist/images/gallery/<basename>/`; wall
+      labels populate (e.g. mystic-falls: PENTAX K-1, 15-30mm, f/5.6, 106 s,
+      ISO 200) with zero GPS tokens on the GPS-bearing file's page.
+      `skeptical-reviewer` signed off (per-task), no blocking findings._
 
 - [ ] **T901** — The GPS barrier as a standing test. `gps-barrier.test.mjs`
       (new; `page-head.test.mjs`'s `run(dir)` child-process helper is the
@@ -252,6 +267,7 @@ run at the implementation tier, the override dropped. -->
 | ------------------------------ | ------------------- | ------------------ | --------------------- |
 | Planning: draft (`sdd-planner`)| implementation (fallback) | 148,300 | drafted first pass |
 | Sign-off: plan/tasks (`skeptical-reviewer`) | implementation (fallback) | 48,861 | signed off; 4 non-blocking notes folded in |
+| T900 review (`skeptical-reviewer`) | reviewer default (opus) | 26,687 | signed off; no blocking findings |
 
 **Totals, written at the merge.**
 
