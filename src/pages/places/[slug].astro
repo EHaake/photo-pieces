@@ -75,7 +75,7 @@ const { Content } = await render(place.entry);
               {formatDate(piece.data.publishDate)}
             </time>
           </div>
-          <ul class="gallery-flow" style={galleryFlowStyle}>
+          <ul class="gallery-flow gallery-wide" style={galleryFlowStyle}>
             {cells.map(({ image, ar, width, sizes }) => (
               <li style={`--ar: ${ar}`}>
                 <a href={withBase(image.url)} class="image-link">

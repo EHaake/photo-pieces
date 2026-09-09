@@ -64,7 +64,7 @@ const cells = images.map((image) => ({ image, ...galleryCell(image.image) }));
     </header>
 
     <div class="section">
-      <ul class="gallery-flow" style={galleryFlowStyle}>
+      <ul class="gallery-flow gallery-wide" style={galleryFlowStyle}>
         {
           cells.map(({ image, ar, width, sizes }) => (
             <li style={`--ar: ${ar}`}>

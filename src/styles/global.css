@@ -1888,10 +1888,24 @@ html[data-pause-active] .social-links a {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: calc(var(--baseline) * 0.75);
+  gap: var(--gallery-gap, calc(var(--baseline) * 0.75));
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* The gallery's rows run to their own width, wider than the text
+   column, centred on the viewport (spec 011). Above the collapse
+   only; below it the flow stays in .section, one frame per row. The
+   width is a knob (src/lib/gallery-layout.ts → --gallery-width); the
+   min() caps a fixed or bleed candidate to the viewport, and body's
+   overflow-x: clip absorbs the vw overshoot, as .piece-wide does. */
+@media (min-width: 720px) {
+  .gallery-flow.gallery-wide {
+    --gw: min(var(--gallery-width, var(--content-width)), calc(100vw - 2 * var(--page-pad)));
+    width: var(--gw);
+    margin-inline: calc(50% - var(--gw) / 2);
+  }
 }
 
 .gallery-flow > li {

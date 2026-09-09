@@ -14,6 +14,13 @@ export const GALLERY_SHORT_PX = 280;
 /** How far a short row may stretch to fill the width (cap knob). */
 export const GALLERY_STRETCH = 1.35;
 
+/** The outer width the packed rows may run to (spec 011). CSS-only:
+ *  the density, not this, sets the per-cell srcset ceiling, so a wider
+ *  row never asks for a larger image. The gate's value (Phase 1). */
+export const GALLERY_WIDTH = 'var(--content-width)'; // inert default
+/** The gap between frames (spec 011). CSS-only. The gate's value. */
+export const GALLERY_GAP = 'calc(var(--baseline) * 0.75)'; // inert default
+
 /** The related strip on an image page (spec 006): the same packing
  *  rule at a smaller short side, so a handful of frames read as a row
  *  of thumbnails in the reading column. Below the 720px collapse the
@@ -24,7 +31,7 @@ export const RELATED_NARROW_SHORT_PX = 96;
 
 /** Inline style for the `.gallery-flow` container. Below ~1080px wide
  *  the short side follows the viewport so rows keep two or three cells. */
-export const galleryFlowStyle = `--gallery-short: clamp(200px, 26vw, ${GALLERY_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}`;
+export const galleryFlowStyle = `--gallery-short: clamp(200px, 26vw, ${GALLERY_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}; --gallery-width: ${GALLERY_WIDTH}; --gallery-gap: ${GALLERY_GAP}`;
 
 /** Inline style for a related strip: a `.gallery-flow` at the smaller
  *  short side, the same stretch cap. */

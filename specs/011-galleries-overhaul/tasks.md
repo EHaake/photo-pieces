@@ -106,7 +106,7 @@ headers to confirm nothing was duplicated or dropped. -->
       GPS metadata" fails its `stdout` `toContain`. Note: the barrier prints
       "1 images scanned" (no pluralization), pinned in the clean assertion._
 
-- [ ] **T902** (`review: per-task`) — The three knobs in one source, and
+- [x] **T902** (`review: per-task`) — The three knobs in one source, and
       the width breakout, inert. `src/lib/gallery-layout.ts`: add
       `GALLERY_WIDTH` (`'var(--content-width)'`) and `GALLERY_GAP`
       (`'calc(var(--baseline) * 0.75)'`) with the plan's comments;
@@ -137,6 +137,29 @@ headers to confirm nothing was duplicated or dropped. -->
       related strip unchanged (grep confirms it has no `gallery-wide` and
       no `--gallery-width`); the place's `.prose` and the gallery's lead
       at their reading measure, unchanged. Numbers recorded here._
+      _**Recorded:** Four source edits (gallery-layout.ts adds `GALLERY_WIDTH`
+      / `GALLERY_GAP`, `galleryFlowStyle` emits all four props, `relatedFlowStyle`
+      neither; global.css gap→`var(--gallery-gap, …)` + the `@media (min-width:
+      720px) .gallery-flow.gallery-wide` breakout, packing rule + `<720` collapse
+      unedited; `gallery-wide` added to the gallery and place flows). New
+      `gallery-layout.test.mjs` (root). Implementer + orchestrator both ran
+      `sh scripts/verify.sh` green: `BUILD/CHECK/TEST EXIT 0`, 12 files, 265
+      tests. Mutations (reverted): (1) `GALLERY_SHORT_PX` 280→300 fails both
+      data tests (density anchor `280px`; srcset `567px→608px`); (2) a divergent
+      `260px` literal in `galleryFlowStyle` fails the emitted test alone; (3)
+      `relatedFlowStyle` given `--gallery-width` fails the strip test. Geometry
+      (javascript_tool, emulated): gallery `/galleries/every-ratio/`
+      `.gallery-flow.gallery-wide` — 1440: **1160 = --content-width** exactly,
+      gap 18px, cell `sizes (min-width: 720px) 1134px, 94vw` (unchanged); 1080:
+      1001 = section width; 375: 343 = full width, one frame per row; no
+      h-scroll at any (scrollWidth ≤ clientWidth). Place `/places/the-headlands/`
+      @1440: outing flow 1160, gap 18px, `.prose` 666 (reading measure). Lead
+      732. Related strip: grep confirms no `gallery-wide`/`--gallery-*`,
+      `images/[...id].astro` untouched; `.gallery-flow > li` unedited.
+      `skeptical-reviewer` signed off (per-task), no blocking findings — two
+      non-blocking notes, both pre-resolved (AC3 density-only is the plan's
+      Known-limitations decision, recorded at T906; root test placement is the
+      repo convention)._
 
 - [ ] **T903** — The sampler (dev-only).
       `src/pages/dev/galleries/[...candidate].astro`
@@ -280,6 +303,8 @@ run at the implementation tier, the override dropped. -->
 | Sign-off: plan/tasks (`skeptical-reviewer`) | implementation (fallback) | 48,861 | signed off; 4 non-blocking notes folded in |
 | T900 review (`skeptical-reviewer`) | reviewer default (opus) | 26,687 | signed off; no blocking findings |
 | T901 impl (`sdd-implementer`) | implementation (opus) | 27,990 | green; both mutations confirmed, barrier reverted |
+| T902 impl (`sdd-implementer`) | implementation (opus) | 38,253 | green; 3 mutations confirmed, inert |
+| T902 review (`skeptical-reviewer`) | reviewer default (opus) | 33,020 | signed off; 2 non-blocking notes, both pre-resolved |
 
 **Totals, written at the merge.**
 
