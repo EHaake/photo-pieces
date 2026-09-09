@@ -1,0 +1,187 @@
+---
+// The gallery sampler (spec 011, T903) — a DEV-ONLY fixture.
+//
+// getStaticPaths() returns [] unless import.meta.env.DEV, so `astro dev`
+// serves these pages and `astro build` emits nothing under dist/dev/.
+// scripts/check-no-dev-routes.mjs is the standing check on that.
+//
+// Paths: /dev/galleries/ (all candidates stacked) and
+// /dev/galleries/<id>/ (one candidate full-page). Each candidate lays a
+// packed .gallery-flow gallery-wide and a .gallery-grid gallery-cards at
+// its own --gallery-width / --gallery-gap / --gallery-short, in the
+// site's real mats and ground, so the gate can judge widths side by side.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+import CoverCards from '../../../components/CoverCards.astro';
+import { galleryCell, GALLERY_STRETCH } from '../../../lib/gallery-layout';
+import { getImageRegistry } from '../../../lib/images';
+import { withBase } from '../../../lib/url';
+
+type Candidate = { id: string; width: string; gap: string; short: string; shortPx: number };
+
+export async function getStaticPaths() {
+  if (!import.meta.env.DEV) return [];
+  // The candidates the visual gate compares — the plan's starting
+  // points for the gallery-width gate. Declared inside getStaticPaths
+  // and handed to the component as a prop rather than sitting at module
+  // scope: Astro runs getStaticPaths in an isolated scope where a
+  // module-level const read here is "not defined" at build time (the
+  // spec-010 gotcha). Still one definition.
+  const CANDIDATES: Candidate[] = [
+    { id: 'current', width: 'var(--content-width)', gap: 'calc(var(--baseline) * 0.75)', short: '280px', shortPx: 280 },
+    { id: 'wide',    width: '1440px',               gap: '1rem',                          short: '320px', shortPx: 320 },
+    { id: 'bleed',   width: 'calc(100vw - 2 * var(--page-pad))', gap: 'calc(var(--baseline))', short: '360px', shortPx: 360 },
+  ];
+  return [
+    { params: { candidate: undefined }, props: { candidate: null, candidates: CANDIDATES } },
+    ...CANDIDATES.map((candidate) => ({
+      params: { candidate: candidate.id },
+      props: { candidate, candidates: CANDIDATES },
+    })),
+  ];
+}
+
+const { candidate, candidates } = Astro.props;
+
+// The sampler's set is the REAL photographs, not the whole mixed root.
+// src/content/gallery-images/ now holds both the real exports (T900) and
+// the synthetic placeholder fixtures — and the gate exists to judge real
+// photographs, not grey rectangles (spec Goal 4). There is no registry
+// flag separating them, but the synthetic fixtures carry a camera name
+// beginning 'Fixture' in their EXIF/wall label ('Fixture FX-1', and one
+// sidecar override, 'Fixture FX-2 (override)' on dock-b), while the real
+// exports carry real camera models (ILCE-7RM4, ILCE-7RM5, PENTAX K-1).
+// Filter on that; if too few real exports exist yet, fall back to the
+// whole gallery root so the sampler still has something to pack.
+const registry = await getImageRegistry();
+const REAL = (img: (typeof registry.images)[number]) =>
+  img.piece === null && !!img.label?.camera && !/^Fixture/i.test(img.label.camera);
+let set = registry.images.filter(REAL);
+if (set.length < 6) set = registry.images.filter((img) => img.piece === null);
+
+// The card grid follows the pages: same real images, a title and an
+// aspect-ratio meta line, at the candidate's width (does the index grid
+// track the pages?).
+const cards = set.map((img) => ({
+  href: img.url,
+  cover: img.image,
+  title: img.title,
+  meta: `${Math.round((img.image.width / img.image.height) * 100) / 100}`,
+}));
+
+// The candidate(s) this request renders: one full-page, or all stacked.
+const shown = candidate ? [candidate] : candidates;
+
+const title = candidate ? `gallery sampler — ${candidate.id}` : 'gallery sampler';
+const label = (c: Candidate) => `${c.id} — width ${c.width} / gap ${c.gap} / short ${c.short}`;
+---
+
+<BaseLayout title={title} description="Dev-only fixture for the galleries overhaul (spec 011).">
+  <article>
+    {
+      shown.map((c) => {
+        // Per-candidate cells: the srcset ceiling follows the candidate's
+        // density so the frames stay crisp at each short side.
+        const cells = set.map((image) => ({ image, ...galleryCell(image.image, c.shortPx) }));
+        return (
+          <section class="sampler-candidate">
+            <p class="sampler-label meta">{label(c)}</p>
+
+            {/* The candidate's four custom properties ride on the flow
+                itself, NOT a wrapper: galleryFlowStyle re-declares
+                --gallery-width / --gallery-gap / --gallery-short inline,
+                and an element's own inline custom property shadows any
+                inherited override, so a wrapper's values would never reach
+                the flow (every candidate would render at the inert
+                defaults). Each candidate therefore carries its own values
+                here, with --gallery-stretch (which the packing needs). The
+                .gallery-wide breakout in global.css reads --gallery-width. */}
+            <div class="section">
+              <ul
+                class="gallery-flow gallery-wide"
+                style={`--gallery-width: ${c.width}; --gallery-gap: ${c.gap}; --gallery-short: ${c.short}; --gallery-stretch: ${GALLERY_STRETCH}`}
+              >
+                {cells.map(({ image, ar, width, sizes }) => (
+                  <li style={`--ar: ${ar}`}>
+                    <a href={withBase(image.url)} class="image-link">
+                      <Image
+                        src={image.image}
+                        alt={image.title}
+                        layout="constrained"
+                        width={width}
+                        sizes={sizes}
+                        loading="lazy"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* The card grid at the candidate's width — capped to the
+                viewport and viewport-centred with the same breakout idiom
+                the flow uses (width: var(--sc); margin-inline: 50% - sc/2),
+                so it stays within the viewport like .gallery-wide rather
+                than overflowing when auto margins center it in the
+                narrower .section. */}
+            <div class="section">
+              <div
+                class="sampler-cards"
+                style={`--sc: min(${c.width}, calc(100vw - 2 * var(--page-pad))); width: var(--sc); margin-inline: calc(50% - var(--sc) / 2)`}
+              >
+                <CoverCards cards={cards} />
+              </div>
+            </div>
+          </section>
+        );
+      })
+    }
+
+    {
+      candidate && (
+        <aside class="sampler-banner meta">
+          <p class="sampler-banner-head">
+            <strong>{candidate.id}</strong> — width {candidate.width} / gap {candidate.gap} / short{' '}
+            {candidate.short}
+          </p>
+          <p>
+            {candidates
+              .filter((other) => other.id !== candidate.id)
+              .map((other) => (
+                <>
+                  <a href={withBase(`/dev/galleries/${other.id}/`)}>{other.id}</a>{' '}
+                </>
+              ))}
+            <a href={withBase('/dev/galleries/')}>stacked</a>
+          </p>
+        </aside>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .sampler-label {
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    margin-inline: auto;
+    padding-top: 2rem;
+  }
+
+  .sampler-banner {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 200;
+    padding: 0.6rem 0.8rem;
+    border: var(--hairline);
+    background: var(--color-surface);
+  }
+
+  .sampler-banner p {
+    margin: 0 0 0.35rem;
+  }
+
+  .sampler-banner-head {
+    color: var(--color-text);
+  }
+</style>

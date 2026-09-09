@@ -161,7 +161,7 @@ headers to confirm nothing was duplicated or dropped. -->
       Known-limitations decision, recorded at T906; root test placement is the
       repo convention)._
 
-- [ ] **T903** — The sampler (dev-only).
+- [x] **T903** — The sampler (dev-only).
       `src/pages/dev/galleries/[...candidate].astro`
       (`src/pages/dev/page-head/[...candidate].astro` is the pattern):
       `getStaticPaths()` returns `[]` unless `import.meta.env.DEV`; the
@@ -186,6 +186,36 @@ headers to confirm nothing was duplicated or dropped. -->
       `/dev/galleries/<id>/` render the real photographs packed and the
       card grid at the candidate's width, labelled; the count of real
       images the set drew on recorded here (enough to pack several rows)._
+      _**Recorded:** `src/pages/dev/galleries/[...candidate].astro` (new,
+      DEV-gated). `sh scripts/verify.sh` green (12 files, 265 tests),
+      `[check-no-dev-routes] no dev routes in dist/.`; `dist/dev` absent;
+      `grep -c "/dev/" dist/sitemap-0.xml` → 0; no build-log `dev/galleries`
+      line. Negative control (guard removed): `npm run build` fails at the
+      barrier — `[check-no-dev-routes] dist/dev/ exists … dist/dev/galleries/
+      bleed/index.html, …/current/…, …/index.html, …/wide/…` (exit 1); guard
+      restored, re-verified green. Dev-server render (1440×900): stacked
+      `/dev/galleries/` shows 3 flows + 3 grids, **10 real cells each**, the
+      candidates rendering distinctly — flow/grid widths 1160 / 1361 / 1361
+      (card grids follow), gaps 18 / 16 / 24px, short 280 / 320 / 360px; each
+      `/dev/galleries/<id>/` full-page clean (bleed 32→1393 within 1425, no
+      h-scroll). **Set = the 10 real exports** (Fixture-camera images excluded;
+      fallback not triggered)._
+      _**Orchestrator-applied fixes** (the implementer passed verify + the
+      negative control but did not render; the render surfaced these, fixed
+      directly — SendMessage to the subagent was unavailable): (1) the
+      candidate's four custom properties now ride on the flow itself, not a
+      wrapper `galleryFlowStyle` shadowed (all three candidates had rendered at
+      the inert values — this traced to a wrong inheritance claim in the
+      orchestrator's own bundle); (2) the REAL predicate excludes any
+      `/^Fixture/i` camera, dropping dock-b (sidecar camera `Fixture FX-2
+      (override)`) so the set is the 10 real exports; (3) `.sampler-cards` uses
+      the flow's viewport-centring breakout idiom, ending a wide/bleed
+      horizontal overshoot. Phase-reviewed (per-phase, with T901); signed off,
+      no blocking findings._
+      _**Deviation (to ratify at the gate):** the sampler draws its set from the
+      real photographs, not the plan's literal "the registry's gallery-root
+      images" — the root now mixes 10 real exports with ~28 synthetic
+      placeholders and the gate judges real photographs (spec Goal 4/5)._
 
 <!-- The gate record goes here at the Phase 0 pause: the width, the gap,
 and the density the photographer named on each screen (16:10 laptop and
@@ -305,6 +335,25 @@ run at the implementation tier, the override dropped. -->
 | T901 impl (`sdd-implementer`) | implementation (opus) | 27,990 | green; both mutations confirmed, barrier reverted |
 | T902 impl (`sdd-implementer`) | implementation (opus) | 38,253 | green; 3 mutations confirmed, inert |
 | T902 review (`skeptical-reviewer`) | reviewer default (opus) | 33,020 | signed off; 2 non-blocking notes, both pre-resolved |
+| T903 impl (`sdd-implementer`) | implementation (opus) | 56,893 | verify+neg-control green; render surfaced 3 defects (fixed by orchestrator) |
+| Phase 0 review (`skeptical-reviewer`) | reviewer default (opus) | 39,368 | signed off (T901+T903); no blocking; 2 notes carried below |
+
+**Open non-blocking notes carried to the pre-merge sweep:**
+
+- _T901 (from the Phase 0 review):_ `gps-barrier.test.mjs`'s
+  `expect(stderr).toContain('GPS')` is satisfied by the barrier's header line
+  ("… carry GPS metadata:"), which is present for any leak — so that third
+  assertion is redundant with `status === 1` and does not bite on a
+  GPS-specific hit. The test remains falsifiable (status + the named file, and
+  the implementer's mutation record confirms neutering the regex flips it), so
+  this is polish, not a gap. Candidate fix at the sweep: assert on a `hits`
+  token (`exif:GPS` / `xmp:GPS`) instead.
+- _T903 (from the Phase 0 review), for the gate, not a code note:_ `wide`
+  (`1440px`, capped to the viewport) and `bleed` (`100vw − 2·page-pad`) render
+  at the **same width** on any screen ≤ ~1500px wide, diverging only above
+  that; they still differ in gap and short side. Surfaced to the product owner
+  at the gate so the width comparison happens where the two actually differ (or
+  a distinct fixed width is named).
 
 **Totals, written at the merge.**
 
