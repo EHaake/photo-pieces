@@ -81,7 +81,7 @@ headers to confirm nothing was duplicated or dropped. -->
       ISO 200) with zero GPS tokens on the GPS-bearing file's page.
       `skeptical-reviewer` signed off (per-task), no blocking findings._
 
-- [ ] **T901** — The GPS barrier as a standing test. `gps-barrier.test.mjs`
+- [x] **T901** — The GPS barrier as a standing test. `gps-barrier.test.mjs`
       (new; `page-head.test.mjs`'s `run(dir)` child-process helper is the
       pattern): run `scripts/check-no-gps.mjs` as a child process against
       a `mkdtemp` fixture directory — once containing a copy of
@@ -94,6 +94,17 @@ headers to confirm nothing was duplicated or dropped. -->
       named that each fails, output recorded here — the barrier's GPS
       regex neutered (the leak case stops failing); the success wording
       changed (the clean case stops matching)._
+      _**Recorded:** `gps-barrier.test.mjs` added at repo root (two tests,
+      the `run(dir)` child-process idiom). `sh scripts/verify.sh` green:
+      `BUILD EXIT 0`, `CHECK EXIT 0`, `TEST EXIT 0` — 11 test files, 262
+      tests. Mutations (each reverted; `check-no-gps.mjs` unchanged at the
+      end): (1) `EXIF_GPS`/`XMP_GPS` neutered to `/^\0NEVER/` → the leak
+      test "a GPS-bearing image fails with a non-zero exit, naming the file
+      and a GPS hit" fails (`expected +0 to be 1` — barrier reported gps.jpg
+      clean, exit 0); (2) the success `console.log` wording changed to
+      `— all clear.` → the clean test "a clean raster exits 0 and reports no
+      GPS metadata" fails its `stdout` `toContain`. Note: the barrier prints
+      "1 images scanned" (no pluralization), pinned in the clean assertion._
 
 - [ ] **T902** (`review: per-task`) — The three knobs in one source, and
       the width breakout, inert. `src/lib/gallery-layout.ts`: add
@@ -268,6 +279,7 @@ run at the implementation tier, the override dropped. -->
 | Planning: draft (`sdd-planner`)| implementation (fallback) | 148,300 | drafted first pass |
 | Sign-off: plan/tasks (`skeptical-reviewer`) | implementation (fallback) | 48,861 | signed off; 4 non-blocking notes folded in |
 | T900 review (`skeptical-reviewer`) | reviewer default (opus) | 26,687 | signed off; no blocking findings |
+| T901 impl (`sdd-implementer`) | implementation (opus) | 27,990 | green; both mutations confirmed, barrier reverted |
 
 **Totals, written at the merge.**
 
