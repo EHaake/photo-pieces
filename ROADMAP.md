@@ -65,6 +65,34 @@ attached.
   decides the widths and the gaps by looking, on both of the
   photographer's screens, and folds in whatever the real photographs
   (below) teach about density.
+- **Aspect-ratio treatment for packed galleries** — raised by the
+  photographer at spec 011's visual gate (2026-09-09): he edits each
+  image to the crop that suits its content rather than to a house
+  shape, so a gallery's frames carry slightly different aspect ratios,
+  and the justified rows (equal short side, the photographer's order)
+  make that variety read as awkward when frames sit side by side —
+  within a row the widths differ, and row to row the heights differ.
+  Spec 011 deliberately left the packing rule alone — its knobs only
+  size and space the rows — so this is the follow-up that changes the
+  presentation, with its own sampler on real photographs and the same
+  look-and-decide gate. The options gathered at the 011 gate, to
+  compare there: (1) **stay with justified rows** and lean on size and
+  spacing — the ceiling of what 011 did, which mitigates but does not
+  remove the variety; (2) **uniform matted frames** — every slot one
+  outer shape (or two, one wide and one upright) with the photograph at
+  its true ratio inside and the mat filling the rest, matted prints on
+  a wall, nothing cropped, though photographs read smaller and a wide
+  panorama in an upright frame goes small; (3) a **column / masonry
+  layout** — a few columns, each frame at its true ratio filling its
+  column and heights stacking, so only the width is shared, at the cost
+  of the strict left-to-right order (it fills by column); (4) **snap
+  near-ratios to a small set of house shapes** (3:2, 4:5, 1:1…) for the
+  layout math only, the photograph still shown at its true ratio —
+  kills the small misalignments without forcing one shape or
+  reordering, the subtlest change, with a thin sliver of mat where a
+  true ratio differs from its slot. The photographer's lean at the gate
+  was matted frames or ratio-snapping, to be judged by eye on real
+  work.
 - **The front door** — to be workshopped with the photographer
   (decided 2026-09-02): the interim homepage (spec 002) stands until
   then. The starting position: the homepage is the site's thesis —
