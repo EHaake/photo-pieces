@@ -227,7 +227,17 @@ images:
 A gallery page packs its images into rows in that order so every
 image in a row renders at the same short side (a panorama takes a
 whole row; nothing is cropped or reordered — `DECISIONS.md` has the
-reasoning). `/galleries/` groups galleries by category and is in the
+reasoning). On a gallery page and in a place page's outings the
+packed rows run wider than the text column — out to a viewport bleed
+chosen at a visual gate on the photographer's two screens (spec 011)
+— while every prose element (a gallery's description, a place's
+writing, a piece's body) keeps its reading measure. The common short
+side that sets how large a frame reads is format-aware: it sizes off
+the smaller viewport dimension (`vmin`), so a tall or near-square
+display (a 16:18 LG DualUp) shows larger frames than a wide laptop.
+The related strip on an image page is deliberately left as it was —
+its reading-column width and its smaller short side. `/galleries/`
+groups galleries by category and is in the
 nav, with the category row under its title — each category a link to
 its own page, nothing marked. `/categories/<category>/` lists a
 category's galleries then its pieces and is reached from category
@@ -348,14 +358,14 @@ photo-pieces/
 │   ├── content/places/           # one file per place
 │   ├── lib/pieces.ts             # the one published-pieces query
 │   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, places, sets)
-│   ├── lib/gallery-layout.ts     # the equal-short-side packing knobs (galleries, place pages, related strips)
+│   ├── lib/gallery-layout.ts     # packing knobs: bleed width, gap, format-aware density (galleries + place pages); density also drives the srcset/sizes math so CSS and images can't drift; the related strip's own knobs live here too, unchanged
 │   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
 │   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
 │   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), LatestWork, CategoryRow
 │   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
-│   ├── pages/dev/                # dev-only fixtures (the page-head sampler); postbuild fails if any reach dist/
+│   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler); postbuild fails if any reach dist/
 │   └── styles/global.css
 ```
 

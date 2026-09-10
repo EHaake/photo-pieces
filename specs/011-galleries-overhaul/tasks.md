@@ -324,7 +324,7 @@ as the substance of the review, not a formality (sign-off note 4). -->
         unedited (global.css diff empty). Index card grids still boxed
         (index pages unchanged)._
 
-- [ ] **T905** — Docs: `README.md`. The galleries description says the
+- [x] **T905** — Docs: `README.md`. The galleries description says the
       packed rows on a gallery page and a place page's outings run wider
       than the text column, to a width chosen at a visual gate on the
       photographer's two screens, while all prose keeps its reading
@@ -337,6 +337,16 @@ as the substance of the review, not a formality (sign-off note 4). -->
       clean (note: Prettier does not enforce README's hand-wrapped prose
       width — check over-long lines by eye); `sh scripts/verify.sh`
       green._
+      _**Recorded:** README updated in three places — the gallery-page
+      paragraph (rows run wider to a viewport bleed chosen at the gate; prose
+      keeps its reading measure; the format-aware `vmin` density sizes up on a
+      tall/near-square display like the 16:18 DualUp; the related strip left as
+      it was), the `gallery-layout.ts` tree comment (bleed width, gap,
+      format-aware density; density also drives the srcset/sizes; related
+      strip's knobs unchanged), and the `pages/dev/` tree comment (gains the
+      gallery sampler). Claims read against the built pages measured at T904.
+      `npx prettier --check README.md` clean; `sh scripts/verify.sh` green (12
+      files, 265 tests)._
 
 ## Phase 2 — Close-out (the docs, the reviewer sweep, then merge)
 
@@ -403,6 +413,7 @@ run at the implementation tier, the override dropped. -->
 | T903 impl (`sdd-implementer`) | implementation (opus) | 56,893 | verify+neg-control green; render surfaced 3 defects (fixed by orchestrator) |
 | Phase 0 review (`skeptical-reviewer`) | reviewer default (opus) | 39,368 | signed off (T901+T903); no blocking; 2 notes carried below |
 | T904 impl (`sdd-implementer`) | implementation (opus) | 35,898 | green; format-aware density; 3 mutations re-proven |
+| T905 impl (`sdd-implementer`) | implementation (opus) | 19,768 | README updated; prettier + verify green |
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
