@@ -414,6 +414,7 @@ run at the implementation tier, the override dropped. -->
 | Phase 0 review (`skeptical-reviewer`) | reviewer default (opus) | 39,368 | signed off (T901+T903); no blocking; 2 notes carried below |
 | T904 impl (`sdd-implementer`) | implementation (opus) | 35,898 | green; format-aware density; 3 mutations re-proven |
 | T905 impl (`sdd-implementer`) | implementation (opus) | 19,768 | README updated; prettier + verify green |
+| Phase 1 review (`skeptical-reviewer`) | reviewer default (opus) | 34,485 | signed off (T904+T905); no blocking; 2 notes carried below |
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
@@ -431,6 +432,15 @@ run at the implementation tier, the override dropped. -->
   that; they still differ in gap and short side. Surfaced to the product owner
   at the gate so the width comparison happens where the two actually differ (or
   a distinct fixed width is named).
+- _T904 (from the Phase 1 review):_ `GALLERY_WIDTH` is now literally
+  `calc(100vw - 2 * var(--page-pad))`, the same expression `global.css`'s
+  breakout uses to cap `--gw`, so `min(var(--gallery-width), calc(100vw - 2 *
+  var(--page-pad)))` is currently `min(X, X)` — a no-op that still protects a
+  future wider-than-viewport width. Harmless; the page-pad breakout math now
+  lives in two spots. No change made (global.css out of scope in Phase 1).
+- _AC5 (index grids boxed) — confirmed by construction:_ the Phase 1 diff
+  carries no `galleries/index.astro` / `places/index.astro` / `.gallery-grid`
+  changes, so the card grids stay boxed as the gate decided.
 
 **Totals, written at the merge.**
 
