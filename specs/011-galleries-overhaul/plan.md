@@ -342,3 +342,56 @@ collapse in `global.css`.
 - **The GPS barrier gets a standing child-process test**, closing spec
   010's note that it had none and making this spec's "green against real
   files" an instrumented guarantee, not a one-time grep.
+
+## Gate outcome (format-aware density) — amendment, 2026-09-09
+
+The Phase 0 visual gate (see `tasks.md`, "Gate record") chose the bleed
+width and the baseline gap as this plan anticipated, but the density could
+**not** be a single value the way this plan's "The knobs" section assumed.
+The photographer's second screen is an **LG DualUp (16:18, ~2560×2880 —
+nearly square, slightly taller than wide)**. A width-based term (`26vw`)
+sizes off the viewport width, which is not the DualUp's large dimension, so
+frames came out small and short rows centred in the margins there, while the
+16:10 laptop looked right. No single width-based value can size the DualUp up
+without oversizing the laptop (the laptop is always the wider viewport). The
+gate's fix — folded into 011 at the photographer's direction — is a
+**format-aware density** that sizes off `vmin` (the smaller viewport
+dimension):
+
+    --gallery-short: clamp(280px, 33vmin, 460px)
+
+Measured: **324px** on the laptop (1512×982 — essentially the 320 the
+photographer chose) and **417px** on a DualUp shape (1280×1440), where the
+rows now fill the full width. `vmin` is the natural choice: a tall/square
+screen's smaller dimension is still large, so it sizes up; a wide-short
+laptop sizes to its (smaller) height, as before.
+
+**How `gallery-layout.ts` changes** (T904):
+
+- `GALLERY_SHORT_PX` becomes the clamp **ceiling** (`460`). It keeps its
+  existing role: `galleryCell`'s srcset ceiling is still `short × ratio ×
+  stretch` with `short` defaulting to `GALLERY_SHORT_PX`, so the srcset
+  serves up to the largest the density can reach. The single-source contract
+  the plan and T902 pinned is **preserved** — the density ceiling still
+  drives both the CSS clamp and the srcset ceiling from one constant.
+- A new **CSS-only** floor constant `GALLERY_SHORT_MIN_PX` (`280`) and the
+  `33vmin` rate join the emission: `galleryFlowStyle` emits
+  `clamp(${GALLERY_SHORT_MIN_PX}px, 33vmin, ${GALLERY_SHORT_PX}px)`. The
+  floor and the rate are CSS-only, exactly like width and gap — they do not
+  feed `galleryCell`, so a reviewer still has one number (the ceiling) behind
+  both the CSS and the srcset. `gallery-layout.test.mjs`'s literal anchors
+  move to the new values; the three mutation checks stay falsifiable.
+- The `26vw`→`33vmin` change is **only** on the gallery flow
+  (`galleryFlowStyle`). `relatedFlowStyle` (the image page's related strip)
+  is untouched — a non-goal — and keeps its own width-based clamp.
+
+**Other gate outcomes**: the **index card grids stay boxed** at the content
+width — they do NOT follow the pages to the bleed width (the photographer's
+call), so `galleries/index.astro` and `places/index.astro` are unchanged.
+The sampler set was the ten real photographs only (Fixture-camera images
+excluded), ratified.
+
+**Verification note**: because the density is now format-aware, T904's probe
+measures on **two screen formats** — a 16:10 laptop shape and a 16:18 DualUp
+shape — and confirms the density resolves to ~324 on the former and sizes up
+(~417, rows filling) on the latter, not a single value on one viewport.

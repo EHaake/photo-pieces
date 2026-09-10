@@ -217,13 +217,37 @@ headers to confirm nothing was duplicated or dropped. -->
       images" — the root now mixes 10 real exports with ~28 synthetic
       placeholders and the gate judges real photographs (spec Goal 4/5)._
 
-<!-- The gate record goes here at the Phase 0 pause: the width, the gap,
-and the density the photographer named on each screen (16:10 laptop and
-portrait monitor), as the exact values to write into gallery-layout.ts,
-and whether the index card grids follow the pages to the wider width. A
-mix or a fourth set is his to name; only a request the three knobs
-cannot express (a different packing rule, a per-screen width) is a spec
-question and goes back to him. The values are not in this plan. -->
+### Gate record (Phase 0 pause, 2026-09-09)
+
+Chosen by looking on the 16:10 laptop and the **LG DualUp (16:18,
+~2560×2880 — nearly square, slightly taller than wide)**, from the
+`/dev/galleries/` sampler, on the ten real photographs:
+
+- **Width**: bleed — `--gallery-width: calc(100vw - 2 * var(--page-pad))`.
+- **Gap**: `--gallery-gap: calc(var(--baseline))` — one full baseline (24px),
+  wider than the previous default (baseline × 0.75 = 18px).
+- **Density**: **format-aware** — `--gallery-short: clamp(280px, 33vmin, 460px)`.
+  A single-value density could not serve both screens: a width-based term
+  (`26vw`) can't size up the DualUp because width is not its large dimension.
+  `vmin` (the smaller viewport dimension) holds the laptop near its chosen 320
+  (measured **324** at 1512×982) and sizes the tall/square DualUp up on its own
+  (measured **417** at a 1280×1440 shape, with the rows now filling the full
+  width). `GALLERY_SHORT_PX` becomes the clamp **ceiling (460)** — it still
+  feeds the srcset ceiling; the **floor (280)** and the **`33vmin` rate** are
+  CSS-only, like width and gap. This is a gate-driven amendment to the plan's
+  density mechanism, folded into 011 at the photographer's direction
+  (2026-09-09) — see plan.md, "Gate outcome (format-aware density)".
+- **Index card grids**: **stay boxed** at the content width — they do NOT
+  follow the pages to the bleed width (the photographer's call).
+  `galleries/index.astro` and `places/index.astro` are left unchanged.
+- **Sampler set**: the real photographs only (Fixture-camera images excluded)
+  — ratified.
+
+The format-aware density stays *within* the three-knob mechanism (the ceiling
+still drives the srcset; the floor and `vmin` rate are CSS-only additions to
+the density knob), so it is not the "per-screen width" kind of change that
+would go back as a spec question — it is the density knob, done to serve both
+of the photographer's real screens (spec Goal 5).
 
 ## Phase 1 — The chosen values and the docs (reviewer after the phase; the person's pause at its end)
 
@@ -234,30 +258,43 @@ tasks inherit — but the phase review must treat T904's recorded numbers
 as the substance of the review, not a formality (sign-off note 4). -->
 
 
-- [ ] **T904** — The gate's values. `src/lib/gallery-layout.ts`:
-      `GALLERY_WIDTH`, `GALLERY_GAP`, and `GALLERY_SHORT_PX` set to the
-      gate record's values, with a comment naming the gate's date and the
-      chosen set; the sampler's candidates untouched (`current` now
-      previews the shipped values). `src/styles/global.css` and the two
-      index pages (`galleries/index.astro`, `places/index.astro`): the
-      card grids widened to the gate's width if the gate said they
-      follow, left as they are if not — the gate record decides, recorded
-      in the task. _Verify: `sh scripts/verify.sh` green; the orchestrator's
-      probe at 1440×900 and 1080×1920 — a gallery page and a place page's
-      outing render the `.gallery-flow` at the gate's width (wider than
-      T902's content width, unless the gate kept `current`); the measured
-      `gap` and a landscape cell's rendered short side equal the gate's
-      values; a sample cell's `sizes` ceiling tracks the gate's density;
+- [ ] **T904** — The gate's values (format-aware density).
+      `src/lib/gallery-layout.ts`: `GALLERY_WIDTH` →
+      `'calc(100vw - 2 * var(--page-pad))'`; `GALLERY_GAP` →
+      `'calc(var(--baseline))'`; `GALLERY_SHORT_PX` → `460` (the density
+      clamp **ceiling**, which still feeds the srcset ceiling); add a
+      **CSS-only** floor constant `GALLERY_SHORT_MIN_PX` = `280` and use the
+      `33vmin` rate so `galleryFlowStyle` emits
+      `--gallery-short: clamp(${GALLERY_SHORT_MIN_PX}px, 33vmin, ${GALLERY_SHORT_PX}px)`
+      (format-aware — `vmin`, not `vw`; the DualUp reason and the gate date
+      in a comment). `galleryCell` is unchanged in shape — its `short`
+      default is still `GALLERY_SHORT_PX` (now 460), so the srcset ceiling
+      tracks the clamp ceiling. Update `gallery-layout.test.mjs`'s literal
+      anchors to the new values (the emitted `--gallery-short` clamp string;
+      the srcset ceiling recomputed from 460) — keep all three mutation
+      checks falsifiable. **The index card grids stay boxed**:
+      `galleries/index.astro`, `places/index.astro`, and the
+      `.gallery-grid`/card CSS are **left unchanged** (the gate's call). The
+      dev sampler stays as gate history (dev-only); `current` no longer
+      previews the shipped values, which is fine. `relatedFlowStyle` and the
+      `.gallery-flow > li` packing rule and the `<720` collapse are untouched.
+      _Verify: `sh scripts/verify.sh` green; the orchestrator's probe on a
+      **16:10 laptop shape (1512×982)** and a **DualUp shape (1280×1440,
+      16:18)** — a gallery page and a place page's outing render the
+      `.gallery-flow` at the bleed width; the measured `gap` = 24px; the
+      density resolves to ~**324** on the laptop and sizes **up** on the
+      DualUp shape (~**417**, rows filling the full width) — format-awareness
+      confirmed on both formats; a sample cell's `sizes` ceiling tracks 460;
       the place's `.prose`, the gallery's lead, and a piece's body still
-      measure their reading measure (equal to T902); at 375×812 the flow
-      is one frame per row at the full width; the image page's related
-      strip keeps its width and its smaller short side (measured, equal
-      to T902); the index card grids match the gate's decision; no
-      horizontal scrollbar (`documentElement.scrollWidth ≤ clientWidth`)
-      at any of the three viewports; a row holding a panorama and a
-      portrait lands them on the same short side (measured) and the
-      `.gallery-flow > li` rule is unedited (grep) — the packing rule
-      unchanged. Every number recorded here._
+      measure their reading measure (equal to T902); at 375×812 the flow is
+      one frame per row at the full width; the image page's related strip
+      keeps its width and its smaller short side (measured, equal to T902 —
+      `relatedFlowStyle` unchanged); the index card grids are still boxed at
+      the content width (unchanged); no horizontal scrollbar
+      (`documentElement.scrollWidth ≤ clientWidth`) at any tested viewport; a
+      row holding a panorama and a portrait lands them on the same short side
+      (measured) and the `.gallery-flow > li` rule is unedited (grep) — the
+      packing rule unchanged. Every number recorded here._
 
 - [ ] **T905** — Docs: `README.md`. The galleries description says the
       packed rows on a gallery page and a place page's outings run wider
