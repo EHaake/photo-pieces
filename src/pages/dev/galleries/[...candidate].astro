@@ -21,16 +21,23 @@ type Candidate = { id: string; width: string; gap: string; short: string; shortP
 
 export async function getStaticPaths() {
   if (!import.meta.env.DEV) return [];
-  // The candidates the visual gate compares — the plan's starting
-  // points for the gallery-width gate. Declared inside getStaticPaths
-  // and handed to the component as a prop rather than sitting at module
-  // scope: Astro runs getStaticPaths in an isolated scope where a
-  // module-level const read here is "not defined" at build time (the
-  // spec-010 gotcha). Still one definition.
+  // The candidates the visual gate compares. The gate chose the bleed
+  // width and the baseline gap (2026-09-09); these tune the density
+  // ceiling (360 / 340 / 320) at that width and gap, with `current` kept
+  // as today's shipped values for reference. `short` is the shipped
+  // clamp form — clamp(200px, 26vw, <ceiling>) — not a fixed px, so each
+  // screen shows what actually ships: the ceiling on a wide screen, 26vw
+  // on a narrow one. Declared inside getStaticPaths and handed to the
+  // component as a prop rather than sitting at module scope: Astro runs
+  // getStaticPaths in an isolated scope where a module-level const read
+  // here is "not defined" at build time (the spec-010 gotcha).
+  const BLEED = 'calc(100vw - 2 * var(--page-pad))';
+  const BLEED_GAP = 'calc(var(--baseline))';
   const CANDIDATES: Candidate[] = [
-    { id: 'current', width: 'var(--content-width)', gap: 'calc(var(--baseline) * 0.75)', short: '280px', shortPx: 280 },
-    { id: 'wide',    width: '1440px',               gap: '1rem',                          short: '320px', shortPx: 320 },
-    { id: 'bleed',   width: 'calc(100vw - 2 * var(--page-pad))', gap: 'calc(var(--baseline))', short: '360px', shortPx: 360 },
+    { id: 'current',   width: 'var(--content-width)', gap: 'calc(var(--baseline) * 0.75)', short: 'clamp(200px, 26vw, 280px)', shortPx: 280 },
+    { id: 'bleed-360', width: BLEED, gap: BLEED_GAP, short: 'clamp(200px, 26vw, 360px)', shortPx: 360 },
+    { id: 'bleed-340', width: BLEED, gap: BLEED_GAP, short: 'clamp(200px, 26vw, 340px)', shortPx: 340 },
+    { id: 'bleed-320', width: BLEED, gap: BLEED_GAP, short: 'clamp(200px, 26vw, 320px)', shortPx: 320 },
   ];
   return [
     { params: { candidate: undefined }, props: { candidate: null, candidates: CANDIDATES } },
@@ -73,7 +80,8 @@ const cards = set.map((img) => ({
 const shown = candidate ? [candidate] : candidates;
 
 const title = candidate ? `gallery sampler — ${candidate.id}` : 'gallery sampler';
-const label = (c: Candidate) => `${c.id} — width ${c.width} / gap ${c.gap} / short ${c.short}`;
+const label = (c: Candidate) =>
+  `${c.id} — width ${c.width} / gap ${c.gap} / density ${c.shortPx}px (clamp ceiling)`;
 ---
 
 <BaseLayout title={title} description="Dev-only fixture for the galleries overhaul (spec 011).">
@@ -141,8 +149,8 @@ const label = (c: Candidate) => `${c.id} — width ${c.width} / gap ${c.gap} / s
       candidate && (
         <aside class="sampler-banner meta">
           <p class="sampler-banner-head">
-            <strong>{candidate.id}</strong> — width {candidate.width} / gap {candidate.gap} / short{' '}
-            {candidate.short}
+            <strong>{candidate.id}</strong> — width {candidate.width} / gap {candidate.gap} /
+            density {candidate.shortPx}px
           </p>
           <p>
             {candidates
