@@ -1,25 +1,34 @@
 import type { ImageMetadata } from 'astro';
 
 /**
- * The gallery page's layout knobs (spec 004, T307R) — the one place
- * their values live. The page hands them to the CSS as custom
- * properties on the row container (global.css's `.gallery-flow` reads
- * `--gallery-short` and `--gallery-stretch` and declares neither) and
- * derives each cell's srcset ceiling and `sizes` from the same numbers,
- * so the two can't drift.
+ * The gallery page's layout knobs (spec 004, T307R; extended spec 011) —
+ * the one place their values live. The page hands them to the CSS as four
+ * custom properties on the row container (global.css's `.gallery-flow`
+ * reads `--gallery-short`, `--gallery-stretch`, `--gallery-width`, and
+ * `--gallery-gap` and declares none) and derives each cell's srcset
+ * ceiling and `sizes` from the same numbers, so the two can't drift. The
+ * density is format-aware (spec 011): `--gallery-short` clamps on `vmin`,
+ * sizing off the smaller viewport dimension.
  */
 
-/** The common short side at desktop width, in CSS px (density knob). */
-export const GALLERY_SHORT_PX = 280;
+/** The density clamp CEILING, in CSS px — the largest common short side,
+ *  reached on a wide or tall/square screen (spec 011 gate, 2026-09-09).
+ *  This is the density knob: it drives both the emitted `--gallery-short`
+ *  clamp ceiling AND `galleryCell`'s srcset ceiling, so the two can't drift. */
+export const GALLERY_SHORT_PX = 460;
+/** The density clamp FLOOR, in CSS px (spec 011). CSS-only — like the width
+ *  and gap, it does not feed the srcset. */
+export const GALLERY_SHORT_MIN_PX = 280;
 /** How far a short row may stretch to fill the width (cap knob). */
 export const GALLERY_STRETCH = 1.35;
 
-/** The outer width the packed rows may run to (spec 011). CSS-only:
- *  the density, not this, sets the per-cell srcset ceiling, so a wider
- *  row never asks for a larger image. The gate's value (Phase 1). */
-export const GALLERY_WIDTH = 'var(--content-width)'; // inert default
-/** The gap between frames (spec 011). CSS-only. The gate's value. */
-export const GALLERY_GAP = 'calc(var(--baseline) * 0.75)'; // inert default
+/** The outer width the packed rows run to (spec 011 gate, 2026-09-09): a
+ *  viewport bleed, wider than the text column, capped to the viewport by the
+ *  breakout's min(). CSS-only — the density, not this, sets the per-cell
+ *  srcset ceiling, so a wider row never asks for a larger image. */
+export const GALLERY_WIDTH = 'calc(100vw - 2 * var(--page-pad))';
+/** The gap between frames (spec 011 gate): one full baseline. CSS-only. */
+export const GALLERY_GAP = 'calc(var(--baseline))';
 
 /** The related strip on an image page (spec 006): the same packing
  *  rule at a smaller short side, so a handful of frames read as a row
@@ -29,9 +38,11 @@ export const GALLERY_GAP = 'calc(var(--baseline) * 0.75)'; // inert default
 export const RELATED_SHORT_PX = 120;
 export const RELATED_NARROW_SHORT_PX = 96;
 
-/** Inline style for the `.gallery-flow` container. Below ~1080px wide
- *  the short side follows the viewport so rows keep two or three cells. */
-export const galleryFlowStyle = `--gallery-short: clamp(200px, 26vw, ${GALLERY_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}; --gallery-width: ${GALLERY_WIDTH}; --gallery-gap: ${GALLERY_GAP}`;
+/** Inline style for the `.gallery-flow` container. The short side is
+ *  format-aware (spec 011 gate): `vmin` sizes off the smaller viewport
+ *  dimension, so a tall/square screen (e.g. the 16:18 LG DualUp) sizes up
+ *  while a 16:10 laptop stays near ~320. Floor/ceiling from the constants. */
+export const galleryFlowStyle = `--gallery-short: clamp(${GALLERY_SHORT_MIN_PX}px, 33vmin, ${GALLERY_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}; --gallery-width: ${GALLERY_WIDTH}; --gallery-gap: ${GALLERY_GAP}`;
 
 /** Inline style for a related strip: a `.gallery-flow` at the smaller
  *  short side, the same stretch cap. */

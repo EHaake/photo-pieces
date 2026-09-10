@@ -258,7 +258,7 @@ tasks inherit — but the phase review must treat T904's recorded numbers
 as the substance of the review, not a formality (sign-off note 4). -->
 
 
-- [ ] **T904** — The gate's values (format-aware density).
+- [x] **T904** — The gate's values (format-aware density).
       `src/lib/gallery-layout.ts`: `GALLERY_WIDTH` →
       `'calc(100vw - 2 * var(--page-pad))'`; `GALLERY_GAP` →
       `'calc(var(--baseline))'`; `GALLERY_SHORT_PX` → `460` (the density
@@ -295,6 +295,34 @@ as the substance of the review, not a formality (sign-off note 4). -->
       row holding a panorama and a portrait lands them on the same short side
       (measured) and the `.gallery-flow > li` rule is unedited (grep) — the
       packing rule unchanged. Every number recorded here._
+      _**Recorded:** Two files changed — `gallery-layout.ts` (`GALLERY_SHORT_PX`
+      = 460 ceiling, new CSS-only `GALLERY_SHORT_MIN_PX` = 280, `GALLERY_WIDTH`
+      = `calc(100vw - 2 * var(--page-pad))`, `GALLERY_GAP` = `calc(var(--baseline))`,
+      `galleryFlowStyle` emits `--gallery-short: clamp(280px, 33vmin, 460px)`)
+      and `gallery-layout.test.mjs` (anchors moved; srcset 567→**932**, width
+      1134→**1864**). `global.css`, the templates, and the index pages
+      untouched (grep/diff). `sh scripts/verify.sh` green (12 files, 265 tests);
+      three mutations re-proven falsifiable (GALLERY_SHORT_PX 460→480 fails both
+      data tests; a divergent literal in the clamp fails the emitted test alone;
+      `relatedFlowStyle` given `--gallery-width` fails the strip test). Geometry
+      (javascript_tool), gallery `/galleries/every-ratio/` + place
+      `/places/the-headlands/`:_
+      - _**Laptop 1512×982 (16:10):** gallery flow **1433** (bleed); gap **24px**;
+        density resolves to **324** (≈ the chosen 320); lead **852** (reading
+        measure, ≪ flow); no h-scroll (scrollW 1497 = clientW 1497)._
+      - _**DualUp 1280×1440 (16:18):** gallery flow **1201** (bleed); gap 24px;
+        density resolves to **417** — it **sizes up** on the tall/square format;
+        lead 842 / place `.prose` **666** (reading measure); place outing flow
+        **1201** at density **417**; no h-scroll. (Some `every-ratio` rows centre
+        rather than fill — the unchanged packing rule for those extreme
+        placeholder ratios; the ten real photographs pack fuller, per the
+        sampler.)_
+      - _**Phone 375×812:** one frame per row at the full width (343); no
+        h-scroll._
+      - _Related strip: `relatedFlowStyle` and `images/[...id].astro` unchanged
+        (diff); `.gallery-flow > li` packing rule and the `<720` collapse
+        unedited (global.css diff empty). Index card grids still boxed
+        (index pages unchanged)._
 
 - [ ] **T905** — Docs: `README.md`. The galleries description says the
       packed rows on a gallery page and a place page's outings run wider
@@ -374,6 +402,7 @@ run at the implementation tier, the override dropped. -->
 | T902 review (`skeptical-reviewer`) | reviewer default (opus) | 33,020 | signed off; 2 non-blocking notes, both pre-resolved |
 | T903 impl (`sdd-implementer`) | implementation (opus) | 56,893 | verify+neg-control green; render surfaced 3 defects (fixed by orchestrator) |
 | Phase 0 review (`skeptical-reviewer`) | reviewer default (opus) | 39,368 | signed off (T901+T903); no blocking; 2 notes carried below |
+| T904 impl (`sdd-implementer`) | implementation (opus) | 35,898 | green; format-aware density; 3 mutations re-proven |
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
