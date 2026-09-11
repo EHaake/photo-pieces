@@ -440,6 +440,10 @@ run at the implementation tier, the override dropped. -->
 | T904 impl (`sdd-implementer`) | implementation (opus) | 35,898 | green; format-aware density; 3 mutations re-proven |
 | T905 impl (`sdd-implementer`) | implementation (opus) | 19,768 | README updated; prettier + verify green |
 | Phase 1 review (`skeptical-reviewer`) | reviewer default (opus) | 34,485 | signed off (T904+T905); no blocking; 2 notes carried below |
+| Pre-merge sweep (`skeptical-reviewer`) | reviewer default (opus) | 113,297 | signed off; no blocking; docs/code consistent post place-split |
+
+_(T905b — places pulled — and T906's ROADMAP/DECISIONS were orchestrator-run
+doc work, no subagent dispatch.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
@@ -467,7 +471,27 @@ run at the implementation tier, the override dropped. -->
   carries no `galleries/index.astro` / `places/index.astro` / `.gallery-grid`
   changes, so the card grids stay boxed as the gate decided.
 
-**Totals, written at the merge.**
+**Totals (at the merge).** Everything ran at opus this spec — the budget
+fallback kept the planner and the plan/tasks sign-off off the top tier, and
+the implementer and reviewer run at opus by default, so **no top-tier (fable)
+tokens were spent.**
+
+- **Planner:** 148,300 (one dispatch, fallback opus). Spec 010: 139,477.
+- **Sign-off (plan/tasks):** 48,861 (fallback opus).
+- **Implementer:** 178,802 over 5 dispatches (T901 27,990; T902 38,253; T903
+  56,893; T904 35,898; T905 19,768), all verified first try, no escape hatch.
+  Spec 010: 399,793 over 11 — this spec had fewer, smaller tasks.
+- **Reviewer:** 246,857 over 5 invocations, all at the default tier (T900
+  26,687; T902 33,020; Phase 0 39,368; Phase 1 34,485; sweep 113,297) — the
+  sweep alone was ~46% of that, reading six docs in full after the mid-spec
+  place-split. Spec 010: 461,195 all tiers.
+- **Tier misses:** none. Third tier: off.
+
+Note the mid-spec scope change: the **place page was pulled from 011** at the
+Phase 1 pause (product owner) and deferred to its own spec — spec 011 shipped
+the galleries only. Two gate-driven amendments (format-aware `vmin` density;
+places deferred) were folded in and recorded in spec.md/plan.md rather than
+re-planned.
 
 ## Handoff note
 
