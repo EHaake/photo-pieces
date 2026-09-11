@@ -54,17 +54,37 @@ attached.
   (`scripts/prune-unreferenced-originals.mjs`) exists because Astro
   leaves untouched originals in the output — worth an upstream issue,
   and a no-op if they fix it.
-- **A galleries overhaul** — noted by the photographer at the spec 007
-  close-out (2026-09-05), for a spec of its own (since spec 009 the
-  place pages share the gallery's packing knobs and rows, so the
-  overhaul moves them too): the gallery grid feels too constrained by
-  the prose column's width — it should be able to run wider on the page
-  than the text does, closer to the content width — and the spacing
-  between the images wants retuning. Both are knobs of
-  `gallery-layout.ts` and the `.gallery-grid` rules today; the spec
-  decides the widths and the gaps by looking, on both of the
-  photographer's screens, and folds in whatever the real photographs
-  (below) teach about density.
+- ~~**A galleries overhaul**~~ — done in spec 011: a gallery page's packed
+  rows run wider than the text column — out to a viewport bleed chosen at a
+  sampler gate on both of the photographer's screens — with a retuned gap and
+  a **format-aware density** (`clamp(280px, 33vmin, 460px)`; `vmin` so a tall
+  or near-square display like the 16:18 LG DualUp sizes frames up while a
+  16:10 laptop holds ~320). The width, gap, and density live in
+  `gallery-layout.ts`, density driving both the CSS and the srcset. Judged on
+  ten real photographs (below), not placeholders. The index card grids stayed
+  boxed at the content width (the gate's call). **The place page was pulled
+  from this spec** — widening its outings opened a design question of its own
+  (see the place-page entry below), so places were left at their pre-011
+  packing and given their own spec.
+- **The place page's own treatment** — raised at spec 011's Phase 1 pause
+  (2026-09-10). Widening a place's outings to the gallery bleed opened a
+  design question spec 011 didn't want to settle in passing: the per-outing
+  piece label ("From the piece: …") sat awkwardly against a full-width band —
+  above it read as an indented title over wide images; below it as a caption
+  collided its rule with the site footer's own divider; centred didn't sit
+  right either. Underneath that is a bigger question the photographer floated:
+  whether a place should read as **per-piece bands** (spec 009's model — one
+  labelled group of frames per contributing piece, oldest first, a timeline of
+  visits) or as **one seamless gallery** of all the place's frames with the
+  contributing pieces listed at the bottom (more gallery-like, packs fuller,
+  but moves the per-frame attribution to the foot / the image pages). His lean
+  was the seamless gallery. So spec 011 left the place page at its pre-011
+  packing (content width, the old density; a local `placeFlowStyle` in
+  `places/[slug].astro` decoupled from the galleries' retuned knobs), and this
+  spec decides: the structure (bands vs. seamless), whether and how wide the
+  frames run, how the outings/pieces are labelled and ordered, and where the
+  writing-to-frames spacing lands — prototyped on the real photographs at a
+  sampler gate on both screens, the way the galleries were.
 - **Aspect-ratio treatment for packed galleries** — raised by the
   photographer at spec 011's visual gate (2026-09-09): he edits each
   image to the crop that suits its content rather than to a house
@@ -195,10 +215,13 @@ attached.
   registry could derive as it derives a place's outings) or only the
   writing; and how several pieces about one item relate to its page.
   Never a link that leads nowhere: no gear file, no link.
-- **Real photographs as fixtures, before more design** — every visual
-  decision so far (the warm ground, the mats, the quiet dark, the
-  packing) was judged on flat placeholder rectangles. Ten real exports
-  as fixtures, no writing needed, then re-judge the samplers.
+- ~~**Real photographs as fixtures, before more design**~~ — done for the
+  gallery packing in spec 011: ten real exports live in
+  `src/content/gallery-images/`, and the gallery width, gap, and density were
+  judged on them at the sampler gate, not on placeholders. Still open for the
+  surfaces spec 011 did **not** re-judge — the warm ground, the mats, and the
+  quiet dark were each set on placeholders and would benefit from a look on
+  real photographs (folded into the mats/ground/dark follow-up, a later spec).
 - ~~**A way back from a category**~~ — done in spec 010: one
   `CategoryRow.astro` under the title on the pieces index, the
   galleries index, and every category page, with the current category
