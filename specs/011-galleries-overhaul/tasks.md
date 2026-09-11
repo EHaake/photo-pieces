@@ -375,7 +375,7 @@ as the substance of the review, not a formality (sign-off note 4). -->
 
 ## Phase 2 — Close-out (the docs, the reviewer sweep, then merge)
 
-- [ ] **T906** — `ROADMAP.md`: strike "A galleries overhaul" and, for the
+- [x] **T906** — `ROADMAP.md`: strike "A galleries overhaul" and, for the
       gallery surfaces this spec covers, "Real photographs as fixtures,
       before more design" (real exports now judge the packing, the width,
       the gap, and the density); add the follow-ups the plan and the gate
@@ -406,6 +406,19 @@ as the substance of the review, not a formality (sign-off note 4). -->
       GPS scan, dev-routes scan, and format green with actual output; the
       PR marked ready and merged with a merge commit. _Verify: main green
       after the merge._
+      _**Recorded:** ROADMAP struck "A galleries overhaul" and "Real
+      photographs as fixtures" (done for the gallery packing; mats/ground/dark
+      re-judgment noted open) and gained the place-page and aspect-ratio
+      follow-up specs; DECISIONS gained the spec 011 section (commit eaf3bfe).
+      Pre-merge sweep by the `skeptical-reviewer` signed off, no blocking
+      findings (five non-blocking notes, all logged/acceptable; docs and code
+      consistent after the place-split). PR #10 marked ready and merged with a
+      merge commit (**c8e2bb0**); `main` green after the merge — `BUILD/CHECK/
+      TEST EXIT 0`, 265 tests, `[check-no-gps] 748 … no GPS metadata.`,
+      `[check-no-dev-routes] no dev routes in dist/.`, `dist/dev` absent,
+      sitemap `/dev/` count 0, docs prettier-clean. (The box was ticked in a
+      follow-up bookkeeping commit on `main` — the work landed with the merge;
+      the checkbox was missed at the time.)_
 
 ---
 
