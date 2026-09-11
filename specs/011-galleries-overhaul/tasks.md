@@ -418,6 +418,15 @@ re-reviewed once; anything open after goes to the tier log below.
 
 ## Tier log (the fifth spec under the model policy)
 
+> **Experiment 1 (from 2026-09-11)** — session tier moved to `claude-fable-5-1`
+> at medium effort; this project now follows the spec-driven-development
+> skill's experiment-1 branch (the session runs on the top-tier model at
+> medium effort rather than on `claude-opus-4-8`; see CLAUDE.md "Model
+> policy"). Fable allowance at **92%** at the start of the experiment. Spec
+> 011 above ran entirely under the previous policy (session `claude-opus-4-8`,
+> all opus, no top-tier spend); the experiment's allowance-draw and
+> report-readability measurements begin with the next spec's tier log.
+
 <!-- Token usage from each subagent return — implementer runs and
 reviewer invocations alike — any escape-hatch miss, and the third tier
 if it is ever on (it is off). Compare against spec 010's totals:
