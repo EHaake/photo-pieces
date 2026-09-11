@@ -757,3 +757,67 @@ declarations are pinned to `.section`'s own `padding-block` value
 rather than to a second copy of the clamp string, so the "keep these
 in step by hand" coupling the stylesheet comment asks for is now
 enforced by a test and not by the comment alone.
+
+## Spec 011: the galleries overhaul
+
+A gallery page was a wall of photographs boxed into the same column the
+writing uses. Spec 011 let a gallery's packed rows run wider than that column
+— out to a viewport bleed — and retuned the gap and the density (the common
+short side), all three chosen by looking rather than by argument, the way
+spec 010's page head was: a dev-only sampler at `/dev/galleries/` renders the
+candidates against real photographs, behind the same `check-no-dev-routes`
+barrier, and the photographer names the set on both of his screens.
+
+The width reuses the site's existing wide/fullbleed idiom
+(`width: var(--gw); margin-inline: calc(50% - var(--gw) / 2)`, with `body`'s
+`overflow-x: clip` absorbing the `vw` overshoot) rather than a new transform:
+it is viewport-centred, the body already clips its overshoot, and one knob
+expresses every width form the gate might pick (a fixed content width, a wider
+fixed width, or a bleed). Width and gap join the density in `gallery-layout.ts`
+so all the packing knobs sit in one file, even though only the density (and
+the stretch cap) feeds the srcset — a wider page must never fetch a larger
+image, so `galleryCell`'s ceiling tracks density, not width. AC3's phrase
+"srcset ceilings track the new width and density" is therefore read as density
+(and stretch), never width; the approved `spec.md` was left unedited, the same
+imprecise-AC call spec 010 made.
+
+The gate's real find was about **density**, and it changed the mechanism.
+A single value could not serve both of the photographer's screens: his second
+display is an LG DualUp (16:18, nearly square, ~2560×2880), and a width-based
+term (`26vw`) sizes off the viewport width, which is not the DualUp's large
+dimension — so frames came out small there while the 16:10 laptop looked
+right, and no single width-based number can size the DualUp up without
+oversizing the laptop. The fix, folded into the spec at the gate, is a
+**format-aware density** that sizes off `vmin` (the smaller viewport
+dimension): `clamp(280px, 33vmin, 460px)` holds the laptop near its chosen 320
+and lets the tall/square DualUp size up on its own. `GALLERY_SHORT_PX` became
+the clamp ceiling (460, still the srcset driver); the floor and the `vmin`
+rate are CSS-only, like the width and gap. The general lesson: a "responsive"
+size keyed to viewport width silently assumes a landscape screen — key it to
+`vmin` when a tall or square display is a real target.
+
+Two smaller calls. The **index card grids** on the galleries and places
+indexes were left boxed at the content width rather than following the pages
+out to the bleed (the gate's decision — the narrower index reads as a calm
+counterpoint to the wide walls). And the **GPS barrier** got a standing
+child-process test (`gps-barrier.test.mjs`), closing spec 010's open note that
+`check-no-gps.mjs` had none, and — because ten real camera exports came in as
+fixtures — it proved itself on a genuinely GPS-bearing file for the first
+time: `mystic-falls.jpg` carries GPS at source, yet its page and the whole
+`dist/` scan are clean, because the registry's reader is allowlist-only with
+`gps: false`.
+
+**The place page was pulled from this spec.** Since spec 009 places had shared
+the galleries' packing, so widening the galleries widened the place outings
+too. But a wide band fronted (or footed) by its outing's piece label opened a
+design question — where that label sits, and whether a place should read as
+per-piece bands at all or as one seamless gallery with the pieces listed below
+— that is a place-page redesign, larger than this spec's width/gap/density
+scope. Rather than improvise it in the close-out, the place page was reverted
+to its pre-011 rendering (decoupled from the galleries' retuned knobs via a
+local `placeFlowStyle`, so it renders exactly as it did on `main`) and given
+its own spec (`ROADMAP.md`). Spec 011 ships the galleries only; `spec.md`
+carries a head amendment saying so. The principle: when a spec's change
+uncovers a design question bigger than the spec's scope, split it out rather
+than let the close-out sprawl — the repeated non-landing tweaks were the
+signal.

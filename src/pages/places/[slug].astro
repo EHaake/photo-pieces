@@ -8,7 +8,7 @@ import { Image, getImage } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate } from '../../i18n';
-import { galleryCell, galleryFlowStyle } from '../../lib/gallery-layout';
+import { galleryCell, GALLERY_STRETCH } from '../../lib/gallery-layout';
 import { getImageRegistry } from '../../lib/images';
 import { ogImageOptions } from '../../lib/og';
 import { withBase } from '../../lib/url';
@@ -24,12 +24,25 @@ export async function getStaticPaths() {
 const { place } = Astro.props;
 const registry = await getImageRegistry();
 
+// Spec 011 widened and retuned the galleries and, through the shared
+// `galleryFlowStyle`, would have moved the place-page outings with them.
+// The place page's own treatment (its width, its density, and how the
+// outings are labelled) turned out to want its own design pass, so it is
+// deferred to its own spec — see ROADMAP. Until then the outings keep
+// their pre-011 packing: this page does NOT share the galleries' retuned
+// width/gap/density. `--gallery-gap` and `--gallery-width` are left unset,
+// so the CSS falls back to today's gap and the flow stays in `.section`
+// (no `gallery-wide`); the short side and the srcset use the pre-011
+// density below.
+const PLACE_SHORT_PX = 280;
+const placeFlowStyle = `--gallery-short: clamp(200px, 26vw, ${PLACE_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}`;
+
 // Every id came from the registry; the lookups can't miss.
 const outings = place.outings.map((outing) => ({
   piece: outing.piece,
   cells: outing.frames.map((id) => {
     const image = registry.byId.get(id)!;
-    return { image, ...galleryCell(image.image) };
+    return { image, ...galleryCell(image.image, PLACE_SHORT_PX) };
   }),
 }));
 
@@ -75,7 +88,7 @@ const { Content } = await render(place.entry);
               {formatDate(piece.data.publishDate)}
             </time>
           </div>
-          <ul class="gallery-flow" style={galleryFlowStyle}>
+          <ul class="gallery-flow" style={placeFlowStyle}>
             {cells.map(({ image, ar, width, sizes }) => (
               <li style={`--ar: ${ar}`}>
                 <a href={withBase(image.url)} class="image-link">
