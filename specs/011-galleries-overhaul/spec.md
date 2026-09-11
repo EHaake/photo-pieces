@@ -10,6 +10,22 @@ srcset/sizes math), 009 (place pages pack their outings through the
 same rules), 006 (the related strip on the image page shares
 `gallery-layout.ts` and must be left where it is).
 
+> **Amendment — places deferred (product owner, 2026-09-10).** At the
+> Phase 1 pause the photographer tried the widened place page and found
+> that widening the outings opened a design question of its own — how the
+> outing's piece label should sit against a bleed-width band, and whether a
+> place should read as per-piece bands at all or as one seamless gallery
+> with the pieces listed below. That is a place-page redesign, larger than
+> this spec's width/gap/density scope, so **the place page is pulled from
+> spec 011 and given its own spec** (see `ROADMAP.md`). This supersedes
+> Goal 3 and the place clauses of the goals, flows, and acceptance criteria
+> below: **spec 011 ships the galleries only.** The place page is reverted
+> to its pre-011 rendering — it does not share the galleries' retuned
+> width/gap/density (the outings keep their own pre-011 packing, a local
+> `placeFlowStyle` in `places/[slug].astro`), so nothing about places
+> changes here. Galleries (and the image registry, the GPS barrier, the
+> sampler) are unaffected.
+
 ## Summary
 
 The photographer noticed this once there were enough galleries to walk

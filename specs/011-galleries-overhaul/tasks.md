@@ -348,6 +348,31 @@ as the substance of the review, not a formality (sign-off note 4). -->
       `npx prettier --check README.md` clean; `sh scripts/verify.sh` green (12
       files, 265 tests)._
 
+- [x] **T905b** — Places pulled from spec 011 (product owner, 2026-09-10).
+      At the Phase 1 pause Erik tried the widened place page and decided the
+      place-page treatment (the outing label against a bleed band; per-piece
+      bands vs. one seamless gallery with the pieces listed below) wants its
+      own design pass, larger than this spec's width/gap/density scope. So the
+      place page is **reverted to pre-011** and deferred to its own spec.
+      `src/pages/places/[slug].astro`: `gallery-wide` removed from the outing
+      flow (no breakout → content width), and the page decoupled from the
+      galleries' retuned `galleryFlowStyle` — a local `placeFlowStyle`
+      (`clamp(200px, 26vw, 280px)`, stretch 1.35, no `--gallery-width`/`-gap`)
+      plus `galleryCell(image, 280)`, so it renders IDENTICALLY to `main`
+      (measured: content width 1160, density 280, gap 18px, srcset ceiling
+      567). `gallery-layout.ts` unchanged (galleryCell already took a `short`
+      arg); galleries, the registry, the GPS barrier, and the sampler are
+      untouched. Docs reconciled: `spec.md` head amendment (supersedes Goal 3
+      and the place clauses — 011 ships galleries only), `plan.md` amendment,
+      `README.md` (no longer claims place outings run wider). T904's and T905's
+      records above describe the place geometry as it was BEFORE this revert;
+      this task supersedes their place lines. `ROADMAP.md`/`DECISIONS.md` get
+      the deferral and the place-page follow-up spec at T906. _Verify:
+      `sh scripts/verify.sh` green (12 files, 265 tests); the place template's
+      only diff from `main` is `placeFlowStyle` + the `galleryCell` short arg
+      (a decoupling that reproduces `main`'s render), grep-confirmed no
+      `gallery-wide` on the place flow._
+
 ## Phase 2 — Close-out (the docs, the reviewer sweep, then merge)
 
 - [ ] **T906** — `ROADMAP.md`: strike "A galleries overhaul" and, for the

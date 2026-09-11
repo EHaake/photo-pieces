@@ -395,3 +395,32 @@ excluded), ratified.
 measures on **two screen formats** — a 16:10 laptop shape and a 16:18 DualUp
 shape — and confirms the density resolves to ~324 on the former and sizes up
 (~417, rows filling) on the latter, not a single value on one viewport.
+
+## Places deferred to their own spec — amendment, 2026-09-10
+
+At the Phase 1 pause the photographer tried the widened place page and
+decided the place page wants its own design pass (the outing label against a
+bleed band; per-piece bands vs. one seamless gallery with the pieces listed
+below). The place page is therefore **pulled from spec 011** and given its own
+spec (`ROADMAP.md`). This supersedes every "galleries and places move
+together" line in this plan: **spec 011 ships the galleries only.**
+
+**What changed back** (`src/pages/places/[slug].astro`): the `gallery-wide`
+class is removed from the outing flow (no breakout → the outings stay at the
+content width in `.section`), and the page no longer shares the galleries'
+retuned `galleryFlowStyle`. Because that shared style now carries the new
+width/gap/density, the place page is given its own local packing that
+reproduces the pre-011 values — `placeFlowStyle`
+(`--gallery-short: clamp(200px, 26vw, 280px); --gallery-stretch: 1.35`, no
+`--gallery-width`/`--gallery-gap` so the CSS falls back to today's gap) and
+`galleryCell(image, 280)` for the srcset. Measured: the place page renders
+identically to `main` — content width, density 280, gap 18px, srcset ceiling
+567. `galleryCell` already took a `short` argument, so no change to
+`gallery-layout.ts` was needed; galleries, the registry, the GPS barrier, and
+the sampler are untouched.
+
+**Docs**: `spec.md` carries the same amendment at its head; `README.md`'s
+galleries paragraph no longer claims a place page's outings run wider; the
+`gallery-layout.ts` structure comment no longer lists place pages among what
+its knobs drive; `ROADMAP.md` gains the place-page follow-up spec and
+`DECISIONS.md` records the deferral (T906).
