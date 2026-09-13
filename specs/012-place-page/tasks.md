@@ -139,7 +139,7 @@ constants. The writing-to-wall gap is one `.section` padding,
 `clamp(3.5rem, 5.5vw, 5.5rem)` (≈83px on the laptop). The head case (a
 place with no writing) takes the same value — no `.reading-head +
 .section.place-wall` override, and the CSS test asserts its absence.
-Screens: not named in the decision. Consequence for T1002: the token
+Screens: not named in the decision; the shipped pages were attested on both screens at the Phase 1 pause. Consequence for T1002: the token
 keeps the literal T1000 landed (it was already the gate's value), with
 the comment dated; the reviewer's by-reference suggestion is not taken
 because no `.section` token exists and the plan's test pins a literal —
@@ -282,6 +282,8 @@ _T1003 record (2026-09-13, implementer at opus):_ `npx prettier --check AUTHORIN
 
 ---
 
+_T1004 record, the documents (2026-09-13, implementer at opus):_ `npx prettier --check ROADMAP.md DECISIONS.md` → `All matched files use Prettier code style!`; `sh scripts/verify.sh` — `87 page(s) built`, `[check-no-gps] 741 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/.`, `BUILD EXIT 0`, `CHECK EXIT 0` (0/0/0), `Test Files 13 passed (13)`, `Tests 277 passed (277)`, `TEST EXIT 0`. ROADMAP: "The place page's own treatment" struck as done in spec 012 (follow-ups: the page/arrow order is one list by construction only because both read `place.frames`, pinned by a source-reading test; the gap's clamp is a literal copy of `.section`'s padding; the sampler stays behind the barrier); spec 009's gallery-root note now says the grouping reason is gone and only an ordering rule keeps them out, and that the index card's summary still counts outings; `grep 'groups by piece'` → none. DECISIONS: a spec 012 section in 011's shape. The implementer omitted a "both screens" claim for the gate since the record said screens were not named; the Phase 1 attestation on both screens is now in the gate record. Read beyond the bundle: `places/index.astro`, `images.ts` (summary), `global.css`, the dev listing, `.prettierrc`.
+
 ### The pre-merge sweep
 
 The `skeptical-reviewer` sweeps the whole spec at its default tier, on
@@ -317,10 +319,10 @@ tier if it is ever on (it is off). -->
 | T1002 impl (`sdd-implementer`)               | implementation (opus)        | 83,601 | green first pass; 7 mutations proven; all geometry measured; no miss |
 | T1003 impl (`sdd-implementer`)               | implementation (opus)        | 40,401 | green first pass; one declared extra passage; no miss |
 | Phase 1 review (`skeptical-reviewer`)        | reviewer default (opus)      | 68,655 | signed off, no blocking; 8 notes — N1 owned by T1004, N3/N4 corrected in the T1002 record, 5 carried below |
-| T1004 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
+| T1004 impl (`sdd-implementer`)               | implementation (opus)        | 50,596 | green first pass; docs only; no miss |
 | Pre-merge sweep (`skeptical-reviewer`)       | reviewer default (opus)      |        |                       |
 
-_(Session-tier allowance draw noted at each pause.)_ Session open, 2026-09-13, before T1000: Fable allowance 69% left. Phase 0 pause (the gate), 2026-09-13: 67% left. Phase 1 pause, 2026-09-13: (to be given by the person).
+_(Session-tier allowance draw noted at each pause.)_ Session open, 2026-09-13, before T1000: Fable allowance 69% left. Phase 0 pause (the gate), 2026-09-13: 67% left. Phase 1 pause, 2026-09-13: 66% left — the place pages attested on both screens.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
