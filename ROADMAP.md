@@ -66,25 +66,25 @@ attached.
   from this spec** — widening its outings opened a design question of its own
   (see the place-page entry below), so places were left at their pre-011
   packing and given their own spec.
-- **The place page's own treatment** — raised at spec 011's Phase 1 pause
-  (2026-09-10). Widening a place's outings to the gallery bleed opened a
-  design question spec 011 didn't want to settle in passing: the per-outing
-  piece label ("From the piece: …") sat awkwardly against a full-width band —
-  above it read as an indented title over wide images; below it as a caption
-  collided its rule with the site footer's own divider; centred didn't sit
-  right either. Underneath that is a bigger question the photographer floated:
-  whether a place should read as **per-piece bands** (spec 009's model — one
-  labelled group of frames per contributing piece, oldest first, a timeline of
-  visits) or as **one seamless gallery** of all the place's frames with the
-  contributing pieces listed at the bottom (more gallery-like, packs fuller,
-  but moves the per-frame attribution to the foot / the image pages). His lean
-  was the seamless gallery. So spec 011 left the place page at its pre-011
-  packing (content width, the old density; a local `placeFlowStyle` in
-  `places/[slug].astro` decoupled from the galleries' retuned knobs), and this
-  spec decides: the structure (bands vs. seamless), whether and how wide the
-  frames run, how the outings/pieces are labelled and ordered, and where the
-  writing-to-frames spacing lands — prototyped on the real photographs at a
-  sampler gate on both screens, the way the galleries were.
+- ~~**The place page's own treatment**~~ — done in spec 012: a place page is
+  **one wall**. The writing, then every published photograph at the place as
+  one continuous packed gallery — oldest visit first, each piece's frames in
+  the piece's order — with nothing between the visits, no piece labels, and no
+  list of pieces after them. The attribution the bands carried lives where the
+  reader goes to look closer: each frame's own page names its piece and links
+  back to it. With the labels gone the wall takes the galleries' knobs from
+  `gallery-layout.ts` (spec 011's width, gap, and format-aware density,
+  confirmed unchanged at the sampler gate — the local `placeFlowStyle` is
+  gone), and the writing-to-wall gap is one `.section` padding chosen there:
+  `--place-wall-gap: clamp(3.5rem, 5.5vw, 5.5rem)`, ≈83px prose-to-first-row
+  on the laptop, taken unchanged by a place with no writing. Follow-ups it
+  leaves: the page's order and the image-page arrows' order are one list only
+  because both read `place.frames`, which a source-reading test pins rather
+  than the type system; the gap's clamp is a literal copy of `.section`'s
+  padding, since that padding has no token to reference, kept in step by a
+  test and a comment; and the wall's sampler stays in the repo as the
+  dev-only route `/dev/place-wall/`, behind the same build barrier the
+  page-head and galleries samplers use.
 - **Aspect-ratio treatment for packed galleries** — raised by the
   photographer at spec 011's visual gate (2026-09-09): he edits each
   image to the crop that suits its content rather than to a house
@@ -177,20 +177,25 @@ attached.
   — `at: <slug>` in a frame's sidecar, with a piece's own `at:` as an
   optional default for its folder and `at: none` to opt a frame out. The
   build refuses a slug with no file and lists the places that exist. The
-  page at `/places/<slug>/` carries the writing, then the outings oldest
-  first, each the piece's own frames at the place in the piece's order,
-  packed as a gallery; `/places/` lists cards, and Places sits in the
-  nav after Galleries. The wall label's place is the place's title as a
+  page at `/places/<slug>/` carries the writing, then one wall — every
+  published frame at the place packed as a single gallery, outings
+  oldest first and each piece's frames in the piece's order, naming no
+  piece; `/places/` lists cards, and Places sits in the nav after
+  Galleries. The wall label's place is the place's title as a
   link, and the arrows step through a place's frames when the reader
   arrives from it. Never by GPS and never by the free-text `place`,
   which stays prose. Follow-ups it leaves: a place's writing is prose
   only — no photograph lives beside a place file, so images in a place's
   body need a reference shape of their own; gallery-root photographs
-  cannot join a place (the page groups by piece and they have none — a
-  group for frames without a piece is the obvious extension, and their
-  `at:` is warned about and ignored until then); and renaming a place is
-  renaming its file, which breaks every `at:` naming it until updated,
-  as the redirect-map item above already notes for images.
+  still cannot join a place, though the cost of admitting them has
+  fallen — spec 012 made the page one wall, so the grouping that the
+  exclusion protected is gone and only an ordering rule stands in the
+  way (a pieceless frame has no publish date to take its turn by, and
+  the index card's summary still counts outings, which such a frame
+  would join none of); their `at:` is warned about and ignored until
+  then; and renaming a place is renaming its file, which breaks every
+  `at:` naming it until updated, as the redirect-map item above already
+  notes for images.
 - **Gear** — raised by the photographer at the spec 009 close-out
   (2026-09-06), in two parts, the first a design conversation before
   any spec. (1) What a gear section is: the photographer intends to

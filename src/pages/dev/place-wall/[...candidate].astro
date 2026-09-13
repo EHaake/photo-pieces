@@ -1,0 +1,226 @@
+---
+// The place-wall sampler (spec 012, T1001) — a DEV-ONLY fixture.
+//
+// getStaticPaths() returns [] unless import.meta.env.DEV, so `astro dev`
+// serves these pages and `astro build` emits nothing under dist/dev/.
+// scripts/check-no-dev-routes.mjs is the standing check on that.
+//
+// Paths: /dev/place-wall/ (all candidates stacked) and
+// /dev/place-wall/<id>/ (one candidate full-page). Each candidate renders
+// the place page's exact markup — head, writing, wall — at its own
+// packing and its own --place-wall-gap, so the gate compares the real
+// rendered distance and the real rendered width, on real photographs.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import { galleryCell, galleryFlowStyle, GALLERY_STRETCH } from '../../../lib/gallery-layout';
+import { getImageRegistry } from '../../../lib/images';
+import { withBase } from '../../../lib/url';
+
+type Candidate = {
+  id: string;
+  /** 'current' — today's content-width packing; 'wall' — the galleries'. */
+  packing: 'current' | 'wall';
+  /** The value set inline on div.section.place-wall. */
+  gap: string;
+  /** Whether the candidate renders the place's writing. */
+  writing: boolean;
+};
+
+export async function getStaticPaths() {
+  if (!import.meta.env.DEV) return [];
+  // The candidates the visual gate compares: today's packing beside the
+  // galleries' wall, and three writing-to-wall spacings (one baseline,
+  // spec 010's head gap, one .section padding) with and without the
+  // writing. Declared inside getStaticPaths and handed to the component
+  // as a prop (Astro runs getStaticPaths in an isolated scope where a
+  // module-level const read here is "not defined" at build time — the
+  // spec-010 gotcha).
+  const TIGHT = '1.5rem'; // one baseline
+  const HEAD = '3rem'; // spec 010's head gap
+  const SECTION = 'clamp(3.5rem, 5.5vw, 5.5rem)'; // one .section padding
+  const CANDIDATES: Candidate[] = [
+    { id: 'current', packing: 'current', gap: SECTION, writing: true },
+    { id: 'wall-tight', packing: 'wall', gap: TIGHT, writing: true },
+    { id: 'wall-head', packing: 'wall', gap: HEAD, writing: true },
+    { id: 'wall-section', packing: 'wall', gap: SECTION, writing: true },
+    { id: 'bare-tight', packing: 'wall', gap: TIGHT, writing: false },
+    { id: 'bare-head', packing: 'wall', gap: HEAD, writing: false },
+    { id: 'bare-section', packing: 'wall', gap: SECTION, writing: false },
+  ];
+  return [
+    { params: { candidate: undefined }, props: { candidate: null, candidates: CANDIDATES } },
+    ...CANDIDATES.map((candidate) => ({
+      params: { candidate: candidate.id },
+      props: { candidate, candidates: CANDIDATES },
+    })),
+  ];
+}
+
+const { candidate, candidates } = Astro.props;
+
+const registry = await getImageRegistry();
+
+// The head and the writing come from the fixture place with the longer
+// writing; its summary line is that place's real one (its own outing and
+// frame counts, not the sampler set's) and is labelled as such below.
+const PLACE_SLUG = 'the-headlands';
+const place = registry.places.find((p) => p.slug === PLACE_SLUG) ?? registry.places[0];
+if (!place) throw new Error(`[place-wall sampler] no places in the registry`);
+const { Content } = await render(place.entry);
+
+// The wall's set is the REAL photographs, not the whole mixed root
+// (the spec-011 lesson): src/content/gallery-images/ holds both the real
+// exports and the synthetic placeholder fixtures, and the gate exists to
+// judge real photographs. The fixtures carry a camera name beginning
+// 'Fixture' in their wall label ('Fixture FX-1', and one sidecar
+// override, 'Fixture FX-2 (override)'), the real exports real camera
+// models. If too few real exports exist yet, fall back to the whole
+// gallery root so the sampler still has a wall to hang.
+const REAL = (img: (typeof registry.images)[number]) =>
+  img.piece === null && !!img.label?.camera && !/^Fixture/i.test(img.label.camera);
+let set = registry.images.filter(REAL);
+if (set.length < 6) set = registry.images.filter((img) => img.piece === null);
+
+// Two packings, each with its own srcset ceiling. `current` retypes the
+// place page's pre-012 values (T1002 retires them from the template);
+// the wall consumes galleryFlowStyle and galleryCell from
+// src/lib/gallery-layout.ts, so it cannot drift from what ships.
+const CURRENT_SHORT_PX = 280;
+const currentFlowStyle = `--gallery-short: clamp(200px, 26vw, ${CURRENT_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}`;
+const currentCells = set.map((image) => ({
+  image,
+  ...galleryCell(image.image, CURRENT_SHORT_PX),
+}));
+const wallCells = set.map((image) => ({ image, ...galleryCell(image.image) }));
+
+// The candidate(s) this request renders: one full-page, or all stacked.
+const shown = candidate ? [candidate] : candidates;
+
+const title = candidate ? `place-wall sampler — ${candidate.id}` : 'place-wall sampler';
+const label = (c: Candidate) =>
+  `${c.id} — ${c.packing === 'current' ? "today's content-width packing" : "the galleries' wall"} / gap ${c.gap} / ${c.writing ? 'with writing' : 'no writing'}`;
+---
+
+<BaseLayout title={title} description="Dev-only fixture for the place page's wall (spec 012).">
+  {
+    shown.map((c) => (
+      <>
+        <p class="sampler-label meta">{label(c)}</p>
+        <article>
+          <header class="page-head section reading-head">
+            <p class="eyebrow">Place</p>
+            <h1>{place.title}</h1>
+            {place.entry.data.description && <p class="lead">{place.entry.data.description}</p>}
+            <div class="entry-meta">{place.summary} (the fixture place's own counts)</div>
+          </header>
+
+          {c.writing && (
+            <div class="section place-writing">
+              <div class="prose">
+                <Content />
+              </div>
+            </div>
+          )}
+
+          {/* The candidate's gap rides on the element whose rule reads it
+              (.section.place-wall), not on a wrapper — an element's own
+              inline custom property shadows any inherited override, so a
+              wrapper's value would never reach the rule. The flow's own
+              --gallery-* ride on the ul for the same reason
+              (galleryFlowStyle already declares them there). */}
+          <div class="section place-wall" style={`--place-wall-gap: ${c.gap}`}>
+            {c.packing === 'current' ? (
+              <ul class="gallery-flow" style={currentFlowStyle}>
+                {currentCells.map(({ image, ar, width, sizes }) => (
+                  <li style={`--ar: ${ar}`}>
+                    <a href={withBase(image.url)} class="image-link">
+                      <Image
+                        src={image.image}
+                        alt={image.title}
+                        layout="constrained"
+                        width={width}
+                        sizes={sizes}
+                        loading="lazy"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul class="gallery-flow gallery-wide" style={galleryFlowStyle}>
+                {wallCells.map(({ image, ar, width, sizes }) => (
+                  <li style={`--ar: ${ar}`}>
+                    <a href={withBase(image.url)} class="image-link">
+                      <Image
+                        src={image.image}
+                        alt={image.title}
+                        layout="constrained"
+                        width={width}
+                        sizes={sizes}
+                        loading="lazy"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </article>
+      </>
+    ))
+  }
+
+  {
+    candidate && (
+      <aside class="sampler-banner meta">
+        <p class="sampler-banner-head">
+          <strong>{candidate.id}</strong> — gap {candidate.gap} /{' '}
+          {candidate.writing ? 'with writing' : 'no writing'}
+        </p>
+        <p>
+          {candidates
+            .filter((other) => other.id !== candidate.id)
+            .map((other) => (
+              <>
+                <a href={withBase(`/dev/place-wall/${other.id}/`)}>{other.id}</a>{' '}
+              </>
+            ))}
+          <a href={withBase('/dev/place-wall/')}>stacked</a>
+        </p>
+      </aside>
+    )
+  }
+</BaseLayout>
+
+<style>
+  /* The place page's own scoped rule on its head, copied so the head
+     reads here exactly as it does there. */
+  .lead {
+    max-width: var(--prose-width);
+  }
+
+  .sampler-label {
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    margin-inline: auto;
+    padding-top: 2rem;
+  }
+
+  .sampler-banner {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 200;
+    padding: 0.6rem 0.8rem;
+    border: var(--hairline);
+    background: var(--color-surface);
+  }
+
+  .sampler-banner p {
+    margin: 0 0 0.35rem;
+  }
+
+  .sampler-banner-head {
+    color: var(--color-text);
+  }
+</style>

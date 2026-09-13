@@ -58,10 +58,10 @@ CMS or backend service for v1.
   place in its sidecar (`at: <slug>`, or `at: none`), a piece may set
   one default for its folder with the same line, and the build refuses
   a slug with no file, listing the places that exist. A place's page
-  groups its published frames by the piece they live in, outings
-  oldest first, own-folder frames only; a place is never inferred from
-  camera metadata, and never from the sidecar's free-text `place`,
-  which stays prose for the wall label.
+  shows its published frames as one wall, outings oldest first,
+  own-folder frames only, naming no piece; a place is never inferred
+  from camera metadata, and never from the sidecar's free-text
+  `place`, which stays prose for the wall label.
 - **Closed block vocabulary**: image treatments inside a piece's body are
   limited to a defined set of directive-backed treatments — as of spec
   007: single, fullbleed, wide, tall, inset, diptych, triptych, grid,

@@ -1,8 +1,9 @@
 import type { ImageMetadata } from 'astro';
 
 /**
- * The gallery page's layout knobs (spec 004, T307R; extended spec 011) —
- * the one place their values live. The page hands them to the CSS as four
+ * The gallery page's layout knobs (spec 004, T307R; extended spec 011;
+ * the place page's wall consumes them too, spec 012) — the one place
+ * their values live. The page hands them to the CSS as four
  * custom properties on the row container (global.css's `.gallery-flow`
  * reads `--gallery-short`, `--gallery-stretch`, `--gallery-width`, and
  * `--gallery-gap` and declares none) and derives each cell's srcset

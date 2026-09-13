@@ -821,3 +821,71 @@ carries a head amendment saying so. The principle: when a spec's change
 uncovers a design question bigger than the spec's scope, split it out rather
 than let the close-out sprawl — the repeated non-landing tweaks were the
 signal.
+
+## Spec 012: the place page as one wall
+
+Spec 009 built a place page as a list of visits: the writing, then one
+labelled group of frames per piece that photographed there, oldest first.
+Spec 011 widened the galleries to a viewport bleed and the place page was to
+follow, but a short piece title over a full-width band read as an indented
+label over a wall, and set below the band its rule collided with the footer's
+own divider. Rather than keep hunting for somewhere to put the label, spec
+012 removes it: **a place page is one wall** — the writing, then every
+published photograph at the place as one continuous packed gallery, in the
+order the page already used (oldest visit first, each piece's frames in the
+piece's order), with nothing between the visits and no list of pieces after
+them.
+
+**No attribution on the place page at all** is the decision that makes the
+rest of it possible, so it is worth naming what carries the attribution
+instead. Each frame's own page names the piece it belongs to and links back
+to it, and the wall label's place link is how the reader arrived. The piece
+is one click from every frame rather than repeated beside all of them, and a
+place reads as a gallery that grows rather than as a timeline of outings.
+The grouping is gone from the page, not from the registry: `place.outings`
+still exists and the places index card still summarises "N outings · M frames
+· years".
+
+**The wall renders from `place.frames`, the registry's flat list, not from a
+re-flattened `place.outings`.** `frames` is the list the image page's arrows
+already step through when the reader arrives from a place, so rendering from
+it makes "the wall's order is the arrows' order" true by construction instead
+of by two pieces of code agreeing. Nothing in `gallery-layout.ts` changed but
+its comment: the page consumes `galleryFlowStyle`, `galleryCell`, and
+`gallery-wide` exactly as the gallery page does, which finally gives galleries
+and places one packing system — spec 011's original Goal 3, before the place
+page was pulled from it.
+
+**The writing-to-wall gap is one token on the wall's own section, with the
+writing's bottom padding zeroed** (`--place-wall-gap`, `.place-writing`,
+`.section.place-wall`), rather than a margin on the flow or a value stacked on
+top of `.section`'s existing padding. The reason is the gate: the photographer
+names a number by looking at candidates, and the number he names has to be the
+number that renders — with two paddings stacking, the visible gap would have
+been his value plus a hidden one, and the token would have lied about what it
+controls. The cost is that the token's clamp is a literal copy of `.section`'s
+padding: that padding has no token of its own to reference, so the copy is
+kept in step by a comment in `global.css` and by `place-page.test.mjs`, which
+pins the literal.
+
+**The gate (2026-09-13) confirmed more than it moved.** The photographer chose
+candidate `wall-section` from the dev-only sampler at `/dev/place-wall/`: the
+galleries' width, gap, and format-aware density carry to a wall that sits
+under prose unchanged — spec 011 chose them on these same photographs, and
+this gate's job was to check that they still hold with writing above them,
+not to re-judge them. What it decided was the transition: one `.section`
+padding, `clamp(3.5rem, 5.5vw, 5.5rem)`, measured at 83.2 / 70.4 / 56px from
+prose to first row at 1512×982, 1280×1440, and 375×812. **The head case took
+the same value.** A place with no writing (head, then wall) was the one spot
+the plan expected might want a tighter gap, and the answer was no, so no
+`.reading-head + .section.place-wall` override exists and the test asserts
+that rule's absence rather than its value. That leaves a source-order
+dependency in `global.css` — `.section.place-wall` has the same specificity as
+`.reading-head + .section` and must stay after it for the wall's gap to win
+after a head — which the test pins and the stylesheet's comment explains.
+
+The sampler is a route of its own rather than a mode on `/dev/galleries/`,
+kept after the gate behind the same `check-no-dev-routes` barrier: the
+galleries sampler is spec 011's gate history and shows neither head nor
+writing, while this gate was entirely about what happens where the writing
+stops and the wall starts.
