@@ -1,6 +1,7 @@
 # Plan: The place page — one wall
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-13) — by the `skeptical-reviewer` at the
+top tier, one review and one re-review; see tasks.md's tier log.
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -122,7 +123,7 @@ for that gate. No schema, no registry, no image-page change.
 
   | id             | packing                                                               | `--place-wall-gap`             | writing |
   | -------------- | --------------------------------------------------------------------- | ------------------------------ | ------- |
-  | `current`      | today's: `.gallery-flow` (no `gallery-wide`), `clamp(200px, 26vw, 280px)`, stretch 1.35, `galleryCell(image, 280)` | `clamp(3.5rem, 5.5vw, 5.5rem)` | yes |
+  | `current`      | today's: `.gallery-flow` (no `gallery-wide`), `clamp(200px, 26vw, 280px)`, stretch `GALLERY_STRETCH` (imported), `galleryCell(image, 280)` | `clamp(3.5rem, 5.5vw, 5.5rem)` | yes |
   | `wall-tight`   | the galleries': `gallery-wide` + `galleryFlowStyle` + `galleryCell(image)` | `1.5rem` (one baseline)     | yes     |
   | `wall-head`    | the galleries'                                                        | `3rem` (spec 010's head gap)   | yes     |
   | `wall-section` | the galleries'                                                        | `clamp(3.5rem, 5.5vw, 5.5rem)` (one `.section` padding) | yes |
@@ -159,10 +160,11 @@ Every claim above is owned by a task and a check:
   `galleryFlowStyle`, carries `gallery-wide`, contains no `--gallery-`
   literal, no `placeFlowStyle`/`PLACE_SHORT_PX`, and every `galleryCell(`
   call has one argument (regex over the source); (b) it renders from
-  `place.frames`, never `place.outings`, and has exactly one
-  `class="gallery-flow` occurrence and no `outing`. Mutation-checked:
-  restore `galleryCell(image.image, 280)` → (a) fails; restore a
-  per-outing map → (b) fails.
+  `place.frames`, never `place.outings`, has exactly one
+  `class="gallery-flow` occurrence and no `outing`, and still renders
+  `place.summary` (AC 5's "the place page's own summary line unchanged").
+  Mutation-checked: restore `galleryCell(image.image, 280)` → (a) fails;
+  restore a per-outing map → (b) fails; drop `place.summary` → (b) fails.
 
 - **The transition is one gate value in CSS** (AC 3) — the same file,
   **T1002**, with `page-head.test.mjs`'s `blocks`/`declarations`
@@ -171,9 +173,13 @@ Every claim above is owned by a task and a check:
   the gate's literal; `.place-writing` sets `padding-block-end: 0`;
   `.place-writing .prose > :last-child` sets `margin-bottom: 0`; a rule
   selecting `.section.place-wall` sets `padding-block-start:
-  var(--place-wall-gap)`; and the head-case rule is present or absent per
-  the gate. Mutation-checked: retune the literal → fails; delete the
-  `.place-writing` rule → fails; delete the `:last-child` rule → fails. Spec 010's reason applies verbatim: a
+  var(--place-wall-gap)`; the head-case rule is present or absent per
+  the gate; and the `.section.place-wall` rule's index in the
+  uncommented CSS is greater than the `.reading-head + .section` rule's
+  (equal specificity, so source order is what makes the head case
+  hold). Mutation-checked: retune the literal → fails; delete the
+  `.place-writing` rule → fails; delete the `:last-child` rule → fails;
+  move the wall rule above the reading-head rule → fails. Spec 010's reason applies verbatim: a
   gate value that lives only in CSS would otherwise fail nothing.
 
 - **The wall's order is the arrow order** (AC 1, AC 4) — **T1002**,
@@ -181,8 +187,10 @@ Every claim above is owned by a task and a check:
   `dist/places/the-headlands/index.html` and `…/the-jetty/index.html`
   is such that, for each consecutive pair, the first image's page holds
   `<nav class="frame-nav" data-set="place:<slug>">` whose `data-nav="next"`
-  link is the second href, and the last has none — checked with a shell
-  loop, the pairs counted and recorded. This is the claim "rendering
+  link is the second href, the last has no `next`, the first has no
+  `prev`, and the href count equals the M in the head's "N outings · M
+  frames" line (a wall missing its first frames would otherwise pass) —
+  checked with a shell loop, the pairs counted and recorded. This is the claim "rendering
   from `place.frames` makes the wall the arrows' set" made falsifiable;
   the registry's own ordering is already pinned in `image-meta.test.mjs`
   (`outings follow the piece order given, oldest first`; `within an
@@ -199,9 +207,15 @@ Every claim above is owned by a task and a check:
   rules landed and no template using the classes, `grep -c
   "place-wall\|place-writing" src/pages/**/*.astro` → 0 outside
   `src/pages/dev/`, and the built `dist/places/the-headlands/index.html`
-  is byte-identical to the one built before the task (a hash, since the
-  template does not change at T1000). `page-head.test.mjs` stays green
-  with the added `:root` declaration.
+  is identical to the one built before the task once the stylesheet's
+  `<link href>` is normalised (`sed -E 's#/_astro/[^"]+\.css#CSS#g' … |
+  shasum` before and after): `astro.config.mjs` sets no
+  `build.inlineStylesheets`, so the default `auto` applies and
+  `global.css`, far over its 4 kB threshold, is emitted as a
+  content-hashed external file whose name — and so every page's raw HTML
+  — changes with any stylesheet edit; the template itself does not
+  change at T1000. `page-head.test.mjs` stays green with the added
+  `:root` declaration.
 
 - **The sampler is dev-only and its candidates differ** — **T1001**:
   the barrier line green, `dist/dev` absent, sitemap `/dev/` count 0; the
@@ -210,16 +224,22 @@ Every claim above is owned by a task and a check:
   `wall-*` flows measure wider than `current`'s (the bleed against the
   content width — if they measure equal, lesson 1 was missed) and the
   three spacings measure three distinct prose-to-first-row distances at
-  1512×982 (≈24 / 48 / ≈83px); the real-image count recorded.
+  1512×982 (≈24 / 48 / ≈83px) — "first row" meaning the top of the
+  `ul.gallery-flow`, since the flow is `align-items: center` and a
+  landscape frame beside a portrait sits below the list's top; the
+  real-image count recorded. Where the implementer cannot drive a
+  browser it says so, and the Phase 0 pause asks the person to attest
+  those lines.
 
 - **Geometry after the gate** (AC 2, AC 3) — **T1002**, on the dev
   server at a 16:10 laptop shape (1512×982), a DualUp shape (1280×1440),
   and 375×812: the place wall's `.gallery-flow` width equals the gallery
   page's at the same viewport (bleed: 1433 / 1201 per 011's record);
   measured `gap` 24px; a landscape cell's short side ≈ 324 / 417; the
-  `.prose` still 666 wide; the prose-to-first-row distance equals the
-  gate's value (and head-to-first-row on a temporarily writing-less
-  fixture, body blanked on the dev server and restored); at 375 one
+  `.prose` still 666 wide; the prose-to-first-row distance (to the top
+  of the `ul.gallery-flow`) equals the gate's value (and
+  head-to-first-row on a temporarily writing-less fixture, body blanked
+  on the dev server and restored, `git status` clean recorded); at 375 one
   frame per row at 343; `documentElement.scrollWidth ≤ clientWidth`
   everywhere. The implementer measures and records numbers; where it
   cannot drive a browser it says so, and the Phase 1 pause asks the
@@ -246,7 +266,7 @@ src/pages/places/[slug].astro                  the wall: one flow from place.fra
 src/lib/gallery-layout.ts                      header comment only: the place wall named among what the knobs drive (T1002)
 place-page.test.mjs                            template consumes the knobs, carries none; the gap token and rules in CSS (new; T1002)
 AUTHORING.md, README.md                        the place page as one wall (T1003)
-ROADMAP.md, DECISIONS.md                       close-out (T1004)
+ROADMAP.md, DECISIONS.md                       close-out (T1004, implementer-edited, orchestrator-committed)
 ```
 
 Untouched, named so the reviewer can confirm the non-goals hold:
@@ -278,8 +298,9 @@ plugin.
 - **`.section.place-wall` outranks `.reading-head + .section` by source
   order, not specificity** — they are both (0,2,0). Moving the reading-head
   rules below the wall rules would silently flip the head case; the CSS
-  test pins the rules' presence and value, not their order, so the
-  head-case measurement at T1002 is the check on that.
+  test (case c) pins the order — the wall rule's index greater than the
+  reading-head rule's — and the head-case measurement at T1002 confirms
+  it renders.
 
 ## Resolved decisions
 

@@ -1,6 +1,8 @@
 # Tasks: The place page — one wall
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-13) — by the `skeptical-reviewer` at the
+top tier; three blocking findings fixed and cleared on the one re-review,
+seven non-blocking notes folded in, five carried to the sweep below.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1000–T1001) — the inert spacing mechanism
 and the sampler the gate judges; reviewed as a phase, no task marked
@@ -32,9 +34,13 @@ resolved in the session. The sweep runs on the documents plus `git diff
 main...HEAD`. The orchestrator never does device or browser checks by
 hand: geometry is the implementer's Verify criterion (numbers recorded
 in this file), and what it cannot measure the person attests at the
-phase pause on his two screens. A fresh orchestrator session starts each
-phase; the person is paused for after each phase and whenever something
-unexpected bears on spec adherence.
+phase pause on his two screens. One implementation session runs the
+whole spec: a phase pause is a pause in it — the person attests and says
+continue — not a session boundary; the person is paused for after each
+phase and whenever something unexpected bears on spec adherence. If the
+person stops at a pause, the report ends with the continuation prompt
+for a fresh session (`/compact` if the context grows large; never
+mid-task).
 
 Task ids: 012 = T10xx.
 
@@ -64,9 +70,14 @@ headers to confirm nothing was duplicated or dropped. -->
       scripts/verify.sh` green (265 tests, 12 files — `page-head.test.mjs`
       still green with the added `:root` declaration); `grep -rc
       "place-wall\|place-writing" src/pages/ src/components/
-      src/layouts/` → 0 everywhere; `shasum
-      dist/places/the-headlands/index.html` recorded before and after
-      the task, identical (inert by construction). Output and the hash
+      src/layouts/` → 0 everywhere; `sed -E 's#/_astro/[^"]+\.css#CSS#g'
+      dist/places/the-headlands/index.html | shasum` recorded before and
+      after the task, identical — the stylesheet's `<link href>` is
+      normalised first, because `global.css` is far over the 4 kB
+      threshold of Astro's default `build.inlineStylesheets: auto` and is
+      emitted as a content-hashed external file, so the raw HTML hash
+      changes with any stylesheet edit (the template itself does not
+      change at T1000: inert by construction). Output and both hashes
       recorded here._
 
 - [ ] **T1001** — The sampler (dev-only).
@@ -85,9 +96,10 @@ headers to confirm nothing was duplicated or dropped. -->
       `getImageRegistry().places`), then — unless `bare` —
       `div.section.place-writing > div.prose` with `render(place.entry)`'s
       `<Content />`, then `div.section.place-wall` with
-      `style={`--place-wall-gap: ${gap}`}` **on that div** and inside it
+      ``style={`--place-wall-gap: ${gap}`}`` **on that div** and inside it
       the wall of the real photographs: for `current` a
-      `<ul class="gallery-flow" style="--gallery-short: clamp(200px, 26vw, 280px); --gallery-stretch: 1.35">`
+      ``<ul class="gallery-flow" style={`--gallery-short: clamp(200px, 26vw, 280px); --gallery-stretch: ${GALLERY_STRETCH}`}>``
+      (`GALLERY_STRETCH` imported, as the galleries sampler does)
       with `galleryCell(image.image, 280)`; for every other candidate
       `<ul class="gallery-flow gallery-wide" style={galleryFlowStyle}>`
       with `galleryCell(image.image)` — consumed from
@@ -104,10 +116,15 @@ headers to confirm nothing was duplicated or dropped. -->
       1512×982: `/dev/place-wall/` renders seven articles; the `wall-*`
       and `bare-*` flows measure wider than `current`'s (≈1433 vs 1160 —
       equal widths mean lesson 1 was missed); the prose-to-first-row
-      distance on `wall-tight` / `wall-head` / `wall-section` measures
-      three distinct values (≈24 / 48 / ≈83px); the `bare-*` articles show
-      head then wall with the same three distances; the count of real
-      images the set drew on recorded (10 expected)._
+      distance — measured to the **top of the `ul.gallery-flow`**, not to
+      the first image (the flow is `align-items: center`, so a landscape
+      frame beside a portrait sits below the list's top) — on
+      `wall-tight` / `wall-head` / `wall-section` measures three distinct
+      values (≈24 / 48 / ≈83px); the `bare-*` articles show head then
+      wall with the same three distances; the count of real images the
+      set drew on recorded (10 expected). Where the implementer cannot
+      drive a browser it says so, line by line, and the Phase 0 pause
+      asks the person to attest those lines on his two screens._
 
 ### Gate record (Phase 0 pause)
 
@@ -150,15 +167,22 @@ the substance of the review, not a formality (011's sign-off note 4). -->
       has no `--gallery-` literal, no `placeFlowStyle`/`PLACE_SHORT_PX`,
       and every `galleryCell(` call has one argument; (b) it renders from
       `place.frames`, never `place.outings`, one `class="gallery-flow`,
-      no `outing`; (c) `:root` declares `--place-wall-gap` at the gate's
+      no `outing`, and still renders `place.summary` (the head's summary
+      line, AC 5); (c) `:root` declares `--place-wall-gap` at the gate's
       literal, `.place-writing` zeroes `padding-block-end`,
       `.place-writing .prose > :last-child` zeroes `margin-bottom`,
       `.section.place-wall` reads the token, the head-case rule present or
-      absent per the gate. _Verify: `sh scripts/verify.sh` green with the
+      absent per the gate, and the rule whose selector is **exactly**
+      `.section.place-wall` (not the head-case rule, if present) comes
+      **later in the uncommented CSS** than the `.reading-head + .section`
+      rule (equal specificity; source order is load-bearing for the head
+      case). _Verify: `sh scripts/verify.sh` green with the
       new file; mutations named and reverted — `galleryCell(image.image,
       280)` restored (a fails), a per-outing map restored (b fails), the
       token's literal retuned (c fails), `.place-writing` deleted (c
-      fails), the `:last-child` rule deleted (c fails). Built HTML for `dist/places/the-headlands/index.html` and
+      fails), the `:last-child` rule deleted (c fails), `place.summary`
+      removed from the template (b fails), the wall rule moved above the
+      reading-head rule (c fails). Built HTML for `dist/places/the-headlands/index.html` and
       `…/the-jetty/index.html`: between `</header>` and `<footer` no
       `href="…/pieces/`, `<h2`, `<time`, `outing`, or `<hr`; exactly one
       `<ul class="gallery-flow gallery-wide"` carrying the
@@ -166,16 +190,21 @@ the substance of the review, not a formality (011's sign-off note 4). -->
       section; `og:image` the cover; for each consecutive pair of the
       wall's `/images/` hrefs the first's page has a `frame-nav`
       `data-set="place:<slug>"` whose `data-nav="next"` is the second, the
-      last has none (a shell loop; pairs counted). `git diff main --
+      last has no `next` and the **first has no `prev`** in that
+      `frame-nav`, and the wall's href count equals the M in the head's
+      "N outings · M frames" line (a shell loop; pairs counted). `git diff main --
       src/lib/images.ts src/lib/image-set.ts src/lib/image-meta.mjs
       src/pages/images/[...id].astro src/pages/places/index.astro
       src/components/CoverCards.astro src/content.config.ts` empty. On
       the dev server at 1512×982, 1280×1440, and 375×812: the place wall's
       `.gallery-flow` width equals `/galleries/every-ratio/`'s at the
       same viewport; `gap` 24px; a landscape cell's short side ≈324 /
-      ≈417; `.prose` 666; prose-to-first-row = the gate's value;
+      ≈417; `.prose` 666; prose-to-first-row (to the top of the
+      `ul.gallery-flow`, as at T1001) = the gate's value;
       head-to-first-row on `the-jetty` with its body temporarily blanked
-      (restored after) = the gate's head-case value; 375: one frame per
+      on the dev server = the gate's head-case value, the file restored
+      after and `git status --short src/content/places/` empty, recorded;
+      375: one frame per
       row at 343; `scrollWidth ≤ clientWidth` everywhere. Every number
       recorded here; any line the implementer cannot measure named for
       the person's attestation at the pause._
@@ -203,7 +232,12 @@ the substance of the review, not a formality (011's sign-off note 4). -->
 
 ## Phase 2 — Close-out (the docs, the reviewer sweep, then merge)
 
-- [ ] **T1004** — Orchestrator-run, as 011's T906 was. `ROADMAP.md`:
+- [ ] **T1004** — Close-out. The two repo-wide documents are edited by
+      the `sdd-implementer` on a bundle (T1003 is the pattern; the bundle
+      carries the gate record, plan.md's "Resolved decisions" and its
+      gate amendment, and the ROADMAP entry to strike) and committed by
+      the orchestrator; the sweep, the merge, and the bookkeeping are the
+      orchestrator's own part, as CLAUDE.md assigns them. `ROADMAP.md`:
       strike "The place page's own treatment" (shipped as spec 012 — one
       wall, no attribution on the page, the galleries' knobs, the gap
       chosen at the gate); in spec 009's follow-ups, the gallery-root
@@ -218,14 +252,17 @@ the substance of the review, not a formality (011's sign-off note 4). -->
       section with the writing's padding zeroed, so the gate names the
       number that renders; the head case's outcome; what the gate
       confirmed or moved. Both ride this branch and merge with the PR, in
-      their own commit. Then the pre-merge whole-spec sweep at the
+      their own commit (`npx prettier --check` clean; hand-edited prose,
+      never script-rewrapped). Then, the orchestrator's part: the
+      pre-merge whole-spec sweep at the
       reviewer's default tier and its findings resolved; the acceptance
       criteria checked against their records (the sampler's absence from
       `dist/` by T1001's and the final build's barrier line); build,
       tests, check, GPS scan, dev-routes scan, and format green with
       actual output; the PR marked ready and merged with a merge commit;
       the close-out box ticked in the same shell command as the merge
-      bookkeeping. _Verify: main green after the merge._
+      bookkeeping. _Verify: the implementer's `sh scripts/verify.sh`
+      green with the two documents edited; main green after the merge._
 
 ---
 
@@ -255,22 +292,38 @@ tier if it is ever on (it is off). -->
 
 | Task / invocation                            | Tier                         | Tokens | Outcome / miss reason |
 | -------------------------------------------- | ---------------------------- | ------ | --------------------- |
-| Planning: draft (`sdd-planner`)              | top (`claude-fable-5-1`, high) |        | drafted first pass    |
-| Sign-off: plan/tasks (`skeptical-reviewer`)  | top (`claude-fable-5-1`, high) |        |                       |
+| Planning: draft (`sdd-planner`)              | top (`claude-fable-5-1`, high) | 133,795 | drafted first pass; no product question returned |
+| Sign-off: plan/tasks (`skeptical-reviewer`)  | top (`claude-fable-5-1`, high) | 88,526 | 3 blocking (T1000 hash Verify; session-per-phase wording; T1004 by hand), 7 notes |
+| Sign-off re-review (`skeptical-reviewer`)    | top (`claude-fable-5-1`, high) | 35,920 | signed off; 5 notes carried below |
 | T1000 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | T1001 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | Phase 0 review (`skeptical-reviewer`)        | reviewer default (opus)      |        |                       |
 | T1002 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | T1003 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | Phase 1 review (`skeptical-reviewer`)        | reviewer default (opus)      |        |                       |
+| T1004 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | Pre-merge sweep (`skeptical-reviewer`)       | reviewer default (opus)      |        |                       |
 
-_(T1004's ROADMAP/DECISIONS is orchestrator-run doc work, no subagent
-dispatch. Session-tier allowance draw noted at each pause.)_
+_(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
-- _(none yet)_
+- _(sign-off re-review)_ Test case (c)'s order assertion must take the
+  index of the rule whose selector is exactly `.section.place-wall`, not
+  the head-case rule `.reading-head + .section.place-wall` if the gate adds
+  it (folded into T1002's text).
+- _(sign-off re-review)_ T1004's `npx prettier --check ROADMAP.md
+  DECISIONS.md` clause was not confirmed from the bundle; checked by the
+  orchestrator at sign-off: both clean on 2026-09-13.
+- _(sign-off re-review)_ The arrow-chain loop's "href count equals M"
+  rests on the head's summary reading "N outings · M frames · years"
+  (`placeSummary`); if the wording differs, adjust the regex, don't drop
+  the check.
+- _(sign-off re-review)_ T1000's "265 tests, 12 files" is a count at
+  sign-off; T1002 adds a file — later Verify lines must not copy it.
+- _(sign-off re-review)_ plan.md's description of today's page says
+  "stretch 1.35" and the sampler's `current` row says `GALLERY_STRETCH`
+  (imported); they agree only while the constant stays 1.35.
 
 **Totals (at the merge).** _To be filled: planner, sign-off,
 implementer (per dispatch), reviewer (per invocation), tier misses,
@@ -307,8 +360,10 @@ plan. The orchestrator does no browser or device checks itself.
 > tokens in one shell command. Involvement level is product owner: pause
 > after each phase — the Phase 0 pause is the gate, and its report
 > carries the sampler's URLs and the candidate table in plain language —
-> and whenever something unexpected bears on spec adherence, and start
-> a fresh session for the next phase.
+> and whenever something unexpected bears on spec adherence; the same
+> session continues after each pause when the person says so, and if the
+> person stops at a pause, end the report with the continuation prompt
+> for a fresh session.
 
 Every pause produces a report in this shape, in this order, in plain
 language (no task ids, agent names, or tier names):
