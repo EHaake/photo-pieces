@@ -71,6 +71,9 @@
      tightened below at 720px and up — the gate's values. */
   --head-pad-reading: clamp(3.5rem, 5.5vw, 5.5rem);
   --head-gap-reading: clamp(3.5rem, 5.5vw, 5.5rem);
+  /* The place page's writing-to-wall gap (spec 012): .section's padding,
+     the inert default — the gate's value lands at T1002. */
+  --place-wall-gap: clamp(3.5rem, 5.5vw, 5.5rem);
 }
 
 /* Light-only by design: the photographer controls how the work is seen,
@@ -305,6 +308,26 @@ html[data-scene-active] .site-header {
     --head-pad-reading: 3rem;
     --head-gap-reading: 3rem;
   }
+}
+
+/* The place page's wall (spec 012). The writing's section drops its
+   bottom padding and the wall's section carries the whole transition,
+   so the space from prose to first row is --place-wall-gap alone. */
+.place-writing {
+  padding-block-end: 0;
+}
+
+/* p carries --para-gap; the idiom .piece-held-prose uses. Without this
+   the rendered distance would be the token plus a paragraph's gap. */
+.place-writing .prose > :last-child {
+  margin-bottom: 0;
+}
+
+/* Later in source than .reading-head + .section at the same specificity,
+   on purpose: a place with no writing (head, then wall) takes the wall's
+   gap after the head too. */
+.section.place-wall {
+  padding-block-start: var(--place-wall-gap);
 }
 
 .eyebrow {

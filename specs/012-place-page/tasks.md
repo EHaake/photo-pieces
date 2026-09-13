@@ -53,7 +53,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the spacing mechanism (inert) and the sampler (reviewer after the phase; the gate at its end)
 
-- [ ] **T1000** — The writing-to-wall token and rules, inert.
+- [x] **T1000** — The writing-to-wall token and rules, inert.
       `src/styles/global.css`: in the main `:root` beside
       `--head-pad-reading`/`--head-gap-reading`, add `--place-wall-gap:
       clamp(3.5rem, 5.5vw, 5.5rem)` (`.section`'s padding — the inert
@@ -79,6 +79,8 @@ headers to confirm nothing was duplicated or dropped. -->
       changes with any stylesheet edit (the template itself does not
       change at T1000: inert by construction). Output and both hashes
       recorded here._
+
+_T1000 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, `[check-no-gps] 748 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/.`, `BUILD EXIT 0`; `astro check` 0 errors 0 warnings 0 hints, `CHECK EXIT 0`; `Test Files 12 passed (12)`, `Tests 265 passed (265)`, `TEST EXIT 0`. Normalised `dist/places/the-headlands/index.html` hash before `f21cc96a5c19b26b3662a2a73ecfa8a50d33e6c8`, after `f21cc96a5c19b26b3662a2a73ecfa8a50d33e6c8` — identical. `grep -rc "place-wall\|place-writing" src/pages/ src/components/ src/layouts/` → 0 everywhere. `prettier --check src/styles/global.css` clean. The plan's two trailing comments were written as block comments above their rules (file style); content unchanged.
 
 - [ ] **T1001** — The sampler (dev-only).
       `src/pages/dev/place-wall/[...candidate].astro`
@@ -295,7 +297,7 @@ tier if it is ever on (it is off). -->
 | Planning: draft (`sdd-planner`)              | top (`claude-fable-5-1`, high) | 133,795 | drafted first pass; no product question returned |
 | Sign-off: plan/tasks (`skeptical-reviewer`)  | top (`claude-fable-5-1`, high) | 88,526 | 3 blocking (T1000 hash Verify; session-per-phase wording; T1004 by hand), 7 notes |
 | Sign-off re-review (`skeptical-reviewer`)    | top (`claude-fable-5-1`, high) | 35,920 | signed off; 5 notes carried below |
-| T1000 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
+| T1000 impl (`sdd-implementer`)               | implementation (opus)        | 24,471 | green first pass; no miss |
 | T1001 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | Phase 0 review (`skeptical-reviewer`)        | reviewer default (opus)      |        |                       |
 | T1002 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
@@ -304,7 +306,7 @@ tier if it is ever on (it is off). -->
 | T1004 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | Pre-merge sweep (`skeptical-reviewer`)       | reviewer default (opus)      |        |                       |
 
-_(Session-tier allowance draw noted at each pause.)_
+_(Session-tier allowance draw noted at each pause.)_ Session open, 2026-09-13, before T1000: Fable allowance 69% left.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
