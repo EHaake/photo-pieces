@@ -248,7 +248,7 @@ _T1003 record (2026-09-13, implementer at opus):_ `npx prettier --check AUTHORIN
 
 ## Phase 2 — Close-out (the docs, the reviewer sweep, then merge)
 
-- [ ] **T1004** — Close-out. The two repo-wide documents are edited by
+- [x] **T1004** — Close-out. The two repo-wide documents are edited by
       the `sdd-implementer` on a bundle (T1003 is the pattern; the bundle
       carries the gate record, plan.md's "Resolved decisions" and its
       gate amendment, and the ROADMAP entry to strike) and committed by
@@ -340,7 +340,7 @@ tier if it is ever on (it is off). -->
 | T1004 impl (`sdd-implementer`)               | implementation (opus)        | 50,596 | green first pass; docs only; no miss |
 | Pre-merge sweep (`skeptical-reviewer`)       | reviewer default (opus)      | 89,478 | 2 blocking (CLAUDE.md Places clause; ROADMAP 009 sentence) → T1004a; 15 carried notes all accepted |
 | T1004a impl (`sdd-implementer`)              | implementation (opus)        | 26,673 | green; pre-existing CLAUDE.md prettier line flagged, left |
-| Sweep re-review (`skeptical-reviewer`)       | reviewer default (opus)      |        |                       |
+| Sweep re-review (`skeptical-reviewer`)       | reviewer default (opus)      | 21,000 | signed off; B1 and B2 resolved; no new issue |
 
 _(Session-tier allowance draw noted at each pause.)_ Session open, 2026-09-13, before T1000: Fable allowance 69% left. Phase 0 pause (the gate), 2026-09-13: 67% left. Phase 1 pause, 2026-09-13: 66% left — the place pages attested on both screens.
 
@@ -399,9 +399,19 @@ _(Session-tier allowance draw noted at each pause.)_ Session open, 2026-09-13, b
   "stretch 1.35" and the sampler's `current` row says `GALLERY_STRETCH`
   (imported); they agree only while the constant stays 1.35.
 
-**Totals (at the merge).** _To be filled: planner, sign-off,
-implementer (per dispatch), reviewer (per invocation), tier misses,
-fallback switches, against the baselines above._
+**Totals (at the merge, 2026-09-13).** Top tier (`claude-fable-5-1`,
+high): planner 133,795; sign-off 88,526 + re-review 35,920 = 124,446.
+Implementer (opus): 287,531 over 6 dispatches (24,471 / 61,789 / 83,601 /
+40,401 / 50,596 / 26,673), every task green on its first pass, no
+escape-hatch miss. Reviewer (opus, per-phase and sweep): 230,463 over 4
+invocations (51,330 / 68,655 / 89,478 / 21,000). Tier misses: none.
+Fallback switches: none — the session stayed on `claude-fable-5-1` at
+medium throughout. Against spec 011 (all opus): planner 148,300 →
+133,795; sign-off 48,861 → 124,446 (two passes at the top tier);
+implementer 178,802 over 5 → 287,531 over 6 (T1002 carried the
+headless geometry and seven mutations); reviewer 246,857 over 5 →
+230,463 over 4. Session-tier allowance draw: 69% at open → 67% at the
+gate → 66% after Phase 1 → (the person's figure at the merge).
 
 ## Handoff note
 
