@@ -301,7 +301,7 @@ tier if it is ever on (it is off). -->
 | Sign-off re-review (`skeptical-reviewer`)    | top (`claude-fable-5-1`, high) | 35,920 | signed off; 5 notes carried below |
 | T1000 impl (`sdd-implementer`)               | implementation (opus)        | 24,471 | green first pass; no miss |
 | T1001 impl (`sdd-implementer`)               | implementation (opus)        | 61,789 | green first pass; all geometry measured headless; no miss |
-| Phase 0 review (`skeptical-reviewer`)        | reviewer default (opus)      |        |                       |
+| Phase 0 review (`skeptical-reviewer`)        | reviewer default (opus)      | 51,330 | signed off, no blocking; 7 notes, 4 carried to T1002 below |
 | T1002 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | T1003 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | Phase 1 review (`skeptical-reviewer`)        | reviewer default (opus)      |        |                       |
@@ -311,6 +311,23 @@ tier if it is ever on (it is off). -->
 _(Session-tier allowance draw noted at each pause.)_ Session open, 2026-09-13, before T1000: Fable allowance 69% left.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
+
+- _(Phase 0 review, for T1002's bundle)_ The sampler's `<article>` drops
+  `data-pagefind-body` and the wall carries no `data-pagefind-ignore`;
+  T1002 must add both on the shipped page deliberately (the spec's
+  "search still ignores the wall") — verify by grep on the template.
+- _(Phase 0 review, for T1002's test)_ `.place-writing { padding-block-end:
+  0 }` beats `.section` by source order alone (both (0,1,0)); case (c)
+  should pin that index relationship too, beside the wall/reading-head one.
+- _(Phase 0 review, for T1002)_ `clamp(3.5rem, 5.5vw, 5.5rem)` now sits in
+  four places in `global.css`; if the gate chooses "one `.section`
+  padding", land it by reference (a token `.section` also reads, or
+  `--head-gap-reading` where equal), not a fifth literal.
+- _(Phase 0 review, for T1002)_ The sampler's `current` row retypes
+  `PLACE_SHORT_PX`/`placeFlowStyle` on purpose; T1002 must retire both
+  from `places/[slug].astro` or two copies of one density remain.
+- _(Phase 0 review, dev-only, no action)_ The stacked sampler renders
+  `<Content />` four times, so body heading ids repeat; no layout effect.
 
 - _(sign-off re-review)_ Test case (c)'s order assertion must take the
   index of the rule whose selector is exactly `.section.place-wall`, not
