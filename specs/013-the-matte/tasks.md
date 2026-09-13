@@ -489,13 +489,13 @@ reviewer invocations alike — any escape-hatch miss, the fallback switch
 if the top tier's budget runs out (the row and the time), and the third
 tier if it is ever on (it is off). -->
 
-| Task / invocation               | Tier                           | Tokens | Outcome / miss reason |
-| ------------------------------- | ------------------------------ | ------ | --------------------- |
-| Planning: draft (`sdd-planner`)                      | top (`claude-fable-5-1`, high) | 236,089 | drafted first pass; no product question returned |
-| Sign-off: plan/tasks (`skeptical-reviewer`)          | top (`claude-fable-5-1`, high) | 86,096  | 3 blocking (B1 packed-row/matched mat rules vs AC 2 — product call; B2 CLAUDE.md amendment trigger; B3 cards-off edit — wrong on the facts), 7 notes |
-| Planning: sign-off fixes (`sdd-planner`, resumed)   | top (`claude-fable-5-1`, high) | 36,776  | B2, B3 (corrected), N2–N7 applied; T1101 split into T1101/T1101b |
-| Sign-off re-review (`skeptical-reviewer`)            | top (`claude-fable-5-1`, high) | 59,061  | signed off; B3 correction accepted; 4 notes carried below |
-| Planning: Prettier repair (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 48,134  | formatting only — code spans broken across lines had read as blockquotes |
+| Task / invocation                                  | Tier                           | Tokens  | Outcome / miss reason                                                                                                                                |
+| -------------------------------------------------- | ------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Planning: draft (`sdd-planner`)                    | top (`claude-fable-5-1`, high) | 236,089 | drafted first pass; no product question returned                                                                                                     |
+| Sign-off: plan/tasks (`skeptical-reviewer`)        | top (`claude-fable-5-1`, high) | 86,096  | 3 blocking (B1 packed-row/matched mat rules vs AC 2 — product call; B2 CLAUDE.md amendment trigger; B3 cards-off edit — wrong on the facts), 7 notes |
+| Planning: sign-off fixes (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 36,776  | B2, B3 (corrected), N2–N7 applied; T1101 split into T1101/T1101b                                                                                     |
+| Sign-off re-review (`skeptical-reviewer`)          | top (`claude-fable-5-1`, high) | 59,061  | signed off; B3 correction accepted; 4 notes carried below                                                                                            |
+| Planning: Prettier repair (`sdd-planner`, resumed) | top (`claude-fable-5-1`, high) | 48,134  | formatting only — code spans broken across lines had read as blockquotes                                                                             |
 
 _(Session-tier allowance draw noted at each pause.)_
 
