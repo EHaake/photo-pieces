@@ -52,7 +52,12 @@ everywhere, the ground goes back toward white.
    and equal on all four sides — the brief's carve-out unchanged. One
    share, chosen once, for every surface that keeps a mat; the frame's
    size decides the width, not which page it is on and not the
-   viewport.
+   viewport. Two geometries take the share from the size that governs
+   them rather than from each frame (amended 2026-09-13 at sign-off, so
+   every fit stays exact): a packed row's frames wear one mat, a share
+   of the row's target short side — the density — not of the size a
+   row grows to when it fills its width; and a matched-height pair or
+   triptych wears one mat, a share of the matched height.
 3. **The ground follows the mats.** Mats anywhere: the warm ground of
    spec 003 stays. Mats nowhere: the ground returns toward the white it
    was before spec 003, chosen by looking at the gate with the old value
@@ -125,7 +130,9 @@ everywhere, the ground goes back toward white.
 ## Design requirements
 
 - **The candidates at the gate**: no mat; today's fixed mat, as the
-  control; and three shares of the frame's rendered short side, spread
+  control; and three shares of the frame's rendered short side (of the
+  row's target short side in a packed row, of the matched height in a
+  matched-height block), spread
   so the smallest reads thinner than today's mat on a reading-width
   single and the largest reads wider, each with the same floor and
   ceiling. The plan names the three and the floor and ceiling; the gate
@@ -170,12 +177,15 @@ everywhere, the ground goes back toward white.
       page's stage; the index cover cards) shows the mat decision the
       gate made for it — present or absent — and fullbleed, tall, and
       strip remain unmatted
-- [ ] Where a mat is present its width is the share of the frame's
-      rendered short side chosen at the gate, within the floor and
-      ceiling chosen there, equal on all four sides, taken from one
-      source by every surface — so two frames of different rendered
-      sizes on the same surface wear visibly different mat widths, and
-      the same frame on the laptop and the DualUp wears the same share
+- [ ] Where a mat is present its width is the share chosen at the gate
+      of the frame's rendered short side — of the row's target short
+      side for the frames of a packed row, of the matched height for a
+      matched-height pair or triptych — within the floor and ceiling
+      chosen there, equal on all four sides, taken from one source by
+      every surface — so two frames of different rendered sizes on the
+      same surface (outside one packed row or one matched block) wear
+      visibly different mat widths, and the same frame on the laptop and
+      the DualUp wears the same share
 - [ ] The matched-height pair and triptych, the held frame, the pause
       frame, the packed rows, and the image page's stage each fit
       exactly as they do today, with the mat's actual width in their
@@ -211,6 +221,16 @@ everywhere, the ground goes back toward white.
 - **Mat colour out of scope** (product owner).
 - **One gate** for presence, share, and ground (product owner, the spec
   author's lean): one sampler, both screens, the real photographs.
+- **Packed rows and matched-height blocks take the share from the size
+  that governs them** (product owner, at sign-off, 2026-09-13). An exact
+  per-frame share on those two geometries cannot coexist with the fits
+  staying exact: a row's grown size is not a length the styling can
+  read, and per-member mats in a matched block can sit at different
+  clamp limits. The fits win; the sampler shows both behaviours at the
+  gate.
+- **The compare slider on the image page follows the stage's decision**
+  (product owner, at sign-off, 2026-09-13); the unplaced latest-work
+  strip follows the packed rows'.
 - **The aspect-ratio treatment waits for this** (product owner, from
   the roadmap conversation): its matted-frames option is a mat doing
   layout work, and needs to know whether gallery frames are matted.

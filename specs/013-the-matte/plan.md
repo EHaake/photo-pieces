@@ -44,13 +44,13 @@ var(--mat)`. With share 0 and floor = ceiling = today's clamp, every
   clamp is exact in every form because the clamp regime depends only on
   known lengths. With `r = max(--ar, 1)` and `q = min(--ar, 1)`:
 
-  | form                                | where                                                                                                                                                                                               | σ and `--mat`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-  | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | **W** — column-bound                | single (both forms, the shorthand), inset, wide, grid, aside, row, default/weighted diptych and triptych, held and pause **anchors**, cover-card spans, the compare figure, `.gallery-grid` anchors | the frame fills its container of width `W` (`100%`); image width `W − 2m`, σ = `(W − 2m)/r` → `--mat: clamp(var(--mat-min), calc(100% * var(--mat-share) / (max(var(--ar, 1), 1) + 2 * var(--mat-share))), var(--mat-max))`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-  | **H** — height-bound box            | `.piece-held figure` (its `max-width`)                                                                                                                                                              | the frame fits `--avail-h: calc(100svh - 2 * var(--hold-margin))`; σ = `(H − 2m)·q` → `--mat: clamp(var(--mat-min), calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))), var(--mat-max))`; then today's box formula with `--mat` in place of `--matte`: `max-width: calc((var(--avail-h) - 2 * var(--mat)) * var(--ar, 1) + 2 * var(--mat))`                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-  | **V + H** — two limits, the smaller | `.piece-pause` (its `--frame-w`/`--frame-h`), `.image-frame` (the stage)                                                                                                                            | `--avail-w` and `--avail-h` as lengths; `--mat: min(clamp(…V…), clamp(…H…))` where V is form W with `var(--avail-w)` for `100%`; clamp is monotone, so the min of the two clamped mats is the mat of the binding limit. Pause: `--avail-w: calc((100vw - 2 * var(--hold-margin)) / var(--pause-scale))`, `--avail-h` the same over `100svh`, `--frame-w: min(var(--avail-w), calc((var(--avail-h) - 2 * var(--mat)) * var(--ar, 1) + 2 * var(--mat)))`, `--frame-h: calc((var(--frame-w) - 2 * var(--mat)) / var(--ar, 1) + 2 * var(--mat))`. Stage: `--avail-w: min(calc(100vw - 2 * var(--page-pad)), var(--content-width))`, `--avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad))`; quiet view redeclares both over `--stage-pad` alone; `img { max-height: calc(var(--avail-h) - 2 * var(--mat)) }` |
-  | **R** — packed rows                 | `.gallery-flow > li` (galleries, the place wall, the related strip)                                                                                                                                 | σ\* = the row's **target** short side, `--gallery-short` → `--mat: clamp(var(--mat-min), calc(var(--gallery-short) * var(--mat-share)), var(--mat-max))`; the cell math keeps the mat as its constant term: `flex: var(--w) 1 calc(var(--gallery-short) * var(--w) + 2 * var(--mat))`, `max-width: min(100%, calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--mat)))`, the `<720px` `.related-flow` cap likewise; the anchor inherits `--mat`                                                                                                                                                                                                                                                                                                                                                       |
-  | **P** — matched heights             | `.piece-diptych.match-height > …`, `.piece-triptych.match-height > …`                                                                                                                               | one mat for the block, a share of the matched height `h = (W − G − 2nm)/A` (A = Σ raw ratios, n = frames, G = gaps): `--mat: clamp(var(--mat-min), calc((100% - (var(--n) - 1) * var(--pair-gap)) * var(--mat-share) / (var(--ar-sum) + 2 * var(--n) * var(--mat-share))), var(--mat-max))`, with `--pair-gap: calc(var(--baseline) / 3)` declared on the block and read by its `gap` too                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+  | form                                | where                                                                                                                                                                                        | σ and `--mat`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+  | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | **W** — column-bound                | single (both forms, the shorthand), inset, wide, grid, aside, row, default/weighted diptych and triptych, held and pause **anchors**, the cover card's `span.image-link`, the compare figure | the frame fills its container of width `W` (`100%`); image width `W − 2m`, σ = `(W − 2m)/r` → `--mat: clamp(var(--mat-min), calc(100% * var(--mat-share) / (max(var(--ar, 1), 1) + 2 * var(--mat-share))), var(--mat-max))`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+  | **H** — height-bound box            | `.piece-held figure` (its `max-width`)                                                                                                                                                       | the frame fits `--avail-h: calc(100svh - 2 * var(--hold-margin))`; σ = `(H − 2m)·q` → `--mat: clamp(var(--mat-min), calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))), var(--mat-max))`; then today's box formula with `--mat` in place of `--matte`: `max-width: calc((var(--avail-h) - 2 * var(--mat)) * var(--ar, 1) + 2 * var(--mat))`                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+  | **V + H** — two limits, the smaller | `.piece-pause` (its `--frame-w`/`--frame-h`), `.image-frame` (the stage)                                                                                                                     | `--avail-w` and `--avail-h` as lengths; `--mat: min(clamp(…V…), clamp(…H…))` where V is form W with `var(--avail-w)` for `100%`; clamp is monotone, so the min of the two clamped mats is the mat of the binding limit. Pause: `--avail-w: calc((100vw - 2 * var(--hold-margin)) / var(--pause-scale))`, `--avail-h` the same over `100svh`, `--frame-w: min(var(--avail-w), calc((var(--avail-h) - 2 * var(--mat)) * var(--ar, 1) + 2 * var(--mat)))`, `--frame-h: calc((var(--frame-w) - 2 * var(--mat)) / var(--ar, 1) + 2 * var(--mat))`. Stage: `--avail-w: min(calc(100vw - 2 * var(--page-pad)), var(--content-width))`, `--avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad))`; quiet view redeclares both over `--stage-pad` alone; `img { max-height: calc(var(--avail-h) - 2 * var(--mat)) }` |
+  | **R** — packed rows                 | `.gallery-flow > li` (galleries, the place wall, the related strip)                                                                                                                          | σ\* = the row's **target** short side, `--gallery-short` → `--mat: clamp(var(--mat-min), calc(var(--gallery-short) * var(--mat-share)), var(--mat-max))`; the cell math keeps the mat as its constant term: `flex: var(--w) 1 calc(var(--gallery-short) * var(--w) + 2 * var(--mat))`, `max-width: min(100%, calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--mat)))`, the `<720px` `.related-flow` cap likewise; the anchor inherits `--mat`                                                                                                                                                                                                                                                                                                                                                       |
+  | **P** — matched heights             | `.piece-diptych.match-height > …`, `.piece-triptych.match-height > …`                                                                                                                        | one mat for the block, a share of the matched height `h = (W − G − 2nm)/A` (A = Σ raw ratios, n = frames, G = gaps): `--mat: clamp(var(--mat-min), calc((100% - (var(--n) - 1) * var(--pair-gap)) * var(--mat-share) / (var(--ar-sum) + 2 * var(--n) * var(--mat-share))), var(--mat-max))`, with `--pair-gap: calc(var(--baseline) / 3)` declared on the block and read by its `gap` too                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
   Forms W and H/V agree on the held, pause and stage frames: when the
   height binds, the box's width is `(H − 2m)·ar + 2m` and form W at that
@@ -60,10 +60,15 @@ var(--mat)`. With share 0 and floor = ceiling = today's clamp, every
   is the plan's central claim and T1101's evaluator test checks it over
   a grid of ratios, viewports, shares and clamps (Testing strategy).
   Form W is declared once, on one selector list — the existing matted
-  list plus `.gallery-card .image-link`, `.gallery-grid > li >
-a.image-link`, and `.compare` — so a scoped stylesheet only ever
-  reads `var(--mat)`; forms H, V+H, R and P are each written once on
-  the element that owns that geometry.
+  list plus `.gallery-card .image-link` and `.compare` — so a scoped
+  stylesheet only ever reads `var(--mat)`; forms H, V+H, R and P are
+  each written once on the element that owns that geometry. The cover
+  card's mat is one place: `CoverCards.astro`'s `span.image-link`, which
+  carries its own `--ar` (no anchor falls back to 1 — the card's anchor
+  is `a.gallery-card`, not `.image-link`). `global.css`'s `.gallery-grid
+
+  > li > a.image-link`rules (~1884–1894) match no markup since spec 009
+moved the cards' mat to the span — the cards'`<ul>`is the only`.gallery-grid` — and T1101 deletes them, so "cards off" is one edit.
 
 - **Form R is a deliberate deviation from the spec's letter.** A packed
   row's actual short side is the target grown by up to `--gallery-stretch`
@@ -72,8 +77,9 @@ a.image-link`, and `.compare` — so a scoped stylesheet only ever
   proportional term, which cannot express today's fixed mat (no
   constant term) and goes inexact the moment the clamp bites. A mat
   proportional to the target keeps the equal-short-side math exact
-  (the constant term stays), scales with the density knob (≈324px on
-  the laptop, 460 on the DualUp — "wider mats by the same share"),
+  (the constant term stays), scales with the density knob (33vmin:
+  ≈324px at 1512×982, ≈422px at 1280×1440 — "wider mats by the same
+  share"),
   makes every cell in a row wear one mat, and expresses today's mat as
   a token setting. The cost: a stretched row wears its mat at between
   `share/1.35` and `share` of its actual short side. Stated here, in
@@ -91,8 +97,10 @@ a.image-link`, and `.compare` — so a scoped stylesheet only ever
   cards set `--ar` on the span from the cover's dimensions; the gallery
   cell already carries it; the image page sets it on `.image-frame` and
   changes the compare figure's `--ar` from `W / H` to the same decimal
-  (`aspect-ratio` accepts a number). A frame with no `--ar` falls back
-  to 1, which is a share of the width — right for a portrait or square,
+  (`aspect-ratio` accepts a number). The span, the cell, the stage
+  figure and the compare figure are the elements form W or V+H is
+  declared on, so each reads its own `--ar`. A frame with no `--ar`
+  falls back to 1, which is a share of the width — right for a portrait or square,
   over by the ratio for a landscape — so the transform test pins that
   every frame has one.
 
@@ -109,19 +117,21 @@ a.image-link`, and `.compare` — so a scoped stylesheet only ever
 - **The four surfaces, and what "off" is.** Each surface's decision is
   landed at T1104 by one edit per surface, whichever way the gate goes:
 
-  | surface                                                        | mat today                                                                                                                             | off = (T1104)                                                                                                                                                                                                                           |
-  | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | a piece's reading-flow frames (one group)                      | the matted-list rule (`padding`, `background`), the half-bleed and `width-fullbleed` exceptions, held/pause box formulas, form P      | delete the matted-list rule's `padding`/`background` and the two exception rules; `.piece-held figure` and `.piece-pause` set `--mat: 0px` in place of their forms; delete the form P rule; drop the piece entries from the form W list |
-  | the packed rows (galleries, the place wall, the related strip) | form R; `.gallery-flow > li > a.image-link` `padding`/`background`                                                                    | `.gallery-flow > li { --mat: 0px }`; delete the anchor's `padding`/`background` (and `LatestWork.astro`'s, see below)                                                                                                                   |
-  | the image page's stage                                         | form V+H on `.image-frame`; the compare figure (form W) with `.compare-frames { gap }` and `.compare-note { margin }` reading `--mat` | `.image-frame { --mat: 0px }`, delete its `padding`/`background`; the compare's `padding`/`background` deleted and its gap and margin set to `calc(var(--baseline) / 2)`; drop `.compare` from the form W list                          |
-  | the index cover cards                                          | `CoverCards.astro` `.gallery-card .image-link` `padding`/`background`                                                                 | delete those two declarations; drop `.gallery-card .image-link` from the form W list                                                                                                                                                    |
+  | surface                                                        | mat today                                                                                                                                           | off = (T1104)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+  | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | a piece's reading-flow frames (one group)                      | the matted-list rule (`padding`, `background`), the half-bleed and `width-fullbleed` exceptions, held/pause box formulas, form P                    | **first**, T1103a: `CLAUDE.md`'s block-vocabulary bullet ("captions via the container form and site-applied mattes") amended in its own commit — the constitution's rule, and the statement is about piece-body treatments, so it goes false on this branch, not only on "nowhere"; then delete the matted-list rule's `padding`/`background` and the two exception rules; `.piece-held figure` and `.piece-pause` set `--mat: 0px` in place of their forms; delete the form P rule; drop the piece entries from the form W list |
+  | the packed rows (galleries, the place wall, the related strip) | form R; `.gallery-flow > li > a.image-link` `padding`/`background`                                                                                  | `.gallery-flow > li { --mat: 0px }`; delete the anchor's `padding`/`background` (and `LatestWork.astro`'s, see below)                                                                                                                                                                                                                                                                                                                                                                                                            |
+  | the image page's stage                                         | form V+H on `.image-frame`; the compare figure (form W) with `.compare-frames { gap }` and `.compare-note { margin }` reading `--mat`               | `.image-frame { --mat: 0px }`, delete its `padding`/`background`; the compare's `padding`/`background` deleted and its gap and margin set to `calc(var(--baseline) / 2)`; drop `.compare` from the form W list                                                                                                                                                                                                                                                                                                                   |
+  | the index cover cards                                          | `CoverCards.astro` `.gallery-card .image-link` `padding`/`background` — the one place, once T1101 has deleted the dead `.gallery-grid` anchor rules | delete those two declarations; drop `.gallery-card .image-link` from the form W list                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
   Two matted things the spec's groups do not name, assigned here: the
   image page's **compare figure** follows the stage (same page, same
   decision); **`LatestWork.astro`** — a curated strip no page places —
   follows the packed rows (it is the related strip's kin) and gets
-  form H over its band height (`--ar` on its anchor, σ = the band
-  height × q) so it keeps compiling; neither is a gate candidate. If
+  form H over its band height (`--ar` on its anchor, `--avail-h` declared
+  there and read by both its `--mat` and its `img { height }`, so the
+  band's height is one string) so it keeps compiling; neither is a gate
+  candidate. If
   **no** surface keeps a mat, T1104 also deletes the three tokens, the
   form W rule and the CSS-test cases that pin them, and T1105 moves the
   ground; `--color-matte` stays only if the compare's divider still
@@ -169,7 +179,7 @@ a.image-link`, and `.compare` — so a scoped stylesheet only ever
   | `today`    | `0`           | `clamp(0.5rem, 1.4vw, 1.05rem)` | `clamp(0.5rem, 1.4vw, 1.05rem)` | 16.8px (the control — T1101's inert literals)                     |
   | `share-25` | `0.025`       | `0.25rem`                       | `2.5rem`                        | ≈10.7px (thinner than today)                                      |
   | `share-40` | `0.04`        | `0.25rem`                       | `2.5rem`                        | ≈16.9px (today's width on this one frame, proportional elsewhere) |
-  | `share-60` | `0.06`        | `0.25rem`                       | `2.5rem`                        | ≈24.7px (wider)                                                   |
+  | `share-60` | `0.06`        | `0.25rem`                       | `2.5rem`                        | ≈24.7px (wider); the 440px square inset ≈23.6px                   |
 
   Floor 4px and ceiling 40px are the plan's starting points; the gate may
   move them. At 4% the ceiling bites nowhere on the laptop (the held
@@ -212,58 +222,60 @@ Every claim above is owned by a task and a check:
 - **The mechanism is one rule, declared once, inert on landing** —
   `matte.test.mjs` (new, root; `place-page.test.mjs` is the pattern, its
   `blocks`/`declarations`/`indexOf` helpers copied, declarations
-  whitespace-normalised because Prettier wraps long values), **T1101**:
+  whitespace-normalised because Prettier wraps long values), **T1101**
+  (the stylesheet and the test; the three files that still read
+  `--matte` switch at **T1101b**, which also deletes `--matte` and adds
+  the "`--matte` appears nowhere under `src/` or in the transform" case):
   (a) `:root` declares the three tokens at T1101's literals; no other
   top-level or nested block in `global.css` and no file under `src/`
   outside `src/pages/dev/` declares `--mat-share`, `--mat-min` or
-  `--mat-max` (grep in the test); `--matte` appears nowhere under `src/`
-  or in the transform; (b) the form W rule's selector list and `--mat`
-  string exact; the piece matted rule, `.gallery-flow > li > a.image-link`,
-  `.image-frame`, and `.gallery-grid > li > a.image-link` declare
-  `padding: var(--mat)`; form R's three declarations, the `.related-flow`
-  cap, form H's `--mat` and `max-width`, form V+H's `--mat`, `--frame-w`,
-  `--frame-h` on `.piece-pause` and `--mat`/`max-height` on `.image-frame`
-  / `.image-frame img`, form P's `--mat` and `--pair-gap` — each pinned
-  as a string; the form P rule's index greater than the form W rule's
-  (its (0,3,1) outranks (0,2,2) anyway, pinned for the reader); (c) the
-  **geometry evaluator**: a ~25-line evaluator over the pinned strings
-  (textual `var()` substitution from `:root`'s declarations plus per-case
-  values, `calc(`→`(`, `clamp`/`min`/`max`→JS, units `px` `rem`(16) `vw`
-  `vh` `svh` `vmin` `%`(the case's W) → numbers, then `Function`), run
-  over ratios {0.5, 0.667, 0.8, 1, 1.5, 1.78, 3} × shares {0, 0.025,
-  0.04, 0.06} × (floor, ceiling) {(0, 0), (8, 16.8), (4, 40)} × viewports
-  {1512×982, 1280×1440, 375×812}: form W at W = 666 gives `m ==
-clamp(F, s·σ, C)` with σ recomputed from `m` (the algebra); held: the
-  figure's `max-width` from form H, form W at that width equals the
-  figure's `--mat`, and the frame's height `(W − 2m)/ar + 2m == H`
-  (fits exactly); pause and stage: `--mat`, `--frame-w`/the stage box,
-  form W at the box width equals `--mat`, the box within both limits and
-  tight on one; form R at growth g ∈ {1, 1.2, 1.35}: image width `==
---gallery-short × w × g` for every share (the mat never enters the
-  photograph's width) and at g = 1.35 equals the px in
-  `galleryCell(image, short).sizes` — **the CSS/srcset agreement**; form
-  P for n = 2, 3 over mixed ratio sets: every member's padding equal,
-  heights equal, `m == clamp(F, s·h, C)`; and the **inert identity**:
-  share 0, floor = ceiling = 16.8 → every form's `m == 16.8` and form
-  R's basis `== short × w + 2 × 16.8`. Mutation-checked: change a `2 *`
-  to `1 *` in any pinned string → (b) and (c) fail; swap `max` for `min`
-  in form W → (c) fails at ratio 1.5.
+  `--mat-max` (grep in the test); no rule selecting `.gallery-grid > li
 
-- **The rendered geometry is unchanged at landing** — **T1101**, on the
-  dev server at 1512×982 and 375×812 (`/pieces/vocabulary-sampler/`,
-  `/galleries/every-ratio/`, `/places/`, one image page), with the same
-  driver as spec 012's T1001: the computed `padding-top` of a single, an
-  inset, a grid cell, a match-height member, the held anchor, the pause
-  anchor, a gallery cell, a related thumbnail, a cover card span and the
-  stage frame — every one 16.8px / 8px before and after the task (the
-  before run recorded first, from `main`); the held figure's and pause
-  frame's widths and the stage image's height identical before/after;
-  the gallery page's built HTML identical once the stylesheet link is
-  normalised (`sed -E 's#/_astro/[^"]+\.css#CSS#g' … | shasum`, the
-  template is untouched); the piece and image pages differ only by the
-  `--ar` style attributes (diff recorded). Where the implementer cannot
-  drive a browser it says so and the Phase 0 pause asks the person to
-  attest those lines.
+  > a.image-link`remains; (b) the form W rule's selector list and`--mat`string exact; the piece matted rule,`.gallery-flow > li >
+  > a.image-link`and`.image-frame`declare`padding: var(--mat)`; form
+R's three declarations, the `.related-flow`cap, form H's`--mat`and`max-width`, form V+H's `--mat`, `--frame-w`,
+`--frame-h`on`.piece-pause`and`--mat`/`max-height`on`.image-frame`/`.image-frame img`, form P's `--mat`and`--pair-gap`— each pinned
+as a string; the form P rule's index greater than the form W rule's
+(its (0,3,1) outranks (0,2,2) anyway, pinned for the reader); (c) the
+**geometry evaluator**: a ~25-line evaluator over the pinned strings
+(textual`var()`substitution from`:root`'s declarations plus per-case
+values, `calc(`→`(`, `clamp`/`min`/`max`→JS, units `px` `rem`(16) `vw`
+`vh` `svh` `vmin` `%`(the case's W) → numbers, then `Function`), run
+over ratios {0.5, 0.667, 0.8, 1, 1.5, 1.78, 3} × shares {0, 0.025,
+0.04, 0.06} × (floor, ceiling) {(0, 0), (8, 16.8), (4, 40)} × viewports
+{1512×982, 1280×1440, 375×812}: form W at W = 666 gives `m ==
+  > clamp(F, s·σ, C)`with σ recomputed from`m`(the algebra); held: the
+figure's`max-width`from form H, form W at that width equals the
+figure's`--mat`, and the frame's height `(W − 2m)/ar + 2m == H`(fits exactly); pause and stage:`--mat`, `--frame-w`/the stage box,
+form W at the box width equals `--mat`, the box within both limits and
+tight on one; form R at growth g ∈ {1, 1.2, 1.35}: image width `==
+  > --gallery-short × w × g`for every share (the mat never enters the
+photograph's width) and at g = 1.35 equals the px in`galleryCell(image, short).sizes`— **the CSS/srcset agreement**; form
+P for n = 2, 3 over mixed ratio sets: every member's padding equal,
+heights equal,`m == clamp(F, s·h, C)`; and the **inert identity**:
+share 0, floor = ceiling = 16.8 → every form's `m == 16.8`and form
+R's basis`== short × w + 2 × 16.8`. Mutation-checked: change a `2 *`to`1 *`in any pinned string → (b) and (c) fail; swap`max`for`min`
+  > in form W → (c) fails at ratio 1.5.
+
+- **The rendered geometry is unchanged at landing** — **T1101** and
+  **T1101b**, on the dev server at 1512×982 and 375×812
+  (`/pieces/vocabulary-sampler/`, `/galleries/every-ratio/`, `/places/`,
+  one image page), with the same driver as spec 012's T1001: the
+  computed `padding-top` of a single, an inset, a grid cell, a
+  match-height member, the held anchor, the pause anchor, a gallery
+  cell, a related thumbnail, a cover card span, the compare figure and
+  the stage frame — every one 16.8px / 8px before and after each task
+  (the before run recorded at the start of T1101, before editing, on the
+  branch as T1100 left it — T1100 changes no geometry); the held figure's
+  and pause frame's widths and the stage image's height identical
+  before/after; the gallery page's built HTML identical once the
+  stylesheet link is normalised (`sed -E 's#/_astro/[^"]+\.css#CSS#g' …
+| shasum`, the template is untouched); after T1101b the image page
+  differs from T1100's build only by the `--ar` style attributes (diff
+  recorded). Where the implementer cannot drive a browser it says so and
+  the Phase 0 pause asks the person to attest those lines. Both runs are
+  at share 0, so they prove the inert identity, not the forms: the
+  forms' first browser exercise is T1103's, below.
 
 - **The derived copies match the ground** — `ground.test.mjs` (new,
   root), **T1102**: an in-test oklch→sRGB conversion (OKLab → linear →
@@ -283,13 +295,20 @@ clamp(F, s·σ, C)` with σ recomputed from `m` (the algebra); held: the
   with the wrapper's tokens set to each candidate in turn (the driver
   calls `setProperty`, as the toolbar does), the fixture piece's 3:2
   single measures padding ≈0 / 16.8 / 10.7 / 16.9 / 24.7 and its inset
-  (440px, the square export) ≈0 / 16.8 / 10.5 / 16.3 / 24.4 — the same
+  (440px, the square export) ≈0 / 16.8 / 10.5 / 16.3 / 23.6 — the same
   frame smaller, so `share-40` reads thinner there than on the single;
   the gallery's cells one value per flow (≈13px at `share-40` on the
   laptop, ≈4.8 on the related strip); the stage frame's padding equals
-  `min(V, H)` for its ratio; the ground buttons change `<html>`'s
-  computed `background-color`; the fixture piece's page count and the
-  REAL count (10) recorded.
+  `min(V, H)` for its ratio; at `share-40` the **held** figure (the
+  portrait) is height-bound at 1512×982 — its height equals `100svh −
+2·hold-margin` (≈883.8px) and its anchor's computed padding equals the
+  figure's computed `--mat` (form W meeting form H in a browser, the
+  first time percentage padding inside a `max-width`-bound figure is
+  exercised) — and the **pause** frame's computed `--frame-h` equals its
+  measured height, its width ≤ `--avail-w` and height ≤ `--avail-h` with
+  one tight within 0.5px; the ground buttons change `<html>`'s computed
+  `background-color`; the fixture piece's page count and the REAL count
+  (10) recorded.
 
 - **Geometry after the gate** (AC 1–3, 6) — **T1104**, on the dev
   server at 1512×982, 1280×1440 and 375×812 on the shipped pages: each
@@ -329,19 +348,20 @@ obsidian-plugin/` empty; `gallery-layout.test.mjs`, `image-set.test.mjs`,
 ## File structure
 
 ```
-src/styles/global.css                          the three tokens (T1101); form W once, forms H, V+H, R, P on their elements; the stage's rules moved in; the gate's values and per-surface presence (T1104); the ground (T1105)
+src/styles/global.css                          the three tokens beside a transitional --matte (T1101); form W once, forms H, V+H, R, P on their elements; the stage's rules arrive (T1101), the dead .gallery-grid anchor rules go (T1101); --matte deleted (T1101b); the gate's values and per-surface presence (T1104); the ground (T1105)
 remark-pieces-blocks.mjs                       the probe for every block and the shorthand; raw --ar on every frame; --ar-sum/--n on match="height" (T1100)
 remark-pieces-blocks.test.mjs                  the ratio cases (T1100)
-src/components/CoverCards.astro                --ar on the span; padding: var(--mat) (T1101); presence (T1104)
-src/components/LatestWork.astro                --ar on the anchor; form H over the band height (T1101); presence (T1104)
-src/pages/images/[...id].astro                 stage rules moved out; --ar on .image-frame; the compare's decimal --ar and var(--mat) (T1101); presence (T1104)
+src/components/CoverCards.astro                --ar on the span; padding: var(--mat) (T1101b); presence (T1104)
+src/components/LatestWork.astro                --ar and --avail-h on the anchor; form H over the band height (T1101b); presence (T1104)
+src/pages/images/[...id].astro                 scoped stage rules deleted; --ar on .image-frame; the compare's decimal --ar and var(--mat) (T1101b); presence (T1104)
 src/pages/og/pieces/[slug].png.ts, public/og.jpg   the ground's derived copies (T1105, nowhere branch only)
-matte.test.mjs                                 tokens once; every form pinned; the geometry evaluator; the inert identity (new; T1101), the gate's literals (T1104)
+matte.test.mjs                                 tokens once; every form pinned; the geometry evaluator; the inert identity (new; T1101); no --matte anywhere (T1101b); the gate's literals (T1104)
 ground.test.mjs                                the OG hex and og.jpg match --color-bg (new; T1102)
 src/content/pieces/matte-sampler/index.md      the draft fixture piece on the real exports (new; T1103)
 src/pages/dev/matte/[...surface].astro         the sampler (dev only, new; T1103)
 README.md, AUTHORING.md                        the block table's Matted column; "never bake a matte" (T1106)
-ROADMAP.md, DECISIONS.md, CLAUDE.md (nowhere branch), design/brief.md (nowhere branch)   close-out (T1107, implementer-edited, orchestrator-committed)
+CLAUDE.md                                      the block-vocabulary bullet's "site-applied mattes", amended in its own commit on any branch where pieces go off (T1103a, before T1104)
+ROADMAP.md, DECISIONS.md, design/brief.md (nowhere branch)   close-out (T1107, implementer-edited, orchestrator-committed)
 ```
 
 Untouched, named so the reviewer can confirm the non-goals hold:
@@ -400,13 +420,26 @@ fit-content`) gets a share of the column, since its containing block
   so the inert landing, the sampler's control and the "everything as
   today" branch are one mechanism — the reason form R keeps the mat as
   the row's constant term.
-- **Form P's single mat per matched block**, for the same reason a
-  packed row wears one mat: the members share a dimension, and two mats
-  side by side at one height is the look the spec is removing.
+- **Form P's single mat per matched block** is a clamp-exactness
+  necessity, not a look: with a mat per member (`clamp(F, s·h·q_i, C)`)
+  the matched height `h` depends on which members sit at the floor or
+  ceiling, and which do depends on `h` — the regime is decided by the
+  answer, and CSS cannot branch on it inside one flex row. One mat for
+  the block puts the whole clamp on a known expression, `s(W − G)/(A +
+2ns)`, so the heights stay exact in every regime, as form H does for
+  the held frame. (The person accepted both at sign-off, 2026-09-13;
+  spec.md's Goal 2, its candidates requirement, and its second
+  acceptance criterion now say so.)
 - **The stage's rules move to `global.css`** so the sampler renders the
   real stage and the form lives with the others; the compare figure
   follows the stage's decision and `LatestWork` the packed rows' — both
   named as plan decisions, neither a candidate.
+- **`--matte` survives T1101 as a transitional alias** at its literal,
+  so the stylesheet and its test land under one review (`review:
+per-task`) while the three files that still read `--matte` stay
+  inert, and T1101b switches them and deletes it: the page's scoped
+  stage rules outrank `global.css`'s `.image-frame` until T1101b removes
+  them, so the moved-in form V+H is shadowed, not doubled, in between.
 - **A draft fixture piece on the borrowed exports**, not copies of the
   photographs and not the vocabulary sampler: spec 008's
   `../../gallery-images/<file>` shape exists for exactly this, a draft
