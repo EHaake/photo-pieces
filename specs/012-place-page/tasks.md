@@ -151,7 +151,7 @@ no fifth copy is added either way.
 the phase review must treat its recorded numbers and grep results as
 the substance of the review, not a formality (011's sign-off note 4). -->
 
-- [ ] **T1002** — The wall. `src/pages/places/[slug].astro`
+- [x] **T1002** — The wall. `src/pages/places/[slug].astro`
       (`src/pages/galleries/[slug].astro` is the pattern for the flow and
       the cell): replace the outings loop, `placeFlowStyle`,
       `PLACE_SHORT_PX`, the `formatDate` import, and the four `.outing*`
@@ -217,6 +217,8 @@ the substance of the review, not a formality (011's sign-off note 4). -->
       recorded here; any line the implementer cannot measure named for
       the person's attestation at the pause._
 
+_T1002 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, `[check-no-gps] 741 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/.`, `BUILD EXIT 0`, `CHECK EXIT 0` (0/0/0), `Test Files 13 passed (13)`, `Tests 277 passed (277)`, `TEST EXIT 0`. Mutations, each reverted: `galleryCell(image.image, 280)` → case (a) "every galleryCell( call takes one argument" fails; per-outing map → (b) "maps place.frames and never touches place.outings" and "exactly one gallery-flow list" fail; token retuned → (c) "the gate's value" fails; `.place-writing` deleted → (c) two tests fail (the padding test and the new `.place-writing`-after-`.section` order test); `:last-child` deleted → (c) fails; `place.summary` removed → (b) "still renders the head's summary line" fails; wall rule moved above reading-head → (c) order test fails (`expected 29 to be greater than 30`). Built HTML, article `</header>` to `<footer`: the-headlands / the-jetty — `href="…/pieces/` 0/0, `<h2` `<time` `<hr` 0; one `<ul class="gallery-flow gallery-wide"` each with the emitted `galleryFlowStyle` (`--gallery-short: clamp(280px, 33vmin, 460px); --gallery-stretch: 1.35; --gallery-width: calc(100vw - 2 * var(--page-pad)); --gallery-gap: calc(var(--baseline))`); `data-pagefind-ignore` on the wall, `data-pagefind-body` on the article; `og:image` the covers (`land-a`, `jetty-dawn`); wall hrefs 6 and 2 = M in "1 outing · 6 frames · 2026" / "2 outings · 2 frames · 2026". The one `outing` hit in the-headlands is the fixture's own prose sentence ("Below the writing the page gathers every outing there…"), pre-012 wording — fixed at T1003. Arrow chain: the-headlands 5 pairs of 5 `next` matches, the-jetty 1 of 1; first frames no `prev`, last no `next`. `git diff main --` on the seven untouched files → 0 lines. Geometry (headless Firefox, which reserves a 15px scrollbar, so absolute widths read 15 under 011's records): place wall `.gallery-flow` width = `/galleries/every-ratio/`'s at 1512×982 / 1280×1440 / 375×812 — 1448 / 1216 / 328 both pages; gaps 24/24 everywhere; `--gallery-short` identical on both `ul`s; `.prose` 666.4; prose→flow top 83.2 / 70.4 / 56 = the gate's clamp at each `clientWidth`; head→flow top with the-jetty's body blanked 83.2 / 70.4 / 56 (not the head gap's 48 — the source order renders); 375: one cell per row, 312 in a 328 flow; `scrollWidth ≤ clientWidth` everywhere; landscape short side 324.8 at 1512; at 1280×1440 no cell lands on the bare ≈417 (rows stretch to the 1.35 cap: 570.2/449.9), the density declaration equal by string. Fixture restored, `git status --short src/content/places/` empty; server and Firefox stopped. Read beyond the bundle: `scripts/verify.sh`, `vitest.config.ts`, `the-jetty.md`. No deviations.
+
 - [ ] **T1003** — Docs: `AUTHORING.md` and `README.md`. `AUTHORING.md`
       "Places": the paragraph beginning "`/places/<slug>/` shows the
       title…" describes the page as the writing and then one wall — every
@@ -233,7 +235,11 @@ the substance of the review, not a formality (011's sign-off note 4). -->
       format-aware density from `gallery-layout.ts`; the
       `lib/gallery-layout.ts` tree comment drops "place pages call
       galleryCell but keep their own pre-011 packing"; the `pages/dev/`
-      tree comment gains the place-wall sampler. Hand-edit the prose
+      tree comment gains the place-wall sampler. Also (added after T1002's
+      record): `src/content/places/the-headlands.md`'s sentence "Below the
+      writing the page gathers every outing there, oldest first, as the
+      pieces were published" describes the pre-012 page — reword it to the
+      one wall (frontmatter untouched). Hand-edit the prose
       (never script-rewrap). _Verify: every claim read against the built
       pages and the gate record; `npx prettier --check AUTHORING.md
       README.md` clean; `sh scripts/verify.sh` green._
@@ -306,7 +312,7 @@ tier if it is ever on (it is off). -->
 | T1000 impl (`sdd-implementer`)               | implementation (opus)        | 24,471 | green first pass; no miss |
 | T1001 impl (`sdd-implementer`)               | implementation (opus)        | 61,789 | green first pass; all geometry measured headless; no miss |
 | Phase 0 review (`skeptical-reviewer`)        | reviewer default (opus)      | 51,330 | signed off, no blocking; 7 notes, 4 carried to T1002 below |
-| T1002 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
+| T1002 impl (`sdd-implementer`)               | implementation (opus)        | 83,601 | green first pass; 7 mutations proven; all geometry measured; no miss |
 | T1003 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | Phase 1 review (`skeptical-reviewer`)        | reviewer default (opus)      |        |                       |
 | T1004 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |

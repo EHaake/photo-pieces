@@ -71,8 +71,11 @@
      tightened below at 720px and up — the gate's values. */
   --head-pad-reading: clamp(3.5rem, 5.5vw, 5.5rem);
   --head-gap-reading: clamp(3.5rem, 5.5vw, 5.5rem);
-  /* The place page's writing-to-wall gap (spec 012): .section's padding,
-     the inert default — the gate's value lands at T1002. */
+  /* The place page's writing-to-wall gap (spec 012). The gate,
+     2026-09-13: the photographer chose candidate `wall-section` — one
+     .section padding between the writing and the first row, and the same
+     value after the head on a place with no writing (no head-case
+     override). Keep the clamp in step with .section by hand. */
   --place-wall-gap: clamp(3.5rem, 5.5vw, 5.5rem);
 }
 

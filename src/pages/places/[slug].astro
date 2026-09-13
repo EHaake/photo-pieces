@@ -1,14 +1,18 @@
 ---
-// A place page (spec 009): the gallery page's shape, grown over time —
-// the place's own writing, then one section per outing there, oldest
-// first, each heading a link to the piece that outing was published as
-// and each frame a link to its own page. The rows pack exactly as a
-// gallery's do (see .gallery-flow in global.css).
+// A place page (spec 012): one wall. The place's own writing, then every
+// published frame at the place as a single packed gallery — the
+// registry's flat `place.frames` (outings oldest first, each piece's
+// own-folder frames in the piece's order), so the wall's order IS the
+// order the image page's arrows step through, by construction. Nothing
+// between the head and the footer names a piece: no outing headings, no
+// dates, no dividers. The rows pack exactly as a gallery's do, at the
+// galleries' width, gap, and density — consumed from
+// src/lib/gallery-layout.ts, never copied here (see .gallery-flow in
+// global.css).
 import { Image, getImage } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { formatDate } from '../../i18n';
-import { galleryCell, GALLERY_STRETCH } from '../../lib/gallery-layout';
+import { galleryCell, galleryFlowStyle } from '../../lib/gallery-layout';
 import { getImageRegistry } from '../../lib/images';
 import { ogImageOptions } from '../../lib/og';
 import { withBase } from '../../lib/url';
@@ -24,27 +28,13 @@ export async function getStaticPaths() {
 const { place } = Astro.props;
 const registry = await getImageRegistry();
 
-// Spec 011 widened and retuned the galleries and, through the shared
-// `galleryFlowStyle`, would have moved the place-page outings with them.
-// The place page's own treatment (its width, its density, and how the
-// outings are labelled) turned out to want its own design pass, so it is
-// deferred to its own spec — see ROADMAP. Until then the outings keep
-// their pre-011 packing: this page does NOT share the galleries' retuned
-// width/gap/density. `--gallery-gap` and `--gallery-width` are left unset,
-// so the CSS falls back to today's gap and the flow stays in `.section`
-// (no `gallery-wide`); the short side and the srcset use the pre-011
-// density below.
-const PLACE_SHORT_PX = 280;
-const placeFlowStyle = `--gallery-short: clamp(200px, 26vw, ${PLACE_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}`;
-
-// Every id came from the registry; the lookups can't miss.
-const outings = place.outings.map((outing) => ({
-  piece: outing.piece,
-  cells: outing.frames.map((id) => {
-    const image = registry.byId.get(id)!;
-    return { image, ...galleryCell(image.image, PLACE_SHORT_PX) };
-  }),
-}));
+// Every id came from the registry; the lookups can't miss. Each cell
+// hands its ratio to the CSS (--ar) and sizes its srcset from the same
+// knobs the CSS gets, as the gallery page does.
+const cells = place.frames.map((id) => {
+  const image = registry.byId.get(id)!;
+  return { image, ...galleryCell(image.image) };
+});
 
 const cover = registry.byId.get(place.cover)!;
 const og = await getImage(ogImageOptions(cover.image));
@@ -69,7 +59,7 @@ const { Content } = await render(place.entry);
 
     {
       hasWriting && (
-        <div class="section">
+        <div class="section place-writing">
           <div class="prose">
             <Content />
           </div>
@@ -77,36 +67,26 @@ const { Content } = await render(place.entry);
       )
     }
 
-    {
-      outings.map(({ piece, cells }) => (
-        <section class="section outing" aria-labelledby={`outing-${piece.id}`} data-pagefind-ignore>
-          <h2 id={`outing-${piece.id}`} class="outing-title">
-            <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
-          </h2>
-          <div class="entry-meta">
-            <time datetime={piece.data.publishDate.toISOString()}>
-              {formatDate(piece.data.publishDate)}
-            </time>
-          </div>
-          <ul class="gallery-flow" style={placeFlowStyle}>
-            {cells.map(({ image, ar, width, sizes }) => (
-              <li style={`--ar: ${ar}`}>
-                <a href={withBase(image.url)} class="image-link">
-                  <Image
-                    src={image.image}
-                    alt={image.title}
-                    layout="constrained"
-                    width={width}
-                    sizes={sizes}
-                    loading="lazy"
-                  />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))
-    }
+    <div class="section place-wall" data-pagefind-ignore>
+      <ul class="gallery-flow gallery-wide" style={galleryFlowStyle}>
+        {
+          cells.map(({ image, ar, width, sizes }) => (
+            <li style={`--ar: ${ar}`}>
+              <a href={withBase(image.url)} class="image-link">
+                <Image
+                  src={image.image}
+                  alt={image.title}
+                  layout="constrained"
+                  width={width}
+                  sizes={sizes}
+                  loading="lazy"
+                />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </article>
 </BaseLayout>
 
@@ -114,27 +94,5 @@ const { Content } = await render(place.entry);
   /* Titles are short here; the lead can run to the prose width. */
   .lead {
     max-width: var(--prose-width);
-  }
-
-  /* One outing after another reads as a list of visits: a hairline
-     between them, as the galleries index sets between its groups. */
-  .outing + .outing {
-    border-top: var(--hairline);
-  }
-
-  .outing-title {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 1.25rem;
-    line-height: 1.25;
-  }
-
-  .outing .entry-meta {
-    margin-top: calc(var(--baseline) * 0.25);
-  }
-
-  .outing .gallery-flow {
-    margin-top: calc(var(--baseline) * 1);
   }
 </style>
