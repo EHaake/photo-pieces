@@ -82,7 +82,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 _T1000 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, `[check-no-gps] 748 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/.`, `BUILD EXIT 0`; `astro check` 0 errors 0 warnings 0 hints, `CHECK EXIT 0`; `Test Files 12 passed (12)`, `Tests 265 passed (265)`, `TEST EXIT 0`. Normalised `dist/places/the-headlands/index.html` hash before `f21cc96a5c19b26b3662a2a73ecfa8a50d33e6c8`, after `f21cc96a5c19b26b3662a2a73ecfa8a50d33e6c8` — identical. `grep -rc "place-wall\|place-writing" src/pages/ src/components/ src/layouts/` → 0 everywhere. `prettier --check src/styles/global.css` clean. The plan's two trailing comments were written as block comments above their rules (file style); content unchanged.
 
-- [ ] **T1001** — The sampler (dev-only).
+- [x] **T1001** — The sampler (dev-only).
       `src/pages/dev/place-wall/[...candidate].astro`
       (`src/pages/dev/galleries/[...candidate].astro` is the pattern —
       copy its three lessons: `getStaticPaths()` returns `[]` unless
@@ -127,6 +127,8 @@ _T1000 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh` — `87
       set drew on recorded (10 expected). Where the implementer cannot
       drive a browser it says so, line by line, and the Phase 0 pause
       asks the person to attest those lines on his two screens._
+
+_T1001 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, `[check-no-gps] 748 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/.`, `BUILD EXIT 0`, `CHECK EXIT 0` (0/0/0), `Test Files 12 passed (12)`, `Tests 265 passed (265)`, `TEST EXIT 0`; `test ! -e dist/dev` → absent; `grep -c "/dev/" dist/sitemap-0.xml` → 0. Negative control (guard removed): `[check-no-dev-routes] dist/dev/ exists — a dev-only route was built: dist/dev/place-wall/bare-head/index.html, … dist/dev/place-wall/wall-tight/index.html` (eight files), `NPM BUILD EXIT 1`; guard restored, verify re-run green (same counts). Geometry, headless Firefox 155 via WebDriver BiDi at a confirmed 1512×982 viewport on the dev server, `/dev/place-wall/`: seven articles; flow widths `current` 1160.0px vs every `wall-*`/`bare-*` 1448.0px (the plan's ≈1433 assumed a ~15px classic scrollbar; headless reserved none — 1512 − 2×32 page pad); prose→top of `ul.gallery-flow`: `wall-tight` 24.0 / `wall-head` 48.0 / `wall-section` 83.2px; head→flow top on `bare-tight`/`bare-head`/`bare-section` 24.0 / 48.0 / 83.1px; `current` prose→flow 83.2px; 10 cells in every flow (the REAL predicate over a 38-raster root; the fallback did not fire); `/dev/place-wall/<id>/` pages 200 with one article, the banner, six sibling links plus `stacked`; `wall-head` full-page remeasured identical to stacked. Side note: the first *image* sits a further ≈26–29px below the flow's top (`align-items: center`). Nothing left unmeasured; the second screen is the person's at the gate. Deviations: the sampler's scoped `<style>` carries the place page's `.lead { max-width: var(--prose-width) }` so the head reads as it does there; the full-page view also shows its `.sampler-label`; the summary line is annotated "(the fixture place's own counts)". Read beyond the bundle: `global.css`, `scripts/check-no-dev-routes.mjs`, `scripts/verify.sh`, `package.json`, `src/content/places/the-headlands.md`, the gallery-images listing, `src/lib/images.ts` (grep). A BiDi driver script (`measure.mjs`, scratchpad) measured this and can serve T1002.
 
 ### Gate record (Phase 0 pause)
 
@@ -298,7 +300,7 @@ tier if it is ever on (it is off). -->
 | Sign-off: plan/tasks (`skeptical-reviewer`)  | top (`claude-fable-5-1`, high) | 88,526 | 3 blocking (T1000 hash Verify; session-per-phase wording; T1004 by hand), 7 notes |
 | Sign-off re-review (`skeptical-reviewer`)    | top (`claude-fable-5-1`, high) | 35,920 | signed off; 5 notes carried below |
 | T1000 impl (`sdd-implementer`)               | implementation (opus)        | 24,471 | green first pass; no miss |
-| T1001 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
+| T1001 impl (`sdd-implementer`)               | implementation (opus)        | 61,789 | green first pass; all geometry measured headless; no miss |
 | Phase 0 review (`skeptical-reviewer`)        | reviewer default (opus)      |        |                       |
 | T1002 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | T1003 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
