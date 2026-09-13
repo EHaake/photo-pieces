@@ -177,10 +177,11 @@ attached.
   — `at: <slug>` in a frame's sidecar, with a piece's own `at:` as an
   optional default for its folder and `at: none` to opt a frame out. The
   build refuses a slug with no file and lists the places that exist. The
-  page at `/places/<slug>/` carries the writing, then the outings oldest
-  first, each the piece's own frames at the place in the piece's order,
-  packed as a gallery; `/places/` lists cards, and Places sits in the
-  nav after Galleries. The wall label's place is the place's title as a
+  page at `/places/<slug>/` carries the writing, then one wall — every
+  published frame at the place packed as a single gallery, outings
+  oldest first and each piece's frames in the piece's order, naming no
+  piece; `/places/` lists cards, and Places sits in the nav after
+  Galleries. The wall label's place is the place's title as a
   link, and the arrows step through a place's frames when the reader
   arrives from it. Never by GPS and never by the free-text `place`,
   which stays prose. Follow-ups it leaves: a place's writing is prose

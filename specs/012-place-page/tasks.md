@@ -282,6 +282,24 @@ _T1003 record (2026-09-13, implementer at opus):_ `npx prettier --check AUTHORIN
 
 ---
 
+- [x] **T1004a** — Sweep fix (blocking B1, B2). `CLAUDE.md`'s Places
+      bullet still says a place's page "groups its published frames by the
+      piece they live in": amend it to the one wall (every published frame
+      at the place as one packed gallery, outings oldest first, own-folder
+      frames only, no piece named on the page) in its own commit, as the
+      constitution requires. `ROADMAP.md`'s spec 009 entry (≈line 180)
+      still describes the page as "then the outings oldest first, each the
+      piece's own frames…, packed as a gallery" four lines above the 012
+      follow-up: reword that sentence to the wall. Cause of the miss: AC 7's
+      document list omitted the constitution, and T1004's grep for "groups
+      by piece" did not match its wording. _Verify: `npx prettier --check
+      CLAUDE.md ROADMAP.md` clean; `grep -rn "groups .*by the piece\|grouped
+      by the piece\|then the outings" CLAUDE.md ROADMAP.md README.md
+      AUTHORING.md DECISIONS.md` → only historical mentions that name spec
+      009 as past; `sh scripts/verify.sh` green._
+
+_T1004a record (2026-09-13, implementer at opus):_ CLAUDE.md's Places clause now "shows its published frames as one wall, outings oldest first, own-folder frames only, naming no piece" (own commit); ROADMAP's spec 009 sentence now "then one wall — every published frame at the place packed as a single gallery, outings oldest first and each piece's frames in the piece's order, naming no piece". `grep -rn 'groups .*by the piece\|grouped by the piece\|then the outings'` over the five documents → no hits. `prettier --check ROADMAP.md` clean; `CLAUDE.md` warns on one pre-existing line (179, a multi-line inline code span in the Model policy — identical against `HEAD:CLAUDE.md`), outside this task and outside the four documents the spec checks; accepted as is, noted for a later bookkeeping fix. `sh scripts/verify.sh` — `87 page(s) built`, `741 images scanned … no GPS`, `no dev routes in dist/.`, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 13 passed (13)`, `Tests 277 passed (277)`, `TEST EXIT 0`.
+
 _T1004 record, the documents (2026-09-13, implementer at opus):_ `npx prettier --check ROADMAP.md DECISIONS.md` → `All matched files use Prettier code style!`; `sh scripts/verify.sh` — `87 page(s) built`, `[check-no-gps] 741 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/.`, `BUILD EXIT 0`, `CHECK EXIT 0` (0/0/0), `Test Files 13 passed (13)`, `Tests 277 passed (277)`, `TEST EXIT 0`. ROADMAP: "The place page's own treatment" struck as done in spec 012 (follow-ups: the page/arrow order is one list by construction only because both read `place.frames`, pinned by a source-reading test; the gap's clamp is a literal copy of `.section`'s padding; the sampler stays behind the barrier); spec 009's gallery-root note now says the grouping reason is gone and only an ordering rule keeps them out, and that the index card's summary still counts outings; `grep 'groups by piece'` → none. DECISIONS: a spec 012 section in 011's shape. The implementer omitted a "both screens" claim for the gate since the record said screens were not named; the Phase 1 attestation on both screens is now in the gate record. Read beyond the bundle: `places/index.astro`, `images.ts` (summary), `global.css`, the dev listing, `.prettierrc`.
 
 ### The pre-merge sweep
@@ -320,7 +338,9 @@ tier if it is ever on (it is off). -->
 | T1003 impl (`sdd-implementer`)               | implementation (opus)        | 40,401 | green first pass; one declared extra passage; no miss |
 | Phase 1 review (`skeptical-reviewer`)        | reviewer default (opus)      | 68,655 | signed off, no blocking; 8 notes — N1 owned by T1004, N3/N4 corrected in the T1002 record, 5 carried below |
 | T1004 impl (`sdd-implementer`)               | implementation (opus)        | 50,596 | green first pass; docs only; no miss |
-| Pre-merge sweep (`skeptical-reviewer`)       | reviewer default (opus)      |        |                       |
+| Pre-merge sweep (`skeptical-reviewer`)       | reviewer default (opus)      | 89,478 | 2 blocking (CLAUDE.md Places clause; ROADMAP 009 sentence) → T1004a; 15 carried notes all accepted |
+| T1004a impl (`sdd-implementer`)              | implementation (opus)        | 26,673 | green; pre-existing CLAUDE.md prettier line flagged, left |
+| Sweep re-review (`skeptical-reviewer`)       | reviewer default (opus)      |        |                       |
 
 _(Session-tier allowance draw noted at each pause.)_ Session open, 2026-09-13, before T1000: Fable allowance 69% left. Phase 0 pause (the gate), 2026-09-13: 67% left. Phase 1 pause, 2026-09-13: 66% left — the place pages attested on both screens.
 
