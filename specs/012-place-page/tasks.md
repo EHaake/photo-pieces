@@ -132,14 +132,18 @@ _T1001 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh` — `87
 
 ### Gate record (Phase 0 pause)
 
-_To be recorded by the orchestrator from the person's decision, in the
-shape of spec 011's gate record: the packing (confirm the galleries'
-width/gap/density, or name the change — which moves the constants in
-`gallery-layout.ts` for galleries and places together); the
-writing-to-wall gap (`tight` / `head` / `section` / a named value); whether
-the head case (no writing) takes the same value or spec 010's head gap;
-which screens it was judged on. Fold the outcome into plan.md as a dated
-"Gate outcome" amendment, as 011 did._
+**Gate outcome (2026-09-13, the product owner, from the sampler):**
+candidate `wall-section`. The packing is the galleries' — width, gap,
+and density confirmed as shown, no change to `gallery-layout.ts`'s
+constants. The writing-to-wall gap is one `.section` padding,
+`clamp(3.5rem, 5.5vw, 5.5rem)` (≈83px on the laptop). The head case (a
+place with no writing) takes the same value — no `.reading-head +
+.section.place-wall` override, and the CSS test asserts its absence.
+Screens: not named in the decision. Consequence for T1002: the token
+keeps the literal T1000 landed (it was already the gate's value), with
+the comment dated; the reviewer's by-reference suggestion is not taken
+because no `.section` token exists and the plan's test pins a literal —
+no fifth copy is added either way.
 
 ## Phase 1 — The wall and the docs (reviewer after the phase; the person's pause at its end)
 
@@ -308,7 +312,7 @@ tier if it is ever on (it is off). -->
 | T1004 impl (`sdd-implementer`)               | implementation (opus)        |        |                       |
 | Pre-merge sweep (`skeptical-reviewer`)       | reviewer default (opus)      |        |                       |
 
-_(Session-tier allowance draw noted at each pause.)_ Session open, 2026-09-13, before T1000: Fable allowance 69% left.
+_(Session-tier allowance draw noted at each pause.)_ Session open, 2026-09-13, before T1000: Fable allowance 69% left. Phase 0 pause (the gate), 2026-09-13: 67% left.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 

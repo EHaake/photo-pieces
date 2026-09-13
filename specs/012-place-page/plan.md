@@ -329,3 +329,15 @@ plugin.
 - **The sampler is a new route, not a mode on `/dev/galleries/`**: the
   galleries sampler is gate history for 011 and shows no head or writing;
   this one needs the place page's exact markup.
+
+## Gate outcome (amendment, 2026-09-13)
+
+The product owner judged the sampler and chose `wall-section`: the
+galleries' width, gap, and density are confirmed for the place wall
+(`gallery-layout.ts`'s constants unchanged), the writing-to-wall gap is
+one `.section` padding — `--place-wall-gap: clamp(3.5rem, 5.5vw, 5.5rem)`,
+the literal T1000 landed, now the gate's value — and the head case takes
+the same value: no `.reading-head + .section.place-wall` override is
+added, and `place-page.test.mjs` case (c) asserts that rule is absent.
+The laptop measurement at 1512×982 is ≈83px prose-to-first-row; the
+plan's ≈1433 bleed reads 1448 without a reserved scrollbar.
