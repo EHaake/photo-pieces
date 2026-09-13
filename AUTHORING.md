@@ -456,10 +456,13 @@ at: the-jetty # its own line wins over the piece's default
 
 `/places/<slug>/` shows the title, the description, a summary line
 ("N outings · M frames · 2019–2026", the years being the outings'
-publish years), your writing, and then the outings — oldest first,
-each headed by the piece's title as a link and its date, with that
-piece's own frames at the place in the piece's order, packed as a
-gallery. That is the whole act of adding photographs: publish a
+publish years), your writing, and then one wall — every published
+frame at the place as a single packed gallery, at the galleries'
+width, gap, and density. The order is the outings oldest first, each
+piece's frames in the piece's own order, with no heading, date, or
+divider between one visit and the next. The page names no piece
+anywhere; a frame's own page says which piece it came from and links
+there. That is the whole act of adding photographs: publish a
 piece whose frames name the place, and the page grows. A borrowed
 photograph stays with its home piece, never counted twice.
 `/places/` lists the places as cards, most recent outing first, and
@@ -474,9 +477,10 @@ refuses a `cover` that is not one of the place's frames, once the
 place publishes. A draft place and a place with no published frame
 yet get a note, not a failure: no page, no card, and their frames
 show no place, so a place can be declared ahead of its first outing.
-A gallery-root photograph cannot join a place — the page groups by
-piece and it has none — so its `at:` is checked for the slug and
-then ignored with a warning naming the file.
+A gallery-root photograph still cannot join a place: belonging to no
+piece, it has no publish date to take its turn by in the wall's order
+(`ROADMAP.md`). Its `at:` is checked for the slug and then ignored
+with a warning naming the file.
 
 ## Hard-won syntax rules
 

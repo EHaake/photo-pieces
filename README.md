@@ -236,11 +236,11 @@ sizes off the smaller viewport dimension (`vmin`), so a tall or
 near-square display (a 16:18 LG DualUp) shows larger frames than a wide
 laptop. The related strip on an image page is deliberately left as it
 was — its reading-column width and its smaller short side. Place pages
-pack their outings through the same `gallery-layout.ts`, but keep their
-own pre-011 packing (a place-page treatment is its own spec — see
-`ROADMAP.md`). `/galleries/` groups galleries by category and is in the
-nav, with the category row under its title — each category a link to
-its own page, nothing marked. `/categories/<category>/` lists a
+share that room: the one wall under a place's writing runs at the
+galleries' width, gap, and format-aware density, from the same
+`gallery-layout.ts` (spec 012). `/galleries/` groups galleries by
+category and is in the nav, with the category row under its title —
+each category a link to its own page, nothing marked. `/categories/<category>/` lists a
 category's galleries then its pieces and is reached from category
 labels, never from the nav; its head carries the same row with `All`
 first, back to `/pieces/`, the category you're on marked rather than
@@ -260,14 +260,18 @@ is the slug and the URL. A frame names its place in its sidecar with
 `at: <slug>`, or a piece names one default for its whole folder with
 `at: <slug>` in its frontmatter — the frame's own line wins, and
 `at: none` opts a frame out of the default. `/places/<slug>/` shows the
-writing and then every published frame at the place, grouped by the
-piece it lives in, outings oldest first, so the page grows as pieces are
-published; `/places/` lists the places as cards and is in the nav after
-Galleries. An `at:` naming a place that does not exist fails the build,
-listing the places that do, as does a place `cover` that is not one of
-its frames once the place publishes; a draft or still-empty place is a
-note and builds no page. Gallery-root photographs are not grouped under
-a place — their `at:` is checked and then ignored with a warning.
+writing and then one wall — every published frame at the place as a
+single packed gallery, outings oldest first and each piece's frames in
+its own order, with nothing between the visits and no piece named on
+the page — so the page grows as pieces are published; `/places/` lists
+the places as cards and is in the nav after Galleries. An `at:` naming
+a place that does not exist fails the build, listing the places that
+do, as does a place `cover` that is not one of its frames once the
+place publishes; a draft or still-empty place is a
+note and builds no page. Gallery-root photographs are still kept out of
+a place — with no piece they have no publish date to take their turn by
+(`ROADMAP.md`) — so their `at:` is checked and then ignored with a
+warning.
 
 **GPS is never published.** The EXIF reader asks for an allowlist of
 exposure tags with GPS parsing off, its output is asserted against a
@@ -359,14 +363,14 @@ photo-pieces/
 │   ├── content/places/           # one file per place
 │   ├── lib/pieces.ts             # the one published-pieces query
 │   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, places, sets)
-│   ├── lib/gallery-layout.ts     # packing knobs: bleed width, gap, format-aware density (galleries); density also drives the srcset/sizes math so CSS and images can't drift; the related strip's knobs live here too; place pages call galleryCell but keep their own pre-011 packing (deferred to their own spec)
+│   ├── lib/gallery-layout.ts     # packing knobs: bleed width, gap, format-aware density (galleries); density also drives the srcset/sizes math so CSS and images can't drift; the related strip's knobs live here too; the place page's wall consumes the same width, gap, and density
 │   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
 │   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
 │   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), LatestWork, CategoryRow
 │   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
-│   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler); postbuild fails if any reach dist/
+│   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler, the place-wall sampler); postbuild fails if any reach dist/
 │   └── styles/global.css
 ```
 
