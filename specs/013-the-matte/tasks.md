@@ -1,6 +1,9 @@
 # Tasks: The matte, rethought
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-13) — by the `skeptical-reviewer` at the
+top tier; three blocking findings (one a product call the person took,
+two fixed) cleared on the one re-review, seven notes folded in, four
+carried to the sweep below.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1100, T1101, T1101b, T1102, T1103) — the
 ratio on every frame, the mat rule landed inert (the stylesheet, then
@@ -24,8 +27,8 @@ orchestrating session triages each task and dispatches routine ones to
 the `sdd-implementer` on a task bundle assembled with shell (the task
 line, the plan sections, the acceptance criteria, the files, the pattern
 file to copy, any recorded gate value), telling it not to read plan.md,
-spec.md, or tasks.md in full; the implementer's verbatim `sh
-scripts/verify.sh` output is the verification, re-run by the
+spec.md, or tasks.md in full; the implementer's verbatim
+`sh scripts/verify.sh` output is the verification, re-run by the
 orchestrator for T1101; the reviewer checks each phase as a whole from a
 staged, shell-assembled bundle — one review and at most one re-review,
 anything still open logged and left to the sweep. A design question the
@@ -62,9 +65,10 @@ headers to confirm nothing was duplicated or dropped. -->
       match="height" keeps its **normalized** `--ar` on the anchors and
       its figure additionally carries `--ar-sum: <Σ raw ratios>` and
       `--n: <images.length>` in `wrapperStyle`; held and pause keep the
-      raw `--ar` on the wrapper as today. The shorthand pass (`visit(tree,
-  'image', …)`) collects its nodes, awaits `probeDimensions` for
-      them, and wraps with `--ar` in `extraProps`. A frame the probe
+      raw `--ar` on the wrapper as today. The shorthand pass
+      (`visit(tree, 'image', …)`) collects its nodes, awaits
+      `probeDimensions` for them, and wraps with `--ar` in `extraProps`.
+      A frame the probe
       cannot read — a remote or root-absolute src, or a file rendered
       with no `file.path` (some transform tests) — carries no `--ar` and
       falls back to 1 in CSS; the probe's existing failure stays for a
@@ -86,10 +90,10 @@ headers to confirm nothing was duplicated or dropped. -->
       recorded and equal to the page's count of `class="image-link"`
       plus its bare-img frames (every frame has one) **plus one per
       `piece-held` and `piece-pause` figure** (their wrappers carry the
-      raw `--ar` too — the expected surplus, counted with `grep -o
-    'piece-held\|piece-pause' … | wc -l`; a match-height figure's
-      `--ar-sum` does not match the pattern); `git diff main --
-  obsidian-plugin/` empty._
+      raw `--ar` too — the expected surplus, counted with
+      `grep -o 'piece-held\|piece-pause' … | wc -l`; a match-height
+      figure's `--ar-sum` does not match the pattern);
+      `git diff main -- obsidian-plugin/` empty._
 
 - [ ] **T1101** — The mat rule, inert (the stylesheet and its test).
       `review: per-task`. `src/styles/global.css`: in `:root` add the
@@ -107,9 +111,10 @@ headers to confirm nothing was duplicated or dropped. -->
       the two `.gallery-grid > li > a.image-link` rules (~1884–1894):
       they match no markup — the only `.gallery-grid` is
       `CoverCards.astro`'s, whose anchor is `a.gallery-card` and whose
-      mat sits on the `span.image-link` (checked by `grep -rn
-    "gallery-grid" src/` → CoverCards and the dev sampler's comment
-      only), so the cards' mat becomes one place; **form P** on the
+      mat sits on the `span.image-link` (checked by
+      `grep -rn "gallery-grid" src/` → CoverCards and the dev sampler's
+      comment only), so the cards' mat becomes one place; **form P** on
+      the
       match-height members (`--pair-gap`
       declared on `.piece-diptych.match-height, .piece-triptych.match-height`
       and read by their `gap`; the members' `--mat` string from the
@@ -122,9 +127,10 @@ headers to confirm nothing was duplicated or dropped. -->
       `--mat`) and the anchor's `padding: var(--mat)`; the stage's rules
       **added** (`.image-stage` with `--avail-w`/`--avail-h`,
       `.image-frame` with `--r`/`--q`/`--mat`/`padding: var(--mat)`,
-      `.image-frame img` with `max-height: calc(var(--avail-h) - 2 *
-  var(--mat))`, the three `html[data-quiet]` stage rules redeclaring
-      `--avail-w`/`--avail-h` over `--stage-pad`) — the page's scoped
+      `.image-frame img` with
+      `max-height: calc(var(--avail-h) - 2 * var(--mat))`, the three
+      `html[data-quiet]` stage rules redeclaring `--avail-w`/`--avail-h`
+      over `--stage-pad`) — the page's scoped
       copies stay until T1101b and outrank these by their scoped
       attribute, so the stage stays inert in between; the `vh` fallback
       lines dropped only where a value passes through a custom property;
@@ -134,23 +140,25 @@ headers to confirm nothing was duplicated or dropped. -->
       spec's four surfaces reads, so T1104's edits are a lookup.
       `matte.test.mjs` (new; the plan's cases (a) the three tokens
       declared once, in `:root`, and nowhere under `src/` outside
-      `src/pages/dev/`; no rule selects `.gallery-grid > li >
-  a.image-link`; (b) every form's strings pinned,
-      whitespace-normalised; (c) the geometry evaluator over the plan's
-      grid — the algebra of form W, the held fit, the pause and stage
-      fits, form R's image width against `galleryCell(image,
-  short).sizes`, form P's equal paddings and heights, and the inert
-      identity at share 0 with floor = ceiling = 16.8). Pattern:
+      `src/pages/dev/`; no rule selects
+      `.gallery-grid > li > a.image-link`; (b) every form's strings
+      pinned, whitespace-normalised; (c) the geometry evaluator over the
+      plan's grid — the algebra of form W, the held fit, the pause and
+      stage fits, form R's image width against
+      `galleryCell(image, short).sizes`, form P's equal paddings and
+      heights, and the inert identity at share 0 with floor = ceiling =
+      16.8). Pattern:
       `place-page.test.mjs` for the CSS reading; the held/pause formulas
       in `global.css` for the forms. _Verify: **at the start of the
       task, before editing** (the branch as T1100 left it — T1100 changes
       no geometry; do not switch branches), the dev-server geometry run
       recorded (the plan's list of eleven frames' `padding-top`, the held
       figure's and pause frame's widths, the stage image's height at
-      1512×982 and 375×812; and `sed -E 's#/_astro/[^"]+\.css#CSS#g'
-  dist/galleries/every-ratio/index.html | shasum`); **after**: `sh
-  scripts/verify.sh` green with the new file, re-run by the
-      orchestrator; the same run identical to the before run, number for
+      1512×982 and 375×812; and
+      `sed -E 's#/_astro/[^"]+\.css#CSS#g' dist/galleries/every-ratio/index.html | shasum`);
+      **after**: `sh scripts/verify.sh` green with the new file, re-run
+      by the orchestrator; the same run identical to the before run,
+      number for
       number (16.8 / 8 on every frame); the gallery page's normalised
       hash identical; `grep -rn "var(--matte)" src/styles/global.css` →
       0 and `grep -c "^  --matte:" src/styles/global.css` → 1 (the
@@ -166,16 +174,18 @@ headers to confirm nothing was duplicated or dropped. -->
       deletion. `src/pages/images/[...id].astro`: the stage rules T1101
       added to `global.css` deleted from the scoped style (`.image-stage`,
       `.image-frame`, `.image-frame img`, the three `html[data-quiet]`
-      stage rules); `--ar` on `.image-frame` (`Math.round(w / h * 1000) /
-  1000`, `galleryCell`'s rounding); the compare figure's `--ar` as the
-      same decimal; `.compare` reads `padding: var(--mat)` and
-      `.compare-frames { gap: var(--mat) }`, `.compare-note { margin:
-  var(--mat) 0 0 }`. `src/components/CoverCards.astro`: `--ar` on the
-      span from `card.cover.width / height`; `padding: var(--mat)` (the
-      form W rule in `global.css` computes `--mat` on this span).
-      `src/components/LatestWork.astro`: `--ar` and `--avail-h:
-  clamp(180px, 30vh, 260px)` on the anchor, its `--mat` form H over
-      `var(--avail-h)`, and the `img` reads `height: var(--avail-h)` (one
+      stage rules); `--ar` on `.image-frame`
+      (`Math.round(w / h * 1000) / 1000`, `galleryCell`'s rounding); the
+      compare figure's `--ar` as the same decimal; `.compare` reads
+      `padding: var(--mat)` and `.compare-frames { gap: var(--mat) }`,
+      `.compare-note { margin: var(--mat) 0 0 }`.
+      `src/components/CoverCards.astro`: `--ar` on the span from
+      `card.cover.width / height`; `padding: var(--mat)` (the form W rule
+      in `global.css` computes `--mat` on this span).
+      `src/components/LatestWork.astro`: `--ar` and
+      `--avail-h: clamp(180px, 30vh, 260px)` on the anchor, its `--mat`
+      form H over `var(--avail-h)`, and the `img` reads
+      `height: var(--avail-h)` (one
       string, no restated coupling); `padding: var(--mat)`.
       `src/styles/global.css`: the transitional `--matte` deleted.
       `matte.test.mjs`: case (a) gains "`--matte` appears nowhere under
@@ -184,8 +194,9 @@ headers to confirm nothing was duplicated or dropped. -->
       repeated, identical to T1101's before run (the compare figure and
       the cover card span included: 16.8 / 8); the image page's built
       HTML differs from T1100's build only by the `--ar` style attributes
-      on `.image-frame` and `.compare` (diff recorded); `grep -rn
-  "var(--matte)\|--matte:" src/ remark-pieces-blocks.mjs` → 0._
+      on `.image-frame` and `.compare` (diff recorded);
+      `grep -rn "var(--matte)\|--matte:" src/ remark-pieces-blocks.mjs`
+      → 0._
 
 - [ ] **T1102** — The ground's derived copies, pinned. `ground.test.mjs`
       (new, root; `page-head.test.mjs` for reading `:root`): an oklch →
@@ -225,52 +236,62 @@ headers to confirm nothing was duplicated or dropped. -->
       only in `:root`; the REAL predicate with the whole-root fallback).
       Paths `/dev/matte/` (four sections) and `/dev/matte/<surface>/`.
       `pieces`: `getEntry('pieces', 'matte-sampler')` + `render`, in the
-      piece page's exact markup (`article`, `header.page-head.section.reading-head
-  > .piece-column`with eyebrow, title, lead, date;`.section >
-  > .prose.piece-column > <Content />`; the page's scoped `.piece-column`    rule copied).`galleries`: `ul.gallery-flow.gallery-wide`at
-   `galleryFlowStyle`+`galleryCell(image.image)`, then
-    `ul.gallery-flow.related-flow`at`relatedFlowStyle`+
-   `galleryCell(image.image, RELATED_SHORT_PX, RELATED_NARROW_SHORT_PX)`    — imported, not retyped.`stage`: four `div.image-stage >
-  > figure.image-frame[style=--ar]`(a landscape, a portrait, a
-    panorama, a square) with the image page's`<Image>`props.`cards`:
-    `<CoverCards>`over the set as`dev/galleries/`builds them. A
-    per-section toolbar (buttons per candidate →`style.setProperty`     of the three tokens on the section, the active one marked; two
-    `rem`inputs, floor and ceiling, applied to the share candidates)
-    and a page toolbar for the ground (warm = today's five tokens;
-    white =`--color-bg: oklch(0.99 0.003 100)`with`--color-surface`,
-    `--color-soft`, `--color-line`, `--color-line-strong`from`git show
-  > f8d87af^:src/styles/global.css`, recorded here), on `<html>`; both
-    kept in `sessionStorage`; a `.sampler-label`per section naming
-    the surface and the active candidate's values. _Verify:`sh
-  > scripts/verify.sh`green with`87 page(s) built`(the draft ships
-    nothing) and`[check-no-dev-routes] no dev routes in dist/.`; `test
-  > ! -e dist/dev && echo absent`; `grep -c "/dev/" dist/sitemap-0.xml`    → 0;`grep -rl matte-sampler dist/`empty (no page, no
-    appearance on any export's page, no OG); the negative control — the
-   `DEV`guard removed,`npm run build`fails at the barrier naming
-   `dist/dev/matte/…`, output recorded, guard restored and
-    re-verified. Then on the dev server at 1512×982: `/dev/matte/`     renders four sections; the driver sets each candidate on the
-    `pieces`section in turn and the fixture's 3:2 single measures
-   `padding-top`≈ 0 / 16.8 / 10.7 / 16.9 / 24.7 and its inset ≈ 0 /
-    16.8 / 10.5 / 16.3 / 23.6 (the same rule on a smaller frame gives
-    less — if the inset equals the single,`--ar`or the form is
-    wrong); the mixed match="height" pair's two members equal paddings
-    and equal image heights at every candidate; at`share-40`the held
-    figure (the portrait) is height-bound: its`offsetHeight`equals
-   `100svh − 2·hold-margin`(≈883.8) within 0.5px and its anchor's
-    computed`padding-top`equals the figure's computed`--mat`(form W
-    meeting form H in the browser — the forms' first exercise, since
-    T1101's runs are at share 0); the pause frame's computed
-   `--frame-h`equals its`offsetHeight`, its width ≤ the scene's
-    computed `--avail-w`and height ≤`--avail-h`, one of them tight
-    within 0.5px; the gallery flow's cells one padding per flow (≈13 at
-    `share-40`, the related strip ≈ 4.8); the stage's landscape frame ≈
-    29.4 at `share-40`(width-bound at 1160) and its portrait the
-    height form, its image height + 2·padding = the stage's inner
-    height within 0.5px; the ground buttons
-    change`<html>`'s computed `background-color` (both values
-  > recorded); the REAL count (10) recorded. Where the implementer
-  > cannot drive a browser it says so, line by line, and the Phase 0
-  > pause asks the person to attest those lines on his two screens._
+      piece page's exact markup (`article`,
+      `header.page-head.section.reading-head > .piece-column` with
+      eyebrow, title, lead, date;
+      `.section > .prose.piece-column > <Content />`; the page's scoped
+      `.piece-column` rule copied). `galleries`:
+      `ul.gallery-flow.gallery-wide` at `galleryFlowStyle` +
+      `galleryCell(image.image)`, then `ul.gallery-flow.related-flow` at
+      `relatedFlowStyle` +
+      `galleryCell(image.image, RELATED_SHORT_PX, RELATED_NARROW_SHORT_PX)`
+      — imported, not retyped. `stage`: four
+      `div.image-stage > figure.image-frame[style=--ar]` (a landscape, a
+      portrait, a panorama, a square) with the image page's `<Image>`
+      props. `cards`: `<CoverCards>` over the set as `dev/galleries/`
+      builds them. A per-section toolbar (buttons per candidate →
+      `style.setProperty` of the three tokens on the section, the active
+      one marked; two `rem` inputs, floor and ceiling, applied to the
+      share candidates) and a page toolbar for the ground (warm = today's
+      five tokens; white = `--color-bg: oklch(0.99 0.003 100)` with
+      `--color-surface`, `--color-soft`, `--color-line`,
+      `--color-line-strong` from
+      `git show f8d87af^:src/styles/global.css`, recorded here), on
+      `<html>`; both kept in `sessionStorage`; a `.sampler-label` per
+      section naming the surface and the active candidate's values.
+      _Verify: `sh scripts/verify.sh` green with `87 page(s) built` (the
+      draft ships nothing) and
+      `[check-no-dev-routes] no dev routes in dist/.`;
+      `test ! -e dist/dev && echo absent`;
+      `grep -c "/dev/" dist/sitemap-0.xml` → 0;
+      `grep -rl matte-sampler dist/` empty (no page, no appearance on any
+      export's page, no OG); the negative control — the `DEV` guard
+      removed, `npm run build` fails at the barrier naming
+      `dist/dev/matte/…`, output recorded, guard restored and
+      re-verified. Then on the dev server at 1512×982: `/dev/matte/`
+      renders four sections; the driver sets each candidate on the
+      `pieces` section in turn and the fixture's 3:2 single measures
+      `padding-top` ≈ 0 / 16.8 / 10.7 / 16.9 / 24.7 and its inset ≈ 0 /
+      16.8 / 10.5 / 16.3 / 23.6 (the same rule on a smaller frame gives
+      less — if the inset equals the single, `--ar` or the form is
+      wrong); the mixed match="height" pair's two members equal paddings
+      and equal image heights at every candidate; at `share-40` the held
+      figure (the portrait) is height-bound: its `offsetHeight` equals
+      `100svh − 2·hold-margin` (≈883.8) within 0.5px and its anchor's
+      computed `padding-top` equals the figure's computed `--mat` (form W
+      meeting form H in the browser — the forms' first exercise, since
+      T1101's runs are at share 0); the pause frame's computed
+      `--frame-h` equals its `offsetHeight`, its width ≤ the scene's
+      computed `--avail-w` and height ≤ `--avail-h`, one of them tight
+      within 0.5px; the gallery flow's cells one padding per flow (≈13 at
+      `share-40`, the related strip ≈ 4.8); the stage's landscape frame ≈
+      29.4 at `share-40` (width-bound at 1160) and its portrait the
+      height form, its image height + 2·padding = the stage's inner
+      height within 0.5px; the ground buttons change `<html>`'s computed
+      `background-color` (both values recorded); the REAL count (10)
+      recorded. Where the implementer cannot drive a browser it says so,
+      line by line, and the Phase 0 pause asks the person to attest those
+      lines on his two screens._
 
 ### Gate record (Phase 0 pause)
 
@@ -301,11 +322,11 @@ it names. -->
       mat is theirs), in **its own commit**, before T1104 is dispatched.
       If the pieces surface stays on, this task is closed with the note
       "pieces keep their mat (gate: …)" and no edit. Pattern: spec 012's
-      T1004a (the Places clause amendment). _Verify: `npx prettier
-  --check CLAUDE.md` no worse than at `main` (one pre-existing line
-      warns, spec 012's T1004a record); `git log -1 --stat` shows the
-      commit touching `CLAUDE.md` alone; `grep -n "site-applied mattes"
-  CLAUDE.md` → 0 on the off branch._
+      T1004a (the Places clause amendment). _Verify:
+      `npx prettier --check CLAUDE.md` no worse than at `main` (one
+      pre-existing line warns, spec 012's T1004a record);
+      `git log -1 --stat` shows the commit touching `CLAUDE.md` alone;
+      `grep -n "site-applied mattes" CLAUDE.md` → 0 on the off branch._
 
 - [ ] **T1104** — The gate's values and each surface's presence.
       Pattern: T1101's forms in `src/styles/global.css` and the Mattes
@@ -321,8 +342,9 @@ it names. -->
       `.piece-pause` set `--mat: 0px` in place of their forms, form P
       deleted, the piece entries dropped from form W's list; packed rows:
       `.gallery-flow > li { --mat: 0px }`, the anchor's `padding`/`background`
-      deleted, `LatestWork.astro` likewise; stage: `.image-frame { --mat:
-  0px }` and its `padding`/`background` deleted, the compare's
+      deleted, `LatestWork.astro` likewise; stage:
+      `.image-frame { --mat: 0px }` and its `padding`/`background`
+      deleted, the compare's
       `padding`/`background` deleted and its gap and note margin set to
       `calc(var(--baseline) / 2)`, `.compare` dropped from form W's
       list; cards: `CoverCards.astro`'s two declarations deleted and its
@@ -347,16 +369,15 @@ it names. -->
       sizes where on, the held and pause and stage fits tight, the quiet
       view's mat `rgb(255, 255, 255)` where the stage is on, one short
       side and one padding per gallery row, `scrollWidth ≤ clientWidth`,
-      the floor holding at 375 on the related strip); `git diff main --
-  src/content.config.ts src/lib/images.ts src/lib/image-meta.mjs
-  src/lib/image-set.ts src/lib/gallery-layout.ts obsidian-plugin/`
+      the floor holding at 375 on the related strip);
+      `git diff main -- src/content.config.ts src/lib/images.ts src/lib/image-meta.mjs src/lib/image-set.ts src/lib/gallery-layout.ts obsidian-plugin/`
       empty; every number recorded here; unmeasured lines named for the
       person's attestation at the pause._
 
 - [ ] **T1105** — The ground follows the mats. **If the gate kept a mat
-      anywhere**: no edit; the record says so, `git diff main --
-  src/pages/og/pieces/[slug].png.ts public/og.jpg` is empty, and
-      `ground.test.mjs` green is the pin. **If no surface keeps a mat**:
+      anywhere**: no edit; the record says so,
+      `git diff main -- src/pages/og/pieces/[slug].png.ts public/og.jpg`
+      is empty, and `ground.test.mjs` green is the pin. **If no surface keeps a mat**:
       `src/styles/global.css` `:root` — `--color-bg` to the gate's white
       (the pre-003 `oklch(0.99 0.003 100)` unless the gate moved it),
       `--color-surface`, `--color-soft`, `--color-line`,
@@ -425,9 +446,10 @@ it names. -->
       `CLAUDE.md` is not this task's: its amendment, where the pieces
       surface went off, was T1103a's own commit before T1104 — the sweep
       confirms the clause matches the gate on every branch (the sweep at
-      spec 012 found the constitution missed, so it is named here). Both ride this branch
-      and merge with the PR, in their own commit(s) (`npx prettier
-  --check` clean; hand-edited prose). Then, the orchestrator's part:
+      spec 012 found the constitution missed, so it is named here). Both
+      ride this branch and merge with the PR, in their own commit(s)
+      (`npx prettier --check` clean; hand-edited prose). Then, the
+      orchestrator's part:
       the pre-merge whole-spec sweep at the reviewer's default tier and
       its findings resolved; the acceptance criteria checked against
       their records (the sampler's absence from `dist/` by T1103's and
@@ -469,13 +491,44 @@ tier if it is ever on (it is off). -->
 
 | Task / invocation               | Tier                           | Tokens | Outcome / miss reason |
 | ------------------------------- | ------------------------------ | ------ | --------------------- |
-| Planning: draft (`sdd-planner`) | top (`claude-fable-5-1`, high) |        |                       |
+| Planning: draft (`sdd-planner`)                      | top (`claude-fable-5-1`, high) | 236,089 | drafted first pass; no product question returned |
+| Sign-off: plan/tasks (`skeptical-reviewer`)          | top (`claude-fable-5-1`, high) | 86,096  | 3 blocking (B1 packed-row/matched mat rules vs AC 2 — product call; B2 CLAUDE.md amendment trigger; B3 cards-off edit — wrong on the facts), 7 notes |
+| Planning: sign-off fixes (`sdd-planner`, resumed)   | top (`claude-fable-5-1`, high) | 36,776  | B2, B3 (corrected), N2–N7 applied; T1101 split into T1101/T1101b |
+| Sign-off re-review (`skeptical-reviewer`)            | top (`claude-fable-5-1`, high) | 59,061  | signed off; B3 correction accepted; 4 notes carried below |
+| Planning: Prettier repair (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 48,134  | formatting only — code spans broken across lines had read as blockquotes |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
-_(none yet)_
+- _(sign-off re-review, N2 — for T1101's and T1103's bundles)_ Reading a
+  computed custom property (`--mat`, `--frame-h`, `--avail-w`) with
+  `getComputedStyle().getPropertyValue()` returns the substituted token
+  stream, not a resolved length, unless the property is registered with
+  a `<length>` syntax. The measurement driver should `CSS.registerProperty`
+  those names before reading, or compare the anchor's `padding-top` and
+  the frame's `offsetHeight` against the evaluator's expected number.
+  The claim is right; the method as written would not return px.
+- _(sign-off re-review, N3 — for T1101b's bundle)_ `LatestWork`'s form H
+  takes the share of `(H − 2m)·q` but its image is `H` tall (the `img`
+  reads `--avail-h` and the anchor adds the mat around it), so its true
+  short side is `H·q` and the mat undershoots by `2msq` — sub-pixel at
+  4%. Inert at share 0, no AC names it; either say so in the plan or
+  write it as a share of the known length (`calc(var(--avail-h) * s * q)`,
+  form R's shape).
+- _(sign-off re-review, N4 — for T1101b's bundle)_ "The image page's HTML
+  differs only by the `--ar` attributes" assumes the scoped stylesheet is
+  linked, not inlined (`inlineStylesheets: 'auto'` inlines small
+  sheets). If inlined, deleting the scoped stage rules changes the HTML
+  beyond the attributes; record the diff and say why rather than fail
+  the line.
+- _(sign-off re-review, N1 — done)_ The Prettier-mangled paragraphs were
+  repaired by the planner before the drafts were marked signed off (the
+  tier-log row above); the sweep should confirm no line outside the two
+  legitimate blockquotes begins with `>`.
+- _(sign-off, N1)_ The compare figure following the stage's decision and
+  `LatestWork` the packed rows' were named to the person at sign-off and
+  accepted (spec.md's Decided list); the gate report names them again.
 
 ## Handoff note
 
