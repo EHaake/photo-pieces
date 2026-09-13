@@ -113,12 +113,52 @@ attached.
   true ratio differs from its slot. The photographer's lean at the gate
   was matted frames or ratio-snapping, to be judged by eye on real
   work.
+- **The matte, rethought** — raised by the photographer after spec 012
+  (2026-09-13). Today the mat is one viewport-relative token
+  (`--matte: clamp(0.5rem, 1.4vw, 1.05rem)`, spec 003) applied at the same
+  width to every matted surface whatever the frame's rendered size — a piece's
+  single at the content width, a grid cell, a packed gallery frame, a cover
+  card, the image page's stage — so a small frame wears a mat that reads heavy
+  and a large one a mat that reads thin, the opposite of a framer's rule, where
+  the mat grows with the print. Two questions, in order. (1) **Whether the site
+  wants mats at all, and where**: everywhere as now, only on some treatments or
+  surfaces (a piece's frames but not the galleries, say, or the image page
+  alone), or nowhere — judged by looking on real photographs the way the ground
+  was, which folds in the mats/warm-ground/quiet-dark re-judging spec 011 left
+  open. (2) **Where a mat stays, a width proportional to the frame itself**
+  rather than to the viewport — a share of the frame's rendered short side,
+  say, with a floor and a ceiling — which reaches every place the fixed token
+  takes part in layout math today: the held and pause frame formulas, the
+  matched-height pairs, the strip's sizing, the gallery cell's flex basis, and
+  the image page's stage. Decide together with, or in a known order against,
+  the aspect-ratio entry above — its "uniform matted frames" option is a mat
+  doing layout work — and revisit `DECISIONS.md`'s "Mattes: site-applied" and
+  the brief's flat-matte carve-out, which stand whatever the answer.
 - **The front door** — to be workshopped with the photographer
   (decided 2026-09-02): the interim homepage (spec 002) stands until
   then. The starting position: the homepage is the site's thesis —
   one photograph, one sentence, the latest piece a scroll away — not
   a grid of recent work, which would undo the argument the rest of
   the site makes. The `LatestWork` strip is built and unplaced.
+- **A design language of its own** — raised by the photographer after spec
+  012 (2026-09-13), as a longer-term direction rather than one spec. The site's
+  functionality, flow, and layout come first and are still being settled; but
+  as it stands the site looks and feels like a site from ten years ago, and
+  there is room for something distinctive. The photographer has been reading
+  showcases such as siteinspire and finding designs that use animation and
+  layout in ways that serve the site's purpose, without yet seeing one that
+  translates directly to this site — so this is expected to take more than one
+  design pass, possibly several specs, each with a look-and-decide gate on real
+  photographs and the photographer's two screens. What it is not: the
+  AI-design defaults the brief already rules out, motion for its own sake, or
+  anything that undoes the argument the rest of the site makes (the anti-feed,
+  the image page as the signature element, the matte as flat and
+  token-driven). Candidates already on this list that are really parts of it:
+  the front door, the slow view, image loading choreography, the reading
+  typography pass, and the matte entry above. The first step is a design
+  conversation that names what "modern" means for this site — which of the
+  references' moves fit a photographer's site that wants the work looked at
+  slowly — and amends `design/brief.md` before any spec is written.
 - ~~**The held image**~~ — done in spec 007: two durational blocks.
   `held` is a container whose body is the prose that passes beside a
   frame that stays — the frame left or right, at the content width or
