@@ -258,6 +258,14 @@ describe('(a) the rule has one source (T1101, spec 013)', () => {
     }
   });
 
+  it('--matte is gone: nothing under src/ or in the transform still reads it', async () => {
+    const transform = await readFile(here('./remark-pieces-blocks.mjs'), 'utf8');
+    const left = Object.entries({ ...src, 'remark-pieces-blocks.mjs': transform })
+      .filter(([, text]) => /--matte\b/.test(text))
+      .map(([path]) => path);
+    expect(left).toEqual([]);
+  });
+
   it('no rule selects .gallery-grid > li > a.image-link — the cards’ mat is one place', () => {
     expect(css).not.toContain('.gallery-grid > li > a.image-link');
     for (const block of [...top, ...nested])
@@ -364,9 +372,56 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(norm(quiet['--stage-pad'])).toBe('clamp(0.5rem, 1.5vh, 1rem)');
     expect(norm(quiet['--avail-w'])).toBe('calc(100vw - 2 * var(--stage-pad))');
     expect(norm(quiet['--avail-h'])).toBe('calc(100svh - 2 * var(--stage-pad))');
-    expect(
-      norm(declarations(ruleFor(top, 'html[data-quiet] .image-frame img').body)['max-height']),
-    ).toBe('calc(var(--avail-h) - 2 * var(--mat))');
+    // Quiet view redeclares those two limits and nothing else: the base
+    // `.image-frame img` max-height above reads --avail-h, so a quiet
+    // copy of it is byte-identical duplication (T1101b deleted it, on
+    // both the page and here). These two rules, and no third.
+    const quietStage = [...top, ...nested]
+      .map((block) => norm(block.prelude))
+      .filter((prelude) => /html\[data-quiet\] \.image-/.test(prelude));
+    expect(quietStage).toEqual([
+      'html[data-quiet] .image-stage',
+      'html[data-quiet] .image-frame, html[data-quiet] .image-stage[data-quiet-ready] .image-frame',
+    ]);
+    // And the page's scoped <style> styles the frame not at all — every
+    // frame rule is here, the zoom-in cursor included. A scoped copy
+    // carries [data-astro-cid] on both compounds, out-specifies the
+    // quiet rule above, and quiet view then shows zoom-in over the
+    // photograph (measured, T1101b).
+    const page = uncomment(src['src/pages/images/[...id].astro']);
+    const scoped = blocks(page.slice(page.indexOf('<style>'), page.indexOf('</style>')));
+    const frameRules = [
+      ...scoped,
+      ...scoped.filter((one) => one.prelude.startsWith('@')).flatMap((one) => blocks(one.body)),
+    ]
+      .map((one) => norm(one.prelude))
+      .filter((prelude) => prelude.includes('.image-frame'));
+    expect(frameRules).toEqual([]);
+    expect(declarations(ruleFor(top, '.image-stage[data-quiet-ready] .image-frame').body)).toEqual({
+      cursor: 'zoom-in',
+    });
+    expect(indexOf(top, '.image-stage[data-quiet-ready] .image-frame')).toBeLessThan(
+      indexOf(top, 'html[data-quiet] .image-frame'),
+    );
+  });
+
+  it('the latest-work band: one height string, and a mat that is a share of it', () => {
+    // The strip is a curated band, not one of the four surfaces; it gets
+    // form R's shape because its image IS --avail-h tall (the mat sits
+    // around that), so σ = --avail-h × min(--ar, 1) exactly. Its --mat is
+    // its own, and it declares none of the three tokens (case (a) pins
+    // that for every file under src/).
+    const band = uncomment(src['src/components/LatestWork.astro']);
+    const rules = blocks(band.slice(band.indexOf('<style>')));
+    const link = declarations(ruleFor(rules, '.image-link', '--mat').body);
+    expect(norm(link['--avail-h'])).toBe('clamp(180px, 30vh, 260px)');
+    expect(norm(link['--mat'])).toBe(
+      'clamp(var(--mat-min), calc(var(--avail-h) * var(--mat-share) * min(var(--ar, 1), 1)), var(--mat-max))',
+    );
+    expect(link['padding']).toBe('var(--mat)');
+    expect(norm(declarations(ruleFor(rules, '.image-link img').body)['height'])).toBe(
+      'var(--avail-h)',
+    );
   });
 
   it('form R: the mat is the packed row’s constant term, in the basis, the cap and the narrow cap', () => {

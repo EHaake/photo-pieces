@@ -56,14 +56,8 @@
      the mechanism lands changing nothing. The share, floor and ceiling
      are chosen once at spec 013's visual gate. */
   --mat-share: 0; /* the share of the photograph's rendered short side; 0 = the floor wins */
-  --mat-min: clamp(
-    0.5rem,
-    1.4vw,
-    1.05rem
-  ); /* floor — at T1101 today's --matte, so nothing changes */
+  --mat-min: clamp(0.5rem, 1.4vw, 1.05rem); /* floor — today's fixed mat, so nothing changes */
   --mat-max: clamp(0.5rem, 1.4vw, 1.05rem); /* ceiling — likewise */
-  /* transitional — T1101b deletes it */
-  --matte: clamp(0.5rem, 1.4vw, 1.05rem);
   --color-matte: oklch(1 0 0);
   /* Quiet view's ground (spec 006, the photographer's call at the
      visual gate): the one place the site goes dark — a dimmed wall
@@ -2138,7 +2132,11 @@ html[data-pause-active] .social-links a {
    frame's mat and the image's max-height read one expression each; the
    `vh` fallbacks are gone from those, since a fallback cannot ride a
    custom property (svh has shipped everywhere since 2022) — the
-   min-height pair, which passes through none, keeps its. */
+   min-height pair, which passes through none, keeps its. Those two
+   lengths carry no fallback, so `.image-frame` lives only inside an
+   `.image-stage`: it is one template's figure (the image page's), and
+   giving the frame a second copy of the stage's limits would be the
+   duplication this rule exists to avoid. */
 .image-stage {
   --stage-pad: clamp(1rem, 3vh, 2rem);
   --avail-w: min(calc(100vw - 2 * var(--page-pad)), var(--content-width));
@@ -2183,11 +2181,22 @@ html[data-pause-active] .social-links a {
   max-height: calc(var(--avail-h) - 2 * var(--mat));
 }
 
+/* The zoom cursor, once the page's script can honour the click (spec
+   006). It lives here, not in the page's scoped <style>, because a
+   scoped copy carries the page's [data-astro-cid] attribute on both
+   compounds and would out-specify the quiet rule below — which is what
+   turns it into zoom-out on the dark ground. */
+.image-stage[data-quiet-ready] .image-frame {
+  cursor: zoom-in;
+}
+
 /* Quiet view (spec 006): chrome gone, the ground dimmed, the frame as
    large as the viewport allows with a small margin. The stage's two
    limits are redeclared over the quiet --stage-pad — no header, and the
    padding is the pad on both axes — so the mat and the image's height
-   follow the larger frame without a second formula. */
+   follow the larger frame without a second formula: the base
+   `.image-frame img` max-height reads --avail-h, so quiet view needs no
+   copy of it. */
 html[data-quiet] .image-stage {
   --stage-pad: clamp(0.5rem, 1.5vh, 1rem);
   --avail-w: calc(100vw - 2 * var(--stage-pad));
@@ -2203,8 +2212,4 @@ html[data-quiet] .image-frame,
 html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   max-width: 100%;
   cursor: zoom-out;
-}
-
-html[data-quiet] .image-frame img {
-  max-height: calc(var(--avail-h) - 2 * var(--mat));
 }
