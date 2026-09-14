@@ -128,6 +128,109 @@ describe('happy paths', () => {
   });
 });
 
+// The ratio on every frame (T1100, spec 013): the mat's width is a share
+// of the frame's rendered short side, so every frame the transform places
+// carries its RAW ratio in --ar — on the anchor, or on the bare img of a
+// decorative one (where it rides in the __ASTRO_IMAGE_ marker's props,
+// which the asset pipeline puts back on the <img>).
+describe('the ratio on every frame (T1100)', () => {
+  // tests/fixtures: photo.jpg is 8x5 (1.6), portrait.jpg is 400x600
+  // (0.6667 — trimNumber's four decimals), square.jpg is 200x200 (1),
+  // rotated.jpg is a 600x400 buffer with EXIF orientation 6, so it
+  // renders 400x600 (0.6667) like a camera portrait.
+  const anchorStyles = (code) =>
+    [...code.matchAll(/<a href="[^"]*" class="image-link"(?: style="([^"]*)")?>/g)].map(
+      (m) => m[1],
+    );
+  const wrapperStyle = (code) =>
+    /<(?:figure|div) class="piece-block[^"]*"(?: style="([^"]*)")?>/.exec(code)?.[1];
+
+  const cases = [
+    ['single, leaf form', '::single{src="./photo.jpg" alt="a"}', ['--ar: 1.6']],
+    [
+      'single, container form',
+      ':::single{src="./portrait.jpg" alt="a"}\nA caption.\n:::',
+      ['--ar: 0.6667'],
+    ],
+    ['fullbleed', '::fullbleed{src="./photo.jpg" alt="a"}', ['--ar: 1.6']],
+    ['wide', '::wide{src="./rotated.jpg" alt="a"}', ['--ar: 0.6667']],
+    ['tall', '::tall{src="./portrait.jpg" alt="a"}', ['--ar: 0.6667']],
+    ['inset', '::inset{src="./square.jpg" alt="a"}', ['--ar: 1']],
+    [
+      'grid',
+      ':::grid\n![a](./photo.jpg)\n![b](./portrait.jpg)\n![c](./square.jpg)\n:::',
+      ['--ar: 1.6', '--ar: 0.6667', '--ar: 1'],
+    ],
+    ['aside', ':::aside{src="./portrait.jpg" alt="a" side="left"}\nWords.\n:::', ['--ar: 0.6667']],
+    ['row', ':::row{src="./square.jpg" alt="a" side="left"}\nWords.\n:::', ['--ar: 1']],
+    [
+      'diptych, default',
+      '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r"}',
+      ['--ar: 1.6', '--ar: 0.6667'],
+    ],
+    [
+      'diptych, weighted',
+      '::diptych{left="./photo.jpg" right="./square.jpg" leftAlt="l" rightAlt="r" weight="left"}',
+      ['--ar: 1.6', '--ar: 1'],
+    ],
+    [
+      'triptych',
+      '::triptych{left="./photo.jpg" center="./portrait.jpg" right="./square.jpg" leftAlt="a" centerAlt="b" rightAlt="c"}',
+      ['--ar: 1.6', '--ar: 0.6667', '--ar: 1'],
+    ],
+    ['strip', ':::strip\n![a](./photo.jpg)\n![b](./square.jpg)\n:::', ['--ar: 1.6', '--ar: 1']],
+    ['held', ':::held{src="./photo.jpg" alt="a"}\nWords.\n:::', ['--ar: 1.6']],
+    ['pause', '::pause{src="./portrait.jpg" alt="a"}', ['--ar: 0.6667']],
+  ];
+
+  it.each(cases)("%s carries each frame's true ratio", async (_name, content, expected) => {
+    const { code } = await render(content);
+    expect(anchorStyles(code)).toEqual(expected);
+  });
+
+  it('a decorative frame carries it on the bare img, which is the frame itself', async () => {
+    const { code } = await render('::fullbleed{src="./portrait.jpg" alt=""}');
+    expect(code).not.toContain('image-link');
+    expect(imageMarkers(code)[0].style).toBe('--ar: 0.6667');
+  });
+
+  it('the shorthand image carries it too', async () => {
+    const { code } = await render('Text.\n\n![a](./square.jpg)\n');
+    expect(anchorStyles(code)).toEqual(['--ar: 1']);
+  });
+
+  it('match="height" keeps the normalized --ar and adds the raw sum and count', async () => {
+    // The anchors are flex-grow factors (smallest 1); the row's height —
+    // and so the mat's width — comes from the raw ratios on the figure.
+    const { code } = await render(
+      '::triptych{left="./photo.jpg" center="./portrait.jpg" right="./square.jpg" leftAlt="a" centerAlt="b" rightAlt="c" match="height"}',
+    );
+    expect(anchorStyles(code)).toEqual(['--ar: 2.4', '--ar: 1', '--ar: 1.5']);
+    // 1.6 + 0.6667 + 1, to trimNumber's four decimals.
+    expect(wrapperStyle(code)).toBe('--ar-sum: 3.2667; --n: 3');
+  });
+
+  it('held and pause keep the raw --ar on the wrapper as well as the frame', async () => {
+    const held = await render(':::held{src="./photo.jpg" alt="a"}\nWords.\n:::');
+    expect(wrapperStyle(held.code)).toBe('--ar: 1.6');
+    const pause = await render('::pause{src="./portrait.jpg" alt="a"}');
+    expect(wrapperStyle(pause.code)).toBe('--ar: 0.6667');
+  });
+
+  it('a frame the probe cannot read carries none — the CSS falls back to 1', async () => {
+    // A remote and a root-absolute src are Astro's business, not the
+    // probe's; a render with no file path cannot resolve them at all.
+    const remote = await render('::single{src="https://example.com/p.jpg" alt="a"}');
+    expect(remote.code).not.toContain('--ar');
+    const rooted = await render('::single{src="/p.jpg" alt="a"}');
+    expect(rooted.code).not.toContain('--ar');
+    const noPath = await processor.render('::single{src="./photo.jpg" alt="a"}');
+    expect(noPath.code).not.toContain('--ar');
+    const noPathShorthand = await processor.render('![a](./photo.jpg)');
+    expect(noPathShorthand.code).not.toContain('--ar');
+  });
+});
+
 describe('fail-loudly cases', () => {
   const cases = [
     ['unknown directive', '::mystery{}', /the block vocabulary is closed/],

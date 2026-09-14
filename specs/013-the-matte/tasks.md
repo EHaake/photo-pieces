@@ -56,7 +56,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the ratio, the rule (inert), the ground test, and the sampler (reviewer after the phase; the gate at its end)
 
-- [ ] **T1100** — The ratio on every frame. `remark-pieces-blocks.mjs`:
+- [x] **T1100** — The ratio on every frame. `remark-pieces-blocks.mjs`:
       the dimension probe runs for every block (drop the `needsRatios`
       gate on the probe; keep `probeAsker` for the message), and every
       image the transform places carries `--ar` with its **raw** ratio
@@ -94,6 +94,8 @@ headers to confirm nothing was duplicated or dropped. -->
       `grep -o 'piece-held\|piece-pause' … | wc -l`; a match-height
       figure's `--ar-sum` does not match the pattern);
       `git diff main -- obsidian-plugin/` empty._
+
+_T1100 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built in 1.44s`, `[check-no-gps] 741 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/.`, `BUILD EXIT 0`, `CHECK EXIT 0` (0/0/0), `Test Files 13 passed (13)`, `Tests 297 passed (297)` (277 + 20 new), `TEST EXIT 0`. Build wall time: before the edit (the branch's code identical to `main`) `87 page(s) built in 1.41s`; after, 1.44s and a second sample 1.26s — probing every block is inside run-to-run noise at this content size; the plan's header-only read stays a follow-up. Counts on `dist/pieces/vocabulary-sampler/index.html`: `style="--ar:` 61 = `class="image-link"` 58 + bare-img frames 0 + held/pause figures 3 (counted as `class="piece-block piece-held…"|…piece-pause…"` — the task's bare `piece-held\|piece-pause` pattern also matches the prose/stage/frame wrappers and gives 15); `--ar-sum` 2, matching neither; anchors with no `--ar` across `dist/pieces/` 0. Mutation: probe nulled for `single` → both single cases fail (`expected [ undefined ] to deeply equal [ '--ar: 1.6' ]`), restored. `git diff main -- obsidian-plugin/` empty. Assertions updated to the new output (deliberate, none loosened), all in `remark-pieces-vocabulary.test.mjs`: the match="height" figure now carries `--ar-sum: 2.2667; --n: 2`; the block-image wrap, strip, shorthand, borrowed-single and gallery-root-shorthand cases now expect `style="--ar: 1.6"` on the anchor. Interpretation recorded: `needsRatios` survives as "this block's own layout requires the numbers" (held, pause, strip, match="height"), where an unmeasurable frame still fails with the pinned messages (`remark-pieces-vocabulary.test.mjs` ~882–903 tests exactly that, and pause's `sizing` reads the dims); every other block and the shorthand measures null and emits no `--ar` for a remote or root-absolute src or a render with no `file.path`. The shorthand probes per node (asker "the image") so a failure keeps the image's own position. Findings: a decorative shorthand (`![](./x.jpg)`) carries no `--ar` (falls back to 1; none in content); a decorative block frame's `--ar` rides Astro's image marker props onto the built `<img>` (none in content; unit-tested only). Read beyond the bundle: `remark-pieces-vocabulary.test.mjs`, `src/lib/image-meta.mjs`, `src/lib/markdown.ts`, Astro's `Image.astro`.
 
 - [ ] **T1101** — The mat rule, inert (the stylesheet and its test).
       `review: per-task`. `src/styles/global.css`: in `:root` add the
@@ -496,6 +498,7 @@ tier if it is ever on (it is off). -->
 | Planning: sign-off fixes (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 36,776  | B2, B3 (corrected), N2–N7 applied; T1101 split into T1101/T1101b                                                                                     |
 | Sign-off re-review (`skeptical-reviewer`)          | top (`claude-fable-5-1`, high) | 59,061  | signed off; B3 correction accepted; 4 notes carried below                                                                                            |
 | Planning: Prettier repair (`sdd-planner`, resumed) | top (`claude-fable-5-1`, high) | 48,134  | formatting only — code spans broken across lines had read as blockquotes                                                                             |
+| T1100 (`sdd-implementer`)                          | implementation (`opus`)        | 111,037 | done; 297 tests; one interpretation recorded (blocks whose layout needs the numbers keep their pinned failure)                                        |
 
 _(Session-tier allowance draw noted at each pause.)_
 
