@@ -638,7 +638,15 @@ export function remarkPiecesBlocks() {
           type: 'image',
           url: src,
           alt,
-          data: { hProperties: { ...block.sizing(attrs, imageIndex, ratios, dims) } },
+          // Marked as a block's own frame: the shorthand pass below
+          // measures every OTHER image the piece wrote, and a decorative
+          // one is a bare img there as it is here — without the mark it
+          // would overwrite this block's --ar (normalized, for a matched
+          // pair) with the raw ratio.
+          data: {
+            pieceFrame: true,
+            hProperties: { ...block.sizing(attrs, imageIndex, ratios, dims) },
+          },
         };
         // The anchor becomes the layout item, so --ar rides on it (the
         // CSS flexes the figure's direct child). An image with alt=""
@@ -746,16 +754,20 @@ export function remarkPiecesBlocks() {
     // too — the same rule, the same exceptions (alt="", remote or
     // root-absolute src, an author's own surrounding link).
     // Collected first, then measured: the visit is synchronous and the
-    // probe is not, and the anchor carries the frame's --ar like every
-    // other frame (spec 013).
+    // probe is not, and the frame carries its --ar like every other frame
+    // (spec 013). A decorative image gets no link (a link with no
+    // accessible name fails WCAG 2.4.4) but IS matted in the column, so
+    // it is measured too and wears --ar itself — the block path's alt=""
+    // case, which puts arStyle on the image node.
     const shorthand = [];
     visit(tree, 'image', (node, index, parent) => {
-      if (!parent || parent.type === 'link') return;
+      if (!parent || parent.type === 'link' || node.data?.pieceFrame) return;
       const failHere = (message) => fail(file, node, message);
       checkReferenceShape(file, node.url, failHere);
       rejectPrivateSrc(node.url, failHere);
-      const url = node.alt === '' ? null : imagePageUrl(file, node.url, failHere);
-      if (!url) return;
+      const decorative = node.alt === '';
+      const url = decorative ? null : imagePageUrl(file, node.url, failHere);
+      if (!url && !decorative) return;
       shorthand.push({ node, index, parent, url });
       return index + 1;
     });
@@ -769,7 +781,12 @@ export function remarkPiecesBlocks() {
           false,
         );
         const arStyle = dim ? { style: `--ar: ${trimNumber(dim.width / dim.height)}` } : {};
-        parent.children.splice(index, 1, wrapInLink(node, url, arStyle));
+        if (url) {
+          parent.children.splice(index, 1, wrapInLink(node, url, arStyle));
+        } else if (dim) {
+          // Decorative and measurable: the image itself is the frame.
+          node.data = { ...node.data, hProperties: { ...node.data?.hProperties, ...arStyle } };
+        }
       }),
     );
   };

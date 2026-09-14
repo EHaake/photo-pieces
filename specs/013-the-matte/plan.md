@@ -131,11 +131,15 @@ every frame it places carries its ratio, which the rule needs.
   Two matted things the spec's groups do not name, assigned here: the
   image page's **compare figure** follows the stage (same page, same
   decision); **`LatestWork.astro`** — a curated strip no page places —
-  follows the packed rows (it is the related strip's kin) and gets
-  form H over its band height (`--ar` on its anchor, `--avail-h` declared
-  there and read by both its `--mat` and its `img { height }`, so the
-  band's height is one string) so it keeps compiling; neither is a gate
-  candidate. If
+  follows the packed rows (it is the related strip's kin) and gets a
+  mat in form R's shape over its band height — a share of the known
+  length, `clamp(--mat-min, --avail-h × --mat-share × q, --mat-max)`,
+  since its image is exactly `--avail-h` tall with the mat around it,
+  so σ = H·q and form H's `(H − 2m)·q` would undershoot (sign-off note
+  N3; amended 2026-09-13 at the Phase 0 review) — with `--ar` on its
+  anchor and `--avail-h` declared there and read by both its `--mat`
+  and its `img { height }`, so the band's height is one string; neither
+  is a gate candidate. If
   **no** surface keeps a mat, T1104 also deletes the three tokens, the
   form W rule and the CSS-test cases that pin them, and T1105 moves the
   ground; `--color-matte` stays only if the compare's divider still
@@ -368,7 +372,7 @@ src/styles/global.css                          the three tokens beside a transit
 remark-pieces-blocks.mjs                       the probe for every block and the shorthand; raw --ar on every frame; --ar-sum/--n on match="height" (T1100)
 remark-pieces-blocks.test.mjs                  the ratio cases (T1100)
 src/components/CoverCards.astro                --ar on the span; padding: var(--mat) (T1101b); presence (T1104)
-src/components/LatestWork.astro                --ar and --avail-h on the anchor; form H over the band height (T1101b); presence (T1104)
+src/components/LatestWork.astro                --ar and --avail-h on the anchor; a mat in form R's shape over the band height (T1101b); presence (T1104)
 src/pages/images/[...id].astro                 scoped stage rules deleted; --ar on .image-frame; the compare's decimal --ar and var(--mat) (T1101b); presence (T1104)
 src/pages/og/pieces/[slug].png.ts, public/og.jpg   the ground's derived copies (T1105, nowhere branch only)
 matte.test.mjs                                 tokens once; every form pinned; the geometry evaluator; the inert identity (new; T1101); no --matte anywhere (T1101b); the gate's literals (T1104)
@@ -390,6 +394,10 @@ the Obsidian plugin.
 
 ## Known limitations
 
+- **A decorative shorthand image (`![](./x.jpg)`) carries its ratio on
+  the bare `img`** (T1100a, from the Phase 0 review): the shorthand pass
+  probes decorative images too, since the matted list mattes that bare
+  `img` and form W at the fallback ratio 1 would over-mat a landscape.
 - **A packed row's mat follows the target short side, not the grown
   one** (form R, above): a stretched row's mat is `share/1.35`–`share`
   of its actual short side, and on a phone the one-per-row cell (343px

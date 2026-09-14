@@ -91,11 +91,27 @@ headers to confirm nothing was duplicated or dropped. -->
       plus its bare-img frames (every frame has one) **plus one per
       `piece-held` and `piece-pause` figure** (their wrappers carry the
       raw `--ar` too — the expected surplus, counted with
-      `grep -o 'piece-held\|piece-pause' … | wc -l`; a match-height
-      figure's `--ar-sum` does not match the pattern);
+      `grep -o 'class="piece-block piece-held[^"]*"\|class="piece-block piece-pause[^"]*"' … | wc -l`
+      (amended at the Phase 0 review, N6: the bare `piece-held\|piece-pause`
+      pattern also matches the prose, stage and frame wrappers); a
+      match-height figure's `--ar-sum` does not match the pattern);
       `git diff main -- obsidian-plugin/` empty._
 
 _T1100 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built in 1.44s`, `[check-no-gps] 741 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/.`, `BUILD EXIT 0`, `CHECK EXIT 0` (0/0/0), `Test Files 13 passed (13)`, `Tests 297 passed (297)` (277 + 20 new), `TEST EXIT 0`. Build wall time: before the edit (the branch's code identical to `main`) `87 page(s) built in 1.41s`; after, 1.44s and a second sample 1.26s — probing every block is inside run-to-run noise at this content size; the plan's header-only read stays a follow-up. Counts on `dist/pieces/vocabulary-sampler/index.html`: `style="--ar:` 61 = `class="image-link"` 58 + bare-img frames 0 + held/pause figures 3 (counted as `class="piece-block piece-held…"|…piece-pause…"` — the task's bare `piece-held\|piece-pause` pattern also matches the prose/stage/frame wrappers and gives 15); `--ar-sum` 2, matching neither; anchors with no `--ar` across `dist/pieces/` 0. Mutation: probe nulled for `single` → both single cases fail (`expected [ undefined ] to deeply equal [ '--ar: 1.6' ]`), restored. `git diff main -- obsidian-plugin/` empty. Assertions updated to the new output (deliberate, none loosened), all in `remark-pieces-vocabulary.test.mjs`: the match="height" figure now carries `--ar-sum: 2.2667; --n: 2`; the block-image wrap, strip, shorthand, borrowed-single and gallery-root-shorthand cases now expect `style="--ar: 1.6"` on the anchor. Interpretation recorded: `needsRatios` survives as "this block's own layout requires the numbers" (held, pause, strip, match="height"), where an unmeasurable frame still fails with the pinned messages (`remark-pieces-vocabulary.test.mjs` ~882–903 tests exactly that, and pause's `sizing` reads the dims); every other block and the shorthand measures null and emits no `--ar` for a remote or root-absolute src or a render with no `file.path`. The shorthand probes per node (asker "the image") so a failure keeps the image's own position. Findings: a decorative shorthand (`![](./x.jpg)`) carries no `--ar` (falls back to 1; none in content); a decorative block frame's `--ar` rides Astro's image marker props onto the built `<img>` (none in content; unit-tested only). Read beyond the bundle: `remark-pieces-vocabulary.test.mjs`, `src/lib/image-meta.mjs`, `src/lib/markdown.ts`, Astro's `Image.astro`.
+
+- [x] **T1100a** — A decorative shorthand image carries its ratio (from
+      the Phase 0 review, B1). The shorthand pass returned before probing
+      when `alt === ''`, so a decorative `![](./x.jpg)` — matted by the
+      list's bare-`img` entry — would wear form W at the fallback ratio
+      1. Now the pass collects decorative images too and puts the raw
+      `--ar` on the `img`'s own properties; block-placed image nodes carry
+      `data.pieceFrame` so the visit skips them (extending the pass had
+      re-measured a matched pair's decorative member and overwritten its
+      normalized `--ar`, which the vocabulary suite caught). _Verify:
+      `sh scripts/verify.sh` green; the new case fails when the decorative
+      collection is reverted._
+
+_T1100a record (2026-09-13, implementer at opus, resumed):_ `sh scripts/verify.sh` — `87 page(s) built in 1.56s`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 15 passed (15)`, `Tests 323 passed (323)`, `TEST EXIT 0`. Mutation: collection reverted → `expected undefined to be '--ar: 1.6'`, restored. Sampler counts unchanged (61 = 58 + 0 + 3). Left as designed: a local non-raster with alt text in prose is never probed (falls back to 1); an image inside an author's own link likewise (the re-review's note, carried to the sweep).
 
 - [x] **T1101** — The mat rule, inert (the stylesheet and its test).
       `review: per-task`. `src/styles/global.css`: in `:root` add the
@@ -188,7 +204,8 @@ _T1101 record (2026-09-13, implementer at opus; per-task review at opus, one re-
       in `global.css` computes `--mat` on this span).
       `src/components/LatestWork.astro`: `--ar` and
       `--avail-h: clamp(180px, 30vh, 260px)` on the anchor, its `--mat`
-      form H over `var(--avail-h)`, and the `img` reads
+      in form R's shape over `var(--avail-h)` (a share of the known
+      length; sign-off N3, plan amended at the Phase 0 review), and the `img` reads
       `height: var(--avail-h)` (one
       string, no restated coupling); `padding: var(--mat)`.
       `src/styles/global.css`: the transitional `--matte` deleted.
@@ -302,6 +319,8 @@ _T1102 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh tests` �
       lines on his two screens._
 
 _T1103 record (2026-09-13, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built in 1.42s` (the draft ships nothing), `[check-no-gps] 741 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/.`, `BUILD EXIT 0`, `CHECK EXIT 0` (0/0/0), `Test Files 15 passed (15)`, `Tests 322 passed (322)`, `TEST EXIT 0`; `test ! -e dist/dev` → absent; `grep -c "/dev/" dist/sitemap-0.xml` → 0; `grep -rl matte-sampler dist/` empty; `npx prettier --check` clean on both new files. Negative control (guard removed): `92 page(s) built`, `[check-no-dev-routes] dist/dev/ exists — a dev-only route was built: dist/dev/matte/cards/index.html, dist/dev/matte/galleries/index.html, dist/dev/matte/index.html, dist/dev/matte/pieces/index.html, dist/dev/matte/stage/index.html`, `BUILD EXIT 1`; guard restored, re-verified green (the run above). URLs: `/dev/matte/`, `/dev/matte/pieces/`, `/dev/matte/galleries/`, `/dev/matte/stage/`, `/dev/matte/cards/`. Measurements (Firefox 155 headless, BiDi, 1512×982; the driver sets the three tokens on the section as the toolbar does; `--mat` read through an out-of-flow probe span that inherits it into a `padding-top`, since form W's `100%` makes it unregistrable as `<length>`): the 3:2 single (`latourelle-gold`, column 666.4) none / today / share-25 / share-40 / share-60 = 0 / 16.783 / 10.733 / 16.85 / 24.667 (plan 0 / 16.8 / 10.7 / 16.9 / 24.7); the inset (440px, `water-and-ice` 0.963) 0 / 16.783 / 10.467 / 16.283 / 23.567 (plan 0 / 16.8 / 10.5 / 16.3 / 23.6) — below the single at every share; the mixed match="height" pair (1.5 + 0.6975) equal paddings at every candidate (0, 16.783, 7.15, 11.167, 16.2) and image heights equal within 0.15–0.17px, the same residual at `none` (pre-existing flex rounding); held at share-40 (portrait 0.667): figure height 883.467 vs `100svh − 2·hold-margin` 883.8 (0.333, height-bound, width 604.4 in a 641px column), anchor `padding-top` 22.383 vs the figure's `--mat` 22.385 (0.002) — form W meets form H; pause at share-40 (panorama 3): `--frame-h` 472.141 vs height 472.133, width 1346.483 vs `--avail-w` 1346.48 (tight, width-bound), height ≤ `--avail-h` 841.714. Galleries: one padding per flow, 10 cells each — `.gallery-wide` 0 / 16.8 / 8.101 / 12.962 / 19.443 (plan ≈13 at share-40), `.related-flow` 0 / 16.8 / 4.0 (floor) / 4.8 / 7.2. Stage at share-40: landscape 29.367 (plan ≈29.4), width 1160 = `--avail-w` (width-bound); portrait 21.456 (the height form; V would give 42.96), image 804.167 + 2·21.456 = 847.079 vs inner height 847.1 (0.021); panorama 15.065; square 30.296. Cards: 10. Ground buttons: `<html>` `background-color` `oklch(0.968 0.006 95)` → `oklch(0.99 0.003 100)` → back; the warm five read off the stylesheet at load. White candidate recorded in the sampler: `--color-bg: oklch(0.99 0.003 100)`, `--color-surface: oklch(0.965 0.004 100)`, `--color-soft: oklch(0.94 0.006 100)`, `--color-line: oklch(0.86 0.008 100)`, `--color-line-strong: oklch(0.72 0.012 120)`. REAL count 10 (`dock-a`/`dock-b` are subject-named but carry fixture EXIF). Toolbar: all sections open on `today`; a choice on one section moves only it; floor 3rem → 48px, ceiling 1rem → 16px; state survives navigating to a surface page. Deviations: the inset is `water-and-ice` (1926×2000, 0.963), not a square — no real export is square (the numbers hold: width-bound, ratio ≤ 1); the pause's panorama and the stage's panorama frame are the placeholder `pano-3x1-01.jpg` — no real export is a panorama; so the fixture places 10 real exports + 1 placeholder; a `data-start` attribute so a surface with no stored choice opens on `today`, not the table's first row. Findings for the gate: at share-60 the 40px ceiling already bites on the laptop's stage (landscape and square at exactly 40.0), which the plan expected only on the DualUp at 4%; the 4px floor bites on the related strip at share-25 and nowhere else above the collapse; the 1/60 px floor is form-specific (16.7833 on form W, 16.8 on form R side by side). Not driven: Blink, WebKit, below-collapse widths, the DualUp — the pause's. Read beyond the bundle: `content.config.ts`, `CoverCards.astro`, `images.ts` (grep), `BaseLayout.astro` (grep), the transform (grep), `_dock-b.md`, an exifr/sharp pass over the gallery root, `scripts/verify.sh`.
+
+_Phase 0 review (2026-09-13, `skeptical-reviewer` at opus, one review and one re-review):_ 2 blocking — B1 the decorative shorthand's missing `--ar` (fixed as T1100a); B2 plan.md named form H for LatestWork's mat where the code (rightly, per sign-off N3) uses form R's shape (plan and T1101b's line amended). Signed off on the re-review; one adjacent gap named for the sweep (an image inside an author's own link is matted at the fallback ratio 1). Notes for the gate (N1–N4): the pause frame and the stage's wide frame are the grey placeholder panorama (no real export is that wide) and the inset is a near-square photograph; at share-60 the stage's ceiling (40px) is what shows on the laptop and at share-25 the related strip's floor (4px) — the two inputs move those limits; the sampler's sticky toolbar can overlap a held frame's top edge while scrolling; Blink, WebKit, the phone width, the DualUp and the quiet view were not driven. Carried to the sweep: N5 the image page's remaining scoped `.image-stage` rule now outranks global.css's for any shared property (nothing visible changed; look at its declarations once); N7 `needsRatios` keeps its narrower meaning (recorded at T1100).
 
 ### Gate record (Phase 0 pause)
 
@@ -514,10 +533,26 @@ tier if it is ever on (it is off). -->
 | T1101b (`sdd-implementer`)                         | implementation (`opus`)        | 121,909 | done; 319 tests; --matte gone; the zoom-in cursor rule moved with the stage (scoped specificity)                                                    |
 | T1102 (`sdd-implementer`)                          | implementation (`opus`)        | 36,148  | done; 322 tests; the copies match today (max delta 1/255)                                                                                            |
 | T1103 (`sdd-implementer`)                          | implementation (`opus`)        | 139,728 | done; sampler dev-only, negative control proven; every plan number met; no real square or panorama export                                          |
+| Phase 0 review (`skeptical-reviewer`, resumed)     | implementation (`opus`)        | 111,839 | 2 blocking (B1 decorative shorthand `--ar`; B2 plan named form H for LatestWork), 8 notes                                                            |
+| T1100a (`sdd-implementer`, resumed)                | implementation (`opus`)        | 16,515  | B1 fixed; 323 tests                                                                                                                                  |
+| Phase 0 re-review (`skeptical-reviewer`, resumed)  | implementation (`opus`)        | 9,116   | signed off; one adjacent gap to the sweep                                                                                                            |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
+
+- _(Phase 0 re-review)_ An image inside an author's own link in prose
+  (`[![x](./a.jpg)](…)`) is matted by the list's `a:not(.image-link) > img`
+  entry but never probed, so it wears the fallback ratio 1; likewise a
+  local non-raster with alt text. Probably absent from content; the sweep
+  decides between the same treatment and a Known-limitation line.
+- _(Phase 0 review, N5)_ The image page's remaining scoped `.image-stage`
+  rule now outranks global.css's `.image-stage` for any shared property;
+  nothing visible changed (T1101b's quiet probe); read its declarations
+  once at the sweep.
+- _(T1101 review, N6/N7)_ `matte.test.mjs` hardcodes the `--gallery-short`
+  clamp as a fallback and its nesting sweep is one level deep (the
+  src-wide case covers the rest).
 
 - _(sign-off re-review, N2 — for T1101's and T1103's bundles)_ Reading a
   computed custom property (`--mat`, `--frame-h`, `--avail-w`) with

@@ -199,6 +199,15 @@ describe('the ratio on every frame (T1100)', () => {
     expect(anchorStyles(code)).toEqual(['--ar: 1']);
   });
 
+  it('a decorative shorthand image carries its ratio on the img', async () => {
+    // No link (a link with no accessible name fails WCAG 2.4.4), but the
+    // column mats a bare img in prose like any frame — so the ratio has
+    // to ride on the image itself or the mat would be sized at 1.
+    const { code } = await render('Text.\n\n![](./photo.jpg)\n');
+    expect(code).not.toContain('image-link');
+    expect(imageMarkers(code)[0].style).toBe('--ar: 1.6');
+  });
+
   it('match="height" keeps the normalized --ar and adds the raw sum and count', async () => {
     // The anchors are flex-grow factors (smallest 1); the row's height —
     // and so the mat's width — comes from the raw ratios on the figure.
