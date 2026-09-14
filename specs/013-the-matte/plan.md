@@ -275,6 +275,9 @@ Every claim above is owned by a task and a check:
   match-height member, the held anchor, the pause anchor, a gallery
   cell, a related thumbnail, a cover card span, the compare figure and
   the stage frame — every one 16.8px / 8px before and after each task
+  (amended 2026-09-13 at T1101's review: within 1/60 px in Firefox on
+  the frames whose padding now resolves through a percentage — the
+  Known limitation below; a real regression is anything larger)
   (the before run recorded at the start of T1101, before editing, on the
   branch as T1100 left it — T1100 changes no geometry); the held figure's
   and pause frame's widths and the stage image's height identical
@@ -411,6 +414,16 @@ the Obsidian plugin.
 - **The probe runs for every block**, reading each file once per render
   (`imageMetadata` over the whole buffer); the build time is recorded at
   T1100 and a header-only read is a follow-up if it ever matters.
+- **Firefox floors a percentage-bearing padding to 1/60 px** (found at
+  T1101, 2026-09-13): Gecko quantises lengths to 1/60 CSS px and
+  truncates a `calc()` that carries a percentage, so form W — which must
+  carry `100%` for the share — resolves today's 16.8px as 16.7833px on a
+  666.4px column, one app unit low; the literal `16.8px` and form R (no
+  percentage) resolve exactly. Invisible, and moot once the share is
+  above 0 (the mat is then no round number); the landing checks at
+  T1101, T1101b and T1103 read "identical" as within 1/60 px on those
+  frames, in Firefox. Blink (1/64 px) and WebKit were not driven; the
+  Phase 0 pause attests the rendered result.
 - **The dev server caches `getStaticPaths`**: editing the sampler's
   candidate table needs a restart. The toolbar state lives in
   `sessionStorage`; a hard reload keeps it, a new tab starts at `today`
