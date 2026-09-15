@@ -31,11 +31,18 @@ import {
 //   classes: (attrs, ratios) => [...]  — ratios present when needsRatios
 //   sizing:  (attrs, imageIndex, ratios, dims) => ({ layout, sizes })
 //            — ratios and dims (orientation-corrected { width, height })
-//            come from the probe, present only when needsRatios
-//   needsRatios / emitsAr: (attrs) => boolean — probe the files; put
-//            --ar on each anchor (normalized so the smallest is 1, or the
-//            raw ratio — on the wrapper too — when rawAr is set; rawAr
-//            implies emitsAr)
+//            come from the probe; an entry the probe could not read is
+//            null, which only a needsRatios block is spared (below)
+//   needsRatios: (attrs) => boolean — the block's layout cannot be drawn
+//            without the measurements (classes/sizing read ratios and
+//            dims), so a frame the probe cannot read fails the build
+//            there. The probe itself runs for EVERY block (spec 013):
+//            each frame carries its raw ratio in --ar, because the mat's
+//            width is a share of the frame's short side.
+//   emitsAr: (attrs) => boolean — the anchors' --ar is normalized so the
+//            smallest is 1 (match="height"'s flex-grow factors) and the
+//            container carries --ar-sum and --n; everything else gets the
+//            raw ratio. rawAr puts the raw ratio on the wrapper too.
 //   probeAsker: what the probe's failure names (default: the block)
 //   rejectBodyImages: the body is prose only — set to the message an
 //            image in it fails with
@@ -56,8 +63,8 @@ import {
 // Spec 004: every image links to its page (`/images/<folder>/<basename>/`,
 // derived by the same rule the image registry uses, from
 // src/lib/image-meta.mjs). The mdast `link` wrapping an image carries
-// class `image-link` and, for match="height", the `--ar` variable — the
-// anchor is the layout item now, and the mat sits on it (global.css).
+// class `image-link` and the frame's `--ar` — the anchor is the layout
+// item now, and the mat sits on it (global.css).
 // Exceptions: alt="" (decorative; a link with no accessible name fails
 // WCAG 2.4.4), remote and root-absolute srcs (no page exists), formats
 // outside the registry (gif, svg), and images an author already linked.
@@ -103,8 +110,8 @@ export const BLOCKS = {
   single: {
     // The directive form of the column-width image — exists so a single
     // can carry a caption; plain ![alt](./img.jpg) stays the captionless
-    // shorthand. 680px is coupled to --prose-width (68ch) minus matte —
-    // see the coupling comment in global.css.
+    // shorthand. 680px is coupled to --prose-width (68ch) minus the mat
+    // — see the coupling comment in global.css.
     forms: 'both',
     body: 'caption',
     attrs: { required: ['src', 'alt'], optional: [], enums: {} },
@@ -428,7 +435,7 @@ export const BLOCKS = {
     // is written as the frame's raw pixel dimensions: a decimal ratio
     // is not parseable everywhere, and an unparseable media condition
     // fails silently. The height branch ignores the mat's two edges:
-    // the true width is 2 × --matte × (1 − ratio) less, so the hint
+    // the true width is 2 × the mat × (1 − ratio) less, so the hint
     // over-delivers for a landscape frame and falls under by that much
     // for a portrait one — 2.1% at 2:3 on 1440×900 (accepted: a pause
     // is for the wide frame).
@@ -586,39 +593,60 @@ export function remarkPiecesBlocks() {
       // the piece folder + basename, the same rule the registry uses.
       const pageUrls = images.map((image) => imagePageUrl(file, image.src, failHere));
 
-      // Blocks that need the frames' shapes (match="height", strip, held,
-      // pause) probe each image's dimensions (orientation-aware — Astro
-      // swaps width/height for EXIF orientations 5–8, so a camera
-      // portrait stored as rotated landscape gets the correct ratio).
-      // Emitted --ar values are normalized so the smallest is 1 —
-      // flex-grow factors summing below 1 would under-fill the row —
-      // unless the block asks for the raw ratio (a single frame
-      // normalized would always be 1; the hold sizes itself from the
-      // real shape).
-      let ratios = null;
-      let dims = null;
-      let normalized = null;
-      if (block.needsRatios?.(attrs)) {
-        dims = await probeDimensions(images, file, block.probeAsker ?? node.name, failHere);
-        ratios = dims.map(({ width, height }) => width / height);
-        if (block.rawAr || block.emitsAr?.(attrs)) {
-          const min = block.rawAr ? 1 : Math.min(...ratios);
-          normalized = ratios.map((r) => r / min);
-        }
-      }
+      // Every block probes each image's dimensions (orientation-aware —
+      // Astro swaps width/height for EXIF orientations 5–8, so a camera
+      // portrait stored as rotated landscape gets the correct ratio):
+      // spec 013 sizes the mat from the frame's short side, so every
+      // frame carries its raw ratio. A frame the probe cannot read — a
+      // remote or root-absolute src, or a render with no file.path —
+      // measures null and carries no --ar (the CSS falls back to 1);
+      // where the block's own layout needs the numbers (needsRatios:
+      // match="height", strip, held, pause) that is still a failure.
+      const needsRatios = Boolean(block.needsRatios?.(attrs));
+      const dims = await probeDimensions(
+        images,
+        file,
+        block.probeAsker ?? node.name,
+        failHere,
+        needsRatios,
+      );
+      const ratios = dims.map((dim) => (dim ? dim.width / dim.height : null));
+      // match="height" emits normalized --ar on the anchors — flex-grow
+      // factors summing below 1 would under-fill the row — and the raw
+      // ratios' sum and count on the container, which is where the row's
+      // height (and so the mat's width) is worked out. Every other block
+      // emits the raw ratio: a single frame normalized would always be 1.
+      const normalized =
+        !block.rawAr && block.emitsAr?.(attrs) ? ratios.map((r) => r / Math.min(...ratios)) : null;
       // The raw ratio also rides on the wrapper: custom properties
       // inherit downward and the frame's width formula reads it there.
       // The first image's — a rawAr block holds one frame (spec 007).
-      const wrapperStyle =
-        block.rawAr && normalized ? { style: `--ar: ${trimNumber(normalized[0])}` } : {};
+      const wrapperStyle = block.rawAr
+        ? ratios[0] === null
+          ? {}
+          : { style: `--ar: ${trimNumber(ratios[0])}` }
+        : normalized
+          ? {
+              style: `--ar-sum: ${trimNumber(ratios.reduce((a, b) => a + b, 0))}; --n: ${images.length}`,
+            }
+          : {};
 
       const imageNodes = images.map(({ src, alt }, imageIndex) => {
-        const arStyle = normalized ? { style: `--ar: ${trimNumber(normalized[imageIndex])}` } : {};
+        const ar = (normalized ?? ratios)[imageIndex];
+        const arStyle = ar === null ? {} : { style: `--ar: ${trimNumber(ar)}` };
         const image = {
           type: 'image',
           url: src,
           alt,
-          data: { hProperties: { ...block.sizing(attrs, imageIndex, ratios, dims) } },
+          // Marked as a block's own frame: the shorthand pass below
+          // measures every OTHER image the piece wrote, and a decorative
+          // one is a bare img there as it is here — without the mark it
+          // would overwrite this block's --ar (normalized, for a matched
+          // pair) with the raw ratio.
+          data: {
+            pieceFrame: true,
+            hProperties: { ...block.sizing(attrs, imageIndex, ratios, dims) },
+          },
         };
         // The anchor becomes the layout item, so --ar rides on it (the
         // CSS flexes the figure's direct child). An image with alt=""
@@ -725,16 +753,42 @@ export function remarkPiecesBlocks() {
     // Shorthand images (`![alt](./x.jpg)` in prose) link to their pages
     // too — the same rule, the same exceptions (alt="", remote or
     // root-absolute src, an author's own surrounding link).
+    // Collected first, then measured: the visit is synchronous and the
+    // probe is not, and the frame carries its --ar like every other frame
+    // (spec 013). A decorative image gets no link (a link with no
+    // accessible name fails WCAG 2.4.4) but IS matted in the column, so
+    // it is measured too and wears --ar itself — the block path's alt=""
+    // case, which puts arStyle on the image node.
+    const shorthand = [];
     visit(tree, 'image', (node, index, parent) => {
-      if (!parent || parent.type === 'link') return;
+      if (!parent || parent.type === 'link' || node.data?.pieceFrame) return;
       const failHere = (message) => fail(file, node, message);
       checkReferenceShape(file, node.url, failHere);
       rejectPrivateSrc(node.url, failHere);
-      const url = node.alt === '' ? null : imagePageUrl(file, node.url, failHere);
-      if (!url) return;
-      parent.children.splice(index, 1, wrapInLink(node, url));
+      const decorative = node.alt === '';
+      const url = decorative ? null : imagePageUrl(file, node.url, failHere);
+      if (!url && !decorative) return;
+      shorthand.push({ node, index, parent, url });
       return index + 1;
     });
+    await Promise.all(
+      shorthand.map(async ({ node, index, parent, url }) => {
+        const [dim] = await probeDimensions(
+          [{ src: node.url }],
+          file,
+          'the image',
+          (message) => fail(file, node, message),
+          false,
+        );
+        const arStyle = dim ? { style: `--ar: ${trimNumber(dim.width / dim.height)}` } : {};
+        if (url) {
+          parent.children.splice(index, 1, wrapInLink(node, url, arStyle));
+        } else if (dim) {
+          // Decorative and measurable: the image itself is the frame.
+          node.data = { ...node.data, hProperties: { ...node.data?.hProperties, ...arStyle } };
+        }
+      }),
+    );
   };
 }
 
@@ -908,12 +962,19 @@ function partitionBody(children, name, fail) {
 // Each image's rendered { width, height } — orientation-corrected, so a
 // camera portrait stored rotated measures portrait. `asker` names what
 // needed the measurement in the failure (the block, or match="height").
-async function probeDimensions(images, file, asker, fail) {
+// `required` is the block's own layout asking (needsRatios): without it
+// a frame the probe cannot resolve at all — a remote or root-absolute
+// src, or a render with no file.path — measures null instead of failing,
+// and simply carries no --ar. A local file that cannot be READ fails
+// either way: it is a broken photograph, not an absent measurement.
+async function probeDimensions(images, file, asker, fail, required = true) {
   if (typeof file.path !== 'string') {
-    fail(`${asker} needs piece-relative image files to measure`);
+    if (required) fail(`${asker} needs piece-relative image files to measure`);
+    return images.map(() => null);
   }
   return Promise.all(
     images.map(async ({ src }) => {
+      if (!required && parseReference(src).kind === 'external') return null;
       const path = resolve(dirname(file.path), src);
       let meta;
       try {

@@ -21,7 +21,11 @@ const images = registry.latest(limit);
   {
     images.map((image) => (
       <li>
-        <a href={withBase(image.url)} class="image-link">
+        <a
+          href={withBase(image.url)}
+          class="image-link"
+          style={`--ar: ${Math.round((image.image.width / image.image.height) * 1000) / 1000}`}
+        >
           <Image
             src={image.image}
             alt={image.title}
@@ -58,16 +62,30 @@ const images = registry.latest(limit);
     scroll-snap-align: start;
   }
 
+  /* The mat (spec 013): the band's height is one string, --avail-h,
+     declared here and read twice — by the image's height and by the
+     mat, which is form R's shape (a share of a known length) because
+     the image is --avail-h tall and the mat sits around it, so the
+     photograph's short side is that height times min(--ar, 1). Not
+     form H, which is for a frame that must FIT a height. This strip
+     follows the packed rows at spec 013's gate; it is not a surface
+     the gate chooses for. */
   .image-link {
+    --avail-h: clamp(180px, 30vh, 260px);
+    --mat: clamp(
+      var(--mat-min),
+      calc(var(--avail-h) * var(--mat-share) * min(var(--ar, 1), 1)),
+      var(--mat-max)
+    );
     display: block;
     height: 100%;
-    padding: var(--matte);
+    padding: var(--mat);
     background: var(--color-matte);
   }
 
   .image-link img {
     display: block;
     width: auto;
-    height: clamp(180px, 30vh, 260px);
+    height: var(--avail-h);
   }
 </style>

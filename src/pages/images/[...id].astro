@@ -205,6 +205,12 @@ const sets = image.sets.map((set) => ({
   nextImage: set.next ? registry.byId.get(set.next) : undefined,
 }));
 
+// The frame's ratio (width / height, raw, rounded as galleryCell's),
+// carried by the stage's figure and the compare figure: the mat rule's
+// form V+H reads --ar to solve for the mat (spec 013), and the compare
+// box's aspect-ratio takes the same decimal (it accepts a number).
+const ar = Math.round((image.image.width / image.image.height) * 1000) / 1000;
+
 // The search index takes pages with something to find: a story, a
 // caption, or a place. Label-only pages would only swamp the pieces.
 const indexed =
@@ -214,7 +220,7 @@ const indexed =
 <BaseLayout title={image.title} description={description} ogType="article" image={og.src}>
   <article class="image-page" data-pagefind-body={indexed || undefined}>
     <div class="image-stage">
-      <figure class="image-frame">
+      <figure class="image-frame" style={`--ar: ${ar}`}>
         {
           /* Width capped at 2× the content width: enough for a retina
             1160px stage. For most sources this IS the source width; the
@@ -369,7 +375,7 @@ const indexed =
             <h2 class="sec-title" id="sec-compare">
               {WORDING.compare.heading}
             </h2>
-            <figure class="compare" style={`--ar: ${image.image.width} / ${image.image.height}`}>
+            <figure class="compare" style={`--ar: ${ar}`}>
               <div class="compare-frames">
                 <div class="compare-frame compare-before">
                   <Image
@@ -478,37 +484,10 @@ const indexed =
 </BaseLayout>
 
 <style>
-  /* The stage: exactly the viewport below the sticky header (which
-     publishes its real height as --header-h; the fallback matches its
-     usual size), with the frame centered in it. The image is sized
-     inside the mat so the whole frame — mat included — fits the stage
-     with breathing room; width:auto plus max constraints, never
-     stretched or cropped, as the tall block. */
-  .image-stage {
-    --stage-pad: clamp(1rem, 3vh, 2rem);
-    position: relative;
-    display: grid;
-    place-items: center;
-    min-height: calc(100vh - var(--header-h, 4.5rem));
-    min-height: calc(100svh - var(--header-h, 4.5rem));
-    padding: var(--stage-pad) var(--page-pad);
-  }
-
-  .image-frame {
-    max-width: min(100%, var(--content-width));
-    margin: 0;
-    padding: var(--matte);
-    background: var(--color-matte);
-  }
-
-  .image-frame img {
-    display: block;
-    width: auto;
-    max-width: 100%;
-    height: auto;
-    max-height: calc(100vh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - 2 * var(--matte));
-    max-height: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - 2 * var(--matte));
-  }
+  /* The stage, the frame and the image are styled in global.css (spec
+     013): the mat sampler must render the real stage and cannot reach a
+     page-scoped stylesheet, and the frame's mat is form V+H, which
+     belongs beside the other forms. Everything below is this page's. */
 
   /* Titles are sentences (an alt text, a sidecar title), not the
      theme's short display headings. */
@@ -685,12 +664,12 @@ const indexed =
        both read it. */
     --split-pct: calc(var(--split) * 1%);
     margin: 0;
-    padding: var(--matte);
+    padding: var(--mat);
     background: var(--color-matte);
   }
   .compare-frames {
     display: grid;
-    gap: var(--matte);
+    gap: var(--mat);
   }
   .compare-frame {
     position: relative;
@@ -713,7 +692,7 @@ const indexed =
     display: none;
   }
   .compare-note {
-    margin: var(--matte) 0 0;
+    margin: var(--mat) 0 0;
     color: var(--color-muted);
     font-size: 0.95rem;
     line-height: 1.6;
@@ -781,13 +760,12 @@ const indexed =
 
   /* Quiet view: chrome gone, the ground dimmed to --color-quiet, the
      frame as large as the viewport allows with a small margin — the
-     photograph on a dark wall. Entered by clicking the photograph (or
-     the toggle); left by Esc or any click. Still a page: the URL and
-     history don't change. The toggle and the zoom cursor appear only
-     once the script can honour them. */
-  .image-stage[data-quiet-ready] .image-frame {
-    cursor: zoom-in;
-  }
+     photograph on a dark wall (the stage's and the frame's own quiet
+     rules, the zoom cursors included, moved to global.css with the
+     stage). Entered by clicking the photograph (or the toggle); left by
+     Esc or any click. Still a page: the URL and history don't change.
+     The toggle and the zoom cursor appear only once the script can
+     honour them. */
   :global(html),
   :global(body),
   .image-stage {
@@ -828,23 +806,6 @@ const indexed =
   :global(html[data-quiet]),
   :global(html[data-quiet] body) {
     background: var(--color-quiet);
-  }
-  :global(html[data-quiet]) .image-stage {
-    --stage-pad: clamp(0.5rem, 1.5vh, 1rem);
-    min-height: 100vh;
-    min-height: 100svh;
-    padding-inline: var(--stage-pad);
-    background: var(--color-quiet);
-    cursor: zoom-out;
-  }
-  :global(html[data-quiet]) .image-frame,
-  :global(html[data-quiet]) .image-stage[data-quiet-ready] .image-frame {
-    max-width: 100%;
-    cursor: zoom-out;
-  }
-  :global(html[data-quiet]) .image-frame img {
-    max-height: calc(100vh - 2 * var(--stage-pad) - 2 * var(--matte));
-    max-height: calc(100svh - 2 * var(--stage-pad) - 2 * var(--matte));
   }
 </style>
 
