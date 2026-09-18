@@ -59,7 +59,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the rule and the floor, the generator, the switch, and the sampler (reviewer after the phase; the gate at its end)
 
-- [ ] **T1200** — The family's rule and the contrast floor, in one
+- [x] **T1200** — The family's rule and the contrast floor, in one
       module and its test. `review: per-task`. `src/lib/ground.ts`
       (new; plain exported functions, no imports — `src/lib/pause-shape.ts`
       is the pattern for a pure module with a `.mjs` test): `STEPS`
@@ -119,6 +119,17 @@ headers to confirm nothing was duplicated or dropped. -->
       landing on today's values the site is already under the floor:
       the numbers are reported and the task stops for the phase review
       — the floor is not lowered._
+
+      _Record (2026-09-17): landed green; the seven ratios at today's
+          `:root` — text/bg 14.571, text/surface 13.654, text/soft 12.681,
+          muted/bg 5.451, muted/surface 5.108, muted/soft 4.744 (the binding
+          pair), mat/bg 1.098 at ΔL 0.032. `deepenMuted` lands deep-1 → 0.49,
+          deep-2 → 0.48, deep-3 → 0.46. Every mutation failed as named,
+          except that `--color-muted` 0.5 → 0.55 names muted/bg (4.430) first,
+          not muted/soft — all three muted pairs fail there. Per-task review:
+          two blocking (the floor loop could go vacuous; a pass flag on the
+          unfloored mat pair) fixed and cleared on the re-review; a readout
+          case added, pinned from the literal `oklch(0.95 0.007 95)`._
 
 - [ ] **T1201** — The social image's generator, and the OG copies all
       pinned. `src/lib/og-card.mjs` (new; plain JS with JSDoc): `COLOR`
@@ -427,12 +438,14 @@ reviewer invocations alike — any escape-hatch miss, the fallback switch
 if the top tier's budget runs out (the row and the time), and the third
 tier if it is ever on (it is off). -->
 
-| Task / invocation                                   | Tier                           | Tokens  | Outcome / miss reason                                        |
-| --------------------------------------------------- | ------------------------------ | ------- | ------------------------------------------------------------ |
-| Planning: draft (`sdd-planner`)                     | top (`claude-fable-5-1`, high) | 166,322 | drafted; no product question returned                        |
-| Planning: findings folded (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 54,636  | B1, B2, N1–N9 folded; no disagreement                        |
-| Sign-off: plan/tasks (`skeptical-reviewer`)         | top (`claude-fable-5-1`, high) | 125,254 | fix and re-review — 2 blocking, 9 notes, no product question |
-| Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 28,042  | signed off; O1, O2 carried and transcribed                   |
+| Task / invocation                                   | Tier                           | Tokens  | Outcome / miss reason                                                                                           |
+| --------------------------------------------------- | ------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------- |
+| Planning: draft (`sdd-planner`)                     | top (`claude-fable-5-1`, high) | 166,322 | drafted; no product question returned                                                                           |
+| Planning: findings folded (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 54,636  | B1, B2, N1–N9 folded; no disagreement                                                                           |
+| Sign-off: plan/tasks (`skeptical-reviewer`)         | top (`claude-fable-5-1`, high) | 125,254 | fix and re-review — 2 blocking, 9 notes, no product question                                                    |
+| Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 28,042  | signed off; O1, O2 carried and transcribed                                                                      |
+| T1200 (`sdd-implementer`)                           | impl (`opus`)                  | 102,298 | done; one orchestrator correction before review (readout graded against the deepened muted), one fix pass after |
+| T1200 per-task review (`skeptical-reviewer`)        | impl (`opus`)                  | 76,363  | 2 blocking + 5 notes; fixed, re-reviewed, signed off                                                            |
 
 _(Session-tier allowance draw noted at each pause.)_
 
