@@ -65,37 +65,54 @@ headers to confirm nothing was duplicated or dropped. -->
       `formatOklch` (`oklch(L C h)`, trailing zeros trimmed, so today's
       ground formats today's four literals byte for byte), `parseOklch`
       and `oklchToRgb255` moved verbatim from `ground.test.mjs`,
-      `toHex`, `relativeLuminance` and `contrast` (plan.md's formula,
-      on the rounded 8-bit channels), `PAIRS` (text × bg/surface/soft,
-      muted × bg/surface/soft, mat × bg), `FLOOR = 4.5`,
-      `deepenMuted(family, muted)` (L down by 0.01 until the three
-      muted pairs pass; `null` if none fails), `readout(bg, muted)`,
-      `tokensFor(bg, muted)` (the five strings plus `--color-muted`
-      only when deepened), `CANDIDATES` (plan.md's eight, `today`
-      first-class with `TODAY` its id) and the `Tone` type. Erasable
-      TypeScript only (no enums, no parameter properties): T1201's
-      script imports it under type stripping. `ground.test.mjs`
-      (extended; its `blocks`/`declarations`/`selects` helpers stay; the
-      converter case now imports): the plan's cases — (a) the four
-      derived `:root` literals equal the rule's strings, each named;
-      (b) `CANDIDATES.today.bg` is `:root`'s `--color-bg`; (c) the
-      spread (two lighter incl. `oklch(0.99 0.003 100)`, two darker,
-      one cool, one warm, ids unique); (d) the six text pairs at
-      `:root`'s values `≥ 4.5`, each named with its ratio; (e) the
-      formula's fixtures — black/white 21.00, `#777777`/white 4.48,
-      `#767676`/white 4.54 to two decimals; (f) `deepenMuted` is `null`
-      today and, for `deriveFamily(deep-2)`, returns an L that passes
-      all three muted pairs while L + 0.01 fails one. _Verify:
-      `sh scripts/verify.sh tests` green, re-run by the orchestrator;
-      the seven ratios at today's values recorded here to three
-      decimals (they replace plan.md's estimates); `npx prettier --check`
-      clean on both files; mutations named and reverted — `--color-soft`
-      L 0.92 → 0.921 fails (a) naming `--color-soft`; `STEPS.line.L`
-      −0.108 → −0.11 fails (a); `--color-muted` L 0.5 → 0.55 fails (d)
-      on muted/soft with the ratio in the message; `0.7152` → `0.7` in
-      the luminance fails (e). If (d) fails at landing on today's values
-      the site is already under the floor: the numbers are reported and
-      the task stops for the phase review — the floor is not lowered._
+      `toHex`, `rootTokens(css)` (the test's `blocks`/`declarations`/
+      `selects` helpers moved in as pure string functions, returning
+      `:root`'s declarations — the test and T1201's generator both read
+      the stylesheet through it), `relativeLuminance` and `contrast`
+      (plan.md's formula, on the rounded 8-bit channels), `PAIRS`
+      (text × bg/surface/soft, muted × bg/surface/soft, mat × bg),
+      `FLOOR = 4.5`, `TEXT`, `MUTED` and `MAT` (the literal tones of
+      `--color-text`, `--color-muted`, `--color-matte` as `:root` has
+      them today — the readout's fixed ends, never a computed style),
+      `deepenMuted(family)` (`MUTED`'s L down by 0.01 until the three
+      muted pairs pass; `null` if none fails), `readout(bg)`,
+      `tokensFor(bg)` (the five strings plus `--color-muted` only when
+      deepened), `CANDIDATES` (plan.md's eight, `today` first-class with
+      `TODAY` its id), `CONTROL` (`oklch(0.968 0.006 95)` as a literal
+      — the tone at spec 014's gate, which T1204 never moves) and the
+      `Tone` type. Erasable TypeScript only (no enums, no parameter
+      properties): T1201's script imports it under type stripping.
+      `ground.test.mjs` (extended; its CSS helpers now imported from
+      the module; the converter case now imports): the plan's cases —
+      (a) the four derived `:root` literals equal the rule's strings,
+      each named; (b) `CANDIDATES.today.bg` is `:root`'s `--color-bg`,
+      `TEXT` its `--color-text`, `MUTED` its `--color-muted`, `MAT` its
+      `--color-matte`; (c) the spread **against `CONTROL`** (two lighter
+      incl. `oklch(0.99 0.003 100)`, two darker, one within L 0.01 with
+      h ≥ 200, one with h < 95 and C above `CONTROL`'s, ids unique), and
+      `CONTROL` equals `CANDIDATES.today.bg` or
+      `CANDIDATES['warm-003'].bg`; (d) the six text pairs at `:root`'s
+      values `≥ 4.5`, each named with its ratio; (e) the formula's
+      fixtures — black/white 21, `#777777`/white 4.48, `#767676`/white
+      4.54, each `toBeCloseTo(x, 2)` on the unrounded ratio; (f)
+      `deepenMuted` is `null` today and, for `deriveFamily(deep-2)`,
+      returns an L that passes all three muted pairs while L + 0.01
+      fails one; (g) the five ground tokens are declared only in
+      `:root` — no other block in `global.css`, no file under `src/`
+      outside `src/pages/dev/` (`matte.test.mjs`'s declared-once case is
+      the pattern). _Verify: `sh scripts/verify.sh tests` green, re-run
+      by the orchestrator; the seven ratios at today's values recorded
+      here to three decimals (they replace plan.md's estimates);
+      `npx prettier --check` clean on both files; mutations named and
+      reverted — `--color-soft` L 0.92 → 0.921 fails (a) naming
+      `--color-soft`; `STEPS.line.L` −0.108 → −0.11 fails (a); `MUTED`
+      L 0.5 → 0.49 in the module fails (b); `--color-muted` L 0.5 →
+      0.55 in `:root` fails (b) and (d) on muted/soft with the ratio in
+      the message; `0.7152` → `0.7` in the luminance fails (e); a second
+      `--color-bg` declared on `.site-header` fails (g). If (d) fails at
+      landing on today's values the site is already under the floor:
+      the numbers are reported and the task stops for the phase review
+      — the floor is not lowered._
 
 - [ ] **T1201** — The social image's generator, and the OG copies all
       pinned. `src/lib/og-card.mjs` (new; plain JS with JSDoc): `COLOR`
@@ -107,27 +124,36 @@ headers to confirm nothing was duplicated or dropped. -->
       three and keeps only `getStaticPaths`, `GET`, `truncate` and the
       Satori/sharp calls. `scripts/gen-og.mjs` (new; the header comment
       shape of `scripts/check-no-gps.mjs`): reads `:root` from
-      `src/styles/global.css` (the test's `blocks`/`declarations`,
-      copied — or exported from a shared helper if the implementer
-      prefers, named in the record), converts `--color-bg`, `--color-text`,
-      `--color-muted`, `--color-line`, `--color-accent` with `ground.ts`,
-      prints each beside `COLOR`'s hex, exits 1 with plan.md's drift
-      line if any channel differs by more than 2, else renders
+      `src/styles/global.css` with `rootTokens` and converts
+      `--color-bg`, `--color-text`, `--color-muted`, `--color-line`,
+      `--color-accent` with `ground.ts` — both imported as
+      `../src/lib/ground.ts`, and `SITE` as `../src/consts.ts`
+      (type stripping needs the extension on the specifier; both files
+      are erasable syntax), prints each beside `COLOR`'s hex, exits 1
+      with plan.md's drift line if any channel differs by more than 2,
+      else renders
       `card({ title: SITE.title, description: SITE.description, kind: '' })`
       at 1200×630 → sharp → JPEG quality 90 → `public/og.jpg` (or
       `--out <path>`), printing the wrote line. `package.json`:
-      `"og": "node --experimental-strip-types scripts/gen-og.mjs"`.
-      `ground.test.mjs`: the OG case imports `COLOR` from `og-card.mjs`
-      (the regex parse of the route deleted) and pins all five hexes
-      within ±2/255 per channel of their token's conversion; the
-      `og.jpg` case unchanged. _Verify: `sh scripts/verify.sh` green;
-      `shasum dist/og/pieces/where-the-fog-lets-go.png` identical
-      before and after the refactor (recorded — the before hash taken at
-      the start of the task, before editing); `node --version` recorded
-      and `npm run og -- --out <scratchpad>/og.jpg` prints the five
-      hex pairs and writes a 1200×630 JPEG whose (10, 10) pixel is
+      `"og": "node --experimental-strip-types scripts/gen-og.mjs"` (an
+      ExperimentalWarning on Node 22.12–22.17 is expected; v26 aliases
+      the flag). `ground.test.mjs`: the OG case imports `COLOR` from
+      `og-card.mjs` (the regex parse of the route deleted) and pins all
+      five hexes within ±2/255 per channel of their token's conversion;
+      the `og.jpg` case unchanged. _Verify: **at the start of the task,
+      before any edit**, with no dev server running, a fresh
+      `npm run build` on the branch and
+      `shasum dist/og/pieces/where-the-fog-lets-go.png` recorded (a
+      stale or absent `dist/` is not a before); after, the same hash
+      from `sh scripts/verify.sh`'s build, identical; `node --version`
+      recorded and `npm run og -- --out <scratchpad>/og.jpg` prints the
+      five hex pairs and writes a 1200×630 JPEG whose (10, 10) pixel is
       within ±3 of the committed `public/og.jpg`'s (both triples
-      recorded); `git diff main -- public/og.jpg` empty; mutation —
+      recorded — the ground is what this proves; the card's layout may
+      differ from the hand-made file, and that is not a failure: the
+      scratch image is attached to the record and shown to the person
+      at the Phase 1 pause if the change branch regenerates it);
+      `git diff main -- public/og.jpg` empty; mutation —
       `COLOR.bg` set to `#f6f0f0` → the test fails and `npm run og`
       refuses with the drift line, restored. If any of the five hexes
       drifts from its token at landing, resync the hex in `og-card.mjs`
@@ -193,17 +219,24 @@ headers to confirm nothing was duplicated or dropped. -->
       two decimals rounded down, `is-fail` under 4.5 on the six text
       rows; the mat row shows the ratio and ΔL), a `.ground-muted` line
       ("muted ships at `oklch(…)` — deepened for <pair>" or "muted
-      unchanged"), and a `reset` button; the surface links stay. The
-      script: import `CANDIDATES`, `TODAY`, `readout`, `tokensFor`,
-      `formatOklch` from `../../../lib/ground`;
-      `applyGround(tone, id)` computes `readout(tone, MUTED_TODAY)` —
-      `MUTED_TODAY` read
-      once from the stylesheet before any override, as the old `WARM`
-      read did, but for `--color-muted` only — fills the readout, writes
-      `localStorage['dev-ground']` = `{ id, bg, muted, tokens }` and
-      `setProperty`s the tokens on `<html>`; `today` and `reset` remove
-      the key and `removeProperty` each of the six; a candidate click
-      seeds the sliders; a slider `input` gives id `tune`. Delete
+      unchanged"), a `.ground-tokens` line listing the stored key's
+      tokens one per `token: value` (empty, "no override — the
+      stylesheet", on `today`), and a `reset` button; the surface links
+      stay. The script: import `CANDIDATES`, `TODAY`, `readout`,
+      `tokensFor`, `formatOklch` from `../../../lib/ground`;
+      `applyGround(tone, id)` computes `readout(tone)` — its fixed ends
+      are the module's `TEXT`/`MUTED`/`MAT`; **no `getComputedStyle`
+      read of any colour token anywhere in the script** (the head
+      applier has already set a deepened `--color-muted` on `<html>`
+      when a stored candidate needed one, and a DOM read would grade
+      the tone against the wrong muted) — fills the readout and the
+      tokens line, writes `localStorage['dev-ground']` =
+      `{ id, bg, muted, tokens }` and `setProperty`s the tokens on
+      `<html>`; `today` and `reset` remove the key and `removeProperty`
+      each of the six; a candidate click seeds the sliders; a slider
+      `input` gives id `tune`. On load the script reads the stored key
+      to mark the active button and seed the sliders, and recomputes
+      the readout from the stored `bg` (not from the DOM). Delete
       `GROUND_TOKENS`, `WHITE`, `WARM`, `applyGround`'s old body and the
       `ground` field of the `matte-sampler` session state; the file's
       header comment and the script's comment say the ground is the
@@ -211,26 +244,32 @@ headers to confirm nothing was duplicated or dropped. -->
       candidates becomes `share-60` (the shipped rule), the comment
       updated; ids unchanged. _Verify: `sh scripts/verify.sh` green with
       `87 page(s) built` and the barrier line; `grep -rl matte-sampler dist/`
-      empty; `npx prettier --check` clean. On the dev server at 1512×982:
+      empty; `grep -c "getComputedStyle" "src/pages/dev/matte/[...surface].astro"`
+      → 0; `npx prettier --check` clean. On the dev server at 1512×982:
       `/dev/matte/` shows eight ground buttons in the table's order and
       the mat candidates open on `share-60`; clicking `deep-2` — `<html>`'s
       background equals its conversion, the key holds six tokens (muted
       deepened), the readout's muted/soft row shows the failing
-      undeepened ratio and the muted line the shipped L (all recorded);
-      the L slider to 0.90 — id `tune`, the tone text `oklch(0.9 0.008 95)`
-      (C and h from `deep-2`), the muted line deeper still; `today` —
-      the key gone and `<html>` carrying no inline token;
-      `/pieces/where-the-fog-lets-go/` opened afterwards with `deep-2`
-      selected wears it; the readout's seven numbers on `today` equal
-      T1200's recorded ratios to two decimals. Where the implementer
-      cannot drive a browser it says so, line by line._
+      undeepened ratio and the muted line the shipped L, the tokens line
+      lists the six (all recorded); **then a reload of `/dev/matte/`
+      with `deep-2` still stored** — the same readout, the same muted
+      line, the key still six tokens, `<html>`'s `--color-muted` the
+      deepened value (the sign-off's B2 case); the L slider to 0.90 —
+      id `tune`, the tone text `oklch(0.9 0.008 95)` (C and h from
+      `deep-2`), the muted line deeper still; `today` — the key gone,
+      `<html>` carrying no inline token, the tokens line reading "no
+      override"; `/pieces/where-the-fog-lets-go/` opened afterwards with
+      `deep-2` selected wears it; the readout's seven numbers on `today`
+      equal T1200's recorded ratios floored to two decimals. Where the
+      implementer cannot drive a browser it says so, line by line._
 
 ### Gate record (Phase 0 pause)
 
 _(The product owner's decision from `/dev/matte/` and the site under the
-switch, on both screens: the tone — a candidate id, or the tune's
-numbers `oklch(L C h)` — the family it derives (the four values the
-readout showed), the readout's seven ratios at that tone, and whether
+switch, on both screens, with the mat bar left on `share-60`: the tone
+— a candidate id, or the tune's numbers `oklch(L C h)` — the family it
+derives (the bar's tokens line, copied), the readout's seven ratios at
+that tone, and whether
 the muted text deepens: its L and the pair that forced it, or "muted
 unchanged". If today's tone is kept, "kept" and why, in the person's
 words. Recorded here by the orchestrator, in the person's words and the
@@ -256,17 +295,24 @@ it names. -->
       candidate or "tuned from <id>", the pair that bound, spec 003's
       warming kept as one line of history); **only if the record says
       the muted text deepened**: `--color-muted` to the recorded value
-      with its own comment naming the pair and the undeepened value.
-      `src/lib/ground.ts`: `CANDIDATES.today.bg` → the landed tone; the
-      former control kept as `warm-003` with its note ("spec 003's
-      warm, the control at spec 014's gate"). `src/lib/og-card.mjs`:
-      `COLOR.bg` and `.line` (and `.muted` on the deepens branch) from
-      `npm run og`'s print; then `npm run og` writes `public/og.jpg`.
-      **Kept**: no edit to any of those files; the record says so.
-      _Verify: `sh scripts/verify.sh` green; changed — `ground.test.mjs`
-      green against the new literals with every delta recorded;
-      `grep -c "0.968 0.006 95" src/styles/global.css` → 0 outside the
-      history comment; `git diff main -- src/styles/global.css` shows
+      with its own comment naming the pair and the undeepened value,
+      **and `MUTED` in `src/lib/ground.ts` to the same value** (test
+      case (b) demands both). `src/lib/ground.ts`: `CANDIDATES.today.bg`
+      → the landed tone; a new entry `warm-003` carrying the former
+      control's tone with the note "spec 003's warm — the control at
+      spec 014's gate"; the taken candidate's entry (`deep-2`, say)
+      **dropped** — its tone is now `today` and two buttons with one
+      tone would mislead the next gate (a tuned tone has no entry to
+      drop); `CONTROL` untouched. `src/lib/og-card.mjs`: `COLOR.bg` and
+      `.line` (and `.muted` on the deepens branch) from `npm run og`'s
+      print; then `npm run og` writes `public/og.jpg`. **Kept**: no edit
+      to any of those files; the record says so. _Verify:
+      `sh scripts/verify.sh` green; changed — `ground.test.mjs` green
+      against the new literals with every delta recorded;
+      `grep -rn "0.968 0.006 95\|0.945 0.007 95\|0.92 0.008 95\|0.86 0.008 95\|0.72 0.012 95" src/`
+      → exactly the `:root` history comment line(s) and the `warm-003`
+      entry, nothing else (every hit listed in the record — a fill left
+      at the old tone is a hit); `git diff main -- src/styles/global.css` shows
       no change inside the `html[data-pause-active]` block or on
       `--color-quiet`, `--pause-depth`, `--color-text`, `--color-accent`,
       `--color-matte`, `--mat-share`, `--mat-min`, `--mat-max`; on the
@@ -277,7 +323,10 @@ it names. -->
       one image page — each the landed token's conversion (or
       `--color-quiet`'s) within 1/255, recorded; a built OG PNG's
       (10, 10) pixel equals `COLOR.bg` within 2; `sharp` reads
-      `public/og.jpg` as 1200×630. Kept —
+      `public/og.jpg` as 1200×630, and the regenerated file's path is
+      named in the record so the Phase 1 pause report can show it to
+      the person (its card is the generator's; the old one was
+      hand-made and may differ beyond the tone). Kept —
       `git diff main -- src/styles/global.css src/lib/og-card.mjs public/og.jpg`
       empty and `git diff main -- src/lib/ground.ts` touching no
       `CANDIDATES` line; `ground.test.mjs` green is the pin. Both —
@@ -339,9 +388,10 @@ it names. -->
       with a merge commit; the close-out box ticked in the same shell
       command as the merge bookkeeping. _Verify: the implementer's
       `sh scripts/verify.sh` green with the documents edited;
-      `grep -rn "0.968 0.006 95\|#f6f4f0" README.md DECISIONS.md ROADMAP.md design/brief.md src/`
+      `grep -rn "0.968 0.006 95\|0.945 0.007 95\|0.92 0.008 95\|0.86 0.008 95\|0.72 0.012 95\|#f6f4f0\|#d2d1cb" README.md DECISIONS.md ROADMAP.md design/brief.md src/`
       → only lines consistent with the gate's outcome (history lines
-      say so); main green after the merge._
+      and `warm-003` say so; every hit listed); main green after the
+      merge._
 
 ---
 
@@ -394,13 +444,17 @@ to the `skeptical-reviewer` at the top tier on a decision bundle from
 Plan Mode. The **Phase 0 pause is the visual gate**: the sampler's URL
 (`/dev/matte/` and its four surface pages), the eight candidates and
 what each is for, the free tune, the readout and what a failing row
-means, that a chosen candidate follows the person across the whole
-site under `npm run dev` until `today` or `reset` is pressed, and the
-one question — which tone, as an id or as the numbers the bar shows,
-and whether he accepts the deepened muted text if the readout says his
-tone needs it — go to the person on both screens; the values are not
-in the plan. The orchestrator does no browser or device checks itself.
-T1204 is written for every outcome; the gate record names the branch.
+means, that the mat bar should stay on `share-60` (the shipped mat)
+while the ground is judged, that a chosen candidate follows the person
+across the whole site under `npm run dev` until `today` or `reset` is
+pressed, and the one question — which tone, as an id or as the numbers
+the bar shows, and whether he accepts the deepened muted text if the
+readout says his tone needs it — go to the person on both screens; the
+values are not in the plan. The orchestrator does no browser or device
+checks itself. T1204 is written for every outcome; the gate record
+names the branch. The **Phase 1 pause** report, on the change branch,
+shows the person the regenerated `public/og.jpg` (its card is the
+generator's, not the hand-made one) beside the pages.
 
 > Read `CLAUDE.md` and `specs/014-ground-tone/{spec,plan,tasks}.md`,
 > then begin at the first unchecked task as the orchestrator under the
@@ -419,8 +473,10 @@ T1204 is written for every outcome; the gate record names the branch.
 > the box, and log the tier and tokens in one shell command.
 > Involvement level is product owner: pause after each phase — the
 > Phase 0 pause is the gate, and its report carries the sampler's URL,
-> the candidate table, the readout's meaning and the one question in
-> plain language — and whenever something unexpected bears on spec
+> the candidate table, the readout's meaning, "leave the mat bar on
+> share-60" and the one question in plain language; the Phase 1 pause
+> shows the regenerated social image — and whenever something
+> unexpected bears on spec
 > adherence; the same session continues after each pause when the
 > person says so, and if the person stops at a pause, end the report
 > with the continuation prompt for a fresh session.

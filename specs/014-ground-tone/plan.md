@@ -44,14 +44,26 @@ registry, no plugin change.
 
   The same module carries: `parseOklch` and `oklchToRgb255` (moved out of
   `ground.test.mjs`, unchanged maths, still pinned there against
-  Ottosson's published values), `toHex`; `relativeLuminance` and
-  `contrast` (below); `PAIRS` — text × {bg, surface, soft}, muted × {bg,
-  surface, soft}, and mat × bg as information; `deepenMuted`;
-  `readout(bg, muted)` returning the family, the seven ratios with a
-  pass flag on the six text pairs, and the muted tone that would ship;
-  `tokensFor(bg, muted)` returning the token → string map the switch
-  applies; and `CANDIDATES`, the gate's fixed set, with `TODAY` its
-  control.
+  Ottosson's published values), `toHex`; `rootTokens(css)` — the
+  test's `blocks`/`declarations`/`selects` helpers moved in as pure
+  string functions, so the test and the generator read `:root` with
+  one parser; `relativeLuminance` and `contrast` (below); `PAIRS` —
+  text × {bg, surface, soft}, muted × {bg, surface, soft}, and mat × bg
+  as information; **`TEXT`, `MUTED` and `MAT`** — the literal tones of
+  `--color-text`, `--color-muted` and `--color-matte` as `:root` carries
+  them, pinned to the stylesheet by the test, so the readout never reads
+  a computed style (the head applier may already have overridden
+  `--color-muted` on `<html>` when the sampler's script runs — a DOM
+  read would return the deepened value and the readout would call a
+  failing tone "unchanged"); `deepenMuted`; `readout(bg)` returning
+  the family, the seven ratios against `TEXT`/`MUTED`/`MAT` with a pass
+  flag on the six text pairs, and the muted tone that would ship;
+  `tokensFor(bg)` returning the token → string map the switch applies;
+  `CANDIDATES`, the gate's fixed set, with `TODAY` its control's id; and
+  **`CONTROL`** — the tone `:root` carried at spec 014's gate,
+  `oklch(0.968 0.006 95)`, as a literal that T1204 never moves, so the
+  spread test measures against a fixed point while `today` follows the
+  landed tone.
 
 - **The contrast formula** — WCAG 2 for normal text, on the 8-bit sRGB
   the browser paints: each channel `/255`, linearised
@@ -62,9 +74,12 @@ registry, no plugin change.
   the test and the readout compute the number a checker given the hex
   would give. The floor is `≥ 4.5`, compared unrounded — no tolerance,
   a pass is a pass; the readout prints two decimals rounded **down**, so
-  nothing shows "4.50" while failing. Pinned against known pairs: black
-  on white 21; `#777777` on white 4.48; `#767676` on white 4.54 (the
-  well-known pair either side of the floor). For a neutral grey OKLab's
+  nothing shows "4.50" while failing. Pinned against known pairs on the
+  unrounded ratio with `toBeCloseTo(x, 2)`: black on white 21;
+  `#777777` on white 4.48 (4.478 unrounded — the readout would print
+  4.47); `#767676` on white 4.54 (the well-known pair either side of the
+  floor). Wherever a readout number is compared to a recorded ratio, the
+  recorded ratio is floored to two decimals first. For a neutral grey OKLab's
   L is exactly the cube root of Y, which is what makes the estimates
   below quick and the test's numbers exact.
 
@@ -88,10 +103,14 @@ registry, no plugin change.
 
   Every darker candidate takes muted-on-soft under 4.5, so **the
   muted-deepens branch is the likely branch for any darker tone**, and
-  the readout says so beside the candidate. `deepenMuted(family, muted)`
-  is the spec's "least step": lower `--color-muted`'s L by 0.01 at a
+  the readout says so beside the candidate. `deepenMuted(family)`
+  is the spec's "least step": lower `MUTED`'s L by 0.01 at a
   time (C and h unchanged) until all three muted pairs pass; the first L
-  that passes ships. Estimates: `deep-1` → 0.49, `deep-2` → 0.48,
+  that passes ships. The step is 0.01, not 0.001, because 0.01 is the
+  stylesheet's visible quantum for the muted token (`0.5` today, two
+  decimals) and a value the person can read and confirm at the gate; a
+  finer step would buy at most 0.009 of L nobody could see. Estimates:
+  `deep-1` → 0.49, `deep-2` → 0.48,
   `deep-3` → 0.46. `--color-text` never moves; if a tuned tone fails a
   text pair (impossible above L 0.85 — ≈9:1 there) the readout marks it
   and the shipped test would refuse it.
@@ -116,7 +135,13 @@ registry, no plugin change.
   as L falls. Beside the set, the **free tune**: three range inputs —
   L 0.85–1.00 by 0.001, C 0–0.03 by 0.001, h 0–360 by 1 — seeded from
   the selected candidate; a move gives id `tune` and the tone is shown
-  as `oklch(L C h)` text so it can be named as numbers.
+  as `oklch(L C h)` text so it can be named as numbers. The spread the
+  spec requires is measured by the test against `CONTROL`, not against
+  `today`: after the gate `today` is the landed tone, and measured
+  against a landed `deep-1` the cool candidate is 0.018 away, against
+  `deep-2` only one candidate is darker, against `warm` nothing is
+  warmer — the spread is a fact about the gate that was held, and the
+  fixed point keeps the test true on every branch.
 
 - **The site-wide switch, dev only** (`src/components/DevGround.astro`,
   new; rendered by `src/layouts/BaseLayout.astro`'s `<head>` as
@@ -154,21 +179,28 @@ registry, no plugin change.
   extended — not a new fixture: the four surfaces on the real exports
   are exactly the thing to judge a ground on, and its ground bar is the
   seam). The `aside[data-ground-bar]` becomes: the candidate buttons
-  (`data-l`/`data-c`/`data-h`/`data-note` from the `candidates` prop),
-  the three tune inputs with their numbers, the tone as text, a
-  seven-row readout (`<table>`, `is-fail` on a row under the floor),
-  one line "muted ships at `oklch(…)` — deepened for muted/soft" or
-  "muted unchanged", and `reset`. Its script imports from
-  `../../../lib/ground` (bundled — the sampler is never built), writes
-  `localStorage['dev-ground']` and applies the tokens to `<html>`
-  itself so the readout and the page move together on every input.
-  The sampler's own `sessionStorage` state (`matte-sampler`: the mat
-  candidates, floor, ceiling) loses its `ground` field; `WHITE`, `WARM`,
-  `GROUND_TOKENS` and `applyGround` go — the ground is the switch's,
-  read by the head applier on this page like every other. The mat
-  candidates open on `share-60` (the shipped rule) rather than spec
-  003's `today`, so the mats the gate judges are the mats that ship;
-  the button ids stay.
+  (`data-l`/`data-c`/`data-h`/`data-note` from the `grounds` prop,
+  which `getStaticPaths` fills from the imported `CANDIDATES`), the
+  three tune inputs with their numbers, the tone as text, a seven-row
+  readout (`<table>`, `is-fail` on a row under the floor), one line
+  "muted ships at `oklch(…)` — deepened for muted/soft" or "muted
+  unchanged", a `.ground-tokens` line listing the stored tokens exactly
+  as `localStorage['dev-ground']` holds them (the family the gate record
+  copies, and the check that the key is what the site is wearing), and
+  `reset`. Its script imports from `../../../lib/ground` (bundled — the
+  sampler is never built), computes `readout(tone)` from the module's
+  `TEXT`/`MUTED`/`MAT` literals — **never from a computed style**, which
+  on a reload with a deepened candidate stored would already be the
+  deepened value — writes `localStorage['dev-ground']` and applies the
+  tokens to `<html>` itself so the readout and the page move together on
+  every input. The sampler's own `sessionStorage` state
+  (`matte-sampler`: the mat candidates, floor, ceiling) loses its
+  `ground` field; `WHITE`, `WARM`, `GROUND_TOKENS` and `applyGround` go
+  — the ground is the switch's, read by the head applier on this page
+  like every other. The mat candidates open on `share-60` (the shipped
+  rule) rather than spec 003's `today`, so the mats the gate judges are
+  the mats that ship; the button ids stay, and the gate report tells
+  the person to leave the mat bar there while judging the ground.
 
 - **The derived copies.** `src/pages/og/pieces/[slug].png.ts`'s `COLOR`
   and its Satori tree move to `src/lib/og-card.mjs` (plain JS: `COLOR`,
@@ -177,21 +209,29 @@ registry, no plugin change.
   `scripts/gen-og.mjs` (new;
   `node --experimental-strip-types scripts/gen-og.mjs [--out path]`,
   wired as `npm run og`) reads
-  `:root`'s tokens from `global.css`, converts them with `ground.ts`
-  (type stripping, since the module is erasable-syntax TypeScript;
-  `.nvmrc` says Node 22 and 22.6+ carries the flag, 22.18+ needs none),
-  prints each token's hex beside `COLOR`'s, **refuses to write** if any
-  differs by more than 2/255 ("update COLOR in src/lib/og-card.mjs
-  first"), else renders
+  `:root`'s tokens from `global.css` with `rootTokens`, converts them
+  with `ground.ts` (type stripping: the module and `consts.ts` are
+  erasable-syntax TypeScript — `consts.ts` confirmed — and the
+  specifiers must carry their extensions, `../src/lib/ground.ts` and
+  `../src/consts.ts`; the engines floor 22.12 carries the flag and
+  prints an ExperimentalWarning until 22.18, and the host's v26 aliases
+  it to `--strip-types`, so the script runs on both), prints each
+  token's hex beside `COLOR`'s, **refuses to write** if any differs by
+  more than 2/255 ("update COLOR in src/lib/og-card.mjs first"), else
+  renders
   `card({ title: SITE.title, description: SITE.description, kind: '' })`
   at 1200×630 through Satori and sharp
   to JPEG (quality 90) at `public/og.jpg`. Spec 002 made that file "with
   the existing satori setup" ad hoc and spec 003 "resynced" it by hand;
   now that `ground.test.mjs` pins it, every retune needs the same run,
   so it is one command. The generator is exercised in Phase 0 against
-  the committed file (`--out` to the scratchpad, pixel compare) so the
-  keep branch leaves `public/og.jpg` byte-identical and the change
-  branch runs a proven script.
+  the committed file (`--out` to the scratchpad, pixel compare at the
+  background point) so the keep branch leaves `public/og.jpg`
+  byte-identical and the change branch runs a proven script — proven
+  for the ground only: the committed card's layout was hand-made and
+  may differ from `card({ kind: '' })`'s, so on the change branch the
+  social image can change beyond its tone, and the Phase 1 pause report
+  shows the person the regenerated file.
 
 - **The gate's landing** (T1204, written for every outcome). **Changed**:
   `:root`'s five literals become `tokensFor(tone)`'s strings (the four
@@ -200,8 +240,14 @@ registry, no plugin change.
   comment above `--color-bg` rewritten (this gate's date, the tone as
   numbers, the pair that bound, the history in one line);
   `--color-muted` to the deepened value only if the record says so, with
-  its own comment naming the pair; `CANDIDATES.today` becomes the landed
-  tone and the old control stays as `warm-003`; `COLOR` in `og-card.mjs`
+  its own comment naming the pair, **and `MUTED` in `ground.ts` beside
+  it** (the test demands both, so the readout after landing tells the
+  truth about the muted that ships); in `ground.ts`, `CANDIDATES.today`
+  becomes the landed tone, the old control's tone is kept as a new entry
+  `warm-003` ("spec 003's warm — the control at spec 014's gate"), the
+  taken candidate's entry is **dropped** (its tone is now `today`; two
+  buttons with one tone would be a trap, and a tuned tone has no entry
+  to drop), and `CONTROL` is not touched; `COLOR` in `og-card.mjs`
   recomputed (bg, line, and muted if deepened); `public/og.jpg`
   regenerated; `README.md` and `design/brief.md` by T1205. **Kept**: no
   edit to the stylesheet, `og-card.mjs`, `og.jpg` or `CANDIDATES` —
@@ -232,21 +278,33 @@ Every claim above is owned by a task and a check:
   into `ground.ts` and is imported), **T1200**: (a) the four derived
   `:root` literals equal `formatOklch(deriveFamily(parse(--color-bg)))`
   as strings — today, byte for byte; (b) `CANDIDATES.today.bg` is
-  `:root`'s `--color-bg`; (c) the spread: at least two candidates with
-  L above today's (one of them `oklch(0.99 0.003 100)`), at least two
-  below, at least one with L within 0.01 of today's and h ≥ 200, one
-  with h < 95 and C > today's; ids unique. Mutation-checked: `--color-soft`
-  L changed by 0.001 → (a) fails naming the token; a step in `STEPS`
-  changed → (a) fails.
+  `:root`'s `--color-bg`, `TEXT` is `--color-text`, `MUTED` is
+  `--color-muted`, `MAT` is `--color-matte` (the module's literals can
+  never drift from the stylesheet's); (c) the spread, measured against
+  `CONTROL`: at least two candidates with L above it (one of them
+  `oklch(0.99 0.003 100)`), at least two below, at least one with L
+  within 0.01 of it and h ≥ 200, one with h < 95 and C > its; ids
+  unique; and `CONTROL` equals `CANDIDATES.today.bg` or
+  `CANDIDATES['warm-003'].bg` (before the gate the first, after a change
+  the second); (g) the five ground tokens are declared only in `:root`
+  — no other block in `global.css` and no file under `src/` outside
+  `src/pages/dev/` declares any of them (`matte.test.mjs`'s
+  declared-once case is the pattern), so "nothing left at the old tone"
+  is pinned where a stray redeclaration would hide. Mutation-checked:
+  `--color-soft` L changed by 0.001 → (a) fails naming the token; a
+  step in `STEPS` changed → (a) fails; `MUTED` L 0.5 → 0.49 in the
+  module → (b) fails; a second `--color-bg` on `.site-header` → (g)
+  fails.
 
 - **The words stay readable at the committed values** — `ground.test.mjs`,
   **T1200** (lands green today, so the floor is a fact before the gate,
   not a hope after it): the six text pairs from `:root`'s tokens are
-  `≥ 4.5`, each named; the formula's fixtures (21 / 4.48 / 4.54, to two
-  decimals); the converter's published values (the existing case);
-  `deepenMuted` returns `null` for today's family and, for
-  `deriveFamily(deep-2)`, an L that passes all three muted pairs while
-  L + 0.01 fails at least one (the least step, pinned both ways).
+  `≥ 4.5`, each named; the formula's fixtures (21 / 4.48 / 4.54,
+  `toBeCloseTo(x, 2)` on the unrounded ratio); the converter's
+  published values (the existing case); `deepenMuted` returns `null`
+  for today's family and, for `deriveFamily(deep-2)`, an L that passes
+  all three muted pairs while L + 0.01 fails at least one (the least
+  step, pinned both ways).
   Mutation-checked: `--color-muted` L 0.5 → 0.55 → the muted/soft case
   fails with the ratio in the message.
 
@@ -259,10 +317,13 @@ Every claim above is owned by a task and a check:
   not loosened); `public/og.jpg` at (10, 10) within ±3 of `--color-bg`
   (the existing case). The generator: `--out <scratch>` on today's
   tokens → the scratch file's (10, 10) within ±3 of the committed
-  file's, both 1200×630; `COLOR.bg` set to `#f6f0f0` → the generator
+  file's, both 1200×630 (the ground is proven; the card's layout is not
+  — see Known limitations); `COLOR.bg` set to `#f6f0f0` → the generator
   refuses with the drift line, restored; the route's PNG for one piece
   byte-identical before and after the refactor (`shasum` of
-  `dist/og/pieces/<slug>.png`).
+  `dist/og/pieces/<slug>.png`, the before hash from a fresh
+  `npm run build` on the branch before any edit — no dev server
+  running, `dist/` may be stale or absent).
 
 - **The switch reaches every page under the dev server and nothing in
   the build** — **T1202**: the barrier line green with the new count;
@@ -292,23 +353,34 @@ Every claim above is owned by a task and a check:
   readout's muted/soft row is marked failing at the undeepened value and
   passing at the shipped one — recorded; the tune's L slider moved to
   0.90 gives id `tune`, the tone text `oklch(0.9 0.008 95)`, and a muted
-  line reading a deeper L; `today` removes the key and every inline
-  token; `/pieces/where-the-fog-lets-go/` opened afterwards with `deep-2`
-  selected wears it (the site-wide claim, sampler → site); the mat
-  candidates open on `share-60`; the readout's seven numbers for `today`
-  equal T1200's test values to two decimals (the page and the test share
-  the code, so this is the check that they do).
+  line reading a deeper L; **a reload of `/dev/matte/` with `deep-2`
+  stored** shows the same readout as the click did — the muted/soft row
+  failing at the undeepened value, the muted line at the shipped L, the
+  key still holding six tokens (the B2 case: the head applier ran first
+  and the readout still reads the module's `MUTED`); `today` removes the
+  key and every inline token; `/pieces/where-the-fog-lets-go/` opened
+  afterwards with `deep-2` selected wears it (the site-wide claim,
+  sampler → site); the mat candidates open on `share-60`; the readout's
+  seven numbers for `today` equal T1200's recorded ratios floored to two
+  decimals (the page and the test share the code, so this is the check
+  that they do); the `.ground-tokens` line lists the stored key's six
+  strings.
 
 - **The tone landed, or didn't** — **T1204**: changed → `ground.test.mjs`
   green against the new literals, `COLOR` and `og.jpg` (deltas recorded);
-  `grep -c "0.968 0.006 95" src/styles/global.css` → 0 outside the
-  history comment; on the dev server with **no** key set, `<html>`'s
+  `grep -rn "0.968 0.006 95\|0.945 0.007 95\|0.92 0.008 95\|0.86 0.008 95\|0.72 0.012 95" src/`
+  → only the `:root` history comment and `CANDIDATES['warm-003']` (a
+  fill left at the old tone anywhere under `src/` is a hit); on the dev
+  server with **no** key set, `<html>`'s
   background, a card, a code block and a hairline read the landed family;
   the quiet view `--color-quiet`'s value; `git diff main -- src/styles/global.css`
   shows nothing inside the `html[data-pause-active]` block or on
   `--color-quiet`, `--pause-depth`, `--color-text`, `--color-accent`,
   `--color-matte`, the mat tokens; one built OG PNG's corner pixel equals
-  `COLOR.bg`; kept → `git diff main -- src/styles/global.css src/lib/og-card.mjs public/og.jpg src/lib/ground.ts`
+  `COLOR.bg`; the regenerated `public/og.jpg` is attached to the Phase 1
+  pause report for the person to see (its layout is the generator's,
+  the committed one was hand-made); kept →
+  `git diff main -- src/styles/global.css src/lib/og-card.mjs public/og.jpg src/lib/ground.ts`
   empty for the token lines and the candidate table (the module's
   other code is Phase 0's).
 
@@ -324,8 +396,8 @@ Every claim above is owned by a task and a check:
 ## File structure
 
 ```
-src/lib/ground.ts                              STEPS, deriveFamily, formatOklch, parseOklch, oklchToRgb255, toHex, relativeLuminance, contrast, PAIRS, deepenMuted, readout, tokensFor, CANDIDATES (new; T1200); CANDIDATES.today → the landed tone (T1204)
-ground.test.mjs                                the family pinned to the rule; the spread; the floor at :root's values; the formula's fixtures (T1200); COLOR from og-card.mjs, all five (T1201)
+src/lib/ground.ts                              STEPS, deriveFamily, formatOklch, parseOklch, oklchToRgb255, toHex, rootTokens, relativeLuminance, contrast, PAIRS, TEXT, MUTED, MAT, deepenMuted, readout, tokensFor, CANDIDATES, CONTROL (new; T1200); CANDIDATES.today → the landed tone, warm-003 added, the taken entry dropped, MUTED on the deepens branch (T1204)
+ground.test.mjs                                the family pinned to the rule; the module's literals pinned to :root; the spread against CONTROL; the tokens declared only in :root; the floor at :root's values; the formula's fixtures (T1200); COLOR from og-card.mjs, all five (T1201)
 src/lib/og-card.mjs                            COLOR, loadFonts, card — out of the route (new; T1201); COLOR recomputed (T1204)
 src/pages/og/pieces/[slug].png.ts              the thin endpoint (T1201)
 scripts/gen-og.mjs, package.json               the generator and `npm run og` (new; T1201)
@@ -367,12 +439,21 @@ prose about the pause), the Obsidian plugin.
 - **`localStorage` is per origin.** The two screens see one candidate
   only if they look at one browser profile on one dev server; on a
   second machine the sampler is opened and the candidate clicked again.
-  The key is shown in the bar so it can be checked.
+  The bar's `.ground-tokens` line lists the stored key's tokens so what
+  the site is wearing can be checked against it.
+- **The generator is proven for the ground, not the card.** Phase 0
+  compares only the background point of its output with the committed
+  `public/og.jpg`, whose card was hand-made at spec 002; on the change
+  branch the regenerated file can differ in layout as well as tone, and
+  the Phase 1 pause report shows it to the person rather than claiming
+  it unchanged.
 - **The dev server caches `getStaticPaths`**: editing `CANDIDATES`
   needs a restart (spec 013's note; the table now lives in `ground.ts`,
   imported, but the paths are still cached).
 - **The generator needs type stripping** to import `ground.ts` and
-  `consts.ts`. On a Node 22 below 22.6 it would fail at import; T1201
+  `consts.ts` (extension-bearing specifiers, erasable syntax only). On
+  the engines floor 22.12 the flag prints an ExperimentalWarning until
+  22.18; on the host's v26 it is an alias of `--strip-types`. T1201
   records the version, and the fallback — a `.mjs` copy of the two
   converters the script needs — is a deviation to name, not to take
   silently.
@@ -402,6 +483,14 @@ prose about the pause), the Obsidian plugin.
   page that will never exist. The readout shows both numbers.
 - **`today` is the absence of an override**, so the control is the
   committed stylesheet itself and a stale override can never pose as it.
+- **The readout's fixed ends are the module's literals, pinned to
+  `:root`, never a computed style** (sign-off B2): the head applier
+  runs before the sampler's script and may already carry a deepened
+  muted on `<html>`, so a DOM read would grade a failing tone as
+  passing and store a key with no muted in it.
+- **The spread is measured against `CONTROL`, a literal the gate never
+  moves** (sign-off B1): `today` follows the landed tone and most
+  landings would break a spread measured against it.
 - **The switch is a blocking inline script in the head**, not a bundled
   module: no flash on the first paint, no import graph to prove absent,
   and one string (`dev-ground`) for the barrier to find.
