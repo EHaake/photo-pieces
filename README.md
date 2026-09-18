@@ -106,8 +106,14 @@ Three minutes apart. Captions take _inline markdown_.
 
 ¹ the bled edge runs clean. ² dropped at `width="fullbleed"`.
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
-`single` — same rendered result. Every image carries its own flat
-matte, applied by the site's CSS (never bake mattes into files).
+`single` — same rendered result. Every matted treatment carries its
+own flat white matte, applied by the site's CSS: a mat 6% of that
+frame's rendered short side, never narrower than 4px or wider than
+40px, equal on all four sides (never bake mattes into files). A big
+frame therefore wears a visibly wider mat than a small one — the
+frames of one packed gallery row share a mat from the row's target
+short side, and a `match="height"` pair or triptych wears one mat from
+its matched height.
 An image's `src` is `./<file>` for the piece's own photograph,
 `../<slug>/<file>` for another piece's, or
 `../../gallery-images/<file>` for one at the gallery root (spec 008) —
@@ -370,7 +376,7 @@ photo-pieces/
 │   ├── lib/categories.ts         # the category taxonomy
 │   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), LatestWork, CategoryRow
 │   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
-│   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler, the place-wall sampler); postbuild fails if any reach dist/
+│   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler, the place-wall sampler, the matte sampler at dev/matte/); postbuild fails if any reach dist/
 │   └── styles/global.css
 ```
 

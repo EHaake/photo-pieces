@@ -1,0 +1,598 @@
+---
+// The matte sampler (spec 013, T1103) — a DEV-ONLY fixture.
+//
+// getStaticPaths() returns [] unless import.meta.env.DEV, so `astro dev`
+// serves these pages and `astro build` emits nothing under dist/dev/.
+// scripts/check-no-dev-routes.mjs is the standing check on that.
+//
+// Paths: /dev/matte/ (the four surfaces stacked) and /dev/matte/<surface>/
+// for `pieces`, `galleries`, `stage`, `cards`. Each surface renders in its
+// page's exact markup and classes, on the real exports, so the gate judges
+// the mat where it actually lives.
+//
+// The candidate's three tokens ride on each surface's wrapper <section>
+// and the frames INHERIT them: spec 013's rule declares --mat-share,
+// --mat-min and --mat-max only in :root and nothing between :root and a
+// frame redeclares them, so an inherited override reaches every form.
+// (Contrast the gallery and place-wall samplers, whose knobs had to sit on
+// the flow itself because galleryFlowStyle re-declares them inline there.)
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+import { getEntry, render } from 'astro:content';
+import CoverCards from '../../../components/CoverCards.astro';
+import {
+  RELATED_NARROW_SHORT_PX,
+  RELATED_SHORT_PX,
+  galleryCell,
+  galleryFlowStyle,
+  relatedFlowStyle,
+} from '../../../lib/gallery-layout';
+import { getImageRegistry } from '../../../lib/images';
+import { categoryLabel } from '../../../lib/categories';
+import { formatDate } from '../../../i18n';
+import { withBase } from '../../../lib/url';
+
+type Candidate = {
+  id: string;
+  /** --mat-share: the share of the photograph's rendered short side. */
+  share: string;
+  /** --mat-min: the floor. */
+  min: string;
+  /** --mat-max: the ceiling. */
+  max: string;
+  /** Whether the floor/ceiling inputs apply (the share candidates). */
+  tunable: boolean;
+  note: string;
+};
+
+type Surface = 'pieces' | 'galleries' | 'stage' | 'cards';
+
+export async function getStaticPaths() {
+  if (!import.meta.env.DEV) return [];
+  // The five candidates the visual gate compares: no mat, spec 003's fixed
+  // mat (the gate's control — T1101's inert literals, what the site ran
+  // before the gate chose the 6% rule), and three shares with the plan's
+  // starting floor (4px) and ceiling (40px). Declared inside
+  // getStaticPaths and handed to the component as a prop (Astro runs
+  // getStaticPaths in an isolated scope where a module-level const read
+  // here is "not defined" at build time — the spec-010 gotcha). The dev
+  // server caches getStaticPaths: restart it after editing this table.
+  const TODAY = 'clamp(0.5rem, 1.4vw, 1.05rem)';
+  const FLOOR = '0.25rem'; // 4px — the plan's starting floor
+  const CEIL = '2.5rem'; // 40px — the plan's starting ceiling
+  const CANDIDATES: Candidate[] = [
+    { id: 'none', share: '0', min: '0px', max: '0px', tunable: false, note: 'no mat anywhere' },
+    {
+      id: 'today',
+      share: '0',
+      min: TODAY,
+      max: TODAY,
+      tunable: false,
+      note: "spec 003's fixed mat — the gate's control (the site now runs the 6% rule)",
+    },
+    {
+      id: 'share-25',
+      share: '0.025',
+      min: FLOOR,
+      max: CEIL,
+      tunable: true,
+      note: '2.5% of the rendered short side',
+    },
+    {
+      id: 'share-40',
+      share: '0.04',
+      min: FLOOR,
+      max: CEIL,
+      tunable: true,
+      note: '4% of the rendered short side',
+    },
+    {
+      id: 'share-60',
+      share: '0.06',
+      min: FLOOR,
+      max: CEIL,
+      tunable: true,
+      note: '6% of the rendered short side',
+    },
+  ];
+  const SURFACES: Surface[] = ['pieces', 'galleries', 'stage', 'cards'];
+  return [
+    {
+      params: { surface: undefined },
+      props: { surface: null, surfaces: SURFACES, candidates: CANDIDATES },
+    },
+    ...SURFACES.map((surface) => ({
+      params: { surface },
+      props: { surface, surfaces: SURFACES, candidates: CANDIDATES },
+    })),
+  ];
+}
+
+const { surface, surfaces, candidates } = Astro.props;
+
+// The page opens on the `today` candidate — spec 003's fixed mat, what the
+// site ran when the gate was held — so the first thing the gate saw was the
+// status quo and every button was a step away from it. (What ships now is the
+// 6% rule the gate chose; `share-60` is that candidate.)
+const START = candidates.find((c) => c.id === 'today') ?? candidates[0];
+
+const registry = await getImageRegistry();
+
+// The sampler's set is the REAL photographs, not the whole mixed root (the
+// spec-011 lesson): src/content/gallery-images/ holds both the real exports
+// and the synthetic placeholder fixtures, and the gate exists to judge mats
+// on photographs. The fixtures carry a camera name beginning 'Fixture';
+// the real exports carry real camera models. If too few real exports exist
+// yet, fall back to the whole gallery root so the sampler still has frames.
+const REAL = (img: (typeof registry.images)[number]) =>
+  img.piece === null && !!img.label?.camera && !/^Fixture/i.test(img.label.camera);
+let set = registry.images.filter(REAL);
+if (set.length < 6) set = registry.images.filter((img) => img.piece === null);
+
+// ---- the `pieces` surface: the draft fixture piece, in the piece page's
+// markup. It is `draft: true`, so it ships no page, no appearance and no
+// OG image; here it is read straight from the collection.
+const piece = await getEntry('pieces', 'matte-sampler');
+if (!piece) throw new Error('[matte sampler] src/content/pieces/matte-sampler/index.md is missing');
+const { Content } = await render(piece);
+
+// ---- the `galleries` surface: the gallery page's packed flow and the
+// image page's related strip, both consumed from src/lib/gallery-layout.ts
+// rather than retyped, so they cannot drift from what ships.
+const galleryCells = set.map((image) => ({ image, ...galleryCell(image.image) }));
+const relatedCells = set.map((image) => ({
+  image,
+  ...galleryCell(image.image, RELATED_SHORT_PX, RELATED_NARROW_SHORT_PX),
+}));
+
+// ---- the `stage` surface: four frames at four ratios, each a viewport
+// tall, as the image page renders them. A landscape, a portrait and a
+// near-square come from the real exports; no real export is a panorama
+// (the widest is 3:2), so that one falls back to the gallery root's
+// placeholder set — the frame's geometry is what the stage is judged on.
+const ratioOf = (img: (typeof registry.images)[number]) => img.image.width / img.image.height;
+const widest = (pool: typeof registry.images) =>
+  pool.reduce((a, b) => (ratioOf(b) > ratioOf(a) ? b : a));
+const tallest = (pool: typeof registry.images) =>
+  pool.reduce((a, b) => (ratioOf(b) < ratioOf(a) ? b : a));
+const squarest = (pool: typeof registry.images) =>
+  pool.reduce((a, b) => (Math.abs(Math.log(ratioOf(b))) < Math.abs(Math.log(ratioOf(a))) ? b : a));
+const root = registry.images.filter((img) => img.piece === null);
+const panoramas = root.filter((img) => ratioOf(img) >= 2);
+const stageFrames = [
+  { role: 'landscape', image: widest(set) },
+  { role: 'portrait', image: tallest(set) },
+  { role: 'panorama', image: panoramas.length > 0 ? widest(panoramas) : widest(root) },
+  { role: 'square', image: squarest(set) },
+];
+
+// ---- the `cards` surface: the index cover card, as dev/galleries builds it.
+const cards = set.map((img) => ({
+  href: img.url,
+  cover: img.image,
+  title: img.title,
+  meta: `${Math.round((img.image.width / img.image.height) * 100) / 100}`,
+}));
+
+const shown: Surface[] = surface ? [surface] : surfaces;
+
+const title = surface ? `matte sampler — ${surface}` : 'matte sampler';
+const SURFACE_NOTE: Record<Surface, string> = {
+  pieces: "a piece's reading-flow frames (forms W, P, H, V+H)",
+  galleries: 'the galleries and the related strip (form R)',
+  stage: "the image page's stage (form V+H)",
+  cards: 'the index cover cards (form W)',
+};
+---
+
+<BaseLayout title={title} description="Dev-only fixture for the mat's width (spec 013).">
+  {
+    shown.map((s) => (
+      <section
+        class="sampler-surface"
+        data-surface={s}
+        style={`--mat-share: ${START.share}; --mat-min: ${START.min}; --mat-max: ${START.max}`}
+      >
+        <div class="sampler-bar meta" data-bar>
+          <strong class="sampler-bar-head">{s}</strong>
+          {candidates.map((c) => (
+            <button
+              type="button"
+              data-candidate={c.id}
+              data-share={c.share}
+              data-min={c.min}
+              data-max={c.max}
+              data-tunable={c.tunable ? 'yes' : 'no'}
+              data-note={c.note}
+              data-start={c.id === START.id ? '' : undefined}
+              class={c.id === START.id ? 'is-active' : undefined}
+            >
+              {c.id}
+            </button>
+          ))}
+          <label>
+            floor <input type="number" step="0.05" min="0" value="0.25" data-floor /> rem
+          </label>
+          <label>
+            ceiling <input type="number" step="0.05" min="0" value="2.5" data-ceil /> rem
+          </label>
+        </div>
+
+        <p class="sampler-label meta" data-label>
+          {s} — {SURFACE_NOTE[s]} — {START.id}: share {START.share} / floor {START.min} / ceiling{' '}
+          {START.max}
+        </p>
+
+        {s === 'pieces' && (
+          /* The piece page's exact markup — article, the reading head and
+             the prose column — and its scoped .piece-column rule copied
+             into this page's <style>. No piece-page script: the pause pins
+             on the light ground, which is the harder ground for a mat. */
+          <article>
+            <header class="page-head section reading-head">
+              <div class="piece-column">
+                <p class="eyebrow">
+                  <span>
+                    {piece.data.categories.map((category, index) => (
+                      <>
+                        {index > 0 && ' / '}
+                        <a href={withBase(`/categories/${category}/`)}>{categoryLabel(category)}</a>
+                      </>
+                    ))}
+                  </span>
+                </p>
+                <h1>{piece.data.title}</h1>
+                <p class="lead">{piece.data.description}</p>
+                <div class="entry-meta">
+                  <time datetime={piece.data.publishDate.toISOString()}>
+                    {formatDate(piece.data.publishDate)}
+                  </time>
+                </div>
+              </div>
+            </header>
+
+            <div class="section">
+              <div class="prose piece-column">
+                <Content />
+              </div>
+            </div>
+          </article>
+        )}
+
+        {s === 'galleries' && (
+          <>
+            <div class="section">
+              <ul class="gallery-flow gallery-wide" style={galleryFlowStyle}>
+                {galleryCells.map(({ image, ar, width, sizes }) => (
+                  <li style={`--ar: ${ar}`}>
+                    <a href={withBase(image.url)} class="image-link">
+                      <Image
+                        src={image.image}
+                        alt={image.title}
+                        layout="constrained"
+                        width={width}
+                        sizes={sizes}
+                        loading="lazy"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div class="section">
+              <ul class="gallery-flow related-flow" style={relatedFlowStyle}>
+                {relatedCells.map(({ image, ar, width, sizes }) => (
+                  <li style={`--ar: ${ar}`}>
+                    <a href={withBase(image.url)} class="image-link" title={image.title}>
+                      <Image
+                        src={image.image}
+                        alt={image.title}
+                        layout="constrained"
+                        width={width}
+                        sizes={sizes}
+                        loading="lazy"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+
+        {s === 'stage' &&
+          stageFrames.map(({ role, image }) => (
+            <div class="image-stage" data-role={role}>
+              <figure
+                class="image-frame"
+                style={`--ar: ${Math.round((image.image.width / image.image.height) * 1000) / 1000}`}
+              >
+                <Image
+                  src={image.image}
+                  alt={image.title}
+                  layout="constrained"
+                  width={Math.min(image.image.width, 2320)}
+                  sizes="(min-width: 1240px) 1160px, 94vw"
+                  loading="eager"
+                />
+              </figure>
+            </div>
+          ))}
+
+        {s === 'cards' && (
+          <div class="section">
+            <CoverCards cards={cards} />
+          </div>
+        )}
+      </section>
+    ))
+  }
+
+  <aside class="sampler-banner meta" data-ground-bar>
+    <p class="sampler-banner-head"><strong>ground</strong></p>
+    <p>
+      <button type="button" data-ground="warm" class="is-active">warm</button>
+      <button type="button" data-ground="white">white</button>
+    </p>
+    <p>
+      {
+        surfaces
+          .filter((other) => other !== surface)
+          .map((other) => (
+            <>
+              <a href={withBase(`/dev/matte/${other}/`)}>{other}</a>{' '}
+            </>
+          ))
+      }
+      {surface && <a href={withBase('/dev/matte/')}>stacked</a>}
+    </p>
+  </aside>
+</BaseLayout>
+
+<script>
+  // The sampler's toolbars — page-level progressive enhancement, the only
+  // script this fixture carries.
+  //
+  // Per surface: the five candidates set --mat-share / --mat-min /
+  // --mat-max on that surface's wrapper <section> (the frames inherit
+  // them), with two rem inputs that replace the floor and ceiling on the
+  // share candidates. On the page: the ground, switched on <html> the way
+  // spec 003's gate switched it — five tokens together.
+  //
+  // The white candidate is the pre-003 ground, recorded here so T1105 can
+  // read it back (git show f8d87af^:src/styles/global.css):
+  //   --color-bg:          oklch(0.99 0.003 100)
+  //   --color-surface:     oklch(0.965 0.004 100)
+  //   --color-soft:        oklch(0.94 0.006 100)
+  //   --color-line:        oklch(0.86 0.008 100)
+  //   --color-line-strong: oklch(0.72 0.012 120)
+  // The warm ground is read back off the stylesheet at load, never retyped.
+  const GROUND_TOKENS = [
+    '--color-bg',
+    '--color-surface',
+    '--color-soft',
+    '--color-line',
+    '--color-line-strong',
+  ];
+  const WHITE: Record<string, string> = {
+    '--color-bg': 'oklch(0.99 0.003 100)',
+    '--color-surface': 'oklch(0.965 0.004 100)',
+    '--color-soft': 'oklch(0.94 0.006 100)',
+    '--color-line': 'oklch(0.86 0.008 100)',
+    '--color-line-strong': 'oklch(0.72 0.012 120)',
+  };
+  const WARM: Record<string, string> = {};
+
+  const KEY = 'matte-sampler';
+  type State = { candidates: Record<string, string>; floor: string; ceil: string; ground: string };
+  const read = (): State => {
+    try {
+      const raw = sessionStorage.getItem(KEY);
+      if (raw)
+        return { candidates: {}, floor: '0.25', ceil: '2.5', ground: 'warm', ...JSON.parse(raw) };
+    } catch {
+      /* a private window with no storage still switches, it just forgets */
+    }
+    return { candidates: {}, floor: '0.25', ceil: '2.5', ground: 'warm' };
+  };
+  let state = read();
+  const save = () => {
+    try {
+      sessionStorage.setItem(KEY, JSON.stringify(state));
+    } catch {
+      /* as above */
+    }
+  };
+
+  const applySurface = (section: HTMLElement) => {
+    const name = section.dataset.surface ?? '';
+    const buttons = [...section.querySelectorAll<HTMLButtonElement>('[data-candidate]')];
+    if (buttons.length === 0) return;
+    const wanted = state.candidates[name];
+    // No stored choice yet: the surface opens where the server rendered it
+    // (the `today` candidate — spec 003's fixed mat), not on the first button
+    // in the table.
+    const button =
+      buttons.find((b) => b.dataset.candidate === wanted) ??
+      buttons.find((b) => b.dataset.start !== undefined) ??
+      buttons[0];
+    const tunable = button.dataset.tunable === 'yes';
+    const min = tunable ? `${state.floor}rem` : (button.dataset.min ?? '0px');
+    const max = tunable ? `${state.ceil}rem` : (button.dataset.max ?? '0px');
+    const share = button.dataset.share ?? '0';
+    section.style.setProperty('--mat-share', share);
+    section.style.setProperty('--mat-min', min);
+    section.style.setProperty('--mat-max', max);
+    for (const b of buttons) b.classList.toggle('is-active', b === button);
+    const label = section.querySelector<HTMLElement>('[data-label]');
+    const note = section.querySelector<HTMLElement>('.sampler-bar-head');
+    if (label) {
+      label.textContent = `${name} — ${button.dataset.note ?? ''} — ${button.dataset.candidate}: share ${share} / floor ${min} / ceiling ${max}`;
+    }
+    if (note) note.textContent = name;
+  };
+
+  const applyGround = () => {
+    const root = document.documentElement;
+    const values = state.ground === 'white' ? WHITE : WARM;
+    for (const token of GROUND_TOKENS) {
+      const value = values[token];
+      if (value) root.style.setProperty(token, value);
+    }
+    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-ground]')) {
+      b.classList.toggle('is-active', b.dataset.ground === state.ground);
+    }
+  };
+
+  const init = () => {
+    const sections = [...document.querySelectorAll<HTMLElement>('.sampler-surface')];
+    if (sections.length === 0) return;
+    // The warm ground, once, off the stylesheet before anything overrides it.
+    if (Object.keys(WARM).length === 0) {
+      const computed = getComputedStyle(document.documentElement);
+      for (const token of GROUND_TOKENS) WARM[token] = computed.getPropertyValue(token).trim();
+    }
+    for (const section of sections) {
+      for (const input of section.querySelectorAll<HTMLInputElement>('[data-floor]')) {
+        input.value = state.floor;
+      }
+      for (const input of section.querySelectorAll<HTMLInputElement>('[data-ceil]')) {
+        input.value = state.ceil;
+      }
+      applySurface(section);
+    }
+    applyGround();
+  };
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const candidate = target.closest<HTMLButtonElement>('[data-candidate]');
+    if (candidate) {
+      const section = candidate.closest<HTMLElement>('.sampler-surface');
+      if (!section) return;
+      state.candidates[section.dataset.surface ?? ''] = candidate.dataset.candidate ?? '';
+      save();
+      applySurface(section);
+      return;
+    }
+    const ground = target.closest<HTMLButtonElement>('[data-ground]');
+    if (ground) {
+      state.ground = ground.dataset.ground ?? 'warm';
+      save();
+      applyGround();
+    }
+  });
+
+  document.addEventListener('input', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    if (target.dataset.floor === undefined && target.dataset.ceil === undefined) return;
+    if (target.dataset.floor !== undefined) state.floor = target.value;
+    else state.ceil = target.value;
+    save();
+    for (const section of document.querySelectorAll<HTMLElement>('.sampler-surface')) {
+      for (const input of section.querySelectorAll<HTMLInputElement>('[data-floor]')) {
+        input.value = state.floor;
+      }
+      for (const input of section.querySelectorAll<HTMLInputElement>('[data-ceil]')) {
+        input.value = state.ceil;
+      }
+      applySurface(section);
+    }
+  });
+
+  document.addEventListener('astro:page-load', () => {
+    state = read();
+    init();
+  });
+</script>
+
+<style>
+  /* The piece page's own scoped rule on its reading column, copied so the
+     column measures here exactly as it does there. Everything else the
+     surfaces wear comes from global.css alone — a scoped rule carries
+     [data-astro-cid-…] on every compound and would out-specify it. */
+  .piece-column {
+    max-width: var(--prose-width);
+    margin-inline: auto;
+  }
+
+  .sampler-bar {
+    position: sticky;
+    top: 0;
+    z-index: 150;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-bottom: var(--hairline);
+    background: var(--color-surface);
+  }
+
+  .sampler-bar-head {
+    color: var(--color-text);
+    margin-right: 0.4rem;
+  }
+
+  .sampler-bar button {
+    padding: 0.2rem 0.5rem;
+    border: var(--hairline);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .sampler-bar button.is-active {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .sampler-bar input {
+    width: 4.5rem;
+    padding: 0.15rem 0.3rem;
+    border: var(--hairline);
+    background: var(--color-bg);
+    font: inherit;
+  }
+
+  .sampler-label {
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    margin-inline: auto;
+    padding-top: 1rem;
+  }
+
+  .sampler-banner {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 200;
+    padding: 0.6rem 0.8rem;
+    border: var(--hairline);
+    background: var(--color-surface);
+  }
+
+  .sampler-banner p {
+    margin: 0 0 0.35rem;
+  }
+
+  .sampler-banner-head {
+    color: var(--color-text);
+  }
+
+  .sampler-banner button {
+    padding: 0.2rem 0.5rem;
+    border: var(--hairline);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .sampler-banner button.is-active {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+</style>

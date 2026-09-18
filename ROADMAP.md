@@ -85,6 +85,22 @@ attached.
   test and a comment; and the wall's sampler stays in the repo as the
   dev-only route `/dev/place-wall/`, behind the same build barrier the
   page-head and galleries samplers use.
+- **The ground tone, rethought** — raised by the photographer at spec 013's
+  matte gate (2026-09-17), in the same breath as keeping the mats: the mattes
+  may not stand out enough against the page, and the warming at spec 003 —
+  chosen so white mattes would read at all against a paper-white ground — may
+  not have gone far enough. What he asked for is a look at "a number of
+  different tones, both lighter and darker, maybe some with slight color",
+  now that mats are settled everywhere and the ground has a fixed job to do
+  behind them. The same shape as spec 003's ground review and spec 013's:
+  candidates on a switch, on real photographs, on both screens, judged by
+  eye — plus the derived copies that have to move with the tone (the OG
+  route's bg hex and `public/og.jpg`, `DECISIONS.md`'s "Ground tone" entry).
+  **Before the aspect-ratio entry below**, not after: it is a token change on
+  a mat rule that is now settled, where the aspect-ratio work is a layout
+  spec with a sampler of its own — and judging new gallery frames against a
+  ground still in question would mean judging them twice. It also feeds the
+  longer-term design-language entry, which it is not a substitute for.
 - **Aspect-ratio treatment for packed galleries** — raised by the
   photographer at spec 011's visual gate (2026-09-09): he edits each
   image to the crop that suits its content rather than to a house
@@ -112,28 +128,36 @@ attached.
   reordering, the subtlest change, with a thin sliver of mat where a
   true ratio differs from its slot. The photographer's lean at the gate
   was matted frames or ratio-snapping, to be judged by eye on real
-  work.
-- **The matte, rethought** — raised by the photographer after spec 012
-  (2026-09-13). Today the mat is one viewport-relative token
-  (`--matte: clamp(0.5rem, 1.4vw, 1.05rem)`, spec 003) applied at the same
-  width to every matted surface whatever the frame's rendered size — a piece's
-  single at the content width, a grid cell, a packed gallery frame, a cover
-  card, the image page's stage — so a small frame wears a mat that reads heavy
-  and a large one a mat that reads thin, the opposite of a framer's rule, where
-  the mat grows with the print. Two questions, in order. (1) **Whether the site
-  wants mats at all, and where**: everywhere as now, only on some treatments or
-  surfaces (a piece's frames but not the galleries, say, or the image page
-  alone), or nowhere — judged by looking on real photographs the way the ground
-  was, which folds in the mats/warm-ground/quiet-dark re-judging spec 011 left
-  open. (2) **Where a mat stays, a width proportional to the frame itself**
-  rather than to the viewport — a share of the frame's rendered short side,
-  say, with a floor and a ceiling — which reaches every place the fixed token
-  takes part in layout math today: the held and pause frame formulas, the
-  matched-height pairs, the strip's sizing, the gallery cell's flex basis, and
-  the image page's stage. Decide together with, or in a known order against,
-  the aspect-ratio entry above — its "uniform matted frames" option is a mat
-  doing layout work — and revisit `DECISIONS.md`'s "Mattes: site-applied" and
-  the brief's flat-matte carve-out, which stand whatever the answer.
+  work. **What spec 013 settled for it** (2026-09-17, the entry below):
+  gallery frames **are** matted, and the mat is now a share of the frame
+  rather than a fixed width — 6% of the row's target short side, clamped to
+  4–40px, one width per row, so every cell in a row already wears the same
+  mat. That is what options (2) and (4) were waiting on: a uniform outer
+  shape is a second mat doing layout work outside the one that exists, and
+  ratio-snapping's sliver would sit inside it, so either has to say how the
+  two reconcile into one number per frame — costable now that the existing
+  mat is a token rule rather than a literal.
+- ~~**The matte, rethought**~~ — done in spec 013: **every surface keeps its
+  mat**, and its width is a share of the frame rather than of the viewport —
+  `--mat-share: 0.06`, clamped between `0.25rem` (4px) and `2.5rem` (40px),
+  one rule in `global.css` resolved per geometry (a frame that knows only its
+  width, only its height, both, a packed row's target short side, a matched
+  pair's shared height), with every frame carrying its aspect ratio from the
+  remark transform. Judged at one sampler gate on both of the photographer's
+  screens and the ten real photographs (2026-09-17) — "let's stick with mats
+  all over with warm background" — so **the ground is unchanged** (the
+  pre-003 white was on the switch and not taken), and `DECISIONS.md`'s
+  "Mattes: site-applied" and the brief's flat-matte carve-out stand as
+  written. The ceiling bites on the wide block and the image page's stage on
+  both screens at 6% and the photographer kept it there, which is the
+  constraint on any later move to a larger mat. Two follow-ups it leaves, both
+  only if they ever matter: a packed row's mat is a share of the row's
+  _target_ short side rather than its flex-grown one, so a stretched row wears
+  its mat at between `share/1.35` and `share` of its actual short side (the
+  alternative gives up the exact equal-short-side fit); and the ratio probe
+  reads every image file once per render for every block, a header-only read
+  being the fix if build time ever bites. What the gate raised instead is the
+  ground-tone entry above.
 - **The front door** — to be workshopped with the photographer
   (decided 2026-09-02): the interim homepage (spec 002) stands until
   then. The starting position: the homepage is the site's thesis —
@@ -155,8 +179,9 @@ attached.
   the image page as the signature element, the matte as flat and
   token-driven). Candidates already on this list that are really parts of it:
   the front door, the slow view, image loading choreography, the reading
-  typography pass, and the matte entry above. The first step is a design
-  conversation that names what "modern" means for this site — which of the
+  typography pass, and the ground-tone entry above (the matte itself shipped
+  as spec 013). The first step is a design conversation that names what
+  "modern" means for this site — which of the
   references' moves fit a photographer's site that wants the work looked at
   slowly — and amends `design/brief.md` before any spec is written.
 - ~~**The held image**~~ — done in spec 007: two durational blocks.

@@ -30,12 +30,34 @@
   --para-gap: 1em;
   --hairline: 1px solid var(--color-line);
   --focus-ring: 0 0 0 3px var(--color-accent-soft);
-  /* The matte (spec 003): a flat color field around images — the
-     photographer's presentation style on every channel, carved out of the
-     skeuomorphism ban (design/brief.md). Pure white against the warm page
-     reads as a matte with no rule needed. Both are one-line retunes;
-     never add shadow, bevel, or texture. */
-  --matte: clamp(0.5rem, 1.4vw, 1.05rem);
+  /* The mat (spec 003; a rule rather than a length since spec 013): a
+     flat color field around images — the photographer's presentation
+     style on every channel, carved out of the skeuomorphism ban
+     (design/brief.md). Pure white against the warm page reads as a mat
+     with no rule needed; never add shadow, bevel, or texture.
+
+     THE RULE, and its single source. A frame's mat is
+     m = clamp(--mat-min, --mat-share × σ, --mat-max), where σ is the
+     photograph's RENDERED SHORT SIDE (inside the mat). CSS cannot
+     measure a rendered height, so each geometry solves for m
+     algebraically from the frame's ratio (--ar, width ÷ height, raw,
+     which the transform puts on every frame) and publishes the answer
+     as one computed property, --mat; the surface applies
+     `padding: var(--mat)` and reads nothing else. Five forms — W
+     (column-bound), H (height-bound), V+H (two limits, the smaller),
+     R (packed rows) and P (matched heights) — each written once, in
+     the Mattes section below, where the per-surface comment says which
+     rule each surface reads.
+
+     These three tokens are declared ONLY here (matte.test.mjs pins
+     that), so one number moves every mat on the site. Their values
+     were set once, at spec 013's visual gate (2026-09-17), from the
+     sampler's candidate table: candidate `share-60` — 6% of the
+     rendered short side, floor 4px, ceiling 40px — with every surface
+     keeping its mat and the warm ground left unchanged. */
+  --mat-share: 0.06; /* the share of the photograph's rendered short side (the gate's share-60) */
+  --mat-min: 0.25rem; /* floor — 4px */
+  --mat-max: 2.5rem; /* ceiling — 40px; the stage's largest frames sit on it at 1512×982 */
   --color-matte: oklch(1 0 0);
   /* Quiet view's ground (spec 006, the photographer's call at the
      visual gate): the one place the site goes dark — a dimmed wall
@@ -1210,8 +1232,12 @@ a.note-row {
    smallest is 1), so heights equalize exactly — no cropping. */
 .piece-diptych.match-height,
 .piece-triptych.match-height {
+  /* The gap is read twice: here, and by form P's mat below, which
+     takes it out of the row before dividing what is left among the
+     frames — so it is declared once, on the block. */
+  --pair-gap: calc(var(--baseline) / 3);
   display: flex;
-  gap: calc(var(--baseline) / 3);
+  gap: var(--pair-gap);
 }
 
 .piece-diptych.match-height > :is(a.image-link, img),
@@ -1268,8 +1294,14 @@ a.note-row {
 /* Collapse breakpoint: 720px — shared with the transform's COLLAPSE
    constant (remark-pieces-blocks.mjs) and every `sizes` string. Keep the
    three in step by hand. Sizing coupling: the transform's 680px/440px
-   constants assume --prose-width (68ch ≈ 665px) and the matte padding —
-   see the sizes table in specs/003-block-vocabulary/plan.md. */
+   constants assume --prose-width (68ch ≈ 665px) and the mat's padding —
+   see the sizes table in specs/003-block-vocabulary/plan.md. Since spec
+   013 the mat is a SHARE of the frame rather than a fixed length, so
+   what the hints assume is now a range: the single's 680px and the
+   pairs' and the pause's hints already over-deliver by the mat, so a
+   smaller mat only widens the margin and a larger one widens the
+   over-delivery. None falls under; the gallery's hint is exact by form
+   R (the mat is that row's constant term). */
 
 /* Centered breakout: wider than the prose column, not the viewport. */
 .piece-wide {
@@ -1513,13 +1545,24 @@ a.note-row {
   justify-self: end;
 }
 
+/* Form H (the mat rule, spec 013): the frame is bound by the height it
+   is allowed, so σ = (H − 2m)·q with q = min(--ar, 1) — the same clamp
+   regime whatever the mat, because --avail-h is a known length. The box
+   formula below is today's, with --mat where the fixed matte was; form
+   W on the anchor inside returns this same m at this max-width (the
+   plan's identity, checked by matte.test.mjs's evaluator). */
 .piece-held figure {
+  --q: min(var(--ar, 1), 1);
+  --avail-h: calc(100svh - 2 * var(--hold-margin));
+  --mat: clamp(
+    var(--mat-min),
+    calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))),
+    var(--mat-max)
+  );
   position: sticky;
   top: var(--hold-margin);
   width: 100%;
-  max-width: calc(
-    (100svh - 2 * var(--hold-margin) - 2 * var(--matte)) * var(--ar, 1) + 2 * var(--matte)
-  );
+  max-width: calc((var(--avail-h) - 2 * var(--mat)) * var(--ar, 1) + 2 * var(--mat));
   margin: 0;
 }
 
@@ -1636,14 +1679,33 @@ a.note-row {
    matte colour. Without script the frame pins on the light ground. */
 .piece-pause {
   --pause-t: 0;
-  --frame-w: min(
-    calc((100vw - 2 * var(--hold-margin)) / var(--pause-scale)),
-    calc(
-      ((100svh - 2 * var(--hold-margin)) / var(--pause-scale) - 2 * var(--matte)) * var(--ar, 1) +
-        2 * var(--matte)
+  /* Form V+H (the mat rule, spec 013): two limits bind this frame, so
+     the mat is the smaller of the two forms' answers — clamp is
+     monotone, so min() of the clamped mats is the mat of the limit that
+     binds. V is form W with --avail-w in place of the container's 100%;
+     H is the held frame's form. --frame-w/--frame-h are today's
+     formulas with --mat where the fixed matte was. */
+  --r: max(var(--ar, 1), 1);
+  --q: min(var(--ar, 1), 1);
+  --avail-w: calc((100vw - 2 * var(--hold-margin)) / var(--pause-scale));
+  --avail-h: calc((100svh - 2 * var(--hold-margin)) / var(--pause-scale));
+  --mat: min(
+    clamp(
+      var(--mat-min),
+      calc(var(--avail-w) * var(--mat-share) / (var(--r) + 2 * var(--mat-share))),
+      var(--mat-max)
+    ),
+    clamp(
+      var(--mat-min),
+      calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))),
+      var(--mat-max)
     )
   );
-  --frame-h: calc((var(--frame-w) - 2 * var(--matte)) / var(--ar, 1) + 2 * var(--matte));
+  --frame-w: min(
+    var(--avail-w),
+    calc((var(--avail-h) - 2 * var(--mat)) * var(--ar, 1) + 2 * var(--mat))
+  );
+  --frame-h: calc((var(--frame-w) - 2 * var(--mat)) / var(--ar, 1) + 2 * var(--mat));
   display: block;
   padding: 0;
 }
@@ -1795,7 +1857,8 @@ html[data-pause-active] .social-links a {
   color: var(--color-muted);
 }
 
-/* ---- Mattes (spec 003 Phase 3; per-image since the sampler review) --
+/* ---- Mattes (spec 003 Phase 3; per-image since the sampler review;
+   a share of the frame since spec 013) ---------------------------------
    Every frame carries its OWN mat — the photographer's presentation
    style per image — so gutters in multi-image blocks show the page
    between mats, and captions sit below the mats on the page (the wall
@@ -1807,7 +1870,76 @@ html[data-pause-active] .social-links a {
    mats. Since spec 004 the mat sits on the image's link (the layout
    item); a bare img — alt="" gets no link — carries it itself. The mats
    do not dim during a pause (the photographer's decision 9): a white
-   mat on the dark ground is what quiet view already does. */
+   mat on the dark ground is what quiet view already does.
+
+   THE MAT'S WIDTH (spec 013). m = clamp(--mat-min, --mat-share × σ,
+   --mat-max) over the photograph's rendered short side σ; the three
+   tokens live in :root and nowhere else. No surface reads them: the
+   rule for a frame's geometry solves for m and publishes --mat, and
+   the surface applies `padding: var(--mat)`. The forms, and which rule
+   each of spec 013's four surfaces reads (the gate lands each surface's
+   decision as one edit per surface, so this list is the lookup):
+
+     W — column-bound: the frame fills a container of known width W, so
+         the image is W − 2m wide and σ = (W − 2m)/r with r = max(--ar,
+         1). Declared once, just below, over the piece's reading-flow
+         frames (SURFACE 1), the index cover card's span.image-link
+         (SURFACE 4) and the image page's compare figure (which follows
+         the stage, SURFACE 3).
+     H — height-bound: `.piece-held figure`, above (SURFACE 1).
+     V + H — two limits, the smaller: `.piece-pause`, above (SURFACE 1),
+         and `.image-frame`, the image page's stage, at the end of this
+         file (SURFACE 3).
+     R — packed rows: `.gallery-flow > li` — the galleries, the place
+         wall and the related strip (SURFACE 2), below.
+     P — matched heights: one mat for a whole match="height" block,
+         just below form W (SURFACE 1). One mat, not one per member,
+         because with a mat per member the matched height decides which
+         members sit at the floor or ceiling and that decision decides
+         the matched height — CSS cannot branch on it inside a flex row,
+         while one mat over the block puts the whole clamp on a known
+         expression and stays exact in every regime.
+
+   Form R is a deliberate deviation from the spec's letter: a packed
+   row's real short side is the target grown by up to --gallery-stretch,
+   and that growth is flex's, not a length CSS can read. So the mat
+   follows the row's TARGET short side, which keeps it the constant term
+   of the equal-short-side math (exact in every regime, and today's
+   fixed mat expressible). The cost: a stretched row wears its mat at
+   between share/1.35 and share of its actual short side.
+
+   The mechanism landed inert at T1101: at share 0 with floor = ceiling
+   every form resolves to that one constant, which is how these formulas
+   replaced the fixed matte without moving a pixel. The gate (2026-09-17)
+   then set the share at 6% with a 4px floor and a 40px ceiling, on every
+   surface. */
+
+/* Form W. The clamp is exact because the regime depends only on known
+   lengths: 100% is the container's width, resolved against the
+   containing block as any percentage padding is. */
+:is(
+    .piece-single,
+    .piece-inset,
+    .piece-wide,
+    .piece-diptych,
+    .piece-triptych,
+    .piece-grid,
+    .piece-aside,
+    .piece-row figure,
+    .piece-held figure,
+    .piece-pause-frame
+  )
+  > :is(a.image-link, img),
+:is(.prose, .piece-row-prose) > p > :is(a.image-link, img),
+:is(.prose, .piece-row-prose) > p > a:not(.image-link) > img,
+.gallery-card .image-link,
+.compare {
+  --mat: clamp(
+    var(--mat-min),
+    calc(100% * var(--mat-share) / (max(var(--ar, 1), 1) + 2 * var(--mat-share))),
+    var(--mat-max)
+  );
+}
 
 :is(
     .piece-single,
@@ -1825,7 +1957,25 @@ html[data-pause-active] .social-links a {
 :is(.prose, .piece-row-prose) > p > :is(a.image-link, img),
 :is(.prose, .piece-row-prose) > p > a:not(.image-link) > img {
   background: var(--color-matte);
-  padding: var(--matte);
+  padding: var(--mat);
+}
+
+/* Form P: one mat for a matched block, a share of the matched height
+   h = (W − G − 2nm)/A — A the sum of the members' raw ratios and n
+   their count, both from the transform on the container; G the gaps.
+   (0,3,1) over form W's (0,2,2), and later in source besides: the
+   members' own --ar is normalized for the flex factors, so form W's
+   answer would be wrong here. */
+.piece-diptych.match-height > :is(a.image-link, img),
+.piece-triptych.match-height > :is(a.image-link, img) {
+  --mat: clamp(
+    var(--mat-min),
+    calc(
+      (100% - (var(--n) - 1) * var(--pair-gap)) * var(--mat-share) /
+        (var(--ar-sum) + 2 * var(--n) * var(--mat-share))
+    ),
+    var(--mat-max)
+  );
 }
 
 /* Half-bleed: the bled edge runs clean to the viewport; the mat holds
@@ -1880,18 +2030,12 @@ html[data-pause-active] .social-links a {
   }
 }
 
-/* A grid cell is one link carrying the mat; the image fills it. */
-.gallery-grid > li > a.image-link {
-  display: block;
-  padding: var(--matte);
-  background: var(--color-matte);
-}
-
-.gallery-grid > li > a.image-link img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
+/* A grid cell's own mat lives with its card: the only .gallery-grid is
+   CoverCards.astro's list, whose anchor is a.gallery-card and whose mat
+   sits on the span.image-link inside it (spec 009). The two
+   `.gallery-grid > li > a.image-link` rules that used to sit here
+   matched no markup after that move and went at spec 013 T1101, so the
+   cards' mat is one place. */
 
 /* ---- Gallery pages: rows packed to equal short sides (T307R) --------
    The photographer's rule from the sampler review: every image's SHORT
@@ -1908,7 +2052,12 @@ html[data-pause-active] .social-links a {
    short, grown up to --gallery-stretch and centered — the cost of
    keeping the order. Both knobs are set by the gallery page from
    src/lib/gallery-layout.ts (one source for the CSS and the srcset
-   math); nothing here declares them. */
+   math); nothing here declares them.
+
+   Form R (the mat rule, spec 013): the mat is a share of the row's
+   TARGET short side, --gallery-short — the deviation stated in the
+   Mattes section above — which keeps it the constant term below and
+   the packing exact, and puts one mat on every frame in a row. */
 .gallery-flow {
   display: flex;
   flex-wrap: wrap;
@@ -1936,17 +2085,18 @@ html[data-pause-active] .social-links a {
 
 .gallery-flow > li {
   --w: max(var(--ar, 1), 1);
+  --mat: clamp(var(--mat-min), calc(var(--gallery-short) * var(--mat-share)), var(--mat-max));
   margin: 0;
-  flex: var(--w) 1 calc(var(--gallery-short) * var(--w) + 2 * var(--matte));
+  flex: var(--w) 1 calc(var(--gallery-short) * var(--w) + 2 * var(--mat));
   max-width: min(
     100%,
-    calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--matte))
+    calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--mat))
   );
 }
 
 .gallery-flow > li > a.image-link {
   display: block;
-  padding: var(--matte);
+  padding: var(--mat);
   background: var(--color-matte);
 }
 
@@ -1966,6 +2116,102 @@ html[data-pause-active] .social-links a {
     max-width: 100%;
   }
   .gallery-flow.related-flow > li {
-    max-width: calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--matte));
+    max-width: calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--mat));
   }
+}
+
+/* ---- The image page's stage (spec 006; moved here from the page's
+   scoped <style> at spec 013) -------------------------------------------
+   Exactly the viewport below the sticky header (which publishes its real
+   height as --header-h; the fallback matches its usual size), with the
+   frame centred in it. The image is sized inside the mat so the whole
+   frame — mat included — fits the stage with breathing room; width:auto
+   plus max constraints, never stretched or cropped, as the tall block.
+   The rules live here, not on the page, for two reasons: the mat
+   sampler must render the real stage and cannot reach a page-scoped
+   stylesheet, and form V+H belongs beside the other forms. The stage
+   publishes its two limits as lengths (--avail-w, --avail-h) so the
+   frame's mat and the image's max-height read one expression each; the
+   `vh` fallbacks are gone from those, since a fallback cannot ride a
+   custom property (svh has shipped everywhere since 2022) — the
+   min-height pair, which passes through none, keeps its. Those two
+   lengths carry no fallback, so `.image-frame` lives only inside an
+   `.image-stage`: it is one template's figure (the image page's), and
+   giving the frame a second copy of the stage's limits would be the
+   duplication this rule exists to avoid. */
+.image-stage {
+  --stage-pad: clamp(1rem, 3vh, 2rem);
+  --avail-w: min(calc(100vw - 2 * var(--page-pad)), var(--content-width));
+  --avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad));
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - var(--header-h, 4.5rem));
+  min-height: calc(100svh - var(--header-h, 4.5rem));
+  padding: var(--stage-pad) var(--page-pad);
+}
+
+/* Form V+H (the mat rule, spec 013): width and height both bind the
+   frame, so the mat is the smaller of the two forms' answers — V is
+   form W over --avail-w, H the held frame's form over --avail-h. */
+.image-frame {
+  --r: max(var(--ar, 1), 1);
+  --q: min(var(--ar, 1), 1);
+  --mat: min(
+    clamp(
+      var(--mat-min),
+      calc(var(--avail-w) * var(--mat-share) / (var(--r) + 2 * var(--mat-share))),
+      var(--mat-max)
+    ),
+    clamp(
+      var(--mat-min),
+      calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))),
+      var(--mat-max)
+    )
+  );
+  max-width: min(100%, var(--content-width));
+  margin: 0;
+  padding: var(--mat);
+  background: var(--color-matte);
+}
+
+.image-frame img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(var(--avail-h) - 2 * var(--mat));
+}
+
+/* The zoom cursor, once the page's script can honour the click (spec
+   006). It lives here, not in the page's scoped <style>, because a
+   scoped copy carries the page's [data-astro-cid] attribute on both
+   compounds and would out-specify the quiet rule below — which is what
+   turns it into zoom-out on the dark ground. */
+.image-stage[data-quiet-ready] .image-frame {
+  cursor: zoom-in;
+}
+
+/* Quiet view (spec 006): chrome gone, the ground dimmed, the frame as
+   large as the viewport allows with a small margin. The stage's two
+   limits are redeclared over the quiet --stage-pad — no header, and the
+   padding is the pad on both axes — so the mat and the image's height
+   follow the larger frame without a second formula: the base
+   `.image-frame img` max-height reads --avail-h, so quiet view needs no
+   copy of it. */
+html[data-quiet] .image-stage {
+  --stage-pad: clamp(0.5rem, 1.5vh, 1rem);
+  --avail-w: calc(100vw - 2 * var(--stage-pad));
+  --avail-h: calc(100svh - 2 * var(--stage-pad));
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-inline: var(--stage-pad);
+  background: var(--color-quiet);
+  cursor: zoom-out;
+}
+
+html[data-quiet] .image-frame,
+html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
+  max-width: 100%;
+  cursor: zoom-out;
 }
