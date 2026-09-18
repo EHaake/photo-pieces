@@ -195,8 +195,15 @@ registry, no plugin change.
   unchanged", a `.ground-tokens` line listing the stored tokens exactly
   as `localStorage['dev-ground']` holds them (the family the gate record
   copies, and the check that the key is what the site is wearing), and
-  `reset`. Its script imports from `../../../lib/ground` (bundled — the
-  sampler is never built), computes `readout(tone)` from the module's
+  `reset`. Its script is `src/pages/dev/matte/_sampler.ts` (the
+  underscore keeps it out of routing), loaded by the page as
+  `<script is:inline type="module" src="/src/pages/dev/matte/_sampler.ts">`
+  — served, never bundled: under `astro dev` Vite transforms the file on
+  request (types stripped, its `../../../lib/ground` import resolved),
+  and `astro build` never asks for it, since an `is:inline` script
+  enters no bundle and the page renders no HTML (decided at T1203 —
+  Resolved decisions). It imports from `../../../lib/ground`, computes
+  `readout(tone)` from the module's
   `TEXT`/`MUTED`/`MAT` literals — **never from a computed style**, which
   on a reload with a deepened candidate stored would already be the
   deepened value — writes `localStorage['dev-ground']` and applies the
@@ -514,3 +521,32 @@ prose about the pause), the Obsidian plugin.
   ground bar was too small.
 - **`deep-3` sits where muted-on-ground fails**, on purpose: the spec
   wants a failing candidate to be seen failing before it is liked.
+- **A dev fixture's script is served, never bundled** (decision review
+  at the top tier during T1203, 2026-09-17). A hoisted `<script>` on a
+  page whose `getStaticPaths` returns `[]` still enters the client
+  bundle: Astro emits its chunk into `dist/_astro/` whenever the chunk
+  is at or over `build.assetsInlineLimit` (4 KB) — `plugin-scripts.js`
+  deletes a chunk only when it qualifies for inlining — so the sampler's
+  bar shipped as an orphan chunk carrying `dev-ground`, and the barrier
+  failed the build as designed. Spec 013's toolbar had sat under that
+  cliff by chance. The rule: every `<script>` under `src/pages/dev/` and
+  in `src/components/Dev*.astro` is `is:inline` — plain JS in the page
+  when it needs no import (the switch, the page-head sampler), or
+  `type="module" src="/src/…/_name.ts"` when it imports a module (the
+  matte sampler, whose readout must be `ground.ts`'s own arithmetic). A
+  served `.ts` keeps its types, `astro check` and its import path; the
+  build never requests it. Not taken: pruning unreferenced chunks after
+  the build (a second cleanup policy that hides the leak, and the
+  barrier would pass because of the prune); a scoped
+  `assetsInlineLimit` (a global knob bent for a fixture, keyed to
+  Astro's chunk names, and it stops working when two fixtures share an
+  import and Rollup splits a chunk — inlining requires
+  `output.imports.length === 0`); keeping the chunk under 4 KB (a cliff
+  nobody sees). `ground.test.mjs` pins the rule at the source: every
+  `<script` in a dev fixture carries `is:inline`, and every
+  `src="/src/…"` such a tag names exists on disk. The output barrier
+  (`dev-ground` in any `.html`/`.js` under `dist/`) stays exactly as
+  T1202 left it. The `src` is root-absolute; if `base` is ever
+  configured the path needs it. Candidate for the sweep or ROADMAP: an
+  output-side orphan-chunk check (fail, not prune: any `dist/_astro/*.js`
+  nothing in `dist/` names).

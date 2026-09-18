@@ -1,4 +1,4 @@
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -360,6 +360,52 @@ describe('(g) the ground tokens are declared once (T1200, spec 014)', () => {
       const found = [...uncomment(text).matchAll(DECLARES)].map((match) => match[1]);
       const allowed = path === 'src/styles/global.css' ? GROUND_NAMES : [];
       expect([path, found.sort()]).toEqual([path, allowed]);
+    }
+  });
+});
+
+/** An .astro file with its comments gone — the frontmatter dropped whole (no
+ *  tag can live there) and the template's `<!-- -->` stripped — so a comment
+ *  that MENTIONS a script tag is not read as one. */
+const astroTemplate = (text) => {
+  const fence = /^---\n[\s\S]*?\n---\n/.exec(text);
+  return (fence ? text.slice(fence[0].length) : text).replace(/<!--[\s\S]*?-->/g, '');
+};
+
+/** Every `<script …>` opening tag in an .astro template, as text. */
+const scriptTags = (text) => [...astroTemplate(text).matchAll(/<script\b[^>]*>/g)].map((m) => m[0]);
+
+describe("(h) a dev fixture's script never enters the bundle (T1203, spec 014)", () => {
+  /** The dev-only .astro files: the samplers under src/pages/dev/ and the
+   *  ground switch component. Their scripts must never reach dist/. */
+  const fixtures = () =>
+    Object.entries(src).filter(
+      ([path]) =>
+        path.endsWith('.astro') &&
+        (path.startsWith('src/pages/dev/') || path.startsWith('src/components/Dev')),
+    );
+
+  it('every script tag in a dev fixture carries is:inline — a hoisted one over 4 KB is emitted as a chunk in dist/_astro/ even though no dev page is built', () => {
+    expect(fixtures().length).toBeGreaterThan(0);
+    for (const [path, text] of fixtures()) {
+      const bundled = scriptTags(text).filter((tag) => !tag.includes('is:inline'));
+      expect([path, bundled]).toEqual([path, []]);
+    }
+  });
+
+  it('every src a dev fixture serves its script from exists as a file — a moved or renamed module would 404 in the browser and the fixture would silently do nothing', async () => {
+    expect(fixtures().length).toBeGreaterThan(0);
+    for (const [path, text] of fixtures()) {
+      for (const tag of scriptTags(text)) {
+        const found = /\ssrc="([^"]+)"/.exec(tag);
+        if (!found) continue;
+        const served = found[1].replace(/^\//, '');
+        const isFile = await stat(here(`./${served}`)).then(
+          (entry) => entry.isFile(),
+          () => false,
+        );
+        expect([path, served, isFile]).toEqual([path, served, true]);
+      }
     }
   });
 });
