@@ -1908,9 +1908,10 @@ html[data-pause-active] .social-links a {
    fixed mat expressible). The cost: a stretched row wears its mat at
    between share/1.35 and share of its actual short side.
 
-   At share 0 with floor = ceiling — where :root stands until spec 013's
-   gate — every form resolves to that constant and every formula that
-   counts the mat reduces to the fixed-matte one it replaced. */
+   The gate (2026-09-17) set the share at 6% with a 4px floor and a 40px
+   ceiling, on every surface. It landed inert: at share 0 with floor =
+   ceiling every form resolves to that one constant, which is how these
+   formulas replaced the fixed matte without moving a pixel. */
 
 /* Form W. The clamp is exact because the regime depends only on known
    lengths: 100% is the container's width, resolved against the

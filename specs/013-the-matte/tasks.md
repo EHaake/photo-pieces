@@ -465,7 +465,7 @@ _T1104 record (2026-09-17, implementer at opus):_ `sh scripts/verify.sh` — `87
 
 _T1105 record (2026-09-17, orchestrator):_ the gate kept a mat on every surface, so the ground and its derived copies are untouched — `git diff main -- src/pages/og/pieces/[slug].png.ts public/og.jpg` empty; `:root`'s five ground tokens unchanged (`--color-bg: oklch(0.968 0.006 95)`, `--color-surface: oklch(0.945 0.007 95)`, `--color-soft: oklch(0.92 0.008 95)`, `--color-line: oklch(0.86 0.008 95)`, `--color-line-strong: oklch(0.72 0.012 95)`); `ground.test.mjs` green in T1104's run is the pin. No edit, no commit of its own.
 
-- [ ] **T1106** — Docs: `README.md` and `AUTHORING.md`, and the CSS
+- [x] **T1106** — Docs: `README.md` and `AUTHORING.md`, and the CSS
       comments the gate settled. `README.md`: the block table's Matted
       column per the pieces decision (every matted treatment flips
       together; fullbleed, tall and strip stay "no"), the footnotes
@@ -483,6 +483,8 @@ _T1105 record (2026-09-17, orchestrator):_ the gate kept a mat on every surface,
       script-rewrap). _Verify: every claim read against the built pages
       and the gate record; `npx prettier --check README.md AUTHORING.md`
       clean; `sh scripts/verify.sh` green._
+
+_T1106 record (2026-09-17, implementer at opus):_ `npx prettier --check README.md AUTHORING.md` → "All matched files use Prettier code style!"; `sh scripts/verify.sh` — `87 page(s) built in 1.12s`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 15 passed (15)`, `Tests 324 passed (324)`, `TEST EXIT 0`. `README.md`: the sentence after the block table states the landed rule (6% of the frame's rendered short side, 4px floor, 40px ceiling, equal on four sides, white, site-applied) and the two governed geometries (a packed row's shared mat from the row's target short side; one mat for a match="height" pair or triptych); the Matted column and both footnotes unchanged (every matted treatment stays on; fullbleed, tall, strip off); the image-page paragraph unchanged (says "matted", claims no width); the `pages/dev/` tree comment gains `dev/matte/`. `AUTHORING.md` ~598: "never bake a matte" stands, reworded — the site's mat is proportional, so a baked one is double-matted, has the share measured over it, and lies to the layout math. `global.css` ~1911: the stale "where `:root` stands until spec 013's gate" sentence now records the landed state, the inert landing kept as one clause of history; no rule changed. Every claim read against the built stylesheet (`--mat-share:.06; --mat-min:.25rem; --mat-max:2.5rem`, `--color-matte`, `padding:var(--mat)`, forms R and P) and T1104's record. Deviations: none. Read beyond the bundle: the built stylesheet, the `dev/matte/` listing, `.prettierrc`.
 
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge)
 
@@ -573,6 +575,7 @@ tier if it is ever on (it is off). -->
 | T1100a (`sdd-implementer`, resumed)                | implementation (`opus`)        | 16,515  | B1 fixed; 323 tests                                                                                                                                  |
 | Phase 0 re-review (`skeptical-reviewer`, resumed)  | implementation (`opus`)        | 9,116   | signed off; one adjacent gap to the sweep                                                                                                            |
 | T1104 (`sdd-implementer`)                          | implementation (`opus`)        | 141,365 | done; 324 tests; every surface measured at three viewports against the rule; T1103a and T1105 closed by the orchestrator (no-edit branches)         |
+| T1106 (`sdd-implementer`)                          | implementation (`opus`)        | 43,218  | done; README, AUTHORING and the stale CSS comment; Prettier clean                                                                                    |
 
 _(Session-tier allowance draw noted at each pause.)_
 
