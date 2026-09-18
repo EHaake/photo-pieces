@@ -69,7 +69,11 @@ const images = registry.latest(limit);
      photograph's short side is that height times min(--ar, 1). Not
      form H, which is for a frame that must FIT a height. This strip
      follows the packed rows at spec 013's gate; it is not a surface
-     the gate chooses for. */
+     the gate chooses for.
+     This is the same shape as form R in global.css's "Mattes" section —
+     a share of a known length, clamped between --mat-min and --mat-max —
+     written out here because the length is this strip's own --avail-h.
+     Keep it in step if form R changes. */
   .image-link {
     --avail-h: clamp(180px, 30vh, 260px);
     --mat: clamp(

@@ -510,9 +510,11 @@ _T1106 record (2026-09-17, implementer at opus):_ `npx prettier --check README.m
 
 _Phase 1 review (2026-09-17, `skeptical-reviewer` at opus, one review and one re-review):_ 1 blocking — B1 the compare figure unmeasured under a record claiming nothing unmeasured (measured; its mat right; the spacings' shortfall found and decided at the top tier as T1104a); notes N1 AUTHORING's "every frame" (fixed: "every matted frame", the double-matting claim scoped), N2 the Mattes comment's "It landed inert" (fixed: the mechanism at T1101), N3 stage fit and row short side at the other viewports (measured), N4 the three literals restated in five prose places with no check (to the sweep), N5 the ceiling bites on `wide` too (the `:root` comment names only the stage — T1107), N6 the floor is dead at 6%, N7 the "three values" triple differs from the plan's but AC 2 is met by measured pairs, N8 LatestWork live and unexercised. Signed off on the re-review; carried to the sweep: the "grid row-gap reads the height axis" clause in plan.md and the page comment is reasoned, not measured (moot — the rule is gone); the "`--mat` read only as padding" invariant is pinned for the image page only.
 
+_Phase 1 pause (2026-09-17, product owner):_ attested on both screens — "Both screens look right, keep the 40px ceiling, continue." The ceiling stays at 2.5rem. Session-tier allowance: not reported.
+
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge)
 
-- [ ] **T1107** — Close-out. The repo-wide documents are edited by the
+- [x] **T1107** — Close-out. The repo-wide documents are edited by the
       `sdd-implementer` on a bundle (T1106 is the pattern; the bundle
       carries the gate record, plan.md's "Resolved decisions" and its
       gate amendment, and the two ROADMAP entries) and committed by the
@@ -553,6 +555,20 @@ _Phase 1 review (2026-09-17, `skeptical-reviewer` at opus, one review and one re
       documents edited; `grep -rn "site-applied mattes\|shows the image matted\|own flat matte" CLAUDE.md README.md AUTHORING.md DECISIONS.md ROADMAP.md`
       → only lines consistent with the gate's outcome; main green after
       the merge._
+
+_T1107 record (2026-09-17, implementer at opus for the documents; orchestrator for the rest):_ `npx prettier --check ROADMAP.md DECISIONS.md` clean; `sh scripts/verify.sh` — `87 page(s) built in 1.30s`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 15 passed (15)`, `Tests 325 passed (325)`, `TEST EXIT 0`; the task's grep → `README.md:148: page shows the image matted, …` and `CLAUDE.md:69: … site-applied mattes; a` — both consistent with mats everywhere; no other hits. ROADMAP: "The matte, rethought" struck as shipped (the file's struck-entry shape); "The ground tone, rethought" added before the aspect-ratio entry (a token change on a settled rule, so the gallery frames are judged once against a settled ground); the aspect-ratio entry annotated (gallery frames matted, one mat per row at 6% of the target short side, 4–40px); the design-language entry's list corrected. DECISIONS: the spec 013 section in 012's shape; "Mattes: site-applied" annotated (stands); "Ground tone" not superseded, one paragraph pointing at the rethink. Deviation: the design-language entry's stale cross-reference fixed (one clause). Prettier normalises `*x*` to `_x_` — hand prose can trip only there. Orchestrator's final run identical (87 / 325 / all EXIT 0); `prettier --check` on the five documents warns only on `CLAUDE.md`'s pre-existing line (unchanged on this branch). Sweep (opus, 166,078): no blocking, 10 notes — N1 the `attr()` claim corrected in plan.md and DECISIONS.md; N2, N3, N4 as Known-limitation lines in plan.md plus an AUTHORING sentence; N6 a cross-reference comment on LatestWork's mat; N8 the sampler's `today` relabelled as spec 003's mat, the gate's control (all six landed as T1107a below); left with reason — N5 (a global.css walker for non-padding `--mat` readers: the layout-math readers are legitimate and the invariant is pinned where the bug was), N7 (the hardcoded `--gallery-short` fallback is harmless — the agreement case drives its own magnitudes), N9 (the no-JS compare stack's 12px gap is unattested — decided at the top tier, invisible with JS on); N10 this record. The sweep could not read the image page's remaining scoped `.image-stage` rule (Phase 0 N5) — its declarations are outside the diff and T1101b's quiet probe showed nothing visible changed; left.
+
+- [x] **T1107a** — The sweep's six note fixes (2026-09-17): the `attr()`
+      claim corrected in `DECISIONS.md` (Firefox 155 shipped advanced
+      `attr()`; the interop reason stands); an `AUTHORING.md` sentence
+      on the two prose frames that carry no measured ratio; the sampler's
+      `today` candidate relabelled as spec 003's mat, the gate's control
+      (id unchanged); a form R cross-reference on `LatestWork`'s mat; the
+      row-gap clause marked spec-derived in the page comment and
+      `DECISIONS.md`. _Verify: `npx prettier --check` on the five files
+      clean; `sh scripts/verify.sh` green._
+
+_T1107a record (2026-09-17, implementer at opus, resumed):_ Prettier clean on the five files; `sh scripts/verify.sh` — `87 page(s) built in 1.35s`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 15 passed (15)`, `Tests 325 passed (325)`, `TEST EXIT 0`. The sampler's relabel touched the note, the candidate-table comment, the `START` comment and the script comment (all called it "today's mat"); the button text and id stay `today`. No preview run for the dev-only string change (behind the barrier; build and tests are the check).
 
 ---
 
@@ -606,6 +622,9 @@ tier if it is ever on (it is off). -->
 | Decision: compare spacings (`skeptical-reviewer`)  | top (`claude-fable-5-1`, high) | 48,125  | option (d): prose spacing at baseline/2 on both branches; transcribed into plan.md                                                                   |
 | T1104a (`sdd-implementer`, resumed)                | implementation (`opus`)        | 18,331  | done; 325 tests; the invariant case pinned                                                                                                           |
 | Phase 1 re-review (`skeptical-reviewer`, resumed)  | implementation (`opus`)        | 14,852  | signed off; two notes to the sweep                                                                                                                   |
+| T1107 docs (`sdd-implementer`)                     | implementation (`opus`)        | 58,423  | ROADMAP and DECISIONS; the ground-tone follow-up added                                                                                              |
+| Pre-merge sweep (`skeptical-reviewer`)             | implementation (`opus`)        | 166,078 | signed off, no blocking; 10 notes — 6 landed as T1107a, 3 left with reason, 1 the record                                                            |
+| T1107a (`sdd-implementer`, resumed)                | implementation (`opus`)        | 18,168  | the sweep's six note fixes; 325 tests                                                                                                                |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -665,7 +684,7 @@ _(Session-tier allowance draw noted at each pause.)_
 
 ## Handoff note
 
-**Nothing is implemented yet.** The next session begins at **T1100**
+**Spec 013 is complete and merged (2026-09-17, PR #12).** The handoff below is history — the next spec is the ground-tone rethink or the aspect-ratio treatment, per `ROADMAP.md`. Originally: nothing was implemented; the next session was to begin at **T1100**
 (Phase 0) as the orchestrator under the model policy's experiment 1: it
 opens on `claude-fable-5-1` at medium effort from `.claude/settings.json`
 (`/effort status` to confirm); it dispatches the `sdd-implementer` one

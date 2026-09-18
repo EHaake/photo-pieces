@@ -49,9 +49,10 @@ type Surface = 'pieces' | 'galleries' | 'stage' | 'cards';
 
 export async function getStaticPaths() {
   if (!import.meta.env.DEV) return [];
-  // The five candidates the visual gate compares: no mat, today's fixed
-  // mat (the control — T1101's inert literals), and three shares with the
-  // plan's starting floor (4px) and ceiling (40px). Declared inside
+  // The five candidates the visual gate compares: no mat, spec 003's fixed
+  // mat (the gate's control — T1101's inert literals, what the site ran
+  // before the gate chose the 6% rule), and three shares with the plan's
+  // starting floor (4px) and ceiling (40px). Declared inside
   // getStaticPaths and handed to the component as a prop (Astro runs
   // getStaticPaths in an isolated scope where a module-level const read
   // here is "not defined" at build time — the spec-010 gotcha). The dev
@@ -67,7 +68,7 @@ export async function getStaticPaths() {
       min: TODAY,
       max: TODAY,
       tunable: false,
-      note: "today's fixed mat — the control",
+      note: "spec 003's fixed mat — the gate's control (the site now runs the 6% rule)",
     },
     {
       id: 'share-25',
@@ -109,8 +110,10 @@ export async function getStaticPaths() {
 
 const { surface, surfaces, candidates } = Astro.props;
 
-// The page opens on today's mat, so the first thing the gate sees is what
-// ships; every button is a step away from it.
+// The page opens on the `today` candidate — spec 003's fixed mat, what the
+// site ran when the gate was held — so the first thing the gate saw was the
+// status quo and every button was a step away from it. (What ships now is the
+// 6% rule the gate chose; `share-60` is that candidate.)
 const START = candidates.find((c) => c.id === 'today') ?? candidates[0];
 
 const registry = await getImageRegistry();
@@ -407,7 +410,8 @@ const SURFACE_NOTE: Record<Surface, string> = {
     if (buttons.length === 0) return;
     const wanted = state.candidates[name];
     // No stored choice yet: the surface opens where the server rendered it
-    // (today's mat), not on the first button in the table.
+    // (the `today` candidate — spec 003's fixed mat), not on the first button
+    // in the table.
     const button =
       buttons.find((b) => b.dataset.candidate === wanted) ??
       buttons.find((b) => b.dataset.start !== undefined) ??

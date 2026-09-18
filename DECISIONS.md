@@ -927,7 +927,10 @@ height (P). The per-form algebra is what lets one number drive all of them
 while the existing fits stay exact. Every frame carries its aspect ratio as a
 raw `--ar` written by the remark transform, rather than container units or
 `attr()`: `cqmin` needs size containment, which breaks auto heights, and typed
-`attr()` has not shipped in Firefox.
+`attr()` had not shipped outside Chromium when 013 was planned. Firefox 155
+shipped advanced `attr()` on 2026-09-01 and WebKit has it in Safari Technology
+Preview only (it is an Interop 2026 focus area), so the interop reason stands
+for now; the transform's `--ar` is the one that works everywhere today.
 
 **A packed row's mat follows the row's target short side, not its grown one**,
 which is a deliberate deviation from "a share of the frame". Flex grows a
@@ -983,7 +986,10 @@ gets its own look in a later spec (`ROADMAP.md`), not a change made here.
 not mats** (`calc(var(--baseline) / 2)`; decision review at the top tier,
 2026-09-17). `--mat` is applied only as `padding`, because its `100%` resolves
 against the reader's containing block — on the padded figure's children that
-is the content box, and for a grid `row-gap` the height axis. A second
+is the content box, and for a grid `row-gap` the height axis (the row-gap
+clause is read from the spec — CSS Box Alignment / CSS Gaps Level 1, where a
+percentage gap resolves against the container's own size in that axis — not
+measured in a browser). A second
 expression of form W on those children would break the single source, and
 accepting the shortfall would have documented an approximation that varies
 with share and ratio. The look changes on one page: the note sits half a

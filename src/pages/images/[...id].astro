@@ -674,7 +674,11 @@ const indexed =
        reader's own containing block — here the padded figure's content
        box, and on a grid's row-gap the height axis — so it would render
        a fraction of the figure's mat rather than the mat. --mat is
-       applied as `padding` and nowhere else. */
+       applied as `padding` and nowhere else.
+       (The row-gap half of that is read from the spec — CSS Gaps Level 1
+       resolves a percentage gap against the container's size in the gap's
+       own axis — not measured in a browser; the padding half is what the
+       landing checks observed.) */
     gap: calc(var(--baseline) / 2);
   }
   .compare-frame {

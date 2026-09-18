@@ -432,6 +432,20 @@ the Obsidian plugin.
   T1101, T1101b and T1103 read "identical" as within 1/60 px on those
   frames, in Firefox. Blink (1/64 px) and WebKit were not driven; the
   Phase 0 pause attests the rendered result.
+- **The literals 6% / 4px / 40px are restated in prose** (sweep, from
+  the Phase 1 review's N4): `README.md`, `AUTHORING.md`, `DECISIONS.md`,
+  `ROADMAP.md`, the `:root` comment and the Mattes comment all carry
+  them, and the px figures assume a 16px root (the tokens are rem).
+  `matte.test.mjs` pins `:root` only; a retune must grep those copies.
+- **An image inside an author's own link in prose, or a local
+  non-raster with alt text, carries no `--ar`** (sweep): the shorthand
+  pass leaves both alone, so the matted list's `a:not(.image-link) > img`
+  entry mattes them as if square — over by the ratio for a landscape.
+  None in content (T1100: 0 anchors without `--ar` in `dist/pieces/`);
+  `AUTHORING.md` says to write such frames as blocks or plain shorthand.
+- **"A grid `row-gap` reads the height axis"** (the compare decision) is
+  spec-derived (CSS Gaps Level 1), not measured — the one number taken
+  (22.84) was the width-basis margin; moot, the rule is gone.
 - **The dev server caches `getStaticPaths`**: editing the sampler's
   candidate table needs a restart. The toolbar state lives in
   `sessionStorage`; a hard reload keeps it, a new tab starts at `today`
@@ -449,8 +463,10 @@ the Obsidian plugin.
   both.
 - **Raw `--ar` on every frame from the transform**, rather than
   container units or `attr()`: `cqmin` needs size containment (which
-  breaks auto heights), typed `attr()` has not shipped in Firefox, and
-  the probe already exists.
+  breaks auto heights), typed `attr()` had not shipped outside Chromium
+  when this was planned (Firefox 155 shipped it on 2026-09-01; WebKit
+  has it in Safari Technology Preview only — corrected at the sweep),
+  and the probe already exists.
 - **Today's mat is expressed by the tokens** (share 0, floor = ceiling)
   so the inert landing, the sampler's control and the "everything as
   today" branch are one mechanism — the reason form R keeps the mat as
