@@ -1,6 +1,10 @@
 # Tasks: The ground tone, rethought
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-17) — by the `skeptical-reviewer` at the
+top tier; two blocking findings fixed and cleared on the one re-review,
+nine notes folded in, and the two items the re-review carried (O1, O2 in
+the tier log) transcribed from its exact text into T1200, T1204, and
+T1206.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1200, T1201, T1202, T1203) — the family's
 rule and the contrast formula in one module with the test that pins
@@ -74,8 +78,8 @@ headers to confirm nothing was duplicated or dropped. -->
       `FLOOR = 4.5`, `TEXT`, `MUTED` and `MAT` (the literal tones of
       `--color-text`, `--color-muted`, `--color-matte` as `:root` has
       them today — the readout's fixed ends, never a computed style),
-      `deepenMuted(family)` (`MUTED`'s L down by 0.01 until the three
-      muted pairs pass; `null` if none fails), `readout(bg)`,
+      `deepenMuted(family, from = MUTED)` (the starting muted's L down
+      by 0.01 until the three muted pairs pass; `null` if none fails), `readout(bg)`,
       `tokensFor(bg)` (the five strings plus `--color-muted` only when
       deepened), `CANDIDATES` (plan.md's eight, `today` first-class with
       `TODAY` its id), `CONTROL` (`oklch(0.968 0.006 95)` as a literal
@@ -95,9 +99,11 @@ headers to confirm nothing was duplicated or dropped. -->
       values `≥ 4.5`, each named with its ratio; (e) the formula's
       fixtures — black/white 21, `#777777`/white 4.48, `#767676`/white
       4.54, each `toBeCloseTo(x, 2)` on the unrounded ratio; (f)
-      `deepenMuted` is `null` today and, for `deriveFamily(deep-2)`,
-      returns an L that passes all three muted pairs while L + 0.01
-      fails one; (g) the five ground tokens are declared only in
+      `deepenMuted` from literals, not the candidate table:
+      `deepenMuted(deriveFamily(parseOklch('oklch(0.93 0.008 95)')), parseOklch('oklch(0.5 0.012 250)'))`
+      returns L 0.48, passing all three muted pairs while 0.49 fails
+      muted/soft, and `deepenMuted(deriveFamily(CANDIDATES.today.bg))`
+      with the default is `null`; (g) the five ground tokens are declared only in
       `:root` — no other block in `global.css`, no file under `src/`
       outside `src/pages/dev/` (`matte.test.mjs`'s declared-once case is
       the pattern). _Verify: `sh scripts/verify.sh tests` green, re-run
@@ -310,8 +316,8 @@ it names. -->
       `sh scripts/verify.sh` green; changed — `ground.test.mjs` green
       against the new literals with every delta recorded;
       `grep -rn "0.968 0.006 95\|0.945 0.007 95\|0.92 0.008 95\|0.86 0.008 95\|0.72 0.012 95" src/`
-      → exactly the `:root` history comment line(s) and the `warm-003`
-      entry, nothing else (every hit listed in the record — a fill left
+      → exactly the `:root` history comment line(s), the `warm-003`
+      entry, and `CONTROL`'s line in `src/lib/ground.ts`, nothing else (every hit listed in the record — a fill left
       at the old tone is a hit); `git diff main -- src/styles/global.css` shows
       no change inside the `html[data-pause-active]` block or on
       `--color-quiet`, `--pause-depth`, `--color-text`, `--color-accent`,
@@ -389,8 +395,9 @@ it names. -->
       command as the merge bookkeeping. _Verify: the implementer's
       `sh scripts/verify.sh` green with the documents edited;
       `grep -rn "0.968 0.006 95\|0.945 0.007 95\|0.92 0.008 95\|0.86 0.008 95\|0.72 0.012 95\|#f6f4f0\|#d2d1cb" README.md DECISIONS.md ROADMAP.md design/brief.md src/`
-      → only lines consistent with the gate's outcome (history lines
-      and `warm-003` say so; every hit listed); main green after the
+      → only lines consistent with the gate's outcome (history lines,
+      `warm-003`, and `CONTROL`'s line in `src/lib/ground.ts` say so;
+      every hit listed); main green after the
       merge._
 
 ---
@@ -420,16 +427,29 @@ reviewer invocations alike — any escape-hatch miss, the fallback switch
 if the top tier's budget runs out (the row and the time), and the third
 tier if it is ever on (it is off). -->
 
-| Task / invocation                           | Tier                           | Tokens | Outcome / miss reason |
-| ------------------------------------------- | ------------------------------ | ------ | --------------------- |
-| Planning: draft (`sdd-planner`)             | top (`claude-fable-5-1`, high) |        |                       |
-| Sign-off: plan/tasks (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) |        |                       |
+| Task / invocation                                   | Tier                           | Tokens  | Outcome / miss reason                                        |
+| --------------------------------------------------- | ------------------------------ | ------- | ------------------------------------------------------------ |
+| Planning: draft (`sdd-planner`)                     | top (`claude-fable-5-1`, high) | 166,322 | drafted; no product question returned                        |
+| Planning: findings folded (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 54,636  | B1, B2, N1–N9 folded; no disagreement                        |
+| Sign-off: plan/tasks (`skeptical-reviewer`)         | top (`claude-fable-5-1`, high) | 125,254 | fix and re-review — 2 blocking, 9 notes, no product question |
+| Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 28,042  | signed off; O1, O2 carried and transcribed                   |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
-- _(none yet)_
+- **O1** (from the sign-off's re-review, 2026-09-17; blocking by
+  definition, so transcribed at once rather than left): T1200's case (f)
+  was written against `CANDIDATES['deep-2']` and stepped from `MUTED`,
+  both of which T1204 moves — on a `deep-2`, `deep-3`, or tuned landing
+  that deepens, (f) would throw or return `null`. The reviewer's text is
+  transcribed into plan.md (the family module, Testing strategy) and
+  T1200 (f): `deepenMuted(family, from = MUTED)`, and (f) pinned from
+  literals. The sweep confirms the transcription against the test that
+  landed.
+- **O2** (same re-review): `CONTROL` in `src/lib/ground.ts` is a certain
+  hit of the old-literal grep on every branch; T1204's and T1206's
+  expected hits now name it. The sweep confirms the grep lines.
 
 ## Handoff note
 

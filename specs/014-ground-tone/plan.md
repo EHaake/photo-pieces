@@ -1,6 +1,10 @@
 # Plan: The ground tone, rethought
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-17) — by the `skeptical-reviewer` at the
+top tier, one review and one re-review; two items the re-review carried
+(a test case written against a value the gate moves, and a grep's
+expected hits) were transcribed from its exact text by the spec session;
+see tasks.md's tier log.
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -103,8 +107,12 @@ registry, no plugin change.
 
   Every darker candidate takes muted-on-soft under 4.5, so **the
   muted-deepens branch is the likely branch for any darker tone**, and
-  the readout says so beside the candidate. `deepenMuted(family)`
-  is the spec's "least step": lower `MUTED`'s L by 0.01 at a
+  the readout says so beside the candidate.
+  `deepenMuted(family, from = MUTED)` is the spec's "least step": the
+  starting muted is a parameter with the module's literal as its
+  default, so the sampler and the shipped check step from what ships
+  while the test can pin the rule from a fixed point (carried from the
+  sign-off's re-review, 2026-09-17); lower the starting L by 0.01 at a
   time (C and h unchanged) until all three muted pairs pass; the first L
   that passes ships. The step is 0.01, not 0.001, because 0.01 is the
   stylesheet's visible quantum for the muted token (`0.5` today, two
@@ -301,10 +309,13 @@ Every claim above is owned by a task and a check:
   not a hope after it): the six text pairs from `:root`'s tokens are
   `≥ 4.5`, each named; the formula's fixtures (21 / 4.48 / 4.54,
   `toBeCloseTo(x, 2)` on the unrounded ratio); the converter's
-  published values (the existing case); `deepenMuted` returns `null`
-  for today's family and, for `deriveFamily(deep-2)`, an L that passes
-  all three muted pairs while L + 0.01 fails at least one (the least
-  step, pinned both ways).
+  published values (the existing case); `deepenMuted` pinned from
+  literals, not the candidate table, so the case survives every landing:
+  `deepenMuted(deriveFamily(parseOklch('oklch(0.93 0.008 95)')), parseOklch('oklch(0.5 0.012 250)'))`
+  returns L 0.48, which passes all three muted pairs while 0.49 fails
+  muted/soft, and `deepenMuted(deriveFamily(CANDIDATES.today.bg))` with
+  the default is `null` — the tone that ships never needs deepening, on
+  every branch (the least step, pinned both ways).
   Mutation-checked: `--color-muted` L 0.5 → 0.55 → the muted/soft case
   fails with the ratio in the message.
 
