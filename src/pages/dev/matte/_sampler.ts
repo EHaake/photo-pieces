@@ -45,9 +45,11 @@
 // as passing. The readout's fixed ends are the module's TEXT/MUTED/MAT.
 import {
   CANDIDATES,
+  FLOOR,
   GROUND_TOKENS,
   MAT,
   TODAY,
+  contrast,
   formatOklch,
   parseOklch,
   readout,
@@ -158,7 +160,24 @@ const showGround = (tone: Tone, id: string, reading = readout(tone)) => {
         name.scope = 'row';
         name.textContent = pair.id;
         const value = document.createElement('td');
-        value.textContent = pair.floored ? floor2(pair.ratio) : `${floor2(pair.ratio)} — ΔL ${dL}`;
+        const shipped =
+          pair.ink === 'muted' && reading.deepened
+            ? contrast(reading.muted, reading.family[pair.on])
+            : null;
+        if (shipped === null) {
+          value.textContent = pair.floored
+            ? floor2(pair.ratio)
+            : `${floor2(pair.ratio)} — ΔL ${dL}`;
+        } else {
+          // Both numbers, as the plan requires: the row fails at the muted the
+          // stylesheet carries today — that is what made it deepen — and passes
+          // at the muted this ground would ship. The second number is marked on
+          // its own; the row's is-fail is about the first.
+          const at = document.createElement('span');
+          at.textContent = `${floor2(shipped)} ${shipped >= FLOOR ? '✓' : '✗'}`;
+          if (shipped < FLOOR) at.classList.add('is-fail');
+          value.append(`${floor2(pair.ratio)} → `, at, ' at the shipped muted');
+        }
         row.append(name, value);
         return row;
       }),

@@ -402,12 +402,12 @@ const SURFACE_NOTE: Record<Surface, string> = {
       {surface && <a href={withBase('/dev/matte/')}>stacked</a>}
     </p>
   </aside>
-</BaseLayout>
 
-<!-- plan.md's resolved decision, "A dev fixture's script is served, never bundled":
-     a hoisted <script> over 4 KB ships as a chunk in dist/_astro/ even when no page
-     is built. The src is root-absolute — it would need `base` if one is configured. -->
-<script is:inline type="module" src="/src/pages/dev/matte/_sampler.ts"></script>
+  <!-- plan.md's resolved decision, "A dev fixture's script is served, never bundled":
+       a hoisted <script> over 4 KB ships as a chunk in dist/_astro/ even when no page
+       is built. The src is root-absolute — it would need `base` if one is configured. -->
+  <script is:inline type="module" src="/src/pages/dev/matte/_sampler.ts"></script>
+</BaseLayout>
 
 <style>
   /* The piece page's own scoped rule on its reading column, copied so the
@@ -522,18 +522,25 @@ const SURFACE_NOTE: Record<Surface, string> = {
     border-collapse: collapse;
   }
 
-  .ground-readout th,
-  .ground-readout td {
+  /* :global inside the scoped table: _sampler.ts CREATES the rows, cells and
+     the shipped-value mark at runtime, so they carry no scope attribute and a
+     scoped selector would never match them. */
+  .ground-readout :global(th),
+  .ground-readout :global(td) {
     padding: 0 0.6rem 0 0;
     font: inherit;
     font-weight: 400;
     text-align: left;
   }
 
-  .ground-readout tr.is-fail {
+  .ground-readout :global(tr.is-fail),
+  .ground-readout :global(tr.is-fail th),
+  .ground-readout :global(tr.is-fail td),
+  .ground-readout :global(span.is-fail) {
     /* The fixture's own literal, not a token: the theme carries no failure
-       tone, and a row under the floor is the one thing the gate must not
-       miss. */
+       tone, and a value under the floor is the one thing the gate must not
+       miss. The cells are named too, or their own font-weight would take the
+       bold back off the failing row. */
     color: oklch(0.5 0.2 25);
     font-weight: 700;
   }

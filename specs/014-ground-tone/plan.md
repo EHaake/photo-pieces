@@ -91,8 +91,9 @@ registry, no plugin change.
   (`.prose p, .prose li`, `global.css` ~641), the lead, the cards' copy
   and the captions read `--color-muted`; headings and the nav read
   `--color-text`. Inline `code` in a paragraph is muted text on the
-  soft fill; the search fallback and the note rows are muted text on
-  the surface fill. So the muted floor is the reading floor, and its
+  soft fill; the search fallback is muted text on the surface fill — the
+  surface's one shipped use (the note rows and the cards sit on the
+  ground; corrected at the Phase 0 review). So the muted floor is the reading floor, and its
   tightest pair today is muted-on-soft. Estimates (greys; T1200's test
   computes and records the exact values, which replace these):
 
@@ -190,7 +191,9 @@ registry, no plugin change.
   (`data-l`/`data-c`/`data-h`/`data-note` from the `grounds` prop,
   which `getStaticPaths` fills from the imported `CANDIDATES`), the
   three tune inputs with their numbers, the tone as text, a seven-row
-  readout (`<table>`, `is-fail` on a row under the floor), one line
+  readout (`<table>`, `is-fail` on a row under the floor; on the three
+  muted rows the ratio at the shipped muted beside the undeepened one
+  when the tone deepens), one line
   "muted ships at `oklch(…)` — deepened for muted/soft" or "muted
   unchanged", a `.ground-tokens` line listing the stored tokens exactly
   as `localStorage['dev-ground']` holds them (the family the gate record
@@ -404,8 +407,10 @@ Every claim above is owned by a task and a check:
 
 - **Untouched by construction** (the non-goals) — **T1204** and the
   sweep: `git diff main -- src/content.config.ts remark-pieces-blocks.mjs obsidian-plugin/ src/lib/gallery-layout.ts`
-  empty; `matte.test.mjs`, `page-head.test.mjs`, `og.test.mjs` green and
-  unedited; the mat's colour `oklch(1 0 0)` and the three mat tokens
+  empty; `matte.test.mjs` and `og.test.mjs` green and unedited;
+  `page-head.test.mjs` green, edited only by T1202 (its verbatim
+  barrier-line assertion follows the line's new shape, and one case
+  covers the marker failure — amended at the Phase 0 review); the mat's colour `oklch(1 0 0)` and the three mat tokens
   unchanged.
 
 - Existing suites stay green (325 tests + the new cases); build with
@@ -423,7 +428,9 @@ public/og.jpg                                  regenerated on the landed ground 
 src/components/DevGround.astro                 the head applier, is:inline (new; T1202)
 src/layouts/BaseLayout.astro                   {import.meta.env.DEV && <DevGround />} in <head> (T1202)
 scripts/check-no-dev-routes.mjs                the dev-ground scan (T1202)
-src/pages/dev/matte/[...surface].astro         the ground bar: candidates, tune, readout; its ground state removed (T1203)
+src/pages/dev/matte/[...surface].astro         the ground bar: candidates, tune, readout; its ground state removed; its script tag is:inline (T1203)
+src/pages/dev/matte/_sampler.ts                the sampler's script, served by the dev server and never bundled (new; T1203)
+page-head.test.mjs                             the barrier's green line as reshaped, and the marker-failure case (T1202)
 src/styles/global.css                          :root's five literals, the comment; --color-muted on the deepens branch (T1204)
 README.md, design/brief.md                     the OG sentence and the scripts tree; the Palette note (T1205)
 ROADMAP.md, DECISIONS.md                       close-out (T1206, implementer-edited, orchestrator-committed)
@@ -433,7 +440,8 @@ Untouched, named so the reviewer can confirm the non-goals hold:
 `--color-text`, `--color-accent` and its two mixes, `--color-on-accent`,
 `--color-matte`, `--color-quiet`, `--pause-depth` and the lights block,
 the three mat tokens and every form, the transform, the schema, the
-fixture piece, `matte.test.mjs`, `page-head.test.mjs`, `og.test.mjs`,
+fixture piece, `matte.test.mjs`, `og.test.mjs` (`page-head.test.mjs`
+is edited by T1202 alone, for the barrier's new green line),
 `public/favicon.svg`, `AUTHORING.md` (it names the ground only in
 prose about the pause), the Obsidian plugin.
 
