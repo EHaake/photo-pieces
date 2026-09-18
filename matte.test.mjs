@@ -232,10 +232,12 @@ beforeAll(async () => {
 });
 
 describe('(a) the rule has one source (T1101, spec 013)', () => {
-  it(":root declares the three tokens at T1101's inert literals", () => {
-    expect(norm(root['--mat-share'])).toBe('0');
-    expect(norm(root['--mat-min'])).toBe('clamp(0.5rem, 1.4vw, 1.05rem)');
-    expect(norm(root['--mat-max'])).toBe('clamp(0.5rem, 1.4vw, 1.05rem)');
+  it(":root declares the three tokens at the gate's values (T1104: share-60)", () => {
+    // The visual gate, 2026-09-17: 6% of the rendered short side, floor
+    // 4px, ceiling 40px — the sampler's `share-60`, every surface on.
+    expect(norm(root['--mat-share'])).toBe('0.06');
+    expect(norm(root['--mat-min'])).toBe('0.25rem');
+    expect(norm(root['--mat-max'])).toBe('2.5rem');
   });
 
   it('no other rule in global.css declares any of them — one number moves every mat', () => {
@@ -818,5 +820,18 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
         }),
       ).toBe(short * Math.max(ratio, 1) + 2 * MAT);
     }
+  });
+
+  it("the gate identity: at :root's tokens the reading-width 3:2 single wears the gate's mat", () => {
+    // What the product owner judged at the gate (T1103's sampler, Firefox
+    // 155, 1512×982): share-60 on the 666px reading column's 3:2 single
+    // read 24.667px = 666 × 0.06 / (1.5 + 2 × 0.06). Run against :root
+    // itself, so moving any of the three tokens moves this number.
+    const m = px(formW(), {
+      env: { ...root, '--ar': 1.5 },
+      viewport: [1512, 982],
+      basis: 666,
+    });
+    expect(Math.abs(m - 24.667)).toBeLessThan(0.05);
   });
 });

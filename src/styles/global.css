@@ -50,14 +50,14 @@
      rule each surface reads.
 
      These three tokens are declared ONLY here (matte.test.mjs pins
-     that), so one number moves every mat on the site. At share 0 with
-     floor = ceiling every form reduces to that constant: the literals
-     below are today's fixed mat expressed by the rule, which is how
-     the mechanism lands changing nothing. The share, floor and ceiling
-     are chosen once at spec 013's visual gate. */
-  --mat-share: 0; /* the share of the photograph's rendered short side; 0 = the floor wins */
-  --mat-min: clamp(0.5rem, 1.4vw, 1.05rem); /* floor — today's fixed mat, so nothing changes */
-  --mat-max: clamp(0.5rem, 1.4vw, 1.05rem); /* ceiling — likewise */
+     that), so one number moves every mat on the site. Their values
+     were set once, at spec 013's visual gate (2026-09-17), from the
+     sampler's candidate table: candidate `share-60` — 6% of the
+     rendered short side, floor 4px, ceiling 40px — with every surface
+     keeping its mat and the warm ground left unchanged. */
+  --mat-share: 0.06; /* the share of the photograph's rendered short side (the gate's share-60) */
+  --mat-min: 0.25rem; /* floor — 4px */
+  --mat-max: 2.5rem; /* ceiling — 40px; the stage's largest frames sit on it at 1512×982 */
   --color-matte: oklch(1 0 0);
   /* Quiet view's ground (spec 006, the photographer's call at the
      visual gate): the one place the site goes dark — a dimmed wall
