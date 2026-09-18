@@ -407,6 +407,28 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     );
   });
 
+  it('the image page reads --mat only as a padding: the compare figure\u2019s, and nothing else', () => {
+    // The mat is a padding and never another property. --mat carries
+    // 100%, and a percentage resolves against the READER's containing
+    // block: on a child of the padded figure that is its content box,
+    // and on a grid's row-gap the height axis \u2014 so `gap: var(--mat)` or
+    // `margin: var(--mat)` renders a fraction of the figure's mat, not
+    // the mat (measured at T1104: 22.85 against a 24.667 mat). The
+    // compare's gap and note margin are prose spacing instead (T1104a).
+    const page = uncomment(src['src/pages/images/[...id].astro']);
+    const scoped = blocks(page.slice(page.indexOf('<style>'), page.indexOf('</style>')));
+    const all = [
+      ...scoped,
+      ...scoped.filter((one) => one.prelude.startsWith('@')).flatMap((one) => blocks(one.body)),
+    ];
+    const reading = [];
+    for (const block of all)
+      for (const [property, value] of Object.entries(declarations(block.body)))
+        if (/var\(--mat\s*[,)]/.test(value)) reading.push(`${norm(block.prelude)} { ${property} }`);
+    expect(reading).toEqual(['.compare { padding }']);
+    expect(declarations(ruleFor(all, '.compare', 'padding').body)['padding']).toBe('var(--mat)');
+  });
+
   it('the latest-work band: one height string, and a mat that is a share of it', () => {
     // The strip is a curated band, not one of the four surfaces; it gets
     // form R's shape because its image IS --avail-h tall (the mat sits

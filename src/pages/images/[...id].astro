@@ -669,7 +669,13 @@ const indexed =
   }
   .compare-frames {
     display: grid;
-    gap: var(--mat);
+    /* Prose spacing, not a mat (T1104a, the decision review of
+       2026-09-17): --mat carries 100%, which resolves against the
+       reader's own containing block — here the padded figure's content
+       box, and on a grid's row-gap the height axis — so it would render
+       a fraction of the figure's mat rather than the mat. --mat is
+       applied as `padding` and nowhere else. */
+    gap: calc(var(--baseline) / 2);
   }
   .compare-frame {
     position: relative;
@@ -692,7 +698,8 @@ const indexed =
     display: none;
   }
   .compare-note {
-    margin: var(--mat) 0 0;
+    /* Prose spacing, not a mat — see .compare-frames above (T1104a). */
+    margin: calc(var(--baseline) / 2) 0 0;
     color: var(--color-muted);
     font-size: 0.95rem;
     line-height: 1.6;

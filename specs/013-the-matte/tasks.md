@@ -435,6 +435,28 @@ _T1103a record (2026-09-17, orchestrator):_ pieces keep their mat (gate: every s
       empty; every number recorded here; unmeasured lines named for the
       person's attestation at the pause._
 
+- [x] **T1104a** — The compare's note margin and frames gap leave the
+      mat (from the Phase 1 review's B1 measurement and a decision
+      review at the top tier, 2026-09-17). `src/pages/images/[...id].astro`
+      scoped style: `.compare-frames { gap: calc(var(--baseline) / 2) }`
+      and `.compare-note { margin: calc(var(--baseline) / 2) 0 0 }`;
+      `.compare { padding: var(--mat) }` and the `data-js` rules
+      untouched. `matte.test.mjs`: any pinned `gap: var(--mat)` /
+      `margin: var(--mat) 0 0` string updated, and a new case named for
+      the invariant — in the image page's style `.compare` declares
+      `padding: var(--mat)` and `var(--mat)` appears there only as a
+      `padding` value. _Verify: `sh scripts/verify.sh` green; mutation —
+      `gap: var(--mat)` reintroduced → the case fails, restored; on the
+      dev server at 1512×982 and 375×812 the compare figure's padding
+      still 24.667 / 12.133 and the note's computed `margin-top` equals
+      `--baseline / 2` exactly (no percentage, so no 1/60 px floor); the
+      `--baseline` value recorded. If `--baseline` is not readable on
+      the image page, stop and return._
+
+_T1104 addendum (2026-09-17, from the Phase 1 review's B1, implementer resumed):_ the compare figure at `/images/where-the-fog-lets-go/land-b/` (quiet state cleared; `--ar: 1.5` from the template): padding 24.667 on all four sides at 1512 and 1280 (σ 411.383 → expected 24.683), 12.133 at 375 (σ 202.483 → 12.149) — a missing ratio would have read 35.7; N3: the stage at 1280 img.w + 80 = 1160.000 = `--avail-w`; at 375 (normal view — the first report's 375 stage numbers were read through a stale quiet state) pad 12.704 = 343 × 0.06 / 1.62 exactly (`--avail-w` probes 100vw − 32 while the classic scrollbar leaves 328), img.w + 2·pad 328.008 vs 328.000; a 1280 gallery row's short sides 436.25 / 436.233, paddings 25.344. Found: `.compare-frames { gap }` and `.compare-note { margin }` reading `--mat` resolved 22.84 / 22.85 (375: 11.25 / 11.233) — the token's `100%` against the padded figure's content box — and the gap renders nothing with JS on; taken to a decision review at the top tier → T1104a.
+
+_T1104a record (2026-09-17, implementer at opus, resumed):_ `sh scripts/verify.sh` — `87 page(s) built in 1.30s`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 15 passed (15)`, `Tests 325 passed (325)`, `TEST EXIT 0`; Prettier clean. No pinned gap/margin string existed; the new case "the image page reads --mat only as a padding: the compare figure's, and nothing else" walks the scoped style and asserts `['.compare { padding }']`; mutation `gap: var(--mat)` → `expected [ '.compare { padding }', '.compare-frames { gap }' ] to deeply equal [ '.compare { padding }' ]`, restored. Dev server: `--baseline` 1.5rem = 24px on the figure; gap 12 / 12, note `margin-top` 12, frames-bottom → note-top 12.000, at 1512 and 375; the compare's padding unchanged 24.667 / 12.133; the figure's height at 1512 532.233 → 521.383 — the one visible change, this page only (against `main` the note moves from 16.8px to 12px).
+
 - [x] **T1105** — The ground follows the mats. **If the gate kept a mat
       anywhere**: no edit; the record says so,
       `git diff main -- src/pages/og/pieces/[slug].png.ts public/og.jpg`
@@ -485,6 +507,8 @@ _T1105 record (2026-09-17, orchestrator):_ the gate kept a mat on every surface,
       clean; `sh scripts/verify.sh` green._
 
 _T1106 record (2026-09-17, implementer at opus):_ `npx prettier --check README.md AUTHORING.md` → "All matched files use Prettier code style!"; `sh scripts/verify.sh` — `87 page(s) built in 1.12s`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 15 passed (15)`, `Tests 324 passed (324)`, `TEST EXIT 0`. `README.md`: the sentence after the block table states the landed rule (6% of the frame's rendered short side, 4px floor, 40px ceiling, equal on four sides, white, site-applied) and the two governed geometries (a packed row's shared mat from the row's target short side; one mat for a match="height" pair or triptych); the Matted column and both footnotes unchanged (every matted treatment stays on; fullbleed, tall, strip off); the image-page paragraph unchanged (says "matted", claims no width); the `pages/dev/` tree comment gains `dev/matte/`. `AUTHORING.md` ~598: "never bake a matte" stands, reworded — the site's mat is proportional, so a baked one is double-matted, has the share measured over it, and lies to the layout math. `global.css` ~1911: the stale "where `:root` stands until spec 013's gate" sentence now records the landed state, the inert landing kept as one clause of history; no rule changed. Every claim read against the built stylesheet (`--mat-share:.06; --mat-min:.25rem; --mat-max:2.5rem`, `--color-matte`, `padding:var(--mat)`, forms R and P) and T1104's record. Deviations: none. Read beyond the bundle: the built stylesheet, the `dev/matte/` listing, `.prettierrc`.
+
+_Phase 1 review (2026-09-17, `skeptical-reviewer` at opus, one review and one re-review):_ 1 blocking — B1 the compare figure unmeasured under a record claiming nothing unmeasured (measured; its mat right; the spacings' shortfall found and decided at the top tier as T1104a); notes N1 AUTHORING's "every frame" (fixed: "every matted frame", the double-matting claim scoped), N2 the Mattes comment's "It landed inert" (fixed: the mechanism at T1101), N3 stage fit and row short side at the other viewports (measured), N4 the three literals restated in five prose places with no check (to the sweep), N5 the ceiling bites on `wide` too (the `:root` comment names only the stage — T1107), N6 the floor is dead at 6%, N7 the "three values" triple differs from the plan's but AC 2 is met by measured pairs, N8 LatestWork live and unexercised. Signed off on the re-review; carried to the sweep: the "grid row-gap reads the height axis" clause in plan.md and the page comment is reasoned, not measured (moot — the rule is gone); the "`--mat` read only as padding" invariant is pinned for the image page only.
 
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge)
 
@@ -576,10 +600,26 @@ tier if it is ever on (it is off). -->
 | Phase 0 re-review (`skeptical-reviewer`, resumed)  | implementation (`opus`)        | 9,116   | signed off; one adjacent gap to the sweep                                                                                                            |
 | T1104 (`sdd-implementer`)                          | implementation (`opus`)        | 141,365 | done; 324 tests; every surface measured at three viewports against the rule; T1103a and T1105 closed by the orchestrator (no-edit branches)         |
 | T1106 (`sdd-implementer`)                          | implementation (`opus`)        | 43,218  | done; README, AUTHORING and the stale CSS comment; Prettier clean                                                                                    |
+| Phase 1 review (`skeptical-reviewer`)              | implementation (`opus`)        | 92,957  | 1 blocking (B1 compare figure unmeasured), 8 notes                                                                                                   |
+| T1104 B1/N3 measurement (`sdd-implementer`, resumed) | implementation (`opus`)      | 27,119  | compare measured, right; the spacings' shortfall found — a design fork returned                                                                     |
+| T1106 fixes N1/N2 (`sdd-implementer`, resumed)     | implementation (`opus`)        | 2,692   | two sentences                                                                                                                                        |
+| Decision: compare spacings (`skeptical-reviewer`)  | top (`claude-fable-5-1`, high) | 48,125  | option (d): prose spacing at baseline/2 on both branches; transcribed into plan.md                                                                   |
+| T1104a (`sdd-implementer`, resumed)                | implementation (`opus`)        | 18,331  | done; 325 tests; the invariant case pinned                                                                                                           |
+| Phase 1 re-review (`skeptical-reviewer`, resumed)  | implementation (`opus`)        | 14,852  | signed off; two notes to the sweep                                                                                                                   |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
+
+- _(Phase 1 review, N4)_ 6% / 4px / 40px are restated in README,
+  AUTHORING, the `:root` comment and the Mattes comment with nothing
+  tying them to `:root` beyond the test's token pin; a doc-grep case or
+  a Known-limitation line naming the copies.
+- _(Phase 1 re-review)_ "a grid `row-gap` reads the height axis" in
+  plan.md's stage row and the image page's comment is reasoned, not
+  measured (the rule is gone, so moot); and the "`--mat` is read only as
+  a padding" invariant is pinned for the image page only — a non-padding
+  reader in global.css would pass case (b)'s string pins.
 
 - _(Phase 0 re-review)_ An image inside an author's own link in prose
   (`[![x](./a.jpg)](…)`) is matted by the list's `a:not(.image-link) > img`

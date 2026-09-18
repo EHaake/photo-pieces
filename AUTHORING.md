@@ -596,9 +596,10 @@ history keeps every byte forever, and the build only needs enough
 pixels for its largest responsive variant. Masters live in the photo
 archive, not the repo. (Decision and numbers: `DECISIONS.md`, "Images
 stay committed to git".) And **never bake a matte into the file**:
-the site mattes every frame itself, and since spec 013 it sizes that
-mat from the frame — 6% of the photograph's rendered short side,
-between 4px and 40px (spec 003, spec 013). A pre-matted export would
-render double-matted — the site measuring its share over your baked mat
-as if that were part of the photograph — and it would lie to the layout
-math that counts the mat.
+the site mattes every matted frame itself (fullbleed, tall and strip
+are deliberately unmatted), and since spec 013 it sizes that mat from
+the frame — 6% of the photograph's rendered short side, between 4px and
+40px (spec 003, spec 013). In a matted treatment a pre-matted export
+would render double-matted — the site measuring its share over your
+baked mat as if that were part of the photograph — and in any treatment
+it would lie to the layout math that counts the mat.

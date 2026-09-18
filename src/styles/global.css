@@ -1908,10 +1908,11 @@ html[data-pause-active] .social-links a {
    fixed mat expressible). The cost: a stretched row wears its mat at
    between share/1.35 and share of its actual short side.
 
-   The gate (2026-09-17) set the share at 6% with a 4px floor and a 40px
-   ceiling, on every surface. It landed inert: at share 0 with floor =
-   ceiling every form resolves to that one constant, which is how these
-   formulas replaced the fixed matte without moving a pixel. */
+   The mechanism landed inert at T1101: at share 0 with floor = ceiling
+   every form resolves to that one constant, which is how these formulas
+   replaced the fixed matte without moving a pixel. The gate (2026-09-17)
+   then set the share at 6% with a 4px floor and a 40px ceiling, on every
+   surface. */
 
 /* Form W. The clamp is exact because the regime depends only on known
    lengths: 100% is the container's width, resolved against the
