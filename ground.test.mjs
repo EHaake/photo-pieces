@@ -27,6 +27,7 @@ import {
   TODAY,
   uncomment,
 } from './src/lib/ground.ts';
+import { COLOR } from './src/lib/og-card.mjs';
 
 // The ground: its derived copies (spec 013, T1102) and its family
 // (spec 014, T1200).
@@ -34,11 +35,12 @@ import {
 // (1) The copies. `--color-bg` in global.css is the ground; two copies
 // of it are derived by hand and cannot update themselves:
 //
-//   (a) COLOR.bg in the Open Graph route — Satori has no oklch(), so the
-//       route carries a hex the author recomputes after retuning the
-//       token. Spec 001's pre-merge review already caught one of these
-//       left stale (the accent, still terracotta after the token went
-//       teal), and nothing but a human eye would have.
+//   (a) COLOR in src/lib/og-card.mjs — Satori has no oklch(), so the
+//       card the OG route and `npm run og` share carries five hexes the
+//       author recomputes after retuning the tokens. Spec 001's
+//       pre-merge review already caught one of these left stale (the
+//       accent, still terracotta after the token went teal), and
+//       nothing but a human eye would have.
 //   (b) public/og.jpg — the static social image, generated once against
 //       the ground of the day.
 //
@@ -92,6 +94,16 @@ async function sources(dir = here('./src'), out = {}) {
 
 const CHANNELS = ['red', 'green', 'blue'];
 
+/** The card's hand-kept hexes and the tokens they copy — the same map
+ *  `scripts/gen-og.mjs` refuses to write against. */
+const COPIES = {
+  bg: '--color-bg',
+  text: '--color-text',
+  muted: '--color-muted',
+  line: '--color-line',
+  accent: '--color-accent',
+};
+
 /** The five tokens the family is committed as, sorted — the form the
  *  per-file scan below compares against. */
 const GROUND_NAMES = Object.values(GROUND_TOKENS).sort();
@@ -109,7 +121,6 @@ let top;
 let nested;
 let src;
 let ground;
-let routeBg;
 let jpegPixel;
 
 beforeAll(async () => {
@@ -122,13 +133,6 @@ beforeAll(async () => {
   src = await sources();
   ground = oklchToRgb255(parseOklch(root['--color-bg']));
 
-  // Parsed from the source text, not imported: the route is an Astro
-  // endpoint whose module graph the test has no business booting.
-  const route = await readFile(here('./src/pages/og/pieces/[slug].png.ts'), 'utf8');
-  const declared = /\bbg:\s*'(#[0-9a-fA-F]{6})'/.exec(route);
-  expect(declared, "COLOR.bg's hex in the OG route").not.toBeNull();
-  routeBg = parseHex(declared[1]);
-
   const { data, info } = await sharp(here('./public/og.jpg'))
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -139,12 +143,20 @@ beforeAll(async () => {
 });
 
 describe("the ground's derived copies (T1102, spec 013)", () => {
-  it("the OG route's COLOR.bg is :root's --color-bg, within 2/255 per channel", () => {
-    for (const [index, name] of CHANNELS.entries()) {
-      expect(
-        Math.abs(routeBg[index] - ground[index]),
-        `${name}: route ${routeBg[index]} vs ground ${ground[index]}`,
-      ).toBeLessThanOrEqual(2);
+  it("the card's five hexes are :root's tokens, within 2/255 per channel", () => {
+    // Imported from the shared card module, not parsed out of the route:
+    // since T1201 the route and `npm run og` draw the same COLOR, so
+    // there is one copy to pin — and all five are pinned, not only the
+    // ground, because the accent is the one that was caught stale.
+    for (const [key, token] of Object.entries(COPIES)) {
+      const expected = oklchToRgb255(parseOklch(root[token]));
+      const copy = parseHex(COLOR[key]);
+      for (const [index, name] of CHANNELS.entries()) {
+        expect(
+          Math.abs(copy[index] - expected[index]),
+          `${token} ${name}: COLOR.${key} ${copy[index]} vs token ${expected[index]}`,
+        ).toBeLessThanOrEqual(2);
+      }
     }
   });
 

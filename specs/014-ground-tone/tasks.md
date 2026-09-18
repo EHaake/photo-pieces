@@ -121,17 +121,17 @@ headers to confirm nothing was duplicated or dropped. -->
       — the floor is not lowered._
 
       _Record (2026-09-17): landed green; the seven ratios at today's
-          `:root` — text/bg 14.571, text/surface 13.654, text/soft 12.681,
-          muted/bg 5.451, muted/surface 5.108, muted/soft 4.744 (the binding
-          pair), mat/bg 1.098 at ΔL 0.032. `deepenMuted` lands deep-1 → 0.49,
-          deep-2 → 0.48, deep-3 → 0.46. Every mutation failed as named,
-          except that `--color-muted` 0.5 → 0.55 names muted/bg (4.430) first,
-          not muted/soft — all three muted pairs fail there. Per-task review:
-          two blocking (the floor loop could go vacuous; a pass flag on the
-          unfloored mat pair) fixed and cleared on the re-review; a readout
-          case added, pinned from the literal `oklch(0.95 0.007 95)`._
+              `:root` — text/bg 14.571, text/surface 13.654, text/soft 12.681,
+              muted/bg 5.451, muted/surface 5.108, muted/soft 4.744 (the binding
+              pair), mat/bg 1.098 at ΔL 0.032. `deepenMuted` lands deep-1 → 0.49,
+              deep-2 → 0.48, deep-3 → 0.46. Every mutation failed as named,
+              except that `--color-muted` 0.5 → 0.55 names muted/bg (4.430) first,
+              not muted/soft — all three muted pairs fail there. Per-task review:
+              two blocking (the floor loop could go vacuous; a pass flag on the
+              unfloored mat pair) fixed and cleared on the re-review; a readout
+              case added, pinned from the literal `oklch(0.95 0.007 95)`._
 
-- [ ] **T1201** — The social image's generator, and the OG copies all
+- [x] **T1201** — The social image's generator, and the OG copies all
       pinned. `src/lib/og-card.mjs` (new; plain JS with JSDoc): `COLOR`
       (the five hexes, moved from the route with their comment),
       `loadFonts()` (the two `readFile(require.resolve(…))` reads,
@@ -178,6 +178,19 @@ headers to confirm nothing was duplicated or dropped. -->
       no design change. If type stripping fails on the installed Node,
       stop and return the error: plan.md names the fallback and it is a
       deviation to record, not to take silently._
+
+      _Record (2026-09-17): Node v26.7.0, no ExperimentalWarning. Before
+          and after hash of `dist/og/pieces/where-the-fog-lets-go.png`
+          identical (`989f1827…7053`). `npm run og`: all five hexes equal
+          their tokens (bg `#f6f4f0`, text `#1e2226`, muted `#5e646a`, line
+          `#d2d1cb`, accent `#004942`), no resync. Scratch and committed
+          `og.jpg` both 1200×630, (10,10) = [245,244,240] in both, delta 0;
+          the scratch card's layout is the generator's, not compared beyond
+          the ground. Mutation `#f6f0f0`: the test names the green channel
+          (240 vs 244); the generator refuses with the drift line. The drift
+          line prints COLOR's hex first, then `:root`'s. One `astro check`
+          error mid-task (Satori's `weight` union) fixed with an explicit
+          JSDoc type on the fonts memo._
 
 - [ ] **T1202** — The site-wide switch, dev only, and the barrier that
       proves it. `src/components/DevGround.astro` (new): one
@@ -446,6 +459,7 @@ tier if it is ever on (it is off). -->
 | Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 28,042  | signed off; O1, O2 carried and transcribed                                                                      |
 | T1200 (`sdd-implementer`)                           | impl (`opus`)                  | 102,298 | done; one orchestrator correction before review (readout graded against the deepened muted), one fix pass after |
 | T1200 per-task review (`skeptical-reviewer`)        | impl (`opus`)                  | 76,363  | 2 blocking + 5 notes; fixed, re-reviewed, signed off                                                            |
+| T1201 (`sdd-implementer`)                           | impl (`opus`)                  | 63,858  | done; no deviation                                                                                              |
 
 _(Session-tier allowance draw noted at each pause.)_
 
