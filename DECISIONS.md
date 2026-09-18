@@ -209,6 +209,15 @@ How to apply them was compared directly:
   (fullbleed, tall, strip) can stay unmatted since the bleed is the
   point.
 
+Spec 013 re-asked the first question — whether the site mattes at all,
+and where — at a sampler gate on real photographs (2026-09-17), and the
+answer was yes on every surface. This decision and the design brief's
+flat-matte carve-out therefore stand as written. What changed is the
+width: the mat is now a share of the frame rather than of the viewport
+(see "Spec 013: the mat as a share of the frame" below) — a retune that
+only the site-applied choice makes possible, since baked mattes would
+have meant re-exporting every image ever committed.
+
 ## Ground tone: warmed so the mattes read
 
 At the spec-003 sampler review the pure-white mattes were nearly
@@ -222,6 +231,12 @@ looks slightly too warm, but our eyes adjust quickly." The mat-edge
 option was rejected as visually noisy; tinted mats were rejected as
 inverting the mat-brighter-than-wall logic. Derived copies resynced:
 the OG route's bg hex (#f6f4f0) and public/og.jpg.
+
+Still the ground at spec 013, which kept mattes on every surface and so
+left this tone alone — but the tone itself is now up for a rethink: at
+that gate the photographer read the mattes as possibly not standing out
+enough, this warming as possibly not having gone far enough, and asked
+for a spec that tries a range of tones (`ROADMAP.md`).
 
 ## Header: full width, hides on scroll down
 
@@ -889,3 +904,94 @@ kept after the gate behind the same `check-no-dev-routes` barrier: the
 galleries sampler is spec 011's gate history and shows neither head nor
 writing, while this gate was entirely about what happens where the writing
 stops and the wall starts.
+
+## Spec 013: the mat as a share of the frame
+
+Spec 003 gave the site one mat width — `--matte: clamp(0.5rem, 1.4vw,
+1.05rem)`, a share of the viewport — worn identically by a single at the
+reading width, a grid cell, a packed gallery frame, a cover card, and the
+image page's stage. On real photographs that is the wrong rule: a small
+frame's mat reads heavy, a large frame's reads thin, and a wall of frames at
+different sizes wearing the same mat reads as the site not having noticed. A
+framer does the opposite — the mat grows with the print. So spec 013 asked two
+questions and settled both by looking: whether the site wants mats at all and
+where, and, where one stays, a width that is a share of the frame itself.
+
+**Three tokens and one rule, resolved per geometry**, rather than a token per
+surface. `--mat-share` (0.06), `--mat-min` (0.25rem) and `--mat-max` (2.5rem)
+are the single source, and the rule that spends them lives in `global.css`,
+written out once per form — because the CSS for a frame knows different things
+in different places: only the frame's width (form W), only its height (H),
+both (V+H), a packed row's target short side (R), or a matched pair's shared
+height (P). The per-form algebra is what lets one number drive all of them
+while the existing fits stay exact. Every frame carries its aspect ratio as a
+raw `--ar` written by the remark transform, rather than container units or
+`attr()`: `cqmin` needs size containment, which breaks auto heights, and typed
+`attr()` has not shipped in Firefox.
+
+**A packed row's mat follows the row's target short side, not its grown one**,
+which is a deliberate deviation from "a share of the frame". Flex grows a
+row's frames by up to `--gallery-stretch` (1.35) to justify the row, and that
+growth is not a length CSS can read; a mat that followed it exactly would have
+to sit inside the proportional term, which then cannot express a fixed mat (no
+constant term) and goes inexact the moment the clamp bites. Following the
+target keeps the equal-short-side math exact, scales with the format-aware
+density knob, and makes every cell in a row wear one mat. The cost — stated
+here, in the CSS comment, and in the test — is that a stretched row wears its
+mat at between `share/1.35` and `share` of its actual short side.
+
+**A matched-height pair wears one mat for the block**, not one per member, and
+that is a clamp-exactness necessity rather than a look. With a mat per member
+the matched height depends on which members sit at the floor or the ceiling,
+and which do depends on that height — the regime is decided by the answer, and
+CSS cannot branch on it inside one flex row. One mat for the block puts the
+whole clamp on a known expression, `s(W − G)/(A + 2ns)`, so the heights stay
+exact in every regime, as the held frame's form already does. The product
+owner accepted this and the packed row's target side together at sign-off
+(2026-09-13), and the sampler put mixed pairs in front of the gate so both
+behaviours were seen, not just described.
+
+**Today's mat is expressed by the same tokens** — share 0, floor equal to
+ceiling — so the inert landing, the sampler's control, and the "everything as
+today" branch are one mechanism rather than a special case. It is also why
+form R has to keep the mat as the row's constant term: a fixed mat must stay
+sayable.
+
+**The gate (2026-09-17, both of the photographer's screens, ten real
+photographs, from the dev-only sampler at `/dev/matte/`) kept every surface
+and chose the largest candidate share.** Pieces, the packed rows (galleries,
+the place wall, the related strip), the image page's stage, and the cover
+cards are all matted: "let's stick with mats all over with warm background".
+The share is **6%** (`--mat-share: 0.06`), which "looks a bit more refined and
+doesn't change the overall size of the frame" for a small loss of image inside
+it. The floor and ceiling are the plan's `0.25rem` (4px) and `2.5rem` (40px) —
+the sampler's defaults, so the values that were judged. At 6% the ceiling
+bites on the wide block and on the image page's stage on both screens, and the
+floor never binds; the photographer kept the ceiling at the Phase 1 pause
+("both screens look right, keep the 40px ceiling"), which is the constraint on
+any later move to a larger mat.
+
+**The ground is unchanged.** One rule bound the answer: the ground was warmed
+at spec 003 so white mats would read, so mats going nowhere would have taken
+it back toward white. Mats stayed everywhere, so the warm ground stays and the
+"Ground tone" decision above is not superseded. What the gate raised instead
+is the opposite worry — that the mats may not stand out enough against the
+ground, that the 003 warming may not have gone far enough — so the tone itself
+gets its own look in a later spec (`ROADMAP.md`), not a change made here.
+
+**The compare slider's note margin and its no-JS frames gap are prose spacing,
+not mats** (`calc(var(--baseline) / 2)`; decision review at the top tier,
+2026-09-17). `--mat` is applied only as `padding`, because its `100%` resolves
+against the reader's containing block — on the padded figure's children that
+is the content box, and for a grid `row-gap` the height axis. A second
+expression of form W on those children would break the single source, and
+accepting the shortfall would have documented an approximation that varies
+with share and ratio. The look changes on one page: the note sits half a
+baseline below the frames rather than a mat's width.
+
+The sampler stays in the repo after the gate behind the same
+`check-no-dev-routes` barrier the page-head, galleries, and place-wall
+samplers use, and so does the draft fixture piece it renders. That fixture
+borrows the gallery images by spec 008's `../../gallery-images/<file>` path
+instead of copying them: the gate needed photographs rather than placeholders,
+and a draft piece ships nothing.
