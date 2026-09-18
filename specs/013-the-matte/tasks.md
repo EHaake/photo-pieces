@@ -330,6 +330,36 @@ ceiling; and — only if no surface keeps a mat — the white. Recorded here
 by the orchestrator, in the person's words and the candidate ids, before
 T1104 is dispatched.)_
 
+**Gate record (2026-09-17, product owner, from the sampler on both
+screens):**
+
+- **Every surface keeps its mat** — pieces, the packed rows (galleries,
+  place wall, related strip), the stage, the cover cards: all **on**.
+  "Let's stick with mats all over with warm background."
+- **The share: `share-60`** — `--mat-share: 0.06`. "I also like the
+  larger mat, so share-60 would be my choice. It looks a bit more
+  refined and doesn't change the overall size of the frame. It does
+  make the image itself within the mat slightly smaller, but not by a
+  large amount so I think it's worth it for the perceptual win. I might
+  even go with mattes even slightly bigger."
+- **Floor and ceiling: the plan's `0.25rem` (4px) and `2.5rem` (40px)**
+  — the sampler's defaults, which is what was judged; no other values
+  named. Noted to the person: at 6% the stage's largest frames on the
+  laptop already sit on the 40px ceiling (T1103's record), so a larger
+  mat would need the ceiling raised too.
+- **The ground: unchanged** (mats stay everywhere, so the rule leaves
+  the warm ground). T1105 is the no-edit branch.
+- **Reasoning the person gave, for the record:** the mats may not stand
+  out enough against the ground — the warming at spec 003 may not have
+  gone far enough — and a **follow-up spec should rethink the ground
+  colour** with a number of tones, lighter and darker, some slightly
+  coloured, now that mats stay. Goes to `ROADMAP.md` at T1107.
+- **Branch for the tasks below:** T1103a closes with no edit (pieces
+  keep their mat); T1104 sets the tokens and turns nothing off; T1105
+  is the no-edit branch; the compare figure and LatestWork follow the
+  stage's and the packed rows' "on".
+- Session-tier allowance at this pause: not reported.
+
 ## Phase 1 — The gate's values, the ground, and the docs (reviewer after the phase; the person's pause at its end)
 
 <!-- T1104 is the load-bearing visible change under per-phase review;
@@ -339,7 +369,7 @@ Each of T1103a, T1104 and T1105 is written for every gate outcome; the
 bundle carries the gate record, and the implementer follows the branch
 it names. -->
 
-- [ ] **T1103a** — The constitution first, if a piece's frames lose
+- [x] **T1103a** — The constitution first, if a piece's frames lose
       their mat. **Only if the gate turned the pieces surface off** (on
       its own or as part of "nowhere"): `CLAUDE.md`'s block-vocabulary
       bullet — "captions via the container form and site-applied
@@ -356,6 +386,8 @@ it names. -->
       pre-existing line warns, spec 012's T1004a record);
       `git log -1 --stat` shows the commit touching `CLAUDE.md` alone;
       `grep -n "site-applied mattes" CLAUDE.md` → 0 on the off branch._
+
+_T1103a record (2026-09-17, orchestrator):_ pieces keep their mat (gate: every surface on, `share-60`); no edit, no commit of its own. `CLAUDE.md`'s "site-applied mattes" clause stays true.
 
 - [ ] **T1104** — The gate's values and each surface's presence.
       Pattern: T1101's forms in `src/styles/global.css` and the Mattes
