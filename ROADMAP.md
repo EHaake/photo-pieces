@@ -38,6 +38,39 @@ attached.
   processed work exists to test against: it could be part of the image
   detail page, its own kind of piece, or spread across both. Subsumes
   the `sequence` block's open interaction design below.
+- **Every page a piece, and the image's study** — raised by the
+  photographer during spec 014 (2026-09-18), as much a statement of intent
+  as a feature: every page but the front door is meant to be a piece — a
+  written thing with the site's treatments open to it — the image's page
+  included. Spec 006 laid the floor (the sidecar body is the image's
+  writing, "How it was made" and the compare its sections); this is the
+  ceiling, reached case by case and never for every image. (1) **A
+  processing overview** on the image page — the showcase entry above, which
+  shares this entry's home. (2) **Analysis and critique** — a breakdown of
+  the image's composition with graphics: how the eye moves through the
+  frame, its lines and masses, and how the photographer thinks about these
+  in the field — drawn over the photograph itself (paths and shapes in the
+  frame's own coordinates, so they scale with it) or diagrammed beside it.
+  That is a treatment the vocabulary does not have: an annotated image is
+  neither a block nor a sidecar field today, and in plain `.md` it needs a
+  directive shape and an authoring convention for the drawing (most likely
+  an SVG file beside the photograph, named to it the way the private
+  camera's frame is), so that a study reads as part of the page rather than
+  a section bolted onto it. (3) **A study is news.** When an existing
+  image's page gains one, the front door should be able to carry it beside
+  new pieces — so an image page needs a date of its own for such an update
+  (a sidecar field; its capture date and its piece's outing are the wrong
+  dates), and the front door's "latest" has to admit an updated image page
+  as well as a new piece, showing the photograph and a line, not what
+  changed. (4) **Dedicated pieces about seeing** — a piece may be a study
+  across several images, placing them with spec 008's cross-piece
+  references, each image's page linking back to the piece that studies it
+  the way "Also in" does now. For the design conversation, before any spec:
+  whether a study is a sidecar section like "How it was made" or a body
+  block in the image's writing that a piece can use too (the second gives
+  (2) and (4) one treatment); whether the overlay is one directive with
+  kinds — flow, lines, masses — or several; and how much of it the Obsidian
+  plugin should render, given that container forms are still raw text there.
 - ~~**Galleries and image pages**~~ — done in spec 004: the image
   registry, image pages, named galleries with a category (rows packed
   to equal short sides in editorial order — the photographer's rule
@@ -163,7 +196,9 @@ attached.
   then. The starting position: the homepage is the site's thesis —
   one photograph, one sentence, the latest piece a scroll away — not
   a grid of recent work, which would undo the argument the rest of
-  the site makes. The `LatestWork` strip is built and unplaced.
+  the site makes. The `LatestWork` strip is built and unplaced. Its
+  "latest" has to admit an updated image page beside a new piece — see the
+  image's-study entry above.
 - **A design language of its own** — raised by the photographer after spec
   012 (2026-09-13), as a longer-term direction rather than one spec. The site's
   functionality, flow, and layout come first and are still being settled; but
