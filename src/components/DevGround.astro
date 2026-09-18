@@ -1,0 +1,52 @@
+---
+// The ground-tone switch (spec 014, T1202) — a DEV-ONLY fixture.
+//
+// src/layouts/BaseLayout.astro renders this as
+// `{import.meta.env.DEV && <DevGround />}` — a build-time constant, so
+// `astro dev` serves it on every page and `astro build` renders nothing.
+// scripts/check-no-dev-routes.mjs is the standing check on that: it scans
+// every .html and .js under dist/ for this script's marker, the string
+// `dev-ground`, and fails the build if one ships.
+//
+// What it does: read the candidate the sampler stored under
+// localStorage['dev-ground'] (JSON `{ id, bg, muted, tokens }`) and set
+// each entry of `tokens` as a custom property on <html>, so the whole site
+// runs on the candidate ground. The applier does no maths — `tokens` is
+// already the derived five plus `--color-muted` when the ground needs the
+// deeper one. No key means no override, so the control is the committed
+// stylesheet with nothing on top. Inline and blocking in the head so the
+// first paint is already on the candidate, with no flash of the
+// stylesheet's ground on a hard reload.
+---
+
+<script is:inline data-dev-ground>
+  (() => {
+    const apply = () => {
+      let stored = null;
+      try {
+        stored = localStorage.getItem('dev-ground');
+      } catch {
+        return; /* storage unavailable: the stylesheet's ground */
+      }
+      if (!stored) return;
+      let candidate = null;
+      try {
+        candidate = JSON.parse(stored);
+      } catch {
+        return; /* a malformed key: the stylesheet's ground */
+      }
+      const tokens = candidate && candidate.tokens;
+      if (!tokens || typeof tokens !== 'object') return;
+      for (const name of Object.keys(tokens)) {
+        document.documentElement.style.setProperty(name, tokens[name]);
+      }
+    };
+    apply();
+    // The router replaces <html>'s attributes on navigation, so the inline
+    // style has to go back on after each swap. Registered once.
+    if (!window.__devGround) {
+      window.__devGround = true;
+      document.addEventListener('astro:after-swap', apply);
+    }
+  })();
+</script>

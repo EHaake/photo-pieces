@@ -121,15 +121,15 @@ headers to confirm nothing was duplicated or dropped. -->
       — the floor is not lowered._
 
       _Record (2026-09-17): landed green; the seven ratios at today's
-              `:root` — text/bg 14.571, text/surface 13.654, text/soft 12.681,
-              muted/bg 5.451, muted/surface 5.108, muted/soft 4.744 (the binding
-              pair), mat/bg 1.098 at ΔL 0.032. `deepenMuted` lands deep-1 → 0.49,
-              deep-2 → 0.48, deep-3 → 0.46. Every mutation failed as named,
-              except that `--color-muted` 0.5 → 0.55 names muted/bg (4.430) first,
-              not muted/soft — all three muted pairs fail there. Per-task review:
-              two blocking (the floor loop could go vacuous; a pass flag on the
-              unfloored mat pair) fixed and cleared on the re-review; a readout
-              case added, pinned from the literal `oklch(0.95 0.007 95)`._
+                  `:root` — text/bg 14.571, text/surface 13.654, text/soft 12.681,
+                  muted/bg 5.451, muted/surface 5.108, muted/soft 4.744 (the binding
+                  pair), mat/bg 1.098 at ΔL 0.032. `deepenMuted` lands deep-1 → 0.49,
+                  deep-2 → 0.48, deep-3 → 0.46. Every mutation failed as named,
+                  except that `--color-muted` 0.5 → 0.55 names muted/bg (4.430) first,
+                  not muted/soft — all three muted pairs fail there. Per-task review:
+                  two blocking (the floor loop could go vacuous; a pass flag on the
+                  unfloored mat pair) fixed and cleared on the re-review; a readout
+                  case added, pinned from the literal `oklch(0.95 0.007 95)`._
 
 - [x] **T1201** — The social image's generator, and the OG copies all
       pinned. `src/lib/og-card.mjs` (new; plain JS with JSDoc): `COLOR`
@@ -180,19 +180,19 @@ headers to confirm nothing was duplicated or dropped. -->
       deviation to record, not to take silently._
 
       _Record (2026-09-17): Node v26.7.0, no ExperimentalWarning. Before
-          and after hash of `dist/og/pieces/where-the-fog-lets-go.png`
-          identical (`989f1827…7053`). `npm run og`: all five hexes equal
-          their tokens (bg `#f6f4f0`, text `#1e2226`, muted `#5e646a`, line
-          `#d2d1cb`, accent `#004942`), no resync. Scratch and committed
-          `og.jpg` both 1200×630, (10,10) = [245,244,240] in both, delta 0;
-          the scratch card's layout is the generator's, not compared beyond
-          the ground. Mutation `#f6f0f0`: the test names the green channel
-          (240 vs 244); the generator refuses with the drift line. The drift
-          line prints COLOR's hex first, then `:root`'s. One `astro check`
-          error mid-task (Satori's `weight` union) fixed with an explicit
-          JSDoc type on the fonts memo._
+              and after hash of `dist/og/pieces/where-the-fog-lets-go.png`
+              identical (`989f1827…7053`). `npm run og`: all five hexes equal
+              their tokens (bg `#f6f4f0`, text `#1e2226`, muted `#5e646a`, line
+              `#d2d1cb`, accent `#004942`), no resync. Scratch and committed
+              `og.jpg` both 1200×630, (10,10) = [245,244,240] in both, delta 0;
+              the scratch card's layout is the generator's, not compared beyond
+              the ground. Mutation `#f6f0f0`: the test names the green channel
+              (240 vs 244); the generator refuses with the drift line. The drift
+              line prints COLOR's hex first, then `:root`'s. One `astro check`
+              error mid-task (Satori's `weight` union) fixed with an explicit
+              JSDoc type on the fonts memo._
 
-- [ ] **T1202** — The site-wide switch, dev only, and the barrier that
+- [x] **T1202** — The site-wide switch, dev only, and the barrier that
       proves it. `src/components/DevGround.astro` (new): one
       `<script is:inline data-dev-ground>` of plain JS — read
       `localStorage['dev-ground']` (JSON `{ id, bg, muted, tokens }`),
@@ -231,6 +231,30 @@ headers to confirm nothing was duplicated or dropped. -->
       value. Where the implementer cannot drive a browser it says so,
       line by line, and the Phase 0 pause asks the person to attest
       those lines._
+
+      _Record (2026-09-17): `87 page(s) built`,
+          `[check-no-dev-routes] no dev routes in dist/; no dev-ground marker in 97 files.`,
+          338 tests. `grep -rl dev-ground dist/` empty; `dist/dev` absent.
+          Negative control: guard removed → the barrier names 89 files
+          including `dist/index.html`, `BUILD EXIT 1`; restored, green.
+          Firefox 155 headless via BiDi, every read exact (0/255): with
+          `deep-2` stored (`bg oklch(0.93 0.008 95)`, muted deepened to
+          `oklch(0.48 0.012 250)`, six tokens) `<html>` reads
+          [233,232,226] on `/`, `/pieces/`, the fog piece, the vocabulary
+          sampler, `/galleries/every-ratio/`, `/places/the-headlands/`,
+          `/about/`, `/search/`, the land-a image page, and `/pieces/` after
+          a router navigation; the quiet view [23,22,18] (`--color-quiet`,
+          unmoved); `code` on the sampler [218,216,209] (soft);
+          `.search-fallback` [226,224,218] (surface); `.site-footer` and
+          `.note-row` borders [199,197,190] (line). Key removed: every read
+          the stylesheet's ([246,244,240] etc.). Substitution: no card on
+          `/` sits on the surface — `.entry-card`/`.work-card` use
+          `--color-bg`, and `--color-surface` has exactly one shipped use,
+          `.search-fallback` — so the surface was measured on `/search/` and
+          the line on `/`'s `.note-row`. Deviations: `page-head.test.mjs`'s
+          verbatim green-line assertion updated to the new line, and one
+          test added for the new failure path (a fixture carrying the
+          marker exits 1 naming the file). Drivers in the scratchpad._
 
 - [ ] **T1203** — The sampler's ground bar: the candidates, the tune,
       the readout. `src/pages/dev/matte/[...surface].astro` (spec 013's
@@ -460,6 +484,7 @@ tier if it is ever on (it is off). -->
 | T1200 (`sdd-implementer`)                           | impl (`opus`)                  | 102,298 | done; one orchestrator correction before review (readout graded against the deepened muted), one fix pass after |
 | T1200 per-task review (`skeptical-reviewer`)        | impl (`opus`)                  | 76,363  | 2 blocking + 5 notes; fixed, re-reviewed, signed off                                                            |
 | T1201 (`sdd-implementer`)                           | impl (`opus`)                  | 63,858  | done; no deviation                                                                                              |
+| T1202 (`sdd-implementer`)                           | impl (`opus`)                  | 86,030  | done; page-head test's verbatim line updated + 1 test added                                                     |
 
 _(Session-tier allowance draw noted at each pause.)_
 
