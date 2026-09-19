@@ -1,6 +1,8 @@
 # Tasks: The ground tone, rethought
 
-**Status**: Signed off (2026-09-17) — by the `skeptical-reviewer` at the
+**Status**: Superseded (2026-09-19) by spec 015 after Phase 0 (T1200–T1203a
+done, reviewed, merged as machinery); T1204–T1206 never ran. Signed off
+(2026-09-17) — by the `skeptical-reviewer` at the
 top tier; two blocking findings fixed and cleared on the one re-review,
 nine notes folded in, and the two items the re-review carried (O1, O2 in
 the tier log) transcribed from its exact text into T1200, T1204, and
@@ -120,16 +122,7 @@ headers to confirm nothing was duplicated or dropped. -->
       the numbers are reported and the task stops for the phase review
       — the floor is not lowered._
 
-      _Record (2026-09-17): landed green; the seven ratios at today's
-                          `:root` — text/bg 14.571, text/surface 13.654, text/soft 12.681,
-                          muted/bg 5.451, muted/surface 5.108, muted/soft 4.744 (the binding
-                          pair), mat/bg 1.098 at ΔL 0.032. `deepenMuted` lands deep-1 → 0.49,
-                          deep-2 → 0.48, deep-3 → 0.46. Every mutation failed as named,
-                          except that `--color-muted` 0.5 → 0.55 names muted/bg (4.430) first,
-                          not muted/soft — all three muted pairs fail there. Per-task review:
-                          two blocking (the floor loop could go vacuous; a pass flag on the
-                          unfloored mat pair) fixed and cleared on the re-review; a readout
-                          case added, pinned from the literal `oklch(0.95 0.007 95)`._
+_T1200 record (2026-09-17):_ landed green; the seven ratios at today's `:root` — text/bg 14.571, text/surface 13.654, text/soft 12.681, muted/bg 5.451, muted/surface 5.108, muted/soft 4.744 (the binding pair), mat/bg 1.098 at ΔL 0.032. `deepenMuted` lands deep-1 → 0.49, deep-2 → 0.48, deep-3 → 0.46. Every mutation failed as named, except that `--color-muted` 0.5 → 0.55 names muted/bg (4.430) first, not muted/soft — all three muted pairs fail there. Per-task review: two blocking (the floor loop could go vacuous; a pass flag on the unfloored mat pair) fixed and cleared on the re-review; a readout case added, pinned from the literal `oklch(0.95 0.007 95)`._
 
 - [x] **T1201** — The social image's generator, and the OG copies all
       pinned. `src/lib/og-card.mjs` (new; plain JS with JSDoc): `COLOR`
@@ -179,18 +172,7 @@ headers to confirm nothing was duplicated or dropped. -->
       stop and return the error: plan.md names the fallback and it is a
       deviation to record, not to take silently._
 
-      _Record (2026-09-17): Node v26.7.0, no ExperimentalWarning. Before
-                      and after hash of `dist/og/pieces/where-the-fog-lets-go.png`
-                      identical (`989f1827…7053`). `npm run og`: all five hexes equal
-                      their tokens (bg `#f6f4f0`, text `#1e2226`, muted `#5e646a`, line
-                      `#d2d1cb`, accent `#004942`), no resync. Scratch and committed
-                      `og.jpg` both 1200×630, (10,10) = [245,244,240] in both, delta 0;
-                      the scratch card's layout is the generator's, not compared beyond
-                      the ground. Mutation `#f6f0f0`: the test names the green channel
-                      (240 vs 244); the generator refuses with the drift line. The drift
-                      line prints COLOR's hex first, then `:root`'s. One `astro check`
-                      error mid-task (Satori's `weight` union) fixed with an explicit
-                      JSDoc type on the fonts memo._
+_T1201 record (2026-09-17):_ Node v26.7.0, no ExperimentalWarning. Before and after hash of `dist/og/pieces/where-the-fog-lets-go.png` identical (`989f1827…7053`). `npm run og`: all five hexes equal their tokens (bg `#f6f4f0`, text `#1e2226`, muted `#5e646a`, line `#d2d1cb`, accent `#004942`), no resync. Scratch and committed `og.jpg` both 1200×630, (10,10) = [245,244,240] in both, delta 0; the scratch card's layout is the generator's, not compared beyond the ground. Mutation `#f6f0f0`: the test names the green channel (240 vs 244); the generator refuses with the drift line. The drift line prints COLOR's hex first, then `:root`'s. One `astro check` error mid-task (Satori's `weight` union) fixed with an explicit JSDoc type on the fonts memo._
 
 - [x] **T1202** — The site-wide switch, dev only, and the barrier that
       proves it. `src/components/DevGround.astro` (new): one
@@ -232,29 +214,7 @@ headers to confirm nothing was duplicated or dropped. -->
       line by line, and the Phase 0 pause asks the person to attest
       those lines._
 
-      _Record (2026-09-17): `87 page(s) built`,
-                  `[check-no-dev-routes] no dev routes in dist/; no dev-ground marker in 97 files.`,
-                  338 tests. `grep -rl dev-ground dist/` empty; `dist/dev` absent.
-                  Negative control: guard removed → the barrier names 89 files
-                  including `dist/index.html`, `BUILD EXIT 1`; restored, green.
-                  Firefox 155 headless via BiDi, every read exact (0/255): with
-                  `deep-2` stored (`bg oklch(0.93 0.008 95)`, muted deepened to
-                  `oklch(0.48 0.012 250)`, six tokens) `<html>` reads
-                  [233,232,226] on `/`, `/pieces/`, the fog piece, the vocabulary
-                  sampler, `/galleries/every-ratio/`, `/places/the-headlands/`,
-                  `/about/`, `/search/`, the land-a image page, and `/pieces/` after
-                  a router navigation; the quiet view [23,22,18] (`--color-quiet`,
-                  unmoved); `code` on the sampler [218,216,209] (soft);
-                  `.search-fallback` [226,224,218] (surface); `.site-footer` and
-                  `.note-row` borders [199,197,190] (line). Key removed: every read
-                  the stylesheet's ([246,244,240] etc.). Substitution: no card on
-                  `/` sits on the surface — `.entry-card`/`.work-card` use
-                  `--color-bg`, and `--color-surface` has exactly one shipped use,
-                  `.search-fallback` — so the surface was measured on `/search/` and
-                  the line on `/`'s `.note-row`. Deviations: `page-head.test.mjs`'s
-                  verbatim green-line assertion updated to the new line, and one
-                  test added for the new failure path (a fixture carrying the
-                  marker exits 1 naming the file). Drivers in the scratchpad._
+_T1202 record (2026-09-17):_ `87 page(s) built`, `[check-no-dev-routes] no dev routes in dist/; no dev-ground marker in 97 files.`, 338 tests. `grep -rl dev-ground dist/` empty; `dist/dev` absent. Negative control: guard removed → the barrier names 89 files including `dist/index.html`, `BUILD EXIT 1`; restored, green. Firefox 155 headless via BiDi, every read exact (0/255): with `deep-2` stored (`bg oklch(0.93 0.008 95)`, muted deepened to `oklch(0.48 0.012 250)`, six tokens) `<html>` reads [233,232,226] on `/`, `/pieces/`, the fog piece, the vocabulary sampler, `/galleries/every-ratio/`, `/places/the-headlands/`, `/about/`, `/search/`, the land-a image page, and `/pieces/` after a router navigation; the quiet view [23,22,18] (`--color-quiet`, unmoved); `code` on the sampler [218,216,209] (soft); `.search-fallback` [226,224,218] (surface); `.site-footer` and `.note-row` borders [199,197,190] (line). Key removed: every read the stylesheet's ([246,244,240] etc.). Substitution: no card on `/` sits on the surface — `.entry-card`/`.work-card` use `--color-bg`, and `--color-surface` has exactly one shipped use, `.search-fallback` — so the surface was measured on `/search/` and the line on `/`'s `.note-row`. Deviations: `page-head.test.mjs`'s verbatim green-line assertion updated to the new line, and one test added for the new failure path (a fixture carrying the marker exits 1 naming the file). Drivers in the scratchpad._
 
 - [x] **T1203** — The sampler's ground bar: the candidates, the tune,
       the readout. `src/pages/dev/matte/[...surface].astro` (spec 013's
@@ -317,44 +277,12 @@ headers to confirm nothing was duplicated or dropped. -->
       equal T1200's recorded ratios floored to two decimals. Where the
       implementer cannot drive a browser it says so, line by line._
 
-      _Record (2026-09-18): first landing stopped on a judgment call —
-              the bar's hoisted `<script>` (7,960 B, over Astro's 4 KB
-              `assetsInlineLimit`) was emitted as an orphan chunk in
-              `dist/_astro/` carrying `dev-ground`, and T1202's barrier failed
-              the build; spec 013's toolbar had sat under that cliff by chance.
-              Decision review at the top tier: the script is served, never
-              bundled — moved verbatim to `src/pages/dev/matte/_sampler.ts`,
-              loaded by `<script is:inline type="module" src=…>`; plan.md's
-              sampler bullet and a resolved decision transcribed; a new test (h)
-              pins every dev-fixture `<script` to `is:inline` and every `src`
-              to a file on disk (negative controls: `is:inline` removed → (h)
-              fails; a renamed src → (h) fails; a type error in `_sampler.ts` →
-              `CHECK EXIT 1`). Final: `87 page(s) built`, barrier line
-              `no dev-ground marker in 97 files`, 340 tests, no `surface_`
-              chunk, `dev-ground` and `matte-sampler` absent from `dist/`,
-              `getComputedStyle` 0 in both files, Prettier clean. Firefox BiDi
-              at 1512×982: `_sampler.ts` served 200 `text/javascript` with types
-              stripped; eight buttons in table order; mat candidates on
-              `share-60`; `today`'s readout 14.57 / 13.65 / 12.68 / 5.45 / 5.10 /
-              4.74 / 1.09 (ΔL 0.032) = T1200's floored; `deep-2` →
-              rgb(233,232,226), key of six tokens, rows 13.03 / 12.12 / 11.22 /
-              4.87 / 4.53 / 4.19 (is-fail) / 1.22, muted line "ships at
-              oklch(0.48 0.012 250) — deepened for muted/soft"; reload with
-              `deep-2` stored identical, `<html>` inline `--color-muted` the
-              deepened value; L slider 0.90 → `tune`, `oklch(0.9 0.008 95)`,
-              muted 0.46 deepened for all three; `today` → key null, no inline
-              colour token (only BaseLayout's `--header-h`), "no override"; the
-              fog piece under `deep-2` rgb(233,232,226); the mat toolbar and a
-              router navigation still work. Deviations: ground imports aliased
-              in the frontmatter (`getStaticPaths` declares its own CANDIDATES/
-              TODAY for the mats); `MAT` and `parseOklch` also imported; the
-              banner gained a bounded scroll; `.is-fail` uses a fixture
-              literal, the theme has no failure tone._
+_T1203 record (2026-09-18):_ first landing stopped on a judgment call — the bar's hoisted `<script>` (7,960 B, over Astro's 4 KB `assetsInlineLimit`) was emitted as an orphan chunk in `dist/_astro/` carrying `dev-ground`, and T1202's barrier failed the build; spec 013's toolbar had sat under that cliff by chance. Decision review at the top tier: the script is served, never bundled — moved verbatim to `src/pages/dev/matte/_sampler.ts`, loaded by `<script is:inline type="module" src=…>`; plan.md's sampler bullet and a resolved decision transcribed; a new test (h) pins every dev-fixture `<script` to `is:inline` and every `src` to a file on disk (negative controls: `is:inline` removed → (h) fails; a renamed src → (h) fails; a type error in `_sampler.ts` → `CHECK EXIT 1`). Final: `87 page(s) built`, barrier line `no dev-ground marker in 97 files`, 340 tests, no `surface_` chunk, `dev-ground` and `matte-sampler` absent from `dist/`, `getComputedStyle` 0 in both files, Prettier clean. Firefox BiDi at 1512×982: `_sampler.ts` served 200 `text/javascript` with types stripped; eight buttons in table order; mat candidates on `share-60`; `today`'s readout 14.57 / 13.65 / 12.68 / 5.45 / 5.10 / 4.74 / 1.09 (ΔL 0.032) = T1200's floored; `deep-2` → rgb(233,232,226), key of six tokens, rows 13.03 / 12.12 / 11.22 / 4.87 / 4.53 / 4.19 (is-fail) / 1.22, muted line "ships at oklch(0.48 0.012 250) — deepened for muted/soft"; reload with `deep-2` stored identical, `<html>` inline `--color-muted` the deepened value; L slider 0.90 → `tune`, `oklch(0.9 0.008 95)`, muted 0.46 deepened for all three; `today` → key null, no inline colour token (only BaseLayout's `--header-h`), "no override"; the fog piece under `deep-2` rgb(233,232,226); the mat toolbar and a router navigation still work. Deviations: ground imports aliased in the frontmatter (`getStaticPaths` declares its own CANDIDATES/ TODAY for the mats); `MAT` and `parseOklch` also imported; the banner gained a bounded scroll; `.is-fail` uses a fixture literal, the theme has no failure tone._
 
 - [x] **T1203a** — Phase 0 review fixes (2026-09-18). B1: on the three
       muted rows, when the tone deepens, the readout shows the ratio at
       the shipped muted beside the undeepened one (`4.19 → 4.58 ✓ at
-    the shipped muted`; `is-fail` stays on the undeepened value; on
+the shipped muted`; `is-fail` stays on the undeepened value; on
       `deep-2` 4.87 → 5.32, 4.53 → 4.95, 4.19 → 4.58; `today` unchanged).
       B2: plan.md's "unedited" claim now exempts `page-head.test.mjs`
       (T1202's), the file table gains `_sampler.ts` and that test, and
@@ -373,6 +301,17 @@ headers to confirm nothing was duplicated or dropped. -->
       CHECK 0, 340 tests, TEST 0, Prettier clean.
 
 ### Gate record (Phase 0 pause)
+
+**Not answered (2026-09-19).** At the gate, looking at the candidates on
+the sampler and the site, the product owner decided the mats should go
+from every surface except the image page's stage and its quiet view
+("in the galleries and pieces, I think it looks better to remove
+them"), which removes this spec's premise. His lean for the ground was
+paper (`oklch(0.99 0.003 100)`), with the concern that the stage's white
+mat vanishes on it, and an idea for the stage to sit in a darker field
+while centred. All of that goes to spec 015, "The hero mat", which
+re-judges the ground on the unmatted site with this spec's switch. The
+sections below stay as written; nothing under them ran.
 
 _(The product owner's decision from `/dev/matte/` and the site under the
 switch, on both screens, with the mat bar left on `share-60`: the tone

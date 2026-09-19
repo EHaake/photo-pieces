@@ -1,7 +1,12 @@
 # Spec: The ground tone, rethought
 
-**Status**: Approved (2026-09-17) — written and approved in the spec conversation with
-the product owner. The third spec under the model
+**Status**: Superseded (2026-09-19) by spec 015, "The hero mat" — approved
+2026-09-17 in the spec conversation with the product owner; its Phase 0
+(the family rule and contrast floor, the site-wide dev switch, the
+sampler's candidate bar and readout, the social image's generator)
+shipped and serves 015's gate; its own gate was never answered, because
+at that gate the photographer decided the mats themselves should go
+from every surface but the image page's stage. The third spec under the model
 policy's experiment 1 (the session on Fable 5.1).
 **Depends on**: 003 (the site-applied white matte and the warm ground
 chosen so it would read), 006 (the image page's stage and the quiet

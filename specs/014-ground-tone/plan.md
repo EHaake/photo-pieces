@@ -1,6 +1,7 @@
 # Plan: The ground tone, rethought
 
-**Status**: Signed off (2026-09-17) — by the `skeptical-reviewer` at the
+**Status**: Superseded (2026-09-19) by spec 015 after Phase 0 — Phases 1
+and 2 never ran; the gate was not answered. Signed off (2026-09-17) — by the `skeptical-reviewer` at the
 top tier, one review and one re-review; two items the re-review carried
 (a test case written against a value the gate moves, and a grep's
 expected hits) were transcribed from its exact text by the spec session;
