@@ -12,6 +12,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
+    "og": "node --experimental-strip-types scripts/gen-og.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "astro": "astro"

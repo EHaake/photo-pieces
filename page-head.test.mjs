@@ -100,6 +100,7 @@ describe('the dev-route barrier (T807, spec 010)', () => {
   const barrier = here('./scripts/check-no-dev-routes.mjs');
   let root;
   let withDevRoute;
+  let withMarker;
   let clean;
 
   const run = (dir) => {
@@ -120,6 +121,12 @@ describe('the dev-route barrier (T807, spec 010)', () => {
     clean = join(root, 'clean');
     mkdirSync(join(withDevRoute, 'dev', 'page-head'), { recursive: true });
     writeFileSync(join(withDevRoute, 'dev', 'page-head', 'index.html'), '<!doctype html>\n');
+    withMarker = join(root, 'shipped');
+    mkdirSync(withMarker, { recursive: true });
+    writeFileSync(
+      join(withMarker, 'index.html'),
+      '<!doctype html>\n<script data-dev-ground>localStorage.getItem("dev-ground")</script>\n',
+    );
     mkdirSync(join(clean, 'pieces'), { recursive: true });
     writeFileSync(join(clean, 'pieces', 'index.html'), '<!doctype html>\n');
   });
@@ -135,9 +142,18 @@ describe('the dev-route barrier (T807, spec 010)', () => {
     expect(result.stderr).toContain(join(withDevRoute, 'dev', 'page-head', 'index.html'));
   });
 
-  it('a directory with no dev/ exits 0 and reports no dev routes', () => {
+  it('a shipped dev-ground marker fails with a non-zero exit and names the file', () => {
+    const result = run(withMarker);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('[check-no-dev-routes] the dev ground switch shipped:');
+    expect(result.stderr).toContain(join(withMarker, 'index.html'));
+  });
+
+  it('a directory with no dev/ and no marker exits 0 and reports both scans', () => {
     const result = run(clean);
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain(`[check-no-dev-routes] no dev routes in ${clean}/.`);
+    expect(result.stdout).toContain(
+      `[check-no-dev-routes] no dev routes in ${clean}/; no dev-ground marker in 1 files.`,
+    );
   });
 });
