@@ -1,6 +1,9 @@
 # Tasks: The hero mat
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-19) — by the `skeptical-reviewer` at the
+top tier; one blocking finding fixed and cleared on the one re-review,
+eight notes folded in, and one item the re-review carried (O1 in the
+tier log) transcribed from its exact text into T1303 and plan.md.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1300, T1301, T1302) — the constitution's
 clause amended first in its own commit, the mat taken off every surface
@@ -323,8 +326,11 @@ it names. -->
       `oklch(0.95 0.007 95)` stepping from the default `MUTED`, and with
       `MUTED` landed deeper `deepenMuted` returns `null` there and the
       case throws — so `readout(bg, from = MUTED)` in `src/lib/ground.ts`
-      gains the optional starting muted, passed to `deepenMuted` and
-      used for `shipped`, and that case passes the literal
+      gains the optional starting muted, passed to `deepenMuted`, used
+      for `shipped`, and as the readout's muted ink (`inks.muted`) — the
+      row is graded at the starting muted, or the case would still fail
+      on `soft.passes` (transcribed from the sign-off's re-review, O1
+      below) — and that case passes the literal
       `oklch(0.5 0.012 250)` (the fixed-point move 014's O1 made for
       `deepenMuted`; the sampler keeps the default); on every other
       branch neither file is touched for this. **Kept**: no edit to any
@@ -511,15 +517,32 @@ reviewer invocations alike — any escape-hatch miss, the fallback switch
 if the top tier's budget runs out (the row and the time), and the third
 tier if it is ever on (it is off). -->
 
-| Task / invocation               | Tier                           | Tokens | Outcome / miss reason                 |
-| ------------------------------- | ------------------------------ | ------ | ------------------------------------- |
-| Planning: draft (`sdd-planner`) | top (`claude-fable-5-1`, high) |        | drafted; no product question returned |
+| Task / invocation                                   | Tier                           | Tokens  | Outcome / miss reason                                                  |
+| --------------------------------------------------- | ------------------------------ | ------- | ---------------------------------------------------------------------- |
+| Planning: draft (`sdd-planner`)                     | top (`claude-fable-5-1`, high) | 291,534 | drafted; no product question returned                                  |
+| Planning: findings folded (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 24,466  | B1 (option i), N1–N8 folded; no disagreement                           |
+| Sign-off: plan/tasks (`skeptical-reviewer`)         | top (`claude-fable-5-1`, high) | 184,475 | fix and re-review — 1 blocking, 8 notes, 2 product items to the person |
+| Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 16,984  | signed off; O1 carried and transcribed                                 |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
-- _(none yet)_
+- **O1** (from the sign-off's re-review, 2026-09-19; blocking on the
+  deepens branch only, so transcribed at once): `readout(bg, from = MUTED)`
+  must also grade the muted rows at `from` (`inks.muted = from`), or the
+  readout case still fails on `soft.passes` when `MUTED` lands deeper.
+  Transcribed into T1303 and plan.md; the sweep confirms it against the
+  module if that branch ran.
+- The transform's comment at `remark-pieces-blocks.mjs` ~113 ("minus
+  the mat") stays stale by construction (non-goal, empty-diff check).
+- The transform's unread `--ar-sum`/`--n` on match-height blocks.
+- The pause anchor's white now wins over `.piece-block a.image-link
+{ background: none }` by source order alone — pinned by T1301's test;
+  the sweep confirms the pin exists and bites.
+- Two product items answered by the person or defaulted at the gate:
+  the compare's letterbox fill and divider (white unless he says
+  otherwise); prose shorthand images unmatted with the rest.
 
 ## Handoff note
 

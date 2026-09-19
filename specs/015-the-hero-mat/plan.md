@@ -1,6 +1,9 @@
 # Plan: The hero mat
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-19) — by the `skeptical-reviewer` at the
+top tier, one review and one re-review; one item the re-review carried
+(the readout's muted ink on the deepens branch) transcribed from its
+exact text by the spec session; see tasks.md's tier log.
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -311,8 +314,11 @@ Every claim above is owned by a task and a check:
   asserts `deepened.L === 0.49` on `oklch(0.95 0.007 95)` from the
   default `MUTED`, and with `MUTED` landed deeper it would return `null`
   and throw (sign-off N2) — so on that branch `readout(bg, from = MUTED)`
-  gains the optional starting muted, threaded to `deepenMuted` and to
-  `shipped`, and the case passes the literal `oklch(0.5 0.012 250)` (the
+  gains the optional starting muted, threaded to `deepenMuted`, to
+  `shipped`, and as the readout's muted ink (`inks.muted`) — the row is
+  graded at the starting muted, or the case would still fail on
+  `soft.passes` (transcribed from the sign-off's re-review) — and the
+  case passes the literal `oklch(0.5 0.012 250)` (the
   fixed-point move 014's O1 made for `deepenMuted`; the sampler keeps
   the default); on every other branch the module and the case are
   untouched. On the dev
