@@ -25,7 +25,9 @@ green through every task. Cadence (product owner, under the model
 policy's experiment 1 — the session on `claude-fable-5-1` at medium
 effort; the planner and the plan/tasks sign-off at the top tier with an
 explicit override; the `sdd-implementer` and the `skeptical-reviewer`'s
-per-phase reviews and sweep at their definitions' `opus`): the
+per-phase reviews and sweep at their definitions' `opus`, with close-out
+the one implementer dispatch at the top tier — `sdd-implementer-fable`,
+per the role table): the
 orchestrating session triages each task and dispatches routine ones to
 the `sdd-implementer` on a task bundle assembled with shell (the task
 line, the plan sections, the acceptance criteria, the files, the pattern
@@ -416,8 +418,11 @@ it names. -->
 
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge)
 
-- [ ] **T1305** — Close-out. The repo-wide documents are edited by the
-      `sdd-implementer` on a bundle (T1304 is the pattern; the bundle
+- [ ] **T1305** — Close-out. The repo-wide documents are edited by
+      `sdd-implementer-fable` — the close-out row of `CLAUDE.md`'s role
+      table, the one dispatch that runs at the top tier, because this
+      task is synthesis and prose rather than bounded transcription —
+      on a bundle (T1304 is the pattern; the bundle
       carries the gate record, plan.md's "Resolved decisions", spec.md's
       "Decided" list, the ROADMAP entries named here and DECISIONS' "Spec
       013" section) and committed by the orchestrator; the sweep, the
@@ -525,6 +530,17 @@ tier if it is ever on (it is off). -->
 | Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 16,984  | signed off; O1 carried and transcribed                                 |
 
 _(Session-tier allowance draw noted at each pause.)_
+
+**Role table changed at this spec (2026-09-19, at the person's
+request).** `CLAUDE.md`'s model policy gained the two profiles and the
+role table, and the close-out dispatch moved up from the implementation
+tier to the top tier's model at medium (`sdd-implementer-fable`); task
+implementation stays on `sdd-implementer`. T1305 and the cadence
+paragraph above follow the new row. Not temporary — it holds until the
+person says otherwise. The close-out line in the table is the one worth
+watching here: the measurement behind it is confounded, so record
+T1305's tokens against the implementation-tier close-outs of specs 012
+and 013.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
