@@ -22,8 +22,8 @@ implementation task ends with the verification command's actual output
 (`sh scripts/verify.sh`, or `sh scripts/verify.sh tests` for a
 pure-rule change) reported, not summarized; the existing suite stays
 green through every task. Cadence (product owner, under the model
-policy's experiment 1 — the session on `claude-fable-5-1` at medium
-effort; the planner and the plan/tasks sign-off at the top tier with an
+policy's standard profile and its role table — the session on
+`claude-fable-5-1` at medium effort; the planner and the plan/tasks sign-off at the top tier with an
 explicit override; the `sdd-implementer` and the `skeptical-reviewer`'s
 per-phase reviews and sweep at their definitions' `opus`, with close-out
 the one implementer dispatch at the top tier — `sdd-implementer-fable`,
@@ -503,13 +503,19 @@ The `skeptical-reviewer` sweeps the whole spec at its default tier, on
 verification, and `git diff main...HEAD`. Blocking findings fixed and
 re-reviewed once; anything open after goes to the tier log below.
 
-## Tier log (the fourth spec under experiment 1)
+## Tier log (the first spec under the settled standard profile)
 
-> **Experiment 1** — the session on `claude-fable-5-1` at medium effort;
-> the planner and the plan/tasks sign-off at the top tier
+> **The standard profile**, as `CLAUDE.md`'s role table now fixes it:
+> the session on `claude-fable-5-1` at medium effort; the planner, the
+> plan/tasks sign-off and any decision review at the top tier
 > (`claude-fable-5-1`, effort high) with an explicit per-call override;
-> implementer and per-phase reviews at `opus`. Baselines — spec 014 (the
-> third spec under this policy, Phase 0 only): planner 166,322 + 54,636
+> task implementation and the per-phase reviews and sweep at `opus`;
+> close-out at the top tier's model at medium
+> (`sdd-implementer-fable`). What specs 012 to 014 ran as an experiment
+> has been consolidated into the skill and the constitution, so this
+> log measures a settled policy rather than a trial — the rows still
+> earn their keep as the evidence behind any later move of a row.
+> Baselines — spec 014 (the last of the three, Phase 0 only): planner 166,322 + 54,636
 > resumed; sign-off 125,254 + re-review 28,042; implementer ≈402k over 4
 > tasks plus fixes; reviewer ≈286k over 3 invocations (one decision
 > review at the top tier, 84,082); no tier miss, no fallback. Spec 013:
@@ -563,8 +569,9 @@ and 013.
 ## Handoff note
 
 Nothing is implemented; the next session begins at **T1300** (Phase 0)
-as the orchestrator under the model policy's experiment 1: it opens on
-`claude-fable-5-1` at medium effort from `.claude/settings.json`
+as the orchestrator under the model policy's standard profile and its
+role table: it opens on `claude-fable-5-1` at medium effort from
+`.claude/settings.json`
 (`/effort status` to confirm); it dispatches the `sdd-implementer` one
 task at a time at `opus` and the `skeptical-reviewer` per phase at
 `opus`, re-running `sh scripts/verify.sh` itself for **T1301**
@@ -592,8 +599,8 @@ dimming now runs from the landed ground.
 
 > Read `CLAUDE.md` and `specs/015-the-hero-mat/{spec,plan,tasks}.md`,
 > then begin at the first unchecked task as the orchestrator under the
-> model policy's experiment 1 (`/effort status` first; medium is right
-> for this session): triage; dispatch each routine task to the
+> model policy's standard profile and its role table (`/effort status`
+> first; medium is right for this session): triage; dispatch each routine task to the
 > `sdd-implementer` on a task bundle assembled with shell (the task
 > line, the plan sections, the acceptance criteria, the files, the
 > pattern file, any recorded gate value), telling it not to read
