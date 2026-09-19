@@ -164,20 +164,102 @@ further, and whenever something unexpected bears on spec adherence.
 ## Model policy
 
 <!-- Decided once, alongside the involvement level. Adjust the tier
-names as models change; the roles don't. -->
+names as models change; the roles don't. A project can move between
+profiles later — change the names here and swap the settings file, one
+commit — and the tier log shows from which spec. -->
 
-- **Tiers by name**: top tier `fable`; implementation tier `opus`;
-  session tier `fable` at medium effort (experiment 1 — the top and
-  session tiers are the same model at different effort; the fallback
-  session model is `claude-opus-4-8`, the full ID, since a
-  previous-generation model has no short alias). These names are the
-  only place a model is spelled out; everything below refers to the
-  roles.
+**This project runs the standard profile.**
+
+**Standard profile** (the default; measured on the projects the skill
+came from). Top tier `fable`; implementation tier `opus`; session tier
+`fable` at medium effort (the top and session tiers are the same model
+at different effort; the fallback session model is `claude-opus-4-8`,
+the full ID, since a previous-generation model has no short alias).
+Settings from the skill's `project/.claude/settings.json`.
+
+**Economy profile** (a small or personal project, or one that should
+leave the top tier's separate allowance to other projects). One model
+family throughout: top tier `opus`; implementation tier `opus`; session
+tier `claude-opus-4-8` at medium effort. Nothing runs on Fable: the
+planner and sign-off dispatches carry no override, and the top-tier
+fallback below never applies. Settings from the skill's
+`project/.claude/settings.economy.json`. Move to the standard profile
+when a spec's plan is the kind a stronger planner would change — a
+sign-off that keeps finding blocking problems is the signal.
+
+These names are the only place a model is spelled out; everything below
+refers to the roles.
+
+### The role table
+
+Every dispatch in this project resolves here. Cells hold tier names,
+never model IDs, so switching profile re-points every row at once and
+the three names above stay the only place a model is spelled out.
+"Override" means the orchestrator passes a per-call model override on
+that dispatch; without one, the agent's own frontmatter applies, and
+every agent definition defaults to the implementation tier except
+`sdd-implementer-fable`, which pins the top tier's model at medium.
+
+| Role                          | Dispatched as           | Model                   | Effort                    |
+| ----------------------------- | ----------------------- | ----------------------- | ------------------------- |
+| Spec conversation             | the spec session itself | session tier            | high (raised per session) |
+| Plan and tasks draft          | `sdd-planner`           | **top tier** (override) | high                      |
+| Plan and tasks sign-off       | `skeptical-reviewer`    | **top tier** (override) | high                      |
+| Decision review               | `skeptical-reviewer`    | **top tier** (override) | high                      |
+| Task implementation           | `sdd-implementer`       | implementation tier     | high                      |
+| Close-out task                | `sdd-implementer-fable` | top tier                | medium                    |
+| Per-task and phase review     | `skeptical-reviewer`    | implementation tier     | high                      |
+| Pre-merge sweep               | `skeptical-reviewer`    | implementation tier     | high                      |
+| Orchestration and bookkeeping | the session itself      | session tier            | medium                    |
+
+**Moving a role.** Edit its row, nothing else. To step a role down,
+replace **top tier** (override) with "implementation tier (no
+override)"; the dispatch then carries no override and the agent runs at
+its own default. To change the implementer, change the agent name in
+that row — both definitions stay installed, so it is a word, not a
+reinstall. Under the economy profile the top tier _is_ the
+implementation tier, so the overrides become no-ops and the close-out
+row reads `sdd-implementer`; nothing else in the table changes.
+
+**A change the person asks for gets written here before it is acted
+on.** If they say to move a role — for one window, for this project,
+for good — edit the row, note it in the current spec's tier log with the
+date and which spec it changed at, and commit, in the same turn,
+_before_ the next dispatch. Then do it. A model preference that lives
+only in a session's context is gone at the next session boundary and the
+next session will not know it ever existed, which is the one failure
+this whole repo-as-interface arrangement exists to prevent. If the
+person frames it as temporary ("while my allowance is low"), write the
+row with the condition and the date in the comment, so whoever reads it
+next knows when it stops applying and can ask. Never infer the end of a
+temporary change and revert it unasked.
+
+<!-- Why the two rows most likely to be questioned read as they do.
+
+Task implementation sits at the implementation tier because it was
+measured there: with the implementer at the top tier's model at medium,
+cost per completed task matched within noise, first-try rate matched,
+and the top tier's separate allowance drew about a fifth more per task.
+The honest limit is that it was measured on bounded transcription
+against a fast automated check, the case least likely to reward a
+stronger model, so a project whose tasks are genuinely hard is the open
+question this row exists to let someone answer. Ask it once, at project
+setup; don't re-open it per spec.
+
+Close-out sits at the top tier because it writes the ROADMAP.md and
+DECISIONS.md entries, the acceptance evidence and the spec summary —
+synthesis and prose, the same work the top tier earns its place on
+everywhere else. The measured close-outs cost several times more at the
+implementation tier than at the top tier's model at medium, but those
+specs also handed close-out a pre-assembled bundle, so the gap is
+confounded: watch it in the tier log rather than trust it. -->
+
 - **The session runs at the session tier, at medium effort**, set in
   this repo's `.claude/settings.json` — written at project setup from
-  the skill's `assets/settings-template.json` (`"model":
-  "claude-fable-5-1"`, `"effortLevel": "medium"`, and a level under
-  `"modelSettings"` for each tier's full model ID). If that file is missing or lacks these
+  the profile's settings file in the skill's `project/.claude/`
+  (`"model"` set to the session tier's full ID, `"effortLevel":
+"medium"`, and a level under `"modelSettings"` for each tier's full
+  model ID). If that file is missing or lacks these
   keys, recreate it from the template and commit it before dispatching
   anything; nobody creates it by hand. Project settings outrank user
   settings, so a model picked in the app's picker only affects the
@@ -188,10 +270,12 @@ names as models change; the roles don't. -->
   bookkeeping turns and re-sends its whole context on each one — the
   dominant cost of the workflow — and it makes no design decisions: it
   assembles bundles, dispatches, verifies, commits, and reports. The
-  role never needs the top tier; it sits on the top tier's model
-  under experiment 1 because Fable 5.1's cache-read rate makes the
-  seat's re-sends cost about what they would on Opus, and this spec
-  measures the allowance draw and the readability of the reports.
+  role never needs the top tier. Under the standard profile it sits on
+  the top tier's model because, measured, Fable 5.1 at medium in this
+  seat cost about a third per task of Opus 4.8 and its allowance held
+  (the skill's design record has the numbers); under the economy
+  profile it sits on Opus 4.8, the model whose reports read most
+  clearly to the person, and the same discipline about turns applies.
   If it drops the protocol (a skipped review, a stale `tasks.md`
   edit, a task done by hand), the first fix is high effort, one line
   in the same file.
@@ -222,12 +306,15 @@ names as models change; the roles don't. -->
   logged as a sub-lettered task; a finding that is really the spec
   being ambiguous goes back to the person as a product question. The
   session never diagnoses in place.
-- **The top tier runs only inside the decisions**: the `sdd-planner`
-  (one dispatch per spec) and the `skeptical-reviewer` on plan/tasks
-  sign-off and on decision reviews — each dispatched with an explicit
-  per-call override to the top tier's name. The three agent
-  definitions carry `effort: high`, which overrides the session's
-  medium, so reasoning stays at full strength where it matters.
+- **The top tier runs only where the role table says it does**: by
+  default the `sdd-planner` (one dispatch per spec), the
+  `skeptical-reviewer` on plan/tasks sign-off and on decision reviews,
+  and the close-out dispatch. The first three carry an explicit
+  per-call override to the top tier's name; drop the override and the
+  definition's own implementation tier applies, which is exactly what
+  stepping one of those rows down means. The agent definitions carry
+  `effort: high`, which overrides the session's medium, so reasoning
+  stays at full strength where it matters.
 - **Spec conversations happen in a Claude Code spec session of their
   own**, at the top tier, never inside an implementation session. The
   spec session also runs planning once `spec.md` is approved — the
@@ -253,9 +340,11 @@ names as models change; the roles don't. -->
   means it would fail an acceptance criterion or a test, or contradicts
   `plan.md` or `CLAUDE.md`; nothing else blocks. Anything open after
   the re-review goes to the tier log and the sweep.
-- **Implementation runs at the implementation tier**, in the
-  `sdd-implementer` subagent (its definition says `opus`), one task
-  per dispatch, sequentially. The orchestrating
+- **Implementation runs in the subagent the role table names** — the
+  task implementation row for ordinary tasks, the close-out row for
+  close-out — one task per dispatch, sequentially. Neither is
+  re-decided per spec: the table is the answer until the person changes
+  a row. The orchestrating
   session triages each task, dispatches routine ones on a task bundle
   assembled with shell (task line, plan section, acceptance criteria,
   files, the pattern file to copy), and on return verifies with the
@@ -271,26 +360,41 @@ names as models change; the roles don't. -->
   `/compact` if the context grows large; never clear or compact
   mid-task. `/clear` is not part of the workflow: both session
   boundaries are new sessions.
-- **Every session-ending pause ends with a continuation prompt.** When
-  the next step belongs in a fresh session — plan and tasks final, a
-  merge with the next spec waiting on `ROADMAP.md`, or a phase pause
-  the person is stopping at — the report's last item is the exact
-  prompt to paste there, in its own fenced block. It names the spec directory,
-  the files to read, where to resume, the involvement level, the
-  pause cadence, and any effort switch the next session needs. Write
-  anything the next session needs to a file first; the prompt points
-  at files. If nothing can proceed until the person decides
-  something, say so instead.
+- **Two pauses end with a continuation prompt, and only two**: plan and
+  tasks final, and the merge with the next spec waiting on
+  `ROADMAP.md`. At those the report's last item is the exact prompt to
+  paste into the next session, in its own fenced block. It names the
+  spec directory, the files to read, where to resume, the involvement
+  level, the pause cadence, and any effort switch the next session
+  needs. Write anything the next session needs to a file first; the
+  prompt points at files. If nothing can proceed until the person
+  decides something, say so instead.
+- **A phase pause never ends with a continuation prompt.** The phase
+  report ends with what to check in the app and how to say continue —
+  nothing else. The session cannot know whether the person is about to
+  stop, so a rule conditioned on that produces a prompt at every phase,
+  which is what this line exists to prevent: the spec runs in one
+  implementation session, and a prompt offered unasked invites a
+  `/clear` that costs a re-read and buys nothing. If the person says
+  they are stopping, or asks for a prompt, write one then, as the next
+  message — the resume form from the first unchecked task. Asked for,
+  it costs one turn; volunteered, it costs the session.
 - **Batch the bookkeeping**: commit, checkbox, and tier-log row in one
   shell command; bundle assembly and dispatch back to back. Every turn
   saved is one fewer re-send of the whole context.
-- **Fallback**: if the top tier's usage budget runs out, dispatch the
-  planner and sign-off at the implementation tier for the rest of the
-  window (drop the override; both definitions default to `opus`), and
-  switch the session itself to `claude-opus-4-8` mid-session
-  (`/model claude-opus-4-8` — one cache re-write, then continue).
-  Nothing else changes; the tier log records what ran and when the
-  switch happened, which is a result of experiment 1 in itself.
+- **Fallback** (standard profile): if the top tier's usage budget runs
+  out, dispatch the planner and sign-off at the implementation tier for
+  the rest of the window (drop the override; both definitions default
+  to `opus`), switch the session itself to `claude-opus-4-8`
+  mid-session (`/model claude-opus-4-8` — one cache re-write, then
+  continue), and dispatch `sdd-implementer` for any row that names
+  `sdd-implementer-fable`, including close-out. This is the whole role
+  table stepped down at once, and it is the automatic form: it fires on
+  the allowance, for the rest of the window, and the rows are not
+  edited. A step-down the person _asks_ for is the other form — it
+  edits the rows and persists until they say otherwise. Don't confuse
+  them, and don't silently revert one the person asked for. Either way
+  the tier log records what ran and when the switch happened.
 - **Escape hatch**: two failed verifications on one task, or a "stopped
   on a judgment call" the orchestrator considers well-specified, and
   the orchestrator does that task itself, noting the
@@ -359,8 +463,29 @@ orchestrator re-runs the command itself before committing.
 ## Git conventions
 
 - **One branch per spec, not per task or phase.**
-- **Never commit directly to `main`.** All implementation work happens
-  on a spec branch.
+- **A spec's implementation never goes to `main` directly.** Its code,
+  its files under `specs/<NNN>-<slug>/`, and any README change
+  describing its behavior live on that spec's branch and reach `main`
+  through its PR.
+- **Work that isn't a spec's implementation commits straight to
+  `main`, and doesn't need to ask.** Roadmap grooming, a `DECISIONS.md`
+  entry, a constitution amendment, a docs or README correction
+  unrelated to a spec in flight, a design brief, the written residue of
+  a conversation that didn't become a spec, tooling or config no spec
+  touches. None of this has a spec branch, and none of it deserves one
+  — a branch and a PR for a roadmap paragraph cost more than they
+  protect, and stopping to ask costs a turn and interrupts the
+  conversation that produced the change. The test is whether the change
+  implements part of some spec's `tasks.md`, not whether the file
+  appears on a list. If it doesn't: commit it to `main`, push, and say
+  so in the report. This line is the permission; don't ask for it
+  again.
+- **Branch anyway when the change wants a diff someone will look at** —
+  a dependency bump, a refactor with no spec behind it, anything where
+  being wrong is expensive or awkward to unwind. Use
+  `fix/<short-description>` or `chore/<short-description>`, not the
+  spec `<NNN>-<slug>` convention, and open a PR. Size and risk decide
+  this, not whether the work counts as "a spec."
 - Open the PR as a draft immediately after pushing the branch, for a
   running diff. Only mark it ready and merge once every task in the
   spec's `tasks.md` is complete and verified.
