@@ -70,7 +70,9 @@ headers to confirm nothing was duplicated or dropped. -->
       _Verify: `npx prettier --check CLAUDE.md` no worse than at `main`
       (one pre-existing line warns — spec 012's record);
       `git log -1 --stat` after the orchestrator's commit shows
-      `CLAUDE.md` alone; `grep -n "site-applied mattes" CLAUDE.md` → 0;
+      `CLAUDE.md` plus `tasks.md`'s bookkeeping (the checkbox and the
+      tier row ride the same commit) and nothing else;
+      `grep -n "site-applied mattes" CLAUDE.md` → 0;
       `sh scripts/verify.sh tests` green (nothing under test changes —
       the run is the record that the suite was green before T1301)._
 
@@ -84,8 +86,14 @@ headers to confirm nothing was duplicated or dropped. -->
       pause frame until its spec; the tokens unchanged at spec 013's
       values; the forms that remain), the four token lines untouched;
       the **form W rule** and the **padding/background rule** each keep
-      exactly one selector, `.piece-pause-frame > :is(a.image-link, img)`,
-      their declarations unchanged; the **form P rule**, the two
+      exactly one selector, `.piece-pause-frame > :is(a.image-link, img)`
+      — the piece entries, the two `:is(.prose, .piece-row-prose) > p > …`
+      shorthand entries (the shorthand is `single`'s captionless form and
+      follows it), `.gallery-card .image-link` and `.compare` all dropped
+      — their declarations unchanged, and **both rules stay after
+      `.piece-block a.image-link` (~1188) in source**: at (0,2,1) they now
+      tie it and the mat's white beats its `background: none` by order
+      alone (the Mattes comment says so); the **form P rule**, the two
       **half-bleed** rules and the **`width-fullbleed`** rule deleted;
       `.piece-held figure`: `--q` deleted, `--mat: 0px` in place of form
       H, `--avail-h` and the `max-width` formula unchanged, the comment
@@ -95,10 +103,18 @@ headers to confirm nothing was duplicated or dropped. -->
       unchanged; `.gallery-flow > li > a.image-link`: `padding` and
       `background` deleted, `display: block` kept; the match-height
       block's two comments (the gap read once now; the members' base
-      size is no longer floored by a mat) and the Mattes section comment
-      rewritten for the new state (which surfaces are matted, the forms
-      that remain, off as `--mat: 0px` where a formula still reads it,
-      the pause deferred; spec 013's history in a few lines). **Nothing
+      size is no longer floored by a mat), the sizing-coupling comment
+      at ~1294–1304 (the hints assume no mat now: the single's 680px and
+      the compare's 700px over-deliver by design, the gallery's is exact
+      with no constant term) and the Mattes section comment rewritten
+      for the new state (which surfaces are matted, the forms that
+      remain, off as `--mat: 0px` where a formula still reads it, the
+      pause deferred, the source-order tie above, and one line that the
+      transform still emits `--ar-sum` and `--n` on match="height"
+      blocks with no reader since form P went; spec 013's history in a
+      few lines). The transform's own stale line (~113, "minus the mat")
+      is **not** edited — the transform is a non-goal and the diff check
+      below forbids it; the record names it as carried. **Nothing
       inside `.piece-pause` through `.piece-pause-frame`, the
       `html[data-pause-active]` block, or `.image-stage` through the
       last `html[data-quiet]` stage rule changes by a byte.**
@@ -124,7 +140,9 @@ headers to confirm nothing was duplicated or dropped. -->
       and nothing else: the matted list, the packed row's anchor, the
       stage" → "the two matted surfaces read --mat as a padding — the
       pause's anchor and the stage's frame — and no other rule applies
-      --mat or --color-matte" (the walk over every block); "form H: the
+      --mat or --color-matte" (the walk over every block, plus the pin
+      that the padding/background rule's index is greater than
+      `.piece-block a.image-link`'s — sign-off N1); "form H: the
       held figure's mat and box formula" → "the held figure at zero: --mat
       0px, no --q, the box formula unchanged"; the pause and stage V+H
       cases unchanged; "the image page reads --mat only as a padding: the
@@ -166,8 +184,9 @@ headers to confirm nothing was duplicated or dropped. -->
       before reads identical after (the pause within 1/60 px; the stage
       exact); `git diff -U0 main -- src/styles/global.css | grep '^@@'`
       lists no hunk whose range falls inside `.piece-pause` through
-      `.piece-pause-frame`, the `html[data-pause-active]` block, or the
-      stage's rules (the three ranges' line numbers recorded);
+      `.piece-pause-frame`, the `html[data-pause-active]` block, the
+      stage's rules, or the fullbleed, tall and strip rules (~1289,
+      ~1344–1355, ~1377–1400) — the six ranges' line numbers recorded;
       `git diff main -- 'src/pages/pieces/[slug].astro' src/lib/pause-shape.ts remark-pieces-blocks.mjs src/lib/gallery-layout.ts src/content.config.ts obsidian-plugin/`
       empty; `grep -c "color-matte" src/components/LatestWork.astro src/components/CoverCards.astro`
       → 0 and 0; `grep -n "var(--mat)" src/styles/global.css` → only the
@@ -179,7 +198,9 @@ headers to confirm nothing was duplicated or dropped. -->
       ×3, inset, wide, a grid cell, default and weighted diptych members,
       match="height" members, aside, row, the held anchor) computes
       `padding` 0 on all four sides and `background-color`
-      `rgba(0, 0, 0, 0)`; the match="height" pair's and triptych's image
+      `rgba(0, 0, 0, 0)`, and the fullbleed, tall and strip frames read
+      the same 0 they read in the before run (AC 1's "unchanged"); the
+      match="height" pair's and triptych's image
       heights equal within 0.2px; the held portrait figure's height
       equals `100svh − 2·hold-margin` within 0.5px where height-bound and
       its image is the figure's width; on `/galleries/every-ratio/` and
@@ -194,9 +215,12 @@ headers to confirm nothing was duplicated or dropped. -->
       headless-scrollbar overshoot excluded, as at T1104); at 1512 the
       rendered image width of the 3:2 single, a `/` cover card, the
       compare's after-frame and a gallery cell at full growth beside its
-      `sizes` hint's px (680, 373, 700, its `galleryCell` value) — within
-      2px over or under, recorded; anything larger is reported at the
-      pause, not fixed. Mutations named and reverted, tree restored
+      `sizes` hint's px (680, 373, 700, its `galleryCell` value),
+      recorded as "hint − rendered": positive is over-delivery and fine
+      (the single's and the compare's are, by design — ~15px and ~35px
+      over the prose column); negative beyond −2px is under-delivery and
+      is reported at the pause, not fixed. Mutations named and reverted,
+      tree restored
       byte-identically: `padding: var(--mat)` reintroduced on
       `.gallery-flow > li > a.image-link` → the two-readers case fails
       naming it; form R's clamp restored on `.gallery-flow > li` → the
@@ -293,14 +317,26 @@ it names. -->
       gate (a tuned tone has no entry to drop); `CONTROL` untouched.
       `src/lib/og-card.mjs`: `COLOR.bg` and `.line` (and `.muted` on the
       deepens branch) from `npm run og`'s print; then `npm run og` writes
-      `public/og.jpg`. **Kept**: no edit to any of those files; the
-      record says so. _Verify: `sh scripts/verify.sh` green; changed —
-      `ground.test.mjs` green against the new literals with every delta
-      recorded;
+      `public/og.jpg`. **Only on the deepens branch** (a tuned tone
+      darker than today — `paper`, `light` and `today` never deepen):
+      `ground.test.mjs`'s readout case asserts `deepened.L` is 0.49 on
+      `oklch(0.95 0.007 95)` stepping from the default `MUTED`, and with
+      `MUTED` landed deeper `deepenMuted` returns `null` there and the
+      case throws — so `readout(bg, from = MUTED)` in `src/lib/ground.ts`
+      gains the optional starting muted, passed to `deepenMuted` and
+      used for `shipped`, and that case passes the literal
+      `oklch(0.5 0.012 250)` (the fixed-point move 014's O1 made for
+      `deepenMuted`; the sampler keeps the default); on every other
+      branch neither file is touched for this. **Kept**: no edit to any
+      of those files; the record says so. _Verify: `sh scripts/verify.sh`
+      green; changed — `ground.test.mjs` green against the new literals
+      with every delta recorded;
       `grep -rn "0.968 0.006 95\|0.945 0.007 95\|0.92 0.008 95\|0.86 0.008 95\|0.72 0.012 95" src/`
-      → exactly the `:root` history comment line(s), the `warm-003`
-      entry, and `CONTROL`'s line in `src/lib/ground.ts`, nothing else
-      (every hit listed — a fill left at the old tone is a hit);
+      → exactly the `:root` history comment line(s) and nothing else
+      (every hit listed — a fill left at the old tone is a hit;
+      `src/lib/ground.ts` cannot hit: it spells tones as object
+      literals, and `warm-003`'s and `CONTROL`'s tones are pinned by
+      `ground.test.mjs` (b) and (c) instead — sign-off B1);
       `git diff -U0 main -- src/styles/global.css | grep '^@@'` shows no
       hunk inside the `html[data-pause-active]` block, `.piece-pause`
       through `.piece-pause-frame`, or the stage's rules beyond T1301's,
@@ -323,7 +359,8 @@ it names. -->
       green is the pin. Both —
       `git diff main -- src/content.config.ts remark-pieces-blocks.mjs obsidian-plugin/ src/lib/gallery-layout.ts 'src/pages/pieces/[slug].astro'`
       empty; `matte.test.mjs` unedited since T1301; `page-head.test.mjs`,
-      `og.test.mjs` unedited. The pause's dimming follows the ground by
+      `og.test.mjs` unedited; `ground.test.mjs` unedited except the one
+      readout case on the deepens branch. The pause's dimming follows the ground by
       construction (the lights block's diff is empty) and is not driven
       headless: named for the person's attestation at the pause, with
       any other unmeasured line, on both screens._
@@ -437,9 +474,11 @@ it names. -->
       → only lines that are history or annotated as reversed (every hit
       listed);
       `grep -rn "0.968 0.006 95\|0.945 0.007 95\|0.92 0.008 95\|0.86 0.008 95\|0.72 0.012 95\|#f6f4f0\|#d2d1cb" README.md DECISIONS.md ROADMAP.md design/brief.md src/`
-      → only lines consistent with the gate's outcome (history lines,
-      `warm-003`, and `CONTROL`'s line in `src/lib/ground.ts` say so;
-      every hit listed);
+      → only lines consistent with the gate's outcome — on the change
+      branch the `:root` history comment and the documents' history
+      lines; on the kept branch the token lines, `og-card.mjs`'s two
+      hexes and the same history lines; `src/lib/ground.ts` never hits
+      (object literals — sign-off B1); every hit listed;
       `grep -n "Superseded" specs/014-ground-tone/plan.md specs/014-ground-tone/tasks.md`
       → both status lines (spec 014 is closed in its own documents
       already; the sweep confirms); main green after the merge._

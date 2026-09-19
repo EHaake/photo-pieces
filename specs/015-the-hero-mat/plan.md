@@ -67,8 +67,12 @@ change; no new dependency.
   are untouched (the transform and templates are non-goals); with no
   mat every image is at most its container wide, and T1301 reads each
   matted-before frame's rendered width against its hint's px at
-  1512×982. The stage's fit is unchanged by being unchanged: its rules
-  and their pins are byte-identical.
+  1512×982 — an **over**-delivery (the hint above the rendered width,
+  as the single's 680px over a ~665px column and the compare's 700px
+  are by design) is harmless and only recorded; an **under**-delivery
+  (the rendered width above the hint) by more than 2px is what reaches
+  the pause report (sign-off N3). The stage's fit is unchanged by being
+  unchanged: its rules and their pins are byte-identical.
 
 - **The pause is untouched, and how that is shown** (AC 2). The pause's
   own CSS — `.piece-pause` (form V+H included), `::after`, `.with-before`,
@@ -84,7 +88,16 @@ change; no new dependency.
   its rendered box are read before the edit and after it, identical.
   The spec's letter ("does not touch its … CSS") is read as the pause's
   own rules — the list it shares with the pieces cannot lose the pieces
-  without being edited — stated here and in the sweep's bundle.
+  without being edited — stated here and in the sweep's bundle. **The
+  mechanism changes even though the effect does not** (sign-off N1):
+  today the list's `:is(…, .piece-row figure, …)` gives both rules
+  specificity (0,2,2), which outranks `.piece-block a.image-link`
+  (`global.css` ~1188, `display: block; background: none`, (0,2,1)) on
+  the pause anchor; narrowed to `.piece-pause-frame > :is(a.image-link, img)`
+  they are (0,2,1) too, and the white background wins by source order
+  alone. T1301's test pins that order (the padding/background rule's
+  index greater than that rule's), so a later move of either rule
+  cannot silently take the pause's mat away.
 
 - **The sampler** (`src/pages/dev/matte/[...surface].astro`,
   `_sampler.ts`; spec 013's, extended at 014). The four surfaces show
@@ -183,7 +196,10 @@ Every claim above is owned by a task and a check:
     either otherwise** (a walk over every block: any `padding*` value
     carrying `var(--mat` or any `background*` carrying `--color-matte`
     must sit on one of those two selectors), the tokens still read only
-    inside a `--mat` value; **the held figure at zero**: `--mat` is
+    inside a `--mat` value, **and the pause anchor's padding/background
+    rule comes after `.piece-block a.image-link` in source** (equal
+    specificity now — the order is what keeps the mat's white over that
+    rule's `background: none`); **the held figure at zero**: `--mat` is
     `0px`, no `--q`, `--avail-h` and the `max-width` string unchanged;
     **form V+H on the pause and on the stage**: unchanged pins, byte for
     byte; **the image page reads `--mat` nowhere** (the T1104a walker now
@@ -240,8 +256,11 @@ Every claim above is owned by a task and a check:
   other frame (single ×3, inset, wide, grid cell, default and weighted
   diptych members, match="height" members, aside, row, the held anchor)
   computes `padding` 0 on all four sides and `background-color`
-  `rgba(0, 0, 0, 0)`; a match="height" pair's and triptych's image
-  heights equal within 0.2px (013's flex residual) with 0 padding; the
+  `rgba(0, 0, 0, 0)`, and the fullbleed, tall and strip frames read 0
+  before and after with their rules (`global.css` ~1289, ~1344, ~1390)
+  inside no hunk (AC 1's "unchanged", sign-off N6); a match="height"
+  pair's and triptych's image heights equal within 0.2px (013's flex
+  residual) with 0 padding; the
   held portrait figure's height equals `100svh − 2·hold-margin` within
   0.5px where height-bound and its image is the figure's width; on
   `/galleries/every-ratio/` and `/places/the-headlands/` every row's
@@ -254,11 +273,12 @@ Every claim above is owned by a task and a check:
   on the galleries, place, places and image pages (the vocabulary
   sampler's known 15px headless-scrollbar overshoot excluded, as at
   T1104); at 1512 each formerly-matted frame's rendered image width
-  against its `sizes` hint's px (single 680, cards 373, compare 700, a
-  gallery cell its `galleryCell` value) — at most 2px over the hint or
-  under it, recorded; anything larger is reported at the pause, not
-  fixed here. `LatestWork` is placed on no page and the sampler does not
-  render it: its pin is the test, said so in the record.
+  beside its `sizes` hint's px (single 680, cards 373, compare 700, a
+  gallery cell its `galleryCell` value), recorded as "hint − rendered":
+  a positive number is over-delivery and fine; a negative one beyond
+  −2px is under-delivery and is reported at the pause, not fixed here.
+  `LatestWork` is placed on no page and the sampler does not render it:
+  its pin is the test, said so in the record.
 
 - **The sampler shows the unmatted surfaces, and its bars are honest** —
   **T1302**: `sh scripts/verify.sh` green with 87 pages and the barrier
@@ -279,8 +299,23 @@ Every claim above is owned by a task and a check:
 - **The tone landed, or didn't** — **T1303**, 014's T1204 checks with
   this spec's expected grep hits: changed → `ground.test.mjs` green
   against the new literals with every delta recorded; the old-literal
-  grep over `src/` returns exactly the `:root` history comment line(s),
-  the `warm-003` entry and `CONTROL`'s line, nothing else; on the dev
+  grep over `src/` returns exactly the `:root` history comment line(s)
+  and nothing else — `ground.ts` spells its tones as object literals
+  (`{ L: 0.968, C: 0.006, h: 95 }`), so `warm-003`'s entry and
+  `CONTROL`'s line can never match the pattern (014's O2 predicted hits
+  that cannot occur; sign-off B1); those two tones are pinned instead
+  by `ground.test.mjs` (b) — `CANDIDATES.today.bg` is `:root`'s ground
+  — and (c) — `CONTROL` equals `warm-003`'s tone once that entry exists.
+  **On the deepens branch only** (a tuned tone darker than today; paper,
+  light and today never deepen): `ground.test.mjs`'s readout case
+  asserts `deepened.L === 0.49` on `oklch(0.95 0.007 95)` from the
+  default `MUTED`, and with `MUTED` landed deeper it would return `null`
+  and throw (sign-off N2) — so on that branch `readout(bg, from = MUTED)`
+  gains the optional starting muted, threaded to `deepenMuted` and to
+  `shipped`, and the case passes the literal `oklch(0.5 0.012 250)` (the
+  fixed-point move 014's O1 made for `deepenMuted`; the sampler keeps
+  the default); on every other branch the module and the case are
+  untouched. On the dev
   server with no `dev-ground` key, `<html>`'s background on a piece, a
   cover card on `/`, a `code` on the vocabulary sampler, the footer's
   `border-top-color` and the quiet view's background each the landed
@@ -296,8 +331,9 @@ Every claim above is owned by a task and a check:
 
 - **Untouched by construction** — **T1301**, **T1303** and the sweep:
   `git diff main -- src/content.config.ts remark-pieces-blocks.mjs obsidian-plugin/ src/lib/gallery-layout.ts 'src/pages/pieces/[slug].astro' src/lib/pause-shape.ts`
-  empty; `ground.test.mjs`, `page-head.test.mjs`, `og.test.mjs` and the
-  transform suites green and unedited; the three mat tokens and
+  empty; `page-head.test.mjs`, `og.test.mjs` and the transform suites
+  green and unedited; `ground.test.mjs` green and unedited except on the
+  deepens branch (the one case above); the three mat tokens and
   `--color-matte` unchanged; `--color-quiet` unchanged.
 
 - Existing suites stay green (340 tests, less the two deleted cases,
@@ -308,7 +344,8 @@ Every claim above is owned by a task and a check:
 
 ```
 CLAUDE.md                                      the block-vocabulary clause: the site mats the image page's stage and quiet view only (T1300, its own commit)
-src/styles/global.css                          :root comment; the two list rules narrowed to the pause's anchor; the exception rules and form P deleted; held --mat: 0px (no --q); form R → --mat: 0px, the anchor's padding/background gone; the Mattes and match-height comments (T1301). :root's five ground literals and the comment; --color-muted on the deepens branch (T1303)
+src/styles/global.css                          :root comment; the two list rules narrowed to the pause's anchor; the exception rules and form P deleted; held --mat: 0px (no --q); form R → --mat: 0px, the anchor's padding/background gone; the Mattes, match-height and sizing-coupling (~1294) comments (T1301). :root's five ground literals and the comment; --color-muted on the deepens branch (T1303)
+src/lib/ground.ts                              (deepens branch only) readout(bg, from = MUTED); ground.test.mjs's readout case from the literal (T1303)
 src/components/CoverCards.astro                the span's padding/background gone; comment (T1301)
 src/components/LatestWork.astro                --mat, padding, background gone; --avail-h stays; comments (T1301)
 src/pages/images/[...id].astro                 .compare's padding/background gone; the T1104a comments and the frontmatter's --ar comment reworded (T1301)
@@ -340,22 +377,48 @@ plugin; `src/lib/gallery-layout.ts`; `DevGround.astro`, `BaseLayout.astro`,
   number at the gate (ΔL 0.01 on `paper`).
 - **A piece with a pause carries one matted frame** until the pause's
   spec — stated in the spec, restated in README's table.
-- **The compare's letterbox fill and divider stay white.** They read
-  `--color-matte` because that is the white the page has; they are not
-  a mat and the spec does not name them. If the ground lands on paper
-  the letterbox is a hair lighter than the page, inside the box only.
+- **The compare's letterbox fill and divider stay white** — put to the
+  person at sign-off. They read `--color-matte` because that is the
+  white the page has; they are not a mat and the spec does not name
+  them; on a paper ground the letterbox is a hair lighter than the page,
+  inside the box only, and only where the camera's crop differs. If he
+  wants them on the ground instead, T1301 sets those two values to
+  `var(--color-bg)` — one line each in `[...id].astro`'s style, and the
+  test's "`--color-matte` on exactly those two" pin becomes "nowhere".
+- **A prose shorthand image (`![alt](./x.jpg)` in a paragraph, and an
+  image inside an author's own link) loses its mat with everything
+  else** — put to the person at sign-off. Goal 1's list names the
+  blocks; the shorthand is `single`'s captionless form ("same rendered
+  result", README) and follows it. If he wants those two frames matted,
+  T1301 keeps the two `:is(.prose, .piece-row-prose) > p > …` entries on
+  the list beside the pause's — one line in each of the two rules and
+  in the test's expected prelude.
 - **The `sizes` hints are the templates' and the transform's**, untouched
   (non-goals). Every hint was written over the frame's outer width, so
-  an unmatted image is at most that wide; T1301 reads the numbers rather
-  than assuming them, and an under-delivery beyond 2px goes to the pause
-  report.
+  an unmatted image is at most that wide and the single's and compare's
+  hints over-deliver by design; T1301 reads the numbers rather than
+  assuming them, and only an under-delivery beyond 2px goes to the
+  pause report.
+- **`remark-pieces-blocks.mjs`'s comment at ~113** ("680px is coupled to
+  --prose-width (68ch) minus the mat") goes stale at T1301 and stays: the
+  transform is a non-goal and T1301's empty-diff check forbids the edit.
+  Carried to the sweep as known, not a finding (sign-off N4); the
+  `global.css` sizing-coupling comment (~1294), which is this spec's to
+  edit, is rewritten at T1301.
+- **The transform still emits `--ar-sum` and `--n` on match="height"
+  blocks**, which nothing reads once form P is gone (sign-off N7); the
+  Mattes comment says so. Untouched, for the same reason.
 - **`LatestWork` is exercised by no page** and not by the sampler; its
   unmatting is pinned by the test alone, as its matting was.
-- **The forms for the surfaces that are off live in spec 013's plan.md
-  and in git, not in the stylesheet.** Turning one back on is a restore,
-  not a switch — the spec keeps the tokens, the rule and the sampler,
-  and a live form on a surface that applies no padding would have to be
-  kept in step with nothing.
+- **"Turning it on" is a restore, not a switch.** The spec's non-goal
+  says a later spec may put a mat back on a surface "by turning it on";
+  in this plan what stays switched on is the tokens, `--mat`, the
+  stage's form and the sampler, and what turning a surface on means is
+  the form restored to its element (from spec 013's plan.md or git)
+  plus `padding: var(--mat)` and the background — one edit per surface,
+  as spec 013's presence table had it. Not a per-surface switch, whose
+  live forms would have to be kept in step with nothing. Stated here so
+  the spec-conformance summary can carry it (sign-off N8).
 - **Firefox floors a percentage-bearing padding to 1/60 px** (spec 013):
   the pause anchor's before/after reads compare at that resolution;
   every other frame now computes a literal 0.
@@ -399,7 +462,11 @@ plugin; `src/lib/gallery-layout.ts`; `DevGround.astro`, `BaseLayout.astro`,
   OG sentence and the tree) rather than being left for a spec that may
   never come: T1205 never ran, and this is the spec that uses
   `npm run og`.
-- **The gate's landing is 014's T1204 unchanged in substance**, ids and
-  expected grep hits updated; `CONTROL` stays the tone at 014's gate,
-  which is also the tone at this one — the spread test's fixed point
-  holds on every branch.
+- **The gate's landing is 014's T1204 unchanged in substance**, ids
+  updated and the old-literal grep's expected hits corrected to the
+  `:root` history line(s) alone (option (i) of sign-off B1: the grep is
+  for a fill left at the old tone, `ground.ts` holds object literals the
+  pattern cannot match, and spelling a tone into two comments to make a
+  list true would be text written for a grep); `CONTROL` stays the tone
+  at 014's gate, which is also the tone at this one — the spread test's
+  fixed point holds on every branch.
