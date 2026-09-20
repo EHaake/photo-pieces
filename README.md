@@ -89,30 +89,31 @@ Three minutes apart. Captions take _inline markdown_.
 
 | Block       | Forms          | Attributes                                                                                         | Matted | Obsidian Live Preview |
 | ----------- | -------------- | -------------------------------------------------------------------------------------------------- | ------ | --------------------- |
-| `single`    | leaf/container | `src` `alt`                                                                                        | yes    | image (leaf)          |
-| `inset`     | leaf/container | `src` `alt`                                                                                        | yes    | image (leaf)          |
-| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                    | yes¹   | image (leaf)          |
+| `single`    | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
+| `inset`     | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
+| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                    | no     | image (leaf)          |
 | `fullbleed` | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
 | `tall`      | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
-| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed` | yes²   | images (leaf)         |
-| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                            | yes²   | images (leaf)         |
-| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                         | yes    | raw text              |
+| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed` | no     | images (leaf)         |
+| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                            | no     | images (leaf)         |
+| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                         | no     | raw text              |
 | `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption               | no     | raw text              |
-| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                            | yes    | raw text              |
-| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                       | yes    | raw text              |
-| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays   | yes    | raw text              |
-| `pause`     | leaf only      | `src` `alt`; no body — nothing to read                                                             | yes    | image (leaf)          |
+| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                            | no     | raw text              |
+| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                       | no     | raw text              |
+| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays   | no     | raw text              |
+| `pause`     | leaf only      | `src` `alt`; no body — nothing to read                                                             | yes¹   | image (leaf)          |
 
-¹ the bled edge runs clean. ² dropped at `width="fullbleed"`.
+¹ the pause frame keeps the mat spec 007 gave it, until the pause gets
+a spec of its own.
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
-`single` — same rendered result. Every matted treatment carries its
-own flat white matte, applied by the site's CSS: a mat 6% of that
-frame's rendered short side, never narrower than 4px or wider than
-40px, equal on all four sides (never bake mattes into files). A big
-frame therefore wears a visibly wider mat than a small one — the
-frames of one packed gallery row share a mat from the row's target
-short side, and a `match="height"` pair or triptych wears one mat from
-its matched height.
+`single` — same rendered result. Since spec 015 the site mats only the
+image page's stage and the quiet view that grows out of it: a flat
+white field 6% of that frame's rendered short side, never narrower than
+4px or wider than 40px, equal on all four sides, applied by the site's
+CSS (never bake mattes into files). A piece's frames sit on the ground
+instead, edge to edge with the page — the gutters of a pair, a grid or
+a packed gallery row show the ground between photographs, and each cell
+is that much more picture.
 An image's `src` is `./<file>` for the piece's own photograph,
 `../<slug>/<file>` for another piece's, or
 `../../gallery-images/<file>` for one at the gallery root (spec 008) —
@@ -128,7 +129,8 @@ rendered.
 
 **Current status**: every block above is implemented — the spec-003
 blocks and spec 007's two durational ones — transform, styling,
-mattes, unit tests, and the Obsidian plugin's leaf-form rendering —
+the mat rule (the image page's stage alone since spec 015), unit tests,
+and the Obsidian plugin's leaf-form rendering —
 with images going through Astro's asset pipeline (hashed src,
 responsive srcset per treatment). Pieces render at
 `/pieces/<slug>/`, list at `/pieces/` (in the nav), and feed the
@@ -144,7 +146,9 @@ Every accepted raster (`jpg jpeg png webp avif tiff`) in a published
 piece's folder — or in the flat `src/content/gallery-images/` root for
 images that belong to no piece — gets a page at `/images/<id>/`, where
 the id is `<piece-folder>/<basename>` or `gallery/<basename>`. The
-page shows the image matted, its title, a wall label of exposure info
+page shows the image matted on the stage — since spec 015 the one
+matted surface on the site, a piece's pause frame excepted until the
+pause gets its own spec — its title, a wall label of exposure info
 read from the file's EXIF (camera, lens, focal length, aperture,
 shutter, ISO, capture date), the piece it came from, the galleries it
 sits in, and an optional caption. Every image in a piece links there;
@@ -333,7 +337,13 @@ via `data-pagefind-body`, and only works against a real build, not
 `astro dev`), the RSS feed at `/rss.xml` (pieces), and sitemap/JSON-LD
 SEO basics. Per-piece Open Graph cards generate at build time from
 `src/pages/og/pieces/[slug].png.ts`; `public/og.jpg` is the site-wide
-fallback for other pages.
+fallback for other pages, regenerated by `npm run og`
+(`scripts/gen-og.mjs`) whenever `:root`'s ground moves — after
+resyncing `COLOR` in `src/lib/og-card.mjs`, the hand-kept hex copy of
+the tokens that Satori's card draws with, since the generator refuses
+to write while the two disagree. `ground.test.mjs` pins both ends: the
+four derived tokens against the ground by the family rule, and `COLOR`
+against the tokens.
 
 ## Project structure
 
@@ -352,6 +362,7 @@ photo-pieces/
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
 ├── scripts/check-no-gps.mjs      # postbuild: no GPS in any built image
 ├── scripts/check-no-dev-routes.mjs # postbuild: no dev-only routes in dist/
+├── scripts/gen-og.mjs             # npm run og: rewrites public/og.jpg on the committed ground
 ├── obsidian-plugin/              # Live Preview rendering (see its README)
 ├── CLAUDE.md, ROADMAP.md, DECISIONS.md, AUTHORING.md
 ├── specs/                        # spec.md, plan.md, tasks.md per spec
@@ -370,9 +381,11 @@ photo-pieces/
 │   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
+│   ├── lib/ground.ts             # the ground's family: fixed steps to the fills and hairlines, the contrast readout, the gate's candidates
+│   ├── lib/og-card.mjs           # the Open Graph card — one tree and one palette for the per-piece route and `npm run og`
 │   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), CategoryRow
 │   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
-│   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler, the place-wall sampler, the matte sampler at dev/matte/); postbuild fails if any reach dist/
+│   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler, the place-wall sampler, the matte sampler at dev/matte/, which also carries the site-wide ground switch); postbuild fails if any reach dist/
 │   └── styles/global.css
 ```
 

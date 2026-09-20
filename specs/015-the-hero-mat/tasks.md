@@ -467,7 +467,7 @@ it names. -->
       headless: named for the person's attestation at the pause, with
       any other unmeasured line, on both screens._
 
-- [ ] **T1304** — Docs: `README.md`, `AUTHORING.md`, `design/brief.md`.
+- [x] **T1304** — Docs: `README.md`, `AUTHORING.md`, `design/brief.md`.
       Pattern: spec 013's T1106 and spec 014's T1205 lines. `README.md`:
       the block table's Matted column — `single`, `inset`, `wide`,
       `diptych`, `triptych`, `grid`, `aside`, `row`, `held` → "no";
@@ -635,6 +635,7 @@ tier if it is ever on (it is off). -->
 | T1302 (`sdd-implementer`)                           | implementation (`opus`, high)  | 108,355 | done first dispatch; Firefox 155 BiDi needs -remote-allow-system-access |
 | Phase 0 review (`skeptical-reviewer`)               | implementation (`opus`, high)  | 113,339 | SIGN OFF, 0 blocking, N1–N6 → the sweep; gate walk names an inline paragraph image |
 | T1303 (`sdd-implementer`)                           | implementation (`opus`, high)  | 117,068 | done first dispatch; paper branch, muted unchanged; og.jpg regenerated (25→49 KB) |
+| T1304 (`sdd-implementer`)                           | implementation (`opus`, high)  | 96,546  | done first dispatch; docs describe the stage matted in both views as shipped |
 
 _(Session-tier allowance draw noted at each pause.)_
 

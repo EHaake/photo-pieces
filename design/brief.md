@@ -68,8 +68,36 @@ brightest surface.
 warm terracotta, which was rejected as too generic (see "What to
 avoid"). Not yet pressure-tested against real photography. Retuning
 is one line in `global.css` (dark mode was removed in spec 002), plus
-two manually synced hex copies: the OG image route's palette and
-`public/favicon.svg`.
+two manually synced hex copies: `public/favicon.svg`, and the Open
+Graph palette (`COLOR` in `src/lib/og-card.mjs`, drawn by both the
+per-piece card route and the static social image). Since spec 014 that
+second copy is pinned to the tokens by `ground.test.mjs` and carried
+into `public/og.jpg` by `npm run og`, which refuses to write while the
+two disagree — so the copy can go stale in an editor, but not in a
+commit.
+
+**The ground, re-judged at spec 015's gate (2026-09-19).** Spec 015
+took the mats off every surface but the image page's stage, which left
+the ground doing a different job: sitting directly under photographs
+and under prose rather than behind white mats. So it was judged again,
+on the unmatted pages — a piece, a gallery, a place, an image page and
+its quiet view, the indexes and About, under the dev server, on both
+screens, switching tones from the sampler's bar. The tone taken is
+`paper`, `oklch(0.99 0.003 100)` — the pre-003 white, back now that
+nothing but the stage needs a wall to read against. The fills and
+hairlines are not separate choices: each is a fixed step from the
+ground (`STEPS` in `src/lib/ground.ts`), giving `--color-surface`
+`oklch(0.967 0.004 100)`, `--color-soft` `oklch(0.942 0.005 100)`,
+`--color-line` `oklch(0.882 0.005 100)` and `--color-line-strong`
+`oklch(0.742 0.009 100)`. Text clears 4.5:1 on the ground and on every
+fill it sits on, pinned by `ground.test.mjs`; the lowest of the floored
+pairs is muted text on the soft fill at 5.05:1, so the muted text ships
+unchanged at `oklch(0.5 0.012 250)` — this gate deepened nothing. The
+spec-003 warming above is history, not the current reason for anything:
+it was done so white mats would read, and on paper the stage's mat
+stands only 1.02:1 off the ground outside the quiet view. That is
+accepted for now; the darker field the stage wants is its own spec
+(`ROADMAP.md`).
 
 ## Typography
 
@@ -113,16 +141,22 @@ label, the general idea of curation) can inform structure and metaphor,
 but nothing renders as a literal object — no textures, or
 shadows standing in for a physical print, plaque, or contact sheet.
 
-**The matte carve-out (amended at spec 003 review).** The photographer
-mattes every image they present, on every channel — it is their
-presentation style, not decorative imitation of physicality. A flat,
-uniform matte field around images is therefore part of this site's
-visual language: no shadow, no texture, no bevel, no frame — a clean
-color field, token-driven (width and color in `global.css`), applied
-by the site's CSS rather than baked into image files (decision
-recorded in `DECISIONS.md`). Which treatments are matted by default
-(edge-to-edge treatments like fullbleed presumably are not) is a
-design/plan detail of spec 003.
+**The matte carve-out (amended at spec 003 review; narrowed at spec
+015).** The photographer mattes every image they present, on every
+channel — it is their presentation style, not decorative imitation of
+physicality. A flat, uniform matte field around an image is therefore
+part of this site's visual language: no shadow, no texture, no bevel,
+no frame — a clean color field, token-driven (width and color in
+`global.css`), applied by the site's CSS rather than baked into image
+files (decision recorded in `DECISIONS.md`). Since spec 015 it is worn
+by the image page's stage and the quiet view that grows out of it, and
+by nothing else: a piece's frames and the galleries' rows present the
+photograph on the ground, edge to edge with the page. The reason is
+that the mat is a hero treatment — it says this one photograph is the
+whole point, which is true of the stage and false of a frame passing
+under a reader's eye in a flow of prose or sitting in a packed row.
+(The pause frame keeps the mat spec 007 gave it until the pause gets a
+spec of its own.)
 
 ## Screens to design
 
