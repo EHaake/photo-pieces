@@ -41,7 +41,7 @@ let fonts = null;
  *
  * Latin subsets, to keep the build light. Satori draws any glyph these
  * fonts lack as an empty box, which is why the `kind` labels stay Latin
- * rather than going through the UI dictionary — `SITE.locale = 'ja'`
+ * rather than going through the UI dictionary — a non-Latin `SITE.locale`
  * would otherwise render them as tofu in every share image. Post titles
  * in a non-Latin script hit the same limit: install a face that covers
  * them (e.g. `@fontsource/noto-sans-jp`) and point the paths below at
