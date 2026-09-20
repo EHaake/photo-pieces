@@ -321,6 +321,47 @@ describes them, and anything he saw that the spec did not say. Recorded
 here by the orchestrator, in the person's words and the numbers, before
 T1303 is dispatched.)_
 
+
+**Measured record before the gate** (the implementer's Firefox 155
+headless reads via BiDi, dev server, taken at T1301 and T1302; the
+person attests by eye, these are the numbers):
+
+- Pause anchor, before → after, identical: padding 25.883 / 21.083 /
+  5.983 px at 1512×982 / 1280×1440 / 375×812; background oklch(1 0 0);
+  frame 1346×483 / 1097×394 / 311×112. Both pieces carrying a pause.
+- Stage frame padding 40 / 40 / 12.704 before and after (12.988 is the
+  quiet view's at 375); stage image height 719.717 / 719.717 / 201.883;
+  quiet frame white before and after.
+- 279 other frames across the two pieces, `/galleries/every-ratio/`,
+  `/places/the-headlands/`, `/places/`, `/`, and an image page: every
+  one pads 0 on four sides with a transparent background after (single
+  24.667→0, inset 23.567→0, wide 40→0, grid 12.183/17.633→0, diptych
+  →0, match-height 16.4/11.05→0, aside 16.05→0, row 18.2/12.583→0,
+  held anchors 23.75/32.733→0, prose shorthand 24.667→0; fullbleed,
+  tall, strip 0 before and after).
+- Held portrait at 1512: figure 883.85 vs 100svh − 2·margin 883.80.
+  Packed rows: worst short-side spread 0.050 / 0 / 0; related strip
+  rows 122.483×4 and 161.75/162. Cards on `/places/`, `/galleries/`,
+  `/categories/landscape/`: pad 0, transparent (`/` has no cards).
+  Compare figure pad 0, transparent, aspect-ratio 1.5 = --ar.
+- Hint − rendered at 1512: single +13.6, compare +33.6, cover card
+  −1.667 (inside 2px), gallery cells ≥ +183.5. Match-height residual
+  0.234 after / 0.217 before (Gecko rounding; tolerance now 0.25).
+- Sampler: sections pieces/galleries/stage/cards, bars 0/0/1/0,
+  candidates 0/0/5/0, inline tokens on the stage alone; fixture pause
+  anchor 25.883 from :root; stage bar share-60 → 40 / 31.389 / 22.308
+  / 40 (landscape/portrait/panorama/square), none → 0. Ground bar:
+  paper → html [252,252,250] = oklchToRgb255(paper), five tokens
+  written, muted unchanged, readout text/bg 15.58, text/surface 14.55,
+  text/soft 13.51, muted/bg 5.82, muted/surface 5.44, muted/soft 5.05,
+  mat/bg 1.02 ΔL 0.01; today → no override, [246,244,240]; paper
+  follows to a piece page.
+
+**Environment note for whoever drives a browser next**: Firefox 155
+BiDi needs `-remote-allow-system-access`, the driver must
+`browsingContext.create {type:'tab'}` (the first context is
+privileged), and one BiDi session per Firefox process.
+
 ## Phase 1 — The tone landed, the copies moved, and the docs (reviewer after the phase; the person's pause at its end)
 
 <!-- T1303 is the load-bearing visible change under per-phase review;
@@ -569,6 +610,7 @@ tier if it is ever on (it is off). -->
 | T1301 per-task review (`skeptical-reviewer`)        | implementation (`opus`, high)  | 99,818  | SIGN OFF, 0 blocking, N1–N7 → T1301a and the sweep                      |
 | T1301a (`sdd-implementer`)                          | implementation (`opus`, high)  | 44,775  | done first dispatch; match-height tolerance set to 0.25px             |
 | T1302 (`sdd-implementer`)                           | implementation (`opus`, high)  | 108,355 | done first dispatch; Firefox 155 BiDi needs -remote-allow-system-access |
+| Phase 0 review (`skeptical-reviewer`)               | implementation (`opus`, high)  | 113,339 | SIGN OFF, 0 blocking, N1–N6 → the sweep; gate walk names an inline paragraph image |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -597,6 +639,21 @@ and 013.
   name "the cards' mat is one place" (an assertion name, outside
   T1301a's one rename), and plan.md's original LatestWork bullet in
   Known limitations (the new bullet beside it says the component is gone).
+- **Phase 0 review N1–N6** (2026-09-19): N1 plan.md's "The rendered
+  result" and Testing strategy still say 0.2px, 12.988 at 375px, and
+  the latest-work pin — Known limitations corrects all three; one
+  line each at the sweep. N2 the Mattes comment says merging the two
+  identical-prelude rules "fails two tests"; the reviewer counts one
+  (the "declared once" case) — fix the count. N3 the sampler's header
+  comment says nothing landed under specs/014-ground-tone/; the T1202
+  record did — the claim is that no gate values landed; keep it
+  consistent with what T1305 writes there. N4 the prose shorthand
+  image is pinned structurally but was not in T1301's measured list —
+  named in the gate walk. N5 the per-task measurement records live in
+  the reports and the gate record below, not per task line. N6 the
+  off-identity's basis assertion passes with or without the
+  `+ 2 * var(--mat)` term; the "still read" guarantee is case (b)'s
+  string pin — move the comment.
 
 - **O1** (from the sign-off's re-review, 2026-09-19; blocking on the
   deepens branch only, so transcribed at once): `readout(bg, from = MUTED)`
