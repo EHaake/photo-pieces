@@ -6,15 +6,36 @@
   --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 84%);
   /* Text/icon color on top of a filled accent surface. */
   --color-on-accent: oklch(0.99 0.003 100);
-  /* Warmed at the spec-003 sampler review so pure-white mattes read as
-     mats on a gallery wall (chosen over mat edges and tinted mats). */
-  --color-bg: oklch(0.968 0.006 95);
-  --color-surface: oklch(0.945 0.007 95);
+  /* THE GROUND, and the family below it. Landed 2026-09-19 at spec
+     015's gate: the candidate `paper` — oklch(0.99 0.003 100) — chosen
+     on both screens with the site seen unmatted for the first time (the
+     mat is the image page's stage and the pause frame now, nothing
+     else). The four fills and hairlines are not separate choices: each
+     is a fixed step from this tone (`STEPS`, src/lib/ground.ts), and
+     ground.test.mjs pins these five literals to the strings the rule
+     derives — to retune, move the ground and paste what the failing
+     test prints.
+
+     The pair that bound: muted/soft at 5.05:1, the lowest of the six
+     floored pairs (inline code sits on the soft fill). It clears 4.5:1,
+     so --color-muted ships unchanged at oklch(0.5 0.012 250) — this
+     gate deepened nothing. White-mat-on-ground is 1.02:1 (ΔL 0.01): the
+     mat reads faintly here, and the stage's darker field is its own
+     spec (ROADMAP).
+
+     History: spec 003 warmed the ground to oklch(0.968 0.006 95) at its
+     sampler review so pure-white mattes read as mats on a gallery wall
+     (chosen over mat edges and tinted mats). Spec 014 built this
+     family's rule, the readout and the dev switch but closed with its
+     gate unanswered — the site was still matted everywhere, which is
+     what spec 015 changed before re-judging. */
+  --color-bg: oklch(0.99 0.003 100);
+  --color-surface: oklch(0.967 0.004 100);
   --color-text: oklch(0.25 0.01 250);
   --color-muted: oklch(0.5 0.012 250);
-  --color-line: oklch(0.86 0.008 95);
-  --color-line-strong: oklch(0.72 0.012 95);
-  --color-soft: oklch(0.92 0.008 95);
+  --color-line: oklch(0.882 0.005 100);
+  --color-line-strong: oklch(0.742 0.009 100);
+  --color-soft: oklch(0.942 0.005 100);
   --font-display: 'Spectral', Georgia, serif;
   --font-body: 'Public Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;

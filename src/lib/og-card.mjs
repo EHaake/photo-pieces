@@ -20,10 +20,10 @@ import { SITE } from '../consts.ts';
 // the token had gone teal). `npm run og` refuses to write while any of
 // them differs from its token, and `ground.test.mjs` pins all five.
 export const COLOR = {
-  bg: '#f6f4f0',
+  bg: '#fcfcfa',
   text: '#1e2226',
   muted: '#5e646a',
-  line: '#d2d1cb',
+  line: '#d9d8d4',
   accent: '#004942',
 };
 

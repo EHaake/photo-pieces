@@ -393,7 +393,7 @@ substance of the review. T1303 is written for every gate outcome; the
 bundle carries the gate record, and the implementer follows the branch
 it names. -->
 
-- [ ] **T1303** — The gate's tone, or the record that it stayed.
+- [x] **T1303** — The gate's tone, or the record that it stayed.
       Pattern: spec 014's T1204 line (specs/014-ground-tone/tasks.md —
       never run; this is it) and `:root` in `src/styles/global.css` with
       its comment above `--color-bg`. **Changed**: `src/styles/global.css`
@@ -634,6 +634,7 @@ tier if it is ever on (it is off). -->
 | T1301a (`sdd-implementer`)                          | implementation (`opus`, high)  | 44,775  | done first dispatch; match-height tolerance set to 0.25px             |
 | T1302 (`sdd-implementer`)                           | implementation (`opus`, high)  | 108,355 | done first dispatch; Firefox 155 BiDi needs -remote-allow-system-access |
 | Phase 0 review (`skeptical-reviewer`)               | implementation (`opus`, high)  | 113,339 | SIGN OFF, 0 blocking, N1–N6 → the sweep; gate walk names an inline paragraph image |
+| T1303 (`sdd-implementer`)                           | implementation (`opus`, high)  | 117,068 | done first dispatch; paper branch, muted unchanged; og.jpg regenerated (25→49 KB) |
 
 _(Session-tier allowance draw noted at each pause.)_
 

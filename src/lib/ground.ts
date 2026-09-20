@@ -368,20 +368,20 @@ export const CONTROL: Tone = { L: 0.968, C: 0.006, h: 95 };
 
 /** The fixed set on the sampler's switch, beside the free tune. */
 export const CANDIDATES: Record<string, Candidate> = {
-  paper: {
-    id: 'paper',
+  today: {
+    id: TODAY,
     bg: { L: 0.99, C: 0.003, h: 100 },
-    why: "the pre-003 paper-white, spec 013's white — its companions now by the rule",
+    why: 'the control — selecting it removes the override, so it is the stylesheet itself',
   },
   light: {
     id: 'light',
     bg: { L: 0.98, C: 0.005, h: 95 },
     why: 'one step lighter than today',
   },
-  today: {
-    id: TODAY,
+  'warm-003': {
+    id: 'warm-003',
     bg: { L: 0.968, C: 0.006, h: 95 },
-    why: 'the control — selecting it removes the override, so it is the stylesheet itself',
+    why: "spec 003's warm — the control at spec 014's and 015's gates",
   },
   'deep-1': {
     id: 'deep-1',
