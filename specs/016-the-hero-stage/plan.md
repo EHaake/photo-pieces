@@ -57,9 +57,12 @@ dependency; the pause's markup, CSS and script byte-identical.
   title) starts at 0.25 and ends at 0.2. On a wall at depth _d_ the
   muted chrome crosses the wall's lightness at chrome ≈ (0.79·_d_ −
   0.49) / 0.3 — 0.74 at depth 0.9 — sitting lighter than the wall
-  below that and darker above it; the text-coloured chrome is darker
-  than the wall at every chrome value once _d_ ≥ 0.94, and at 0.9 is
-  within 0.03 of it at chrome 0. This is the pause's own arithmetic
+  below that and darker above it; the text-coloured chrome (L 0.25 →
+  0.2) is darker than the wall at every chrome value while _d_ < 0.937
+  (the wall is above 0.25 there — at 0.9 it is 0.279, so the text sits
+  0.03 below it at chrome 0 and 0.08 below at chrome 1), and from
+  _d_ ≥ 0.94 the wall is the darker one at low chrome and the text
+  crosses it on the way down. This is the pause's own arithmetic
   (its words end 0.12 below its ground); it is stated so the
   photographer can read the slider. If "dimmed" reads as broken at
   the gate, "away" is one rule — the scene rule's `transform:
@@ -107,10 +110,15 @@ dependency; the pause's markup, CSS and script byte-identical.
     background: var(--arrival-ground);
     border-bottom-color: color-mix(in oklch, var(--color-line), var(--color-quiet) var(--arrival-ink));
   }
-  html[data-arrival]:not([data-quiet]) .site-header :is(.brand, .site-nav a),
+  /* The text-coloured chrome: the brand, the current page's nav link,
+     the title. The [aria-current] compound is what makes the split
+     from the muted links real — by specificity, not by source order. */
+  html[data-arrival]:not([data-quiet]) .site-header :is(.brand, .site-nav a[aria-current='page']),
   html[data-arrival]:not([data-quiet]) .image-head h1 {
     color: color-mix(in oklch, var(--color-text), var(--color-quiet) var(--arrival-ink));
   }
+  /* The muted-coloured chrome: the other nav links, the frame nav, the
+     toggle. */
   html[data-arrival]:not([data-quiet]) :is(.frame-nav, .frame-nav a, .quiet-toggle),
   html[data-arrival]:not([data-quiet]) .site-nav a:not([aria-current='page']) {
     color: color-mix(in oklch, var(--color-muted), var(--color-quiet) var(--arrival-ink));
@@ -118,13 +126,36 @@ dependency; the pause's markup, CSS and script byte-identical.
   html[data-arrival]:not([data-quiet]) .image-head :is(.eyebrow, .eyebrow a) {
     color: color-mix(in oklch, var(--color-accent), var(--color-quiet) var(--arrival-ink));
   }
+  /* The theme eases a link's colour 180ms for the hover; on the dimmed
+     links that ease would run behind every scroll step and at every
+     router arrival. The underline's ease stays; the colour's goes. */
+  html[data-arrival]:not([data-quiet]) :is(.site-nav a, .frame-nav a, .image-head .eyebrow a) {
+    transition: background-size 180ms ease;
+  }
   /* Focus on the dimmed chrome: readable at every lights value — the
      text colour on paper, paper on the dark wall. The ring is the
-     theme's. */
-  html[data-arrival]:not([data-quiet]) :is(.site-header a, .frame-nav a, .quiet-toggle):focus-visible {
+     theme's. The long compound in the :is() list is deliberate: it
+     lifts this rule above the current-page link's text rule. */
+  html[data-arrival]:not([data-quiet]) :is(.site-header .site-nav a[aria-current='page'], .site-header a, .frame-nav a, .quiet-toggle):focus-visible {
     color: color-mix(in oklch, var(--color-text), var(--color-bg) calc(var(--arrival-lights, 0) * 100%));
   }
   ```
+
+  **Specificity, so nothing depends on source order.** With html plus
+  two attribute compounds every selector starts at (0,2,1). The text
+  rule's `:is()` takes its most specific argument,
+  `.site-nav a[aria-current='page']` (0,2,1), so with `.site-header` it
+  is (0,5,2); the muted nav rule's `.site-nav a:not([aria-current='page'])`
+  is (0,2,1), so (0,4,2) — the two never match the same link, so no
+  tie arises; the transition rule declares nothing the others do; the
+  focus rule's `:is()` takes `.site-header .site-nav a[aria-current='page']`
+  (0,3,1) plus `:focus-visible`, so (0,6,2), above both colour rules on
+  every link it names. The theme's `a:not(.brand, .button):hover`
+  (0,2,1) loses to all of them, so a dimmed link does not change colour
+  on hover at the top; its underline still draws. Test (b) pins each
+  rule's full selector list, the focus rule's long compound included,
+  so a later edit that drops the compound fails by name rather than by
+  a link that happens to look right.
 
   The dimmed set is exactly the spec's: the header (its ground, its
   hairline, the brand, the nav), the frame nav, the quiet toggle, and
@@ -239,16 +270,28 @@ dependency; the pause's markup, CSS and script byte-identical.
   goes dark at load — a light-then-dark step, the direction the spec
   allows, in a broken-link case) and a position the browser restores
   differently from what the router stored (they agree in practice —
-  the router stores at scrollend). On a router navigation
-  `astro:after-swap` fires after `moveToLocation` has pushed the new
-  entry and scrolled (Astro's `updateDOM` calls `moveToLocation` before
+  the router stores at scrollend). On a router navigation there are
+  two paths, and both land on the same function. **The first
+  client-side arrival at an image page in a session**: the arrival
+  script is not yet on the page, so the router's `runScripts()` — which
+  runs after `astro:after-swap`, on `updateCallbackDone.finally`, still
+  before the new page is shown — executes it for the first time; its
+  head-time branch runs with `history.state` already pushed by
+  `moveToLocation` (`{ scrollX: 0, scrollY: 0 }` for a forward
+  navigation, the stored entry for a traversal), so the destination
+  rule gives the right answer there too, and the guard then binds the
+  listeners. **Every later arrival**: the script is already present
+  and identical, the router does not re-run it, and the `astro:after-swap`
+  listener does the work — it fires after `moveToLocation` has pushed
+  the new entry and scrolled (`updateDOM` calls `moveToLocation` before
   it triggers the event — T1402 reads the router source in
-  `node_modules/astro` and records the lines), inside the swap and
-  before the new page paints, so `scrollY` is already the destination
-  and one `apply(scrollY)` is exact. The stub test in
-  `arrival.test.mjs` pins the head decision directly: with
-  `history.state.scrollY` past the fade the script writes `0.000`
-  before any event fires.
+  `node_modules/astro` and records the lines, `runScripts`'s position
+  included), inside the swap and before the new page paints, so
+  `scrollY` is already the destination and one `apply(scrollY)` is
+  exact. The stub test in `arrival.test.mjs` pins the head decision
+  directly: with `history.state.scrollY` past the fade the script
+  writes `0.000` before any event fires, and with the router's fresh
+  `{ scrollY: 0 }` and no hash it writes `1.000`.
 
 - **The dev-only control** (`src/components/DevArrival.astro` +
   `src/components/dev-arrival.ts`), spec 014's switch and the sampler's
@@ -275,8 +318,11 @@ dependency; the pause's markup, CSS and script byte-identical.
     a fixed bottom-right `<aside class="meta" data-dev-arrival-bar>`
     with an injected `<style>` copied from the sampler's
     `.sampler-banner`, hidden under `html[data-quiet]` — with three
-    range inputs and outputs (`depth` 0.5–1 step 0.01, `chrome` 0–1
-    step 0.01, `fade` 0.25–2 step 0.05), a live `lights` readout (the
+    range inputs and outputs (`depth` 0.5–0.99 step 0.01, `chrome`
+    0.01–1 step 0.01, `fade` 0.25–2 step 0.05 — the depth's ceiling and
+    the chrome's floor are the open ends test (a) rejects, so the bar
+    cannot offer a value the landing would refuse), a live `lights`
+    readout (the
     inline `--arrival-lights`, updated on scroll), a `<code>` line in
     the exact form the landing pastes
     (`--arrival-depth: 0.9; --arrival-chrome: 1; --arrival-fade: 1`),
@@ -356,9 +402,10 @@ dependency; the pause's markup, CSS and script byte-identical.
   rule — the spec says AUTHORING needs nothing, and it needs no new
   content; this is a correction of the same interim framing, see
   Deviations in the report). `ROADMAP.md` and `DECISIONS.md` at
-  close-out (T1407), drafted on the branch as a patch file and applied
-  to `main` after the merge — see Resolved decisions. `specs/015` is
-  frozen and never edited.
+  close-out (T1407), edited on the branch and merged through the PR
+  exactly as spec 015's T1305 did — spec.md's AC 11 and AC 12 name
+  them, so they are the spec's implementation by the constitution's
+  test. `specs/015` is frozen and never edited.
 
 - **Carried from spec 015's sweep.** N6: `CoverCards.astro`'s hint
   `373px` → `375px` (the 1160px grid at three columns with the
@@ -413,7 +460,18 @@ Every claim above is owned by a task and a check:
     `background: var(--color-arrival)` and the gated stage rule
     `background: transparent`; the dimmed set's selectors are exactly
     the list above (an addition is deliberate); the focus rule exists
-    and mixes toward `--color-bg`. (That the pause's lights block, the
+    and mixes toward `--color-bg`; **each colour rule's `color` value
+    is pinned as a string with its source token** (`--color-text`,
+    `--color-muted`, `--color-accent`, and `--color-bg` on the focus
+    rule) — at chrome 1 and lights 1 every dimmed element computes to
+    exactly `--color-quiet` whichever token it started from, so a
+    browser read at the top cannot tell a wrong source and this pin is
+    what can; the focus rule's `:is()` list contains
+    `.site-header .site-nav a[aria-current='page']` (the compound that
+    lifts it above the text rule — dropped, the current page's link
+    would keep its dim colour under focus with everything else green);
+    the link transition rule declares `transition` alone, its value
+    `background-size 180ms ease`. (That the pause's lights block, the
     quiet rules and the page's `<style>` are untouched is the task's
     diff check, below, and `matte.test.mjs`'s existing quiet-rule pins
     — not a second string pin here.)
@@ -442,7 +500,9 @@ Every claim above is owned by a task and a check:
   so the test can fire `scroll`, `astro:after-swap` and
   `astro:page-load`. Cases, each named for what would fail:
   - first paint at the top (no state, no hash): `data-arrival` set and
-    `--arrival-lights` `1.000` **before any event**;
+    `--arrival-lights` `1.000` **before any event**; the router's fresh
+    entry (`history.state = { scrollY: 0 }`, no hash — the first
+    client-side arrival, run by `runScripts`) → `1.000` likewise;
   - **a restored position paints light first**: `history.state = { scrollY: 3·vh }`
     → `0.000` before any event; a hash → `0.000`; a restored position
     inside the fade (vh/2 → `0.500`; vh/4 → `0.844`) → the computed
@@ -477,9 +537,16 @@ Every claim above is owned by a task and a check:
   before read, the brand's, a nav link's, the frame nav's, the
   toggle's, the eyebrow's and the h1's computed colours each their
   token mixed all the way to quiet (chrome 1), `transition-property`
-  on `<html>` `none`; at y = vh/2 `0.500` and the ground half-way (the
-  test's arithmetic again); at y ≥ vh `0.000` and every read the
-  pre-spec value (paper, the tokens unmixed); back to 0 → `1.000`;
+  on `<html>` `none`; at y = vh/2 `0.500`, the ground half-way, and
+  **one muted element (a nav link) and one text element (the h1) each
+  at its own token's half mix** (the test's arithmetic again — the
+  two differ here, so a rule mixing from the wrong token shows; at
+  the top they do not); at y ≥ vh `0.000` and every read the pre-spec
+  value **within 1/255** (paper, the tokens unmixed — a
+  `color-mix(… 0%)` through oklch need not serialize identically to
+  the raw token); back to 0 → `1.000`; on the router path, right after
+  `astro:page-load`, `document.getAnimations()` empty (no link colour
+  easing — the transition rule);
   `scrollTo(2000)` then `browsingContext.reload` → after load `0.000`
   with `scrollY` restored (the value; a flash is not observable
   headless — the stub test is the pin, and the person reloads mid-page
@@ -555,7 +622,7 @@ scripts/check-no-dev-routes.mjs                MARKERS = ['dev-ground', 'dev-arr
 src/components/CoverCards.astro                sizes 373px → 375px, comment (T1404)
 ground.test.mjs                                og.jpg 1200×630 asserted (T1404)
 README.md, AUTHORING.md, design/brief.md       the rule, the arrival, the tree (T1406)
-specs/016-the-hero-stage/close-out.patch       ROADMAP.md and DECISIONS.md, drafted on the branch, applied to main after the merge (T1407)
+ROADMAP.md, DECISIONS.md                       close-out (T1407, implementer-edited, orchestrator-committed on the branch, as spec 015's T1305)
 ```
 
 Untouched, named so the reviewer can confirm the non-goals hold:
@@ -571,14 +638,14 @@ Obsidian plugin; `DevGround.astro`, `BaseLayout.astro`, `src/pages/dev/`,
 
 ## Known limitations
 
-- **Link colours ease 180ms behind the scroll** on the dimmed nav,
-  frame nav and eyebrow links: the theme's `a:not(.brand, .button)`
-  rule transitions `color` for the hover, and an inherited or mixed
-  colour change runs that transition too. The pause's links have done
-  this since spec 007. Not motion of the arrival's own — the value only
-  changes on scroll — and left as is; if the gate sees it, one
-  `transition: none` on the dimmed links under `data-arrival` removes it
-  and the hover underline animation at the top of the page with it.
+- **The dimmed links do not change colour on hover** at the top of the
+  page: the theme's hover rule loses to the arrival's colour rules by
+  specificity. The underline still draws (its `background-size` ease is
+  kept by the transition rule); the colour's 180ms ease is dropped on
+  those links because it would otherwise run behind every scroll step
+  and at every router arrival — `moveToLocation` scrolls and flushes
+  style before the listener sets `data-arrival`. The pause's links keep
+  the theme's ease, as spec 007 left them.
 - **A fragment that matches nothing** goes dark at `load` after
   painting light: the head cannot know the target is missing. A broken
   link, in the direction the spec allows.
@@ -664,18 +731,10 @@ Obsidian plugin; `DevGround.astro`, `BaseLayout.astro`, `src/pages/dev/`,
   ("the pause frame excepted until its own spec") contradicts the rule
   this spec states, and the constitution's own rule is amendment first,
   explicitly, in its own commit.
-- **`ROADMAP.md` and `DECISIONS.md` are drafted on the branch and
-  applied to `main` after the merge** (the dispatcher's instruction,
-  per the constitution's "work that isn't a spec's implementation
-  commits straight to main"): T1407 edits the two files, the
-  orchestrator writes `git diff -- ROADMAP.md DECISIONS.md` to
-  `specs/016-the-hero-stage/close-out.patch`, restores the two files on
-  the branch, and commits the patch with the close-out; the sweep reads
-  the patch; after the merge the orchestrator runs
-  `git apply specs/016-the-hero-stage/close-out.patch` on `main` and
-  commits. A patch rather than prose because applying it is mechanical
-  and a conflict with roadmap grooming that happened on `main`
-  meanwhile fails loudly instead of being merged by hand. Spec 015 rode
-  the branch; this is the deviation the bundle asked for.
+- **Close-out follows spec 015's T1305**: `ROADMAP.md` and
+  `DECISIONS.md` are edited on the branch, committed there by the
+  orchestrator in their own commit, read by the sweep as files, and
+  reach `main` through the PR — they implement AC 11 and AC 12, which
+  is the constitution's test for what rides a spec branch.
 - **N6 is the hint moved, not pinned**: one literal; a parser for the
   grid's column arithmetic is an abstraction with one caller.

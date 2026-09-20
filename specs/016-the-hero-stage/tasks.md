@@ -39,8 +39,8 @@ from a staged, shell-assembled bundle — one review and at most one
 re-review, anything still open logged and left to the sweep. A design
 question the session cannot triage as routine goes to the
 `skeptical-reviewer` at the top tier on a decision bundle, never
-resolved in the session. The sweep runs on the documents, the
-close-out patch, and `git diff main...HEAD`. The orchestrator never
+resolved in the session. The sweep runs on the documents plus
+`git diff main...HEAD`. The orchestrator never
 does device or browser checks by hand: computed colours, the lights'
 values and the geometry are the implementer's Verify criterion
 (numbers recorded in this file), and what it cannot measure — a flash,
@@ -151,7 +151,11 @@ headers to confirm nothing was duplicated or dropped. -->
       from the `.image-stage` gate rule → (b)'s gate case fails;
       `--color-arrival` retyped as `oklch(0.279 0.0075 95)` → (a)'s
       string case and (d) fail; `html[data-arrival]:not([data-quiet]) .image-body p`
-      added to the muted rule → (b)'s dimmed-set case fails. Where the
+      added to the muted rule → (b)'s dimmed-set case fails;
+      `.site-header .site-nav a[aria-current='page']` dropped from the
+      focus rule's `:is()` → (b)'s focus case fails; the h1 rule's
+      `var(--color-text)` changed to `var(--color-muted)` → (b)'s
+      source-string case fails naming the rule. Where the
       implementer cannot drive a browser it says so, line by line, and
       the Phase 0 pause asks the person to attest those lines._
 
@@ -165,28 +169,38 @@ headers to confirm nothing was duplicated or dropped. -->
       `<Fragment slot="head">` inside `<BaseLayout …>` before
       `<article>`, carrying `<script is:inline data-arrival>` with
       plan.md's script and a comment above it (what it is; why inline
-      and in the head; the destination rule; the one guard); the
-      file's header comment's "the script below is page-level
-      enhancement: the compare slider, quiet view, and set selection"
-      gains "and, in the head, the arrival (spec 016)". The page's
-      module `<script>` and `<style>` are untouched. **First**, read
-      Astro's router in `node_modules/astro/dist/transitions/router.js`
+      and in the head; the destination rule; the one guard — **the
+      comment spells the attribute as "the arrival attribute", never
+      the literal `data-arrival`**, so the Verify grep below counts
+      the tag alone); the file's header comment's "the script below is
+      page-level enhancement: the compare slider, quiet view, and set
+      selection" gains "and, in the head, the arrival (spec 016)". The
+      page's module `<script>` and `<style>` are untouched. **First**,
+      read Astro's router in `node_modules/astro/dist/transitions/router.js`
       and record the lines where `updateDOM` calls `moveToLocation`
-      before triggering `astro:after-swap`, and where the initial
-      `history.state` restore and `scrollend` store happen — the plan's
-      claim, checked against the installed version (`package.json`
-      pins `astro ^7.2.2`; record the resolved version). `arrival.test.mjs`
+      before triggering `astro:after-swap`, where `runScripts()` sits
+      relative to that event (after it, on `updateCallbackDone.finally`
+      — the path the script's first client-side run takes, its
+      head-time branch seeing the just-pushed `history.state`), and
+      where the initial `history.state` restore and the `scrollend`
+      store happen — the plan's claims, checked against the installed
+      version (`package.json` pins `astro ^7.2.2`; record the resolved
+      version). `arrival.test.mjs`
       gains case (c) — the script extracted from the page's text and run
       with `new Function('window', 'document', 'history', 'location', body)`
       against the stub Testing strategy describes (a small fake in the
       test file: `documentElement` with a recording `style`,
       `clientHeight`, attribute methods; `querySelector` switchable;
       listener registries on `window` and `document`; `scrollY`
-      settable) — every case Testing strategy (c) lists, each named for
-      what would fail, plus the pin that the script's `FADE` literal
-      equals `:root`'s `--arrival-fade`. _Verify: `sh scripts/verify.sh`
-      green; `grep -c "data-arrival" "src/pages/images/[...id].astro"`
-      → 1; `git diff main -- 'src/pages/images/[...id].astro'` touches
+      settable) — every case Testing strategy (c) lists, the router's
+      fresh entry (`history.state = { scrollY: 0 }`, no hash → `1.000`)
+      among them, each named for what would fail, plus the pin that the
+      script's `FADE` literal equals `:root`'s `--arrival-fade`.
+      _Verify: `sh scripts/verify.sh` green;
+      `grep -c '<script is:inline data-arrival>' "src/pages/images/[...id].astro"`
+      → 1 and `grep -c "data-arrival" "src/pages/images/[...id].astro"`
+      → 1 (the comment avoids the literal; T1403's comment must too);
+      `git diff main -- 'src/pages/images/[...id].astro'` touches
       only the head fragment and the header comment (hunks listed);
       `git diff main -- src/styles/global.css` unchanged since T1401;
       the router lines recorded. Then on the dev server (Firefox
@@ -197,9 +211,13 @@ headers to confirm nothing was duplicated or dropped. -->
       transparent, the frame's rect identical to T1401's before read;
       the six chrome colours (brand, a nav link, the frame nav, the
       toggle, the eyebrow, the h1) each their token mixed all the way
-      to `--color-quiet`; `<html>`'s `transition-property` `none`; at
-      y = vh/2 `0.500` and the ground at the half mix; at y ≥ vh
-      `0.000` and every read the pre-spec value; back to 0 `1.000`;
+      to `--color-quiet`; `<html>`'s `transition-property` `none` and
+      a nav link's `background-size`; at y = vh/2 `0.500`, the ground
+      at the half mix, **and a nav link (muted) and the h1 (text) each
+      at its own token's half mix within 1/255** — the two differ
+      here, so a rule mixing from the wrong token shows, which the
+      lights-1 reads cannot; at y ≥ vh `0.000` and every read the
+      pre-spec value **within 1/255**; back to 0 `1.000`;
       `scrollTo(0, 2000)` then reload → `0.000` and `scrollY` restored;
       a `script.addPreloadScript` reading `documentElement.clientHeight`
       and `history.state` before any page script → the viewport height
@@ -210,7 +228,9 @@ headers to confirm nothing was duplicated or dropped. -->
       rgb and `<html>` paper; a nav link focused at y = 0 →
       `--color-bg`'s rgb; `scrollWidth ≤ clientWidth`; the after-swap
       path — a click from `/galleries/fog-frames/` to a frame → `1.000`
-      at page-load; the next link → `1.000`; scroll past vh then
+      at page-load and `document.getAnimations()` empty right after
+      `astro:page-load` (no link colour easing on arrival — the
+      transition rule); the next link → `1.000`; scroll past vh then
       `traverseHistory(-1)` and forward again → `0.000` at the restored
       position. A flash is not observable headless: said so in the
       record, with the stub case named as the pin and the reload
@@ -238,7 +258,10 @@ headers to confirm nothing was duplicated or dropped. -->
       sampler, fixed bottom-right, `.meta`, hidden under
       `html[data-quiet]`) and build `<aside class="meta" data-dev-arrival-bar>`:
       three labelled `<input type="range">`s with `<output>`s (depth
-      0.5–1 step 0.01; chrome 0–1 step 0.01; fade 0.25–2 step 0.05), a
+      0.5–**0.99** step 0.01; chrome **0.01**–1 step 0.01; fade 0.25–2
+      step 0.05 — the depth's ceiling and the chrome's floor are the
+      open ends `arrival.test.mjs` (a) rejects, so the bar cannot offer
+      a value the landing would refuse), a
       `lights` readout kept current on `scroll` from `<html>`'s inline
       `--arrival-lights`, a `<code data-dev-arrival-line>` in the exact
       form `--arrival-depth: <d>; --arrival-chrome: <c>; --arrival-fade: <f>`,
@@ -252,7 +275,9 @@ headers to confirm nothing was duplicated or dropped. -->
       with a key: seed from the key. `src/pages/images/[...id].astro`:
       `import DevArrival from '../../components/DevArrival.astro'` and
       `{import.meta.env.DEV && <DevArrival />}` as the head fragment's
-      first child, before the arrival script, with a one-line comment.
+      first child, before the arrival script, with a one-line comment
+      that does not spell the literal `data-arrival` (T1402's grep
+      counts it).
       `scripts/check-no-dev-routes.mjs`: `MARKER` → `MARKERS = ['dev-ground', 'dev-arrival']`
       with the header comment's third paragraph (spec 016's control,
       three carriers of the string), the scan over `.html`, `.js` **and
@@ -263,8 +288,13 @@ headers to confirm nothing was duplicated or dropped. -->
       empty; `test ! -e dist/dev && echo absent`;
       `grep -c "getComputedStyle" src/components/dev-arrival.ts` → 1;
       `grep -c "is:inline" src/components/DevArrival.astro` → 2;
-      `ground.test.mjs` case (h) green over the new component (it
-      matches `src/components/Dev*`); `npx prettier --check` clean on
+      `ground.test.mjs` case (h) green over the new component (its
+      fixture filter at ~385 matches `src/components/Dev*`) — **print
+      what (h) enumerates** (a `console.log` of `fixtures().map(([p]) => p)`
+      run once and removed, or the list read off a deliberate failure)
+      so `src/components/DevArrival.astro` is seen in it, recorded;
+      `grep -c "data-arrival" "src/pages/images/[...id].astro"` still
+      → 1; `npx prettier --check` clean on
       the three new or edited files. On the dev server at 1512×982:
       the bar renders on `/images/where-the-fog-lets-go/land-b/` and
       not on `/pieces/where-the-fog-lets-go/`; with no key the line
@@ -429,14 +459,11 @@ the docs and the close-out cite.)_
       gate records, plan.md's "Resolved decisions", spec.md's "Decided"
       and "Non-goals", the three ROADMAP entries and the motion entry,
       DECISIONS' "Spec 015" section and its "Ground tone" and "Mattes"
-      entries) and **captured as a patch by the orchestrator** rather
-      than committed on the branch: after the implementer's edit and
-      `npx prettier --check ROADMAP.md DECISIONS.md`, the orchestrator
-      runs `git diff -- ROADMAP.md DECISIONS.md > specs/016-the-hero-stage/close-out.patch`,
-      then `git checkout -- ROADMAP.md DECISIONS.md`, and commits the
-      patch with the close-out bookkeeping (plan.md, Resolved decisions:
-      the two documents are not the spec's implementation and reach
-      `main` by their own commit after the merge). `ROADMAP.md`: strike
+      entries) and committed by the orchestrator on the branch in their
+      own commit(s), exactly as spec 015's T1305 (commit 67ebbe8) did —
+      they implement AC 11 and AC 12 and merge with the PR; the sweep,
+      the merge, and the bookkeeping are the orchestrator's own part,
+      as CLAUDE.md assigns them. `ROADMAP.md`: strike
       "The stage's darker field" as done in spec 016 with the hero form
       taken in one clause (the whole page dark on arrival, lightening on
       the reader's scroll; the recorded lean — the stage's own field,
@@ -470,7 +497,7 @@ the docs and the close-out cite.)_
       (`npx prettier --check` clean; grep for lines beginning with a
       CSS `>` or `+` before any format run). Then, the orchestrator's
       part: the pre-merge whole-spec sweep at the reviewer's default
-      tier on the documents, the patch and `git diff main...HEAD`, its
+      tier on the documents and `git diff main...HEAD`, its
       findings resolved; the acceptance criteria checked against their
       records (AC 1, 2 by T1402's reads and the gate records; AC 3 by
       `arrival.test.mjs` (a) and T1402's quiet reads; AC 4 by T1403's
@@ -479,32 +506,26 @@ the docs and the close-out cite.)_
       sampler; AC 7 by `matte.test.mjs` (d); AC 8 by T1401/T1402's rect
       reads and (b)'s allowlist; AC 9 by the empty diffs; AC 10 by
       T1402's focus read and (b)'s allowlist; AC 11 by T1405's record
-      and the DECISIONS entry; AC 12 by T1406's greps and the patch; AC
-      13 by the final run); build, tests, check, GPS scan, dev-routes
+      and the DECISIONS entry; AC 12 by T1406's greps and this task's;
+      AC 13 by the final run); build, tests, check, GPS scan, dev-routes
       scan, and format green with actual output; the PR marked ready
-      and merged with a merge commit; **then on `main`**:
-      `git apply specs/016-the-hero-stage/close-out.patch`,
-      `npx prettier --check ROADMAP.md DECISIONS.md`, and one commit
-      ("Spec 016 close-out: roadmap and decisions"), pushed; a failed
-      apply (roadmap grooming on `main` meanwhile) is dispatched to the
-      `sdd-implementer` as a re-draft on `main`, not merged by hand;
-      the close-out box ticked in the same shell command as the merge
-      bookkeeping. _Verify: the implementer's `sh scripts/verify.sh`
-      green with the documents edited; `git apply --check` of the patch
-      on the branch before it is committed;
+      and merged with a merge commit; the close-out box ticked in the
+      same shell command as the merge bookkeeping. _Verify: the
+      implementer's `sh scripts/verify.sh` green with the documents
+      edited;
       `grep -rn "excepted until its own spec\|until the pause gets\|darker field the stage wants\|reads faintly\|interim state" CLAUDE.md README.md AUTHORING.md design/brief.md`
-      → 0, and the same grep over the patched `ROADMAP.md` and
-      `DECISIONS.md` → only lines that are history or annotated as done
-      (every hit listed); `git diff main -- specs/015-the-hero-mat/`
-      empty; `main` green after the merge and after the patch commit._
+      → 0, and the same grep over `ROADMAP.md` and `DECISIONS.md` →
+      only lines that are history or annotated as done (every hit
+      listed); `git diff main -- specs/015-the-hero-mat/` empty;
+      `main` green after the merge._
 
 ---
 
 ### The pre-merge sweep
 
 The `skeptical-reviewer` sweeps the whole spec at its default tier, on
-`spec.md`, `plan.md`, `tasks.md`, the carried notes, the close-out
-patch, the final verification, and `git diff main...HEAD`. Blocking
+`spec.md`, `plan.md`, `tasks.md`, the carried notes, the final
+verification, and `git diff main...HEAD`. Blocking
 findings fixed and re-reviewed once; anything open after goes to the
 tier log below.
 
@@ -538,18 +559,15 @@ _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
-- The theme's 180ms `color` transition on links runs behind the
-  scroll on the dimmed nav, frame nav and eyebrow links (plan.md,
-  Known limitations) — as the pause's links have since spec 007; the
-  gate may name it.
+- The dimmed links keep the theme's underline ease and lose its
+  colour ease (the transition rule), and do not change colour on
+  hover at the top by specificity (plan.md, Known limitations); the
+  gate may name either.
 - `.image-body` is outside the dimmed set by the plan's reading of the
   spec's list; the gate may add it (T1405 carries the edit).
 - The sampler's stage section now renders on the arrival's dark with
   no script — by construction, files untouched; the sweep confirms
   `git diff main -- src/pages/dev/` is empty.
-- The two documents drafted as a patch (`close-out.patch`) rather than
-  committed on the branch, per the dispatcher's instruction; the
-  sweep reads the patch.
 
 ## Handoff note
 
