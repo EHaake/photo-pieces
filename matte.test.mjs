@@ -2,6 +2,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { galleryCell, GALLERY_STRETCH } from './src/lib/gallery-layout.ts';
+import { blocks, uncomment } from './src/lib/ground.ts';
 
 // The mat rule (spec 013, T1101): one rule, declared once, resolved per
 // geometry. A frame's mat is m = clamp(--mat-min, --mat-share × σ,
@@ -36,30 +37,6 @@ import { galleryCell, GALLERY_STRETCH } from './src/lib/gallery-layout.ts';
 //     makes T1101 land changing nothing.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
-
-/** Strip CSS comments — they carry braces and colons in this file. */
-const uncomment = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
-
-/** Every brace block at the top level of `css`, as { prelude, body }. */
-function blocks(css) {
-  const found = [];
-  let depth = 0;
-  let start = 0;
-  let open = -1;
-  for (let i = 0; i < css.length; i += 1) {
-    if (css[i] === '{') {
-      depth += 1;
-      if (depth === 1) open = i;
-    } else if (css[i] === '}') {
-      depth -= 1;
-      if (depth === 0) {
-        found.push({ prelude: css.slice(start, open).trim(), body: css.slice(open + 1, i) });
-        start = i + 1;
-      }
-    }
-  }
-  return found;
-}
 
 /** The declarations of a rule body, as name -> value. Nested rules are ignored. */
 function declarations(body) {
