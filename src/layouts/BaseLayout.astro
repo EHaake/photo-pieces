@@ -10,7 +10,6 @@ import { ClientRouter } from 'astro:transitions';
 import { withBase } from '../lib/url';
 import { SITE, NAV_ITEMS } from '../consts';
 import { locale, navLabel, t } from '../i18n';
-import CodeCopy from '../components/CodeCopy.astro';
 import DevGround from '../components/DevGround.astro';
 import SocialLinks from '../components/SocialLinks.astro';
 
@@ -103,8 +102,6 @@ const isActive = (href: string) => {
       </div>
       <SocialLinks />
     </footer>
-
-    <CodeCopy />
 
     <script>
       import { IMAGE_SET_KEY, setKeyFromPath } from '../lib/image-set';
