@@ -236,11 +236,12 @@ attached.
   pair's shared height), with every frame carrying its aspect ratio from the
   remark transform. Judged at one sampler gate on both of the photographer's
   screens and the ten real photographs (2026-09-17) — "let's stick with mats
-  all over with warm background" — so **the ground is unchanged** (the
-  pre-003 white was on the switch and not taken), and `DECISIONS.md`'s
-  "Mattes: site-applied" and the brief's flat-matte carve-out stand as
-  written. The ceiling bites on the wide block and the image page's stage on
-  both screens at 6% and the photographer kept it there, which is the
+  all over with warm background" — so the ground stayed warm then, and spec
+  015 took the pre-003 white after re-judging it unmatted (the ground-tone
+  entry above). `DECISIONS.md`'s "Mattes: site-applied" stands as written;
+  the brief's flat-matte carve-out was narrowed at spec 015 to the stage and
+  its quiet view. The ceiling bites on the wide block and the image page's
+  stage on both screens at 6% and the photographer kept it there, which is the
   constraint on any later move to a larger mat. Two follow-ups it leaves, both
   only if they ever matter: a packed row's mat is a share of the row's
   _target_ short side rather than its flex-grown one, so a stretched row wears
@@ -270,10 +271,10 @@ attached.
   anything that undoes the argument the rest of the site makes (the anti-feed,
   the image page as the signature element, the matte as flat and
   token-driven). Candidates already on this list that are really parts of it:
-  the front door, the slow view, image loading choreography, the reading
-  typography pass, and the ground-tone entry above (the matte itself shipped
-  as spec 013). The first step is a design conversation that names what
-  "modern" means for this site — which of the
+  the front door, the slow view, image loading choreography, and the reading
+  typography pass (the matte itself shipped as spec 013 and the ground tone
+  was settled at spec 015, both struck above). The first step is a design
+  conversation that names what "modern" means for this site — which of the
   references' moves fit a photographer's site that wants the work looked at
   slowly — and amends `design/brief.md` before any spec is written.
 - ~~**The held image**~~ — done in spec 007: two durational blocks.

@@ -266,7 +266,7 @@ describe('(a) the rule has one source (T1101, spec 013)', () => {
     expect(left).toEqual([]);
   });
 
-  it('no rule selects .gallery-grid > li > a.image-link — the cards’ mat is one place', () => {
+  it('no rule selects .gallery-grid > li > a.image-link — the grid’s cards wear no mat', () => {
     expect(css).not.toContain('.gallery-grid > li > a.image-link');
     for (const block of [...top, ...nested])
       expect(splitTop(block.prelude).map(norm)).not.toContain('.gallery-grid > li > a.image-link');
@@ -480,7 +480,9 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(norm(cell['--mat'])).toBe('0px');
     // The basis and both caps keep their `+ 2 * var(--mat)` term — that
     // constant term is what makes the packing and the srcset exact, at
-    // zero as at the gate's share (AC 3), and a mat here one edit.
+    // zero as at the gate's share (AC 3), and a mat here one edit. These
+    // pinned strings are the guarantee that the term is still read: at
+    // zero it contributes nothing, but it is still in the string.
     expect(norm(cell['flex'])).toBe(
       'var(--w) 1 calc(var(--gallery-short) * var(--w) + 2 * var(--mat))',
     );
@@ -787,7 +789,8 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
       const cellAt = at({ '--gallery-short': `${short}px`, '--w': Math.max(ratio, 1) });
       expect(px(cell['--mat'], cellAt)).toBe(0);
       // And form R's basis is the row's target width with no constant
-      // left in it: the term is still read, and it contributes nothing.
+      // left in it — the term contributes nothing at zero. That it is
+      // still in the string at all is case (b)'s pin, not this one.
       expect(
         px(basisOf(cell['flex']), {
           ...cellAt,

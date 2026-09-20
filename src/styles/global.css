@@ -1903,7 +1903,7 @@ html[data-pause-active] .social-links a {
    below that one; matte.test.mjs pins the order. Their preludes are
    byte-identical and the two stay separate on purpose: form W declares
    --mat and nothing else, the rule after it is the surface applying
-   it, and merging the pair fails two tests.
+   it, and merging the pair fails the "declared once" test.
 
    The transform still emits --ar-sum and --n on match="height" blocks
    and nothing reads them now that form P is gone: the transform is
