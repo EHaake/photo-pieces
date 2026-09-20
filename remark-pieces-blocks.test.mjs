@@ -249,7 +249,6 @@ describe('fail-loudly cases', () => {
     // weakened-to-pass). Its replacement coverage lives in
     // remark-pieces-vocabulary.test.mjs: captions, [label] rejection,
     // no-nesting, and wrong-form errors.
-    ['reserved sequence block', '::sequence{}', /reserved but not implemented/],
     ['fullbleed without src', '::fullbleed{alt="x"}', /requires a src/],
     ['fullbleed without alt', '::fullbleed{src="./photo.jpg"}', /requires an alt/],
     [

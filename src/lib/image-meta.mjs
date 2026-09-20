@@ -405,8 +405,8 @@ export function nearest(list, id, limit) {
 
 /**
  * What each block's container body is (spec 007): a caption, the
- * piece's own prose, images then a caption, or nothing (leaf-only and
- * reserved blocks). The transform's descriptor table is the vocabulary's
+ * piece's own prose, images then a caption, or nothing (leaf-only
+ * blocks). The transform's descriptor table is the vocabulary's
  * source of truth; this map mirrors it here because this module must
  * stay Astro-free, and a test asserts the two agree — names and kinds.
  */
@@ -424,7 +424,6 @@ export const BLOCK_BODIES = Object.freeze({
   row: 'prose',
   held: 'prose',
   pause: 'none',
-  sequence: 'none',
 });
 
 // The body kinds whose non-image lines are a caption. A prose body is

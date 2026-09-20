@@ -87,22 +87,21 @@ Three minutes apart. Captions take _inline markdown_.
 :::
 ```
 
-| Block       | Forms          | Attributes                                                                                                                    | Matted | Obsidian Live Preview |
-| ----------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------- |
-| `single`    | leaf/container | `src` `alt`                                                                                                                   | yes    | image (leaf)          |
-| `inset`     | leaf/container | `src` `alt`                                                                                                                   | yes    | image (leaf)          |
-| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                                               | yes¹   | image (leaf)          |
-| `fullbleed` | leaf/container | `src` `alt`                                                                                                                   | no     | image (leaf)          |
-| `tall`      | leaf/container | `src` `alt`                                                                                                                   | no     | image (leaf)          |
-| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed`                            | yes²   | images (leaf)         |
-| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                                                       | yes²   | images (leaf)         |
-| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                                                    | yes    | raw text              |
-| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption                                          | no     | raw text              |
-| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                                                       | yes    | raw text              |
-| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                                                  | yes    | raw text              |
-| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays                              | yes    | raw text              |
-| `pause`     | leaf only      | `src` `alt`; no body — nothing to read                                                                                        | yes    | image (leaf)          |
-| `sequence`  | reserved       | fails the build until its presentation is designed (`ROADMAP.md`; the image page's compare is a page section, not this block) | —      | —                     |
+| Block       | Forms          | Attributes                                                                                         | Matted | Obsidian Live Preview |
+| ----------- | -------------- | -------------------------------------------------------------------------------------------------- | ------ | --------------------- |
+| `single`    | leaf/container | `src` `alt`                                                                                        | yes    | image (leaf)          |
+| `inset`     | leaf/container | `src` `alt`                                                                                        | yes    | image (leaf)          |
+| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                    | yes¹   | image (leaf)          |
+| `fullbleed` | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
+| `tall`      | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
+| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed` | yes²   | images (leaf)         |
+| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                            | yes²   | images (leaf)         |
+| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                         | yes    | raw text              |
+| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption               | no     | raw text              |
+| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                            | yes    | raw text              |
+| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                       | yes    | raw text              |
+| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays   | yes    | raw text              |
+| `pause`     | leaf only      | `src` `alt`; no body — nothing to read                                                             | yes    | image (leaf)          |
 
 ¹ the bled edge runs clean. ² dropped at `width="fullbleed"`.
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
@@ -127,11 +126,11 @@ must exist, borrowed drafts fail. The sampler piece
 (`src/content/pieces/vocabulary-sampler/`) shows every treatment
 rendered.
 
-**Current status**: every block above except the reserved `sequence`
-is implemented — the spec-003 blocks and spec 007's two durational
-ones — transform, styling, mattes, unit tests, and the Obsidian
-plugin's leaf-form rendering — with images going through Astro's asset pipeline
-(hashed src, responsive srcset per treatment). Pieces render at
+**Current status**: every block above is implemented — the spec-003
+blocks and spec 007's two durational ones — transform, styling,
+mattes, unit tests, and the Obsidian plugin's leaf-form rendering —
+with images going through Astro's asset pipeline (hashed src,
+responsive srcset per treatment). Pieces render at
 `/pieces/<slug>/`, list at `/pieces/` (in the nav), and feed the
 homepage, RSS, and per-piece Open Graph images. Since spec 004 every
 image in a piece links to its own page (next section). Check the
