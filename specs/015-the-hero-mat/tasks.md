@@ -62,7 +62,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the constitution, the mat off, and the sampler (reviewer after the phase; the gate at its end)
 
-- [ ] **T1300** — The constitution first. `CLAUDE.md`'s block-vocabulary
+- [x] **T1300** — The constitution first. `CLAUDE.md`'s block-vocabulary
       bullet says "with captions via the container form and site-applied
       mattes" — a statement about piece-body treatments that goes false
       when T1301 lands, and the constitution requires its amendment
@@ -534,6 +534,7 @@ tier if it is ever on (it is off). -->
 | Planning: findings folded (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 24,466  | B1 (option i), N1–N8 folded; no disagreement                           |
 | Sign-off: plan/tasks (`skeptical-reviewer`)         | top (`claude-fable-5-1`, high) | 184,475 | fix and re-review — 1 blocking, 8 notes, 2 product items to the person |
 | Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 16,984  | signed off; O1 carried and transcribed                                 |
+| T1300 (`sdd-implementer`)                           | implementation (`opus`, high)  | 28,396  | done first dispatch; Verify note stale: CLAUDE.md at main is prettier-clean |
 
 _(Session-tier allowance draw noted at each pause.)_
 
