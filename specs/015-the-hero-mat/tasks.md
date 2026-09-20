@@ -81,7 +81,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `sh scripts/verify.sh tests` green (nothing under test changes —
       the run is the record that the suite was green before T1301)._
 
-- [ ] **T1301** — The mat off every surface but the stage and the pause,
+- [x] **T1301** — The mat off every surface but the stage and the pause,
       and the test that pins it. `review: per-task`. Pattern: spec 013's
       presence table (specs/013-the-matte/plan.md, "The four surfaces,
       and what off is") and T1101's forms in `src/styles/global.css`;
@@ -239,6 +239,36 @@ headers to confirm nothing was duplicated or dropped. -->
       test is its pin) — said so in the record. Where the implementer
       cannot drive a browser it says so, line by line, and the Phase 0
       pause asks the person to attest those lines._
+
+- [ ] **T1301a** — Record corrections from T1301's per-task review
+      (all notes, none blocking; logged here so they do not evaporate).
+      `src/styles/global.css`: the sizing-coupling comment (~1271) loses
+      its "None falls under" clause — the cover card renders 374.667px
+      against a 373px hint (−1.667px, inside the 2px threshold); the
+      `.prose > p > a.image-link` comment (~1163) and the anchor comment
+      (~1152) stop giving the mat as their reason (the rules stay, for
+      the anchor's width); the gallery-grid paragraph (~1942) is
+      rewritten to say why the two `.gallery-grid > li > a.image-link`
+      rules are absent without describing a card mat that no longer
+      exists; the Mattes comment gains one clause saying the two
+      identical-prelude rules (form W and padding/background) are
+      separate on purpose — merging them fails two tests.
+      `matte.test.mjs`: the off-identity case takes the task line's
+      name ("at share 0 with floor = ceiling …"); the gate-identity
+      comment stops claiming that moving any token moves the number
+      (it pins the ceiling; token drift is caught by case (a)).
+      `plan.md` Known limitations: add the −1.667px cover-card
+      under-delivery; add the match-height residual (0.234px after,
+      0.217px before at 1512/1280 — Gecko flex rounding above the
+      0.2px figure carried from 013, not a regression) with the
+      corrected tolerance; list the three global.css comments above as
+      carried-stale until this task lands; note that `/` has no cover
+      cards (they are on `/places/`, `/galleries/`, `/categories/<c>/`),
+      that the stage's 375px padding is 12.704 (12.988 is the quiet
+      view's), and that the latest-work band row is moot since PR #15
+      deleted the component. No rule changes. _Verify:
+      `sh scripts/verify.sh` green; `git diff --stat` touches only
+      those three files; `grep -n "None falls under" src/styles/global.css` → 0._
 
 - [ ] **T1302** — The sampler's bars, honest. `src/pages/dev/matte/[...surface].astro`
       (spec 013's file, extended at 014 — its own template is the
@@ -535,6 +565,8 @@ tier if it is ever on (it is off). -->
 | Sign-off: plan/tasks (`skeptical-reviewer`)         | top (`claude-fable-5-1`, high) | 184,475 | fix and re-review — 1 blocking, 8 notes, 2 product items to the person |
 | Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 16,984  | signed off; O1 carried and transcribed                                 |
 | T1300 (`sdd-implementer`)                           | implementation (`opus`, high)  | 28,396  | done first dispatch; Verify note stale: CLAUDE.md at main is prettier-clean |
+| T1301 (`sdd-implementer`)                           | implementation (`opus`, high)  | 209,163 | done first dispatch; LatestWork bullet moot (PR #15); BiDi before/after identical on pause and stage |
+| T1301 per-task review (`skeptical-reviewer`)        | implementation (`opus`, high)  | 99,818  | SIGN OFF, 0 blocking, N1–N7 → T1301a and the sweep                      |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -550,6 +582,16 @@ T1305's tokens against the implementation-tier close-outs of specs 012
 and 013.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
+
+- **T1301 review N1–N7** (2026-09-19): N1 "None falls under" false by
+  the cover card's −1.667px; N2 match-height residual 0.234/0.217px
+  above the plan's 0.2px before and after; N3 three stale mat comments
+  in global.css (~1152, ~1163, ~1942); N4 off-identity test name wider
+  than its body; N5 gate-identity comment overstates sensitivity; N6
+  two identical-prelude rules that must not be merged; N7 three verify
+  items resolved by substitution (`/` has no cards, stage 375px pad is
+  12.704, LatestWork moot). N1–N6 addressed by T1301a; the sweep
+  confirms.
 
 - **O1** (from the sign-off's re-review, 2026-09-19; blocking on the
   deepens branch only, so transcribed at once): `readout(bg, from = MUTED)`
