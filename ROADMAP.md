@@ -420,6 +420,30 @@ attached.
 - **Image loading choreography** — a large frame popping in
   half-decoded breaks the spell: a fade on decode and a mat-coloured
   placeholder.
+- **Motion, considered** — raised by the photographer in spec 016's
+  conversation (2026-09-20): the site "now feels a bit old-school", and
+  he can imagine two kinds of subtle animation. (1) On a dark ground —
+  the quiet view, the hero stage spec 016 builds, a pause — a faint glow
+  or burst behind the frame that moves smoothly and subtly: a light
+  that breathes behind the photograph rather than a static field. (2) A
+  scroll that settles: some acceleration and deceleration, so that
+  things come to rest once the scroll stops rather than stopping dead.
+  Both are a design conversation before any spec, because both cross a
+  line the site has held since spec 007 — nothing moves unless the
+  reader scrolls, no timed or automatic motion — so the first thing to
+  decide is whether that rule bends for a glow (motion with no reading
+  purpose, which is what the rule was written against), and what
+  reduced motion gets instead. The scroll settle is the riskier of the
+  two: scroll hijacking is the thing readers most resent on photography
+  sites, and a settle that lands mid-paragraph is worse than none, so it
+  wants a prototype judged on both screens, and the narrower option of
+  a settle only inside the scenes where the site already runs the
+  scroll (the hero stage's fade, the pause). Worth asking in that
+  conversation what "old-school" names precisely — the type, the static
+  ground, the absence of motion, the layouts — since the answer may be
+  the reading typography pass below as much as animation. "Image
+  loading choreography" below (a fade on decode) is the same family and
+  would fold in.
 - **Output formats and a page-weight budget** — eight exports at two
   megabytes is a sixteen-megabyte piece; AVIF output and a stated
   budget per piece.
