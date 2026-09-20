@@ -240,7 +240,7 @@ headers to confirm nothing was duplicated or dropped. -->
       cannot drive a browser it says so, line by line, and the Phase 0
       pause asks the person to attest those lines._
 
-- [ ] **T1301a** — Record corrections from T1301's per-task review
+- [x] **T1301a** — Record corrections from T1301's per-task review
       (all notes, none blocking; logged here so they do not evaporate).
       `src/styles/global.css`: the sizing-coupling comment (~1271) loses
       its "None falls under" clause — the cover card renders 374.667px
@@ -567,6 +567,7 @@ tier if it is ever on (it is off). -->
 | T1300 (`sdd-implementer`)                           | implementation (`opus`, high)  | 28,396  | done first dispatch; Verify note stale: CLAUDE.md at main is prettier-clean |
 | T1301 (`sdd-implementer`)                           | implementation (`opus`, high)  | 209,163 | done first dispatch; LatestWork bullet moot (PR #15); BiDi before/after identical on pause and stage |
 | T1301 per-task review (`skeptical-reviewer`)        | implementation (`opus`, high)  | 99,818  | SIGN OFF, 0 blocking, N1–N7 → T1301a and the sweep                      |
+| T1301a (`sdd-implementer`)                          | implementation (`opus`, high)  | 44,775  | done first dispatch; match-height tolerance set to 0.25px             |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -591,7 +592,10 @@ and 013.
   two identical-prelude rules that must not be merged; N7 three verify
   items resolved by substitution (`/` has no cards, stage 375px pad is
   12.704, LatestWork moot). N1–N6 addressed by T1301a; the sweep
-  confirms.
+  confirms. Still stale for the sweep: matte.test.mjs case (a)'s
+  name "the cards' mat is one place" (an assertion name, outside
+  T1301a's one rename), and plan.md's original LatestWork bullet in
+  Known limitations (the new bullet beside it says the component is gone).
 
 - **O1** (from the sign-off's re-review, 2026-09-19; blocking on the
   deepens branch only, so transcribed at once): `readout(bg, from = MUTED)`

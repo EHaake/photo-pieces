@@ -1148,10 +1148,11 @@ a.note-row {
 }
 
 /* Spec 004: every image is a link to its page, and the anchor is the
-   layout item — the flex or grid child, the thing that floats, the
-   thing that carries the mat — with the image filling it. background:
-   none drops the theme's gradient underline; the site's :focus-visible
-   ring draws around the whole frame. */
+   layout item — the flex or grid child, the thing that floats — with
+   the image filling it; since spec 015 the only anchor that also
+   carries a mat is the pause's. background: none drops the theme's
+   gradient underline; the site's :focus-visible ring draws around the
+   whole frame. */
 .piece-block a.image-link,
 .prose > p > a.image-link,
 .piece-row-prose > p > a.image-link {
@@ -1160,7 +1161,8 @@ a.note-row {
 }
 
 /* Shorthand images sit in a paragraph at their own width, as before —
-   the mat must hug the image, not span the column. */
+   fit-content keeps the anchor at the image's width instead of
+   stretching it across the column. */
 .prose > p > a.image-link,
 .piece-row-prose > p > a.image-link {
   width: fit-content;
@@ -1272,7 +1274,9 @@ a.note-row {
    over-delivers against the ~665px column by design (the compare's
    700px likewise, measured ~35px over at T1301), and the gallery's
    hint is exact — the cell's cap is the row's math with a constant
-   term of zero. None falls under. */
+   term of zero. One hint under-delivers: the index cover card renders
+   374.667px against a 373px hint, 1.667px short — measured at T1301,
+   inside the 2px threshold. */
 
 /* Centered breakout: wider than the prose column, not the viewport. */
 .piece-wide {
@@ -1875,7 +1879,10 @@ html[data-pause-active] .social-links a {
    `.piece-block a.image-link` above, whose `background: none` drops
    the theme's gradient underline — so the mat's white now wins by
    coming later in this file and by nothing else. Both rules must stay
-   below that one; matte.test.mjs pins the order.
+   below that one; matte.test.mjs pins the order. Their preludes are
+   byte-identical and the two stay separate on purpose: form W declares
+   --mat and nothing else, the rule after it is the surface applying
+   it, and merging the pair fails two tests.
 
    The transform still emits --ar-sum and --n on match="height" blocks
    and nothing reads them now that form P is gone: the transform is
@@ -1939,12 +1946,12 @@ html[data-pause-active] .social-links a {
   }
 }
 
-/* A grid cell's own mat lives with its card: the only .gallery-grid is
-   CoverCards.astro's list, whose anchor is a.gallery-card and whose mat
-   sits on the span.image-link inside it (spec 009). The two
-   `.gallery-grid > li > a.image-link` rules that used to sit here
-   matched no markup after that move and went at spec 013 T1101, so the
-   cards' mat is one place. */
+/* Nothing here selects `.gallery-grid > li > a.image-link`, and the
+   absence is deliberate: the only .gallery-grid is CoverCards.astro's
+   list, whose anchor is a.gallery-card with a span.image-link inside it
+   (spec 009), so the two rules that used to sit here matched no markup
+   after that move and went at spec 013 T1101. matte.test.mjs case (a)
+   pins that they stay gone. */
 
 /* ---- Gallery pages: rows packed to equal short sides (T307R) --------
    The photographer's rule from the sampler review: every image's SHORT

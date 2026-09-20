@@ -732,7 +732,7 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     }
   });
 
-  it('the off identity: at any tokens the matted forms give the mat and the unmatted surfaces give 0', () => {
+  it('the off identity: at share 0 with floor = ceiling the matted forms give the mat and the unmatted surfaces give 0', () => {
     const cell = declarations(ruleFor(top, '.gallery-flow > li').body);
     const held = declarations(ruleFor(top, '.piece-held figure').body);
     const pause = declarations(ruleFor(top, '.piece-pause').body);
@@ -800,8 +800,10 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
   it("the gate identity: at :root's tokens the stage wears the 40px ceiling and the reading-width single wears nothing", () => {
     // The gate's number, kept: at 1512×982 the stage's 3:2 frame sits on
     // the ceiling on both of form V+H's branches (T1104's record, Firefox
-    // 155: 40.0). Run against :root itself, so moving any of the three
-    // tokens moves this number — spec 015 re-derived none of them.
+    // 155: 40.0). Run against :root itself, so a move in the ceiling
+    // moves this number — it is the ceiling the frame sits on here;
+    // drift in the other two tokens is caught by case (a). Spec 015
+    // re-derived none of the three.
     const stage = declarations(ruleFor(top, '.image-stage').body);
     const frame = declarations(ruleFor(top, '.image-frame').body);
     const m = px(frame['--mat'], {

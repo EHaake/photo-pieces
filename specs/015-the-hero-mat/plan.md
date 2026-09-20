@@ -428,6 +428,37 @@ plugin; `src/lib/gallery-layout.ts`; `DevGround.astro`, `BaseLayout.astro`,
 - **Firefox floors a percentage-bearing padding to 1/60 px** (spec 013):
   the pause anchor's before/after reads compare at that resolution;
   every other frame now computes a literal 0.
+- **The index cover card's `sizes` hint under-delivers by 1.667px** —
+  measured at T1301: the card renders 374.667px against a 373px hint.
+  Inside the 2px threshold the bullet above sets, so it did not go to
+  the pause report, but it is the one hint that falls under, and
+  `global.css`'s sizing-coupling comment says so since T1301a (it used
+  to say none did). Cover cards live on `/places/`, `/galleries/` and
+  `/categories/<c>/` — `/` carries none, so the home page is not where
+  to check this frame.
+- **A `match="height"` row leaves a sub-pixel residual in Gecko** —
+  measured at T1301 at both 1512 and 1280: the row's images land within
+  0.234px of a common height after the unmatting and 0.217px before it
+  (the triptych 0.167 / 0.150). Firefox's flex rounding, unchanged by
+  spec 015 and not a regression. The 0.2px figure carried over from
+  spec 013 is the wrong tolerance for this setup, since the residual
+  sits above it on both sides of the change; corrected to 0.25px, the
+  next round figure above the measured value. What says "no
+  regression" is the before/after pair, not the absolute number.
+- **Three `global.css` comments went stale at T1301 and are corrected
+  at T1301a** (per-task review; all notes, none blocking): the anchor
+  comment (~1152), which called the anchor "the thing that carries the
+  mat" — true of the pause's anchor alone now; the shorthand comment
+  (~1163), which gave the mat as the reason for `width: fit-content`
+  — the declaration still has a real effect, keeping the anchor at the
+  image's width; and the gallery-grid paragraph (~1942), whose card mat
+  no longer exists — rewritten rather than deleted, because it records
+  why the two `.gallery-grid > li > a.image-link` rules are absent, a
+  fact matte.test.mjs case (a) pins. Two more corrections from the same
+  review: the stage's padding at 375px reads 12.704 (12.988 is the
+  quiet view's), and the surface table's latest-work row is moot —
+  PR #15 deleted `LatestWork.astro`, so the `LatestWork` bullet above
+  describes a component that is no longer in the tree.
 - **014's limitations stand**: the readout is arithmetic, not a
   photometer; contrast is checked at seven pairs; `localStorage` is per
   origin; the generator is proven for the ground, not the card (the
