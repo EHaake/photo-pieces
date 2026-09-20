@@ -19,9 +19,10 @@
      The pair that bound: muted/soft at 5.05:1, the lowest of the six
      floored pairs (inline code sits on the soft fill). It clears 4.5:1,
      so --color-muted ships unchanged at oklch(0.5 0.012 250) — this
-     gate deepened nothing. White-mat-on-ground is 1.02:1 (ΔL 0.01): the
-     mat reads faintly here, and the stage's darker field is its own
-     spec (ROADMAP).
+     gate deepened nothing. White-mat-on-ground is 1.02:1 (ΔL 0.01):
+     the mat reads faintly here, and the stage sits on the arrival's
+     dark since spec 016 — the mat/bg row is the no-script page's
+     only.
 
      History: spec 003 warmed the ground to oklch(0.968 0.006 95) at its
      sampler review so pure-white mattes read as mats on a gallery wall
@@ -58,9 +59,12 @@
      warm page reads as a mat with no rule needed; never add shadow,
      bevel, or texture.
 
-     WHERE IT IS, since spec 015. The image page's stage and its quiet
+     WHERE IT IS, by the rule spec 016 states (CLAUDE.md): the mat is
+     worn where the ground is dark — the stage on arrival, the quiet
+     view, the pause. Those are the image page's stage and its quiet
      view (form V+H on `.image-frame`), and the pause frame (form W, on
-     a list of one) until the pause gets a spec of its own. Every other
+     a list of one); the pause's mat is the rule now, not a deferred
+     exception, and its rework stays on the roadmap. Every other
      surface is unmatted — a piece's reading-flow frames, the held
      frame, the packed galleries, the place wall, the related strip,
      the index cover cards, the compare figure — and off means the
@@ -94,6 +98,29 @@
      behind a single matted frame, entered and left on purpose, never a
      site-wide mode (the light-only decision of spec 002 stands). */
   --color-quiet: oklch(0.2 0.008 95);
+  /* The arrival (spec 016): the image page's dark first screen, the
+     field the stage sits in before the reader scrolls. --arrival-depth
+     is the ground's share of the way from --color-bg to --color-quiet
+     at full lights — the pause's --pause-depth model, one step deeper;
+     --arrival-chrome the dimmed chrome's share of the way from ITS OWN
+     token to --color-quiet, scaled by the lights (1 is the pause's
+     rule for words, all the way); --arrival-fade the fade's length in
+     viewport heights, READ BY NOTHING IN CSS — it is the head script's
+     FADE constant written a second time so the dev control can show a
+     default it can read, and arrival.test.mjs pins the two equal.
+     --color-arrival is the dark itself: derived from the depth, so it
+     follows the ground if the ground moves, and written once because
+     it is read twice — by the no-script field on .image-stage and by
+     the page's mix. These three values are the plan's start; the
+     photographer's gate sets them. */
+  --arrival-depth: 0.9;
+  --arrival-chrome: 1;
+  --arrival-fade: 1;
+  --color-arrival: color-mix(
+    in oklch,
+    var(--color-bg),
+    var(--color-quiet) calc(var(--arrival-depth) * 100%)
+  );
   /* Sampler-review knobs for the tall and strip treatments. --tall-max
      was 92vh; at the second visual gate (2026-09-05, a 16:10 laptop) a
      2:3 tall was "difficult while scrolling to centre such that the
@@ -1852,11 +1879,12 @@ html[data-pause-active] .social-links a {
 /* ---- Mattes (spec 003 Phase 3; per-image since the sampler review;
    a share of the frame since spec 013; the hero's alone since spec
    015) -------------------------------------------------------------
-   MATTED, and this is the whole list: the image page's stage
-   (`.image-frame`, form V+H, at the end of this file) and its quiet
-   view, and the pause frame — `.piece-pause-frame`'s anchor, form W,
-   just below, on a selector list of one — until the pause gets a spec
-   of its own. The pause's mat does not dim during a pause (the
+   MATTED, and this is the whole list — it is the rule spec 016
+   states: the mat is worn where the ground is dark. The image page's
+   stage (`.image-frame`, form V+H, at the end of this file), on
+   arrival and in its quiet view, and the pause frame —
+   `.piece-pause-frame`'s anchor, form W, just below, on a selector
+   list of one. The pause's mat does not dim during a pause (the
    photographer's decision 9): a white mat on the dark ground is what
    quiet view already does. Since spec 004 a mat sits on the image's
    link (the layout item); a bare img — alt="" gets no link — carries
@@ -2087,6 +2115,7 @@ html[data-pause-active] .social-links a {
   min-height: calc(100vh - var(--header-h, 4.5rem));
   min-height: calc(100svh - var(--header-h, 4.5rem));
   padding: var(--stage-pad) var(--page-pad);
+  background: var(--color-arrival); /* no script: the stage's own field */
 }
 
 /* Form V+H (the mat rule, spec 013): width and height both bind the
@@ -2152,4 +2181,114 @@ html[data-quiet] .image-frame,
 html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   max-width: 100%;
   cursor: zoom-out;
+}
+
+/* ---- The arrival (spec 016) -------------------------------------------
+   The image page's first screen: the stage in a dark field edge to
+   edge, the chrome dimmed, both fading to the ordinary page as the
+   stage scrolls away. THE PATTERN IS THE PAUSE'S LIGHTS, borrowed
+   whole — a number on <html> (--arrival-lights, 1 at the top, 0 once
+   the stage has gone) and a block of color-mix() rules, each mixing
+   from ITS OWN token toward the quiet dark, so at lights 0 every
+   element computes to exactly its unmixed colour and nothing snaps
+   when the state appears. Nothing is timed, nothing moves.
+
+   THE SCRIPT OWNS THE STATE. data-arrival and --arrival-lights are
+   written by the image page's inline head script and rendered by
+   nobody, so a page without script is a page without them and the
+   no-script look is what this stylesheet says with no attribute on
+   <html>: the field declared on .image-stage above, ending at the
+   stage's own edge and scrolling away with it.
+
+   THE QUIET GATE. Every rule here begins
+   `html[data-arrival]:not([data-quiet])`, so under data-quiet none of
+   them match: the quiet view's rules are never in competition, no
+   source-order or specificity argument is needed, and the quiet block
+   above stays byte-identical.
+
+   THE DIMMED SET is the spec's — the header (its ground, its hairline,
+   the brand, the nav), the frame nav, the quiet toggle, and the label
+   beneath the stage that reads as the page head (.image-head's eyebrow
+   and title). .image-body is NOT in it: the story and its label read
+   at full strength on the light ground, and at fade 1 the body's top
+   enters the viewport with the lights already below half — one
+   selector adds it if the gate wants it. The nav is split on
+   [aria-current] because the current page's link reads the text token,
+   not the muted one, and the pause's rule is "each element from its
+   own token". Nothing below declares display, visibility, opacity or
+   any box property: the dimming is colour only, so nothing is hidden
+   from assistive technology and nothing can shift — arrival.test.mjs
+   walks this block and allows five properties and the two customs. */
+
+/* The two mixes, written once and read by the rules below.
+   `transition: none` because the image page's own
+   `:global(html), :global(body), .image-stage { transition:
+   background-color 220ms ease }` would otherwise ease every
+   scroll-driven step of the ground — a settle after the scroll stops,
+   which is the roadmap's "motion, considered", not this spec. Under
+   data-quiet this rule stops matching, so entering quiet view keeps
+   its 220ms ease. */
+html[data-arrival]:not([data-quiet]),
+html[data-arrival]:not([data-quiet]) body {
+  --arrival-ground: color-mix(
+    in oklch,
+    var(--color-bg),
+    var(--color-arrival) calc(var(--arrival-lights, 0) * 100%)
+  );
+  --arrival-ink: calc(var(--arrival-lights, 0) * var(--arrival-chrome) * 100%);
+  background: var(--arrival-ground);
+  transition: none; /* the page's quiet-view easing must not ride the scroll */
+}
+html[data-arrival]:not([data-quiet]) .image-stage {
+  background: transparent; /* the page's ground is the field now */
+}
+html[data-arrival]:not([data-quiet]) .site-header {
+  background: var(--arrival-ground);
+  border-bottom-color: color-mix(
+    in oklch,
+    var(--color-line),
+    var(--color-quiet) var(--arrival-ink)
+  );
+}
+/* The text-coloured chrome: the brand, the current page's nav link,
+   the title. The [aria-current] compound is what makes the split
+   from the muted links real — by specificity, not by source order. */
+html[data-arrival]:not([data-quiet]) .site-header :is(.brand, .site-nav a[aria-current='page']),
+html[data-arrival]:not([data-quiet]) .image-head h1 {
+  color: color-mix(in oklch, var(--color-text), var(--color-quiet) var(--arrival-ink));
+}
+/* The muted-coloured chrome: the other nav links, the frame nav, the
+   toggle. */
+html[data-arrival]:not([data-quiet]) :is(.frame-nav, .frame-nav a, .quiet-toggle),
+html[data-arrival]:not([data-quiet]) .site-nav a:not([aria-current='page']) {
+  color: color-mix(in oklch, var(--color-muted), var(--color-quiet) var(--arrival-ink));
+}
+html[data-arrival]:not([data-quiet]) .image-head :is(.eyebrow, .eyebrow a) {
+  color: color-mix(in oklch, var(--color-accent), var(--color-quiet) var(--arrival-ink));
+}
+/* The theme eases a link's colour 180ms for the hover; on the dimmed
+   links that ease would run behind every scroll step and at every
+   router arrival. The underline's ease stays; the colour's goes. */
+html[data-arrival]:not([data-quiet]) :is(.site-nav a, .frame-nav a, .image-head .eyebrow a) {
+  transition: background-size 180ms ease;
+}
+/* Focus on the dimmed chrome: readable at every lights value — the
+   text colour on paper, paper on the dark wall. The ring is the
+   theme's. The long compound in the :is() list is deliberate: it
+   lifts this rule above the current-page link's text rule; the
+   eyebrow's link is in the list because it is a focusable member of
+   the dimmed set, and the wall label is a way back too. */
+html[data-arrival]:not([data-quiet])
+  :is(
+    .site-header .site-nav a[aria-current='page'],
+    .site-header a,
+    .frame-nav a,
+    .quiet-toggle,
+    .image-head .eyebrow a
+  ):focus-visible {
+  color: color-mix(
+    in oklch,
+    var(--color-text),
+    var(--color-bg) calc(var(--arrival-lights, 0) * 100%)
+  );
 }

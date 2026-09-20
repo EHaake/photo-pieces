@@ -12,16 +12,20 @@ import { blocks, uncomment } from './src/lib/ground.ts';
 // frame's ratio and publishes --mat, which the surface applies as
 // `padding: var(--mat)`.
 //
-// TWO SURFACES WEAR ONE, since spec 015: the image page's stage
-// (form V+H) and the pause frame (form W, on a selector list of one),
-// which keeps its mat until the pause gets a spec of its own. Every
-// other surface is off, and off has two shapes — `--mat: 0px` where a
+// TWO SURFACES WEAR ONE, since spec 015, and BY THE RULE spec 016
+// states (CLAUDE.md): the mat is worn where the ground is dark — the
+// stage on arrival, the quiet view, the pause — and nowhere else. So
+// the image page's stage (form V+H) and the pause frame (form W, on a
+// selector list of one), whose mat is the rule now rather than a
+// deferred exception; the pause's rework stays on the roadmap, its mat
+// does not wait for it. Every other surface is off, and off has two
+// shapes — `--mat: 0px` where a
 // layout formula still reads the mat (the held figure, the packed
 // cell), and nothing at all where only the padding did. Both shapes are
 // pinned below, so a padding that grows back on a surface, or a formula
 // that loses its term, fails a case that names it.
 //
-// Three kinds of guard, because three different things can go wrong:
+// Four kinds of guard, because four different things can go wrong:
 //
 // (a) The single source. Three tokens in :root and nowhere else: a
 //     second declaration anywhere (a surface "just overriding the
@@ -48,6 +52,13 @@ import { blocks, uncomment } from './src/lib/ground.ts';
 //     a height-bound frame's width returns that frame's mat), the
 //     CSS/srcset agreement for packed rows, and the off identity: at any
 //     tokens at all, the unmatted surfaces resolve to zero.
+//
+// (d) The why, since spec 016. (a)-(c) pin WHICH surfaces wear a mat
+//     and what shape it takes; they would pass just as well if the two
+//     had been picked out of a hat. This case pins the reason: each of
+//     the two sits under a ground that goes dark, the three darks are
+//     one token, and the stylesheet has no fourth dark ground for a mat
+//     to be missing from.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -837,5 +848,81 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
         /piece-(single|inset|wide|diptych|triptych|grid|aside|row|held)|\.prose/.test(prelude),
       );
     expect(onPieces).toEqual([]);
+  });
+});
+
+describe('(d) worn where the ground is dark (T1401, spec 016)', () => {
+  // The rule, restated: the mat is worn where the ground is dark — the
+  // stage on arrival, the quiet view, the pause — and nowhere else.
+  // Case (b) pins the two selectors that read --mat as a padding; this
+  // case pins the three dark grounds they sit under, so "the hero's
+  // alone" is a consequence of the rule rather than a list someone
+  // kept in their head.
+
+  it('the stage’s ground is the arrival’s dark without script, and the quiet dark in quiet view', () => {
+    expect(norm(declarations(ruleFor(top, '.image-stage').body)['background'])).toBe(
+      'var(--color-arrival)',
+    );
+    expect(
+      norm(declarations(ruleFor(top, 'html[data-quiet] .image-stage').body)['background']),
+    ).toBe('var(--color-quiet)');
+  });
+
+  it('the pause’s ground mixes toward the same quiet dark — read off the lights block, not retyped', () => {
+    const lights = declarations(ruleFor(top, 'html[data-pause-active]', 'background').body);
+    expect(norm(lights['background'])).toBe(
+      'color-mix(in oklch, var(--color-bg), var(--color-quiet) calc(var(--pause-lights, 0) * var(--pause-depth) * 100%))',
+    );
+  });
+
+  it('--color-arrival is the quiet dark walked back by the depth — one dark, derived, not a second literal', () => {
+    // Retyped as an oklch() literal the arrival stops being the quiet
+    // dark's relative and this rule stops being one rule — which is
+    // what these two reads say, and all this case needs to say. The
+    // exact mix string is pinned once, in arrival.test.mjs's (a),
+    // beside the numeric "lighter than quiet" claim.
+    const value = norm(root['--color-arrival']);
+    expect(value).toContain('var(--color-quiet)');
+    expect(value).toContain('var(--arrival-depth)');
+  });
+
+  it('those three are the whole set of dark grounds, and the two matted surfaces are what sits on them', () => {
+    // Every background in the file that reads one of the two darks —
+    // and there is no fourth. A surface given a dark ground without a
+    // mat, or a mat put on a light one, breaks the rule here rather
+    // than at the gate. (The arrival's page-wide ground reaches
+    // --color-arrival through --arrival-ground, which arrival.test.mjs
+    // pins; it is the same dark, carried by <html> instead of by the
+    // stage's box.)
+    const dark = [];
+    for (const block of [...top, ...nested])
+      for (const [property, value] of Object.entries(declarations(block.body)))
+        if (/^background/.test(property) && /--color-(quiet|arrival)\b/.test(value))
+          dark.push(norm(block.prelude));
+    expect(dark.sort()).toEqual([
+      '.image-stage',
+      'html[data-pause-active], html[data-pause-active] body',
+      'html[data-quiet] .image-stage',
+    ]);
+    // ...and each of the two matted selectors sits under one of them,
+    // by the limits it reads rather than by assertion: --avail-w and
+    // --avail-h carry no fallback, so a frame that reads them renders
+    // only inside a box that publishes them — and the three boxes that
+    // do are the pause's scene and the stage's two rules, which are
+    // the three dark grounds above. A matted frame moved under a light
+    // surface would have to bring a fourth publisher with it, and this
+    // list is where it would appear.
+    const limits = [...top, ...nested]
+      .filter((block) => '--avail-w' in declarations(block.body))
+      .map((block) => norm(block.prelude));
+    expect(limits.sort()).toEqual([
+      '.image-stage',
+      '.piece-pause',
+      'html[data-quiet] .image-stage',
+    ]);
+    expect(norm(declarations(ruleFor(top, MATTED[1]).body)['--mat'])).toContain('var(--avail-w)');
+    expect(norm(declarations(ruleFor(top, '.piece-pause').body)['--mat'])).toContain(
+      'var(--avail-w)',
+    );
   });
 });

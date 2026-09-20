@@ -140,7 +140,7 @@ dependency; the pause's markup, CSS and script byte-identical.
      text colour on paper, paper on the dark wall. The ring is the
      theme's. The long compound in the :is() list is deliberate: it
      lifts this rule above the current-page link's text rule. */
-  html[data-arrival]:not([data-quiet]) :is(.site-header .site-nav a[aria-current='page'], .site-header a, .frame-nav a, .quiet-toggle):focus-visible {
+  html[data-arrival]:not([data-quiet]) :is(.site-header .site-nav a[aria-current='page'], .site-header a, .frame-nav a, .quiet-toggle, .image-head .eyebrow a):focus-visible {
     color: color-mix(in oklch, var(--color-text), var(--color-bg) calc(var(--arrival-lights, 0) * 100%));
   }
   ```
@@ -154,7 +154,11 @@ dependency; the pause's markup, CSS and script byte-identical.
   tie arises; the transition rule declares nothing the others do; the
   focus rule's `:is()` takes `.site-header .site-nav a[aria-current='page']`
   (0,3,1) plus `:focus-visible`, so (0,6,2), above both colour rules on
-  every link it names. The theme's `a:not(.brand, .button):hover`
+  every link it names — the eyebrow's link included (its colour rule is
+  (0,4,2)); it was missing from the list until T1401's per-task review
+  (B-1, 2026-09-20): a focusable member of the dimmed set outside the
+  focus rule, and the label sits just under the stage, so it is reached
+  with the lights still near 1. The theme's `a:not(.brand, .button):hover`
   (0,2,1) loses to all of them, so a dimmed link does not change colour
   on hover at the top; its underline still draws. Test (b) pins each
   rule's full selector list, the focus rule's long compound included,

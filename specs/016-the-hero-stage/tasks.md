@@ -86,7 +86,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `sh scripts/verify.sh tests` green (the record that the suite was
       green before T1401)._
 
-- [ ] **T1401** — The tokens, the arrival's rules, and the pins.
+- [x] **T1401** — The tokens, the arrival's rules, and the pins.
       `review: per-task`. Pattern: the pause's lights block in
       `src/styles/global.css` (~1767–1836: the `color-mix()` rules, each
       from its own token) and `:root`'s `--pause-depth`; `matte.test.mjs`
@@ -162,6 +162,8 @@ headers to confirm nothing was duplicated or dropped. -->
       source-string case fails naming the rule. Where the
       implementer cannot drive a browser it says so, line by line, and
       the Phase 0 pause asks the person to attest those lines._
+
+_T1401 record (2026-09-20, implementer at opus; per-task review at opus, one re-review):_ orchestrator's re-run of `sh scripts/verify.sh` — `87 page(s) built`, `[check-no-gps] 741 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/; no dev-ground marker in 97 files.`, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 16 passed (16)`, `Tests 347 passed (347)`, `TEST EXIT 0` (335 on main + 12 in `arrival.test.mjs`... 347 total with matte's four (d) cases). Before-read (Firefox 155 headless via BiDi, dev server, quiet state cleared; `<html>` [252,252,250] paper everywhere, `.image-stage` transparent): land-b 1512×982 stage rect x0 y75.8 1497×906 pad 29.45/32, frame x168.5 y128.93 1160×799.72 pad 40, img h 719.72; port-a 1512 frame x455.67 y105.25 585.65×847.08 pad 31.3886, img h 784.32; land-b 375×812 stage x0 y136.4 360×676 pad 24.35/16, frame x16 y360.75 328×227.28 pad 12.7037, img h 201.88; port-a 375 frame x16 y237.58 328×473.63 pad 18.375, img h 436.9; sampler stage frame x168.5 y227 1160×799.72 pad 40. After: `<html>` still paper; `.image-stage` computed `oklch(0.279 0.0075 95.5)` → [42,41,37] = the test's arithmetic exactly (0/255); every rect, padding and image height identical to before on all five reads; the sampler's four stages [42,41,37]; quiet view on land-b: `<html>`, `body`, stage [23,22,18] = `--color-quiet`; left → `<html>` paper, stage [42,41,37]. Hunks against main: -22,3 / -61 / -63 (comments), -96,0 +101,23 (tokens after `--color-quiet`), -1855,5 (the Mattes-section comment's third "until the pause gets a spec" — reworded too, reported as a deviation), -2089,0 (the stage's background), -2155,0 +2185,110 (the arrival block); protected regions `.piece-pause`→`.piece-pause-frame` 1672–1765, `html[data-pause-active]` 1778–1836, `.image-frame` 2095–2114, `.image-frame img` 2116–2122, the two `html[data-quiet] .image-` rules 2140–2155, form W 1922–1928 and the six token lines extracted from both revisions and identical. The named diff over the pieces page, pause-shape, the transform, `src/pages/dev/`, `DevGround.astro` empty; `data-arrival` in global.css only inside the block. All seven named mutations fail their named cases (quoted in the review bundle), tree restored by checksum. Review B-1: the eyebrow's link was in the dimmed set but not the focus rule's `:is()` (AC 10) — the plan's CSS amended (focus rule and specificity paragraph, dated), the rule, the pinned prelude and the mutation added; N-3 the one-source case now counts declaring blocks (`[':root']` exactly — a second `:root`, plain or in a media query, fails it; the file has one at 389); N-4 matte (d)'s duplicate exact-string pin dropped, `toContain` kept; N-6 the third `ruleFor` argument is a real disambiguator, kept. Findings: `--header-h` is 76px at 1512 and 136px at 375 (the nav wraps), so the phone's dark field is 676 of 812px; one BiDi session per Firefox process (kill port 9222 first); Firefox serialises the mix in oklch — canvas round-trip for rgb.
 
 - [ ] **T1402** — The script, and the no-flash rule. Pattern:
       `src/components/DevGround.astro` (an inline, render-blocking head
@@ -566,11 +568,39 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | Sign-off: plan/tasks (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 124,686 | BLOCK — B1 (close-out patch flow, the dispatcher's own wrong instruction), B2 (aria-current split by source order); N1–N11 |
 | Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 23,108 | B1, B2 cleared; O1 carried and transcribed; two notes below |
 | T1400 (`sdd-implementer`)                  | implementation (`opus`, high)  | 23,747 | done first dispatch; 331 tests green before T1401; CLAUDE.md prettier-clean at head |
+| T1401 (`sdd-implementer`)                  | implementation (`opus`, high)  | 138,181 | done first dispatch; BiDi before/after identical; seven mutations |
+| T1401 fix (`sdd-implementer`)              | implementation (`opus`, high)  | 58,830 | B-1, N-3, N-4 fixed; N-6 reported |
+| T1401 per-task review (`skeptical-reviewer`) | implementation (`opus`, high) | 80,999 | BLOCK — B-1 (eyebrow link outside the focus rule, AC 10); N-1–N-8 |
+| T1401 re-review (`skeptical-reviewer`)     | implementation (`opus`, high)  | 27,764 | PASS; three second-look notes below |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
+- **From T1401's per-task review (2026-09-20), non-blocking, carried:**
+  N-1 `transition: none` holds at every lights value, so leaving quiet
+  view at lights 0 snaps the ground to paper where the pre-spec page
+  eased 220ms (entering is fine; the stage's own ease covers leaving
+  only while the stage is on screen) — look at the gate under T1402;
+  N-2 `:root`'s `--arrival-fade` comment says arrival.test.mjs pins it
+  equal to `FADE` — true only once T1402 writes the pin (named in
+  T1402's bundle); N-5 matte (d)'s "whole set of dark grounds" is
+  scoped to global.css (the quiet view's page-wide dark lives in the
+  page's scoped style); N-7 six helpers are now copied between the two
+  test files — a third reader lifts them into a module; N-8 the ground
+  comment's "the mat/bg row is the no-script page's only" is the
+  steady state (during the fade the pair recurs transiently). From
+  the re-review: the exact `--color-arrival` string is pinned in
+  arrival (a) alone and matte (d)'s comment says so (prose
+  dependency); dropping the eyebrow from the focus rule fails two (b)
+  cases, so those two are not independent; the one-source case's
+  `[':root']` is spelling-sensitive (`:root, html` would fail it).
+  For T1402 (the reviewer's inherit notes): the script must set
+  `data-arrival` even at a restored position (without it the stage's
+  base rule paints the dark field — AC 5's "dark frame first"), and
+  must write the attribute and the lights value in one synchronous
+  head step (the lights fallback is 0 and the gated stage is
+  transparent, so attribute-first paints light then snaps dark).
 - **O1** (from the sign-off's re-review, 2026-09-20; transcribed at
   once, the review cap reached): T1402's "`document.getAnimations()`
   empty right after `astro:page-load`" would fail on a correct page —
