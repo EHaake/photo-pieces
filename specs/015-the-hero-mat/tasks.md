@@ -509,6 +509,15 @@ it names. -->
       → 0; `npx prettier --check README.md AUTHORING.md design/brief.md`
       clean; `sh scripts/verify.sh` green._
 
+### Phase 1 record (the person's walkthrough)
+
+Attested 2026-09-20 with one word, "Continue", after the pause report
+that named the paper ground on both screens, a pause's dimming, the
+regenerated `public/og.jpg` (a different picture, not only a different
+colour), and the stage's mat reading a hair brighter than the page as
+the expected interim state. No findings reported. The Phase 0 gate's
+words stand as his verdict on the look ("Looks great …").
+
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge)
 
 - [x] **T1305** — Close-out. The repo-wide documents are edited by
@@ -589,6 +598,22 @@ it names. -->
 
 ---
 
+- [x] **T1305a** — Record corrections from the pre-merge sweep (none
+      blocking). `src/styles/global.css` Mattes comment: merging the two
+      identical-prelude rules fails one test (the "declared once" case),
+      not two; `plan.md` carries the same sentence — fix both.
+      `src/pages/dev/matte/[...surface].astro` ~39: "nothing landed under
+      specs/014-ground-tone/" → no gate values landed (its task records
+      did). `matte.test.mjs` ~789: move the "the term is still read"
+      comment to case (b)'s pinned flex string, where the guarantee
+      lives; ~269: rename case (a) so it no longer says "the cards' mat
+      is one place" (the assertion is unchanged). `ROADMAP.md` "The
+      matte, rethought" tail: the ground is no longer unchanged (the
+      pre-003 white is paper since 015) and the brief's carve-out was
+      narrowed; the design-language entry stops listing the struck
+      ground-tone entry as live. _Verify: `sh scripts/verify.sh` green;
+      prettier clean on the touched files._
+
 ### The pre-merge sweep
 
 The `skeptical-reviewer` sweeps the whole spec at its default tier, on
@@ -637,6 +662,7 @@ tier if it is ever on (it is off). -->
 | T1304 (`sdd-implementer`)                           | implementation (`opus`, high)    | 96,546  | done first dispatch; docs describe the stage matted in both views as shipped                         |
 | Phase 1 review (`skeptical-reviewer`)               | implementation (`opus`, high)    | 119,960 | SIGN OFF, 0 blocking, N1–N5 → T1305 and the sweep                                                    |
 | T1305 close-out (`sdd-implementer-fable`)           | top (`claude-fable-5-1`, medium) | 78,551  | done first dispatch; Phase 1 N1/N3/N4 folded in; vs 012/013 close-outs on opus                       |
+| Pre-merge sweep (`skeptical-reviewer`)              | implementation (`opus`, high)    | 199,617 | SIGN OFF, 0 blocking, N1–N10; N1–N5 and N8 → T1305a, N6/N7/N9/N10 logged for the next spec           |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -696,6 +722,14 @@ and 013.
   condensed reports; the orchestrator holds verbatim BUILD/CHECK/TEST
   EXIT 0 for T1303 and T1304. N1, N3, N4 are folded into T1305's
   bundle as document corrections.
+- **Pre-merge sweep N1–N10** (2026-09-20): N1 Phase 1 had no record
+  (written above). N2–N5, N8 → T1305a. **For the next spec's plan**:
+  N6 the cover card's `sizes` hint (373px in `CoverCards.astro`) vs
+  its 374.667px unmatted render — move to 375 or pin it as form R's
+  cap is pinned; N7 spec.md names the latest-work band and cards on
+  `/`, surfaces removed or never there (plan.md records it; spec.md
+  is frozen); N9 `public/og.jpg`'s 1200×630 is asserted by nothing;
+  N10 README's tree omits `DevGround.astro` and the newer test files.
 
 - **O1** (from the sign-off's re-review, 2026-09-19; blocking on the
   deepens branch only, so transcribed at once): `readout(bg, from = MUTED)`
