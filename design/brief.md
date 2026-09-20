@@ -70,8 +70,9 @@ avoid"). Not yet pressure-tested against real photography. Retuning
 is one line in `global.css` (dark mode was removed in spec 002), plus
 two manually synced hex copies: `public/favicon.svg`, and the Open
 Graph palette (`COLOR` in `src/lib/og-card.mjs`, drawn by both the
-per-piece card route and the static social image). Since spec 014 that
-second copy is pinned to the tokens by `ground.test.mjs` and carried
+per-piece card route and the static social image). Since spec 013 that
+second copy's five hexes are pinned to the tokens by `ground.test.mjs`
+(T1102); spec 014 folded them into the single `COLOR` and carried them
 into `public/og.jpg` by `npm run og`, which refuses to write while the
 two disagree — so the copy can go stale in an editor, but not in a
 commit.

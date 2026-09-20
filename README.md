@@ -107,7 +107,8 @@ Three minutes apart. Captions take _inline markdown_.
 a spec of its own.
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
 `single` — same rendered result. Since spec 015 the site mats only the
-image page's stage and the quiet view that grows out of it: a flat
+image page's stage and the quiet view that grows out of it (a piece's
+pause frame excepted until its own spec): a flat
 white field 6% of that frame's rendered short side, never narrower than
 4px or wider than 40px, equal on all four sides, applied by the site's
 CSS (never bake mattes into files). A piece's frames sit on the ground
@@ -129,7 +130,8 @@ rendered.
 
 **Current status**: every block above is implemented — the spec-003
 blocks and spec 007's two durational ones — transform, styling,
-the mat rule (the image page's stage alone since spec 015), unit tests,
+the mat rule (the image page's stage alone since spec 015, a piece's
+pause frame excepted until its own spec), unit tests,
 and the Obsidian plugin's leaf-form rendering —
 with images going through Astro's asset pipeline (hashed src,
 responsive srcset per treatment). Pieces render at

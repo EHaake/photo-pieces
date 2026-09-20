@@ -321,7 +321,6 @@ describes them, and anything he saw that the spec did not say. Recorded
 here by the orchestrator, in the person's words and the numbers, before
 T1303 is dispatched.)_
 
-
 **The person's decision (2026-09-19)**, in his words: "Looks great and
 I think this confirms that removing the mattes in most cases was the
 right move. I'd say we'd go with Paper for the ground tone for now. I
@@ -330,7 +329,7 @@ the background is darkened is the right move as well."
 
 - Tone: **`paper`** — `--color-bg oklch(0.99 0.003 100)`,
   `--color-surface oklch(0.967 0.004 100)`, `--color-soft
-  oklch(0.942 0.005 100)`, `--color-line oklch(0.882 0.005 100)`,
+oklch(0.942 0.005 100)`, `--color-line oklch(0.882 0.005 100)`,
   `--color-line-strong oklch(0.742 0.009 100)`; muted unchanged
   (`oklch(0.5 0.012 250)`). Readout at paper: text/bg 15.58,
   text/surface 14.55, text/soft 13.51, muted/bg 5.82, muted/surface
@@ -512,7 +511,7 @@ it names. -->
 
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge)
 
-- [ ] **T1305** — Close-out. The repo-wide documents are edited by
+- [x] **T1305** — Close-out. The repo-wide documents are edited by
       `sdd-implementer-fable` — the close-out row of `CLAUDE.md`'s role
       table, the one dispatch that runs at the top tier, because this
       task is synthesis and prose rather than bounded transcription —
@@ -622,21 +621,22 @@ reviewer invocations alike — any escape-hatch miss, the fallback switch
 if the top tier's budget runs out (the row and the time), and the third
 tier if it is ever on (it is off). -->
 
-| Task / invocation                                   | Tier                           | Tokens  | Outcome / miss reason                                                  |
-| --------------------------------------------------- | ------------------------------ | ------- | ---------------------------------------------------------------------- |
-| Planning: draft (`sdd-planner`)                     | top (`claude-fable-5-1`, high) | 291,534 | drafted; no product question returned                                  |
-| Planning: findings folded (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 24,466  | B1 (option i), N1–N8 folded; no disagreement                           |
-| Sign-off: plan/tasks (`skeptical-reviewer`)         | top (`claude-fable-5-1`, high) | 184,475 | fix and re-review — 1 blocking, 8 notes, 2 product items to the person |
-| Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 16,984  | signed off; O1 carried and transcribed                                 |
-| T1300 (`sdd-implementer`)                           | implementation (`opus`, high)  | 28,396  | done first dispatch; Verify note stale: CLAUDE.md at main is prettier-clean |
-| T1301 (`sdd-implementer`)                           | implementation (`opus`, high)  | 209,163 | done first dispatch; LatestWork bullet moot (PR #15); BiDi before/after identical on pause and stage |
-| T1301 per-task review (`skeptical-reviewer`)        | implementation (`opus`, high)  | 99,818  | SIGN OFF, 0 blocking, N1–N7 → T1301a and the sweep                      |
-| T1301a (`sdd-implementer`)                          | implementation (`opus`, high)  | 44,775  | done first dispatch; match-height tolerance set to 0.25px             |
-| T1302 (`sdd-implementer`)                           | implementation (`opus`, high)  | 108,355 | done first dispatch; Firefox 155 BiDi needs -remote-allow-system-access |
-| Phase 0 review (`skeptical-reviewer`)               | implementation (`opus`, high)  | 113,339 | SIGN OFF, 0 blocking, N1–N6 → the sweep; gate walk names an inline paragraph image |
-| T1303 (`sdd-implementer`)                           | implementation (`opus`, high)  | 117,068 | done first dispatch; paper branch, muted unchanged; og.jpg regenerated (25→49 KB) |
-| T1304 (`sdd-implementer`)                           | implementation (`opus`, high)  | 96,546  | done first dispatch; docs describe the stage matted in both views as shipped |
-| Phase 1 review (`skeptical-reviewer`)               | implementation (`opus`, high)  | 119,960 | SIGN OFF, 0 blocking, N1–N5 → T1305 and the sweep                       |
+| Task / invocation                                   | Tier                             | Tokens  | Outcome / miss reason                                                                                |
+| --------------------------------------------------- | -------------------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| Planning: draft (`sdd-planner`)                     | top (`claude-fable-5-1`, high)   | 291,534 | drafted; no product question returned                                                                |
+| Planning: findings folded (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high)   | 24,466  | B1 (option i), N1–N8 folded; no disagreement                                                         |
+| Sign-off: plan/tasks (`skeptical-reviewer`)         | top (`claude-fable-5-1`, high)   | 184,475 | fix and re-review — 1 blocking, 8 notes, 2 product items to the person                               |
+| Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high)   | 16,984  | signed off; O1 carried and transcribed                                                               |
+| T1300 (`sdd-implementer`)                           | implementation (`opus`, high)    | 28,396  | done first dispatch; Verify note stale: CLAUDE.md at main is prettier-clean                          |
+| T1301 (`sdd-implementer`)                           | implementation (`opus`, high)    | 209,163 | done first dispatch; LatestWork bullet moot (PR #15); BiDi before/after identical on pause and stage |
+| T1301 per-task review (`skeptical-reviewer`)        | implementation (`opus`, high)    | 99,818  | SIGN OFF, 0 blocking, N1–N7 → T1301a and the sweep                                                   |
+| T1301a (`sdd-implementer`)                          | implementation (`opus`, high)    | 44,775  | done first dispatch; match-height tolerance set to 0.25px                                            |
+| T1302 (`sdd-implementer`)                           | implementation (`opus`, high)    | 108,355 | done first dispatch; Firefox 155 BiDi needs -remote-allow-system-access                              |
+| Phase 0 review (`skeptical-reviewer`)               | implementation (`opus`, high)    | 113,339 | SIGN OFF, 0 blocking, N1–N6 → the sweep; gate walk names an inline paragraph image                   |
+| T1303 (`sdd-implementer`)                           | implementation (`opus`, high)    | 117,068 | done first dispatch; paper branch, muted unchanged; og.jpg regenerated (25→49 KB)                    |
+| T1304 (`sdd-implementer`)                           | implementation (`opus`, high)    | 96,546  | done first dispatch; docs describe the stage matted in both views as shipped                         |
+| Phase 1 review (`skeptical-reviewer`)               | implementation (`opus`, high)    | 119,960 | SIGN OFF, 0 blocking, N1–N5 → T1305 and the sweep                                                    |
+| T1305 close-out (`sdd-implementer-fable`)           | top (`claude-fable-5-1`, medium) | 78,551  | done first dispatch; Phase 1 N1/N3/N4 folded in; vs 012/013 close-outs on opus                       |
 
 _(Session-tier allowance draw noted at each pause.)_
 
