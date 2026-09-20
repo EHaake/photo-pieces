@@ -337,10 +337,13 @@ the background is darkened is the right move as well."
   5.44, muted/soft 5.05, mat/bg 1.02 (ΔL 0.01). "For now" — his words.
 - The unmatted surfaces seen on both screens as the spec describes
   them; nothing reported that the spec did not say.
-- His last sentence reads as a possible product direction beyond this
-  spec (the mat only where the ground is darkened, i.e. not on the
-  stage's normal view): raised back to him as a question before T1303
-  rather than acted on.
+- His last sentence was a product direction beyond this spec. Asked,
+  he confirmed: "Stage's normal view unmatted, as it blends into the
+  Paper ground tone." Not acted on here — spec changes stay out of
+  implementation sessions — and written to `ROADMAP.md` ("The mat only
+  where the ground goes dark") the same day. This spec ships the stage
+  matted in both views, as specified; the docs it writes say so, and
+  the roadmap entry corrects them when it runs.
 
 **Measured record before the gate** (the implementer's Firefox 155
 headless reads via BiDi, dev server, taken at T1301 and T1302; the
