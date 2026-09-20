@@ -636,6 +636,7 @@ tier if it is ever on (it is off). -->
 | Phase 0 review (`skeptical-reviewer`)               | implementation (`opus`, high)  | 113,339 | SIGN OFF, 0 blocking, N1–N6 → the sweep; gate walk names an inline paragraph image |
 | T1303 (`sdd-implementer`)                           | implementation (`opus`, high)  | 117,068 | done first dispatch; paper branch, muted unchanged; og.jpg regenerated (25→49 KB) |
 | T1304 (`sdd-implementer`)                           | implementation (`opus`, high)  | 96,546  | done first dispatch; docs describe the stage matted in both views as shipped |
+| Phase 1 review (`skeptical-reviewer`)               | implementation (`opus`, high)  | 119,960 | SIGN OFF, 0 blocking, N1–N5 → T1305 and the sweep                       |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -679,6 +680,22 @@ and 013.
   off-identity's basis assertion passes with or without the
   `+ 2 * var(--mat)` term; the "still read" guarantee is case (b)'s
   string pin — move the comment.
+- **Phase 1 review N1–N5** (2026-09-19): N1 the candidate bar's `why`
+  strings in `src/lib/ground.ts` still measure from the old ground
+  (`light` "one step lighter than today" now sits darker than today;
+  `cool`/`warm` "today's lightness" at 0.968 vs 0.99; `deep-*` counted
+  from 0.968) — one clause each, and the rule "a candidate's `why` is
+  relative to the committed ground and moves with it" for the next
+  spec's plan. N2 `public/og.jpg`'s size is asserted by nothing; the
+  orchestrator holds T1303's verbatim record: sharp reads 1200×630,
+  pixel (10,10) [252,252,250]. N3 two README sentences (~109, ~132)
+  state the mat rule without the pause exception the table and the
+  image-page paragraph carry — one clause each. N4 `design/brief.md`
+  ~73 dates the OG five-hex pin to spec 014; it is spec 013's (T1102),
+  014 added the single `COLOR` and the refusal. N5 the review saw
+  condensed reports; the orchestrator holds verbatim BUILD/CHECK/TEST
+  EXIT 0 for T1303 and T1304. N1, N3, N4 are folded into T1305's
+  bundle as document corrections.
 
 - **O1** (from the sign-off's re-review, 2026-09-19; blocking on the
   deepens branch only, so transcribed at once): `readout(bg, from = MUTED)`
