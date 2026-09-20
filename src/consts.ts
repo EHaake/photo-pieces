@@ -4,10 +4,10 @@
 import type { UIKey } from './i18n/en';
 
 export const SITE = {
-  /** BCP 47 language tag. Picks the UI dictionary in `src/i18n/`, and sets
-   *  `<html lang>`, date formatting, and the RSS feed language. Dictionaries
-   *  ship for `en` and `ja`; regional variants like `en-GB` reuse the base
-   *  language's strings while keeping their own date format. */
+  /** BCP 47 language tag. Sets `<html lang>`, date formatting, and the RSS
+   *  feed language. One dictionary ships, `src/i18n/en.ts`; a regional
+   *  variant like `en-GB` reuses its strings while keeping its own date
+   *  format. */
   locale: 'en',
   /** Site name — used in the header brand, <title>, and og:site_name. */
   title: 'Erik Haake Photography',

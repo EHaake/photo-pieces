@@ -84,11 +84,11 @@ src/
   content.config.ts  # collection schemas (Content Layer API)
   content/           # works/ and blog/ Markdown & MDX entries
   layouts/           # BaseLayout — head, nav, theme toggle, footer
-  components/        # Pagination, SocialLinks, CodeCopy, StructuredData…
+  components/        # Pagination, SocialLinks, StructuredData…
   pages/             # routes: /, /about, /works, /blog, tags, search, rss.xml
   lib/url.ts         # withBase() — always use it for internal links/assets
   styles/global.css  # design tokens (OKLCH), typography, layout primitives
-astro.config.mjs     # site URL, base path, integrations, Shiki config
+astro.config.mjs     # site URL, base path, integrations
 ```
 
 Two things that trip people up:
