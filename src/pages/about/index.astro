@@ -1,10 +1,10 @@
 ---
 // About page structure (spec 002; the text task T113 moved to spec 005
-// with the go-live pause). Every visible TODO-AUTHOR block
-// below is a placeholder awaiting Erik's own words — the design brief's
-// voice rule forbids shipping invented biography, so the T113 task stays
-// open (and this page should not go behind the custom domain) while any
-// TODO-AUTHOR marker remains.
+// with the go-live pause). The visible text below is INTERIM wording
+// written from what the project's own documents say about the site —
+// no invented biography — and stands in until Erik supplies his own
+// words (2026-09-19: he asked for a stand-in for now). T113 stays open
+// in specs/005-going-live/spec.md; this comment is the only marker.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { withBase } from '../../lib/url';
 import { t } from '../../i18n';
@@ -15,7 +15,8 @@ import { t } from '../../i18n';
     <p class="eyebrow">{t('about.eyebrow')}</p>
     <h1>Erik Haake</h1>
     <p class="lead">
-      TODO-AUTHOR: one or two sentences, in your voice, on who you are and what this site is.
+      Photographer. This site is where the photographs are written up: pieces about a day out with a
+      camera, the frames it produced, and what stayed with me afterwards.
     </p>
   </section>
 
@@ -25,12 +26,14 @@ import { t } from '../../i18n';
     </div>
     <div class="prose-stack">
       <p>
-        TODO-AUTHOR: the longer introduction — how you came to photography, the genres you work in
-        (landscape/nature first, street, portrait, event), and what a "piece" means on this site.
+        Most of the work is landscape and nature, with street, portrait, and event photography
+        alongside. Rather than a feed, the site is organised as pieces: each one pairs a set of
+        images with the writing that belongs to them, whether that is an account of an outing, notes
+        on gear, or a short announcement.
       </p>
       <p>
-        TODO-AUTHOR: anything else worth saying — gear philosophy, where you shoot, what you're
-        working toward.
+        The galleries collect images by category and link back to the piece each came from. Every
+        photograph has its own page with the exposure it was made at.
       </p>
     </div>
   </section>
