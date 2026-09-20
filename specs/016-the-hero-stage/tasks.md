@@ -68,7 +68,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the constitution, the arrival, the control, and the carried items (reviewer after the phase; the gate at its end) — walkthrough: an image page under `npm run dev` opens dark with the photograph matted and the header, frame nav, toggle and title faint; scrolling down lightens the page to paper over about one screen and scrolling up darkens it again; the quiet view deepens from it; a reload mid-page shows the light page at once; the bottom-right bar moves the depth, the chrome and the fade live and shows the numbers
 
-- [ ] **T1400** — The constitution first. `CLAUDE.md`'s block-vocabulary
+- [x] **T1400** — The constitution first. `CLAUDE.md`'s block-vocabulary
       bullet says "the site mats only the image page's stage and its
       quiet view (spec 015) — a piece's frames sit unmatted on the
       ground, the pause frame excepted until its own spec": true in
@@ -565,6 +565,7 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | Planning: revision (`sdd-planner`, resumed) | top (`claude-fable-5-1`, high) | 30,669 | B1, B2 fixed; N1–N3, N5–N8, N11 folded; N4, N9, N10 left |
 | Sign-off: plan/tasks (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 124,686 | BLOCK — B1 (close-out patch flow, the dispatcher's own wrong instruction), B2 (aria-current split by source order); N1–N11 |
 | Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 23,108 | B1, B2 cleared; O1 carried and transcribed; two notes below |
+| T1400 (`sdd-implementer`)                  | implementation (`opus`, high)  | 23,747 | done first dispatch; 331 tests green before T1401; CLAUDE.md prettier-clean at head |
 
 _(Session-tier allowance draw noted at each pause.)_
 
