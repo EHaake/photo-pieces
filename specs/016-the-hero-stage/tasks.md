@@ -1,6 +1,10 @@
 # Tasks: The hero stage
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-20) — by the `skeptical-reviewer` at
+the top tier; two blocking findings fixed and cleared on the one
+re-review, nine notes folded in, and one item the re-review carried (O1
+in the tier log) transcribed from its exact text into T1402 and
+plan.md.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1400–T1404) — the constitution's clause
 amended first in its own commit, the tokens and the stylesheet's
@@ -228,9 +232,14 @@ headers to confirm nothing was duplicated or dropped. -->
       rgb and `<html>` paper; a nav link focused at y = 0 →
       `--color-bg`'s rgb; `scrollWidth ≤ clientWidth`; the after-swap
       path — a click from `/galleries/fog-frames/` to a frame → `1.000`
-      at page-load and `document.getAnimations()` empty right after
-      `astro:page-load` (no link colour easing on arrival — the
-      transition rule); the next link → `1.000`; scroll past vh then
+      at page-load and, right after `astro:page-load`,
+      `document.getAnimations().filter((a) => a instanceof CSSTransition
+      && a.transitionProperty === 'color')` empty, and empty again after
+      one `scrollBy(0, 40)` at the top (no link colour easing on arrival
+      or behind the scroll — the transition rule; the unfiltered list is
+      non-empty on a correct page: the stage's own 220ms ease and Astro's
+      root fade are running at that moment, O1 in the tier log); the
+      next link → `1.000`; scroll past vh then
       `traverseHistory(-1)` and forward again → `0.000` at the restored
       position. A flash is not observable headless: said so in the
       record, with the stub case named as the pin and the reload
@@ -552,13 +561,45 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 
 | Task / invocation                          | Tier                           | Tokens | Outcome / miss reason                |
 | ------------------------------------------ | ------------------------------ | ------ | ------------------------------------ |
-| Planning: draft (`sdd-planner`)            | top (`claude-fable-5-1`, high) | —      | drafted; no product question returned |
-| Sign-off: plan/tasks (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | —      |                                      |
+| Planning: draft (`sdd-planner`)            | top (`claude-fable-5-1`, high) | 282,633 | drafted; no product question returned; ≈170k context at return |
+| Planning: revision (`sdd-planner`, resumed) | top (`claude-fable-5-1`, high) | 30,669 | B1, B2 fixed; N1–N3, N5–N8, N11 folded; N4, N9, N10 left |
+| Sign-off: plan/tasks (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 124,686 | BLOCK — B1 (close-out patch flow, the dispatcher's own wrong instruction), B2 (aria-current split by source order); N1–N11 |
+| Sign-off: re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 23,108 | B1, B2 cleared; O1 carried and transcribed; two notes below |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
+- **O1** (from the sign-off's re-review, 2026-09-20; transcribed at
+  once, the review cap reached): T1402's "`document.getAnimations()`
+  empty right after `astro:page-load`" would fail on a correct page —
+  the stage's 220ms `background-color` ease from `--color-arrival` to
+  transparent and Astro's root fade are both running then. Replaced in
+  T1402 and plan.md with the filtered read (`CSSTransition` on `color`)
+  right after page-load and again after one `scrollBy(0, 40)` at the
+  top. The sweep confirms the criterion as written is the one the
+  implementer ran.
+- **The hover-colour loss is page-wide on image pages under script,
+  not "at the top"** (re-review note 1): `data-arrival` stays on
+  `<html>` at every scroll position, so the arrival colour rules
+  outrank the theme's hover rule at lights 0 too — the nav, frame-nav
+  and eyebrow links never change colour on hover on an image page. A
+  small divergence from AC 2's "exactly the pre-spec page" that no
+  Verify reads. The Known-limitations wording should say "on an image
+  page while the arrival attribute is present"; if the gate minds, the
+  one-rule remedy is an arrival `:hover` rule mixing from
+  `--color-accent-hover` (`color` is allowlisted). T1405 carries the
+  wording and, if asked, the rule.
+- **The stage's 220ms ease fires on router arrivals** (re-review note
+  2): the same style flush makes `.image-stage` ease from
+  `--color-arrival` to transparent on every client-side arrival —
+  invisible at lights 1, but on a traversal restored to a position
+  inside the fade the partly visible stage fades from full dark over
+  220ms, timed motion in a corner. Not a block. The clean remedy is to
+  set the attribute and lights on `event.newDocument.documentElement`
+  at `astro:before-swap`, so the new DOM's first style carries them —
+  a plan change for a decision review if the person sees it at the
+  gate, not something to improvise in T1402.
 - The dimmed links keep the theme's underline ease and lose its
   colour ease (the transition rule), and do not change colour on
   hover at the top by specificity (plan.md, Known limitations); the

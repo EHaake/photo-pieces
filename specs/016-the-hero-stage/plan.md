@@ -1,6 +1,10 @@
 # Plan: The hero stage
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-20) — by the `skeptical-reviewer` at
+the top tier; two blocking findings fixed and cleared on the one
+re-review, nine notes folded in, and one item the re-review carried (O1
+in tasks.md's tier log) transcribed from its exact text into T1402 and
+"The rendered result".
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -545,8 +549,12 @@ Every claim above is owned by a task and a check:
   value **within 1/255** (paper, the tokens unmixed — a
   `color-mix(… 0%)` through oklch need not serialize identically to
   the raw token); back to 0 → `1.000`; on the router path, right after
-  `astro:page-load`, `document.getAnimations()` empty (no link colour
-  easing — the transition rule);
+  `astro:page-load`, `document.getAnimations().filter((a) => a
+  instanceof CSSTransition && a.transitionProperty === 'color')` empty,
+  and empty again after one `scrollBy(0, 40)` at the top (no link
+  colour easing — the transition rule; the unfiltered list is non-empty
+  on a correct page, since the stage's 220ms ease and Astro's root fade
+  are running at that moment);
   `scrollTo(2000)` then `browsingContext.reload` → after load `0.000`
   with `scrollY` restored (the value; a flash is not observable
   headless — the stub test is the pin, and the person reloads mid-page
