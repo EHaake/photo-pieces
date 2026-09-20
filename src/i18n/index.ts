@@ -1,39 +1,23 @@
 // UI localization. Every user-facing string the theme itself renders comes from
-// a dictionary here; `SITE.locale` in `src/consts.ts` picks which one, and also
-// drives `<html lang>`, date formatting, and the RSS feed language.
-//
-// To add a locale: copy `ja.ts`, translate the values, and register it in
-// `DICTIONARIES` below. Nothing else needs editing.
+// the dictionary in `./en`; `SITE.locale` in `src/consts.ts` drives
+// `<html lang>`, date formatting, and the RSS feed language.
 import { SITE, type NavItem } from '../consts';
 import { en, type UIKey, type UIStrings } from './en';
-import { ja } from './ja';
 
 export type { UIKey, UIStrings };
 
-/** Fallback used when `SITE.locale` has no dictionary. */
-export const DEFAULT_LOCALE = 'en';
-
-/** Registered dictionaries, keyed by BCP 47 language tag. */
-export const DICTIONARIES: Record<string, UIStrings> = { en, ja };
-
 /** The active locale, straight from `SITE.locale`. Also the value passed to
- *  `Intl`, `<html lang>`, and the RSS `<language>` element. */
+ *  `Intl`, `<html lang>`, and the RSS `<language>` element. A regional
+ *  variant like `en-GB` keeps its own date format while reading the same
+ *  strings — there is one dictionary. */
 export const locale: string = SITE.locale;
-
-// `en-GB` falls back to the `en` dictionary while still formatting dates as
-// `en-GB` — a regional variant rarely needs its own copy of every string.
-const resolveDictionary = (tag: string): UIStrings =>
-  DICTIONARIES[tag] ?? DICTIONARIES[tag.split('-')[0]] ?? DICTIONARIES[DEFAULT_LOCALE];
-
-/** The active dictionary. Exported mainly for tests and debugging — prefer `t()`. */
-export const strings: UIStrings = resolveDictionary(locale);
 
 /**
  * Look up a UI string, filling `{name}` placeholders from `params`.
  * Unknown keys are impossible: `UIKey` is derived from the English dictionary.
  */
 export const t = (key: UIKey, params?: Record<string, string | number>): string => {
-  const value = strings[key];
+  const value = en[key];
   if (!params) return value;
   return value.replace(/\{(\w+)\}/g, (match, name: string) =>
     name in params ? String(params[name]) : match,

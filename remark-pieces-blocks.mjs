@@ -23,7 +23,7 @@ import {
 //
 // Each block is a descriptor (spec 003's block-descriptor model):
 //
-//   forms:   'leaf' | 'container' | 'both' | 'reserved'
+//   forms:   'leaf' | 'container' | 'both'
 //   body:    'caption' | 'prose' | 'images+caption' | 'none' (leaf-only)
 //   attrs:   { required: [...], optional: [...], enums: { name: [...] },
 //              flags: [...] }  — a flag is valid only bare: {bleed}
@@ -446,14 +446,6 @@ export const BLOCKS = {
       sizes: `(min-aspect-ratio: ${dims[i].width}/${dims[i].height}) ${pauseWidth(ratios[i], 'vh')}, ${pauseWidth(1, 'vw')}`,
     }),
   },
-
-  sequence: {
-    // Reserved in the content model; presentation undecided (ROADMAP.md).
-    // Modeled explicitly so a refactor can't regress this to the generic
-    // unknown-name error — the message is a tested contract.
-    forms: 'reserved',
-    reservedMessage: 'the sequence block is reserved but not implemented yet — see ROADMAP.md',
-  },
 };
 
 // Sizing for the pair blocks across their width variants (added at the
@@ -529,7 +521,6 @@ export function remarkPiecesBlocks() {
             `known blocks: ${Object.keys(BLOCKS).join(', ')}`,
         );
       }
-      if (block.forms === 'reserved') failHere(block.reservedMessage);
 
       let caption = null;
       let bodyProse = null;

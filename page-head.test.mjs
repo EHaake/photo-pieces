@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { blocks, declarations, selects, uncomment } from './src/lib/ground.ts';
 
 // Two standing guards (spec 010, T807). The first: the reading head's
 // values are a visual-gate decision (2026-09-07) that lives only in CSS,
@@ -14,44 +15,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // fixture directory, since the barrier takes an optional [dir].
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
-
-/** Strip CSS comments — they carry braces and colons in this file. */
-const uncomment = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
-
-/** Every brace block at the top level of `css`, as { prelude, body }. */
-function blocks(css) {
-  const found = [];
-  let depth = 0;
-  let start = 0;
-  let open = -1;
-  for (let i = 0; i < css.length; i += 1) {
-    if (css[i] === '{') {
-      depth += 1;
-      if (depth === 1) open = i;
-    } else if (css[i] === '}') {
-      depth -= 1;
-      if (depth === 0) {
-        found.push({ prelude: css.slice(start, open).trim(), body: css.slice(open + 1, i) });
-        start = i + 1;
-      }
-    }
-  }
-  return found;
-}
-
-/** The declarations of a rule body, as name -> value. Nested rules are ignored. */
-function declarations(body) {
-  const flat = body.replace(/\{[^{}]*\}/g, '');
-  const out = {};
-  for (const part of flat.split(';')) {
-    const at = part.indexOf(':');
-    if (at === -1) continue;
-    out[part.slice(0, at).trim()] = part.slice(at + 1).trim();
-  }
-  return out;
-}
-
-const selects = (prelude, selector) => prelude.split(',').some((one) => one.trim() === selector);
 
 let css;
 let mediaWithHead;

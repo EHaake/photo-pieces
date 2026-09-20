@@ -526,48 +526,6 @@ pre code {
   background: transparent;
 }
 
-.code-block {
-  position: relative;
-}
-
-.code-copy {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  padding: 0.25rem 0.6rem;
-  border: var(--hairline);
-  background: var(--color-bg);
-  color: var(--color-muted);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  cursor: pointer;
-  opacity: 0;
-  transition:
-    opacity 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease;
-}
-
-.code-block:hover .code-copy,
-.code-copy:focus-visible,
-.code-copy.is-copied {
-  opacity: 1;
-}
-
-.code-copy:hover,
-.code-copy.is-copied {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-@media (hover: none) {
-  .code-copy {
-    opacity: 1;
-  }
-}
-
 .content-index,
 .article-layout {
   display: grid;

@@ -76,8 +76,7 @@ attached.
   to equal short sides in editorial order — the photographer's rule
   from the sampler review, `DECISIONS.md`), the galleries index,
   category pages, every piece image linking to its page, and the GPS
-  barriers. Follow-ups it surfaced: the homepage design pass places the
-  `LatestWork` strip (built, unplaced); renaming an image changes its
+  barriers. Follow-ups it surfaced: renaming an image changes its
   URL with no redirect (fine while nothing is live — a redirect map
   becomes worth having once URLs are public); an image's page doesn't
   distinguish "referenced by the piece" from "in the folder", and an
@@ -196,9 +195,8 @@ attached.
   then. The starting position: the homepage is the site's thesis —
   one photograph, one sentence, the latest piece a scroll away — not
   a grid of recent work, which would undo the argument the rest of
-  the site makes. The `LatestWork` strip is built and unplaced. Its
-  "latest" has to admit an updated image page beside a new piece — see the
-  image's-study entry above.
+  the site makes. A "latest" on the front door has to admit an updated
+  image page beside a new piece — see the image's-study entry above.
 - **A design language of its own** — raised by the photographer after spec
   012 (2026-09-13), as a longer-term direction rather than one spec. The site's
   functionality, flow, and layout come first and are still being settled; but

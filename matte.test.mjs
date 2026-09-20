@@ -2,6 +2,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { galleryCell, GALLERY_STRETCH } from './src/lib/gallery-layout.ts';
+import { blocks, uncomment } from './src/lib/ground.ts';
 
 // The mat rule (spec 013, T1101): one rule, declared once, resolved per
 // geometry. A frame's mat is m = clamp(--mat-min, --mat-share × σ,
@@ -36,30 +37,6 @@ import { galleryCell, GALLERY_STRETCH } from './src/lib/gallery-layout.ts';
 //     makes T1101 land changing nothing.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
-
-/** Strip CSS comments — they carry braces and colons in this file. */
-const uncomment = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
-
-/** Every brace block at the top level of `css`, as { prelude, body }. */
-function blocks(css) {
-  const found = [];
-  let depth = 0;
-  let start = 0;
-  let open = -1;
-  for (let i = 0; i < css.length; i += 1) {
-    if (css[i] === '{') {
-      depth += 1;
-      if (depth === 1) open = i;
-    } else if (css[i] === '}') {
-      depth -= 1;
-      if (depth === 0) {
-        found.push({ prelude: css.slice(start, open).trim(), body: css.slice(open + 1, i) });
-        start = i + 1;
-      }
-    }
-  }
-  return found;
-}
 
 /** The declarations of a rule body, as name -> value. Nested rules are ignored. */
 function declarations(body) {
@@ -427,25 +404,6 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
         if (/var\(--mat\s*[,)]/.test(value)) reading.push(`${norm(block.prelude)} { ${property} }`);
     expect(reading).toEqual(['.compare { padding }']);
     expect(declarations(ruleFor(all, '.compare', 'padding').body)['padding']).toBe('var(--mat)');
-  });
-
-  it('the latest-work band: one height string, and a mat that is a share of it', () => {
-    // The strip is a curated band, not one of the four surfaces; it gets
-    // form R's shape because its image IS --avail-h tall (the mat sits
-    // around that), so σ = --avail-h × min(--ar, 1) exactly. Its --mat is
-    // its own, and it declares none of the three tokens (case (a) pins
-    // that for every file under src/).
-    const band = uncomment(src['src/components/LatestWork.astro']);
-    const rules = blocks(band.slice(band.indexOf('<style>')));
-    const link = declarations(ruleFor(rules, '.image-link', '--mat').body);
-    expect(norm(link['--avail-h'])).toBe('clamp(180px, 30vh, 260px)');
-    expect(norm(link['--mat'])).toBe(
-      'clamp(var(--mat-min), calc(var(--avail-h) * var(--mat-share) * min(var(--ar, 1), 1)), var(--mat-max))',
-    );
-    expect(link['padding']).toBe('var(--mat)');
-    expect(norm(declarations(ruleFor(rules, '.image-link img').body)['height'])).toBe(
-      'var(--avail-h)',
-    );
   });
 
   it('form R: the mat is the packed row’s constant term, in the basis, the cap and the narrow cap', () => {

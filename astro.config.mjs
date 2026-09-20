@@ -26,11 +26,5 @@ export default defineConfig({
       // ::block syntax into directive nodes the transform then renders.
       remarkPlugins: [remarkReadingTime, remarkDirective, remarkPiecesBlocks],
     }),
-    // Single light theme — the site is light-only (spec 002 removed dark
-    // mode); global.css neutralizes the highlighter's own background.
-    shikiConfig: {
-      theme: 'github-light',
-      wrap: true,
-    },
   },
 });
