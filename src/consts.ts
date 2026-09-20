@@ -12,13 +12,13 @@ export const SITE = {
   /** Site name — used in the header brand, <title>, and og:site_name. */
   title: 'Erik Haake Photography',
   /** Default meta description for pages that don't set their own.
-   *  TODO-AUTHOR: interim factual wording — replace with Erik's own
-   *  (spec 005, task T114). */
+   *  Interim factual wording until Erik supplies his own (spec 005,
+   *  task T114). */
   description:
     'Photography by Erik Haake — landscape and nature, street, portrait, and event work, presented as written pieces.',
   /** Description of the RSS feed at /rss.xml.
-   *  TODO-AUTHOR: interim factual wording — replace with Erik's own
-   *  (spec 005, task T114). */
+   *  Interim factual wording until Erik supplies his own (spec 005,
+   *  task T114). */
   rssDescription: 'Pieces from Erik Haake Photography.',
   /** Default social share image, relative to the site root (see public/). */
   ogImage: '/og.jpg',

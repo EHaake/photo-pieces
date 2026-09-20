@@ -68,8 +68,11 @@ DNS + dashboard only, zero code change.
 
 ## Carried-over tasks (from spec 002 tasks.md)
 
-- [ ] **T113 [author]** — About page text (structure already in place
-      with `TODO-AUTHOR` markers).
+- [ ] **T113 [author]** — About page text. Since 2026-09-19 the page
+      carries interim wording written from the project's own documents
+      (no invented biography), at Erik's request, so no `TODO-AUTHOR`
+      marker is visible; the page's header comment says so. Still open
+      until his own words replace it.
 - [ ] **T114 [author]** — Site description wording in `consts.ts`.
 - [ ] **T115 [author]** — Cloudflare account, workers.dev subdomain,
       repo connection (walkthrough already provided; repo is now
