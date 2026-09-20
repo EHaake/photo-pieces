@@ -133,6 +133,19 @@ attached.
   spec with a sampler of its own — and judging new gallery frames against a
   ground still in question would mean judging them twice. It also feeds the
   longer-term design-language entry, which it is not a substitute for.
+- **The mat only where the ground goes dark** — raised by the
+  photographer at spec 015's gate (2026-09-19), after seeing the site
+  unmatted on the paper tone: "Stage's normal view unmatted, as it blends
+  into the Paper ground tone." Spec 015 leaves the image page's stage
+  matted in both its normal and its quiet view; what he wants is the mat
+  only where the ground is darkened — the quiet view, and the pause's dark
+  stage — with the stage's normal view bare like every other frame. A
+  small spec of its own: the stage rule and its test pin, the quiet view's
+  mat kept, the compare's white fill and divider decided in the same
+  breath, and the docs that spec 015 writes about the stage corrected.
+  Not folded into 015 because the constitution keeps spec changes out of
+  implementation sessions. The pause frame's own spec, which 015 also
+  defers, may be the same spec.
 - **Aspect-ratio treatment for packed galleries** — raised by the
   photographer at spec 011's visual gate (2026-09-09): he edits each
   image to the crop that suits its content rather than to a house
