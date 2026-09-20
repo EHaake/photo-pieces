@@ -66,9 +66,10 @@ CMS or backend service for v1.
   limited to a defined set of directive-backed treatments — as of spec
   007: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
   strip, aside, row, and the two durational blocks, held and pause,
-  with captions via the container form and site-applied mattes; a
-  `sequence` type is reserved but its final presentation is undecided
-  — see `ROADMAP.md`. Adding a new
+  with captions via the container form and site-applied mattes. A
+  `sequence` treatment is a roadmap candidate whose presentation is
+  undecided; it is not in the vocabulary and the transform reserves
+  nothing for it — see `ROADMAP.md`. Adding a new
   treatment means deliberately adding a new directive + presentation
   contract — a handler in the remark transform (the vocabulary's single
   source of truth) plus the CSS that styles its output — not writing
