@@ -4,12 +4,22 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { galleryCell, GALLERY_STRETCH } from './src/lib/gallery-layout.ts';
 import { blocks, uncomment } from './src/lib/ground.ts';
 
-// The mat rule (spec 013, T1101): one rule, declared once, resolved per
-// geometry. A frame's mat is m = clamp(--mat-min, --mat-share × σ,
-// --mat-max) over the photograph's RENDERED SHORT SIDE σ — and because
-// CSS cannot measure a rendered height, each geometry solves for m
-// algebraically from the frame's ratio and publishes --mat, which the
-// surface applies as `padding: var(--mat)`.
+// The mat rule (spec 013, T1101; a hero treatment since spec 015,
+// T1301): one rule, declared once, resolved per geometry. A frame's mat
+// is m = clamp(--mat-min, --mat-share × σ, --mat-max) over the
+// photograph's RENDERED SHORT SIDE σ — and because CSS cannot measure a
+// rendered height, each geometry solves for m algebraically from the
+// frame's ratio and publishes --mat, which the surface applies as
+// `padding: var(--mat)`.
+//
+// TWO SURFACES WEAR ONE, since spec 015: the image page's stage
+// (form V+H) and the pause frame (form W, on a selector list of one),
+// which keeps its mat until the pause gets a spec of its own. Every
+// other surface is off, and off has two shapes — `--mat: 0px` where a
+// layout formula still reads the mat (the held figure, the packed
+// cell), and nothing at all where only the padding did. Both shapes are
+// pinned below, so a padding that grows back on a surface, or a formula
+// that loses its term, fails a case that names it.
 //
 // Three kinds of guard, because three different things can go wrong:
 //
@@ -21,10 +31,13 @@ import { blocks, uncomment } from './src/lib/ground.ts';
 //     spec 009 moved the cards' mat to the span, so "cards off" is one
 //     edit.
 //
-// (b) The forms' strings, pinned. A form is algebra that renders; a
-//     typo in it renders too, just wrong, and the inert landing (share
-//     0, floor = ceiling) hides every one of them behind a constant.
-//     Whitespace-normalised, because Prettier wraps long calc() values.
+// (b) The strings, pinned: the two forms that remain, the zeros that
+//     replaced the other three, and the absence of everything else. A
+//     form is algebra that renders; a typo in it renders too, just
+//     wrong. Whitespace-normalised, because Prettier wraps long calc()
+//     values. The walk over every rule in the file is what makes "off"
+//     a fact about the stylesheet rather than about the rules this file
+//     happens to name.
 //
 // (c) The geometry, evaluated. The strings are pinned against the plan,
 //     but a pinned string can pin a wrong formula, so the forms are
@@ -33,10 +46,18 @@ import { blocks, uncomment } from './src/lib/ground.ts';
 //     rule it claims to implement over a grid of ratios, shares, clamps
 //     and viewports — including the plan's central identity (form W at
 //     a height-bound frame's width returns that frame's mat), the
-//     CSS/srcset agreement for packed rows, and the inert identity that
-//     makes T1101 land changing nothing.
+//     CSS/srcset agreement for packed rows, and the off identity: at any
+//     tokens at all, the unmatted surfaces resolve to zero.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
+
+/** The one selector form W and the padding/background rule are left with
+ *  (spec 015): the pause frame's anchor, or the bare img an alt="" image
+ *  gets instead. */
+const PAUSE_ANCHOR = '.piece-pause-frame > :is(a.image-link, img)';
+
+/** The two surfaces that still wear a mat. */
+const MATTED = [PAUSE_ANCHOR, '.image-frame'];
 
 /** The declarations of a rule body, as name -> value. Nested rules are ignored. */
 function declarations(body) {
@@ -245,7 +266,7 @@ describe('(a) the rule has one source (T1101, spec 013)', () => {
     expect(left).toEqual([]);
   });
 
-  it('no rule selects .gallery-grid > li > a.image-link — the cards’ mat is one place', () => {
+  it('no rule selects .gallery-grid > li > a.image-link — the grid’s cards wear no mat', () => {
     expect(css).not.toContain('.gallery-grid > li > a.image-link');
     for (const block of [...top, ...nested])
       expect(splitTop(block.prelude).map(norm)).not.toContain('.gallery-grid > li > a.image-link');
@@ -259,39 +280,49 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     'clamp(var(--mat-min), calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))), var(--mat-max))';
   const FORM_V =
     'clamp(var(--mat-min), calc(var(--avail-w) * var(--mat-share) / (var(--r) + 2 * var(--mat-share))), var(--mat-max))';
-  const MATTED_LIST =
-    ':is(.piece-single, .piece-inset, .piece-wide, .piece-diptych, .piece-triptych, .piece-grid, .piece-aside, .piece-row figure, .piece-held figure, .piece-pause-frame) > :is(a.image-link, img), :is(.prose, .piece-row-prose) > p > :is(a.image-link, img), :is(.prose, .piece-row-prose) > p > a:not(.image-link) > img';
 
-  it('form W is declared once, on the matted list plus the cover card and the compare figure', () => {
-    const formW = ruleFor(top, '.compare', '--mat');
-    expect(norm(formW.prelude)).toBe(
-      `${MATTED_LIST}, .gallery-card .image-link, .compare`.replace(/\s+/g, ' '),
-    );
+  it('form W is declared once, on the pause’s anchor alone (spec 015)', () => {
+    const formW = ruleFor(top, PAUSE_ANCHOR, '--mat');
+    expect(norm(formW.prelude)).toBe(PAUSE_ANCHOR);
     expect(norm(declarations(formW.body)['--mat'])).toBe(FORM_W);
     expect(Object.keys(declarations(formW.body))).toEqual(['--mat']);
-    // "Once" literally: no second rule anywhere in the file publishes the
-    // same string, so a surface can only be added to, or dropped from,
-    // this one selector list.
+    // "Once", and on that one surface: no second rule anywhere in the
+    // file publishes the same string, and the one that does selects the
+    // pause's anchor and nothing beside it — a piece's frame, a cover
+    // card or the compare figure put back on this list fails here.
     const declaringW = [...top, ...nested].filter(
       (block) => norm(declarations(block.body)['--mat'] ?? '') === FORM_W,
     );
-    expect(declaringW.map((block) => norm(block.prelude))).toHaveLength(1);
+    expect(declaringW.map((block) => norm(block.prelude))).toEqual([PAUSE_ANCHOR]);
   });
 
-  it('the surfaces read --mat and nothing else: the matted list, the packed row’s anchor, the stage', () => {
-    const matted = ruleFor(
-      top,
-      ':is(.prose, .piece-row-prose) > p > a:not(.image-link) > img',
-      'padding',
-    );
-    expect(norm(matted.prelude)).toBe(MATTED_LIST);
-    expect(declarations(matted.body)['padding']).toBe('var(--mat)');
-    expect(declarations(ruleFor(top, '.gallery-flow > li > a.image-link').body)['padding']).toBe(
-      'var(--mat)',
-    );
-    expect(declarations(ruleFor(top, '.image-frame').body)['padding']).toBe('var(--mat)');
-    // ...and nothing else: outside :root the three tokens are read only
-    // inside a --mat value, so every surface goes through the forms
+  it('the two matted surfaces read --mat as a padding — the pause’s anchor and the stage’s frame — and no other rule applies --mat or --color-matte', () => {
+    const anchor = declarations(ruleFor(top, PAUSE_ANCHOR, 'padding').body);
+    expect(anchor['padding']).toBe('var(--mat)');
+    expect(anchor['background']).toBe('var(--color-matte)');
+    const stage = declarations(ruleFor(top, '.image-frame').body);
+    expect(stage['padding']).toBe('var(--mat)');
+    expect(stage['background']).toBe('var(--color-matte)');
+    // The walk, over every rule in the file, nested ones included: a
+    // padding that reads --mat or a background that reads --color-matte
+    // may sit on those two selectors and nowhere else. This is what
+    // makes spec 015's "off" a fact about the stylesheet — a surface
+    // that grows its padding back shows up here by name.
+    const applying = [];
+    for (const block of [...top, ...nested])
+      for (const [property, value] of Object.entries(declarations(block.body))) {
+        const mat = /^padding/.test(property) && /var\(--mat\s*[,)]/.test(value);
+        const matte = /^background/.test(property) && /--color-matte\b/.test(value);
+        if (mat || matte) applying.push(`${norm(block.prelude)} { ${property} }`);
+      }
+    expect(applying.sort()).toEqual([
+      `${MATTED[1]} { background }`,
+      `${MATTED[1]} { padding }`,
+      `${MATTED[0]} { background }`,
+      `${MATTED[0]} { padding }`,
+    ]);
+    // ...and nothing reads the tokens: outside :root the three are read
+    // only inside a --mat value, so every surface goes through the forms
     // rather than reading the share or the clamp for itself.
     const reading = [];
     for (const block of [...top, ...nested]) {
@@ -301,13 +332,24 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
           reading.push(`${norm(block.prelude)} { ${property} }`);
     }
     expect(reading).toEqual([]);
+    // Source order is the pause's mat now (sign-off N1). Narrowed to one
+    // selector both rules are (0,2,1) — a tie with `.piece-block
+    // a.image-link`, whose `background: none` drops the theme's
+    // underline — so the white wins by coming later in the file and by
+    // nothing else. Move either rule above that one and the pause frame
+    // silently loses its mat.
+    const underline = indexOf(top, '.piece-block a.image-link');
+    expect(indexOf(top, PAUSE_ANCHOR, 'padding')).toBeGreaterThan(underline);
+    expect(indexOf(top, PAUSE_ANCHOR, '--mat')).toBeGreaterThan(underline);
   });
 
-  it('form H: the held figure’s mat and box formula', () => {
+  it('the held figure at zero: --mat 0px, no --q, the box formula unchanged', () => {
     const held = declarations(ruleFor(top, '.piece-held figure').body);
-    expect(norm(held['--q'])).toBe('min(var(--ar, 1), 1)');
+    // The zero is the rule's value, from the same property the box
+    // formula always read; --q was form H's and went with it.
+    expect(norm(held['--mat'])).toBe('0px');
+    expect(Object.keys(held)).not.toContain('--q');
     expect(norm(held['--avail-h'])).toBe('calc(100svh - 2 * var(--hold-margin))');
-    expect(norm(held['--mat'])).toBe(FORM_H);
     expect(norm(held['max-width'])).toBe(
       'calc((var(--avail-h) - 2 * var(--mat)) * var(--ar, 1) + 2 * var(--mat))',
     );
@@ -384,14 +426,15 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     );
   });
 
-  it('the image page reads --mat only as a padding: the compare figure\u2019s, and nothing else', () => {
-    // The mat is a padding and never another property. --mat carries
-    // 100%, and a percentage resolves against the READER's containing
-    // block: on a child of the padded figure that is its content box,
-    // and on a grid's row-gap the height axis \u2014 so `gap: var(--mat)` or
-    // `margin: var(--mat)` renders a fraction of the figure's mat, not
-    // the mat (measured at T1104: 22.85 against a 24.667 mat). The
-    // compare's gap and note margin are prose spacing instead (T1104a).
+  it('the image page reads --mat nowhere: the compare is unmatted, and --color-matte is its letterbox and divider only', () => {
+    // The compare figure lost its mat with every other non-hero surface
+    // (spec 015). What keeps --color-matte is the compare's own device
+    // inside its box — the letterbox fill behind a camera frame whose
+    // crop differs, and the slider's divider — neither of which is a
+    // field around a photograph. The gap and the note's margin were
+    // already prose spacing, not the mat (T1104a): --mat carries 100%,
+    // and a percentage resolves against the READER's containing block,
+    // so they would have rendered a fraction of the figure's mat.
     const page = uncomment(src['src/pages/images/[...id].astro']);
     const scoped = blocks(page.slice(page.indexOf('<style>'), page.indexOf('</style>')));
     const all = [
@@ -399,18 +442,47 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
       ...scoped.filter((one) => one.prelude.startsWith('@')).flatMap((one) => blocks(one.body)),
     ];
     const reading = [];
+    const matte = [];
     for (const block of all)
-      for (const [property, value] of Object.entries(declarations(block.body)))
+      for (const [property, value] of Object.entries(declarations(block.body))) {
         if (/var\(--mat\s*[,)]/.test(value)) reading.push(`${norm(block.prelude)} { ${property} }`);
-    expect(reading).toEqual(['.compare { padding }']);
-    expect(declarations(ruleFor(all, '.compare', 'padding').body)['padding']).toBe('var(--mat)');
+        if (/--color-matte\b/.test(value)) matte.push(norm(block.prelude));
+      }
+    expect(reading).toEqual([]);
+    const compare = declarations(ruleFor(all, '.compare').body);
+    expect(Object.keys(compare)).not.toContain('padding');
+    expect(Object.keys(compare)).not.toContain('background');
+    expect(matte.sort()).toEqual([
+      '.compare[data-js] .compare-frame :global(img)',
+      '.compare[data-js] .compare-line',
+    ]);
   });
 
-  it('form R: the mat is the packed row’s constant term, in the basis, the cap and the narrow cap', () => {
+  it('the cover card’s span reads no mat: a block box, the cover’s ratio, nothing else', () => {
+    const card = src['src/components/CoverCards.astro'];
+    const style = uncomment(card);
+    const scoped = blocks(style.slice(style.indexOf('<style>'), style.indexOf('</style>')));
+    const all = [
+      ...scoped,
+      ...scoped.filter((one) => one.prelude.startsWith('@')).flatMap((one) => blocks(one.body)),
+    ];
+    expect(declarations(ruleFor(all, '.gallery-card .image-link').body)).toEqual({
+      display: 'block',
+    });
+    // Nothing in the file reads the mat or its colour at all — the span
+    // stays only to carry the cover's --ar, as every frame does.
+    expect(/var\(--mat\s*[,)]|--color-matte\b/.test(card)).toBe(false);
+    expect(card).toContain('--ar: ');
+  });
+
+  it('form R at zero: the constant term is 0px and the packed row’s formulas keep it', () => {
     const cell = declarations(ruleFor(top, '.gallery-flow > li').body);
-    expect(norm(cell['--mat'])).toBe(
-      'clamp(var(--mat-min), calc(var(--gallery-short) * var(--mat-share)), var(--mat-max))',
-    );
+    expect(norm(cell['--mat'])).toBe('0px');
+    // The basis and both caps keep their `+ 2 * var(--mat)` term — that
+    // constant term is what makes the packing and the srcset exact, at
+    // zero as at the gate's share (AC 3), and a mat here one edit. These
+    // pinned strings are the guarantee that the term is still read: at
+    // zero it contributes nothing, but it is still in the string.
     expect(norm(cell['flex'])).toBe(
       'var(--w) 1 calc(var(--gallery-short) * var(--w) + 2 * var(--mat))',
     );
@@ -421,24 +493,39 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(norm(narrow['max-width'])).toBe(
       'calc(var(--gallery-short) * var(--w) * var(--gallery-stretch) + 2 * var(--mat))',
     );
+    expect(declarations(ruleFor(top, '.gallery-flow > li > a.image-link').body)).toEqual({
+      display: 'block',
+    });
   });
 
-  it('form P: one mat for the matched block, over the gap the block declares once', () => {
-    const member = declarations(
-      ruleFor(top, '.piece-diptych.match-height > :is(a.image-link, img)', '--mat').body,
+  it('form P is gone: no rule gives the matched members a --mat or a padding, and --pair-gap stays', () => {
+    const members = [...top, ...nested].filter((block) =>
+      selects(block.prelude, '.piece-diptych.match-height > :is(a.image-link, img)'),
     );
-    expect(norm(member['--mat'])).toBe(
-      'clamp(var(--mat-min), calc((100% - (var(--n) - 1) * var(--pair-gap)) * var(--mat-share) / (var(--ar-sum) + 2 * var(--n) * var(--mat-share))), var(--mat-max))',
+    // The members' own rules still exist (the flex item, and the
+    // collapse below 720px) — what is gone is any mat on them. With no
+    // padding their base size is the image alone and the heights are
+    // equal by algebra, so there is nothing left here to evaluate.
+    expect(members.length).toBeGreaterThan(0);
+    for (const block of members) {
+      const declared = Object.keys(declarations(block.body));
+      expect([norm(block.prelude), declared.filter((one) => /^(--mat|padding)/.test(one))]) //
+        .toEqual([norm(block.prelude), []]);
+    }
+    // ...and form P's string is published nowhere: it read --ar-sum and
+    // --n, which the transform still emits and nothing now reads.
+    const declaringP = [...top, ...nested].filter((block) =>
+      /--ar-sum/.test(declarations(block.body)['--mat'] ?? ''),
     );
-    const block = declarations(ruleFor(top, '.piece-diptych.match-height', '--pair-gap').body);
+    expect(declaringP.map((block) => norm(block.prelude))).toEqual([]);
+    // The gap stays, declared once on the block and read once in `gap`.
+    const gaps = [...top, ...nested].filter((block) => '--pair-gap' in declarations(block.body));
+    expect(gaps.map((block) => norm(block.prelude))).toEqual([
+      '.piece-diptych.match-height, .piece-triptych.match-height',
+    ]);
+    const block = declarations(gaps[0].body);
     expect(norm(block['--pair-gap'])).toBe('calc(var(--baseline) / 3)');
     expect(norm(block['gap'])).toBe('var(--pair-gap)');
-  });
-
-  it('form P comes after form W in source (it out-specifies it too: (0,3,1) over (0,2,2))', () => {
-    expect(
-      indexOf(top, '.piece-diptych.match-height > :is(a.image-link, img)', '--mat'),
-    ).toBeGreaterThan(indexOf(top, '.compare', '--mat'));
   });
 });
 
@@ -453,7 +540,7 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     ...extra,
   });
 
-  const formW = () => norm(declarations(ruleFor(top, '.compare', '--mat').body)['--mat']);
+  const formW = () => norm(declarations(ruleFor(top, PAUSE_ANCHOR, '--mat').body)['--mat']);
 
   it('form W: m is the share of the rendered short side, at every width it is given', () => {
     // A phone column, the prose column, the site's widest breakout: the
@@ -472,32 +559,23 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     }
   });
 
-  it('form H: the held frame fits its height exactly, and form W inside it agrees', () => {
+  it('the held frame at zero mat fits its height exactly', () => {
     const held = declarations(ruleFor(top, '.piece-held figure').body);
     for (const one of grid()) {
-      const env = envFor(one, {
-        '--q': held['--q'],
-        '--avail-h': held['--avail-h'],
-        '--mat': held['--mat'],
-      });
+      const env = envFor(one, { '--avail-h': held['--avail-h'], '--mat': held['--mat'] });
       const at = { env, viewport: one.viewport };
       const m = px(held['--mat'], at);
       const H = px(held['--avail-h'], at);
       const boxW = px(held['max-width'], at);
-      // The mat is the share of the short side the frame actually renders.
-      const sigma = (H - 2 * m) * Math.min(one.ratio, 1);
-      expect([where('form H mat', one), close(m, CLAMP(one.floor, one.share * sigma, one.ceiling))]) //
-        .toEqual([where('form H mat', one), true]);
-      // The box fits the height exactly...
-      expect([where('form H fit', one), close((boxW - 2 * m) / one.ratio + 2 * m, H)]) //
-        .toEqual([where('form H fit', one), true]);
-      // ...and form W, which the anchor inside the figure carries, returns
-      // the same mat at that width — the plan's central identity.
-      const fromW = px(formW(), { env, viewport: one.viewport, basis: boxW });
-      expect([where('form H identity', one), close(fromW, m)]).toEqual([
-        where('form H identity', one),
-        true,
-      ]);
+      // Off is off whatever the tokens say: the surface declares the
+      // zero, so no ratio, share or clamp can put a mat back on it.
+      expect([where('held mat', one), m]).toEqual([where('held mat', one), 0]);
+      // The box formula still reads --mat, and at zero it is H × ar —
+      // the frame is exactly the height it is allowed (AC 3).
+      expect([where('held box', one), close(boxW, H * one.ratio)]) //
+        .toEqual([where('held box', one), true]);
+      expect([where('held fit', one), close((boxW - 2 * m) / one.ratio + 2 * m, H)]) //
+        .toEqual([where('held fit', one), true]);
     }
   });
 
@@ -582,7 +660,7 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     }
   });
 
-  it('form R: the mat never enters the photograph’s width, at any growth', () => {
+  it('form R at zero: the photograph’s width is the row’s math, at any growth', () => {
     const cell = declarations(ruleFor(top, '.gallery-flow > li').body);
     const basisOf = (flex) => splitTop(norm(flex), ' ').slice(2).join(' ');
     const ROW = [0.667, 1, 1.78]; // a mixed row: portrait, square, landscape
@@ -613,13 +691,12 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
         const sumW = cells.reduce((total, c) => total + c.w, 0);
         const free = (growth - 1) * short * sumW;
         for (const c of cells) {
-          // The magnitude itself: the mat is the share of the row's
-          // TARGET short side (form R's stated deviation), so a wrong
-          // factor fails here and not only against the pinned string.
-          expect([
+          // The cell is unmatted (spec 015): zero at every point of the
+          // grid, so form R restored here — or any other mat — fails.
+          expect([where(`form R mat ratio ${c.ratio}`, one), c.m]).toEqual([
             where(`form R mat ratio ${c.ratio}`, one),
-            close(c.m, CLAMP(one.floor, one.share * short, one.ceiling)),
-          ]).toEqual([where(`form R mat ratio ${c.ratio}`, one), true]);
+            0,
+          ]);
           const width = c.basis + (free * c.w) / sumW;
           const image = width - 2 * c.m;
           expect([
@@ -657,99 +734,21 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     }
   });
 
-  it('form P: one mat for the block, equal on every member, and the heights stay matched', () => {
-    const member = declarations(
-      ruleFor(top, '.piece-diptych.match-height > :is(a.image-link, img)', '--mat').body,
-    );
-    const block = declarations(ruleFor(top, '.piece-diptych.match-height', '--pair-gap').body);
-    const SETS = [
-      [1.5, 0.667],
-      [0.8, 1.78],
-      [1.5, 1, 0.667],
-      [3, 0.5, 1],
-    ];
-    const W = 666;
-    let ragged = false;
-    for (const one of grid()) {
-      for (const set of SETS) {
-        const sum = set.reduce((total, r) => total + r, 0);
-        const env = envFor(one, {
-          '--n': set.length,
-          '--ar-sum': sum,
-          '--pair-gap': block['--pair-gap'],
-        });
-        const at = { env, viewport: one.viewport, basis: W };
-        // The members carry NORMALIZED --ar (the flex factors), so a mat
-        // that read --ar would differ between them: it must not.
-        const mats = set.map((ratio) =>
-          px(member['--mat'], { ...at, env: { ...env, '--ar': ratio / Math.min(...set) } }),
-        );
-        expect([
-          where(`form P equal n=${set.length}`, one),
-          mats.every((m) => close(m, mats[0])),
-        ]).toEqual([where(`form P equal n=${set.length}`, one), true]);
-        const m = mats[0];
-        const gap = px(block['--pair-gap'], at);
-        // Each member is a flex item with `flex: var(--ar, 1) 1 0` and
-        // border-box padding, so its base size is its OWN two mats and
-        // the free space is shared by the normalized ratio. A member's
-        // RENDERED height is its image's height plus its own two mats —
-        // which is where one mat per block earns its name: mats that
-        // differ between members leave the frames ragged even though the
-        // images still line up, and the padding is what the reader sees.
-        const norms = set.map((ratio) => ratio / Math.min(...set));
-        const grow = norms.reduce((total, one) => total + one, 0);
-        const memberHeights = (each) => {
-          const free = W - (set.length - 1) * gap - each.reduce((total, mi) => total + 2 * mi, 0);
-          return set.map((ratio, at2) => ((norms[at2] / grow) * free) / ratio + 2 * each[at2]);
-        };
-        const heights = memberHeights(mats);
-        expect([
-          where(`form P heights n=${set.length}`, one),
-          heights.every((h) => close(h, heights[0])),
-        ]).toEqual([where(`form P heights n=${set.length}`, one), true]);
-        const h = heights[0] - 2 * m; // the matched height the mat is a share of
-        expect([
-          where(`form P share n=${set.length}`, one),
-          close(m, CLAMP(one.floor, one.share * h, one.ceiling)),
-        ]).toEqual([where(`form P share n=${set.length}`, one), true]);
-        // The clause has teeth: the mat the plan rejected — one per
-        // member, clamp(F, s·h·q_i, C) — puts the members at different
-        // clamp limits over a mixed set, and the same model then returns
-        // UNEQUAL heights. Where that variant's mats really do differ,
-        // the equality above must be able to tell them apart.
-        const perMember = set.map((ratio) =>
-          CLAMP(one.floor, one.share * h * Math.min(ratio, 1), one.ceiling),
-        );
-        if (perMember.some((mi) => !close(mi, perMember[0]))) {
-          ragged = true;
-          const uneven = memberHeights(perMember);
-          expect([
-            where(`form P per-member ragged n=${set.length}`, one),
-            uneven.every((height) => close(height, uneven[0])),
-          ]).toEqual([where(`form P per-member ragged n=${set.length}`, one), false]);
-        }
-      }
-    }
-    // ...and the mixed sets really do reach that case, so the check above
-    // is not vacuous.
-    expect(ragged).toBe(true);
-  });
-
-  it('the inert identity: at :root’s literals every form is today’s fixed mat', () => {
+  it('the off identity: at share 0 with floor = ceiling the matted forms give the mat and the unmatted surfaces give 0', () => {
     const cell = declarations(ruleFor(top, '.gallery-flow > li').body);
     const held = declarations(ruleFor(top, '.piece-held figure').body);
     const pause = declarations(ruleFor(top, '.piece-pause').body);
     const frame = declarations(ruleFor(top, '.image-frame').body);
-    const member = declarations(
-      ruleFor(top, '.piece-diptych.match-height > :is(a.image-link, img)', '--mat').body,
-    );
-    const block = declarations(ruleFor(top, '.piece-diptych.match-height', '--pair-gap').body);
     const stage = declarations(ruleFor(top, '.image-stage').body);
     const basisOf = (flex) => splitTop(norm(flex), ' ').slice(2).join(' ');
-    const MAT = 16.8; // 1.4vw capped at 1.05rem — the laptop's mat, today
+    // Share 0 with floor = ceiling is the one setting where every form
+    // collapses to a single constant, so it separates the surfaces that
+    // read the rule from the surfaces that are off: with the tokens
+    // saying "16.8px everywhere", the two matted surfaces wear 16.8 and
+    // the unmatted ones still wear nothing, because their zero is
+    // declared, not derived.
+    const MAT = 16.8;
     for (const ratio of RATIOS) {
-      const one = { viewport: [1512, 982], floor: MAT, ceiling: MAT, share: 0, ratio };
       const base = {
         ...root,
         '--mat-share': 0,
@@ -757,11 +756,10 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
         '--mat-max': `${MAT}px`,
         '--ar': ratio,
       };
-      const at = (extra) => ({ env: { ...base, ...extra }, viewport: one.viewport, basis: 666 });
+      const at = (extra) => ({ env: { ...base, ...extra }, viewport: [1512, 982], basis: 666 });
+      // Matted: the pause's anchor (form W), the pause's own box and the
+      // stage (form V+H).
       expect(px(formW(), at({}))).toBe(MAT);
-      expect(px(held['--mat'], at({ '--q': held['--q'], '--avail-h': held['--avail-h'] }))).toBe(
-        MAT,
-      );
       expect(
         px(
           pause['--mat'],
@@ -785,33 +783,59 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
           }),
         ),
       ).toBe(MAT);
-      expect(
-        px(member['--mat'], at({ '--n': 2, '--ar-sum': 2.4, '--pair-gap': block['--pair-gap'] })),
-      ).toBe(MAT);
+      // Off: the held figure and the packed cell, whatever the tokens.
+      expect(px(held['--mat'], at({ '--avail-h': held['--avail-h'] }))).toBe(0);
       const short = 460;
       const cellAt = at({ '--gallery-short': `${short}px`, '--w': Math.max(ratio, 1) });
-      expect(px(cell['--mat'], cellAt)).toBe(MAT);
-      // Form R's basis is the row's target width plus two mats — the mat
-      // as the constant term is what keeps the packing exact.
+      expect(px(cell['--mat'], cellAt)).toBe(0);
+      // And form R's basis is the row's target width with no constant
+      // left in it — the term contributes nothing at zero. That it is
+      // still in the string at all is case (b)'s pin, not this one.
       expect(
         px(basisOf(cell['flex']), {
           ...cellAt,
-          env: { ...cellAt.env, '--mat': `${MAT}px` },
+          env: { ...cellAt.env, '--mat': cell['--mat'] },
         }),
-      ).toBe(short * Math.max(ratio, 1) + 2 * MAT);
+      ).toBe(short * Math.max(ratio, 1));
     }
   });
 
-  it("the gate identity: at :root's tokens the reading-width 3:2 single wears the gate's mat", () => {
-    // What the product owner judged at the gate (T1103's sampler, Firefox
-    // 155, 1512×982): share-60 on the 666px reading column's 3:2 single
-    // read 24.667px = 666 × 0.06 / (1.5 + 2 × 0.06). Run against :root
-    // itself, so moving any of the three tokens moves this number.
-    const m = px(formW(), {
-      env: { ...root, '--ar': 1.5 },
+  it("the gate identity: at :root's tokens the stage wears the 40px ceiling and the reading-width single wears nothing", () => {
+    // The gate's number, kept: at 1512×982 the stage's 3:2 frame sits on
+    // the ceiling on both of form V+H's branches (T1104's record, Firefox
+    // 155: 40.0). Run against :root itself, so a move in the ceiling
+    // moves this number — it is the ceiling the frame sits on here;
+    // drift in the other two tokens is caught by case (a). Spec 015
+    // re-derived none of the three.
+    const stage = declarations(ruleFor(top, '.image-stage').body);
+    const frame = declarations(ruleFor(top, '.image-frame').body);
+    const m = px(frame['--mat'], {
+      env: {
+        ...root,
+        '--ar': 1.5,
+        '--r': frame['--r'],
+        '--q': frame['--q'],
+        '--stage-pad': stage['--stage-pad'],
+        '--avail-w': stage['--avail-w'],
+        '--avail-h': stage['--avail-h'],
+      },
       viewport: [1512, 982],
-      basis: 666,
     });
-    expect(Math.abs(m - 24.667)).toBeLessThan(0.05);
+    expect(m).toBe(40);
+    // And the frame the same gate judged at 24.667px — the 3:2 single in
+    // the reading column — has no --mat reader at all since spec 015: no
+    // rule in the file applies a mat-bearing padding to a piece's
+    // reading-flow frame or to a prose shorthand image.
+    const onPieces = [...top, ...nested]
+      .filter((block) =>
+        Object.entries(declarations(block.body)).some(
+          ([property, value]) => /^padding/.test(property) && /var\(--mat\s*[,)]/.test(value),
+        ),
+      )
+      .map((block) => norm(block.prelude))
+      .filter((prelude) =>
+        /piece-(single|inset|wide|diptych|triptych|grid|aside|row|held)|\.prose/.test(prelude),
+      );
+    expect(onPieces).toEqual([]);
   });
 });

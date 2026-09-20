@@ -368,44 +368,44 @@ export const CONTROL: Tone = { L: 0.968, C: 0.006, h: 95 };
 
 /** The fixed set on the sampler's switch, beside the free tune. */
 export const CANDIDATES: Record<string, Candidate> = {
-  paper: {
-    id: 'paper',
+  today: {
+    id: TODAY,
     bg: { L: 0.99, C: 0.003, h: 100 },
-    why: "the pre-003 paper-white, spec 013's white — its companions now by the rule",
+    why: 'the control — selecting it removes the override, so it is the stylesheet itself',
   },
   light: {
     id: 'light',
     bg: { L: 0.98, C: 0.005, h: 95 },
-    why: 'one step lighter than today',
+    why: "a hair below today — L 0.98 against paper's 0.99, between it and spec 003's warm",
   },
-  today: {
-    id: TODAY,
+  'warm-003': {
+    id: 'warm-003',
     bg: { L: 0.968, C: 0.006, h: 95 },
-    why: 'the control — selecting it removes the override, so it is the stylesheet itself',
+    why: "spec 003's warm — the control at spec 014's and 015's gates",
   },
   'deep-1': {
     id: 'deep-1',
     bg: { L: 0.95, C: 0.007, h: 95 },
-    why: 'one step darker',
+    why: "L 0.95 — 0.04 below today, a shade below spec 003's warm",
   },
   'deep-2': {
     id: 'deep-2',
     bg: { L: 0.93, C: 0.008, h: 95 },
-    why: 'two steps darker',
+    why: 'L 0.93 — 0.06 below today',
   },
   'deep-3': {
     id: 'deep-3',
     bg: { L: 0.9, C: 0.009, h: 95 },
-    why: 'the far bracket, where muted-on-ground itself fails',
+    why: 'the far bracket — L 0.9, 0.09 below today, where muted-on-ground itself fails',
   },
   cool: {
     id: 'cool',
     bg: { L: 0.968, C: 0.008, h: 250 },
-    why: "today's lightness at the text's hue — a cool grey",
+    why: "spec 003's lightness (0.968, below today's paper) at the text's hue — a cool grey",
   },
   warm: {
     id: 'warm',
     bg: { L: 0.968, C: 0.012, h: 75 },
-    why: "today's lightness, warmer and more coloured",
+    why: "spec 003's lightness (0.968, below today's paper), warmer and more coloured",
   },
 };

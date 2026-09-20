@@ -6,15 +6,36 @@
   --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 84%);
   /* Text/icon color on top of a filled accent surface. */
   --color-on-accent: oklch(0.99 0.003 100);
-  /* Warmed at the spec-003 sampler review so pure-white mattes read as
-     mats on a gallery wall (chosen over mat edges and tinted mats). */
-  --color-bg: oklch(0.968 0.006 95);
-  --color-surface: oklch(0.945 0.007 95);
+  /* THE GROUND, and the family below it. Landed 2026-09-19 at spec
+     015's gate: the candidate `paper` — oklch(0.99 0.003 100) — chosen
+     on both screens with the site seen unmatted for the first time (the
+     mat is the image page's stage and the pause frame now, nothing
+     else). The four fills and hairlines are not separate choices: each
+     is a fixed step from this tone (`STEPS`, src/lib/ground.ts), and
+     ground.test.mjs pins these five literals to the strings the rule
+     derives — to retune, move the ground and paste what the failing
+     test prints.
+
+     The pair that bound: muted/soft at 5.05:1, the lowest of the six
+     floored pairs (inline code sits on the soft fill). It clears 4.5:1,
+     so --color-muted ships unchanged at oklch(0.5 0.012 250) — this
+     gate deepened nothing. White-mat-on-ground is 1.02:1 (ΔL 0.01): the
+     mat reads faintly here, and the stage's darker field is its own
+     spec (ROADMAP).
+
+     History: spec 003 warmed the ground to oklch(0.968 0.006 95) at its
+     sampler review so pure-white mattes read as mats on a gallery wall
+     (chosen over mat edges and tinted mats). Spec 014 built this
+     family's rule, the readout and the dev switch but closed with its
+     gate unanswered — the site was still matted everywhere, which is
+     what spec 015 changed before re-judging. */
+  --color-bg: oklch(0.99 0.003 100);
+  --color-surface: oklch(0.967 0.004 100);
   --color-text: oklch(0.25 0.01 250);
   --color-muted: oklch(0.5 0.012 250);
-  --color-line: oklch(0.86 0.008 95);
-  --color-line-strong: oklch(0.72 0.012 95);
-  --color-soft: oklch(0.92 0.008 95);
+  --color-line: oklch(0.882 0.005 100);
+  --color-line-strong: oklch(0.742 0.009 100);
+  --color-soft: oklch(0.942 0.005 100);
   --font-display: 'Spectral', Georgia, serif;
   --font-body: 'Public Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
@@ -30,11 +51,20 @@
   --para-gap: 1em;
   --hairline: 1px solid var(--color-line);
   --focus-ring: 0 0 0 3px var(--color-accent-soft);
-  /* The mat (spec 003; a rule rather than a length since spec 013): a
-     flat color field around images — the photographer's presentation
-     style on every channel, carved out of the skeuomorphism ban
-     (design/brief.md). Pure white against the warm page reads as a mat
-     with no rule needed; never add shadow, bevel, or texture.
+  /* The mat (spec 003; a rule rather than a length since spec 013; the
+     hero's alone since spec 015): a flat color field around a
+     photograph — the photographer's presentation style, carved out of
+     the skeuomorphism ban (design/brief.md). Pure white against the
+     warm page reads as a mat with no rule needed; never add shadow,
+     bevel, or texture.
+
+     WHERE IT IS, since spec 015. The image page's stage and its quiet
+     view (form V+H on `.image-frame`), and the pause frame (form W, on
+     a list of one) until the pause gets a spec of its own. Every other
+     surface is unmatted — a piece's reading-flow frames, the held
+     frame, the packed galleries, the place wall, the related strip,
+     the index cover cards, the compare figure — and off means the
+     frame is the photograph.
 
      THE RULE, and its single source. A frame's mat is
      m = clamp(--mat-min, --mat-share × σ, --mat-max), where σ is the
@@ -43,18 +73,18 @@
      algebraically from the frame's ratio (--ar, width ÷ height, raw,
      which the transform puts on every frame) and publishes the answer
      as one computed property, --mat; the surface applies
-     `padding: var(--mat)` and reads nothing else. Five forms — W
-     (column-bound), H (height-bound), V+H (two limits, the smaller),
-     R (packed rows) and P (matched heights) — each written once, in
-     the Mattes section below, where the per-surface comment says which
-     rule each surface reads.
+     `padding: var(--mat)` and reads nothing else. Two forms are left —
+     W (column-bound), on the pause's anchor, and V+H (two limits, the
+     smaller), on the stage — both in the Mattes section below, where
+     the per-surface comment says which rule each surface reads and
+     what an unmatted surface does with --mat instead.
 
      These three tokens are declared ONLY here (matte.test.mjs pins
-     that), so one number moves every mat on the site. Their values
-     were set once, at spec 013's visual gate (2026-09-17), from the
-     sampler's candidate table: candidate `share-60` — 6% of the
-     rendered short side, floor 4px, ceiling 40px — with every surface
-     keeping its mat and the warm ground left unchanged. */
+     that), so one number moves every mat on the site. Their values are
+     spec 013's, set at its visual gate (2026-09-17) from the sampler's
+     candidate table: candidate `share-60` — 6% of the rendered short
+     side, floor 4px, ceiling 40px. Spec 015 re-derived nothing: the
+     one surface that keeps a mat keeps the gate's number. */
   --mat-share: 0.06; /* the share of the photograph's rendered short side (the gate's share-60) */
   --mat-min: 0.25rem; /* floor — 4px */
   --mat-max: 2.5rem; /* ceiling — 40px; the stage's largest frames sit on it at 1512×982 */
@@ -1139,10 +1169,11 @@ a.note-row {
 }
 
 /* Spec 004: every image is a link to its page, and the anchor is the
-   layout item — the flex or grid child, the thing that floats, the
-   thing that carries the mat — with the image filling it. background:
-   none drops the theme's gradient underline; the site's :focus-visible
-   ring draws around the whole frame. */
+   layout item — the flex or grid child, the thing that floats — with
+   the image filling it; since spec 015 the only anchor that also
+   carries a mat is the pause's. background: none drops the theme's
+   gradient underline; the site's :focus-visible ring draws around the
+   whole frame. */
 .piece-block a.image-link,
 .prose > p > a.image-link,
 .piece-row-prose > p > a.image-link {
@@ -1151,7 +1182,8 @@ a.note-row {
 }
 
 /* Shorthand images sit in a paragraph at their own width, as before —
-   the mat must hug the image, not span the column. */
+   fit-content keeps the anchor at the image's width instead of
+   stretching it across the column. */
 .prose > p > a.image-link,
 .piece-row-prose > p > a.image-link {
   width: fit-content;
@@ -1190,9 +1222,10 @@ a.note-row {
    smallest is 1), so heights equalize exactly — no cropping. */
 .piece-diptych.match-height,
 .piece-triptych.match-height {
-  /* The gap is read twice: here, and by form P's mat below, which
-     takes it out of the row before dividing what is left among the
-     frames — so it is declared once, on the block. */
+  /* The gap is read once, here, since form P went with the block's mat
+     at spec 015 — it stays a declared property because the gap is the
+     block's own fact and the transform's --ar-sum/--n still describe
+     the row it sits in. */
   --pair-gap: calc(var(--baseline) / 3);
   display: flex;
   gap: var(--pair-gap);
@@ -1201,8 +1234,9 @@ a.note-row {
 .piece-diptych.match-height > :is(a.image-link, img),
 .piece-triptych.match-height > :is(a.image-link, img) {
   /* The flex item is the anchor (or a bare img when alt="" — no link).
-     border-box floors the item's base size at its mat padding, so the
-     proportional part is the image alone: heights come out exact. */
+     Unmatted since spec 015, its base size is no longer floored by a
+     mat's padding: the whole item is the image, free space is shared
+     by --ar, and the heights are equal by algebra. */
   flex: var(--ar, 1) 1 0;
   min-width: 0;
   width: auto;
@@ -1252,14 +1286,18 @@ a.note-row {
 /* Collapse breakpoint: 720px — shared with the transform's COLLAPSE
    constant (remark-pieces-blocks.mjs) and every `sizes` string. Keep the
    three in step by hand. Sizing coupling: the transform's 680px/440px
-   constants assume --prose-width (68ch ≈ 665px) and the mat's padding —
-   see the sizes table in specs/003-block-vocabulary/plan.md. Since spec
-   013 the mat is a SHARE of the frame rather than a fixed length, so
-   what the hints assume is now a range: the single's 680px and the
-   pairs' and the pause's hints already over-deliver by the mat, so a
-   smaller mat only widens the margin and a larger one widens the
-   over-delivery. None falls under; the gallery's hint is exact by form
-   R (the mat is that row's constant term). */
+   constants assume --prose-width (68ch ≈ 665px) and, when they were
+   written, the mat's padding — see the sizes table in
+   specs/003-block-vocabulary/plan.md. Since spec 015 a piece's frames
+   carry no mat, so the hints assume a frame the image now fills
+   outright: every hint was written over the frame's OUTER width, which
+   makes an unmatted image at most that wide. The single's 680px
+   over-delivers against the ~665px column by design (the compare's
+   700px likewise, measured ~35px over at T1301), and the gallery's
+   hint is exact — the cell's cap is the row's math with a constant
+   term of zero. One hint under-delivers: the index cover card renders
+   374.667px against a 373px hint, 1.667px short — measured at T1301,
+   inside the 2px threshold. */
 
 /* Centered breakout: wider than the prose column, not the viewport. */
 .piece-wide {
@@ -1503,20 +1541,16 @@ a.note-row {
   justify-self: end;
 }
 
-/* Form H (the mat rule, spec 013): the frame is bound by the height it
-   is allowed, so σ = (H − 2m)·q with q = min(--ar, 1) — the same clamp
-   regime whatever the mat, because --avail-h is a known length. The box
-   formula below is today's, with --mat where the fixed matte was; form
-   W on the anchor inside returns this same m at this max-width (the
-   plan's identity, checked by matte.test.mjs's evaluator). */
+/* The held frame is unmatted (spec 015), and zero is the rule's value
+   here: form H, which solved the mat from the height the frame is
+   allowed, is gone and --mat is the zero the box formula reads. The
+   formula keeps its term — the frame is bound by --avail-h, and the
+   box is (H − 2m)·ar + 2m, which at m = 0 is H·ar — so putting a mat
+   back on this surface is one declaration (spec 013's plan.md carries
+   form H's string). */
 .piece-held figure {
-  --q: min(var(--ar, 1), 1);
   --avail-h: calc(100svh - 2 * var(--hold-margin));
-  --mat: clamp(
-    var(--mat-min),
-    calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))),
-    var(--mat-max)
-  );
+  --mat: 0px;
   position: sticky;
   top: var(--hold-margin);
   width: 100%;
@@ -1816,82 +1850,76 @@ html[data-pause-active] .social-links a {
 }
 
 /* ---- Mattes (spec 003 Phase 3; per-image since the sampler review;
-   a share of the frame since spec 013) ---------------------------------
-   Every frame carries its OWN mat — the photographer's presentation
-   style per image — so gutters in multi-image blocks show the page
-   between mats, and captions sit below the mats on the page (the wall
-   label sits on the wall, not the mat). Matted: single (both forms),
-   inset, wide, diptych, triptych, grid, aside, row, held, pause.
-   Unmatted: fullbleed, tall, strip, width="fullbleed" pairs, and
-   half-bleed's bled edge. Equal-heights note: the padding participates
-   in the flex basis floor, so match="height" stays exact with per-image
-   mats. Since spec 004 the mat sits on the image's link (the layout
-   item); a bare img — alt="" gets no link — carries it itself. The mats
-   do not dim during a pause (the photographer's decision 9): a white
-   mat on the dark ground is what quiet view already does.
+   a share of the frame since spec 013; the hero's alone since spec
+   015) -------------------------------------------------------------
+   MATTED, and this is the whole list: the image page's stage
+   (`.image-frame`, form V+H, at the end of this file) and its quiet
+   view, and the pause frame — `.piece-pause-frame`'s anchor, form W,
+   just below, on a selector list of one — until the pause gets a spec
+   of its own. The pause's mat does not dim during a pause (the
+   photographer's decision 9): a white mat on the dark ground is what
+   quiet view already does. Since spec 004 a mat sits on the image's
+   link (the layout item); a bare img — alt="" gets no link — carries
+   it itself.
+
+   UNMATTED since spec 015, which took the mat off every surface but
+   the hero's: a piece's reading-flow frames (single — the prose
+   shorthand included, single's captionless form — inset, wide,
+   diptych, triptych, grid, aside, row, held), the packed rows (the
+   galleries, the place wall, the related strip), the index cover cards
+   and the image page's compare figure. Fullbleed, tall and strip never
+   had a mat. Off means the frame is the photograph: no padding, no
+   field, nothing between the image and the page. Where a layout
+   formula still reads the mat, the surface declares `--mat: 0px` — the
+   held figure and the packed cell — so the formula includes zero from
+   the same single source and a later mat is one edit; where only the
+   padding read it, the declarations are simply gone.
 
    THE MAT'S WIDTH (spec 013). m = clamp(--mat-min, --mat-share × σ,
    --mat-max) over the photograph's rendered short side σ; the three
    tokens live in :root and nowhere else. No surface reads them: the
    rule for a frame's geometry solves for m and publishes --mat, and
-   the surface applies `padding: var(--mat)`. The forms, and which rule
-   each of spec 013's four surfaces reads (the gate lands each surface's
-   decision as one edit per surface, so this list is the lookup):
+   the surface applies `padding: var(--mat)`. The two forms left:
 
      W — column-bound: the frame fills a container of known width W, so
          the image is W − 2m wide and σ = (W − 2m)/r with r = max(--ar,
-         1). Declared once, just below, over the piece's reading-flow
-         frames (SURFACE 1), the index cover card's span.image-link
-         (SURFACE 4) and the image page's compare figure (which follows
-         the stage, SURFACE 3).
-     H — height-bound: `.piece-held figure`, above (SURFACE 1).
-     V + H — two limits, the smaller: `.piece-pause`, above (SURFACE 1),
-         and `.image-frame`, the image page's stage, at the end of this
-         file (SURFACE 3).
-     R — packed rows: `.gallery-flow > li` — the galleries, the place
-         wall and the related strip (SURFACE 2), below.
-     P — matched heights: one mat for a whole match="height" block,
-         just below form W (SURFACE 1). One mat, not one per member,
-         because with a mat per member the matched height decides which
-         members sit at the floor or ceiling and that decision decides
-         the matched height — CSS cannot branch on it inside a flex row,
-         while one mat over the block puts the whole clamp on a known
-         expression and stays exact in every regime.
+         1). Declared once, just below, over the pause frame's anchor
+         and nothing else.
+     V + H — two limits, the smaller: `.piece-pause` (the pause's own
+         box, above) and `.image-frame`, the stage, at the end of this
+         file.
 
-   Form R is a deliberate deviation from the spec's letter: a packed
-   row's real short side is the target grown by up to --gallery-stretch,
-   and that growth is flex's, not a length CSS can read. So the mat
-   follows the row's TARGET short side, which keeps it the constant term
-   of the equal-short-side math (exact in every regime, and today's
-   fixed mat expressible). The cost: a stretched row wears its mat at
-   between share/1.35 and share of its actual short side.
+   Forms H (the held figure), R (packed rows) and P (matched heights)
+   went with their surfaces' mats at spec 015. Spec 013's plan.md
+   carries every form's string, so turning a surface back on is that
+   form restored to its element plus `padding: var(--mat)` and the
+   background — one edit per surface, as it always was.
 
-   The mechanism landed inert at T1101: at share 0 with floor = ceiling
-   every form resolves to that one constant, which is how these formulas
-   replaced the fixed matte without moving a pixel. The gate (2026-09-17)
-   then set the share at 6% with a 4px floor and a 40px ceiling, on every
-   surface. */
+   SOURCE ORDER IS LOAD-BEARING for the pause. Narrowed to one
+   selector, the padding/background rule below is (0,2,1) — a tie with
+   `.piece-block a.image-link` above, whose `background: none` drops
+   the theme's gradient underline — so the mat's white now wins by
+   coming later in this file and by nothing else. Both rules must stay
+   below that one; matte.test.mjs pins the order. Their preludes are
+   byte-identical and the two stay separate on purpose: form W declares
+   --mat and nothing else, the rule after it is the surface applying
+   it, and merging the pair fails the "declared once" test.
+
+   The transform still emits --ar-sum and --n on match="height" blocks
+   and nothing reads them now that form P is gone: the transform is
+   spec 015's non-goal, so they stay, with its own stale note about the
+   mat in the `sizes` hints.
+
+   History: spec 003 gave the site a fixed matte; spec 013 turned it
+   into this rule and landed it inert (share 0, floor = ceiling, every
+   form a constant), and its gate (2026-09-17) set share-60 on every
+   surface; spec 015 made the mat a hero treatment at those same three
+   tokens. */
 
 /* Form W. The clamp is exact because the regime depends only on known
    lengths: 100% is the container's width, resolved against the
    containing block as any percentage padding is. */
-:is(
-    .piece-single,
-    .piece-inset,
-    .piece-wide,
-    .piece-diptych,
-    .piece-triptych,
-    .piece-grid,
-    .piece-aside,
-    .piece-row figure,
-    .piece-held figure,
-    .piece-pause-frame
-  )
-  > :is(a.image-link, img),
-:is(.prose, .piece-row-prose) > p > :is(a.image-link, img),
-:is(.prose, .piece-row-prose) > p > a:not(.image-link) > img,
-.gallery-card .image-link,
-.compare {
+.piece-pause-frame > :is(a.image-link, img) {
   --mat: clamp(
     var(--mat-min),
     calc(100% * var(--mat-share) / (max(var(--ar, 1), 1) + 2 * var(--mat-share))),
@@ -1899,58 +1927,9 @@ html[data-pause-active] .social-links a {
   );
 }
 
-:is(
-    .piece-single,
-    .piece-inset,
-    .piece-wide,
-    .piece-diptych,
-    .piece-triptych,
-    .piece-grid,
-    .piece-aside,
-    .piece-row figure,
-    .piece-held figure,
-    .piece-pause-frame
-  )
-  > :is(a.image-link, img),
-:is(.prose, .piece-row-prose) > p > :is(a.image-link, img),
-:is(.prose, .piece-row-prose) > p > a:not(.image-link) > img {
+.piece-pause-frame > :is(a.image-link, img) {
   background: var(--color-matte);
   padding: var(--mat);
-}
-
-/* Form P: one mat for a matched block, a share of the matched height
-   h = (W − G − 2nm)/A — A the sum of the members' raw ratios and n
-   their count, both from the transform on the container; G the gaps.
-   (0,3,1) over form W's (0,2,2), and later in source besides: the
-   members' own --ar is normalized for the flex factors, so form W's
-   answer would be wrong here. */
-.piece-diptych.match-height > :is(a.image-link, img),
-.piece-triptych.match-height > :is(a.image-link, img) {
-  --mat: clamp(
-    var(--mat-min),
-    calc(
-      (100% - (var(--n) - 1) * var(--pair-gap)) * var(--mat-share) /
-        (var(--ar-sum) + 2 * var(--n) * var(--mat-share))
-    ),
-    var(--mat-max)
-  );
-}
-
-/* Half-bleed: the bled edge runs clean to the viewport; the mat holds
-   on the other three sides (sampler-review knob). */
-.piece-wide.bleed-left > :is(a.image-link, img) {
-  padding-left: 0;
-}
-
-.piece-wide.bleed-right > :is(a.image-link, img) {
-  padding-right: 0;
-}
-
-/* Fullbleed-width pairs: edge-to-edge is the point — no mats. */
-.piece-diptych.width-fullbleed > :is(a.image-link, img),
-.piece-triptych.width-fullbleed > :is(a.image-link, img) {
-  background: none;
-  padding: 0;
 }
 
 /* ---- Galleries (spec 004) --------------------------------------------
@@ -1988,12 +1967,12 @@ html[data-pause-active] .social-links a {
   }
 }
 
-/* A grid cell's own mat lives with its card: the only .gallery-grid is
-   CoverCards.astro's list, whose anchor is a.gallery-card and whose mat
-   sits on the span.image-link inside it (spec 009). The two
-   `.gallery-grid > li > a.image-link` rules that used to sit here
-   matched no markup after that move and went at spec 013 T1101, so the
-   cards' mat is one place. */
+/* Nothing here selects `.gallery-grid > li > a.image-link`, and the
+   absence is deliberate: the only .gallery-grid is CoverCards.astro's
+   list, whose anchor is a.gallery-card with a span.image-link inside it
+   (spec 009), so the two rules that used to sit here matched no markup
+   after that move and went at spec 013 T1101. matte.test.mjs case (a)
+   pins that they stay gone. */
 
 /* ---- Gallery pages: rows packed to equal short sides (T307R) --------
    The photographer's rule from the sampler review: every image's SHORT
@@ -2005,17 +1984,20 @@ html[data-pause-active] .social-links a {
    to --w, so one factor scales a whole row to fill the width and every
    image in it lands on exactly the same short side — the triptych's
    match="height" math with a different target. The mat's padding
-   rides in the basis as a constant so it doesn't skew the ratio.
+   rode in the basis as a constant so it never skewed the ratio; since
+   spec 015 that constant is zero.
    A row that can't fill (a lone landscape before a panorama) stays
    short, grown up to --gallery-stretch and centered — the cost of
    keeping the order. Both knobs are set by the gallery page from
    src/lib/gallery-layout.ts (one source for the CSS and the srcset
    math); nothing here declares them.
 
-   Form R (the mat rule, spec 013): the mat is a share of the row's
-   TARGET short side, --gallery-short — the deviation stated in the
-   Mattes section above — which keeps it the constant term below and
-   the packing exact, and puts one mat on every frame in a row. */
+   The packed rows are unmatted (spec 015): form R, which made the mat
+   a share of the row's target short side, is gone and the cell
+   declares --mat: 0px. The basis and the caps keep their `+ 2 *
+   var(--mat)` term, now zero — the mat was always the constant term of
+   the equal-short-side math, which is what kept the packing and the
+   srcset exact, so it stays readable and a mat here is one edit. */
 .gallery-flow {
   display: flex;
   flex-wrap: wrap;
@@ -2043,7 +2025,7 @@ html[data-pause-active] .social-links a {
 
 .gallery-flow > li {
   --w: max(var(--ar, 1), 1);
-  --mat: clamp(var(--mat-min), calc(var(--gallery-short) * var(--mat-share)), var(--mat-max));
+  --mat: 0px;
   margin: 0;
   flex: var(--w) 1 calc(var(--gallery-short) * var(--w) + 2 * var(--mat));
   max-width: min(
@@ -2054,8 +2036,6 @@ html[data-pause-active] .social-links a {
 
 .gallery-flow > li > a.image-link {
   display: block;
-  padding: var(--mat);
-  background: var(--color-matte);
 }
 
 .gallery-flow > li > a.image-link img {

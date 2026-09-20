@@ -23,10 +23,14 @@
 // The sampler's toolbars — page-level progressive enhancement, the only
 // script this fixture carries.
 //
-// Per surface: the five mat candidates set --mat-share / --mat-min /
-// --mat-max on that surface's wrapper <section> (the frames inherit
-// them), with two rem inputs that replace the floor and ceiling on the
-// share candidates. That state is this page's, in sessionStorage.
+// THE MAT BAR IS THE STAGE'S (spec 015): the stage is the only section the
+// page still renders a bar for, since it is the only surface the site still
+// mats. Its five mat candidates set --mat-share / --mat-min / --mat-max on
+// that section's wrapper <section> (the frames inherit them), with two rem
+// inputs that replace the floor and ceiling on the share candidates. That
+// state is this page's, in sessionStorage. `pieces`, `galleries` and
+// `cards` render no bar, so applySurface returns on them untouched — see
+// its early return below.
 //
 // The GROUND is the site-wide switch's (spec 014). This bar writes
 // localStorage['dev-ground'] = { id, bg, muted, tokens } and sets the same
@@ -36,7 +40,9 @@
 // arithmetic — the family's steps, the contrast, the muted deepening, the
 // candidate table — is src/lib/ground.ts, the module the tests pin, so the
 // numbers shown here are the numbers the suite guarantees. The gate's
-// recorded values live in specs/014-ground-tone/.
+// recorded values live in specs/015-the-hero-mat/ — spec 014 built this bar
+// but its own gate was never answered; spec 015 is where the ground was
+// judged, on the unmatted site.
 //
 // NO COLOUR TOKEN IS EVER READ OFF A COMPUTED STYLE here: on a reload with
 // a deepened candidate stored, the head applier has already put the deeper
@@ -80,6 +86,8 @@ const save = () => {
 const applySurface = (section: HTMLElement) => {
   const name = section.dataset.surface ?? '';
   const buttons = [...section.querySelectorAll<HTMLButtonElement>('[data-candidate]')];
+  // An unmatted surface renders no bar (spec 015): nothing to read, nothing
+  // to set, and its server-rendered label — which says so — stays as it is.
   if (buttons.length === 0) return;
   const wanted = state.candidates[name];
   // No stored choice yet: the surface opens where the server rendered it

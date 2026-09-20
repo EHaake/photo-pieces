@@ -206,9 +206,10 @@ const sets = image.sets.map((set) => ({
 }));
 
 // The frame's ratio (width / height, raw, rounded as galleryCell's),
-// carried by the stage's figure and the compare figure: the mat rule's
-// form V+H reads --ar to solve for the mat (spec 013), and the compare
-// box's aspect-ratio takes the same decimal (it accepts a number).
+// carried by the stage's figure and the compare figure: the stage's mat
+// is form V+H, which reads --ar to solve for m (spec 013), and the
+// compare box's aspect-ratio takes the same decimal (it accepts a
+// number) — the compare figure itself is unmatted since spec 015.
 const ar = Math.round((image.image.width / image.image.height) * 1000) / 1000;
 
 // The search index takes pages with something to find: a story, a
@@ -664,21 +665,16 @@ const indexed =
        both read it. */
     --split-pct: calc(var(--split) * 1%);
     margin: 0;
-    padding: var(--mat);
-    background: var(--color-matte);
   }
   .compare-frames {
     display: grid;
-    /* Prose spacing, not a mat (T1104a, the decision review of
-       2026-09-17): --mat carries 100%, which resolves against the
-       reader's own containing block — here the padded figure's content
-       box, and on a grid's row-gap the height axis — so it would render
-       a fraction of the figure's mat rather than the mat. --mat is
-       applied as `padding` and nowhere else.
-       (The row-gap half of that is read from the spec — CSS Gaps Level 1
-       resolves a percentage gap against the container's size in the gap's
-       own axis — not measured in a browser; the padding half is what the
-       landing checks observed.) */
+    /* Prose spacing, and it stays prose spacing: the figure is unmatted
+       since spec 015, and even while it was matted this gap was never
+       the mat (T1104a, the decision review of 2026-09-17) — --mat
+       carries 100%, which resolves against the reader's own containing
+       block, so it would have rendered a fraction of the figure's mat
+       rather than the mat. --mat is applied as `padding` and nowhere
+       else, on the two surfaces that still wear one. */
     gap: calc(var(--baseline) / 2);
   }
   .compare-frame {
@@ -702,7 +698,7 @@ const indexed =
     display: none;
   }
   .compare-note {
-    /* Prose spacing, not a mat — see .compare-frames above (T1104a). */
+    /* Prose spacing — see .compare-frames above (T1104a, spec 015). */
     margin: calc(var(--baseline) / 2) 0 0;
     color: var(--color-muted);
     font-size: 0.95rem;
@@ -719,6 +715,11 @@ const indexed =
     position: absolute;
     inset: 0;
   }
+  /* The letterbox fill behind a camera frame whose crop differs from
+     the finished one, and the divider below: the compare's own device
+     INSIDE its box, not a mat around a photograph (spec 015's resolved
+     decision). They read --color-matte because white is the white this
+     page has. */
   .compare[data-js] .compare-frame :global(img) {
     width: 100%;
     height: 100%;
@@ -743,6 +744,8 @@ const indexed =
   .compare[data-js] .compare-after .compare-tag {
     right: 0.5rem;
   }
+  /* The divider: the compare's device, not a mat — see the letterbox
+     fill above. */
   .compare[data-js] .compare-line {
     display: block;
     position: absolute;

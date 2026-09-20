@@ -66,7 +66,9 @@ CMS or backend service for v1.
   limited to a defined set of directive-backed treatments — as of spec
   007: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
   strip, aside, row, and the two durational blocks, held and pause,
-  with captions via the container form and site-applied mattes. A
+  with captions via the container form; the site mats only the image
+  page's stage and its quiet view (spec 015) — a piece's frames sit
+  unmatted on the ground, the pause frame excepted until its own spec. A
   `sequence` treatment is a roadmap candidate whose presentation is
   undecided; it is not in the vocabulary and the transform reserves
   nothing for it — see `ROADMAP.md`. Adding a new

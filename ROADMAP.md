@@ -117,22 +117,26 @@ attached.
   test and a comment; and the wall's sampler stays in the repo as the
   dev-only route `/dev/place-wall/`, behind the same build barrier the
   page-head and galleries samplers use.
-- **The ground tone, rethought** — raised by the photographer at spec 013's
-  matte gate (2026-09-17), in the same breath as keeping the mats: the mattes
-  may not stand out enough against the page, and the warming at spec 003 —
-  chosen so white mattes would read at all against a paper-white ground — may
-  not have gone far enough. What he asked for is a look at "a number of
-  different tones, both lighter and darker, maybe some with slight color",
-  now that mats are settled everywhere and the ground has a fixed job to do
-  behind them. The same shape as spec 003's ground review and spec 013's:
-  candidates on a switch, on real photographs, on both screens, judged by
-  eye — plus the derived copies that have to move with the tone (the OG
-  route's bg hex and `public/og.jpg`, `DECISIONS.md`'s "Ground tone" entry).
-  **Before the aspect-ratio entry below**, not after: it is a token change on
-  a mat rule that is now settled, where the aspect-ratio work is a layout
-  spec with a sampler of its own — and judging new gallery frames against a
-  ground still in question would mean judging them twice. It also feeds the
-  longer-term design-language entry, which it is not a substitute for.
+- ~~**The ground tone, rethought**~~ — superseded by spec 015 (2026-09-19).
+  Raised by the photographer at spec 013's matte gate (2026-09-17), in the
+  same breath as keeping the mats: the mattes may not stand out enough
+  against the page, and the warming at spec 003 — chosen so white mattes
+  would read at all against a paper-white ground — may not have gone far
+  enough; what he asked for was a look at "a number of different tones,
+  both lighter and darker, maybe some with slight color". Spec 014 took it
+  up and shipped its Phase 0 machinery — the family rule (the fills and
+  hairlines as fixed steps from the ground, `src/lib/ground.ts`), the
+  dev-only site-wide switch, the sampler's candidate bar and contrast
+  readout, and the social image's generator (`npm run og`) — but its own
+  gate was never answered on its terms: looking at the candidates on the
+  real photographs, the photographer reconsidered the mats themselves
+  rather than the ground behind them. Spec 015 made that change (the mat
+  is the stage's alone) and then re-judged the ground on the unmatted
+  pages with 014's switch, on both screens; the tone taken is `paper`,
+  `oklch(0.99 0.003 100)`, the pre-003 white, muted text unchanged. The
+  derived copies (the OG route's hexes, `public/og.jpg`, `DECISIONS.md`'s
+  "Ground tone" entry) moved with it by the rule 014 landed. Spec 014 is
+  closed in its own documents with the reason.
 - **The mat only where the ground goes dark** — raised by the
   photographer at spec 015's gate (2026-09-19), after seeing the site
   unmatted on the paper tone: "Stage's normal view unmatted, as it blends
@@ -146,6 +150,37 @@ attached.
   Not folded into 015 because the constitution keeps spec changes out of
   implementation sessions. The pause frame's own spec, which 015 also
   defers, may be the same spec.
+- **The pause, rethought** — deferred wholesale at spec 015 (2026-09-19):
+  the photographer does not like how the pause works today, and its rework
+  is a spec of its own, in two parts — the pause mid-piece (the frame that
+  pins at the centre of the screen while the lights go down and the words
+  wait above and below it), and the pause as a hero presentation of one
+  frame, the same family as the image page's stage. Until that spec lands
+  the pause keeps exactly what spec 007 gave it: its white mat (the one
+  matted frame a piece can still carry), its dark ground, and its lights —
+  spec 015 narrowed the shared mat rules to the pause's anchor alone and
+  left its own CSS, markup and script byte-identical. Spec 007's own
+  follow-ups fold in here rather than standing on their own: a tall pause
+  frame on a short viewport pushing an anchored paragraph partly off-screen
+  while pinned; the half-screen of words a pause needs after it to finish;
+  the header's focus-reveal overridden while a scene is active; a pause
+  written into a sidecar story getting the CSS but not the script; and the
+  lights' enumerated list of elements. Likely the same spec as the stage's
+  darker field below and "the mat only where the ground goes dark" above:
+  all three are about the one frame that is the whole point.
+- **The stage's darker field** — deferred at spec 015 (2026-09-19): the
+  photographer wants the image page's stage to sit in a field much darker
+  than the page, near the quiet view's dark (`--color-quiet`), giving way
+  to the light ground as the reader scrolls down into the words. Two leans
+  recorded for whoever writes it: the field is the stage's own background
+  and scrolls away with it — no script, no fixed layer, nothing the pause's
+  lights do; and it ends at the stage's edge, the header and the frame nav
+  staying on the page ground. Until then the stage's white mat on the
+  paper ground reads faintly outside the quiet view — mat/bg 1.02:1, ΔL
+  0.01 at the gate — an interim state spec 015 accepted and stated. Likely
+  the pause's spec, since both are hero presentations of one frame; and
+  "the mat only where the ground goes dark" above is the same question
+  asked from the other side.
 - **Aspect-ratio treatment for packed galleries** — raised by the
   photographer at spec 011's visual gate (2026-09-09): he edits each
   image to the crop that suits its content rather than to a house
@@ -181,20 +216,32 @@ attached.
   shape is a second mat doing layout work outside the one that exists, and
   ratio-snapping's sliver would sit inside it, so either has to say how the
   two reconcile into one number per frame — costable now that the existing
-  mat is a token rule rather than a literal.
+  mat is a token rule rather than a literal. **What spec 015 changed for it**
+  (2026-09-19): gallery frames are **no longer matted** — the mat is the image
+  page's stage alone — so what the paragraph above was waiting on is gone
+  the other way. Option (2), "uniform matted frames", would now mean putting
+  a mat back on the galleries, a surface spec 015 deliberately took it off;
+  option (4)'s sliver has no mat to sit in, and would be a field of its own
+  or nothing. The entry needs a rethink — the product owner's note at spec
+  015's approval — decided later, with (2) either revived by matting the
+  galleries again or replaced.
 - ~~**The matte, rethought**~~ — done in spec 013: **every surface keeps its
-  mat**, and its width is a share of the frame rather than of the viewport —
+  mat** (reversed at spec 015: the mat is the stage's — the image page's
+  stage and its quiet view — and the pause frame's until its own spec;
+  every other surface is bare), and its width is a share of the frame
+  rather than of the viewport —
   `--mat-share: 0.06`, clamped between `0.25rem` (4px) and `2.5rem` (40px),
   one rule in `global.css` resolved per geometry (a frame that knows only its
   width, only its height, both, a packed row's target short side, a matched
   pair's shared height), with every frame carrying its aspect ratio from the
   remark transform. Judged at one sampler gate on both of the photographer's
   screens and the ten real photographs (2026-09-17) — "let's stick with mats
-  all over with warm background" — so **the ground is unchanged** (the
-  pre-003 white was on the switch and not taken), and `DECISIONS.md`'s
-  "Mattes: site-applied" and the brief's flat-matte carve-out stand as
-  written. The ceiling bites on the wide block and the image page's stage on
-  both screens at 6% and the photographer kept it there, which is the
+  all over with warm background" — so the ground stayed warm then, and spec
+  015 took the pre-003 white after re-judging it unmatted (the ground-tone
+  entry above). `DECISIONS.md`'s "Mattes: site-applied" stands as written;
+  the brief's flat-matte carve-out was narrowed at spec 015 to the stage and
+  its quiet view. The ceiling bites on the wide block and the image page's
+  stage on both screens at 6% and the photographer kept it there, which is the
   constraint on any later move to a larger mat. Two follow-ups it leaves, both
   only if they ever matter: a packed row's mat is a share of the row's
   _target_ short side rather than its flex-grown one, so a stretched row wears
@@ -224,10 +271,10 @@ attached.
   anything that undoes the argument the rest of the site makes (the anti-feed,
   the image page as the signature element, the matte as flat and
   token-driven). Candidates already on this list that are really parts of it:
-  the front door, the slow view, image loading choreography, the reading
-  typography pass, and the ground-tone entry above (the matte itself shipped
-  as spec 013). The first step is a design conversation that names what
-  "modern" means for this site — which of the
+  the front door, the slow view, image loading choreography, and the reading
+  typography pass (the matte itself shipped as spec 013 and the ground tone
+  was settled at spec 015, both struck above). The first step is a design
+  conversation that names what "modern" means for this site — which of the
   references' moves fit a photographer's site that wants the work looked at
   slowly — and amends `design/brief.md` before any spec is written.
 - ~~**The held image**~~ — done in spec 007: two durational blocks.

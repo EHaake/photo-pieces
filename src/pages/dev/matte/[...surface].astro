@@ -12,19 +12,33 @@
 // page's exact markup and classes, on the real exports, so the gate judges
 // the mat where it actually lives.
 //
-// The candidate's three tokens ride on each surface's wrapper <section>
-// and the frames INHERIT them: spec 013's rule declares --mat-share,
-// --mat-min and --mat-max only in :root and nothing between :root and a
-// frame redeclares them, so an inherited override reaches every form.
-// (Contrast the gallery and place-wall samplers, whose knobs had to sit on
-// the flow itself because galleryFlowStyle re-declares them inline there.)
+// THE MAT BAR IS THE STAGE'S (spec 015): the stage and the quiet view are
+// the only surfaces the site still mats, so `pieces`, `galleries` and
+// `cards` render no bar and no inline tokens — they show the unmatted state
+// by construction, being the real markup on the real stylesheet, and a bar
+// there would move nothing but the fixture piece's pause frame, the one
+// frame spec 015 defers. A bar that silently moves only the deferred frame
+// is a trap at the gate; a label saying the surface is unmatted is not.
+//
+// The candidate's three tokens therefore ride on the `stage` section's
+// wrapper <section> alone, and its frames INHERIT them: spec 013's rule
+// declares --mat-share, --mat-min and --mat-max only in :root and nothing
+// between :root and a frame redeclares them, so an inherited override
+// reaches every form. (Contrast the gallery and place-wall samplers, whose
+// knobs had to sit on the flow itself because galleryFlowStyle re-declares
+// them inline there.) With no tokens on the other three wrappers, the
+// fixture piece's pause frame wears form W from :root, exactly as it does
+// on the site.
 //
 // The GROUND is no longer this page's to own (spec 014): the ground-tone
 // switch is site-wide — src/components/DevGround.astro applies the candidate
 // stored under localStorage['dev-ground'] in the head of every dev page, this
 // one included. The bar below is what writes that key. Every tone, step,
 // ratio and deepening it shows comes from src/lib/ground.ts, the module the
-// tests pin; the gate's recorded values live in specs/014-ground-tone/.
+// tests pin; the gate's recorded values live in specs/015-the-hero-mat/ —
+// spec 014 built this bar but its own gate was never answered, so no gate
+// values landed under specs/014-ground-tone/ and spec 015 is where the
+// ground was judged, on the unmatted site.
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import { getEntry, render } from 'astro:content';
@@ -128,10 +142,12 @@ export async function getStaticPaths() {
 
 const { surface, surfaces, candidates, grounds } = Astro.props;
 
-// The page opens on the `share-60` candidate — the 6% rule spec 013's gate
-// chose and the site now ships — so the mats the ground gate judges are the
-// mats the site wears. (Spec 003's fixed mat is still on the bar as `today`,
-// one button away; the ids are unchanged.)
+// The `stage` section — the only one with a bar since spec 015 — opens on
+// the `share-60` candidate, the 6% rule spec 013's gate chose and the stage
+// still wears, so the mat the ground gate judges is the mat the site wears.
+// (Spec 003's fixed mat is still on the bar as `today`, one button away;
+// the ids are unchanged.) The gate's recorded values live in
+// specs/015-the-hero-mat/; spec 014's gate was not answered.
 const START = candidates.find((c) => c.id === 'share-60') ?? candidates[0];
 
 const registry = await getImageRegistry();
@@ -195,11 +211,18 @@ const cards = set.map((img) => ({
 const shown: Surface[] = surface ? [surface] : surfaces;
 
 const title = surface ? `matte sampler — ${surface}` : 'matte sampler';
+// What each label says after the surface's name. The stage names its form,
+// because its bar can still move it; the other three say they are unmatted,
+// because nothing on the page can. (The exception is the fixture piece's
+// pause frame, which keeps form W from :root — deferred to the pause's own
+// spec, and the reason those sections carry no tokens to override it.)
+const UNMATTED =
+  "unmatted since spec 015 (the mat is the stage's; the pause frame is deferred to its own spec)";
 const SURFACE_NOTE: Record<Surface, string> = {
-  pieces: "a piece's reading-flow frames (forms W, P, H, V+H)",
-  galleries: 'the galleries and the related strip (form R)',
+  pieces: UNMATTED,
+  galleries: UNMATTED,
   stage: "the image page's stage (form V+H)",
-  cards: 'the index cover cards (form W)',
+  cards: UNMATTED,
 };
 ---
 
@@ -209,36 +232,43 @@ const SURFACE_NOTE: Record<Surface, string> = {
       <section
         class="sampler-surface"
         data-surface={s}
-        style={`--mat-share: ${START.share}; --mat-min: ${START.min}; --mat-max: ${START.max}`}
+        style={
+          s === 'stage'
+            ? `--mat-share: ${START.share}; --mat-min: ${START.min}; --mat-max: ${START.max}`
+            : undefined
+        }
       >
-        <div class="sampler-bar meta" data-bar>
-          <strong class="sampler-bar-head">{s}</strong>
-          {candidates.map((c) => (
-            <button
-              type="button"
-              data-candidate={c.id}
-              data-share={c.share}
-              data-min={c.min}
-              data-max={c.max}
-              data-tunable={c.tunable ? 'yes' : 'no'}
-              data-note={c.note}
-              data-start={c.id === START.id ? '' : undefined}
-              class={c.id === START.id ? 'is-active' : undefined}
-            >
-              {c.id}
-            </button>
-          ))}
-          <label>
-            floor <input type="number" step="0.05" min="0" value="0.25" data-floor /> rem
-          </label>
-          <label>
-            ceiling <input type="number" step="0.05" min="0" value="2.5" data-ceil /> rem
-          </label>
-        </div>
+        {s === 'stage' && (
+          <div class="sampler-bar meta" data-bar>
+            <strong class="sampler-bar-head">{s}</strong>
+            {candidates.map((c) => (
+              <button
+                type="button"
+                data-candidate={c.id}
+                data-share={c.share}
+                data-min={c.min}
+                data-max={c.max}
+                data-tunable={c.tunable ? 'yes' : 'no'}
+                data-note={c.note}
+                data-start={c.id === START.id ? '' : undefined}
+                class={c.id === START.id ? 'is-active' : undefined}
+              >
+                {c.id}
+              </button>
+            ))}
+            <label>
+              floor <input type="number" step="0.05" min="0" value="0.25" data-floor /> rem
+            </label>
+            <label>
+              ceiling <input type="number" step="0.05" min="0" value="2.5" data-ceil /> rem
+            </label>
+          </div>
+        )}
 
         <p class="sampler-label meta" data-label>
-          {s} — {SURFACE_NOTE[s]} — {START.id}: share {START.share} / floor {START.min} / ceiling{' '}
-          {START.max}
+          {s} — {SURFACE_NOTE[s]}
+          {s === 'stage' &&
+            ` — ${START.id}: share ${START.share} / floor ${START.min} / ceiling ${START.max}`}
         </p>
 
         {s === 'pieces' && (

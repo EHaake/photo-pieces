@@ -3,10 +3,10 @@
 // share — cover, title, a meta line — laid out in the plain grid's own
 // columns. Was GalleryCards.astro's markup and styles (spec 004); moved
 // here when the places index needed the same card, with GalleryCards
-// left as the wrapper that builds a gallery's cards. The mat sits on a
-// span (not the img) for the same reason piece images carry theirs on
-// the anchor, and the span carries the cover's ratio because form W
-// solves the mat from it (spec 013). `href` is a site-root path; this
+// left as the wrapper that builds a gallery's cards. The cards are
+// unmatted since spec 015; the span that used to carry the mat stays
+// as the cover's own box, with the cover's ratio on it — every frame
+// on the site carries its ratio. `href` is a site-root path; this
 // component applies the configured base.
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
@@ -57,12 +57,11 @@ const { cards } = Astro.props;
     background: none;
   }
 
-  /* The mat: form W in global.css computes --mat on this span from the
-     --ar above (spec 013); the card's own anchor is .gallery-card. */
+  /* The cover's box: a block so the image fills it, and nothing more —
+     the mat it used to wear came off at spec 015. The card's own anchor
+     is .gallery-card. */
   .gallery-card .image-link {
     display: block;
-    padding: var(--mat);
-    background: var(--color-matte);
   }
 
   .gallery-card img {
