@@ -270,7 +270,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `sh scripts/verify.sh` green; `git diff --stat` touches only
       those three files; `grep -n "None falls under" src/styles/global.css` → 0._
 
-- [ ] **T1302** — The sampler's bars, honest. `src/pages/dev/matte/[...surface].astro`
+- [x] **T1302** — The sampler's bars, honest. `src/pages/dev/matte/[...surface].astro`
       (spec 013's file, extended at 014 — its own template is the
       pattern): the wrapper `<section>`'s inline tokens and the
       `.sampler-bar` (candidate buttons, floor and ceiling inputs) render
@@ -568,6 +568,7 @@ tier if it is ever on (it is off). -->
 | T1301 (`sdd-implementer`)                           | implementation (`opus`, high)  | 209,163 | done first dispatch; LatestWork bullet moot (PR #15); BiDi before/after identical on pause and stage |
 | T1301 per-task review (`skeptical-reviewer`)        | implementation (`opus`, high)  | 99,818  | SIGN OFF, 0 blocking, N1–N7 → T1301a and the sweep                      |
 | T1301a (`sdd-implementer`)                          | implementation (`opus`, high)  | 44,775  | done first dispatch; match-height tolerance set to 0.25px             |
+| T1302 (`sdd-implementer`)                           | implementation (`opus`, high)  | 108,355 | done first dispatch; Firefox 155 BiDi needs -remote-allow-system-access |
 
 _(Session-tier allowance draw noted at each pause.)_
 
