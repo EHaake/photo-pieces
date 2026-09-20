@@ -14,7 +14,8 @@
 // nothing but its file renders the 004 baseline.
 //
 // Static HTML throughout; the script below is page-level enhancement:
-// the compare slider, quiet view, and set selection by route in.
+// the compare slider, quiet view, and set selection by route in — and,
+// in the head, the arrival (spec 016).
 import { Image, getImage } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -219,6 +220,74 @@ const indexed =
 ---
 
 <BaseLayout title={image.title} description={description} ogType="article" image={og.src}>
+  <Fragment slot="head">
+    {
+      /* The arrival (spec 016): the image page's dark first screen and the
+        number that fades it away. The script writes both onto <html> — the
+        arrival attribute, which switches on global.css's page-wide rules,
+        and --arrival-lights, 1 at the top and 0 once the stage has scrolled
+        off — in one synchronous step, since the attribute alone would paint
+        light (the lights fallback is 0) and then snap dark.
+
+        Inline and in the head because that is the only place a script is
+        guaranteed to run before the first paint; a hoisted module runs
+        after parsing and the browser may paint the light page first. The
+        whole rule lives in this block rather than in a module the head
+        imports (the head cannot import) so it is written once and read
+        once: arrival.test.mjs evaluates this very text in a stub browser.
+
+        The destination rule: at head time it decides from where the page
+        is GOING, not from scrollY, which is 0 until the browser or the
+        router restores the position — the router keeps every entry's
+        position in history.state, and a fragment lands below the stage.
+        astro:page-load then corrects from the real scrollY.
+
+        One guard: window.__arrival (DevGround.astro's __devGround shape)
+        binds the listeners once. The router replaces <html>'s attributes
+        on every navigation, so astro:after-swap re-applies rather than
+        anything removing them by hand. */
+    }
+    <script is:inline data-arrival>
+      (() => {
+        const FADE = 1; // viewport heights; :root's --arrival-fade repeats it for the dev control (arrival.test.mjs pins them equal)
+        const root = document.documentElement;
+        let last = '';
+        const lightsAt = (y, vh, fade) => {
+          const p = Math.min(1, Math.max(0, y / (vh * fade)));
+          return 1 - p * p * (3 - 2 * p);
+        };
+        const apply = (y) => {
+          const override = Number.parseFloat(root.style.getPropertyValue('--arrival-fade'));
+          const fade = Number.isFinite(override) && override > 0 ? override : FADE;
+          const value = lightsAt(y, root.clientHeight, fade).toFixed(3);
+          if (value !== last) {
+            root.style.setProperty('--arrival-lights', value);
+            last = value;
+          }
+          if (!root.hasAttribute('data-arrival')) root.setAttribute('data-arrival', '');
+        };
+        // Before the first paint: the DESTINATION, not scrollY, which is 0
+        // until the browser or the router restores it. The router keeps the
+        // position in history.state; a fragment lands below the stage.
+        const state = history.state;
+        const restored = state && typeof state.scrollY === 'number' ? state.scrollY : 0;
+        apply(location.hash ? Infinity : restored);
+        if (window.__arrival) return;
+        window.__arrival = true;
+        const update = () => {
+          if (document.querySelector('.image-page')) apply(window.scrollY);
+        };
+        window.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        document.addEventListener('astro:after-swap', () => {
+          last = '';
+          update();
+        });
+        document.addEventListener('astro:page-load', update);
+      })();
+    </script>
+  </Fragment>
+
   <article class="image-page" data-pagefind-body={indexed || undefined}>
     <div class="image-stage">
       <figure class="image-frame" style={`--ar: ${ar}`}>

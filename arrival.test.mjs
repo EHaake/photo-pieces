@@ -132,6 +132,87 @@ async function sources(dir = here('./src'), out = {}) {
   return out;
 }
 
+// ---- (c)'s extractor and stub browser ----------------------------------
+// The head script is plain JS inside an .astro file, so the test runs the
+// page's own text rather than a copy: the rule is written once and this
+// is the reader. matte.test.mjs and ground.test.mjs already read .astro
+// files as text; this one also evaluates what it reads.
+
+/** The head script's body — between the opening tag and `</script>`. */
+function scriptBody(page) {
+  const open = '<script is:inline data-arrival>';
+  const from = page.indexOf(open);
+  const to = page.indexOf('</script>', from);
+  // Not `toBeGreaterThan`: a rename of the tag should say what it broke.
+  expect([open, from > -1, to > from]).toEqual([open, true, true]);
+  return page.slice(from + open.length, to);
+}
+
+/** A stub browser with the five things the script touches: <html>'s
+ *  inline style and attributes, its clientHeight, a switchable
+ *  `.image-page`, `scrollY`, and listener registries on window and
+ *  document. Not jsdom — a recording stub is the only thing that can
+ *  answer "what did the script do BEFORE any event fired", which is the
+ *  whole of the no-flash rule. */
+function stubBrowser({ vh = 800, imagePage = true, state = null, hash = '' } = {}) {
+  const props = new Map();
+  const attrs = new Map();
+  const windowListeners = {};
+  const documentListeners = {};
+  const on = (registry) => (type, fn) => (registry[type] ??= []).push(fn);
+  const root = {
+    style: {
+      setProperty: (name, value) => props.set(name, String(value)),
+      getPropertyValue: (name) => props.get(name) ?? '',
+    },
+    clientHeight: vh,
+    hasAttribute: (name) => attrs.has(name),
+    setAttribute: (name, value) => attrs.set(name, String(value)),
+  };
+  const win = { scrollY: 0, addEventListener: on(windowListeners) };
+  const doc = {
+    documentElement: root,
+    querySelector: (selector) =>
+      selector === '.image-page' && stub.imagePage ? { className: 'image-page' } : null,
+    addEventListener: on(documentListeners),
+  };
+  const stub = {
+    vh,
+    imagePage,
+    window: win,
+    history: { state },
+    location: { hash },
+    /** The three-decimal string on <html>, or undefined if never written. */
+    lights: () => props.get('--arrival-lights'),
+    /** The arrival attribute, the gate every page-wide rule begins with. */
+    gated: () => attrs.has('data-arrival'),
+    listeners: (registry, type) =>
+      (registry === 'window' ? windowListeners : documentListeners)[type]?.length ?? 0,
+    fade: (value) => props.set('--arrival-fade', value),
+    /** What the router does to <html> on every navigation. */
+    swapClearsRoot: () => {
+      attrs.clear();
+      props.clear();
+    },
+    fire: (registry, type) => {
+      const list = (registry === 'window' ? windowListeners : documentListeners)[type] ?? [];
+      for (const listener of list) listener();
+    },
+    scrollTo: (y) => {
+      win.scrollY = y;
+      stub.fire('window', 'scroll');
+    },
+    run: () =>
+      new Function('window', 'document', 'history', 'location', body)(
+        win,
+        doc,
+        stub.history,
+        stub.location,
+      ),
+  };
+  return stub;
+}
+
 // ------------------------------------------------------------------------
 
 let css;
@@ -140,6 +221,7 @@ let nested;
 let root;
 let src;
 let arrival;
+let body;
 
 beforeAll(async () => {
   css = uncomment(await readFile(here('./src/styles/global.css'), 'utf8'));
@@ -155,6 +237,7 @@ beforeAll(async () => {
   );
   src = await sources();
   arrival = [...top, ...nested].filter((block) => block.prelude.includes('[data-arrival]'));
+  body = scriptBody(src['src/pages/images/[...id].astro']);
 });
 
 describe('(a) the arrival’s knobs (T1401, spec 016)', () => {
@@ -322,5 +405,188 @@ describe('(b) the arrival’s rules (T1401, spec 016)', () => {
     const link = declarations(ruleFor(arrival, LINK_RULE).body);
     expect(Object.keys(link)).toEqual(['transition']);
     expect(norm(link['transition'])).toBe('background-size 180ms ease');
+  });
+});
+
+describe('(c) the script’s behaviour, and the no-flash rule (T1402, spec 016)', () => {
+  it('first paint at the top: the attribute and 1.000 are both set before any event fires', () => {
+    // One synchronous head step, not two: the attribute alone would
+    // paint light (--arrival-lights falls back to 0 and the gated stage
+    // is transparent) and then snap dark when the number arrived.
+    const stub = stubBrowser();
+    stub.run();
+    expect([stub.gated(), stub.lights()]).toEqual([true, '1.000']);
+  });
+
+  it('the router’s fresh entry is still the top — { scrollY: 0 } and no hash reads 1.000', () => {
+    // The first client-side arrival at an image page: runScripts() runs
+    // this block after moveToLocation has pushed { scrollX: 0, scrollY: 0 },
+    // so the head-time branch sees a state object rather than null and
+    // must read the same answer as a cold load.
+    const stub = stubBrowser({ state: { index: 3, scrollX: 0, scrollY: 0 } });
+    stub.run();
+    expect([stub.gated(), stub.lights()]).toEqual([true, '1.000']);
+  });
+
+  it('a restored position paints light first — the destination decides, not scrollY (AC 5)', () => {
+    // scrollY is 0 at head time on every hard load; deciding from it
+    // would paint the full dark and snap to paper a frame later, which
+    // is exactly the dark frame AC 5 forbids. The attribute goes on
+    // here too: without it the stage's own field paints the dark box.
+    const stub = stubBrowser({ vh: 900, state: { index: 1, scrollX: 0, scrollY: 2700 } });
+    stub.run();
+    expect([stub.gated(), stub.lights()]).toEqual([true, '0.000']);
+  });
+
+  it('a fragment lands below the stage — a hash reads 0.000 before any event', () => {
+    const stub = stubBrowser({ hash: '#wall-label' });
+    stub.run();
+    expect([stub.gated(), stub.lights()]).toEqual([true, '0.000']);
+  });
+
+  it('a restored position inside the fade is computed, not guessed — vh/2 and vh/4', () => {
+    // A guess would have to be one of the two ends; these are neither.
+    for (const [scrollY, expected] of [
+      [400, '0.500'],
+      [200, '0.844'],
+    ]) {
+      const stub = stubBrowser({ vh: 800, state: { index: 1, scrollX: 0, scrollY } });
+      stub.run();
+      expect([scrollY, stub.lights()]).toEqual([scrollY, expected]);
+    }
+  });
+
+  it('the curve: 1.000 at the top, 0.500 at half a screen, 0.000 at a screen and beyond', () => {
+    const stub = stubBrowser({ vh: 800 });
+    stub.run();
+    for (const [y, expected] of [
+      [0, '1.000'],
+      [400, '0.500'],
+      [800, '0.000'],
+      [8000, '0.000'],
+    ]) {
+      stub.scrollTo(y);
+      expect([y, stub.lights()]).toEqual([y, expected]);
+    }
+  });
+
+  it('the curve is monotone non-increasing across the fade — scrolling down never brightens', () => {
+    const stub = stubBrowser({ vh: 800 });
+    stub.run();
+    const read = [];
+    for (let step = 0; step <= 20; step += 1) {
+      stub.scrollTo((step * 800) / 20);
+      read.push(Number.parseFloat(stub.lights()));
+    }
+    expect(read).toEqual([...read].sort((a, b) => b - a));
+    expect([read[0], read[20]]).toEqual([1, 0]);
+  });
+
+  it('the curve is the pause’s smoothstep — symmetric about the middle of the fade', () => {
+    // t²(3 − 2t) descending: a linear ramp would pass the monotone case
+    // and the three pinned values above, and fail here only at the
+    // quarter points if the shape were wrong in an asymmetric way.
+    const stub = stubBrowser({ vh: 800 });
+    stub.run();
+    stub.scrollTo(200);
+    const quarter = Number.parseFloat(stub.lights());
+    stub.scrollTo(600);
+    const threeQuarters = Number.parseFloat(stub.lights());
+    expect(Math.abs(quarter + threeQuarters - 1)).toBeLessThan(1e-9);
+    // Rounded to the written three decimals: smoothstep'''s 0.84375. A
+    // linear ramp would read 0.750 here and still satisfy the symmetry
+    // above, so this line is the one that tells the two apart.
+    expect(quarter).toBe(0.844);
+  });
+
+  it('scrolling back up runs the same function backwards', () => {
+    const stub = stubBrowser({ vh: 800 });
+    stub.run();
+    stub.scrollTo(1200);
+    expect(stub.lights()).toBe('0.000');
+    stub.scrollTo(400);
+    expect(stub.lights()).toBe('0.500');
+    stub.scrollTo(0);
+    expect(stub.lights()).toBe('1.000');
+  });
+
+  it('the dev control’s --arrival-fade overrides the length — two screens halves the rate', () => {
+    const stub = stubBrowser({ vh: 800 });
+    stub.run();
+    stub.fade('2');
+    stub.scrollTo(800);
+    expect(stub.lights()).toBe('0.500');
+  });
+
+  it('a missing or nonsense --arrival-fade falls back to FADE, never to zero or a negative', () => {
+    // A fade of 0 would divide by zero and a negative would invert the
+    // curve; both have to read as "no override".
+    for (const override of ['', '0', '-1', 'abc']) {
+      const stub = stubBrowser({ vh: 800 });
+      stub.run();
+      stub.fade(override);
+      stub.scrollTo(800);
+      expect([override, stub.lights()]).toEqual([override, '0.000']);
+    }
+  });
+
+  it('astro:after-swap re-applies both after the router wipes <html>', () => {
+    // The router replaces <html>'s attributes and inline style on every
+    // navigation. The cached last value has to be cleared with them, or
+    // the write is skipped as unchanged and the page arrives ungated
+    // with no number on it.
+    const stub = stubBrowser({ vh: 800 });
+    stub.run();
+    expect(stub.lights()).toBe('1.000');
+    stub.swapClearsRoot();
+    expect([stub.gated(), stub.lights()]).toEqual([false, undefined]);
+    stub.fire('document', 'astro:after-swap');
+    expect([stub.gated(), stub.lights()]).toEqual([true, '1.000']);
+  });
+
+  it('a swap to a page that is not an image page writes nothing', () => {
+    // .image-page is the whole guard: the arrival's rules are the image
+    // page's, and a piece or a gallery must arrive with <html> clean.
+    const stub = stubBrowser({ vh: 800 });
+    stub.run();
+    stub.swapClearsRoot();
+    stub.imagePage = false;
+    stub.fire('document', 'astro:after-swap');
+    expect([stub.gated(), stub.lights()]).toEqual([false, undefined]);
+  });
+
+  it('astro:page-load corrects from the real scrollY — a fragment that matched nothing goes dark', () => {
+    // The head cannot know the target is missing, so it paints light for
+    // the hash; load finds the page still at the top and darkens. A
+    // light-then-dark step in a broken-link case, and the only thing
+    // that pins the page-load listener.
+    const stub = stubBrowser({ vh: 800, hash: '#not-here' });
+    stub.run();
+    expect(stub.lights()).toBe('0.000');
+    stub.fire('document', 'astro:page-load');
+    expect(stub.lights()).toBe('1.000');
+  });
+
+  it('the listeners are bound once — a second run of the same script adds none', () => {
+    // The router re-runs nothing it has already run, but the guard makes
+    // that irrelevant: without it, a page that somehow evaluated the
+    // block twice would run every scroll handler twice for ever.
+    const stub = stubBrowser({ vh: 800 });
+    stub.run();
+    stub.run();
+    expect([
+      stub.listeners('window', 'scroll'),
+      stub.listeners('window', 'resize'),
+      stub.listeners('document', 'astro:after-swap'),
+      stub.listeners('document', 'astro:page-load'),
+    ]).toEqual([1, 1, 1, 1]);
+  });
+
+  it('the script’s FADE is :root’s --arrival-fade — the dev control shows the default in force', () => {
+    // The script cannot read the stylesheet before the first paint, so
+    // the fade's default is written twice. This is the only thing
+    // holding the two copies together (global.css's comment says so).
+    const match = /const FADE = ([\d.]+);/.exec(body);
+    expect([Boolean(match), match?.[1]]).toEqual([true, root['--arrival-fade'].trim()]);
   });
 });
