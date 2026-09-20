@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  formatGalleryProblems,
-  orderLatestWork,
-  sidecarImageId,
-  validateGalleries,
-} from './src/lib/image-meta.mjs';
+import { formatGalleryProblems, sidecarImageId, validateGalleries } from './src/lib/image-meta.mjs';
 
 // Spec 004's gallery rules — the pure half of the registry
 // (src/lib/images.ts), which feeds these the collection data and fails
@@ -137,50 +132,5 @@ describe('gallery validation (T305)', () => {
       known,
     );
     expect(problems.map((p) => `${p.galleryId}:${p.line}`)).toEqual(['one:5', 'two:5']);
-  });
-});
-
-describe('latest-work ordering (T305)', () => {
-  const d = (s) => new Date(s);
-  const galleries = [
-    { id: 'old', date: d('2026-01-01'), images: ['a', 'b'] },
-    { id: 'new', date: d('2026-08-01'), images: ['c', 'a'] },
-    { id: 'undated', images: ['d', 'e'] },
-  ];
-
-  it('newest gallery first, gallery order within, de-duplicated across', () => {
-    const captureDates = new Map([['d', d('2026-03-01')]]);
-    expect(orderLatestWork(galleries, captureDates)).toEqual(['c', 'a', 'd', 'e', 'b']);
-  });
-
-  it("an undated gallery is placed by its newest image's capture date", () => {
-    const captureDates = new Map([
-      ['d', d('2026-02-01')],
-      ['e', d('2026-09-01')],
-    ]);
-    expect(orderLatestWork(galleries, captureDates)).toEqual(['d', 'e', 'c', 'a', 'b']);
-  });
-
-  it('an undated gallery with no capture dates goes last', () => {
-    expect(orderLatestWork(galleries, new Map())).toEqual(['c', 'a', 'b', 'd', 'e']);
-  });
-
-  it('two undated galleries with no capture dates keep their input order', () => {
-    const pair = [
-      { id: 'first', images: ['a'] },
-      { id: 'second', images: ['b'] },
-      { id: 'dated', date: d('2026-01-01'), images: ['c'] },
-    ];
-    expect(orderLatestWork(pair, new Map())).toEqual(['c', 'a', 'b']);
-  });
-
-  it('honours the limit after de-duplication', () => {
-    expect(orderLatestWork(galleries, new Map(), 3)).toEqual(['c', 'a', 'b']);
-  });
-
-  it('does not reorder its input', () => {
-    const ids = galleries.map((g) => g.id);
-    orderLatestWork(galleries, new Map());
-    expect(galleries.map((g) => g.id)).toEqual(ids);
   });
 });

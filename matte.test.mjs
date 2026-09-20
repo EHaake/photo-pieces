@@ -429,25 +429,6 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(declarations(ruleFor(all, '.compare', 'padding').body)['padding']).toBe('var(--mat)');
   });
 
-  it('the latest-work band: one height string, and a mat that is a share of it', () => {
-    // The strip is a curated band, not one of the four surfaces; it gets
-    // form R's shape because its image IS --avail-h tall (the mat sits
-    // around that), so σ = --avail-h × min(--ar, 1) exactly. Its --mat is
-    // its own, and it declares none of the three tokens (case (a) pins
-    // that for every file under src/).
-    const band = uncomment(src['src/components/LatestWork.astro']);
-    const rules = blocks(band.slice(band.indexOf('<style>')));
-    const link = declarations(ruleFor(rules, '.image-link', '--mat').body);
-    expect(norm(link['--avail-h'])).toBe('clamp(180px, 30vh, 260px)');
-    expect(norm(link['--mat'])).toBe(
-      'clamp(var(--mat-min), calc(var(--avail-h) * var(--mat-share) * min(var(--ar, 1), 1)), var(--mat-max))',
-    );
-    expect(link['padding']).toBe('var(--mat)');
-    expect(norm(declarations(ruleFor(rules, '.image-link img').body)['height'])).toBe(
-      'var(--avail-h)',
-    );
-  });
-
   it('form R: the mat is the packed row’s constant term, in the basis, the cap and the narrow cap', () => {
     const cell = declarations(ruleFor(top, '.gallery-flow > li').body);
     expect(norm(cell['--mat'])).toBe(

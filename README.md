@@ -221,7 +221,7 @@ first image:
 title: Fog frames
 category: landscape # landscape | street | portrait | event
 description: Optional.
-date: 2026-08-28 # optional; orders the index and the latest-work strip
+date: 2026-08-28 # optional; orders the index
 cover: where-the-fog-lets-go/land-b
 images:
   - where-the-fog-lets-go/land-a
@@ -255,9 +255,6 @@ indexes. The row is one component, `src/components/CategoryRow.astro`,
 fed by `categoryRow()` in `src/lib/categories.ts` and shared with
 `/pieces/`, which keeps the row it already had. A missing, duplicate,
 or draft-owned id in a gallery fails the build with the file and line.
-`src/components/LatestWork.astro` renders the newest curated images as
-a strip and is not placed on any page yet (the homepage design pass
-will place it).
 
 **Place** — `src/content/places/<slug>.md` (spec 009), somewhere the
 photographer returns to: a title, an optional description, cover, and
@@ -374,7 +371,7 @@ photo-pieces/
 │   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
-│   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), LatestWork, CategoryRow
+│   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), CategoryRow
 │   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
 │   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler, the place-wall sampler, the matte sampler at dev/matte/); postbuild fails if any reach dist/
 │   └── styles/global.css

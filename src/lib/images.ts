@@ -23,7 +23,6 @@ import {
   mergeOverrides,
   nearest,
   neighbours,
-  orderLatestWork,
   passageFor,
   pieceFrames,
   placeNameProblem,
@@ -185,8 +184,6 @@ export interface ImageRegistry {
   galleries: CollectionEntry<'galleries'>[];
   /** Every published place (spec 009), most recent outing first, ties by title. */
   places: SitePlace[];
-  /** The n newest curated images — see orderLatestWork. */
-  latest(limit: number): SiteImage[];
 }
 
 // Both letter cases: the site accepts camera-style `.JPG` too, and the
@@ -705,22 +702,12 @@ async function buildRegistry(): Promise<ImageRegistry> {
   );
 
   const byId = new Map(images.map((image) => [image.id, image]));
-  const captureDates = new Map(
-    images.flatMap((image) => (image.label.date ? [[image.id, image.label.date] as const] : [])),
-  );
-  const galleryLists = galleries.map((gallery) => ({
-    id: gallery.id,
-    date: gallery.data.date,
-    images: gallery.data.images,
-  }));
 
   return {
     images,
     byId,
     galleries,
     places,
-    latest: (limit) =>
-      orderLatestWork(galleryLists, captureDates, limit).map((id: string) => byId.get(id)!),
   };
 }
 

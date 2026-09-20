@@ -891,49 +891,6 @@ export function placeSummary(outings, dateByPiece) {
   return parts.join(' · ');
 }
 
-/**
- * Latest-work ordering: galleries newest first, each gallery's images
- * in the photographer's order, de-duplicated across galleries. A
- * gallery with no date is placed by its newest image's capture date —
- * the only place EXIF dates affect ordering — and after everything
- * dated if none of its images has one. `galleries` is `[{ id, date?,
- * images }]`; `captureDates` maps image ids to Dates.
- */
-export function orderLatestWork(galleries, captureDates, limit = Infinity) {
-  const placed = galleries.map((gallery) => ({
-    gallery,
-    when: gallery.date ?? newestCapture(gallery.images, captureDates),
-  }));
-  // Undated galleries rank below every dated one and keep their input
-  // order among themselves (a plain subtraction would be NaN there).
-  const rank = (entry) => entry.when?.valueOf() ?? -Infinity;
-  placed.sort((a, b) => {
-    const ra = rank(a);
-    const rb = rank(b);
-    return ra === rb ? 0 : rb > ra ? 1 : -1;
-  });
-  const out = [];
-  const seen = new Set();
-  for (const { gallery } of placed) {
-    for (const id of gallery.images) {
-      if (seen.has(id)) continue;
-      seen.add(id);
-      out.push(id);
-      if (out.length >= limit) return out;
-    }
-  }
-  return out;
-}
-
-function newestCapture(ids, captureDates) {
-  let newest;
-  for (const id of ids) {
-    const date = captureDates.get(id);
-    if (date instanceof Date && (newest === undefined || date > newest)) newest = date;
-  }
-  return newest;
-}
-
 // The 1-based line of the nth list item naming `id` in a gallery file
 // (`  - <id>`, quoted or not), falling back to the nth line mentioning
 // it at all. Undefined only if the id isn't in the file — which can't
