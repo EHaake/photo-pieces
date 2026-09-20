@@ -322,6 +322,26 @@ here by the orchestrator, in the person's words and the numbers, before
 T1303 is dispatched.)_
 
 
+**The person's decision (2026-09-19)**, in his words: "Looks great and
+I think this confirms that removing the mattes in most cases was the
+right move. I'd say we'd go with Paper for the ground tone for now. I
+also think that having the matte only on the 'quiet view' or whenever
+the background is darkened is the right move as well."
+
+- Tone: **`paper`** — `--color-bg oklch(0.99 0.003 100)`,
+  `--color-surface oklch(0.967 0.004 100)`, `--color-soft
+  oklch(0.942 0.005 100)`, `--color-line oklch(0.882 0.005 100)`,
+  `--color-line-strong oklch(0.742 0.009 100)`; muted unchanged
+  (`oklch(0.5 0.012 250)`). Readout at paper: text/bg 15.58,
+  text/surface 14.55, text/soft 13.51, muted/bg 5.82, muted/surface
+  5.44, muted/soft 5.05, mat/bg 1.02 (ΔL 0.01). "For now" — his words.
+- The unmatted surfaces seen on both screens as the spec describes
+  them; nothing reported that the spec did not say.
+- His last sentence reads as a possible product direction beyond this
+  spec (the mat only where the ground is darkened, i.e. not on the
+  stage's normal view): raised back to him as a question before T1303
+  rather than acted on.
+
 **Measured record before the gate** (the implementer's Firefox 155
 headless reads via BiDi, dev server, taken at T1301 and T1302; the
 person attests by eye, these are the numbers):
