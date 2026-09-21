@@ -709,11 +709,33 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | Gate finding 2: decision review (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 45,790 | the cue: --stage-cue subtracted in the base stage rule, set by the gate to --frame-nav-h — T1401b |
 | T1401b (`sdd-implementer`)                 | implementation (`opus`, high)  | 131,316 | done first dispatch; 0.4px fold overshoot at 375 is --header-h's rounding, pre-existing |
 | T1406 (`sdd-implementer`)                  | implementation (`opus`, high)  | 66,478 | done first dispatch; README's arrival paragraph omits the cue (flagged to the review) |
+| Phase 1 review (`skeptical-reviewer`)      | implementation (`opus`, high)  | 97,754 | BLOCK — B1 (the :root comment said chrome open; the record says 1), B2 (the cue's nav 1.55:1 on the wall — plan said "readable" unmeasured; corrected, question to the person), B3 (CLAUDE.md — the reviewer's stale copy; HEAD has 0 hits, dismissed); N1–N8 |
+| Phase 1 fix (`sdd-implementer`)            | implementation (`opus`, high)  | 35,180 | B1 comment fixed; N5 read: toggle [23,22,18] at y = 0, [94,100,106] at lights 0 |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
+- **From the Phase 1 review (2026-09-21), carried:** N1 the 0.4px fold
+  overshoot at 375 is `--header-h` rounding 136.4 → 136 (pre-016); N2
+  `--header-h` is absent at first paint (the `4.5rem` fallback), so on
+  the phone the stage starts 64px too tall and the nav rises into view
+  as the header's height publishes — pre-016, now visible; a roadmap
+  line (publish `--header-h` before first paint); N3 `--frame-nav-h`
+  mirrors four facts of the nav's rule by hand, pinned as text not
+  truth — a cheap guard would assert the nav's font-size, gap, padding
+  and breakpoint against the token's terms; N4 one row is assumed from
+  720px up — a long set title at ~800px may wrap the nav taller than
+  the reserve (unmeasured); N5 read at the fix — the quiet toggle still
+  dims to [23,22,18] at y = 0 and lands on muted at lights 0; N7 the
+  allowlist now admits a length, so "nothing shifts" rests on the head
+  script setting the attribute before first paint and never removing
+  it — pin "set once, never removed" if no case does; N8 the brief's
+  carve-out heading "narrowed at spec 015", README's tree missing
+  `StructuredData.astro` / `SocialLinks.astro`, README's arrival
+  paragraph should carry the cue in one clause (close-out), grep the
+  five docs for the stage "fills the viewport" at close-out, the
+  arrival comment counts `transition` among "colour properties".
 - **From the Phase 0 review (2026-09-20), PASS, carried:** N1
   `documentElement.clientHeight` is the large viewport on iOS, not the
   small — the fade outruns the stage by a toolbar's height on the
@@ -775,8 +797,10 @@ _(Session-tier allowance draw noted at each pause.)_
 - **The hover-colour loss is page-wide on image pages under script,
   not "at the top"** (re-review note 1): `data-arrival` stays on
   `<html>` at every scroll position, so the arrival colour rules
-  outrank the theme's hover rule at lights 0 too — the nav, frame-nav
-  and eyebrow links never change colour on hover on an image page. A
+  outrank the theme's hover rule at lights 0 too — the nav and eyebrow
+  links never change colour on hover on an image page (the frame nav
+  left those rules at T1401b and hovers as the theme's — Phase 1 review
+  N6). A
   small divergence from AC 2's "exactly the pre-spec page" that no
   Verify reads. The Known-limitations wording should say "on an image
   page while the arrival attribute is present"; if the gate minds, the
