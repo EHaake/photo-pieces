@@ -239,9 +239,15 @@ dependency; the pause's markup, CSS and script byte-identical.
   and the head's top edge meets the fold — accepted, not special-cased.
   The cue is not a knob on the tuning control. **The nav's colour under
   the arrival is the theme's `--color-muted` at every scroll position**
-  (L 0.5 on a 0.3975 wall at depth 0.75 — lighter than the wall,
-  readable; the arrival's ink mixes toward the dark, so "full strength"
-  is the theme's own colour): it leaves the muted mix rule and the
+  (L 0.5 on a 0.3975 wall at depth 0.75 — lighter than the wall by
+  ΔL 0.103, about a hairline's separation; measured [94,100,106] on
+  [72,71,67], **1.55:1** by the project's contrast measure against
+  5.82:1 on paper — the Phase 1 review's B2: the plan first called this
+  "readable" unmeasured. Whether the paper-tuned muted grey is the
+  right colour for the cue on a dark wall is the person's at the second
+  look; if he wants it lighter, that is a plan decision and a
+  DECISIONS entry, not an improvisation. The arrival's ink mixes toward
+  the dark, so "full strength" means the theme's own colour): it leaves the muted mix rule and the
   transition rule (the theme's colour ease returns to it, harmless on an
   unmixed colour) and **stays in the focus rule**, since the theme's
   ring is a 1px accent outline (L ≈ 0.4) that does not read on the wall
@@ -737,9 +743,12 @@ Obsidian plugin; `DevGround.astro`, `BaseLayout.astro`, `src/pages/dev/`,
 
 ## Known limitations
 
-- **The dimmed links do not change colour on hover** at the top of the
-  page: the theme's hover rule loses to the arrival's colour rules by
-  specificity. The underline still draws (its `background-size` ease is
+- **The dimmed links do not change colour on hover** on an image page
+  while the arrival attribute is present (page-wide under script, not
+  only at the top): the theme's hover rule loses to the arrival's colour
+  rules by specificity. Since T1401b the frame nav is outside those
+  rules, so its links hover and ease as the theme's do while the header
+  nav and the eyebrow do not (Phase 1 review N6). The underline still draws (its `background-size` ease is
   kept by the transition rule); the colour's 180ms ease is dropped on
   those links because it would otherwise run behind every scroll step
   and at every router arrival — `moveToLocation` scrolls and flushes
