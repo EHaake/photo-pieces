@@ -350,6 +350,23 @@ _T1403 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87
 
 _T1404 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 16 passed (16)`, `Tests 364 passed (364)`, `TEST EXIT 0`; prettier clean on both files. Mutation: a 1199×630 copy written with sharp to the scratchpad and pointed at by the `beforeAll` line → only the new case fails, `expected [ 1199, 630 ] to deeply equal [ 1200, 630 ]` (the background-pixel case passes against the mutant — "asserted by nothing before spec 016" holds); reverted, sha256 restored, `public/og.jpg` untouched. Dev server (Firefox 155 BiDi, 1512×982, `/galleries/`): `.gallery-cards` 1160px, `grid-template-columns` 374.667 ×3, `column-gap` 18px, the first three cards' `li`/link/`img` 374.667; `sizes` reads back `(min-width: 1160px) 375px, (min-width: 720px) 47vw, 94vw`; hint − rendered = +0.333. Footprint: the two files only. Findings: the 18px gap is `calc(var(--baseline) * 0.75)` with `--baseline: 1.5rem` — the comment names both forms; `CoverCards.astro` had no `sizes` comment before, so the convention followed is the image page's.
 
+- [ ] **T1401a** — The header's hairline takes the wall's ink (gate
+      round 1 finding 1; decision review at the top tier, 2026-09-21).
+      Pattern: the header rule in the arrival block and its pinned
+      string in `arrival.test.mjs` (b). `src/styles/global.css`, the
+      arrival block's `.site-header` rule: `border-bottom-color` →
+      `color-mix(in oklch, var(--color-line), var(--color-quiet) calc(var(--arrival-lights, 0) * var(--arrival-depth) * 100%))`,
+      the rule's comment stating why (a line on the wall, not a word
+      on it — the wall's share, chrome-independent, exactly
+      `--color-line` at lights 0); `arrival.test.mjs`: the pinned
+      header string and its comment updated. Nothing else. _Verify:
+      `sh scripts/verify.sh` green; the old string fails the pin
+      (mutation, reverted); on the dev server at 1512×982 with the
+      `dev-arrival` key at depth 0.75 the header's `border-bottom-color`
+      L − `<html>`'s L at y = 0 ≈ −0.027 and identical at chrome 1,
+      0.5, 0.01; at lights 0 exactly `--color-line`; `git diff -U0 main -- src/styles/global.css | grep '^@@'`
+      still lists no protected hunk._
+
 ### Gate record (Phase 0 pause — round 1)
 
 _(The product owner's decision from the image pages under `npm run dev`
@@ -608,6 +625,8 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | T1403 (`sdd-implementer`)                  | implementation (`opus`, high)  | 86,328 | done first dispatch; page-head.test.mjs's barrier strings updated (outside the named footprint, reported) |
 | T1404 (`sdd-implementer`)                  | implementation (`opus`, high)  | 42,407 | done first dispatch; +0.333 over-delivery recorded |
 | Phase 0 review (`skeptical-reviewer`)      | implementation (`opus`, high)  | 137,917 | PASS, no blocking; N1–N10 below; plan.md corrected at N1, N4, N8 |
+| Gate finding 1: diagnosis (`sdd-implementer`) | implementation (`opus`, high) | 90,667 | the hairline's ink coupling measured; five options; nothing edited |
+| Gate finding 1: decision review (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 29,668 | (e) the wall's own ink — T1401a; one build, not two |
 
 _(Session-tier allowance draw noted at each pause.)_
 

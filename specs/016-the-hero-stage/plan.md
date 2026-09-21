@@ -181,6 +181,30 @@ dependency; the pause's markup, CSS and script byte-identical.
   a test walks the block and allows only `background`, `color`,
   `border-bottom-color`, `transition` and the two custom properties.
 
+  **The header's hairline is the wall's own ink** (decision review at
+  the top tier, gate round 1, 2026-09-21 — T1401a). Under the arrival
+  the header's `border-bottom-color` is `--color-line` mixed toward
+  `--color-quiet` by the wall's share — lights × depth — and not by the
+  chrome's ink:
+  `color-mix(in oklch, var(--color-line), var(--color-quiet) calc(var(--arrival-lights, 0) * var(--arrival-depth) * 100%))`.
+  The hairline is a member of the dimmed set, but it is a line on the
+  wall, not a word on it, so it takes the wall's darkening and none of
+  the chrome's. It is exactly `--color-line` at lights 0 (nothing snaps
+  when the state appears), monotone in lights, paper's polarity
+  throughout, and never stronger than paper's hairline (ΔL −0.108): at
+  depth 0.75 it reads −0.027 at the top. The chrome knob does not move
+  it; chrome is tuned by the header's words alone. Written inline; no
+  new token. _Rejected at gate round 1:_ mixing by ink (the CSS block
+  above as first written — coupled to chrome, and at depth 0.75, chrome
+  1 nearly twice paper's strength, ΔL = 0.79·(depth − 1); weaker than
+  paper at depth 0.9, which is why T1401 did not see it); mixing toward
+  `--arrival-ground` or transparent (no line at the top, but a light
+  line mid-fade peaking near paper's strength with a polarity flip near
+  lights 0.18 — not the spec's smooth curve); a relative-colour
+  constant offset (not `--color-line` at lights 0, hard-codes 0.108,
+  no fallback). The block's CSS above shows the first rule; the header
+  rule as shipped is this one.
+
   `transition: none` on `html`/`body` under the arrival is the one
   place this spec touches the quiet view's neighbourhood: the page's
   scoped `:global(html), :global(body), .image-stage { transition:
