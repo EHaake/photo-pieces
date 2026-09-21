@@ -111,9 +111,12 @@
      --color-arrival is the dark itself: derived from the depth, so it
      follows the ground if the ground moves, and written once because
      it is read twice — by the no-script field on .image-stage and by
-     the page's mix. These three values are the plan's start; the
-     photographer's gate sets them. */
-  --arrival-depth: 0.9;
+     the page's mix. These three values are the photographer's, set at
+     the visual gate's first round (2026-09-21): depth 0.75, chrome 1,
+     fade 1. Chrome kept the plan's 1 because that round could not
+     judge it — the header's hairline was still coupled to it (T1401a
+     decoupled it); a later round sets it. */
+  --arrival-depth: 0.75;
   --arrival-chrome: 1;
   --arrival-fade: 1;
   --color-arrival: color-mix(
