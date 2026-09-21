@@ -367,6 +367,29 @@ did not say; one line that the pause mid-piece was not looked at, or
 what he saw if he did. If he stopped at a value he is not sure of, say
 so — Phase 1 is the second look.)_
 
+**Round 1 (2026-09-21), in the person's words:** "for the hero stage,
+I think it looks and works great overall. I like depth at 0.75, fade
+at 1, but not sure about Chrome." Line so far:
+`--arrival-depth: 0.75; --arrival-chrome: <open>; --arrival-fade: 1`.
+Two findings: (1) "When the stage is darkened, the line underneath the
+menu bar seems to get darker and more noticeable than it normally is
+and the chrome setting seems to affect it, but I can't get a chrome
+setting that i like." — the header's hairline under the arrival;
+restated: AC 1/AC 2's dimmed header, the hairline mixes from
+`--color-line` toward `--color-quiet` by the ink, so at every chrome
+value but one crossing it sits either lighter or darker than the wall;
+taken to a diagnosis (T1401a below). (2) "when you enter the stage, it
+might appear to the user that that's it, just the image. It's not clear
+that there is more content underneath. I think we should make the
+image slightly smaller so that footer text underneath the image shows
+up at least partially" — a product request against AC 8 (the stage's
+size unchanged) and spec 015's stage height; returned to the person as
+a spec question (in this spec by amendment, or the roadmap). Header
+dimmed vs away and the body's words: not raised — "great overall"
+read as dimmed kept, body undimmed, to be confirmed at the second
+look. The pause mid-piece: not mentioned. Chrome stays open until the
+hairline is settled; round 2 is the second look.
+
 ## Phase 1 — The values landed, and the docs (reviewer after the phase; the person's pause at its end, repeated until done) — walkthrough: the same image pages with the bar reading "no override — the stylesheet": the dark, the chrome and the fade as he chose them on both screens; if he wants another round, the bar is still there and the next landing is one more line below
 
 <!-- T1405 is written to be run once per round: the first round as
