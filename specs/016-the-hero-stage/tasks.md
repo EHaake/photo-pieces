@@ -584,11 +584,37 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | T1402 (`sdd-implementer`)                  | implementation (`opus`, high)  | 140,703 | done first dispatch; Verify grep count corrected 1 → 2 (the plan's script names the attribute); preload-script check substituted |
 | T1403 (`sdd-implementer`)                  | implementation (`opus`, high)  | 86,328 | done first dispatch; page-head.test.mjs's barrier strings updated (outside the named footprint, reported) |
 | T1404 (`sdd-implementer`)                  | implementation (`opus`, high)  | 42,407 | done first dispatch; +0.333 over-delivery recorded |
+| Phase 0 review (`skeptical-reviewer`)      | implementation (`opus`, high)  | 137,917 | PASS, no blocking; N1–N10 below; plan.md corrected at N1, N4, N8 |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
+- **From the Phase 0 review (2026-09-20), PASS, carried:** N1
+  `documentElement.clientHeight` is the large viewport on iOS, not the
+  small — the fade outruns the stage by a toolbar's height on the
+  phone; plan.md corrected, the gate's phone pass is the check. N2 the
+  first client-side arrival's "before paint" rests on the router source
+  read (`runScripts` after after-swap, before the new page is shown),
+  not on an observation — the person's first click into a frame from a
+  fresh gallery load is the eye on it. N3 `arrival.test.mjs` (c)'s
+  fade-fallback case cannot fail for the `'0'` entry (a used override
+  of 0 also yields `0.000` at y = vh); asserting at y = 0 would (NaN vs
+  `1.000`) — one number, rides T1405's edit of that file or the sweep.
+  N4 `page-head.test.mjs` was edited (two barrier strings) though the
+  plan's untouched list named it — plan corrected. N5 the barrier's new
+  `.css`/`dev-arrival` branches are exercised once by hand, by no
+  fixture case — one `it` for the sweep. N6 the copied helpers have
+  already drifted (`ruleFor`'s third argument) while the header comment
+  says "unchanged" — say "copied and trimmed", or lift to a module at
+  the third reader. N7 (a)'s exemption is case-sensitive
+  (`src/components/Dev*`), so `dev-arrival.ts` must never write
+  `--arrival-depth:` as source text — widen to `[Dd]ev` at the sweep.
+  N8 the third comment rewording in global.css — plan corrected. N9
+  the `.quiet-toggle` and `.brand` are outside the transition rule's
+  `:is()`; no colour ease runs on them today (one read), no test
+  guards it. N10 AC 6 with script actually off on a real image page
+  has no recorded read — the person's, at the gate.
 - **From T1401's per-task review (2026-09-20), non-blocking, carried:**
   N-1 `transition: none` holds at every lights value, so leaving quiet
   view at lights 0 snaps the ground to paper where the pre-spec page

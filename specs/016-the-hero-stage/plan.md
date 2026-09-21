@@ -251,8 +251,15 @@ dependency; the pause's markup, CSS and script byte-identical.
   descending: lights are 1 at y = 0, ½ at half the fade, 0 at the
   fade's length and beyond, monotone between. The fade's unit is the
   viewport height (`document.documentElement.clientHeight` — the
-  layout viewport, which is the small viewport on iOS, so the collapsing
-  toolbar does not stretch the fade mid-scroll). At fade 1 the lights
+  initial containing block's height, which is `100vh`'s, the _large_
+  viewport on iOS, not the small one as this plan first said; corrected
+  at the Phase 0 review, 2026-09-20, N1. What the fade needed from it
+  holds: the value does not change as the toolbar collapses, so the
+  fade does not stretch mid-scroll. What follows: on a phone with a
+  dynamic toolbar the fade runs about one toolbar-height longer than
+  the stage's `100svh − header`, so the lights are near but not at
+  `0.000` when the frame leaves the screen — the gate's phone pass is
+  the check, and T1405's fade value can absorb it). At fade 1 the lights
   reach 0 when the stage's bottom edge (at `100svh` from the page's top:
   the sticky header's height plus the stage's `100svh − header`) passes
   the viewport's top — "by the time the frame has left the screen"; the
@@ -370,8 +377,10 @@ dependency; the pause's markup, CSS and script byte-identical.
   mat _by the rule_ now, not as a deferred exception: the comments
   that said "until the pause gets a spec of its own" in `global.css`'s
   `:root` mat comment and `matte.test.mjs`'s header say "on a dark
-  ground, by the rule" instead — the pause's _rework_ is still on the
-  roadmap, its mat is not.
+  ground, by the rule" instead — three places in `global.css`, not two:
+  the Mattes-section header comment said it a third time and T1401
+  reworded it too (Phase 0 review N8) — the pause's _rework_ is still
+  on the roadmap, its mat is not.
 
 - **The sampler shows the no-script look.** `/dev/matte/stage/` renders
   the real `.image-stage` markup on the real stylesheet with no arrival
@@ -612,7 +621,10 @@ Every claim above is owned by a task and a check:
   or the three mat tokens and `--color-matte` (the ranges' line numbers
   recorded); `git diff main -- 'src/pages/pieces/[slug].astro' src/lib/pause-shape.ts remark-pieces-blocks.mjs src/content.config.ts obsidian-plugin/ src/components/DevGround.astro src/pages/dev/ src/lib/ground.ts src/lib/og-card.mjs public/og.jpg`
   empty; `pause-shape.test.mjs`, `matte.test.mjs` cases (a)–(c),
-  `page-head.test.mjs`, `og.test.mjs` unedited and green;
+  `og.test.mjs` unedited and green (`page-head.test.mjs` carries the
+  barrier's two message pins, so T1403's new wording moves those two
+  strings and nothing else — this list first said it was unedited;
+  Phase 0 review N4);
   `--color-quiet`, `--pause-depth`, the mat tokens and `--color-matte`
   unchanged by string.
 
@@ -678,11 +690,13 @@ Obsidian plugin; `DevGround.astro`, `BaseLayout.astro`, `src/pages/dev/`,
 - **The dev control shows numbers, not colours**: depth and chrome are
   read as the values on `<html>`, and the arrival's colour is the
   browser's mix — the gate is by eye, which is what the spec asks.
-- **The fade is measured in layout-viewport heights**
-  (`documentElement.clientHeight`), stable on iOS as the toolbar
-  collapses; the stage's own `100svh` is the same quantity, so the two
-  agree, but the person is the check on the phone — Firefox headless
-  has no dynamic toolbar.
+- **The fade is measured in large-viewport heights**
+  (`documentElement.clientHeight` = `100vh` = `lvh` on iOS), stable as
+  the toolbar collapses; the stage is `100svh − header`, so on a phone
+  with a dynamic toolbar the fade outruns the stage by about a
+  toolbar's height (Phase 0 review N1; the plan first said the two
+  agree). The person is the check on the phone — Firefox headless has
+  no dynamic toolbar.
 - **The control's bar covers the bottom-right corner** of the page
   under dev, including the frame nav's next link on a phone; drag it
   aside is not built — collapse is `reset` and a reload with the
