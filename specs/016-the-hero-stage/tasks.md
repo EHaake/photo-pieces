@@ -350,7 +350,7 @@ _T1403 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87
 
 _T1404 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 16 passed (16)`, `Tests 364 passed (364)`, `TEST EXIT 0`; prettier clean on both files. Mutation: a 1199×630 copy written with sharp to the scratchpad and pointed at by the `beforeAll` line → only the new case fails, `expected [ 1199, 630 ] to deeply equal [ 1200, 630 ]` (the background-pixel case passes against the mutant — "asserted by nothing before spec 016" holds); reverted, sha256 restored, `public/og.jpg` untouched. Dev server (Firefox 155 BiDi, 1512×982, `/galleries/`): `.gallery-cards` 1160px, `grid-template-columns` 374.667 ×3, `column-gap` 18px, the first three cards' `li`/link/`img` 374.667; `sizes` reads back `(min-width: 1160px) 375px, (min-width: 720px) 47vw, 94vw`; hint − rendered = +0.333. Footprint: the two files only. Findings: the 18px gap is `calc(var(--baseline) * 0.75)` with `--baseline: 1.5rem` — the comment names both forms; `CoverCards.astro` had no `sizes` comment before, so the convention followed is the image page's.
 
-- [ ] **T1401a** — The header's hairline takes the wall's ink (gate
+- [x] **T1401a** — The header's hairline takes the wall's ink (gate
       round 1 finding 1; decision review at the top tier, 2026-09-21).
       Pattern: the header rule in the arrival block and its pinned
       string in `arrival.test.mjs` (b). `src/styles/global.css`, the
@@ -366,6 +366,8 @@ _T1404 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87
       L − `<html>`'s L at y = 0 ≈ −0.027 and identical at chrome 1,
       0.5, 0.01; at lights 0 exactly `--color-line`; `git diff -U0 main -- src/styles/global.css | grep '^@@'`
       still lists no protected hunk._
+
+_T1401a record (2026-09-21, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 16 passed (16)`, `Tests 364 passed (364)`, `TEST EXIT 0`; prettier clean. Mutation: the old `var(--arrival-ink)` string restored → (b) "each dimmed element mixes from ITS OWN token" fails with the two strings quoted; reverted. Reads (Firefox, 1512×982, land-b, depth 0.75, y = 0): wall L 0.3975, hairline L 0.3705, ΔL −0.027 at chrome 1, 0.5 and 0.01 alike; lights forced 0 → `oklch(0.882 0.005 100)` byte-identical to `--color-line`, −0.108 below paper. Hunks: the arrival block's additive hunk 110 → 115 lines, no other change. The pinned string is a literal now (not built from the shared `ink` template).
 
 ### Gate record (Phase 0 pause — round 1)
 
@@ -627,6 +629,7 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | Phase 0 review (`skeptical-reviewer`)      | implementation (`opus`, high)  | 137,917 | PASS, no blocking; N1–N10 below; plan.md corrected at N1, N4, N8 |
 | Gate finding 1: diagnosis (`sdd-implementer`) | implementation (`opus`, high) | 90,667 | the hairline's ink coupling measured; five options; nothing edited |
 | Gate finding 1: decision review (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 29,668 | (e) the wall's own ink — T1401a; one build, not two |
+| T1401a (`sdd-implementer`)                 | implementation (`opus`, high)  | 44,611 | done first dispatch; ΔL −0.027 at every chrome |
 
 _(Session-tier allowance draw noted at each pause.)_
 

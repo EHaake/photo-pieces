@@ -2244,10 +2244,15 @@ html[data-arrival]:not([data-quiet]) .image-stage {
 }
 html[data-arrival]:not([data-quiet]) .site-header {
   background: var(--arrival-ground);
+  /* The hairline is a line on the wall, not a word on it: it takes the
+     wall's own share of the dark — lights × depth — and none of the
+     chrome's ink, so the chrome knob never moves it. Exactly
+     --color-line at lights 0, so nothing snaps when the state
+     appears, and never stronger than paper's hairline. */
   border-bottom-color: color-mix(
     in oklch,
     var(--color-line),
-    var(--color-quiet) var(--arrival-ink)
+    var(--color-quiet) calc(var(--arrival-lights, 0) * var(--arrival-depth) * 100%)
   );
 }
 /* The text-coloured chrome: the brand, the current page's nav link,

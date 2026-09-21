@@ -362,7 +362,10 @@ describe('(b) the arrival’s rules (T1401, spec 016)', () => {
     // every one of these computes to exactly --color-quiet whichever
     // token it started from, so a wrong source is invisible at the top
     // and shows only here. The header's hairline mixes from the line
-    // token for the same reason.
+    // token for the same reason, but by the WALL's share — lights ×
+    // depth — and not by the chrome's ink: it is a line on the wall,
+    // not a word on it, so the chrome knob never moves it and it is
+    // exactly --color-line at lights 0 (T1401a).
     const ink = 'var(--color-quiet) var(--arrival-ink)';
     const colours = Object.fromEntries(
       [TEXT_RULE, MUTED_RULE, ACCENT_RULE, FOCUS_RULE].map((prelude) => [
@@ -382,7 +385,7 @@ describe('(b) the arrival’s rules (T1401, spec 016)', () => {
     const header = declarations(ruleFor(arrival, HEADER_RULE).body);
     expect(norm(header['background'])).toBe('var(--arrival-ground)');
     expect(norm(header['border-bottom-color'])).toBe(
-      `color-mix(in oklch, var(--color-line), ${ink})`,
+      'color-mix(in oklch, var(--color-line), var(--color-quiet) calc(var(--arrival-lights, 0) * var(--arrival-depth) * 100%))',
     );
   });
 
