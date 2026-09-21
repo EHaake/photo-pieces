@@ -418,7 +418,7 @@ round's values are the record; the docs (T1406) cite no numbers, so
 they run once. The phase review after the first round reviews T1405
 and T1406 together; a later round is reviewed with the sweep. -->
 
-- [ ] **T1405** — The gate's values landed (round 1; further rounds
+- [x] **T1405** — The gate's values landed (round 1; further rounds
       as T1405a, T1405b, …). Pattern: spec 015's T1303 (a gate's
       numbers typed from the record, never re-read by eye) and `:root`
       in `src/styles/global.css`. From the gate record's line:
@@ -451,6 +451,8 @@ and T1406 together; a later round is reviewed with the sweep. -->
       `0.500`; `git diff main -- src/styles/global.css` shows no hunk
       inside the pause's block, the quiet rules or the stage's mat
       rules; kept — no edit, `arrival.test.mjs` green is the pin._
+
+_T1405 record (round 1, 2026-09-21, implementer at opus):_ `--arrival-depth` 0.9 → 0.75; chrome 1 and fade 1 unchanged (chrome open — the round could not judge it while the hairline rode it; T1401a decoupled it; round 2 sets it); `FADE` unedited (fade stayed 1); the comment carries the date, the round, the numbers and why chrome stayed. `sh scripts/verify.sh` — `87 page(s) built`, both barriers, `BUILD EXIT 0`, `CHECK EXIT 0`, `Tests 364 passed (364)`, `TEST EXIT 0`; (a) and the `FADE` pin green. Old-literal grep: only the live `--arrival-chrome: 1;` and `--arrival-fade: 1;` lines (120–121). Dev server, no key: `<html>` at y = 0 [72,71,67] = the 0.75 mix exactly at 1512×982 and 375×812; lights `0.500` at vh/2 (491 / 406). No protected hunk.
 
 - [ ] **T1406** — Docs: `README.md`, `AUTHORING.md`, `design/brief.md`
       (and carried item N10). Pattern: spec 015's T1304 line. `README.md`:
@@ -512,6 +514,18 @@ _(Each round: the date, "done" or the next line of values, and anything
 seen. A round that changes the values adds a T1405x line above and a
 tier-log row; the phase pause repeats. The last entry is the verdict
 the docs and the close-out cite.)_
+
+**Paused before T1406 (2026-09-21):** the person's second request at
+round 1 — the stage slightly smaller so the label beneath it peeks
+above the fold as a cue that there is more — contradicts AC 8 (the
+stage's size unchanged) and spec 015's stage height (`100svh − header`;
+measured: the stage's bottom edge is exactly the viewport height on
+both screens and both frames, `.image-head` begins 29px / 62px below
+the fold). It is a spec question, returned to the person: amend this
+spec (AC 8 and the design requirements, in his words, then a decision
+review on the mechanism), or a roadmap entry for the next spec. The
+docs (T1406) wait on the answer, since their arrival paragraph would
+describe the stage.
 
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge) — walkthrough: none — the roadmap and decisions text, the sweep and the merge change nothing the person can try; the arrival was attested at Phase 1
 
@@ -630,6 +644,7 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | Gate finding 1: diagnosis (`sdd-implementer`) | implementation (`opus`, high) | 90,667 | the hairline's ink coupling measured; five options; nothing edited |
 | Gate finding 1: decision review (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 29,668 | (e) the wall's own ink — T1401a; one build, not two |
 | T1401a (`sdd-implementer`)                 | implementation (`opus`, high)  | 44,611 | done first dispatch; ΔL −0.027 at every chrome |
+| T1405 round 1 (`sdd-implementer`)          | implementation (`opus`, high)  | 44,658 | depth 0.75 landed; chrome open for round 2 |
 
 _(Session-tier allowance draw noted at each pause.)_
 
