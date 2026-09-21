@@ -205,6 +205,57 @@ dependency; the pause's markup, CSS and script byte-identical.
   no fallback). The block's CSS above shows the first rule; the header
   rule as shipped is this one.
 
+  **The cue (gate round 1; spec amended 2026-09-21; decision review at
+  the top tier — T1401b).** With script and outside the quiet view, the
+  stage gives up the frame nav's height so that line — previous, where,
+  next — sits fully above the fold at the top. The mechanism is one
+  custom property the base stage rule already subtracts, set by the
+  arrival's gate; no script, no measurement, no markup change.
+  `--frame-nav-h` (`:root`, beside `--baseline`) states the nav's
+  rendered height in the nav's own terms — one row of 0.78rem mono at
+  the page's line-height plus its half-baseline bottom padding; two
+  rows and the 1rem row gap below 720px, the breakpoint the nav wraps
+  on — checked against the measured heights (29px at 1512×982; the
+  phone's measured in T1401b); the nav reads it as `min-height` with
+  `box-sizing: border-box`, so the nav is never shorter than the
+  reserve. `--stage-cue` is `0px` in the base `.image-stage` rule, and
+  that rule's `--avail-h` and both `min-height` lines subtract it;
+  `html[data-arrival]:not([data-quiet]) .image-stage` sets it to
+  `var(--frame-nav-h)` — the arrival block's only declaration about the
+  stage beyond `background: transparent`, and the only property beyond
+  colour its allowlist admits. It must be `--avail-h` as well as
+  `min-height`: `--avail-h` drives the mat's form and the frame's height
+  cap, and a `min-height`-only shrink would let a height-bound frame
+  grow the stage back and push the nav below the fold. The quiet rule
+  redeclares both without the cue; without script the attribute is
+  absent and the cue is `0px`. No flash, no shift: the head script sets
+  the attribute before first paint at every destination and never
+  toggles it by scroll, so the stage's first layout is the shorter one
+  at any scroll position. In effect at 1512×982 a height-bound frame is
+  29px shorter and a width-bound landscape frame is unchanged (800 <
+  818); at 375×812 both frames are width-bound and nothing changes
+  size — the nav rises into view under an unchanged image. A frame in
+  no set keeps the reserve: the page ground continues below the stage
+  and the head's top edge meets the fold — accepted, not special-cased.
+  The cue is not a knob on the tuning control. **The nav's colour under
+  the arrival is the theme's `--color-muted` at every scroll position**
+  (L 0.5 on a 0.3975 wall at depth 0.75 — lighter than the wall,
+  readable; the arrival's ink mixes toward the dark, so "full strength"
+  is the theme's own colour): it leaves the muted mix rule and the
+  transition rule (the theme's colour ease returns to it, harmless on an
+  unmixed colour) and **stays in the focus rule**, since the theme's
+  ring is a 1px accent outline (L ≈ 0.4) that does not read on the wall
+  — the focused text going to paper is what makes focus visible there
+  (a known limitation for every dimmed control: the ring itself is
+  faint on the wall). Rejected: a measured height (a ResizeObserver
+  arrives after layout — the fallback either equals the constant or
+  shifts); a shared 100svh grid box for stage and nav (moves markup, and
+  the fit is computed from `100svh` via `--avail-h`, so a height-bound
+  frame would grow the row and push the nav back down). Carried: the
+  719.98px breakpoint now lives in the nav's rule and in `:root`'s
+  token, cross-referenced by comment; docs that say the stage fills the
+  viewport below the header need "with script, less the frame nav".
+
   `transition: none` on `html`/`body` under the arrival is the one
   place this spec touches the quiet view's neighbourhood: the page's
   scoped `:global(html), :global(body), .image-stage { transition:

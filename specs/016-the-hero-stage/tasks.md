@@ -369,6 +369,53 @@ _T1404 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87
 
 _T1401a record (2026-09-21, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 16 passed (16)`, `Tests 364 passed (364)`, `TEST EXIT 0`; prettier clean. Mutation: the old `var(--arrival-ink)` string restored → (b) "each dimmed element mixes from ITS OWN token" fails with the two strings quoted; reverted. Reads (Firefox, 1512×982, land-b, depth 0.75, y = 0): wall L 0.3975, hairline L 0.3705, ΔL −0.027 at chrome 1, 0.5 and 0.01 alike; lights forced 0 → `oklch(0.882 0.005 100)` byte-identical to `--color-line`, −0.108 below paper. Hunks: the arrival block's additive hunk 110 → 115 lines, no other change. The pinned string is a literal now (not built from the shared `ink` template).
 
+- [ ] **T1401b** — The cue: the stage shorter by the frame nav under the
+      arrival (spec amended at gate round 1; decision review at the top
+      tier, 2026-09-21). Pattern: `--stage-pad` in the base `.image-stage`
+      rule (a stage-local property read by `--avail-h`); T1401a's edit
+      of the arrival block and its pinned strings. `src/styles/global.css`:
+      `:root` gains `--frame-nav-h` beside `--baseline` (one row: 0.78rem
+      × the nav's inherited line-height + `--baseline` × 0.5; a
+      `@media (max-width: 719.98px)` `:root` gives two rows + 1rem gap +
+      the padding), with a comment naming the nav's rule in the image
+      page and the measured heights; the base `.image-stage` rule gains
+      `--stage-cue: 0px` and subtracts `var(--stage-cue)` in `--avail-h`
+      and both `min-height` lines; the arrival block's gated
+      `.image-stage` rule gains `--stage-cue: var(--frame-nav-h)`; the
+      muted mix rule and the transition rule lose `.frame-nav, .frame-nav a`
+      / `.frame-nav a` (the focus rule keeps `.frame-nav a`); the block's
+      header comment states the cue. `src/pages/images/[...id].astro`,
+      the `.frame-nav` rule: `box-sizing: border-box; min-height: var(--frame-nav-h)`
+      with a comment. `arrival.test.mjs`: ALLOWED gains exactly
+      `--stage-cue` with the rationale reworded; PRELUDES updated; a case
+      that exactly one arrival rule declares `--stage-cue`, gated, on
+      `.image-stage`, value `var(--frame-nav-h)`; a case that the mix
+      rule's selector list does not contain `frame-nav`. `matte.test.mjs`:
+      the stage's `--avail-h` pin updated to the new text; pins that the
+      base rule declares `--stage-cue: 0px` and both `min-height` lines
+      subtract it, that the quiet rule's `--avail-h` and `min-height` do
+      not reference it, and that `:root` declares `--frame-nav-h` twice
+      (base and the 719.98px query). _Verify: `sh scripts/verify.sh`
+      green; mutations — the gated `--stage-cue` line removed → the new
+      arrival case fails; `.frame-nav a` re-added to the mix rule → the
+      negative case fails; `--avail-h`'s subtraction dropped → matte's
+      pin fails; each reverted. Then on the dev server at 1512×982 and
+      375×812 with script at scrollY 0 on land-b and port-a:
+      `nav.getBoundingClientRect().bottom ≤ innerHeight`,
+      `stage.bottom = innerHeight − nav.height` (±1), `.image-head.top ≥ innerHeight − 1`,
+      the nav's rendered height vs `--frame-nav-h` (equal within 1px on
+      both screens — if not, the token's formula is corrected to the
+      measured composition and the numbers recorded); the stage's rect
+      at first paint (the during-load poll) equal to its rect after load
+      + rAF at scrollY 0 and after a reload mid-page; land-b 1160×799.72
+      unchanged at 1512, port-a's height down by exactly the cue, both
+      frames unchanged at 375; the nav's colour `--color-muted`'s rgb at
+      y = 0; attribute removed → `stage.bottom = innerHeight`; quiet view
+      → `stage.height = innerHeight` as today; matte (d)'s publisher count
+      still three; `git diff -U0 main -- src/styles/global.css | grep '^@@'`
+      — the base stage rule's hunk is new and named; no hunk in the
+      pause's block, the quiet rules or `.image-frame`._
+
 ### Gate record (Phase 0 pause — round 1)
 
 _(The product owner's decision from the image pages under `npm run dev`
@@ -655,6 +702,7 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | Gate finding 1: decision review (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 29,668 | (e) the wall's own ink — T1401a; one build, not two |
 | T1401a (`sdd-implementer`)                 | implementation (`opus`, high)  | 44,611 | done first dispatch; ΔL −0.027 at every chrome |
 | T1405 round 1 (`sdd-implementer`)          | implementation (`opus`, high)  | 44,658 | depth 0.75 landed; chrome open for round 2 |
+| Gate finding 2: decision review (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 45,790 | the cue: --stage-cue subtracted in the base stage rule, set by the gate to --frame-nav-h — T1401b |
 
 _(Session-tier allowance draw noted at each pause.)_
 
