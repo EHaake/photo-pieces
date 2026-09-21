@@ -711,11 +711,24 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | T1406 (`sdd-implementer`)                  | implementation (`opus`, high)  | 66,478 | done first dispatch; README's arrival paragraph omits the cue (flagged to the review) |
 | Phase 1 review (`skeptical-reviewer`)      | implementation (`opus`, high)  | 97,754 | BLOCK — B1 (the :root comment said chrome open; the record says 1), B2 (the cue's nav 1.55:1 on the wall — plan said "readable" unmeasured; corrected, question to the person), B3 (CLAUDE.md — the reviewer's stale copy; HEAD has 0 hits, dismissed); N1–N8 |
 | Phase 1 fix (`sdd-implementer`)            | implementation (`opus`, high)  | 35,180 | B1 comment fixed; N5 read: toggle [23,22,18] at y = 0, [94,100,106] at lights 0 |
+| Phase 1 re-review (`skeptical-reviewer`)   | implementation (`opus`, high)  | 40,031 | PASS; B3's dismissal independently confirmed; four second-look notes below |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
+- **Open from the Phase 1 review's B2 (2026-09-21): the cue's colour.**
+  The undimmed frame nav is the theme's muted grey on the arrival wall —
+  1.55:1 at depth 0.75 (5.82:1 on paper). Whether that is the right
+  colour for the cue is the person's at the second look; "lighter" is a
+  plan decision plus a DECISIONS entry. If he defers, the sweep carries
+  it. From the re-review: paste the amended block-vocabulary clause
+  into the Phase 2 and sweep bundles (a reviewer's session copy of
+  CLAUDE.md is stale and will raise B3 again); a multiline or
+  single-word grep for the interim phrases, since the docs are
+  hard-wrapped; the phase commit rests on a full `sh scripts/verify.sh`
+  (run by the orchestrator below); two over-long prose lines in plan.md
+  and CLAUDE.md's stranded "A" — cosmetic.
 - **From the Phase 1 review (2026-09-21), carried:** N1 the 0.4px fold
   overshoot at 375 is `--header-h` rounding 136.4 → 136 (pre-016); N2
   `--header-h` is absent at first paint (the `4.5rem` fallback), so on
