@@ -205,9 +205,25 @@ Nothing dims and nothing fades.
   gate sets it. The photographer has said he does not know the value
   yet, and the tuning control exists so he can find it.
 - **The chrome dims the way the pause dims its words**: toward the
-  ground's dark, faintly there, never gone — the header, the frame nav,
-  the quiet toggle and the label beneath the stage. The pause's depth
-  for words is the starting value; the gate sets it.
+  ground's dark, faintly there, never gone — the header, the quiet
+  toggle and the label beneath the stage. The pause's depth for words
+  is the starting value; the gate sets it. _Amended at gate round 1
+  (2026-09-21): the frame nav is not in the dimmed set — it is the cue
+  below._
+- **A cue that there is more** (added at gate round 1, 2026-09-21, in
+  the photographer's words: "when you enter the stage, it might appear
+  to the user that that's it, just the image. It's not clear that there
+  is more content underneath. I think we should make the image slightly
+  smaller so that footer text underneath the image shows up at least
+  partially, which is an indication to the viewer that there is more to
+  scroll down to" — the text being "just the left and right links and
+  what's in between", the frame nav). With script, the stage is shorter
+  than the viewport by enough that the frame nav line — previous, where,
+  next — sits fully above the fold at the top on both screens, at full
+  strength on the dark wall, not dimmed. The photograph fits the
+  shorter stage as it fits today (smaller only where it is height-bound;
+  a width-bound landscape frame does not change). Without script and in
+  the quiet view the stage keeps its full height.
 - **The header stays, dimmed, rather than away.** The pause hides the
   header because the reader is mid-scene; here the reader has just
   arrived and the header is their way back. Lean, confirmed at the
@@ -230,8 +246,10 @@ Nothing dims and nothing fades.
   asks only that it be quick to use and impossible to ship.
 - **The state is a function of scroll position**, computed before the
   first paint that can show it, so a restored scroll position never
-  flashes dark. No layout shifts: the stage's size and place are
-  exactly today's, with and without script.
+  flashes dark. No layout shifts: the stage's width and place are
+  exactly today's, with and without script; its height with script is
+  the cue's (above), decided before the first paint like the rest of
+  the state, so nothing moves on load or on scroll.
 - **Without script, the field is the stage's own background** — the
   arrival's dark, ending at the stage's edge, header and frame nav on the
   page ground — and the mat sits on it. The script extends the dark to
@@ -269,9 +287,10 @@ frozen and its `plan.md` records it.)
 ## Acceptance criteria
 
 - [ ] An image page opened at the top shows the arrival's dark edge to
-      edge, the header, frame nav, quiet toggle and label dimmed, and
-      the photograph matted at the stage's size — with no timed motion
-      of any kind.
+      edge, the header, quiet toggle and label dimmed, the frame nav at
+      full strength fully above the fold on both screens, and the
+      photograph matted at the stage's size — with no timed motion of
+      any kind. _(Amended at gate round 1, 2026-09-21.)_
 - [ ] Scrolling down fades the ground to the page ground and the chrome
       to full over about the stage's height of scroll; by the time the
       stage has left the viewport the page is exactly the pre-spec page;
@@ -290,8 +309,13 @@ frozen and its `plan.md` records it.)
 - [ ] The mat rule is stated once and pinned by a test: worn on the
       stage, in the quiet view and on the pause frame; every other
       frame on the site bare; the compare's fill and divider white.
-- [ ] The stage's size, place and fit are unchanged with and without
-      script; no layout shift is introduced on load or on scroll.
+- [ ] The stage's width, place and fit are unchanged with and without
+      script; with script the stage is shorter by the frame nav's
+      height so that line sits above the fold at the top on both
+      screens, and without script and in quiet view its height is
+      unchanged; no layout shift is introduced on load or on scroll.
+      _(Amended at gate round 1, 2026-09-21 — was "size, place and
+      fit unchanged".)_
 - [ ] The pause block's markup, CSS and script are byte-identical
       against `main`.
 - [ ] Focus into the dimmed chrome yields a readable control; nothing
@@ -339,6 +363,15 @@ frozen and its `plan.md` records it.)
   action", each to be confirmed by looking at the gate.
 - **The compare's fill and divider stay white** — carried from 015's
   default, unchanged unless the photographer says otherwise.
+- **The stage shorter by the frame nav, as the cue that there is more**
+  (product owner, gate round 1, 2026-09-21): "it might appear to the
+  user that that's it, just the image … make the image slightly smaller
+  so that footer text underneath the image shows up at least partially"
+  — clarified as the frame nav ("just the left and right links and
+  what's in between"), at full strength on the dark wall, the stage box
+  shrunk (the photograph smaller only where height-bound), with script
+  only. Header dimmed and the body's words undimmed confirmed; depth
+  0.75, chrome 1, fade 1; "the line below the header looks good now".
 - **The motion ideas go to the roadmap** (product owner): the glow
   behind a dark frame and the scroll that settles, as "Motion,
   considered", committed to `main` in this conversation.

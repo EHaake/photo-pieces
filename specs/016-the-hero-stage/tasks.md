@@ -386,6 +386,16 @@ did not say; one line that the pause mid-piece was not looked at, or
 what he saw if he did. If he stopped at a value he is not sure of, say
 so — Phase 1 is the second look.)_
 
+**Round 1, continued (2026-09-21):** "the line below the header looks
+good now. Chrome at 1." The line: `--arrival-depth: 0.75;
+--arrival-chrome: 1; --arrival-fade: 1` — landed by T1405. The stage:
+what peeks is "just the left and right links and what's in between"
+(the frame nav), at full strength on the dark wall, the stage box
+shrunk (photograph smaller only where height-bound), with script only
+(quiet view and the no-script page keep the full height). spec.md
+amended in his words (design requirements, AC 1, AC 8, Decided); the
+mechanism to a decision review at the top tier → T1401b.
+
 **Round 1 (2026-09-21), in the person's words:** "for the hero stage,
 I think it looks and works great overall. I like depth at 0.75, fade
 at 1, but not sure about Chrome." Line so far:
