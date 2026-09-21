@@ -329,7 +329,7 @@ _T1402 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87
 
 _T1403 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, `[check-no-gps] 741 images scanned in dist/ — no GPS metadata.`, `[check-no-dev-routes] no dev routes in dist/; no dev-ground or dev-arrival marker in 102 files.` (the `.css` files now scanned), `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 16 passed (16)`, `Tests 363 passed (363)`, `TEST EXIT 0`. `grep -rl "dev-arrival\|dev-ground" dist/` empty; `dist/dev` absent; `getComputedStyle` in `dev-arrival.ts` 1; `is:inline` in `DevArrival.astro` 2; `data-arrival` on the page 2; prettier clean on the five files. (h) enumerates `src/components/DevArrival.astro`, `src/components/DevGround.astro`, and the four `src/pages/dev/` routes. Negative control: the marker planted in `dist/_astro/BaseLayout.*.css` → `[check-no-dev-routes] a dev-only marker shipped (dev-arrival): dist/_astro/BaseLayout.BS6OSPyR.css`, exit 1; restored, green. Dev server (Firefox 155 BiDi, 1512×982): bar on land-b, none on the piece page; no key → `no override — the stylesheet`, outputs 0.9 / 1 / 1, `<html>` [42,41,37]; depth 0.95 → inline property, key `{"depth":"0.95","chrome":"1","fade":"1"}`, the line verbatim, `<html>` [32,31,27] = the 0.95 mix exactly; fade 0.5 → lights `0.000` at vh/2 and `0.502` at vh/4 (Firefox clamps `scrollTo` to 245 of 245.5 — the script's arithmetic at 245); reload keeps all three, inline before `astro:page-load` (the during-load poll); land-c by client-side navigation wears them; reset → key null, inline gone, 0.9 / 1 / 1, [42,41,37]; quiet view → bar `display: none`. Deviations: `page-head.test.mjs`'s two pinned barrier strings updated to the new wording (the task changes the messages; the assertions still fail on regression); `const CSS` → `BAR_CSS` (`astro check` ts(2451), a DOM global). Findings: `arrival.test.mjs` (a)'s exemption is `src/components/Dev*` case-sensitively, so the lowercase served module is not exempt — it builds the pasteable line from a `KNOBS` array and never writes `--arrival-depth:` as source text (noted beside `KNOBS`); mid-session only the moved knob is inline while the key holds three (a reload materialises all three); the bar is fixed bottom-right with no small-screen rule and will cover the frame nav on the phone (plan.md's known limitation; the person judges).
 
-- [ ] **T1404** — Two items carried from spec 015's sweep (N6, N9;
+- [x] **T1404** — Two items carried from spec 015's sweep (N6, N9;
       N10 rides T1406). Pattern: the `sizes` comment in
       `src/components/CoverCards.astro` and the `og.jpg` case in
       `ground.test.mjs`. `src/components/CoverCards.astro`: the hint's
@@ -347,6 +347,8 @@ _T1403 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87
       1512×982 a cover card on `/galleries/` renders 374.667px against
       the 375px hint → +0.333, recorded; `git diff --stat main` for this
       task touches only the two files._
+
+_T1404 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 16 passed (16)`, `Tests 364 passed (364)`, `TEST EXIT 0`; prettier clean on both files. Mutation: a 1199×630 copy written with sharp to the scratchpad and pointed at by the `beforeAll` line → only the new case fails, `expected [ 1199, 630 ] to deeply equal [ 1200, 630 ]` (the background-pixel case passes against the mutant — "asserted by nothing before spec 016" holds); reverted, sha256 restored, `public/og.jpg` untouched. Dev server (Firefox 155 BiDi, 1512×982, `/galleries/`): `.gallery-cards` 1160px, `grid-template-columns` 374.667 ×3, `column-gap` 18px, the first three cards' `li`/link/`img` 374.667; `sizes` reads back `(min-width: 1160px) 375px, (min-width: 720px) 47vw, 94vw`; hint − rendered = +0.333. Footprint: the two files only. Findings: the 18px gap is `calc(var(--baseline) * 0.75)` with `--baseline: 1.5rem` — the comment names both forms; `CoverCards.astro` had no `sizes` comment before, so the convention followed is the image page's.
 
 ### Gate record (Phase 0 pause — round 1)
 
@@ -581,6 +583,7 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | T1401 re-review (`skeptical-reviewer`)     | implementation (`opus`, high)  | 27,764 | PASS; three second-look notes below |
 | T1402 (`sdd-implementer`)                  | implementation (`opus`, high)  | 140,703 | done first dispatch; Verify grep count corrected 1 → 2 (the plan's script names the attribute); preload-script check substituted |
 | T1403 (`sdd-implementer`)                  | implementation (`opus`, high)  | 86,328 | done first dispatch; page-head.test.mjs's barrier strings updated (outside the named footprint, reported) |
+| T1404 (`sdd-implementer`)                  | implementation (`opus`, high)  | 42,407 | done first dispatch; +0.333 over-delivery recorded |
 
 _(Session-tier allowance draw noted at each pause.)_
 
