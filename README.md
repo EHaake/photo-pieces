@@ -103,18 +103,17 @@ Three minutes apart. Captions take _inline markdown_.
 | `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays   | no     | raw text              |
 | `pause`     | leaf only      | `src` `alt`; no body — nothing to read                                                             | yes¹   | image (leaf)          |
 
-¹ the pause frame keeps the mat spec 007 gave it, until the pause gets
-a spec of its own.
+¹ the pause frame's ground is dark while the pause is active, so it
+wears the mat by the rule (spec 016).
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
-`single` — same rendered result. Since spec 015 the site mats only the
-image page's stage and the quiet view that grows out of it (a piece's
-pause frame excepted until its own spec): a flat
-white field 6% of that frame's rendered short side, never narrower than
-4px or wider than 40px, equal on all four sides, applied by the site's
-CSS (never bake mattes into files). A piece's frames sit on the ground
-instead, edge to edge with the page — the gutters of a pair, a grid or
-a packed gallery row show the ground between photographs, and each cell
-is that much more picture.
+`single` — same rendered result. The mat is worn where the ground is
+dark: the image page's stage on arrival, its quiet view, and a piece's
+pause frame — a flat white field 6% of that frame's rendered short
+side, never narrower than 4px or wider than 40px, equal on all four
+sides, applied by the site's CSS (never bake mattes into files). Every
+other frame sits bare on the ground, edge to edge with the page — the
+gutters of a pair, a grid or a packed gallery row show the ground
+between photographs, and each cell is that much more picture.
 An image's `src` is `./<file>` for the piece's own photograph,
 `../<slug>/<file>` for another piece's, or
 `../../gallery-images/<file>` for one at the gallery root (spec 008) —
@@ -130,8 +129,7 @@ rendered.
 
 **Current status**: every block above is implemented — the spec-003
 blocks and spec 007's two durational ones — transform, styling,
-the mat rule (the image page's stage alone since spec 015, a piece's
-pause frame excepted until its own spec), unit tests,
+the mat rule (worn where the ground is dark, spec 016), unit tests,
 and the Obsidian plugin's leaf-form rendering —
 with images going through Astro's asset pipeline (hashed src,
 responsive srcset per treatment). Pieces render at
@@ -148,12 +146,15 @@ Every accepted raster (`jpg jpeg png webp avif tiff`) in a published
 piece's folder — or in the flat `src/content/gallery-images/` root for
 images that belong to no piece — gets a page at `/images/<id>/`, where
 the id is `<piece-folder>/<basename>` or `gallery/<basename>`. The
-page shows the image matted on the stage — since spec 015 the one
-matted surface on the site, a piece's pause frame excepted until the
-pause gets its own spec — its title, a wall label of exposure info
-read from the file's EXIF (camera, lens, focal length, aperture,
-shutter, ISO, capture date), the piece it came from, the galleries it
-sits in, and an optional caption. Every image in a piece links there;
+page shows the image matted on the stage, its title, a wall label of
+exposure info read from the file's EXIF (camera, lens, focal length,
+aperture, shutter, ISO, capture date), the piece it came from, the
+galleries it sits in, and an optional caption. Since spec 016 the page
+arrives dark: the stage's field spreads edge to edge with the
+photograph matted on it and the chrome faint against it, and scrolling
+gives the page back over about a screen while scrolling up takes it
+again — nothing is timed. Without script the stage sits in its own
+dark field, ending at its own edge. Every image in a piece links there;
 so does every gallery cell. A piece is not limited to the photographs
 in its own folder: since spec 008 it may place another piece's or a
 gallery-root one by path, and that photograph's page stays its home
@@ -359,6 +360,13 @@ photo-pieces/
 ├── image-meta.test.mjs, exif.test.mjs, galleries.test.mjs # spec-004 suites
 ├── image-set.test.mjs            # the set key: gallery, piece, place
 ├── pause-shape.test.mjs          # spec-007: the pause's 0 → 1 → 0 shape
+├── gallery-layout.test.mjs, place-page.test.mjs # the packing knobs; the place wall
+├── categories.test.mjs, page-head.test.mjs # spec-010: the row's rule; the reading head and the dev-route barrier
+├── og.test.mjs                   # spec-004: the OG image is an optimized output, never the original
+├── gps-barrier.test.mjs          # spec-004's GPS barrier, kept as a standing test
+├── ground.test.mjs               # the ground's family, its contrast floors, and COLOR
+├── matte.test.mjs                # the mat rule: which surfaces wear it, and why
+├── arrival.test.mjs              # spec-016: the arrival's head script and its CSS block
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
@@ -385,8 +393,9 @@ photo-pieces/
 │   ├── lib/categories.ts         # the category taxonomy
 │   ├── lib/ground.ts             # the ground's family: fixed steps to the fills and hairlines, the contrast readout, the gate's candidates
 │   ├── lib/og-card.mjs           # the Open Graph card — one tree and one palette for the per-piece route and `npm run og`
-│   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), CategoryRow
+│   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), CategoryRow; DevGround.astro and DevArrival.astro + dev-arrival.ts are dev-only: the ground switch and the arrival's tuning bar; postbuild fails if either ships
 │   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
+│   ├── pages/images/             # the image page: the stage, the wall label, the quiet view — and the arrival's inline head script (spec 016)
 │   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler, the place-wall sampler, the matte sampler at dev/matte/, which also carries the site-wide ground switch); postbuild fails if any reach dist/
 │   └── styles/global.css
 ```

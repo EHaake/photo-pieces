@@ -95,10 +95,12 @@ fill it sits on, pinned by `ground.test.mjs`; the lowest of the floored
 pairs is muted text on the soft fill at 5.05:1, so the muted text ships
 unchanged at `oklch(0.5 0.012 250)` — this gate deepened nothing. The
 spec-003 warming above is history, not the current reason for anything:
-it was done so white mats would read, and on paper the stage's mat
-stands only 1.02:1 off the ground outside the quiet view. That is
-accepted for now; the darker field the stage wants is its own spec
-(`ROADMAP.md`).
+it was done so white mats would read, and against paper the stage's mat
+stands only 1.02:1 off the ground. Spec 016 answers that with the
+arrival: the image page opens on a dark ground a share of the way to
+the quiet dark (`--arrival-depth`, `--color-arrival`), lightening to
+paper as the reader scrolls, so the white mat is seen on a dark wall
+and never sits on paper for long.
 
 ## Typography
 
@@ -149,15 +151,16 @@ physicality. A flat, uniform matte field around an image is therefore
 part of this site's visual language: no shadow, no texture, no bevel,
 no frame — a clean color field, token-driven (width and color in
 `global.css`), applied by the site's CSS rather than baked into image
-files (decision recorded in `DECISIONS.md`). Since spec 015 it is worn
-by the image page's stage and the quiet view that grows out of it, and
-by nothing else: a piece's frames and the galleries' rows present the
-photograph on the ground, edge to edge with the page. The reason is
-that the mat is a hero treatment — it says this one photograph is the
-whole point, which is true of the stage and false of a frame passing
+files (decision recorded in `DECISIONS.md`). It is worn where the
+ground is dark — the image page's stage on arrival, the quiet view
+that grows out of it, and a piece's pause frame — and nowhere else: a
+piece's other frames and the galleries' rows present the photograph on
+the ground, edge to edge with the page. The reason is that the mat is a
+hero treatment — it says this one photograph is the whole point, which
+is true of a frame on a darkened wall and false of a frame passing
 under a reader's eye in a flow of prose or sitting in a packed row.
-(The pause frame keeps the mat spec 007 gave it until the pause gets a
-spec of its own.)
+(The compare's white fill and divider are its own device inside its
+box, not a mat.)
 
 ## Screens to design
 

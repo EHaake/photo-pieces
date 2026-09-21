@@ -596,16 +596,16 @@ history keeps every byte forever, and the build only needs enough
 pixels for its largest responsive variant. Masters live in the photo
 archive, not the repo. (Decision and numbers: `DECISIONS.md`, "Images
 stay committed to git".) And **never bake a matte into the file**:
-the site mats the frames it mats itself, and since spec 015 those are
-the image page's stage and the quiet view that grows out of it — plus
-the pause frame, until the pause gets a spec of its own. Every other
-frame, in a piece or a gallery, sits on the ground unmatted. So a baked
-mat would be the only mat in a piece, white around one photograph in a
-reading flow where nothing else has any; on the image page it would
-render double-matted, the site measuring its own share — 6% of the
-photograph's rendered short side, between 4px and 40px, spec 003 and
-spec 013 — over your baked one as if that were part of the picture; and
-anywhere it would lie to the layout math that counts the mat. Two
+the site mats the frames it mats itself, and those are the frames whose
+ground is dark: the image page's stage on arrival, its quiet view, and
+the pause frame (spec 016). Every other frame, in a piece or a gallery,
+sits on the ground unmatted. So a baked mat would be the only mat in a
+piece, white around one photograph in a reading flow where nothing else
+has any; on the image page it would render double-matted, the site
+measuring its own share — 6% of the photograph's rendered short side,
+between 4px and 40px, spec 003 and spec 013 — over your baked one as if
+that were part of the picture; and anywhere it would lie to the layout
+math that counts the mat. Two
 frames carry no measured ratio — an image inside a link you write
 yourself in prose (`[![alt](./a.jpg)](…)`), and a local non-raster (an
 SVG, say) with alt text. Both used to wear a mat computed as if the

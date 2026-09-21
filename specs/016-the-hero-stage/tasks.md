@@ -513,7 +513,7 @@ and T1406 together; a later round is reviewed with the sweep. -->
 
 _T1405 record (round 1, 2026-09-21, implementer at opus):_ `--arrival-depth` 0.9 → 0.75; chrome 1 and fade 1 unchanged (chrome open — the round could not judge it while the hairline rode it; T1401a decoupled it; round 2 sets it); `FADE` unedited (fade stayed 1); the comment carries the date, the round, the numbers and why chrome stayed. `sh scripts/verify.sh` — `87 page(s) built`, both barriers, `BUILD EXIT 0`, `CHECK EXIT 0`, `Tests 364 passed (364)`, `TEST EXIT 0`; (a) and the `FADE` pin green. Old-literal grep: only the live `--arrival-chrome: 1;` and `--arrival-fade: 1;` lines (120–121). Dev server, no key: `<html>` at y = 0 [72,71,67] = the 0.75 mix exactly at 1512×982 and 375×812; lights `0.500` at vh/2 (491 / 406). No protected hunk.
 
-- [ ] **T1406** — Docs: `README.md`, `AUTHORING.md`, `design/brief.md`
+- [x] **T1406** — Docs: `README.md`, `AUTHORING.md`, `design/brief.md`
       (and carried item N10). Pattern: spec 015's T1304 line. `README.md`:
       the block table's `pause` row stays "yes" and footnote ¹ becomes
       "the pause frame's ground is dark while the pause is active, so it
@@ -566,6 +566,8 @@ _T1405 record (round 1, 2026-09-21, implementer at opus):_ `--arrival-depth` 0.9
       `grep -n "excepted until its own spec\|until the pause gets\|darker field the stage wants\|reads faintly" README.md AUTHORING.md design/brief.md`
       → 0; `npx prettier --check README.md AUTHORING.md design/brief.md`
       clean; `sh scripts/verify.sh` green._
+
+_T1406 record (2026-09-21, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, both barriers, `BUILD EXIT 0`, `CHECK EXIT 0`, `Tests 367 passed (367)`, `TEST EXIT 0`; the interim grep over the three files → 0; prettier clean. README: footnote ¹, the post-table rule, the status line, the image-page paragraph (the arrival in two sentences, no numbers), the tree (nine test files, the two dev components + the served module, the head-script clause). AUTHORING: the one clause, four lines hand-rewrapped. brief: the Palette note's deferral → the arrival (the 1.02:1 measurement kept as the lights-0 fact, "outside the quiet view" → dropped since the stage now has a dark wall too); the carve-out states the rule once, the compare's white as its own device. Deviations: the Palette note had two deferral sentences, not three; README's arrival sentences do not mention the cue (no doc sentence claimed the stage fills the viewport, so nothing needed "less the frame nav") — flagged; test files grouped seven lines. Findings: the brief's carve-out heading still says "narrowed at spec 015"; `StructuredData.astro`/`SocialLinks.astro` never listed in README's tree.
 
 ### Phase 1 record (the person's walkthrough, round by round)
 
@@ -706,6 +708,7 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | T1405 round 1 (`sdd-implementer`)          | implementation (`opus`, high)  | 44,658 | depth 0.75 landed; chrome open for round 2 |
 | Gate finding 2: decision review (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 45,790 | the cue: --stage-cue subtracted in the base stage rule, set by the gate to --frame-nav-h — T1401b |
 | T1401b (`sdd-implementer`)                 | implementation (`opus`, high)  | 131,316 | done first dispatch; 0.4px fold overshoot at 375 is --header-h's rounding, pre-existing |
+| T1406 (`sdd-implementer`)                  | implementation (`opus`, high)  | 66,478 | done first dispatch; README's arrival paragraph omits the cue (flagged to the review) |
 
 _(Session-tier allowance draw noted at each pause.)_
 
