@@ -44,6 +44,20 @@
   --prose-width: 68ch;
   --page-pad: clamp(1rem, 3vw, 2rem);
   --baseline: 1.5rem;
+  /* THE FRAME NAV'S HEIGHT, stated in the nav's own terms, so the
+     stage can give it up under the arrival — spec 016's cue that
+     there is more below the photograph (T1401b). One row of 0.78rem
+     mono plus the half-baseline bottom padding of `.frame-nav` (the
+     image page's scoped <style>, which reads this back as a
+     min-height under `box-sizing: border-box`, so the nav is never
+     shorter than the reserve). The nav sets no line-height and the
+     page sets none either, so a row is the mono's `normal` — 1.362 at
+     this size for JetBrains Mono Variable, measured, not assumed.
+     Checked against the rendered nav: 29px at 1512x982. Below 720px
+     the nav wraps to two rows over a 1rem row gap and the query just
+     below mirrors `.frame-nav`'s own 719.98px query: 62px at
+     375x812. Retune either and the other moves with it. */
+  --frame-nav-h: calc(0.78rem * 1.362 + var(--baseline) * 0.5);
   /* The two vertical rhythms the pause's stage reads (T504a review):
      the block margin every piece block keeps, and the paragraph gap —
      the UA's 1em made explicit, so the stage's outer margins and the
@@ -159,6 +173,16 @@
      value after the head on a place with no writing (no head-case
      override). Keep the clamp in step with .section by hand. */
   --place-wall-gap: clamp(3.5rem, 5.5vw, 5.5rem);
+}
+
+/* The frame nav wraps to two rows below 720px — `.frame-nav` in the
+   image page's scoped <style> drops to two columns at exactly this
+   breakpoint and puts `where` on a second row — so the reserve is two
+   rows, the 1rem row gap between them, and the same bottom padding. */
+@media (max-width: 719.98px) {
+  :root {
+    --frame-nav-h: calc(0.78rem * 1.362 * 2 + 1rem + var(--baseline) * 0.5);
+  }
 }
 
 /* Light-only by design: the photographer controls how the work is seen,
@@ -2110,13 +2134,23 @@ html[data-pause-active] .social-links a {
    duplication this rule exists to avoid. */
 .image-stage {
   --stage-pad: clamp(1rem, 3vh, 2rem);
+  /* The cue (spec 016, T1401b): the height the stage gives up so the
+     frame nav sits above the fold. Zero here — without script the
+     stage is the whole viewport below the header, as it always was —
+     and --frame-nav-h under the arrival's gate, which is the only
+     place it is set. It comes off --avail-h as well as the two
+     min-heights: --avail-h drives the mat's form and the image's
+     height cap, and a min-height-only shrink would let a
+     height-bound frame grow the stage back and push the nav down
+     again. */
+  --stage-cue: 0px;
   --avail-w: min(calc(100vw - 2 * var(--page-pad)), var(--content-width));
-  --avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad));
+  --avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--stage-cue));
   position: relative;
   display: grid;
   place-items: center;
-  min-height: calc(100vh - var(--header-h, 4.5rem));
-  min-height: calc(100svh - var(--header-h, 4.5rem));
+  min-height: calc(100vh - var(--header-h, 4.5rem) - var(--stage-cue));
+  min-height: calc(100svh - var(--header-h, 4.5rem) - var(--stage-cue));
   padding: var(--stage-pad) var(--page-pad);
   background: var(--color-arrival); /* no script: the stage's own field */
 }
@@ -2209,19 +2243,38 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
    source-order or specificity argument is needed, and the quiet block
    above stays byte-identical.
 
+   THE CUE (gate round 1; spec amended 2026-09-21 — T1401b). With
+   script and outside the quiet view THE STAGE GIVES UP THE FRAME NAV'S
+   HEIGHT, so that line — previous, where, next — sits fully above the
+   fold at the top and says there is more below. The mechanism is one
+   custom property the base .image-stage rule already subtracts,
+   --stage-cue, set here to --frame-nav-h: no script, no measurement,
+   no markup change. The head script writes data-arrival before first
+   paint at every destination and never toggles it by scroll, so the
+   stage's first layout is the shorter one at any scroll position and
+   nothing shifts. It is not a knob on the tuning control.
+
    THE DIMMED SET is the spec's — the header (its ground, its hairline,
-   the brand, the nav), the frame nav, the quiet toggle, and the label
-   beneath the stage that reads as the page head (.image-head's eyebrow
-   and title). .image-body is NOT in it: the story and its label read
+   the brand, the nav), the quiet toggle, and the label beneath the
+   stage that reads as the page head (.image-head's eyebrow and title).
+   THE FRAME NAV IS NOT IN IT, since it is the cue: it reads the
+   theme's own --color-muted at every scroll position — lighter than
+   the wall and readable, and the arrival's ink mixes toward the dark,
+   so leaving the mix rule IS full strength. It stays in the focus rule
+   below, because the theme's 1px accent ring does not read on the wall
+   and the focused text going to paper is what makes focus visible
+   there. .image-body is NOT in it either: the story and its label read
    at full strength on the light ground, and at fade 1 the body's top
    enters the viewport with the lights already below half — one
-   selector adds it if the gate wants it. The nav is split on
+   selector adds it if the gate wants it. The header's nav is split on
    [aria-current] because the current page's link reads the text token,
    not the muted one, and the pause's rule is "each element from its
    own token". Nothing below declares display, visibility, opacity or
-   any box property: the dimming is colour only, so nothing is hidden
-   from assistive technology and nothing can shift — arrival.test.mjs
-   walks this block and allows five properties and the two customs. */
+   any box property: the dimming is colour only — --stage-cue is a
+   length, but it is a reserve the base rule spends and not a box on
+   anything here — so nothing is hidden from assistive technology and
+   nothing can shift. arrival.test.mjs walks this block and allows the
+   four colour properties and the three customs. */
 
 /* The two mixes, written once and read by the rules below.
    `transition: none` because the image page's own
@@ -2243,6 +2296,7 @@ html[data-arrival]:not([data-quiet]) body {
   transition: none; /* the page's quiet-view easing must not ride the scroll */
 }
 html[data-arrival]:not([data-quiet]) .image-stage {
+  --stage-cue: var(--frame-nav-h); /* the cue: the stage is shorter by the nav */
   background: transparent; /* the page's ground is the field now */
 }
 html[data-arrival]:not([data-quiet]) .site-header {
@@ -2265,9 +2319,10 @@ html[data-arrival]:not([data-quiet]) .site-header :is(.brand, .site-nav a[aria-c
 html[data-arrival]:not([data-quiet]) .image-head h1 {
   color: color-mix(in oklch, var(--color-text), var(--color-quiet) var(--arrival-ink));
 }
-/* The muted-coloured chrome: the other nav links, the frame nav, the
-   toggle. */
-html[data-arrival]:not([data-quiet]) :is(.frame-nav, .frame-nav a, .quiet-toggle),
+/* The muted-coloured chrome: the other nav links and the toggle. The
+   frame nav is deliberately absent — it is the cue, and it reads
+   --color-muted itself at every scroll position (T1401b). */
+html[data-arrival]:not([data-quiet]) .quiet-toggle,
 html[data-arrival]:not([data-quiet]) .site-nav a:not([aria-current='page']) {
   color: color-mix(in oklch, var(--color-muted), var(--color-quiet) var(--arrival-ink));
 }
@@ -2277,7 +2332,7 @@ html[data-arrival]:not([data-quiet]) .image-head :is(.eyebrow, .eyebrow a) {
 /* The theme eases a link's colour 180ms for the hover; on the dimmed
    links that ease would run behind every scroll step and at every
    router arrival. The underline's ease stays; the colour's goes. */
-html[data-arrival]:not([data-quiet]) :is(.site-nav a, .frame-nav a, .image-head .eyebrow a) {
+html[data-arrival]:not([data-quiet]) :is(.site-nav a, .image-head .eyebrow a) {
   transition: background-size 180ms ease;
 }
 /* Focus on the dimmed chrome: readable at every lights value — the

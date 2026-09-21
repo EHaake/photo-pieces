@@ -43,9 +43,9 @@ const PRELUDES = [
   `${GATE} .image-stage`,
   `${GATE} .site-header`,
   `${GATE} .site-header :is(.brand, .site-nav a[aria-current='page']),\n${GATE} .image-head h1`,
-  `${GATE} :is(.frame-nav, .frame-nav a, .quiet-toggle),\n${GATE} .site-nav a:not([aria-current='page'])`,
+  `${GATE} .quiet-toggle,\n${GATE} .site-nav a:not([aria-current='page'])`,
   `${GATE} .image-head :is(.eyebrow, .eyebrow a)`,
-  `${GATE} :is(.site-nav a, .frame-nav a, .image-head .eyebrow a)`,
+  `${GATE} :is(.site-nav a, .image-head .eyebrow a)`,
   `${GATE} :is(.site-header .site-nav a[aria-current='page'], .site-header a, .frame-nav a, .quiet-toggle, .image-head .eyebrow a):focus-visible`,
 ];
 
@@ -60,11 +60,16 @@ const [
   FOCUS_RULE,
 ] = PRELUDES;
 
-/** Colour only, plus the two mixes written once and read by the rest.
- *  No display, no visibility, no opacity, no box property. */
+/** Colour only, plus the two mixes written once and read by the rest
+ *  and the cue's reserve. --stage-cue is a length, and the one thing
+ *  here that is not a colour: the BASE .image-stage rule declares it
+ *   0px and spends it, this block only says how much (T1401b). It is
+ *  not a box on anything in this block, so the rule the list enforces
+ *  holds — no display, no visibility, no opacity, no box property. */
 const ALLOWED = [
   '--arrival-ground',
   '--arrival-ink',
+  '--stage-cue',
   'background',
   'border-bottom-color',
   'color',
@@ -355,6 +360,40 @@ describe('(b) the arrival’s rules (T1401, spec 016)', () => {
     // With script the page carries the dark edge to edge, so the stage's
     // own field would be a second, identical box painted over it.
     expect(norm(declarations(ruleFor(arrival, STAGE_RULE).body)['background'])).toBe('transparent');
+  });
+
+  it('the cue: one rule sets --stage-cue, on the gated stage, to the frame nav\u2019s height', () => {
+    // AC 1 as amended at gate round 1: with script the stage is shorter
+    // by the frame nav's height, so that line sits above the fold. The
+    // whole mechanism is this one declaration — delete it and the stage
+    // fills the viewport below the header again, with the nav under the
+    // fold and nothing else in the file different. It must also be the
+    // ONLY one here: a second setter would make the reserve two numbers
+    // and the base rule's 0px stop being the no-script answer.
+    const setters = arrival
+      .filter((block) => '--stage-cue' in declarations(block.body))
+      .map((block) => norm(block.prelude));
+    expect(setters).toEqual([norm(STAGE_RULE)]);
+    expect(norm(declarations(ruleFor(arrival, STAGE_RULE).body)['--stage-cue'])).toBe(
+      'var(--frame-nav-h)',
+    );
+  });
+
+  it('the frame nav is not in the dimmed set — it is the cue, and reads its own token at full strength', () => {
+    // The spec's words at gate round 1: the nav sits above the fold
+    // "at full strength on the dark wall, not dimmed". Dimming IS
+    // membership of the muted mix rule's selector list, so the list not
+    // naming the nav is the whole guarantee — and `.frame-nav`, as a
+    // compound or inside an :is(), puts it back. Found by the rule's
+    // source token rather than by its pinned prelude, so re-adding the
+    // nav fails HERE, on the claim, and not only on the list above.
+    const muted = arrival.filter((block) =>
+      norm(declarations(block.body)['color'] ?? '').startsWith(
+        'color-mix(in oklch, var(--color-muted)',
+      ),
+    );
+    expect(muted.map((block) => norm(block.prelude))).toHaveLength(1);
+    expect(norm(muted[0].prelude)).not.toContain('frame-nav');
   });
 
   it('each dimmed element mixes from ITS OWN token — the source pinned as a string', () => {

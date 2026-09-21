@@ -683,6 +683,14 @@ const indexed =
     grid-template-columns: 1fr auto 1fr;
     gap: 1rem;
     width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    /* The height --frame-nav-h states, claimed rather than assumed:
+       under the arrival the stage gives up exactly that much so this
+       line sits above the fold (spec 016, T1401b), and a nav shorter
+       than the reserve would leave a gap below it. border-box because
+       the token counts the bottom padding in. Keep the token, the
+       0.78rem below and the 719.98px query below in step. */
+    box-sizing: border-box;
+    min-height: var(--frame-nav-h);
     margin-inline: auto;
     padding-block: 0 calc(var(--baseline) * 0.5);
     color: var(--color-muted);

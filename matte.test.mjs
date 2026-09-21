@@ -391,8 +391,23 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
       'min(calc(100vw - 2 * var(--page-pad)), var(--content-width))',
     );
     expect(norm(stage['--avail-h'])).toBe(
-      'calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad))',
+      'calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--stage-cue))',
     );
+    // The cue (spec 016, T1401b): the reserve the stage gives up so the
+    // frame nav sits above the fold. Zero here — without script the
+    // stage is what it always was — and --frame-nav-h under the
+    // arrival's gate, which arrival.test.mjs pins. It must come off
+    // --avail-h as well as the min-heights: --avail-h is what the mat's
+    // form and the image's height cap read, and a min-height-only
+    // shrink would let a height-bound frame grow the stage back.
+    expect(norm(stage['--stage-cue'])).toBe('0px');
+    // Both min-height lines, read raw: `declarations` keeps the last of
+    // a repeated property, and the vh/svh pair is deliberate.
+    const stageMinHeights = [...ruleFor(top, '.image-stage').body.matchAll(/min-height:([^;]*)/g)];
+    expect(stageMinHeights.map((found) => norm(found[1]))).toEqual([
+      'calc(100vh - var(--header-h, 4.5rem) - var(--stage-cue))',
+      'calc(100svh - var(--header-h, 4.5rem) - var(--stage-cue))',
+    ]);
     const frame = declarations(ruleFor(top, '.image-frame').body);
     expect(norm(frame['--r'])).toBe('max(var(--ar, 1), 1)');
     expect(norm(frame['--q'])).toBe('min(var(--ar, 1), 1)');
@@ -404,6 +419,15 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(norm(quiet['--stage-pad'])).toBe('clamp(0.5rem, 1.5vh, 1rem)');
     expect(norm(quiet['--avail-w'])).toBe('calc(100vw - 2 * var(--stage-pad))');
     expect(norm(quiet['--avail-h'])).toBe('calc(100svh - 2 * var(--stage-pad))');
+    // And quiet view keeps the full viewport: it redeclares both limits
+    // and both min-heights WITHOUT the cue, which is what AC 1 means by
+    // "in the quiet view its height is unchanged". A cue term added
+    // here would shrink the frame behind the quiet view's own dark.
+    const quietStageBody = ruleFor(top, 'html[data-quiet] .image-stage').body;
+    expect(quietStageBody).not.toContain('--stage-cue');
+    expect(
+      [...quietStageBody.matchAll(/min-height:([^;]*)/g)].map((found) => norm(found[1])),
+    ).toEqual(['100vh', '100svh']);
     // Quiet view redeclares those two limits and nothing else: the base
     // `.image-frame img` max-height above reads --avail-h, so a quiet
     // copy of it is byte-identical duplication (T1101b deleted it, on
@@ -435,6 +459,31 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(indexOf(top, '.image-stage[data-quiet-ready] .image-frame')).toBeLessThan(
       indexOf(top, 'html[data-quiet] .image-frame'),
     );
+  });
+
+  it('--frame-nav-h is :root’s at both widths — the reserve the stage spends and the nav claims', () => {
+    // The cue's other half (T1401b): the stage subtracts this and the
+    // nav claims it back as a min-height, so one token has to say both.
+    // One row of 0.78rem mono at the inherited `normal` line-height
+    // (1.362 for JetBrains Mono Variable, measured: 17px at 12.48px)
+    // plus .frame-nav's half-baseline bottom padding — 29px at
+    // 1512×982. Below 720px the nav wraps to two rows over its 1rem row
+    // gap — 62px at 375×812.
+    expect(norm(root['--frame-nav-h'])).toBe('calc(0.78rem * 1.362 + var(--baseline) * 0.5)');
+    const phone = top
+      .filter((block) => norm(block.prelude) === '@media (max-width: 719.98px)')
+      .flatMap((block) => blocks(block.body))
+      .filter((block) => selects(block.prelude, ':root'));
+    expect(phone.map((block) => norm(declarations(block.body)['--frame-nav-h']))).toEqual([
+      'calc(0.78rem * 1.362 * 2 + 1rem + var(--baseline) * 0.5)',
+    ]);
+    // Twice, both on :root, and nowhere else: a third declaration on
+    // some other selector would make the nav's reserve and the stage's
+    // disagree by cascade rather than by arithmetic.
+    const declaring = [...top, ...nested]
+      .filter((block) => '--frame-nav-h' in declarations(block.body))
+      .map((block) => norm(block.prelude));
+    expect(declaring).toEqual([':root', ':root']);
   });
 
   it('the image page reads --mat nowhere: the compare is unmatted, and --color-matte is its letterbox and divider only', () => {
@@ -647,6 +696,7 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     for (const one of grid()) {
       const env = envFor(one, {
         '--stage-pad': stage['--stage-pad'],
+        '--stage-cue': stage['--stage-cue'],
         '--avail-w': stage['--avail-w'],
         '--avail-h': stage['--avail-h'],
         '--r': frame['--r'],
@@ -789,6 +839,7 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
             '--r': frame['--r'],
             '--q': frame['--q'],
             '--stage-pad': stage['--stage-pad'],
+            '--stage-cue': stage['--stage-cue'],
             '--avail-w': stage['--avail-w'],
             '--avail-h': stage['--avail-h'],
           }),
@@ -827,6 +878,7 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
         '--r': frame['--r'],
         '--q': frame['--q'],
         '--stage-pad': stage['--stage-pad'],
+        '--stage-cue': stage['--stage-cue'],
         '--avail-w': stage['--avail-w'],
         '--avail-h': stage['--avail-h'],
       },

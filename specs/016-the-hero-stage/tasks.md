@@ -369,7 +369,7 @@ _T1404 record (2026-09-20, implementer at opus):_ `sh scripts/verify.sh` — `87
 
 _T1401a record (2026-09-21, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, both barrier lines, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 16 passed (16)`, `Tests 364 passed (364)`, `TEST EXIT 0`; prettier clean. Mutation: the old `var(--arrival-ink)` string restored → (b) "each dimmed element mixes from ITS OWN token" fails with the two strings quoted; reverted. Reads (Firefox, 1512×982, land-b, depth 0.75, y = 0): wall L 0.3975, hairline L 0.3705, ΔL −0.027 at chrome 1, 0.5 and 0.01 alike; lights forced 0 → `oklch(0.882 0.005 100)` byte-identical to `--color-line`, −0.108 below paper. Hunks: the arrival block's additive hunk 110 → 115 lines, no other change. The pinned string is a literal now (not built from the shared `ink` template).
 
-- [ ] **T1401b** — The cue: the stage shorter by the frame nav under the
+- [x] **T1401b** — The cue: the stage shorter by the frame nav under the
       arrival (spec amended at gate round 1; decision review at the top
       tier, 2026-09-21). Pattern: `--stage-pad` in the base `.image-stage`
       rule (a stage-local property read by `--avail-h`); T1401a's edit
@@ -415,6 +415,8 @@ _T1401a record (2026-09-21, implementer at opus):_ `sh scripts/verify.sh` — `8
       still three; `git diff -U0 main -- src/styles/global.css | grep '^@@'`
       — the base stage rule's hunk is new and named; no hunk in the
       pause's block, the quiet rules or `.image-frame`._
+
+_T1401b record (2026-09-21, implementer at opus):_ `sh scripts/verify.sh` — `87 page(s) built`, both barriers, `BUILD EXIT 0`, `CHECK EXIT 0`, `Test Files 16 passed (16)`, `Tests 367 passed (367)`, `TEST EXIT 0`. `--frame-nav-h: calc(0.78rem * 1.362 + var(--baseline) * 0.5)` (the nav inherits `line-height: normal`; JetBrains Mono's metrics give 17px at 12.48px = 1.362) and the 719.98px `:root` query's two-row form; resolves 29px / 62px = the nav's rendered height on both screens. Mutations: gated `--stage-cue` removed → the new arrival case fails; `.frame-nav a` re-added to the mix rule → the negative case (+2) fails; `--avail-h`'s subtraction dropped → matte's form V+H pin fails; reverted. Reads (scrollY 0): 1512 — nav bottom 981.8 ≤ 982, stage bottom 952.8 vs 953, head top 981.8, nav colour [94,100,106] = `--color-muted`, land-b 1160×799.72 unchanged with and without the attribute, port-a 847.08 → 818.10 (−28.98, the cue), attribute removed → stage bottom 981.8, quiet → 982; 375 — nav 62 rendered = 62 token, nav bottom 812.4 vs 812 (over by 0.4: `--header-h` publishes 136px for a 136.4px header — pre-existing, the stage itself overshot by the same 0.4 before this task; the text sits inside the 12px padding), stage bottom 750.4, both frames 328 wide unchanged, quiet → 812. First-paint vs settled stage: 881 → 877 (1512), 678 → 614 (375) — identical settle on pre-change code (910 → 906, 740 → 676): `--header-h` arriving after its `4.5rem` fallback, not the cue (the cue term is in the first sample). Deviations: the arrival comment's "five properties" miscount fixed to four + three customs; the muted rule's `:is(.frame-nav, .frame-nav a, .quiet-toggle)` became `.quiet-toggle` ((0,3,1), still above the page's scoped rules and below the focus rule); `box-sizing` declared though the reset supplies it. Findings: `--header-h` rounds to whole px and is absent at first paint (pre-016) — where an exact fold would be fixed; a swapped mono font can make the nav taller than the reserve (min-height guards shorter, not taller); matte's `substitute` throws on an unbound var, so a new stage term must be added to its three env objects.
 
 ### Gate record (Phase 0 pause — round 1)
 
@@ -703,6 +705,7 @@ tier if it is ever on (it is off). One row per gate round for T1405x. -->
 | T1401a (`sdd-implementer`)                 | implementation (`opus`, high)  | 44,611 | done first dispatch; ΔL −0.027 at every chrome |
 | T1405 round 1 (`sdd-implementer`)          | implementation (`opus`, high)  | 44,658 | depth 0.75 landed; chrome open for round 2 |
 | Gate finding 2: decision review (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 45,790 | the cue: --stage-cue subtracted in the base stage rule, set by the gate to --frame-nav-h — T1401b |
+| T1401b (`sdd-implementer`)                 | implementation (`opus`, high)  | 131,316 | done first dispatch; 0.4px fold overshoot at 375 is --header-h's rounding, pre-existing |
 
 _(Session-tier allowance draw noted at each pause.)_
 
