@@ -19,6 +19,7 @@
 import { Image, getImage } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import DevArrival from '../../components/DevArrival.astro';
 import { CONTACT_EMAIL, SITE } from '../../consts';
 import { formatDate } from '../../i18n';
 import { categoryLabel } from '../../lib/categories';
@@ -221,6 +222,12 @@ const indexed =
 
 <BaseLayout title={image.title} description={description} ogType="article" image={og.src}>
   <Fragment slot="head">
+    {
+      /* The dev-only tuning control (spec 016): under `astro dev` only, and
+        FIRST — its head applier must put the stored values on <html> before
+        the arrival script below reads the fade off it. */
+    }
+    {import.meta.env.DEV && <DevArrival />}
     {
       /* The arrival (spec 016): the image page's dark first screen and the
         number that fades it away. The script writes both onto <html> — the

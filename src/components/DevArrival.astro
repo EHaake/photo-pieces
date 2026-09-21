@@ -1,0 +1,80 @@
+---
+// The arrival's tuning control (spec 016, T1403) — a DEV-ONLY fixture.
+//
+// src/pages/images/[...id].astro renders this as
+// `{import.meta.env.DEV && <DevArrival />}` inside its head slot — a
+// build-time constant, so `astro dev` serves it on every image page and
+// `astro build` renders nothing. scripts/check-no-dev-routes.mjs is the
+// standing check on that: it scans every .html, .js and .css under dist/
+// for this fixture's marker, the string `dev-arrival`, and fails the
+// build if one ships. The string has three carriers — the script
+// attribute below, the storage key, and the bar's own attribute — so any
+// of them reaching the build is caught.
+//
+// The component carries two script tags and NO MARKUP AND NO <style>: a
+// component's <style> is bundled by its import whether or not the
+// component ever renders, so a rule of this control would sit in the
+// built CSS, which is exactly "something of the control reaching the
+// build". The bar's rules are a string in dev-arrival.ts, injected at
+// runtime.
+//
+// What the applier does: read the tuning the bar stored under
+// localStorage['dev-arrival'] (JSON `{ depth, chrome, fade }`, three
+// strings) and set the arrival's three custom properties inline on
+// <html>. A malformed key, or a field that is missing, applies nothing
+// for that field, so the control is the committed stylesheet with
+// nothing on top. Inline and blocking in the head so the first paint is
+// already on the tuned values, with no flash of the stylesheet's depth.
+//
+// IT MUST PRECEDE THE ARRIVAL SCRIPT in the head. That script reads the
+// fade override off <html>'s inline style, at head time and again on
+// every swap; this applier runs first in document order and, because it
+// registers its astro:after-swap listener first, fires first — so the
+// inline properties are back before the lights are computed from them.
+---
+
+<script is:inline data-dev-arrival>
+  (() => {
+    // field -> the property it writes. The bar writes the same three.
+    const PROPERTIES = {
+      depth: '--arrival-depth',
+      chrome: '--arrival-chrome',
+      fade: '--arrival-fade',
+    };
+    const apply = () => {
+      let stored = null;
+      try {
+        stored = localStorage.getItem('dev-arrival');
+      } catch {
+        return; /* storage unavailable: the stylesheet's arrival */
+      }
+      if (!stored) return;
+      let tuning = null;
+      try {
+        tuning = JSON.parse(stored);
+      } catch {
+        return; /* a malformed key: the stylesheet's arrival */
+      }
+      if (!tuning || typeof tuning !== 'object') return;
+      for (const field of Object.keys(PROPERTIES)) {
+        const value = tuning[field];
+        // A missing or non-string field is left to the stylesheet rather
+        // than written as "undefined", which would break the whole mix.
+        if (typeof value !== 'string' || value === '') continue;
+        document.documentElement.style.setProperty(PROPERTIES[field], value);
+      }
+    };
+    apply();
+    // The router replaces <html>'s attributes on navigation, so the inline
+    // style has to go back on after each swap. Registered once.
+    if (!window.__devArrival) {
+      window.__devArrival = true;
+      document.addEventListener('astro:after-swap', apply);
+    }
+  })();
+</script>
+
+<!-- plan.md's resolved decision, "A dev fixture's script is served, never bundled":
+     a hoisted <script> over 4 KB ships as a chunk in dist/_astro/ even when no page
+     is built. The src is root-absolute — it would need `base` if one is configured. -->
+<script is:inline type="module" src="/src/components/dev-arrival.ts"></script>

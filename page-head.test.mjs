@@ -108,7 +108,9 @@ describe('the dev-route barrier (T807, spec 010)', () => {
   it('a shipped dev-ground marker fails with a non-zero exit and names the file', () => {
     const result = run(withMarker);
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain('[check-no-dev-routes] the dev ground switch shipped:');
+    expect(result.stderr).toContain(
+      '[check-no-dev-routes] a dev-only marker shipped (dev-ground):',
+    );
     expect(result.stderr).toContain(join(withMarker, 'index.html'));
   });
 
@@ -116,7 +118,7 @@ describe('the dev-route barrier (T807, spec 010)', () => {
     const result = run(clean);
     expect(result.status).toBe(0);
     expect(result.stdout).toContain(
-      `[check-no-dev-routes] no dev routes in ${clean}/; no dev-ground marker in 1 files.`,
+      `[check-no-dev-routes] no dev routes in ${clean}/; no dev-ground or dev-arrival marker in 1 files.`,
     );
   });
 });

@@ -12,6 +12,16 @@
 // read for the switch's marker, the string `dev-ground`, and the build fails
 // naming the files if any carries it.
 //
+// Third scan (spec 016): the arrival's tuning control
+// (src/components/DevArrival.astro + src/components/dev-arrival.ts) is the
+// same shape one page down — a head applier the image page renders only
+// under `{import.meta.env.DEV && ...}`, plus a served module that builds the
+// bar. Three things carry its marker, the string `dev-arrival`: the applier's
+// script attribute, the storage key, and the bar's own attribute. The scan
+// takes .css as well as .html and .js, because the way this control would
+// most quietly ship is a component <style> — bundled by the import whether or
+// not the component ever renders.
+//
 //   node scripts/check-no-dev-routes.mjs [dir]   # default: dist
 import { readdir, readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
@@ -40,21 +50,30 @@ if (built.length > 0) {
   );
   process.exit(1);
 }
-const MARKER = 'dev-ground'; // the switch's script attribute and storage key
+// Each fixture's script attribute, storage key and bar attribute.
+const MARKERS = ['dev-ground', 'dev-arrival'];
 
 const scanned = [];
-const shipped = [];
+const shipped = new Map();
 for await (const file of files(root)) {
   const ext = extname(file);
-  if (ext !== '.html' && ext !== '.js') continue;
+  if (ext !== '.html' && ext !== '.js' && ext !== '.css') continue;
   scanned.push(file);
-  if ((await readFile(file, 'utf8')).includes(MARKER)) shipped.push(file);
+  const text = await readFile(file, 'utf8');
+  for (const marker of MARKERS) {
+    if (text.includes(marker)) shipped.set(marker, [...(shipped.get(marker) ?? []), file]);
+  }
 }
 
-if (shipped.length > 0) {
-  console.error(`[check-no-dev-routes] the dev ground switch shipped: ${shipped.join(', ')}`);
+if (shipped.size > 0) {
+  // One line per marker, so the message names which fixture leaked.
+  for (const [marker, leaked] of shipped) {
+    console.error(
+      `[check-no-dev-routes] a dev-only marker shipped (${marker}): ${leaked.join(', ')}`,
+    );
+  }
   process.exit(1);
 }
 console.log(
-  `[check-no-dev-routes] no dev routes in ${root}/; no ${MARKER} marker in ${scanned.length} files.`,
+  `[check-no-dev-routes] no dev routes in ${root}/; no ${MARKERS.join(' or ')} marker in ${scanned.length} files.`,
 );
