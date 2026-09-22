@@ -64,14 +64,19 @@ CMS or backend service for v1.
   `place`, which stays prose for the wall label.
 - **Closed block vocabulary**: image treatments inside a piece's body are
   limited to a defined set of directive-backed treatments — as of spec
-  007: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
-  strip, aside, row, and the two durational blocks, held and pause,
-  with captions via the container form; the site mats only the image
-  page's stage and its quiet view (spec 015) — a piece's frames sit
-  unmatted on the ground, the pause frame excepted until its own spec. A
-  `sequence` treatment is a roadmap candidate whose presentation is
-  undecided; it is not in the vocabulary and the transform reserves
-  nothing for it — see `ROADMAP.md`. Adding a new
+  017: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
+  strip, aside, row, and one durational block, held, with captions via
+  the container form; the site mats only the image page's quiet view
+  (spec 015, narrowed at 017: the mat is worn where the ground is dark)
+  — a piece's frames and the stage on paper sit unmatted on the ground.
+  The pause block (spec 007) was withdrawn at spec 017 and is not in
+  the vocabulary; the transform reserves nothing for it, so a piece
+  that still writes it fails the build as any unknown directive does,
+  naming the piece. Its code is `main`'s history up to spec 017, and
+  the hero stage built on it is archived unmerged on
+  `016-the-hero-stage`. A `sequence` treatment is a roadmap candidate
+  whose presentation is undecided; it is not in the vocabulary and the
+  transform reserves nothing for it — see `ROADMAP.md`. Adding a new
   treatment means deliberately adding a new directive + presentation
   contract — a handler in the remark transform (the vocabulary's single
   source of truth) plus the CSS that styles its output — not writing
