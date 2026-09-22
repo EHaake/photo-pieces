@@ -122,6 +122,7 @@ let nested;
 let src;
 let ground;
 let jpegPixel;
+let jpegSize;
 
 beforeAll(async () => {
   const css = await readFile(here('./src/styles/global.css'), 'utf8');
@@ -140,6 +141,7 @@ beforeAll(async () => {
   // card and of JPEG ringing along the edge.
   const at = (10 * info.width + 10) * info.channels;
   jpegPixel = [data[at], data[at + 1], data[at + 2]];
+  jpegSize = [info.width, info.height];
 });
 
 describe("the ground's derived copies (T1102, spec 013)", () => {
@@ -167,6 +169,13 @@ describe("the ground's derived copies (T1102, spec 013)", () => {
         `${name}: og.jpg ${jpegPixel[index]} vs ground ${ground[index]}`,
       ).toBeLessThanOrEqual(3);
     }
+  });
+
+  it("public/og.jpg is 1200×630 — the card's size, asserted by nothing before spec 016", () => {
+    // The og image is drawn at the card's size and shipped as a file:
+    // nothing else checks its dimensions, so a redraw at the wrong
+    // canvas (or a hand-swapped file) reached the crawlers unremarked.
+    expect(jpegSize).toEqual([1200, 630]);
   });
 
   it('the conversion reproduces published oklch → sRGB values', () => {
