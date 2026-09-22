@@ -588,6 +588,30 @@ review on the mechanism), or a roadmap entry for the next spec. The
 docs (T1406) wait on the answer, since their arrival paragraph would
 describe the stage.
 
+**Round 2 (2026-09-22), the second look, in the person's words:**
+"Overall looks good." Two findings, both about the stage's geometry
+across screen shapes, neither inside this spec's acceptance criteria:
+(1) on the DualUp (1280×1440) "if the image is horizontal, it's now too
+small as it seems to conform to the text margins, which makes verticals
+appear much larger. I'd like to make sure that images are sized as
+evenly as possible across all screen sizes, again within reason … the
+difference between 2:3 and 3:2 images between horizontal and vertical
+style screens" — the stage's width cap at `--content-width` (spec
+013/015's fit, AC 8's "width unchanged"); (2) "on the DualUP display,
+there is that issue with the Pause that all text is pushed so far away
+from the image that it makes it look isolated. There is way too much
+margin between the top and bottom of the image and the header above it
+and the start of the title/text below it. The text should always be
+the same distance away from the image. The scrolling should just fade
+the dimming in and out without moving the text at all" — the
+viewport-height box (the pause's stage, and the image page's stage on a
+tall screen with a landscape frame). The pause is this spec's declared
+non-goal (AC 9, "The pause, rethought" on the roadmap); the sizing rule
+is spec 015's. Returned to the person with clarifying questions and a
+recommendation (close 016; a spec of its own for the stage across
+screens, the pause's rework riding it). The cue's colour: not raised —
+read as fine, to be confirmed.
+
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge) — walkthrough: none — the roadmap and decisions text, the sweep and the merge change nothing the person can try; the arrival was attested at Phase 1
 
 - [ ] **T1407** — Close-out. The repo-wide documents are edited by
