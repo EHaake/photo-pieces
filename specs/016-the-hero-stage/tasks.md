@@ -612,6 +612,24 @@ recommendation (close 016; a spec of its own for the stage across
 screens, the pause's rework riding it). The cue's colour: not raised —
 read as fine, to be confirmed.
 
+**Round 2, continued (2026-09-22), the person's decision, in his
+words:** "I think we should scrap the Pause block and the stage using
+the Pause block for now, though keep it in a branch so we can revisit
+it at a later time, but remove it from the main site for now. My
+reasoning is that after testing it, it is more of an obstacle to the
+enjoyment and reading experience of a piece than an improvement. The
+viewer can still click into the image to view the Quiet View, and the
+fading in and back out is a bit awkward and a clumsy, at least as
+currently implemented." A change of direction: the hero this spec
+built and the pause block (spec 007, on main) both leave the site;
+the branch keeps the hero. Not acted on in this session — a spec
+conversation (the removal spec, and the constitution's vocabulary
+clause amended first); this spec's close-out is on hold pending the
+person's answers to the session's questions (which parts of 016
+survive: the mat rule, the cue, the carried items; how a piece that
+still writes `:::pause` builds; the held block; PR #16 closed unmerged
+as the archive).
+
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge) — walkthrough: none — the roadmap and decisions text, the sweep and the merge change nothing the person can try; the arrival was attested at Phase 1
 
 - [ ] **T1407** — Close-out. The repo-wide documents are edited by
