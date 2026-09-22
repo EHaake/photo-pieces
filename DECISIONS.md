@@ -1137,3 +1137,49 @@ of different ratios set in mats of one ratio so they line up side by side
 owner noted it at approval. The `ROADMAP.md` entry is annotated and decided
 later, with that option either revived by putting a mat back on the
 galleries or replaced.
+
+## Spec 016: the hero stage — built, then withdrawn
+
+Spec 016 gave the image page an arrival: the whole page dark on opening
+(a share of the way to the quiet dark, its own token), the header, quiet
+toggle and label dimmed the way the pause dims its words, the ground and
+chrome fading back to paper over one screen of scroll and darkening again
+on the way up, nothing timed, a restored position never flashing dark; a
+dev-only tuning bar; the mat rule restated and pinned — worn where the
+ground is dark, and nowhere else. At the first look the photographer chose
+depth 0.75, chrome 1, fade 1, had the header's hairline decoupled from the
+chrome (it takes the wall's own darkening), and asked for a cue that there
+is more below: the stage shorter by the frame nav's height so the
+previous / next line sits above the fold. All of it was built, measured
+and reviewed. At the second look (2026-09-22) he withdrew it, and the
+pause with it: "I think we should scrap the Pause block and the stage
+using the Pause block for now, though keep it in a branch so we can revisit
+it at a later time, but remove it from the main site for now. My reasoning
+is that after testing it, it is more of an obstacle to the enjoyment and
+reading experience of a piece than an improvement. The viewer can still
+click into the image to view the Quiet View, and the fading in and back
+out is a bit awkward and a clumsy, at least as currently implemented."
+
+**The work is kept, not merged.** Branch `016-the-hero-stage` and tag
+`archive/016-the-hero-stage` hold the spec, plan, tasks, gate records and
+code; pull request #16 is closed unmerged. What survives to main: the two
+housekeeping fixes carried from spec 015's sweep (committed directly), and
+three decisions the removal spec carries forward — the mat rule as 016
+stated it (which, with no dark ground in normal view, means the quiet view
+alone and the stage bare on paper, as he asked at spec 015's gate); the cue
+(the frame nav above the fold, on the paper stage); and the held block
+unchanged. Confirmed with him the same day: the whole arrival goes, a
+piece still writing a pause fails the build by name, the held block stays.
+
+**Why the record keeps his reasons in his words.** The hero form was his
+own description ("taking part of the pause elements … when you begin
+scrolling down, the background fades back into the normal ground"), built
+to the letter and tuned by him; it was the experience of using it, not the
+implementation missing his intent, that decided. That is what a gate is
+for, and it is the reason the tuning loop and the branch archive exist: a
+withdrawn spec costs a branch, not a rewrite of main.
+
+The same look raised the stage's geometry across screen shapes (the
+DualUp's landscape frames too small against the text column, portraits
+large, the words far from the image) — recorded on the roadmap as a spec
+after the removal.

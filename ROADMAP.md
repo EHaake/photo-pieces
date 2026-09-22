@@ -137,6 +137,51 @@ attached.
   derived copies (the OG route's hexes, `public/og.jpg`, `DECISIONS.md`'s
   "Ground tone" entry) moved with it by the rule 014 landed. Spec 014 is
   closed in its own documents with the reason.
+- **The pause and the hero leave the site** — decided by the
+  photographer at spec 016's second look (2026-09-22), and the next
+  spec: "I think we should scrap the Pause block and the stage using the
+  Pause block for now, though keep it in a branch so we can revisit it at
+  a later time, but remove it from the main site for now. My reasoning
+  is that after testing it, it is more of an obstacle to the enjoyment
+  and reading experience of a piece than an improvement. The viewer can
+  still click into the image to view the Quiet View, and the fading in
+  and back out is a bit awkward and a clumsy, at least as currently
+  implemented." Settled with him the same day, for the spec: the whole
+  arrival goes (the dark opening, the dimmed chrome, the fade) and the
+  image page opens on paper as before spec 016; the pause block leaves
+  the vocabulary — the transform, the styles, the Obsidian plugin, the
+  fixtures, the docs — and the constitution's block-vocabulary clause is
+  amended first, in its own commit; a piece that still writes `:::pause`
+  fails the build loudly, naming the piece (the session's reading of his
+  "yes" to an either/or; confirm at the spec); the held block stays; the
+  mat rule stays as spec 016 stated it — worn where the ground is dark —
+  which now means the quiet view alone, the stage bare on paper (his
+  spec 015 words); the cue stays — the frame nav's previous / next line
+  sits above the fold at the top of the image page, so the stage is
+  shorter by that line's height on paper too (spec 016 built it under
+  the arrival only, `--stage-cue` set by the arrival's gate; the removal
+  spec sets it unconditionally). Spec 016's hero is archived unmerged on
+  branch `016-the-hero-stage` and tag `archive/016-the-hero-stage` (its
+  spec, plan, tasks and gate records live there); the pause's code is
+  main's history up to this spec. His two other findings from the same
+  look stand on their own below ("The stage across screen shapes").
+- **The stage across screen shapes** — raised by the photographer at
+  spec 016's second look (2026-09-22), on the DualUp (1280×1440): "if
+  the image is horizontal, it's now too small as it seems to conform to
+  the text margins, which makes verticals appear much larger. I'd like
+  to make sure that images are sized as evenly as possible across all
+  screen sizes, again within reason … the difference between 2:3 and
+  3:2 images between horizontal and vertical style screens"; and "there
+  is way too much margin between the top and bottom of the image and the
+  header above it and the start of the title/text below it. The text
+  should always be the same distance away from the image." The stage's
+  width cap at the text column and its viewport-height box are spec
+  013/015's fit; a rule that sizes 2:3 and 3:2 evenly on horizontal and
+  vertical screens, and a box that hugs the frame so the words sit a
+  fixed distance from it, is a spec of its own after the removal.
+  Questions left for it: equal short side, area or height; a share of
+  the screen rather than a pixel size; a landscape frame wider than the
+  text column on a tall screen; the same distance or the same share.
 - **The mat only where the ground goes dark** — raised by the
   photographer at spec 015's gate (2026-09-19), after seeing the site
   unmatted on the paper tone: "Stage's normal view unmatted, as it blends
@@ -149,7 +194,10 @@ attached.
   breath, and the docs that spec 015 writes about the stage corrected.
   Not folded into 015 because the constitution keeps spec changes out of
   implementation sessions. The pause frame's own spec, which 015 also
-  defers, may be the same spec.
+  defers, may be the same spec. _Done at spec 016 (the rule stated and
+  pinned, worn where the ground is dark); with the pause and the arrival
+  withdrawn (2026-09-22) the rule leaves the stage bare on paper and
+  matted in the quiet view alone — the removal spec keeps it so._
 - **The pause, rethought** — deferred wholesale at spec 015 (2026-09-19):
   the photographer does not like how the pause works today, and its rework
   is a spec of its own, in two parts — the pause mid-piece (the frame that
@@ -167,7 +215,9 @@ attached.
   written into a sidecar story getting the CSS but not the script; and the
   lights' enumerated list of elements. Likely the same spec as the stage's
   darker field below and "the mat only where the ground goes dark" above:
-  all three are about the one frame that is the whole point.
+  all three are about the one frame that is the whole point. _Withdrawn
+  (2026-09-22): the pause leaves the site in the removal spec above; this
+  rework is for the day it is revisited, from the archive branch._
 - **The stage's darker field** — deferred at spec 015 (2026-09-19): the
   photographer wants the image page's stage to sit in a field much darker
   than the page, near the quiet view's dark (`--color-quiet`), giving way
@@ -180,7 +230,10 @@ attached.
   0.01 at the gate — an interim state spec 015 accepted and stated. Likely
   the pause's spec, since both are hero presentations of one frame; and
   "the mat only where the ground goes dark" above is the same question
-  asked from the other side.
+  asked from the other side. _Built at spec 016 as the arrival — the
+  whole page dark on arrival, lightening on the reader's scroll — and
+  withdrawn at its second look (2026-09-22): "the fading in and back out
+  is a bit awkward and a clumsy". Archived on `016-the-hero-stage`._
 - **Aspect-ratio treatment for packed galleries** — raised by the
   photographer at spec 011's visual gate (2026-09-09): he edits each
   image to the crop that suits its content rather than to a house
