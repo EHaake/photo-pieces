@@ -239,7 +239,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `img` in `[...id].astro` → the build's barrier names an image
       page._
 
-- [ ] **T1602** — The motion module's helpers and the dev switch.
+- [x] **T1602** — The motion module's helpers and the dev switch.
       Pattern: `src/components/DevGround.astro` (the applier — its
       comment, its `astro:after-swap` re-apply, its `window.__devGround`
       once-guard) and `src/pages/dev/matte/_sampler.ts` with
@@ -807,6 +807,7 @@ tier if it is ever on (it is off). -->
 | T1600 re-review (`skeptical-reviewer`, resumed)             | `opus` (Opus 5.5)              | 69,238 cumulative           | signed off                                                                                                                                                                 |
 | T1600→T1601 decision review (`skeptical-reviewer`, resumed) | `opus` (Opus 5.5)              | 78,021 cumulative           | option B: T1601 re-tokens the quiet ground's 220ms; T1605 deletes it                                                                                                       |
 | T1601 (`sdd-implementer`)                                   | `opus` (Opus 5.5)              | 74,700                      | done; 360 tests; three barrier lines; minifier drops `ease` and writes `.22s` — the source scan is what catches a bare `ease`; headless Firefox defaults to reduced motion |
+| T1602 (`sdd-implementer`)                                   | `opus` (Opus 5.5)              | 76,967                      | done; 363 tests; switch writes only changed tokens (html.style baseline is `--header-h` alone)                                                                             |
 
 _(Session-tier allowance draw noted at each pause.)_
 

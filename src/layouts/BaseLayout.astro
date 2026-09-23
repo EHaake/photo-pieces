@@ -11,6 +11,7 @@ import { withBase } from '../lib/url';
 import { SITE, NAV_ITEMS } from '../consts';
 import { locale, navLabel, t } from '../i18n';
 import DevGround from '../components/DevGround.astro';
+import DevMotion from '../components/DevMotion.astro';
 import SocialLinks from '../components/SocialLinks.astro';
 
 interface Props {
@@ -54,6 +55,8 @@ const isActive = (href: string) => {
 
     {/* The ground switch, spec 014 — a DEV-only constant, so the build renders nothing. */}
     {import.meta.env.DEV && <DevGround />}
+    {/* The motion switch, spec 018 — the same guard. */}
+    {import.meta.env.DEV && <DevMotion />}
 
     {/* Astro comment syntax — an HTML comment here would ship on every page. */}
     {/* Open Graph */}

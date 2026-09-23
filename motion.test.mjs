@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { blocks, uncomment } from './src/lib/ground.ts';
+import { FRAME_IMG, MOTION_TOKENS, ms } from './src/lib/motion.ts';
 import { scanMotion } from './src/lib/motion-scan.mjs';
 
 // The motion grammar (spec 018, T1600): three durations, two curves,
@@ -13,8 +14,9 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 // properties on :root, declared once, read by every transition and
 // animation on the site. The rule: motion answers the reader.
 //
-// Five kinds of guard here, because five different things can go wrong
-// (the literal scan (b) and the built-output barrier (e) are T1601's):
+// Six kinds of guard here, because six different things can go wrong
+// (the literal scan (b) and the built-output barrier (e) are T1601's,
+// the module (f) T1602's):
 //
 // (a) The single source. `EXPECTED` below is the grammar's one other
 //     copy: a round that retunes a value moves it in :root and in its
@@ -57,6 +59,11 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //     page's <style>, a motion attribute, `autoplay`, or an inline
 //     view-transition-name each exit 1 naming the file; the same names in
 //     rule and script text only, and pagefind's own stylesheet, do not.
+//
+// (f) The module (T1602). src/lib/motion.ts's `ms` reads a CSS time
+//     as milliseconds; its `MOTION_TOKENS` — what the dev panel builds
+//     its rows from — names exactly the grammar's twenty; `FRAME_IMG` is
+//     each frame host's direct `img`.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -593,6 +600,22 @@ describe('(e) the barrier fails on the built output (T1601, spec 018)', () => {
     expect([result.status, result.stderr]).toEqual([0, '']);
     expect(result.stdout).toContain(
       '[check-motion] no literal duration or curve in 2 stylesheets; no hidden frame, inline transition name or autoplay in 1 pages.',
+    );
+  });
+});
+
+describe('(f) the module (T1602, spec 018)', () => {
+  it('ms: `480ms` -> 480, `.5s` -> 500, anything else -> 0', () => {
+    expect([ms('480ms'), ms('.5s'), ms('ease')]).toEqual([480, 500, 0]);
+  });
+
+  it("MOTION_TOKENS names exactly EXPECTED's twenty — a token missing from the panel or a stray one fails", () => {
+    expect(MOTION_TOKENS.map((entry) => entry.name).sort()).toEqual(Object.keys(EXPECTED).sort());
+  });
+
+  it('FRAME_IMG is the six hosts, each `> img`, comma-joined', () => {
+    expect(FRAME_IMG).toBe(
+      '.image-link > img, .image-frame > img, .piece-block > img, .piece-block figure > img, .piece-strip-scroll > img, .note-cover > img',
     );
   });
 });
