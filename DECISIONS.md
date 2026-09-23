@@ -1236,8 +1236,10 @@ other frame: its normal view declares `--mat: 0px`, spec 015's shape for
 a surface whose formula still reads the mat (here the image's height
 cap), and form V+H moves under `html[data-quiet] .image-frame` as its own
 rule. The cascade between the two is the state switch the page already
-has, not a second declaration on one state. The quiet view's rules are
-byte-identical against `main`, pinned by string.
+has, not a second declaration on one state. The quiet stage rule and
+the image rule are byte-identical against `main`, pinned by string; the
+quiet frame's mat is the same strings in the new rule, and the cursor
+list rule is pinned by its declarations.
 
 **The stage hugs the frame.** His finding on the DualUp: "the stage for
 the image's page makes it so that it is centered completely in the screen
@@ -1263,9 +1265,12 @@ width and is shallower; the width is not capped at the text column.
 Attested 2026-09-22 on both screens: "Honestly looks great now. This is
 much better than before. Both 3:2, 3:2 [2:3], and panos look great, as do
 all the others I've checked." Equal area was not tried. The numbers
-beside it: 781 × 521 on the laptop, 1216 × 811 on the DualUp, and every
-frame larger by the 80px of mat it lost — the photograph on paper is
-resized by the rule, said plainly in the pause report.
+beside it: on the laptop, where the first screen's height decides, a 3:2
+is 781 × 521, smaller than the roughly 1080px it was, and a 2:3 taller;
+on the DualUp both are larger, 1216 × 811 and turned. The mat it lost was
+40px a side on desktop, at its ceiling, and about 13–18px on a phone —
+the photograph on paper is resized by the rule, said plainly in the pause
+report.
 
 **The cue is a term, not a switch.** He asked at spec 016's first look for
 a cue that there is more below — the previous / next line above the fold.

@@ -205,11 +205,12 @@ attached.
   breath, and the docs that spec 015 writes about the stage corrected.
   Not folded into 015 because the constitution keeps spec changes out of
   implementation sessions. The pause frame's own spec, which 015 also
-  defers, may be the same spec. _Done at spec 016 (the rule stated and
-  pinned, worn where the ground is dark); with the pause and the arrival
-  withdrawn (2026-09-22) the rule leaves the stage bare on paper and
-  matted in the quiet view alone — the removal spec keeps it so. Done at
-  spec 017: the stage bare on paper, the quiet view matted, pinned._
+  defers, may be the same spec. _Stated and pinned at spec 016 (worn
+  where the ground is dark), which was closed unmerged; with the pause
+  and the arrival withdrawn (2026-09-22) the rule leaves the stage bare
+  on paper and matted in the quiet view alone. Done at spec 017: the rule
+  restated and landed — the stage bare on paper, the quiet view matted,
+  pinned._
 - **The pause, rethought** — deferred wholesale at spec 015 (2026-09-19):
   the photographer does not like how the pause works today, and its rework
   is a spec of its own, in two parts — the pause mid-piece (the frame that
@@ -246,7 +247,8 @@ attached.
   asked from the other side. _Built at spec 016 as the arrival — the
   whole page dark on arrival, lightening on the reader's scroll — and
   withdrawn at its second look (2026-09-22): "the fading in and back out
-  is a bit awkward and a clumsy". Archived on `016-the-hero-stage`._
+  is a bit awkward and a clumsy"; spec 017 withdrew it with the pause.
+  Never merged: archived on `016-the-hero-stage`._
 - **Aspect-ratio treatment for packed galleries** — raised by the
   photographer at spec 011's visual gate (2026-09-09): he edits each
   image to the crop that suits its content rather than to a house

@@ -149,7 +149,10 @@ const SURFACE_NOTE: Record<Surface, string> = {
 };
 ---
 
-<BaseLayout title={title} description="Dev-only fixture for the mat's width (spec 013).">
+<BaseLayout
+  title={title}
+  description="Dev-only sampler: the four surfaces on the real stylesheet, and the ground bar."
+>
   {
     shown.map((s) => (
       <section class="sampler-surface" data-surface={s}>

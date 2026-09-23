@@ -982,6 +982,28 @@ dispatched.)_
       `git diff main --stat` lists no file outside plan.md's File
       structure and this directory; main green after the merge._
 
+- [x] **T1506a** — Sweep notes: N3 (DECISIONS' two overstatements —
+      the frame sizes stated per screen; the quiet pins stated as they
+      are), N6 (ROADMAP: spec 016 closed unmerged, not done; the darker
+      field's entry matches the brief), N8 (the sampler's description;
+      README's doubled "set"). Hand-edited; prettier clean; verify 87
+      pages, 320 tests, all `EXIT 0`. Sweep B1 (plan.md's file
+      structure missing `content.config.ts`, `verify.sh` and
+      `BaseLayout.astro`'s comment) and N4/N5 (two stale plan
+      sentences) fixed by the orchestrator in plan.md. **N1, the
+      plain-word grep, run by the orchestrator** over `src/`, the
+      transform, every `*.test.mjs` and all of `obsidian-plugin/`:
+      `src/pages/about/index.astro:3` ("go-live pause"), the one
+      test's lines (936, 948, 949, 955, 964, 966), and
+      `obsidian-plugin/main.js:59` — an untracked, gitignored local
+      build of the plugin from before T1501 (the photographer rebuilds
+      and installs the plugin himself; `main.ts` has no hit). **N2,
+      the container form's build control, run by the orchestrator**:
+      `:::pause{…}\nA caption.\n:::` on lines 68–70 of the fog piece →
+      `BUILD EXIT 1`, `index.md:68:1-70:4: … unknown block directive
+      "pause" — the block vocabulary is closed; known blocks: …`;
+      reverted, `src/content` diff empty.
+
 ---
 
 ### The pre-merge sweep
@@ -1037,6 +1059,9 @@ tier if it is ever on (it is off). -->
 | Phase 1 review (`skeptical-reviewer`) | implementation (`opus`, high) | 48,776 | one blocking: B1 README states the long side as L for every ratio → T1505a (with N4); N1 plan.md 4.5rem drift fixed by the orchestrator; N2 to T1506; N3, N5–N8 carried |
 | T1505a (`sdd-implementer`) | implementation (`opus`, high) | 25,203 | done first dispatch; README clause reworded to the fit-inside-3:2 rule; 320 tests |
 | Phase 1 re-review (`skeptical-reviewer`, new invocation) | implementation (`opus`, high) | 22,150 | SIGNED OFF; two style notes (the long README sentence; the doubled "set") carried |
+| T1506 close-out (`sdd-implementer-fable`) | top (`claude-fable-5-1`, medium) | 80,100 | done first dispatch; ROADMAP, DECISIONS, the brief, five comments |
+| Pre-merge sweep (`skeptical-reviewer`) | implementation (`opus`, high) | 201,882 | one blocking: B1 plan.md's file structure vs the diff (orchestrator fixed); N1 grep and N2 control run by the orchestrator; N3/N6/N8 → T1506a; N4/N5 fixed in plan.md; N7, the rest of N8, S1/S2/S8 carried |
+| T1506a (`sdd-implementer`) | implementation (`opus`, high) | 34,080 | done first dispatch; 320 tests |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -1095,6 +1120,10 @@ _(Session-tier allowance draw noted at each pause.)_
   not a mat; the README's "one matted surface" holds.
 - Phase 1 review N8: confirm at the sweep that the sampler's
   site-absolute link left with the pause section (T1500 deleted it).
+- Sweep N7: `--frame-nav-h`'s half-baseline term mirrors the nav's
+  `padding-block` but no test ties the two; a longer middle label
+  wrapping on the laptop is the same risk from the content side.
+- Sweep N8 (remaining): T1502 N4–N7, S1, S2, S8 stand as listed.
 - Phase 0 review S8: `stageSizes` prints full-precision coefficients
   (`0.6666666666666666`) — valid, noisy; cosmetic.
 - T1502 N8: the walk's pattern misses upper-case constants and any

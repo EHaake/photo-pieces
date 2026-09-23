@@ -166,11 +166,10 @@ the label's head — the place being the declared place's title as a
 link, then the sidecar's free text, when the frame names one — "How
 it was made", a raw-to-finished compare against the camera's frame,
 the passage of the piece the image sits in, related frames from the
-same outing, and "The print" with an enquiry link. Every page has a
-neighbour line, where the page has a set, for the set the reader
-is stepping through (the
-gallery, piece, or place they came from; arrow keys work), and a
-quiet view — click the photograph — that dims the ground and gives
+same outing, and "The print" with an enquiry link. Every page in a set
+has a neighbour line for it (the
+gallery, piece, or place they came from; arrow keys work), and every
+page has a quiet view — click the photograph — that dims the ground and gives
 the frame the viewport, matted on the quiet dark: the one matted
 surface on the site. Rules the build enforces: piece folders
 must be slugs and file names URL-safe (letters, digits, `.`, `-`,
