@@ -235,8 +235,13 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   every image in it has decoded (`load` then `img.decode()`, never
   `decode()` before `load`, which would fetch a lazy image early) and,
   for a unit not intersecting the viewport at hook time, when one
-  `IntersectionObserver` per page with `threshold: --arrive-threshold`
-  has seen it; the observer `unobserve`s a unit as it arrives and
+  `IntersectionObserver` per page has seen it arrive — arrival being
+  `entry.intersectionRatio >= --arrive-threshold` (the share of the
+  unit in view), or, for a unit too tall ever to reach that share,
+  `entry.intersectionRect.height >= --arrive-threshold × rootBounds.height`;
+  the observer's thresholds are the token plus steps of 0.05 so a tall
+  unit keeps getting callbacks (`isIntersecting` alone fires at the
+  first pixel whatever the threshold — Phase 1 review B1); the observer `unobserve`s a unit as it arrives and
   disconnects when the last has. A unit in view at hook time gets
   `data-shown="fade"`; one below the fold gets `"rise"` when
   `--arrive-rise` is non-zero and reduced motion is off, else `"fade"`;
@@ -338,12 +343,19 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   snapshot is the cell's `img`, the new is the figure wearing the
   understudy: the group morphs one small rendering of the photograph
   into the other, nothing blank between. For **out**, the cell whose
-  href is `from.pathname` is named in the new document, and at
+  href is `from.pathname` is named in the new document — when the
+  stored origin's `path` is the destination, the same-path link at the
+  stored position `nth` among the page's links to that path (the one
+  the reader clicked; a piece may place one photograph twice), else the
+  first (Phase 1 review B2) — and at
   `astro:after-swap` (after the router's own scroll: to top for a link,
   to the saved position for a traverse) the page is scrolled to the
   stored `y` when the stored path matches, else the cell is
   `scrollIntoView({ block: 'center' })` — so the photograph lands in
-  its own cell. Every name, `data-moving` and `data-slide` is cleared
+  its own cell. The appearance's after-swap hook is registered after
+  this scroll listener (and the `lastY` listener last), so `appear()`
+  reads what is in view where the page lands, not at the top (Phase 1
+  review B3). Every name, `data-moving` and `data-slide` is cleared
   on the swap event's `viewTransition.finished` — `.then(clear, clear)`,
   never `.finally`, which would re-throw a skipped transition's
   rejection.
