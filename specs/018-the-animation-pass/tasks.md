@@ -795,12 +795,13 @@ reviewer invocations alike — any escape-hatch miss, the fallback switch
 if the top tier's budget runs out (the row and the time), and the third
 tier if it is ever on (it is off). -->
 
-| Task / invocation                                  | Tier                           | Tokens                      | Outcome / miss reason                                                |
-| -------------------------------------------------- | ------------------------------ | --------------------------- | -------------------------------------------------------------------- |
-| Planning: draft (`sdd-planner`)                    | top (`claude-fable-5-1`, high) | 301,018                     | drafted; 8 deviations reported, 2 corrected the spec's router claims |
-| Planning: sign-off fixes (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 89,960 (cumulative 390,978) | five blocking fixed, eight notes folded                              |
-| Sign-off (`skeptical-reviewer`)                    | top (`claude-fable-5-1`, high) | 164,289                     | fix and re-review: 5 blocking, 8 notes                               |
-| Sign-off re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 32,818 (cumulative 197,107) | signed off; 4 lines carried (14–17)                                  |
+| Task / invocation                                  | Tier                           | Tokens                      | Outcome / miss reason                                                                                                                                        |
+| -------------------------------------------------- | ------------------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Planning: draft (`sdd-planner`)                    | top (`claude-fable-5-1`, high) | 301,018                     | drafted; 8 deviations reported, 2 corrected the spec's router claims                                                                                         |
+| Planning: sign-off fixes (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 89,960 (cumulative 390,978) | five blocking fixed, eight notes folded                                                                                                                      |
+| Sign-off (`skeptical-reviewer`)                    | top (`claude-fable-5-1`, high) | 164,289                     | fix and re-review: 5 blocking, 8 notes                                                                                                                       |
+| Sign-off re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 32,818 (cumulative 197,107) | signed off; 4 lines carried (14–17)                                                                                                                          |
+| Step-down (the person's request, 2026-09-23)       | all rows → `opus` (Opus 5.5)   | —                           | low Fable allowance; session on `claude-opus-5-5` medium; decision review and close-out at `opus`, no override, for the rest of 018 (CLAUDE.md's role table) |
 
 _(Session-tier allowance draw noted at each pause.)_
 

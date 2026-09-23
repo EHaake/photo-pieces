@@ -219,12 +219,22 @@ every agent definition defaults to the implementation tier except
 | Spec conversation             | the spec session itself | session tier            | high (raised per session) |
 | Plan and tasks draft          | `sdd-planner`           | **top tier** (override) | high                      |
 | Plan and tasks sign-off       | `skeptical-reviewer`    | **top tier** (override) | high                      |
-| Decision review               | `skeptical-reviewer`    | **top tier** (override) | high                      |
+| Decision review               | `skeptical-reviewer`    | implementation tier     | high                      |
 | Task implementation           | `sdd-implementer`       | implementation tier     | high                      |
-| Close-out task                | `sdd-implementer-fable` | top tier                | medium                    |
+| Close-out task                | `sdd-implementer`       | implementation tier     | high                      |
 | Per-task and phase review     | `skeptical-reviewer`    | implementation tier     | high                      |
 | Pre-merge sweep               | `skeptical-reviewer`    | implementation tier     | high                      |
 | Orchestration and bookkeeping | the session itself      | session tier            | medium                    |
+
+<!-- Stepped down at the person's request, 2026-09-23, at spec 018's
+implementation start, "due to low Fable allowance", for the rest of
+spec 018 only: every remaining dispatch at the implementation tier
+(Opus 5.5 via `opus`, no override) — decision review and close-out
+above — and the session itself on `claude-opus-5-5` at medium, picked
+in the app (settings.json unchanged). Planning and sign-off already ran
+at the top tier. Restore the two rows (`**top tier** (override)` /
+`sdd-implementer-fable`, top tier, medium) only when the person says
+so; ask at spec 018's merge. -->
 
 **Moving a role.** Edit its row, nothing else. To step a role down,
 replace **top tier** (override) with "implementation tier (no
