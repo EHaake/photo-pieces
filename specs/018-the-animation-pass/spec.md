@@ -192,7 +192,9 @@ later." Both stay on the roadmap.
   rather than pop; nothing travels, grows, rises or slides — the image
   page is simply there, the quiet view simply dark.
 - **A reader without script, or an older browser.** Every photograph
-  is visible; pages change as they do today. Nothing is hidden waiting
+  is visible; pages change as they do today; a browser without the
+  view-transition machinery cuts to the quiet view rather than fading
+  the ground, its one visible difference. Nothing is hidden waiting
   for a script that never runs.
 - **Writing a piece.** Nothing to author: the frames a writer places
   animate by the site's rules. The plugin does not change.
@@ -272,9 +274,11 @@ later." Both stay on the roadmap.
   animation to one millisecond is removed in favour of that
   distinction, pinned by a test on the stylesheet: under the media
   query no transform or size transition has a duration, and no opacity
-  transition has lost one. The router's own reduced-motion behaviour
-  (it disables its animations entirely) is accepted: a page change
-  under reduced motion cuts.
+  transition has lost one. A page change under reduced motion keeps
+  its cross-fade — a fade, within this rule; the planner found Astro 7's
+  router has no reduced-motion path of its own on a site without
+  per-element transition directives, correcting the draft's claim that
+  it cuts.
 - **The dev switch.** A dev-only control on the real pages, in the
   ground switch's pattern — inline, guarded by the build-time
   constant, remembered in the browser — with a toggle per behaviour
