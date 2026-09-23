@@ -808,11 +808,27 @@ tier if it is ever on (it is off). -->
 | T1600→T1601 decision review (`skeptical-reviewer`, resumed) | `opus` (Opus 5.5)              | 78,021 cumulative           | option B: T1601 re-tokens the quiet ground's 220ms; T1605 deletes it                                                                                                       |
 | T1601 (`sdd-implementer`)                                   | `opus` (Opus 5.5)              | 74,700                      | done; 360 tests; three barrier lines; minifier drops `ease` and writes `.22s` — the source scan is what catches a bare `ease`; headless Firefox defaults to reduced motion |
 | T1602 (`sdd-implementer`)                                   | `opus` (Opus 5.5)              | 76,967                      | done; 363 tests; switch writes only changed tokens (html.style baseline is `--header-h` alone)                                                                             |
+| Phase 0 review, T1601–T1602 (`skeptical-reviewer`)          | `opus` (Opus 5.5)              | 62,746                      | signed off; no blocking; 7 notes carried to the sweep                                                                                                                      |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
+- Phase 0 review (2026-09-23), non-blocking: (1) the built CSS drops a
+  bare `ease` and rewrites `220ms` as `.22s`, so the build barrier
+  catches times but not a lone default curve — the source scan (b) is
+  the guard for curves (recorded in plan.md's Known limitations); (2)
+  `scanMotion` passes a `var(--x, 200ms)` fallback, `calc(180ms)` and
+  `-webkit-` prefixed properties, as the task line allows — worth a
+  sentence in its header; (3) the barrier's "text only exits 0" case
+  cannot fail on its `<style>` half (the attribute pattern only matches
+  inside a tag); (4) the source test's `<style>` pattern finds blocks at
+  column 0 only — every block today is; asserting the count against a
+  plain `<style` count would close it; (5) `motion.ts`'s header claims
+  the `FRAME_HOSTS` pin, which lands at T1603 (g) — check it did; (6)
+  the panel's `{ tokens, rise }` key, its two combined rows and its
+  invented `0.5rem` rise default are dev-only and recorded; (7) an
+  explicit `animation-iteration-count: 1` would be flagged.
 - Sign-off re-review 14–16 are transcribed into plan.md's "Carried from
   the sign-off" and into T1603/T1604 as binding text; the sweep checks
   they landed. 17 (the `viewtransitions.css` wording) is applied in

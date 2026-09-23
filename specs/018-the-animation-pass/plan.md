@@ -681,6 +681,14 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   the planner brief names were applied from the brief itself, and each
   choice below says which way it went.
 
+- **The build barrier sees what the minifier leaves.** Lightning CSS
+  rewrites `220ms` as `.22s` and drops a bare `ease` (the default
+  curve), so `check-motion` on `dist/` catches a literal time but not a
+  lone default curve; the source scan (describe (b) over `global.css`
+  and every `.astro` `<style>`) is the guard for curves. The example
+  failure line above shows the source spelling; the build prints the
+  minified one. _(Phase 0 review, 2026-09-23.)_
+
 ## Resolved decisions
 
 - **A navigation is classified by what was clicked, not by its
