@@ -643,7 +643,7 @@ headers to confirm nothing was duplicated or dropped. -->
       also pins `position: relative`; the sampler's `sizes` call
       wrapped over three lines for Prettier.
 
-- [ ] **T1504** — The sampler, honest. Pattern:
+- [x] **T1504** — The sampler, honest. Pattern:
       `src/pages/dev/matte/[...surface].astro` and `_sampler.ts` (spec
       013's, made honest at 015's T1302 — the same move, one section
       further). `[...surface].astro`: delete the `Candidate` type, the
@@ -683,6 +683,23 @@ headers to confirm nothing was duplicated or dropped. -->
       `oklchToRgb255(paper)` within 1/255 and writes the key with five
       tokens, `today` removes the key and every inline token (spec 015's
       T1302 reads, repeated); `ground.test.mjs` green and unedited._
+
+- [x] **T1504 record** — Mat bar gone; every grep 0; `dist/dev` absent,
+      no `dev-ground` or `matte-sampler` in `dist/`; prettier clean on
+      the two sampler files. On the dev server at 1512×982: four
+      sections, no bar elements, the four stage frames padding 0 with
+      `rgba(0, 0, 0, 0)`, no `.piece-pause` and the held figure laid
+      out as a grid with its image complete; the ground bar read on
+      `light` (there is no `paper` button — `today` is the paper ground
+      since spec 015; the Verify copied 015's wording): html background
+      `rgb(249, 248, 245)` = `oklchToRgb255(light)` exactly, the key
+      with five tokens; `today` removes the key and every ground token.
+      Case (a) can fail: HEAD's sampler file put back → `Received
+      ["--mat-max","--mat-min","--mat-share"]`. Verify: 87 pages, `BUILD
+      EXIT 0`, `CHECK EXIT 0`, 319 tests, `TEST EXIT 0`. Noted:
+      `matte.test.mjs` is prettier-unclean at ~340 (pre-existing on
+      `main`); the sampler's "each a viewport tall" stage comment may be
+      stale after T1503 — for the phase review.
 
 ### Phase 0 record (the person's walkthrough)
 
@@ -918,6 +935,7 @@ tier if it is ever on (it is off). -->
 | T1502 (`sdd-implementer`) | implementation (`opus`, high) | 137,230 | done first dispatch; BiDi before/after identical on the quiet view and the held park; 316 tests |
 | T1502 per-task review (`skeptical-reviewer`) | implementation (`opus`, high) | 72,565 | signed off, no blocking; N1 → T1503, N2–N8 carried |
 | T1503 (`sdd-implementer`) | implementation (`opus`, high) | 146,717 | done first dispatch; header 76 not 72, L 781 at the laptop; no-script nav 3.8px under the fold there (known limitation, to the pause report); 319 tests |
+| T1504 (`sdd-implementer`) | implementation (`opus`, high) | 80,634 | done first dispatch; 319 tests |
 
 _(Session-tier allowance draw noted at each pause.)_
 

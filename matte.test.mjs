@@ -268,9 +268,8 @@ describe('(a) the rule has one source (T1101, spec 013)', () => {
     }
   });
 
-  it('no file under src/ outside src/pages/dev/ declares one — the sampler alone may override', () => {
+  it('no file under src/ declares one', () => {
     for (const [path, text] of Object.entries(src)) {
-      if (path.startsWith('src/pages/dev/')) continue;
       const declares = /(--mat-share|--mat-min|--mat-max)\s*:/g;
       const found = [...text.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(declares)].map((m) => m[1]);
       const allowed =
