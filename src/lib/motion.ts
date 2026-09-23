@@ -136,15 +136,52 @@ function inViewport(rect: DOMRect): boolean {
   return rect.bottom > 0 && rect.right > 0 && rect.top < innerHeight && rect.left < innerWidth;
 }
 
+/** A shown frame's key: the page it was shown on, the viewport it was
+ *  shown at (width, height and pixel ratio) and its `src`, `srcset` and
+ *  `sizes` attributes — exactly the inputs the browser picks a candidate
+ *  from, so an image made eager on a held key asks for the very file
+ *  that was shown: a memory-cache hit, never a new request. (The same
+ *  photograph placed twice at different `sizes` is two keys.) */
+export function shownKey(pathname: string, img: Element): string {
+  const src = img.getAttribute('src') ?? '';
+  const srcset = img.getAttribute('srcset') ?? '';
+  const sizes = img.getAttribute('sizes') ?? '';
+  return `${pathname}|${innerWidth}x${innerHeight}x${devicePixelRatio}|${src}|${srcset}|${sizes}`;
+}
+
+/** The frames this document has shown, by `shownKey`, for its life —
+ *  the way back holds what the reader saw (spec 018, D1604 Q2). */
+const held = new Set<string>();
+
+/** Before a swap: every frame image in the new document `doc` (at
+ *  `pathname`) that this document has shown, at this viewport, is made
+ *  `loading="eager"`. A lazy image in an adopted document is not
+ *  fetched until the next rendering step's intersection check, so it
+ *  would never be `complete` at the hook and every frame the reader saw
+ *  would fade again; its file is in the memory cache, so eager is a
+ *  cache hit, and the `complete` short-cut and the early-`load` rule
+ *  show it at once. A frame never shown, or shown at another viewport,
+ *  is left as it is — eager would fetch a candidate the page would not
+ *  request. */
+export function holdShown(doc: Document, pathname: string): void {
+  for (const img of doc.querySelectorAll(FRAME_IMG)) {
+    if (held.has(shownKey(pathname, img))) img.setAttribute('loading', 'eager');
+  }
+}
+
 /** Mark a photograph shown for good: `data-shown=""`, which lifts the
  *  gate and the waiting fill. The one writer of the empty value — the
  *  animation's end, the `complete` short-cut, the early-`load` rule and
  *  the appearance-off case all come here — and so the one place a
  *  host's `data-understudy` (the travel's) and its `--understudy` leave
  *  with the fill, so a second visit to a stage never keeps the previous
- *  rendering under a live photograph. */
-function shown(img: HTMLImageElement): void {
+ *  rendering under a live photograph. A frame that has its file
+ *  (`complete`, with a `naturalWidth`) is remembered for `holdShown`;
+ *  one shown without it (the appearance off, before its load) is not.
+ *  Exported for the unit test. */
+export function shown(img: HTMLImageElement): void {
   img.dataset.shown = '';
+  if (img.complete && img.naturalWidth > 0) held.add(shownKey(location.pathname, img));
   const host = img.parentElement;
   if (host && 'understudy' in host.dataset) {
     delete host.dataset.understudy;

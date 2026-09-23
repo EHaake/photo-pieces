@@ -4,9 +4,17 @@ import { readFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { blocks, uncomment } from './src/lib/ground.ts';
-import { FRAME_HOSTS, FRAME_IMG, MOTION_TOKENS, ms } from './src/lib/motion.ts';
+import {
+  FRAME_HOSTS,
+  FRAME_IMG,
+  MOTION_TOKENS,
+  holdShown,
+  ms,
+  shown,
+  shownKey,
+} from './src/lib/motion.ts';
 import { scanMotion } from './src/lib/motion-scan.mjs';
 
 // The motion grammar (spec 018, T1600): three durations, two curves,
@@ -754,5 +762,113 @@ describe("(g) the hidden state is the script's (T1603, spec 018)", () => {
   it("PieceList.astro wraps its cover in span.note-cover — the row cover's waiting box", async () => {
     const source = await readFile(here('./src/components/PieceList.astro'), 'utf8');
     expect(source).toContain('class="note-cover"');
+  });
+});
+
+describe('(h) the way back holds what the reader saw (T1604b, spec 018)', () => {
+  // No DOM in this suite: the fixture is parsed into minimal elements —
+  // each `<img>` tag's attributes, readable and writable — and the
+  // document's querySelectorAll answers only FRAME_IMG, so holdShown
+  // asking for anything else fails here.
+  const parse = (html) => {
+    const images = [...html.matchAll(/<img\b([^>]*)>/g)].map(([, attrs]) => {
+      const map = new Map([...attrs.matchAll(/([\w-]+)="([^"]*)"/g)].map(([, k, v]) => [k, v]));
+      return {
+        dataset: {},
+        parentElement: null,
+        complete: false,
+        naturalWidth: 0,
+        getAttribute: (name) => map.get(name) ?? null,
+        setAttribute: (name, value) => map.set(name, String(value)),
+      };
+    });
+    return {
+      images,
+      doc: {
+        querySelectorAll(selector) {
+          if (selector !== FRAME_IMG) throw new Error(`unexpected selector ${selector}`);
+          return images;
+        },
+      },
+    };
+  };
+  const SET = '/_astro/a-640.webp 640w, /_astro/a-1080.webp 1080w';
+  const FIXTURE = `
+    <a class="image-link" href="/images/g/a/"><img src="/_astro/a.jpg" srcset="${SET}" sizes="50vw" loading="lazy"></a>
+    <a class="image-link" href="/images/g/b/"><img src="/_astro/b.jpg" srcset="" sizes="50vw" loading="lazy"></a>
+    <a class="image-link" href="/images/g/c/"><img src="/_astro/c.jpg" srcset="" sizes="50vw" loading="lazy"></a>
+    <a class="image-link" href="/images/g/d/"><img src="/_astro/d.jpg" srcset="" sizes="50vw" loading="lazy"></a>`;
+  const at = (pathname, width, height, ratio) => {
+    vi.stubGlobal('location', { pathname });
+    vi.stubGlobal('innerWidth', width);
+    vi.stubGlobal('innerHeight', height);
+    vi.stubGlobal('devicePixelRatio', ratio);
+  };
+  const loading = (html, pathname) => {
+    const { images, doc } = parse(html);
+    holdShown(doc, pathname);
+    return images.map((img) => img.getAttribute('loading'));
+  };
+  const loaded = (img) => Object.assign(img, { complete: true, naturalWidth: 1600 });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('the key is `<pathname>|<innerWidth>x<innerHeight>x<devicePixelRatio>|<src>|<srcset>|<sizes>`', () => {
+    at('/elsewhere/', 1512, 982, 2);
+    const [a] = parse(FIXTURE).images;
+    expect(shownKey('/galleries/g/', a)).toBe(`/galleries/g/|1512x982x2|/_astro/a.jpg|${SET}|50vw`);
+    // An absent attribute reads as empty, not "null".
+    const [bare] = parse('<img src="/_astro/z.jpg">').images;
+    expect(shownKey('/p/', bare)).toBe('/p/|1512x982x2|/_astro/z.jpg||');
+  });
+
+  it('holdShown makes eager only a frame shown with its file, on that pathname, at that viewport', () => {
+    at('/galleries/g/', 1512, 982, 2);
+    const [a, , c, d] = parse(FIXTURE).images;
+    // a: loaded and shown; b: never shown; c: shown before its load (the
+    // appearance off); d: complete with no naturalWidth (a broken file).
+    loaded(a);
+    Object.assign(d, { complete: true, naturalWidth: 0 });
+    for (const img of [a, c, d]) shown(img);
+    expect([a, c, d].map((img) => img.dataset.shown)).toEqual(['', '', '']);
+
+    // The same page at the same viewport: the one held frame is eager.
+    expect(loading(FIXTURE, '/galleries/g/')).toEqual(['eager', 'lazy', 'lazy', 'lazy']);
+    // Another pathname: untouched.
+    expect(loading(FIXTURE, '/pieces/p/')).toEqual(['lazy', 'lazy', 'lazy', 'lazy']);
+    // Another width, height or pixel ratio: untouched.
+    for (const [w, h, r] of [
+      [1280, 982, 2],
+      [1512, 1440, 2],
+      [1512, 982, 1],
+    ]) {
+      at('/galleries/g/', w, h, r);
+      expect(loading(FIXTURE, '/galleries/g/')).toEqual(['lazy', 'lazy', 'lazy', 'lazy']);
+    }
+  });
+
+  // The fog piece's case: one photograph, a block frame and a full-bleed
+  // frame, the same src and srcset at different sizes.
+  const TWICE = (second) => `
+    <a class="image-link" href="/images/f/x/"><img src="/_astro/x.jpg" srcset="/_astro/x-750.webp 750w, /_astro/x-1668.webp 1668w" sizes="(min-width: 1240px) 670px, 94vw" loading="lazy"></a>
+    <a class="image-link" href="/images/f/x/"><img src="/_astro/x.jpg" srcset="/_astro/x-750.webp 750w, /_astro/x-1668.webp 1668w" sizes="${second}" loading="lazy"></a>`;
+
+  it('same src, different sizes: only the placement shown is held', () => {
+    at('/pieces/twice/', 1512, 982, 1);
+    const [block] = parse(TWICE('100vw')).images;
+    shown(loaded(block));
+    expect(loading(TWICE('100vw'), '/pieces/twice/')).toEqual(['eager', 'lazy']);
+  });
+
+  it('identical attributes: both held', () => {
+    at('/pieces/twice-again/', 1512, 982, 1);
+    const [block] = parse(TWICE('(min-width: 1240px) 670px, 94vw')).images;
+    shown(loaded(block));
+    expect(loading(TWICE('(min-width: 1240px) 670px, 94vw'), '/pieces/twice-again/')).toEqual([
+      'eager',
+      'eager',
+    ]);
   });
 });

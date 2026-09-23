@@ -131,7 +131,7 @@ const isActive = (href: string) => {
       } from 'astro:transitions/client';
       import { IMAGE_SET_KEY, setKeyFromPath } from '../lib/image-set';
       import { enhanceCompare } from '../lib/compare';
-      import { NAME, appear, flag, reducedMotion, token } from '../lib/motion';
+      import { NAME, appear, flag, holdShown, reducedMotion, token } from '../lib/motion';
 
       // The appearance and the arrival (spec 018). The initial
       // astro:page-load fires on window's load, after every image
@@ -142,13 +142,17 @@ const isActive = (href: string) => {
       // gets the gate, since the router replaces <html>'s attributes.
       // The image page's compare is overlaid here too, and on the new
       // document at before-swap, before it is swapped in (why, in
-      // src/lib/compare.ts).
+      // src/lib/compare.ts). On every navigation, whatever the travel
+      // flag or the setting, the new document's frames this document
+      // has shown at this viewport are made eager, so the way back
+      // shows them at once instead of fading them again (holdShown).
       let teardown = appear(document);
       enhanceCompare(document);
       document.addEventListener('astro:before-swap', (event) => {
         teardown();
         event.newDocument.documentElement.dataset.motion = '';
         enhanceCompare(event.newDocument);
+        holdShown(event.newDocument, event.to.pathname);
       });
       document.addEventListener('astro:after-swap', () => {
         teardown = appear(document);
@@ -295,32 +299,49 @@ const isActive = (href: string) => {
           (a) => new URL(a.getAttribute('href') ?? '', base).pathname === path,
         );
 
-      // The next stage's file, fetched before the swap: the same `sizes`
-      // the stage will carry (`100vw` in the quiet view, the value the
-      // image page's applyQuiet gives it), then srcset, then src, so the
-      // browser picks the candidate the page will request a moment later
-      // — a cache hit then, not a second request. Bounded at a second: a
+      // A photograph of the new document, fetched before the swap: the
+      // `sizes` it will carry, then srcset, then src, so the browser
+      // picks the candidate the page will request a moment later — a
+      // cache hit then, not a second request. Bounded at a second: a
       // wait bound, not an animation's timer.
-      const preloadStage = async (doc: Document) => {
-        const next = doc.querySelector<HTMLImageElement>('.image-frame img');
-        if (!next) return;
+      const preload = async (next: HTMLImageElement, sizes: string) => {
         const img = new Image();
-        img.sizes = document.documentElement.hasAttribute('data-quiet')
-          ? '100vw'
-          : (next.getAttribute('sizes') ?? '');
+        img.sizes = sizes;
         img.srcset = next.getAttribute('srcset') ?? '';
         img.src = next.getAttribute('src') ?? '';
         try {
           await Promise.race([img.decode(), new Promise((resolve) => setTimeout(resolve, 1000))]);
         } catch {
-          /* a broken or slow file: the stage waits in its box, as today */
+          /* a broken or slow file: the frame waits in its box, as today */
         }
       };
-      const preloadOnLoad = (event: TransitionBeforePreparationEvent) => {
+      // The loader is extended to preload what the swap will show. For
+      // an out, the landing — its cell's img, at its own `sizes` — so it
+      // is decoded when the new snapshot is taken; between image pages
+      // only when the new document holds the cell and the traverse is
+      // back (the kind before-swap settles on), else the stage. For a
+      // step, the stage, at the `sizes` it will carry: `100vw` in the
+      // quiet view, the value the image page's applyQuiet gives it.
+      const preloadOnLoad = (event: TransitionBeforePreparationEvent, out: boolean) => {
         const load = event.loader;
         event.loader = async () => {
           await load();
-          await preloadStage(event.newDocument);
+          const doc = event.newDocument;
+          const between = isImagePage(event.to);
+          const cell = out ? cellFor(doc, event.from.pathname, event.to)?.querySelector('img') : null;
+          if (cell && (!between || event.direction === 'back')) {
+            await preload(cell, cell.getAttribute('sizes') ?? '');
+            return;
+          }
+          if (out && !between) return;
+          const stage = doc.querySelector<HTMLImageElement>('.image-frame img');
+          if (!stage) return;
+          await preload(
+            stage,
+            document.documentElement.hasAttribute('data-quiet')
+              ? '100vw'
+              : (stage.getAttribute('sizes') ?? ''),
+          );
         };
       };
 
@@ -354,13 +375,14 @@ const isActive = (href: string) => {
             navigationType,
           };
           if (slide()) name(document.querySelector<HTMLElement>('.image-frame'));
-          preloadOnLoad(event);
+          preloadOnLoad(event, false);
         } else if (isImagePage(event.from)) {
           name(document.querySelector<HTMLElement>('.image-frame'));
           moving = { kind: 'out', navigationType, direction: event.direction };
-          // A traverse between image pages: the kind is settled at
-          // before-swap, once the new document can be read.
-          if (isImagePage(event.to)) preloadOnLoad(event);
+          // Between image pages the kind is settled at before-swap, once
+          // the new document can be read; the loader preloads whichever
+          // photograph that kind will show.
+          preloadOnLoad(event, true);
         }
       });
 
@@ -390,7 +412,11 @@ const isActive = (href: string) => {
           // (reduced motion) there is nothing for them to move.
           if (name(frame)) root.dataset.slide = moving.dir;
         } else if (moving.kind === 'out') {
+          // The landing is eager, so the file its preload decoded is
+          // loaded before the new snapshot, not at the next intersection
+          // check.
           landing = cell?.querySelector('img') ?? null;
+          landing?.setAttribute('loading', 'eager');
           name(landing);
         }
         const record = moving;

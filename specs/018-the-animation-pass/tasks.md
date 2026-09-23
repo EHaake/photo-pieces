@@ -637,7 +637,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `--rm-quiet` `1` only the root group animates" is read as "only
       root's old/new animate; no group animation"._
 
-- [ ] **T1604b** — The way back holds what the reader saw (decision
+- [x] **T1604b** — The way back holds what the reader saw (decision
       review D1604, Q2). Footprint: `src/lib/motion.ts`,
       `BaseLayout.astro`'s script, `motion.test.mjs`. `motion.ts`: a
       module-level `Set<string>` of shown keys
@@ -968,6 +968,7 @@ tier if it is ever on (it is off). -->
 | T1604 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 110,045                     | Q1 RM withholds names only (+ group rule, header group at state duration); Q2 hold shown frames eager + preload landing; Q3 compare overlaid at before-swap from the layout; quiet-view sizes → T1605                                                                                                                                                       |
 | T1604a (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 80,266                      | done; 370 tests; RM: no group animates, root old/new 480, header old/new 180, understudy and origin scroll kept; the header-group state-duration rule is not pinned (sweep)                                                                                                                                                                                 |
 | T1604c (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 73,281                      | done; 370 tests; compare overlaid at before-swap (505 at after-swap = full load); strip way back lands at 429.43 / 658.87 exactly; Firefox 156 has no `layout-shift` entries — a per-frame position trace instead; a below-fold ≤14px mono-font move on the first swap into an image page (not this task's)                                                 |
+| T1604b (`sdd-implementer`, + one key round)                 | `opus` (Opus 5.5)              | 140,610                     | done; 374 tests; 0 fades on every way back, landing complete, both screens, dev and preview; the `src`-only key fetched the unseen fullbleed `land-b` → key now every candidate input (D1604 follow-up, 113,343 cumulative reviewer); fallback not needed; dev re-requests each piece frame's `src` on return, as on `main`                                 |
 
 _(Session-tier allowance draw noted at each pause.)_
 
