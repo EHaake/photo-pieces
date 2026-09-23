@@ -641,7 +641,7 @@ headers to confirm nothing was duplicated or dropped. -->
       review D1604, Q2). Footprint: `src/lib/motion.ts`,
       `BaseLayout.astro`'s script, `motion.test.mjs`. `motion.ts`: a
       module-level `Set<string>` of shown keys
-      (`${location.pathname}|${innerWidth}x${devicePixelRatio}|${img.getAttribute('src')}`);
+      (`${pathname}|${innerWidth}x${innerHeight}x${devicePixelRatio}|${src}|${srcset}|${sizes}`, the three read with `getAttribute(…) ?? ''`, the pathname being `location.pathname` when recording and `event.to.pathname` in `holdShown` — D1604 follow-up: a `src`-only key collided on the fog piece's two `land-b` placements);
       `shown(img)` adds the key only when
       `img.complete && img.naturalWidth > 0`; export
       `holdShown(doc: Document, pathname: string)` setting
@@ -658,7 +658,7 @@ headers to confirm nothing was duplicated or dropped. -->
       else the stage; in `astro:before-swap` the out `landing` gets
       `loading="eager"`. Tests: a unit test on the key and on
       `holdShown` over a parsed fixture (held key → eager; other
-      pathname, other viewport, never-loaded → untouched).
+      pathname, other viewport, never-loaded → untouched; "same src, different sizes: only the placement shown is held" and "identical attributes: both held", the first able to fail — `sizes` dropped from the key → it fails on the second image).
       Pre-authorised fallback, used only if the Verify still counts
       fades above zero: in `appear()`, a frame whose key is held and is
       not `complete` at the hook is shown on its `load` whenever it
@@ -676,7 +676,10 @@ headers to confirm nothing was duplicated or dropped. -->
       lists the landing's candidate exactly once; resize the window on
       the image page, then back: no cell carries `loading="eager"`
       except the landing; with `--motion-travel: 0` on `html` the return
-      still shows 0 fades._
+      still shows 0 fades; on the fog piece, dev and preview, both
+      screens, history back from `land-b`: the fullbleed `land-b` reads
+      `loading="lazy"`, its candidate's timeline count stays 0, the
+      block frame is held (0 fades)._
 
 - [x] **T1604c** — The compare overlays before the swap (decision
       review D1604, Q3). Footprint: new `src/lib/compare.ts`;

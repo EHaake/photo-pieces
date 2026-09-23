@@ -357,7 +357,15 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   T1604, all four surfaces, both screens, dev and preview). Two
   changes, neither adding a request: (1) `motion.ts` keeps, for the
   document's life, the frames it has shown — key
-  `<pathname>|<innerWidth>x<devicePixelRatio>|<src attribute>`,
+  `<pathname>|<innerWidth>x<innerHeight>x<devicePixelRatio>|<src>|<srcset>|<sizes>`
+  (the three attributes as written, each absent one as the empty
+  string) — exactly the inputs from which the browser selects a
+  candidate, so an image made eager on a held key selects the file the
+  shown image already fetched: a memory-cache hit, never a new
+  candidate. A key on `src` alone collided when a page places one
+  photograph twice with different `sizes` (the fog piece's `land-b`, a
+  block frame and a fullbleed: the unseen fullbleed went eager and
+  fetched w1668; T1604b's Verify, D1604 follow-up) —
   recorded in `shown()` only when the image is `complete` with a
   `naturalWidth` — and `holdShown(doc)` sets `loading="eager"` on
   every frame image in the new document whose key is held; the layout
@@ -712,13 +720,17 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   good. Without script at all nothing is hidden, by construction and
   by the barrier.
 - **A frame the document has shown is held on return only at the
-  same viewport.** The key includes width and pixel ratio, so after a
-  resize a returning page's frames are lazy again and fade as on a
-  first visit — the price of never fetching a candidate the page would
-  not request. (Replaces the T1604-era limitation "whether a
-  memory-cached image reads `complete` … is the browser's business",
-  refuted by T1604's measurement: the cause was the site's own
-  `loading="lazy"` — D1604, Q2.)
+  same viewport and the same attributes.** The key is the viewport's
+  width, height and pixel ratio plus the image's `src`, `srcset` and
+  `sizes`, so after any resize — a phone's toolbar changing the height
+  included — a returning page's frames are lazy again and fade as on a
+  first visit, and a second placement of a shown photograph with
+  different `sizes` (the fog piece's block frame and fullbleed
+  `land-b`) stays lazy. The price of never fetching a candidate the
+  page would not request (AC 13). (Replaces the T1604-era limitation
+  "whether a memory-cached image reads `complete` … is the browser's
+  business", refuted by T1604's measurement: the cause was the site's
+  own `loading="lazy"` — D1604, Q2.)
 - **The way back names a cell the browser may have evicted.** The new
   snapshot for **out** is the cell's live `img`; if its file is no
   longer in the memory cache, the landing's preload re-reads it (from
