@@ -452,7 +452,7 @@ Every claim above is owned by a task and a check:
   stage case, rewritten: `.image-stage` declares `--stage-pad` as
   `var(--block-margin)`, `--avail-w` as
   `calc(100vw - 2 * var(--page-pad))`, `--avail-h` as
-  `calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--frame-nav-h))`,
+  `calc(100svh - var(--header-h, 4.75rem) - 2 * var(--stage-pad) - var(--frame-nav-h))`,
   `display: grid`, `place-items: center`, `padding: var(--stage-pad) var(--page-pad)`,
   and no `min-height` (the raw regex finds none in its body); the
   rule's prelude is exactly `.image-stage`; `html[data-quiet] .image-stage`'s
@@ -475,7 +475,7 @@ Every claim above is owned by a task and a check:
   `@media (max-width: 719.98px)` block with a `.frame-nav` rule inside
   it. (c) "one rectangle, turned": over the evaluator's grid — its
   ratios already span 0.5, 0.667, 0.8 (4:5), 1, 1.5, 1.78 (16:9) and 3
-  — with `--header-h` absent (the 4.5rem fallback), the frame's width
+  — with `--header-h` absent (the fallback, 4.75rem since T1503a), the frame's width
   from the rule and its height from `--ar`, with L = `min(--avail-w,
   --avail-h)` and S = ⅔L computed by the test itself: the frame fits
   inside the box turned (width ≤ L and height ≤ S for `ar ≥ 1`; width ≤
@@ -521,7 +521,7 @@ Every claim above is owned by a task and a check:
   `astro:page-load`. Script off (`javascript.enabled=false` in the
   profile's `user.js`): the nav's bottom at the three viewports with
   the header at its fallback — recorded; at 375 the header may wrap
-  taller than 4.5rem, and the difference is the known limitation
+  taller than the fallback, and the difference is the known limitation
   below. The person judges the equal rectangle on both screens at the
   pause. Mutations, reverted: the token dropped from `--avail-h` → the
   stage case fails; a `min-height` restored on `.image-stage` → the
