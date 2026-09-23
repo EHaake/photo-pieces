@@ -1036,6 +1036,7 @@ tier if it is ever on (it is off). -->
 | T1505 (`sdd-implementer`) | implementation (`opus`, high) | 57,786 | done first dispatch; 320 tests |
 | Phase 1 review (`skeptical-reviewer`) | implementation (`opus`, high) | 48,776 | one blocking: B1 README states the long side as L for every ratio → T1505a (with N4); N1 plan.md 4.5rem drift fixed by the orchestrator; N2 to T1506; N3, N5–N8 carried |
 | T1505a (`sdd-implementer`) | implementation (`opus`, high) | 25,203 | done first dispatch; README clause reworded to the fit-inside-3:2 rule; 320 tests |
+| Phase 1 re-review (`skeptical-reviewer`, new invocation) | implementation (`opus`, high) | 22,150 | SIGNED OFF; two style notes (the long README sentence; the doubled "set") carried |
 
 _(Session-tier allowance draw noted at each pause.)_
 
