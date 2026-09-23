@@ -1403,10 +1403,19 @@ a.note-row {
 
 /* Viewport-height cap for verticals. width:auto + max constraints (never
    width:100%) so the image can neither stretch nor crop — spec 003 forbids
-   both. --tall-max is a sampler-review knob. */
-.piece-tall > a.image-link {
-  width: fit-content;
-  max-width: 100%;
+   both. --tall-max is a sampler-review knob.
+   The host — the anchor, or the img itself when alt="" leaves it
+   unlinked — takes its width from --ar before the image loads (spec 018,
+   T1603b): a lazy img has no natural size until then, so a fit-content
+   host sat 0×0 and the page grew as each tall arrived. The width is the
+   one the loaded image settles at anyway — the column, or --tall-max
+   times the ratio — so nothing moves at load. The transform's sizes
+   slot never binds here: above the collapse the column (--prose-width)
+   is narrower than it, and below it 94vw is never narrower than the
+   column. A frame the probe could not read carries no --ar, so the
+   width falls back to auto, as before. */
+.piece-tall > :is(a.image-link, img) {
+  width: min(100%, var(--tall-max) * var(--ar));
   margin-inline: auto;
 }
 

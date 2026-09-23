@@ -428,7 +428,7 @@ headers to confirm nothing was duplicated or dropped. -->
       dropped from the gate's prelude → (g)'s opacity walk fails; a
       seventh host added to the CSS list alone → the list pin fails._
 
-- [ ] **T1603b** — The tall frame's box (decision review 2026-09-23,
+- [x] **T1603b** — The tall frame's box (decision review 2026-09-23,
       Q2). Footprint: the `.piece-tall` rules in `global.css` only. The
       unloaded `img` has no natural size, so with the anchor
       `width: fit-content` and the image `width: auto; height: auto` the
@@ -845,6 +845,7 @@ tier if it is ever on (it is off). -->
 | Phase 0 review, T1601–T1602 (`skeptical-reviewer`)          | `opus` (Opus 5.5)              | 62,746                      | signed off; no blocking; 7 notes carried to the sweep                                                                                                                                                                                                                                                                                                       |
 | T1603 (`sdd-implementer`, + one fix round)                  | `opus` (Opus 5.5)              | 190,450                     | done after a stop on the strip unit; 368 tests, 0 hints; every host's rect equal DCL→load except two shifts identical on `main` (→ T1603b/c); at 1512 too the strip overflows (2528px) so frames 3–4 wait for the sideways scroll — the decided rule; unlinked strip branch unverified (no fixture); early-load rule on localhost can show whole pages held |
 | T1603 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 71,717                      | Q1 strip frames own units; Q2 T1603b/c inside the spec; Q3 stagger on the fade; notes: a unit taller than viewport/threshold never arrives (read a tall grid at T1604)                                                                                                                                                                                      |
+| T1603b (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 75,510                      | done; tall box reserved at DCL on both screens (main 0×0), size equal after load, width within 0.016px of `main`; position moves 0–1.4px from sub-pixel figure drift above, identical on `main` (under the 3px rule)                                                                                                                                        |
 
 _(Session-tier allowance draw noted at each pause.)_
 
