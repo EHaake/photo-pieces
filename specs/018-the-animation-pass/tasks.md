@@ -79,7 +79,7 @@ headers to confirm nothing was duplicated or dropped. -->
       and its `blocks`/`declarations` reading of the stylesheet for the
       test's shape; plan.md's "The grammar" and "Reduced motion" for
       the exact strings. `src/styles/global.css`: after
-      `--place-wall-gap`, the eighteen tokens exactly as plan.md lists
+      `--place-wall-gap`, the twenty tokens exactly as plan.md lists
       them, under one comment (THE MOTION GRAMMAR, spec 018: three
       durations, two curves, read by every transition and animation on
       the site; the flags and numbers the tuning envelope names; the
@@ -102,23 +102,35 @@ headers to confirm nothing was duplicated or dropped. -->
       slot may carry; the travel and the growth need no rule: the
       script never names the photograph under reduced motion). Add a
       first `::view-transition-group(*) { animation-duration: var(--dur-state); animation-timing-function: var(--ease-state); }`
-      and `html[data-moving]::view-transition-group(*) { animation-duration: var(--dur-move); animation-timing-function: var(--ease-move); }`
-      at the start of a new `/* ---- Motion (spec 018) ---- */` section
-      at the end of the file, with its header comment (what the section
-      holds, task by task; the old/new pseudo-elements inherit the
-      group's duration per the UA stylesheet). **`motion.test.mjs`**,
-      new, header comment in matte.test.mjs's voice (what can go wrong
-      and which case catches it): the `EXPECTED` table (the eighteen
-      names → values, verbatim); describe "(a) the grammar is declared
-      once": `:root` declares exactly `EXPECTED` (every name, every
-      value, nothing of the family missing or extra — the set of
-      `--dur-*`, `--ease-*`, `--motion-*`, `--arrive-*`, `--wait-fill`,
-      `--hero-*`, `--arrows-slide`, `--rm-*` names in `:root` equals
-      the table's keys), and a walk over every rule in `global.css` and
-      every text file under `src/` finds none of the eighteen declared
-      elsewhere except the reduced-motion block's `:root { --arrive-rise: 0px }`;
+      and `html[data-moving]::view-transition-group(*) { animation-duration: var(--dur-move); animation-timing-function: var(--ease-move); }`,
+      then `::view-transition-old(*), ::view-transition-new(*) { animation-timing-function: inherit; }`
+      (the UA stylesheet inherits the group's duration, fill and delay
+      but not its timing function — csswg-drafts #11546), then the
+      covers rule `.note-cover, .gallery-card .image-link { --motion-appear: var(--motion-appear-covers); --motion-arrive: var(--motion-arrive-covers); }`
+      (the script reads the two flags from the host's computed style;
+      this is how the covers get their own switch), at the start of a
+      new `/* ---- Motion (spec 018) ---- */` section at the end of the
+      file, with its header comment (what the section holds, task by
+      task; `.note-cover` is T1603's wrapper — the rule may precede the
+      markup). **`motion.test.mjs`**, new, header comment in
+      matte.test.mjs's voice (what can go wrong and which case catches
+      it): the `EXPECTED` table (the twenty names → values, verbatim);
+      describe "(a) the grammar is declared once": `:root` declares
+      exactly `EXPECTED` (every name, every value, nothing of the
+      family missing or extra — the set of `--dur-*`, `--ease-*`,
+      `--motion-*`, `--arrive-*`, `--wait-fill`, `--hero-*`,
+      `--arrows-slide`, `--rm-*` names in `:root` equals the table's
+      keys), and a walk over every CSS declaration in `global.css` and
+      in every `<style>` block of every `.astro` file under `src/` — a
+      declaration walk, not a grep: `motion.ts` and the panel carry the
+      names as strings — finds none of the twenty declared elsewhere
+      except the reduced-motion block's `:root { --arrive-rise: 0px }`
+      and the covers rule's `--motion-appear` / `--motion-arrive`
+      reading the two `*-covers` tokens;
       describe "(c) the inherited motion reads the tokens": the six
-      rules' declarations by string (normalised); describe "(d) reduced
+      rules' declarations by string (normalised), plus the two group
+      rules, the old/new `animation-timing-function: inherit` rule and
+      the covers rule, each by string; describe "(d) reduced
       motion keeps the fades and drops the movement": the
       `@media (prefers-reduced-motion: reduce)` block's rules are
       exactly the five (preludes and declarations), no prelude is `*`,
@@ -132,7 +144,9 @@ headers to confirm nothing was duplicated or dropped. -->
       → 0 lines with a literal time or curve in a transition/animation
       (every hit listed and explained); `grep -c "!important" src/styles/global.css`
       recorded (the three from the blanket gone); `grep -n "view-transition" src/styles/global.css`
-      → the header's declaration and the two group rules;
+      → the header's declaration, the two group rules and the old/new
+      inherit rule; `grep -n -- "-covers" src/styles/global.css` → the
+      two `:root` tokens and the covers rule's two reads;
       `git diff -U0 main -- src/styles/global.css | grep '^@@'` — every
       hunk listed, none inside `.image-stage`, `.image-frame`,
       `.image-frame img`, the `html:not([data-quiet])` or
@@ -174,11 +188,14 @@ headers to confirm nothing was duplicated or dropped. -->
       `scripts/check-motion.mjs [dir]` (default `dist`): every
       `_astro/*.css` and every `<style>…</style>` block of every
       `.html` under the dir except under `<dir>/pagefind/`, through
-      `scanMotion`; every `.html` searched for `data-motion`,
-      `data-shown`, `data-moving`, `data-understudy`,
-      `view-transition-name` and `autoplay` (case-sensitive attribute
-      names; the search excludes `<script>` contents, so a page script
-      that mentions an attribute does not trip it); on any finding the
+      `scanMotion`; every `.html` searched — with `<script>` and
+      `<style>` blocks removed first, since a page script names these
+      attributes and Astro's `inlineStylesheets: 'auto'` puts the
+      site's own rules into `<style>` — for the attributes
+      `data-motion`, `data-shown`, `data-moving`, `data-understudy`
+      and `autoplay`, and for `view-transition-name` inside a
+      `style="…"` attribute (`/style="[^"]*view-transition-name/`);
+      on any finding the
       lines plan.md shows to stderr and `process.exit(1)`; else the
       summary line. `package.json` `postbuild`: `&& node scripts/check-motion.mjs`
       after the dev-routes check; `scripts/verify.sh` line 26 gains
@@ -198,12 +215,15 @@ headers to confirm nothing was duplicated or dropped. -->
       `[]` (the file and line in the failure message), no `.astro`
       file matches `/\stransition:(name|animate|persist)\b/` and none
       contains `autoplay`; describe "(e) the barrier fails on the
-      built output": five temp dirs — `_astro/x.css` with `220ms`
+      built output": seven temp dirs — `_astro/x.css` with `220ms`
       (exit 1, stderr names the file and `"220ms"`), a page with
       `data-shown=""` on an `img` (exit 1), a page with `<video autoplay>`
-      (exit 1), a page whose `<style>` carries `ease` (exit 1), a clean
-      dir with a `pagefind/pagefind-ui.css` full of literals (exit 0,
-      the summary line with its counts). _Verify: `sh scripts/verify.sh`
+      (exit 1), a page whose `<style>` carries `ease` (exit 1), a page
+      with `style="view-transition-name: photograph"` on a figure
+      (exit 1), a page whose `<style>` and `<script>` mention
+      `data-shown` and `view-transition-name` in rule and code text
+      only (exit 0), a clean dir with a `pagefind/pagefind-ui.css` full
+      of literals (exit 0, the summary line with its counts). _Verify: `sh scripts/verify.sh`
       green with 87 pages and **three** barrier lines (the new line
       quoted); `node scripts/check-motion.mjs dist` alone → exit 0 and
       the line; `grep -rn "check-motion" package.json scripts/verify.sh`
@@ -224,7 +244,7 @@ headers to confirm nothing was duplicated or dropped. -->
       shape, `reset` as the absence of an override); `src/lib/image-set.ts`
       for a small typed module's shape; plan.md's "The dev switch" and
       "The quiet view as one movement" (for `withTransition`). New
-      `src/lib/motion.ts`: `MOTION_TOKENS` — the eighteen names with
+      `src/lib/motion.ts`: `MOTION_TOKENS` — the twenty names with
       `kind: 'time' | 'curve' | 'flag' | 'length' | 'number' | 'fill'`
       and a short `label` — `NAME = 'photograph'`, `FRAME_HOSTS` and
       `FRAME_IMG` as plan.md spells them, `ms(value)` (`480ms` → 480,
@@ -234,7 +254,9 @@ headers to confirm nothing was duplicated or dropped. -->
       exactly as plan.md describes (synchronous `update()` when
       `!animate` or no `startViewTransition`; else the name and
       `data-moving` set, `document.startViewTransition(update)`, both
-      cleared on `finished`, the promise returned). `appear()` is
+      cleared on `finished` via `.then(clear, clear)` — never
+      `.finally`, which re-throws a skipped transition's rejection —
+      the promise returned). `appear()` is
       T1603's and is not stubbed here: nothing unread ships. Header comment: the
       module's three readers (the layout, the image page, the panel)
       and the pin that ties `FRAME_HOSTS` to the stylesheet. New
@@ -269,7 +291,7 @@ headers to confirm nothing was duplicated or dropped. -->
       are `is:inline`; the served path exists); `grep -rl "dev-motion" dist/`
       empty and `test ! -e dist/dev && echo absent`; on the dev server
       at 1512×982 on `/pieces/where-the-fog-lets-go/`: the panel
-      renders with eighteen rows; setting `--dur-move` to `900ms`
+      renders with twenty rows; setting `--dur-move` to `900ms`
       writes `localStorage['dev-motion']` with that token and
       `getComputedStyle(html).getPropertyValue('--dur-move')` reads
       `900ms`; a navigation to `/galleries/fog-frames/` keeps it (the
@@ -297,26 +319,36 @@ headers to confirm nothing was duplicated or dropped. -->
       `motion.ts`, pinned equal; the fill stays through the fade and
       leaves at `data-shown=""`; why the stage is excluded under
       `data-quiet`). `src/lib/motion.ts`: `appear(scope)` as plan.md
-      describes — the `complete` short-cut, the unit rule (a
-      `.piece-block` holding more than one `img`, else the image's
-      host), `load`-then-`decode()` per image (never `decode()` on an
-      image not yet loaded), one `IntersectionObserver` with
+      describes — `window.__motion = true` as its first line, the
+      flags `--motion-appear` and `--motion-arrive` read from each
+      image's **host** computed style (the covers rule is what makes
+      them differ from the root's), the `complete` short-cut, the
+      early-`load` rule (a `requestAnimationFrame` settles the hook; an
+      image whose `load` fires before it counts as held: `""`, no
+      animation), the unit rule (a `.piece-block` holding more than
+      one `img`, else the image's host), `load`-then-`decode()` per
+      image (never `decode()` on an image not yet loaded), one
+      `IntersectionObserver` with
       `threshold: Number(token('--arrive-threshold'))`, in-view units
       (`getBoundingClientRect` intersecting the viewport at hook time)
       revealed on decode alone as `"fade"`, others on decode and
       intersection as `"rise"` when `--arrive-rise` parses above zero
       and `reducedMotion()` is false, else `"fade"`; `--i` per image
-      only when `ms(token('--arrive-stagger')) > 0`; `animationend` →
-      `data-shown=""` and the host's `data-understudy` and
-      `--understudy` removed if present; `--motion-arrive` off → every
-      unit is in view; `--motion-appear` off → every image `""` at
-      once; `unobserve` on arrival, `disconnect` when none remain; the
-      whole in `try` with `delete root.dataset.motion` in the `catch`;
-      returns the teardown. `src/layouts/BaseLayout.astro`: in the
-      `<head>`, before `<slot name="head" />`,
-      `<script is:inline>document.documentElement.dataset.motion = '';</script>`
-      with an Astro comment (the gate; spec 018 — one line so a
-      photograph never paints before the script decides); in the
+      only when `ms(token('--arrive-stagger')) > 0`; one `shown(img)`
+      writer for `data-shown=""` that also strips the host's
+      `data-understudy` and `--understudy` when present, called from
+      `animationend`, the `complete` short-cut, the early-`load` rule
+      and the appear-off path alike; `--motion-arrive` off on a host →
+      its unit is in view; `--motion-appear` off on a host → its image
+      `""` at once; `unobserve` on arrival, `disconnect` when none
+      remain; the whole in `try` with `delete root.dataset.motion` in
+      the `catch`; returns the teardown. `src/layouts/BaseLayout.astro`:
+      in the `<head>`, before `<slot name="head" />`, the inline gate
+      `<script is:inline>document.documentElement.dataset.motion = ''; addEventListener('load', () => { if (!window.__motion) delete document.documentElement.dataset.motion; }, { once: true });</script>`
+      with an Astro comment (the gate and its release; spec 018 — a
+      photograph never paints before the script decides, and a page
+      whose module never runs shows every frame at `load`, a response
+      to an event, not a timer); in the
       body's script: `import { appear } from '../lib/motion';`, a
       `let teardown = appear(document);` at module evaluation (a
       comment: the initial `astro:page-load` fires on `load`, after
@@ -348,7 +380,9 @@ headers to confirm nothing was duplicated or dropped. -->
       `DOMContentLoaded`), cache cleared, at 1512×982 and 1280×1440,
       on `/pieces/where-the-fog-lets-go/`, `/pieces/vocabulary-sampler/`,
       `/galleries/fog-frames/`, `/places/the-headlands/`,
-      `/images/where-the-fog-lets-go/land-b/` and `/pieces/`: every
+      `/images/where-the-fog-lets-go/land-b/`, and the three indexes
+      and the front door — `/pieces/`, `/galleries/`, `/places/`, `/`
+      (the `CoverCards` spans, the `PieceList` covers, the hero): every
       host's rect at `DOMContentLoaded` equals its rect after `load`
       (zero shift — each page's count of hosts and any difference
       recorded); at hook time (read from the preload script at the
@@ -369,8 +403,17 @@ headers to confirm nothing was duplicated or dropped. -->
       warm reload writes `""` on every image and creates no animation.
       Without script (spec 017's sandboxed-iframe recipe): `html` has
       no `data-motion`, every `FRAME_IMG` image's computed `opacity` is
-      `1`. Under reduced motion: `"fade"` animates at 400, no `"rise"`
-      is ever written. `performance.getEntriesByType('resource')`
+      `1`. With the layout's module request blocked in the BiDi
+      profile (`network.addIntercept` on its chunk URL, or a 404 via
+      the dev server): `html` carries `data-motion` before `load` and
+      none after it, `window.__motion` is undefined, every frame's
+      `opacity` is `1` (the release). On `/pieces/` and `/` the row
+      cover's rect (the `PieceList` wrapper is the one markup change)
+      equals the same row's rect on `main` at both viewports. With
+      `--motion-appear-covers: 0` on `html`, the covers on `/`,
+      `/pieces/`, `/galleries/` and `/places/` read `""` at once while
+      a gallery cell still fades (the host-read flag). Under reduced
+      motion: `"fade"` animates at 400, no `"rise"` is ever written. `performance.getEntriesByType('resource')`
       image entries on the gallery page equal `main`'s in count and
       URLs (recorded). Mutations, reverted: `html[data-motion]`
       dropped from the gate's prelude → (g)'s opacity walk fails; a
@@ -389,75 +432,122 @@ headers to confirm nothing was duplicated or dropped. -->
       `../lib/motion`; a module-level `moving` record
       (`{ kind: 'in' | 'step' | 'out'; src?: string; dir?: 'prev' | 'next'; navigationType: string }`
       or null) and `landing: HTMLImageElement | null`;
-      `astro:before-preparation`: return unless `--motion-travel` is
-      `1` and `reducedMotion()` is false; classify from
-      `event.from.pathname` / `event.to.pathname` against
-      `IMAGES_PATH`; **in** — `sourceElement`'s `closest('.image-link')`'s
-      `img` (else return), inline `viewTransitionName = NAME`,
-      `moving = { kind: 'in', src: img.currentSrc, … }`,
-      `sessionStorage['motion-origin'] = JSON.stringify({ path: from.pathname, y: scrollY })`;
-      **step** — `moving = { kind: 'step', dir: sourceElement?.closest('[data-nav]')?.dataset.nav }`,
-      and if `parseFloat(token('--arrows-slide')) > 0` the current
-      `.image-frame` named; `const load = event.loader; event.loader = async () => { await load(); await preloadStage(event.newDocument); }`
-      where `preloadStage` reads the new document's `.image-frame img`,
-      creates an `Image`, sets `sizes` then `srcset` (then `src`),
+      **`astro:before-preparation`**: return unless `--motion-travel`
+      is `1` and `reducedMotion()` is false; classify by **what was
+      clicked**, never by the paths alone — the related strip is on the
+      image page, and a path rule would take its click for an arrow
+      step: `link` is `sourceElement.closest('a')` when the source is an
+      element, else null. **in** — `link?.closest('.image-link')`
+      exists: that link's `img` (else return) gets inline
+      `viewTransitionName = NAME`; `moving = { kind: 'in', src: img.currentSrc, … }`;
+      `sessionStorage['motion-origin']` set to the JSON of
+      `{ path: from.pathname, y: scrollY }`. **step** —
+      `link?.closest('[data-nav]')` exists:
+      `moving = { kind: 'step', dir: that element's data-nav }`, and if
+      `parseFloat(token('--arrows-slide')) > 0` the current
+      `.image-frame` is named; the loader extended —
+      `const load = event.loader; event.loader = async () => { await load(); await preloadStage(event.newDocument); }`
+      — where `preloadStage` reads the new document's `.image-frame img`,
+      creates an `Image`, sets `sizes` (`'100vw'` when the current
+      `html` has `data-quiet` — the value `applyQuiet` will give the
+      stage — else the attribute's) then `srcset` then `src`, and
       awaits `decode()` raced against a one-second bound, swallowing
-      errors; **out** — the current `.image-frame` named,
-      `moving = { kind: 'out', navigationType: event.navigationType }`.
-      `astro:before-swap`: if `moving`, `newDocument.documentElement.dataset.moving = moving.kind`;
-      **in** → the new `.image-frame` named, `dataset.understudy = ''`,
-      `style.setProperty('--understudy', \`url("${moving.src}")\`)`;
-      **step** with a slide → the new figure named and
-      `dataset.slide = moving.dir`; **out** →
-      `landing = newDocument.querySelector(\`.image-link[href="${event.from.pathname}"] img\`)`    named when found;`event.viewTransition?.finished.finally(clear)`    where`clear`empties every inline`viewTransitionName`the
-    script set, deletes`data-moving`and`data-slide`, and nulls
-    `moving`and`landing`. `astro:after-swap`: if `moving?.kind === 'out'`    and`landing`and`moving.navigationType !== 'traverse'`: the
-    stored origin's `y`when its`path`is`location.pathname`, else
-    `landing.scrollIntoView({ block: 'center', behavior: 'instant' })`    (the existing`lastY = scrollY`line follows).`global.css`, the
-    Motion section: the understudy rule as plan.md spells it (a
-    comment: the photograph the reader saw stays in the box until
-    the page's own file has decoded — same photograph, same ratio,
-    so `100% 100%`is not a distortion; removed by`appear()`); the
-    slide variant — `html[data-slide='next'] { --dir: -1; }`,
-    `html[data-slide='prev'] { --dir: 1; }`,
-    `html[data-slide]::view-transition-old(photograph) { animation: motion-slide-out var(--dur-move) var(--ease-move) both; }`,
-    `html[data-slide]::view-transition-new(photograph) { animation: motion-slide-in var(--dur-move) var(--ease-move) both; }`,
-    `@keyframes motion-slide-out { to { opacity: 0; transform: translateX(calc(var(--arrows-slide) * var(--dir))); } }`,
-    `@keyframes motion-slide-in { from { opacity: 0; transform: translateX(calc(var(--arrows-slide) * var(--dir) * -1)); } }`     (a comment: built for the pause's "or slide" question; off at
-    `0px`). `motion.test.mjs`: describe (b) already covers the new
-    rules (re-run); add to (g): the understudy and slide rules'
-    preludes carry `[data-understudy]`/`[data-slide]`(transient
-    attributes, never in markup — the markup walk covers them).
-    _Verify:`sh scripts/verify.sh`green (count recorded);
-   `git diff main -- src/layouts/BaseLayout.astro`shows the three
-    listeners and nothing in the header-hide or`image-set`code
-    beyond the`lastY`line's neighbours (hunks listed); on the dev
-    server (the BiDi recipe) at 1512×982 and 1280×1440: from
-   `/galleries/fog-frames/`scrolled so`land-b`'s cell is
-    mid-screen, `click`it — during the transition
-   `document.getAnimations()`includes effects on
-   `::view-transition-group(photograph)`and`::view-transition-group(root)`    with`getTiming().duration`480 and`easing` `cubic-bezier(0.22, 1, 0.36, 1)`    (recorded),`html`reads`data-moving="in"`, the new figure
-    `data-understudy`and`--understudy`equal to the clicked image's
-   `currentSrc`; after the stage's `animationend`the figure has
-    neither and`html`no`data-moving`after`finished`; history
-    back — during: `data-moving="out"`, the cell for
-    `/images/where-the-fog-lets-go/land-b/`named; after:`scrollY`    equals the value before the click (±1); the image page's "In
-    the gallery" link — the same reads,`scrollY`from
-   `motion-origin`; from `/pieces/where-the-fog-lets-go/`(a frame
-    in the prose),`/places/the-headlands/` (a wall cell) and an
-    image page's related strip (its clipped rect recorded) — the
-    same in/out reads; an arrow (`→`key and the link): no element
-    named, only the root group animates (at 480), the next stage
-   `img.complete`is`true`at`astro:after-swap`, and the resource
-    timeline lists its candidate URL exactly once (the URL and the
-    count recorded), the swap happening within 1.2 s of the key on
-    the dev server; with `--arrows-slide: 2rem`on`html`both
-    figures named and`getAnimations()`includes`motion-slide-out`    and`motion-slide-in`; `::view-transition-group(site-header)`    present on every navigation; with`dom.viewTransitions.enabled=false`    in the profile: no console error,`startViewTransition`    undefined, the pages change and`html`carries no leftover
-    attribute; under reduced motion: nothing named on any of the
-    three navigations, the root group animates (the plan's recorded
-    deviation),`data-moving` still set and cleared. Where the
-      headless run cannot observe a pseudo-element animation it says
-      so line by line and the Phase 1 pause asks the person to attest
+      errors. **out** — otherwise, when `from.pathname` starts with
+      `IMAGES_PATH`: the current `.image-frame` is named and
+      `moving = { kind: 'out', navigationType: event.navigationType, direction: event.direction }`;
+      when `to.pathname` also starts with `IMAGES_PATH` (a traverse
+      between image pages — the kind is settled at before-swap) the
+      loader is extended as for a step. Nothing else is a travel.
+      **`astro:before-swap`**: if `moving`, first settle the traverse
+      case — `kind === 'out'` with `to` an image page becomes `'step'`
+      (`dir` from `direction`: `back` → `prev`, `forward` → `next`)
+      unless the new document holds an `.image-link` whose `href` is
+      `event.from.pathname`; then `newDocument.documentElement.dataset.moving = moving.kind`;
+      **in** → the new `.image-frame` named, `dataset.understudy = ''`
+      and `--understudy` set to `url("<moving.src>")` by
+      `style.setProperty`; **step** with a slide → the new figure named
+      and `dataset.slide = moving.dir`; **out** → `landing` is the
+      `img` inside the `.image-link` whose `href` is
+      `event.from.pathname` in the new document, named when found;
+      `event.viewTransition?.finished.then(clear, clear)` (never
+      `.finally`, which re-throws a skipped transition's rejection),
+      where `clear` empties every inline `viewTransitionName` the
+      script set, deletes `data-moving` and `data-slide`, and nulls
+      `moving` and `landing`. **`astro:after-swap`**: if
+      `moving?.kind === 'out'` and `landing` and
+      `moving.navigationType !== 'traverse'`: scroll to the stored
+      origin's `y` when its `path` is `location.pathname`, else
+      `landing.scrollIntoView({ block: 'center', behavior: 'instant' })`
+      (the existing `lastY = scrollY` line follows). `global.css`, the
+      Motion section: the understudy rule as plan.md spells it (a
+      comment: the photograph the reader saw stays in the box until the
+      page's own file has decoded — same photograph, same ratio, so
+      `100% 100%` is not a distortion; removed by `appear()` on every
+      path that shows the image); the slide variant —
+      `html[data-slide='next'] { --dir: -1; }`,
+      `html[data-slide='prev'] { --dir: 1; }`,
+      `html[data-slide]::view-transition-old(photograph) { animation: motion-slide-out var(--dur-move) var(--ease-move) both; }`,
+      `html[data-slide]::view-transition-new(photograph) { animation: motion-slide-in var(--dur-move) var(--ease-move) both; }`,
+      `@keyframes motion-slide-out { to { opacity: 0; transform: translateX(calc(var(--arrows-slide) * var(--dir))); } }`,
+      `@keyframes motion-slide-in { from { opacity: 0; transform: translateX(calc(var(--arrows-slide) * var(--dir) * -1)); } }`
+      (a comment: built for the pause's "or slide" question; off at
+      `0px`). `motion.test.mjs`: describe (b) already covers the new
+      rules (re-run); add to (g): the understudy and slide rules'
+      preludes carry `[data-understudy]` / `[data-slide]` (transient
+      attributes, never in markup — the markup walk covers them).
+      _Verify: `sh scripts/verify.sh` green (count recorded);
+      `git diff main -- src/layouts/BaseLayout.astro` shows the three
+      listeners and nothing in the header-hide or `image-set` code
+      beyond the `lastY` line's neighbours (hunks listed); on the dev
+      server (the BiDi recipe) at 1512×982 and 1280×1440: from
+      `/galleries/fog-frames/` scrolled so `land-b`'s cell is
+      mid-screen, `click` it — during the transition
+      `document.getAnimations()` includes effects on
+      `::view-transition-group(photograph)` and
+      `::view-transition-group(root)` with `getTiming().duration` 480
+      and `easing` `cubic-bezier(0.22, 1, 0.36, 1)` (recorded), `html`
+      reads `data-moving="in"`, the new figure `data-understudy` and
+      `--understudy` equal to the clicked image's `currentSrc`; after
+      the stage's `animationend` the figure has neither and `html` no
+      `data-moving` after `finished`; history back — during:
+      `data-moving="out"`, the cell for
+      `/images/where-the-fog-lets-go/land-b/` named; after: `scrollY`
+      equals the value before the click (±1); the image page's "In the
+      gallery" link — the same reads, `scrollY` from `motion-origin`;
+      **on each way back**, read at `astro:after-swap` after the hook:
+      the landing `img.complete`, its `data-shown` (`""` expected), and
+      the number of frame images on the page that pass through `"fade"`
+      (a `MutationObserver` log) — 0 expected for every frame the
+      reader saw before the click; if `complete` read false, say
+      whether the early-`load` rule caught it; if the count is above
+      zero, record the browser and the count and repeat the read on
+      `astro preview` (plan.md's known limitation); from
+      `/pieces/where-the-fog-lets-go/` (a frame in the prose),
+      `/places/the-headlands/` (a wall cell) and an image page's
+      related strip — the strip click classified **in**
+      (`data-moving="in"`, the strip image named, the understudy on the
+      new figure; its clipped rect recorded) and its browser back
+      classified **out** with the strip cell named — the same in/out
+      reads; a second click on the same gallery cell after returning:
+      the figure carries no `data-understudy` and no `--understudy`
+      after the hook; an arrow (`→` key and the link): no element named,
+      only the root group animates (at 480), the next stage
+      `img.complete` is `true` at `astro:after-swap`, and the resource
+      timeline lists its candidate URL exactly once (the URL and the
+      count recorded), the swap happening within 1.2 s of the key on
+      the dev server — and the same arrow taken in the quiet view: the
+      preload's URL equals the stage's `currentSrc` under `sizes="100vw"`
+      and appears once; with `--arrows-slide: 2rem` on `html` both
+      figures named and `getAnimations()` includes `motion-slide-out`
+      and `motion-slide-in`; `::view-transition-group(site-header)`
+      present on every navigation; with `dom.viewTransitions.enabled=false`
+      in the profile: no console error, `startViewTransition`
+      undefined, the pages change and `html` carries no leftover
+      attribute; under reduced motion: nothing named on any of the
+      three navigations, the root group animates (the plan's recorded
+      deviation), `data-moving` still set and cleared. Where the
+      headless run cannot observe a pseudo-element animation it says so
+      line by line and the Phase 1 pause asks the person to attest
       those lines._
 
 - [ ] **T1605** — The quiet view as one movement. Pattern: the
@@ -640,7 +730,8 @@ keeps in his words. Anything he saw that the spec did not say.)_
       tier and its findings resolved; the acceptance criteria checked
       against their records (AC 1 by T1600's (a)/(c)/(d) and T1601's
       (b)/(e) with the build's barrier line; AC 2 by T1607's brief
-      section; AC 3 by T1603's rect and fill reads on the six pages;
+      section; AC 3 by T1603's rect and fill reads on the nine pages
+      (the three indexes and the front door among them);
       AC 4 by T1603's no-script read and T1601's barrier; AC 5 by
       T1603's diptych and warm-reload reads and the Phase 1
       attestation; AC 6 by T1604's reads on the four surfaces, the

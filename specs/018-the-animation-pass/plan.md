@@ -40,7 +40,14 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   duration this spec gives the root group — a fade, kept under Goal 6's
   principle — rather than cutting as the spec expected of the router.
   Said in the report as a deviation; a cut is one line in the
-  reduced-motion block if the photographer wants it.
+  reduced-motion block if the photographer wants it. (Astro ships a
+  `components/viewtransitions.css` whose lines 56–66 put
+  `animation: none !important` on the view-transition pseudo-elements
+  under `prefers-reduced-motion`; nothing in `node_modules/astro`
+  imports or references it, so it is dead on this site. If a later
+  Astro wires it in, its `!important` would beat this spec's
+  `html[data-moving]::view-transition-group(*)` rules under reduced
+  motion — which is the outcome the spec asked for anyway.)
 
 - **The grammar** (`src/styles/global.css`, `:root`, after
   `--place-wall-gap`). Three durations, two curves, and beside them the
@@ -59,6 +66,8 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
       --motion-arrive: 1;
       --motion-travel: 1;
       --motion-quiet: 1;
+      --motion-appear-covers: 1; /* the covers on the three indexes and the front door: their own appearance and arrival flags */
+      --motion-arrive-covers: 1;
       --arrive-rise: 0px;        /* the arrival's shape: 0px is the fade alone, a length is the fade with a rise */
       --arrive-threshold: 0.15;  /* the share of a frame in view that counts as arrived */
       --arrive-stagger: 0ms;     /* a multi-cell block arrives as one; a stagger only if asked to see one */
@@ -86,8 +95,18 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   stylesheet); under `html[data-moving]` — the attribute the script
   sets while a photograph is travelling, stepping or growing — every
   group takes `--dur-move --ease-move`, so the page beneath lands with
-  the photograph. One rule and one attribute rather than a per-case
-  duration: the simpler shape, and the token is the tunable.
+  the photograph. Beside those two, `::view-transition-old(*), ::view-transition-new(*) { animation-timing-function: inherit; }`:
+  the UA stylesheet inherits duration, fill and delay from the group
+  but not the timing function (csswg-drafts #11546), and `inherit` is
+  not a literal to the scanner. One rule and one attribute rather than
+  a per-case duration: the simpler shape, and the token is the tunable.
+  The two `*-covers` flags exist because the envelope names the covers
+  as their own question: script reads `--motion-appear` and
+  `--motion-arrive` from the **host's** computed style, not the root's
+  — custom properties inherit, so one rule in the Motion section,
+  `.note-cover, .gallery-card .image-link { --motion-appear: var(--motion-appear-covers); --motion-arrive: var(--motion-arrive-covers); }`,
+  gives the covers their own switch and any later surface gets one in
+  one line. Twenty tokens in all.
 
 - **Reduced motion** (`global.css`, the `@media (prefers-reduced-motion: reduce)`
   block). The blanket `* { animation-duration: 1ms; transition-duration: 1ms; scroll-behavior: auto }`
@@ -131,9 +150,19 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
 
   The hidden state is script-set, in two parts so that nothing can pop
   and nothing is hidden without script. An inline script in the
-  layout's head — `<script is:inline>document.documentElement.dataset.motion=''</script>`,
-  before the body is parsed — writes `html[data-motion]`; the gate rule
-  reads it:
+  layout's head, before the body is parsed, writes `html[data-motion]`
+  and arms its own release:
+
+      document.documentElement.dataset.motion = '';
+      addEventListener('load', () => { if (!window.__motion) delete document.documentElement.dataset.motion; }, { once: true });
+
+  The module sets `window.__motion = true` the moment `appear()` binds;
+  a deferred module always evaluates — or fails — before `load`, so the
+  release never races a healthy run and never fires on one, and a page
+  whose module never arrives (a stale hashed chunk after a deploy, a
+  throw ahead of `appear()` in the layout's script) shows every frame
+  at `load`: a response to an event, which Goal 2 allows, not a timer.
+  The gate rule reads the attribute:
 
       html[data-motion] :is(FRAME_HOSTS) > img:not([data-shown]) { opacity: 0; }
       html[data-motion]:not([data-quiet]) :is(FRAME_HOSTS):has(> img:not([data-shown=''])) { background-color: var(--wait-fill); }
@@ -148,11 +177,21 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   proves on `dist/`. The `:not([data-quiet])` keeps the waiting fill
   off the quiet view's frame, where the mat is the box (the quiet
   rule's `background` shorthand would otherwise lose its colour to a
-  more specific fill). `appear()` then, per frame image in `FRAME_IMG`:
-  an image with `complete` true is marked `data-shown=""` at once — no
-  fade, no rise, so a return to a page replays nothing; every other
-  image belongs to a **unit** — its `.piece-block` when that block
-  holds more than one image (diptych, triptych, grid, strip, row with a
+  more specific fill). `appear()` then, per frame image in `FRAME_IMG`,
+  with the flags read from the image's host
+  (`getComputedStyle(host).getPropertyValue('--motion-appear')`, and
+  `--motion-arrive` likewise — the covers rule above is what makes a
+  surface's own value differ from the root's): an image with `complete`
+  true is marked `data-shown=""` at once — no fade, no rise, so a
+  return to a page replays nothing — and so is an image whose `load`
+  fires before the first animation frame after the hook (a
+  `requestAnimationFrame` settles the hook; a `load` that arrives
+  before it means the browser already held the file and only the event
+  was late): that rule is stated so the design does not rest on whether
+  a memory-cached image reads `complete` in the same task the router
+  adopts the body — a browser detail T1604 measures rather than assumes
+  (Known limitations). Every other image belongs to a **unit** — its
+  `.piece-block` when that block holds more than one image (diptych, triptych, grid, strip, row with a
   pair), otherwise its host — and a unit is revealed as one, when
   every image in it has decoded (`load` then `img.decode()`, never
   `decode()` before `load`, which would fetch a lazy image early) and,
@@ -162,10 +201,15 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   disconnects when the last has. A unit in view at hook time gets
   `data-shown="fade"`; one below the fold gets `"rise"` when
   `--arrive-rise` is non-zero and reduced motion is off, else `"fade"`;
-  `--motion-arrive: 0` treats every unit as in view; `--motion-appear: 0`
-  marks everything `""` at once. On `animationend` the script writes
-  `data-shown=""` so the fill leaves with the fade, and a host with
-  `data-understudy` (the travel's, below) loses it there. `--i` is set
+  `--motion-arrive: 0` on a host treats its unit as in view;
+  `--motion-appear: 0` on a host marks its image `""` at once. On
+  `animationend` the script writes `data-shown=""` so the fill leaves
+  with the fade. A host carrying `data-understudy` (the travel's,
+  below) is stripped of it and of `--understudy` on **every** path that
+  writes `data-shown=""` — the `animationend`, the `complete`
+  short-cut, the early-`load` rule, the appear-off case — so a second
+  visit to a stage never keeps the previous rendering under a live
+  photograph. `--i` is set
   per image in a unit only when `--arrive-stagger` is non-zero. The
   whole of `appear()` is wrapped so that a throw removes `data-motion`
   and shows everything — the one failure that could hide a photograph.
@@ -180,28 +224,43 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
 
 - **The travel** (`BaseLayout.astro`'s script, on the router's events;
   `src/lib/motion.ts` for `NAME`, `flag`, `token`, `reducedMotion`).
-  Three navigations are told apart in `astro:before-preparation` from
-  `from`, `to` and `sourceElement`, and nothing is named unless
+  Three navigations are told apart in `astro:before-preparation` by
+  **what was clicked** (`sourceElement`), not by the paths — the
+  related strip lives on the image page, so a path rule would take a
+  strip click for an arrow step — and nothing is named unless
   `--motion-travel` is 1 and reduced motion is off:
-  - **in** — `to` is under `/images/`, `from` is not: the photograph
-    the reader clicked (`sourceElement.closest('.image-link')`'s `img`
-    — the photograph, not the cell) gets an inline
-    `view-transition-name: photograph`; the origin's scroll position is
-    stored (`sessionStorage['motion-origin'] = { path, y }`).
-  - **step** — both under `/images/`: nothing is named when
+  - **in** — `sourceElement.closest('.image-link')` exists, on any
+    page (a piece's frame, a gallery cell, the wall, the related strip
+    on an image page): that link's `img` (the photograph, not the cell)
+    gets an inline `view-transition-name: photograph`; the origin's
+    scroll position is stored (`sessionStorage['motion-origin'] = { path, y }`).
+  - **step** — `sourceElement.closest('[data-nav]')` exists (the
+    arrows; the arrow keys `.click()` them): nothing is named when
     `--arrows-slide` is `0px`, so the root cross-fade carries the
     photograph in its box, as today; the event's `loader` is extended
     to preload the next stage's file — an `Image` given the new
-    document's stage `sizes` then `srcset`, awaited through `decode()`
-    with a bound of one second — so the new stage is `complete` at the
-    swap and the cross-fade goes from one photograph straight to the
-    next. The same URL the page requests a moment later: a cache hit,
-    not a second request (a claim T1604 verifies from the resource
-    timeline). With a slide distance the old and new stage figures are
-    named and `data-slide="prev|next"` selects the slide keyframes.
-  - **out** — `from` is under `/images/`, `to` is not, whether by the
-    page's way-back links or the browser's back: the stage figure is
-    named.
+    document's stage `sizes` (or `100vw` when `html[data-quiet]` is
+    set, the value `applyQuiet` will give the stage) then `srcset`,
+    awaited through `decode()` with a bound of one second — so the new
+    stage is `complete` at the swap and the cross-fade goes from one
+    photograph straight to the next. The same URL the page requests a
+    moment later: a cache hit, not a second request (a claim T1604
+    verifies from the resource timeline, in both views). With a slide
+    distance the old and new stage figures are named and
+    `data-slide="prev|next"` selects the slide keyframes.
+  - **out** — `from` is under `/images/` and the click was neither of
+    the above (the page's way-back links), or the navigation is a
+    `traverse` from an image page: the stage figure is named. For a
+    traverse whose `to` is also an image page the kind is settled in
+    `astro:before-swap`: **out** when the new document holds
+    `.image-link[href="<from.pathname>"]` (the reader came through a
+    related strip and is going back to it — that cell is named), else
+    **step** (the loader has preloaded the stage as for any
+    image-to-image traverse; with a slide the direction is the event's
+    `direction`, `back` → prev, `forward` → next). In that one case the
+    old figure is named before the kind is known; when it turns out to
+    be a nameless step the figure exits on its own group instead of
+    inside the root's — the same cross-fade in its box.
 
   In `astro:before-swap` the new document is dressed before it is
   swapped in (inline styles and attributes on it survive the swap;
@@ -226,7 +285,9 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   stored `y` when the stored path matches, else the cell is
   `scrollIntoView({ block: 'center' })` — so the photograph lands in
   its own cell. Every name, `data-moving` and `data-slide` is cleared
-  on the swap event's `viewTransition.finished`. `.site-header`
+  on the swap event's `viewTransition.finished` — `.then(clear, clear)`,
+  never `.finally`, which would re-throw a skipped transition's
+  rejection. `.site-header`
   declares `view-transition-name: site-header`: chrome, excluded from
   the page's cross-fade and never blended with the photograph; where
   the old page had hidden it (`data-hidden`), it slides in on its own
@@ -259,8 +320,9 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
 
   `withTransition(update, moving, named, animate)`: `animate` false or
   no `startViewTransition` → `update()` synchronously; else name
-  `named` (when given), set `data-moving`, start, and on `finished`
-  clear both. The image page is its one caller today; the layout's
+  `named` (when given), set `data-moving`, start, and clear both on
+  `finished` via `.then(clear, clear)`. The image page is its one
+  caller today; the layout's
   travel wires the router's events instead of calling it, because the
   router owns that transition. One helper, not a module of transition
   kinds: the second caller does not exist.
@@ -296,10 +358,13 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   `180ms` fails. Two callers: the test runs it over `global.css` and
   every `<style>` block in `src/**/*.astro` (line-numbered findings),
   and the postbuild barrier runs it over `dist/_astro/*.css` and every
-  `<style>` in `dist/**/*.html`, and also fails a page that carries
-  `data-motion`, `data-shown`, `data-moving`, `data-understudy`, an
-  inline `view-transition-name` or `autoplay` — the no-script pin on
-  `dist/`. `dist/pagefind/` is excluded: pagefind's UI stylesheet is a
+  `<style>` in `dist/**/*.html`, and also fails a page whose markup —
+  `<script>` and `<style>` blocks excluded, since Astro's
+  `inlineStylesheets: 'auto'` inlines small stylesheets and the site's
+  own rules name these attributes — carries `data-motion`,
+  `data-shown`, `data-moving`, `data-understudy`, `autoplay`, or a
+  `view-transition-name` inside a `style="…"` attribute — the no-script
+  pin on `dist/`. `dist/pagefind/` is excluded: pagefind's UI stylesheet is a
   third party's, loaded on the search page alone, and its transitions
   are not the site's (a known limitation, below). A companion pin in
   the test: no `transition:` directive in any `.astro` file — Astro
@@ -337,17 +402,23 @@ Every claim above is owned by a task and a check:
 
 - **The grammar is one set of tokens, declared once, and everything
   reads it** — `motion.test.mjs`, **T1600**. (a) `:root` declares
-  exactly the eighteen names in `EXPECTED` with those values (the
+  exactly the twenty names in `EXPECTED` with those values (the
   table at the top of the file is the one edit a round makes beside
-  the stylesheet), and no other rule in `global.css` or any file under
-  `src/` declares one of them outside the reduced-motion block's
-  `:root { --arrive-rise: 0px }` (walk, matte.test.mjs (a)'s shape).
+  the stylesheet), and no other rule in `global.css` or in any
+  `<style>` block of any `.astro` file under `src/` declares one of
+  them — a walk over CSS declarations, not a grep, because
+  `motion.ts` and the panel carry the names as strings — except the
+  reduced-motion block's `:root { --arrive-rise: 0px }` and the covers
+  rule's two reads of the `*-covers` tokens (walk, matte.test.mjs
+  (a)'s shape).
   (b) `scanMotion(global.css)` is empty; every `<style>` block in every
   `src/**/*.astro` scans empty; no `.astro` file carries a
   `transition:` directive or `autoplay`. (c) The inherited rules, by
   string: `a:not(.brand, .button)`'s `transition`, `.site-header`'s,
   `.button`'s, `.social-links a`'s, `.hero > *`'s `animation` and the
-  three delays, and `keel-enter`'s body unchanged. (d) The
+  three delays, and `keel-enter`'s body unchanged; and, by string, the
+  two `::view-transition-group` rules, the old/new
+  `animation-timing-function: inherit` rule and the covers rule. (d) The
   reduced-motion block contains exactly the five rules above and no
   `*` prelude, no `1ms`, no `scroll-behavior`, and no rule under it
   names an `opacity` transition or the appearance animation with a
@@ -407,8 +478,10 @@ Every claim above is owned by a task and a check:
   (Firefox 156 headless via BiDi, spec 015's recipe; a preload script
   records rects at `DOMContentLoaded`): on `/pieces/where-the-fog-lets-go/`
   and `/pieces/vocabulary-sampler/` (every treatment), `/galleries/fog-frames/`,
-  `/places/the-headlands/`, `/images/where-the-fog-lets-go/land-b/`
-  and `/pieces/` at 1512×982 and 1280×1440, cache cleared: every
+  `/places/the-headlands/`, `/images/where-the-fog-lets-go/land-b/`,
+  and the three indexes and the front door — `/pieces/`, `/galleries/`,
+  `/places/`, `/` (the `CoverCards` spans, the `PieceList` covers, the
+  hero) — at 1512×982 and 1280×1440, cache cleared: every
   `FRAME_IMG` host's rect at `DOMContentLoaded` equals its rect after
   `load` (zero shift); at hook time each in-view undecoded image has
   no `data-shown` and computed `opacity` 0 with its host's
@@ -425,9 +498,16 @@ Every claim above is owned by a task and a check:
   changes no attribute; a reload with the cache warm marks every image
   `""` at once and creates no animation. Without script (the sandboxed
   iframe recipe from spec 017's T1503): `html` has no `data-motion`,
-  every frame image's computed `opacity` is 1. Under reduced motion:
-  `"fade"` still animates at `--dur-appear`; no `"rise"` is written;
-  the `.site-header`'s `transition-duration` is 0s. Observer hygiene
+  every frame image's computed `opacity` is 1. With the layout's
+  module request blocked in the profile (the chunk 404s): `html`
+  carries `data-motion` before `load` and none after it,
+  `window.__motion` is undefined, every frame's `opacity` is 1 (the
+  release). On `/pieces/` and `/` the row cover's rect equals `main`'s
+  (the one markup change, measured). With `--motion-appear-covers: 0`
+  on `html` the covers read `""` at once while a gallery cell still
+  fades (the host-read flag). Under reduced motion: `"fade"` still
+  animates at `--dur-appear`; no `"rise"` is written; the
+  `.site-header`'s `transition-duration` is 0s. Observer hygiene
   is read in the code (`unobserve` on arrival, `disconnect` at the end
   and at teardown) and in behaviour (no attribute changes after all
   units arrived).
@@ -444,13 +524,25 @@ Every claim above is owned by a task and a check:
   image page's path is named in the new document, the scroll position
   equals the one before the click, `data-moving="out"` during. The
   page's "In the gallery" link: the same, the scroll restored from
-  `motion-origin`. From a piece, a place wall and a related strip:
-  the same reads (the strip's clipped rect recorded). An arrow: no
-  element named, only the root group animates at `--dur-move`, the
-  next stage image is `complete` at `astro:after-swap`, and
+  `motion-origin`. On the way back, read at `astro:after-swap` after
+  the hook: the landing `img.complete`, its `data-shown`, and the
+  number of frame images on the page that pass through `"fade"` —
+  which must be 0 for the frames the reader saw before the click
+  (the premise "a return replays nothing", measured, not assumed; if
+  `complete` reads false and the early-`load` rule catches them the
+  count is still 0; if neither, the limitation is recorded with the
+  browser and the count). From a piece, a place wall and a related
+  strip: the same reads — the strip click classified **in**, not
+  step (the strip's clipped rect recorded); a second click on the
+  same cell: the figure carries no `data-understudy` and no
+  `--understudy` after the hook. An arrow: no element named, only
+  the root group animates at `--dur-move`, the next stage image is
+  `complete` at `astro:after-swap`, and
   `performance.getEntriesByType('resource')` lists its candidate URL
-  once; with `--arrows-slide: 2rem` both figures are named and the
-  old/new photograph pseudo-elements animate the slide keyframes.
+  once — and once more in the quiet view, where the preload's
+  candidate equals the stage's `currentSrc` under `sizes="100vw"`;
+  with `--arrows-slide: 2rem` both figures are named and the old/new
+  photograph pseudo-elements animate the slide keyframes.
   The header: `::view-transition-group(site-header)` present, the
   root cross-fade never includes it. With `dom.viewTransitions.enabled=false`
   in the profile: no error in the console, the page changes as on
@@ -477,7 +569,7 @@ Every claim above is owned by a task and a check:
 ## File structure
 
 ```
-src/styles/global.css                     :root — the eighteen tokens and their comment; a: / .site-header (+ view-transition-name) / .button / .social-links a / .hero rules on the tokens; the reduced-motion block rewritten (T1600). The Motion section at the end: the gate, the fill, the two appearance animations and keyframes, the understudy, the view-transition group rules, the slide variant's rules and keyframes (T1603, T1604)
+src/styles/global.css                     :root — the twenty tokens and their comment; a: / .site-header (+ view-transition-name) / .button / .social-links a / .hero rules on the tokens; the reduced-motion block rewritten; the Motion section opened with the view-transition group rules, the old/new timing-function inherit, and the covers rule (T1600). Then the gate, the fill, the two appearance animations and keyframes (T1603), the understudy and the slide variant's rules and keyframes (T1604)
 src/lib/motion.ts                         new: MOTION_TOKENS, NAME, FRAME_HOSTS, FRAME_IMG, ms(), token(), flag(), reducedMotion(), withTransition(), appear() (T1602; appear() at T1603)
 src/lib/motion-scan.mjs                   new: scanMotion(css) — the literal, easing and iteration finder (T1601)
 scripts/check-motion.mjs                  new: the postbuild barrier over dist/ (T1601)
@@ -510,13 +602,25 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   without `transition:*` directives (verified in `astro/dist`). A fade,
   within Goal 6; a cut is one rule in the reduced-motion block
   (`::view-transition-group(*) { animation-duration: 0s }`) if wanted.
-- **The gate depends on the module running.** `html[data-motion]` is
-  written by an inline script before the body; if the layout's module
-  then fails to evaluate (a script error in an old browser), frames
-  stay hidden. `appear()` removes the attribute on any throw, and
-  `astro check` plus the browser reads are the guard; a timed CSS
-  fallback is exactly what the rule forbids. Without script at all
-  nothing is hidden, by construction and by the barrier.
+- **The gate holds frames hidden until `load` if the module never
+  runs.** `html[data-motion]` is written by an inline script before
+  the body; the same script releases it at `load` unless the module
+  has set `window.__motion`, and `appear()` releases it on any throw
+  of its own. So a stale chunk or a throw ahead of `appear()` shows
+  every frame at `load` — later than a healthy page, never hidden for
+  good. Without script at all nothing is hidden, by construction and
+  by the barrier.
+- **Whether a memory-cached image reads `complete` at
+  `astro:after-swap` is the browser's business.** The new document is
+  parsed by `DOMParser` (no image fetched); the fetch starts when the
+  router adopts the body, in the same task the hook runs. The design
+  covers the false case with the early-`load` rule (a `load` before
+  the first frame counts as held), and T1604 measures the count of
+  frames that still pass through `"fade"` on the way back; if a
+  browser leaves it above zero the record says which and by how much
+  — and the landing cell's snapshot is the fill until its `load`.
+  `astro dev`'s cache headers may differ from production's; the read
+  is repeated on `astro preview` if the dev number is not zero.
 - **The way back names a cell the browser may have evicted.** The new
   snapshot for **out** is the cell's live `img`; if its file is no
   longer in cache the photograph fades to the waiting fill as it lands
@@ -525,8 +629,12 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
 - **A frame inside the strip's scroller** travels from its clipped
   rect (the snapshot is what was visible). Recorded at T1604.
 - **The preload for an arrow step is bounded at one second**; on a
-  slow network the step proceeds with the fill and the fade. A wait
-  bound, not a timer-started animation.
+  slow network the step proceeds when the bound is hit, and what the
+  reader then sees is the stage's box waiting — the surface fill on
+  paper, and in the quiet view the white mat around an empty content
+  box (the fill is excluded under `data-quiet` and the understudy is
+  in-only) — until the photograph decodes and fades in. A wait bound,
+  not a timer-started animation.
 - **`dist/pagefind/pagefind-ui.css` carries literal transitions** —
   pagefind's, on the search page's results only; excluded from the
   barrier by path and from the grammar's claim, which is about the
@@ -550,6 +658,19 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
 
 ## Resolved decisions
 
+- **A navigation is classified by what was clicked, not by its
+  paths.** `closest('.image-link')` is a travel in from any page — the
+  related strip is on the image page, and a path rule would have made
+  its click an arrow step (the sign-off's first finding);
+  `closest('[data-nav]')` is a step; the rest from an image page is
+  out, with the one traverse case settled at before-swap by whether the
+  new document holds the cell.
+- **The appearance flags are read from the host, not the root.**
+  Custom properties inherit, so a surface's own value is one rule and
+  the covers' two root tokens are the envelope's "whether the covers
+  take the appearance at all" as tokens, pinned by name and on the
+  panel, rather than a code constant; `FRAME_HOSTS` still says where a
+  photograph can be, the flags say whether it moves.
 - **Off is a flag token, not a deleted rule** (`--motion-*: 0`,
   `--hero-enter: 0`): the envelope says "the code stays, the token or
   flag turns it off, and the test pins the off state". Script-read
