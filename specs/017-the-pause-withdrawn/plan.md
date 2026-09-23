@@ -1,16 +1,16 @@
-# Plan: The pause withdrawn
+# Plan: The pause withdrawn, and the stage refit
 
-**Status**: Signed off (2026-09-22) — by the `skeptical-reviewer` at the
-top tier, one review and one re-review; three blocking findings fixed
-(the cue's measurement scoped to the height-bound viewports, AC 7's
-diff pins on both tasks, the closed-vocabulary case named for what it
-asserts at its commit) and four notes folded in; see tasks.md's tier
-log.
+**Status**: Draft — pending sign-off (amended) — signed off 2026-09-22
+by the `skeptical-reviewer` at the top tier (three blocking findings
+fixed and four notes folded in; see tasks.md's tier log), then reopened
+the same day when the product owner folded the stage's geometry into
+the spec; the refit (T1503, and its documents) is what the re-sign-off
+reads.
 **Implements**: spec.md in this directory
 
 ## Shape of the change
 
-A deletion with two small rules landing in the space it leaves. The
+A deletion with two rules landing in the space it leaves. The
 pause leaves every layer it touched — the transform's descriptor and
 its `frame` structure, the passage table's body kind, the plugin's
 entry, the piece page's script, the stylesheet's scene and lights, its
@@ -23,11 +23,18 @@ hiding while a frame is parked, keyed on `data-scene-active`) is
 restated for it alone as `data-held-active`. Then the mat rule narrows
 to the quiet view — form V+H moves under `html[data-quiet]` and the
 stage's normal view declares `--mat: 0px`, spec 015's "off" shape — and
-the cue lands: one token, `--frame-nav-h`, that the base `.image-stage`
-rule subtracts from its height and the frame nav's own rule claims as a
-`min-height`, so the previous / where / next line ends exactly at the
-fold on every image page, with script and without. No schema, no
-registry, no dependency; `astro.config.mjs` untouched.
+the stage is refit: on paper its box is the frame plus a piece's
+frame-to-prose spacing (`--block-margin`) above and below, no minimum
+height; the frame is one rectangle turned, its long side
+`min(--avail-w, --avail-h)` with the width the page's less its pads and
+the height the first screen's below the header less the nav line's
+token (`--frame-nav-h`, which the nav's own rule claims) and the two
+spacings — so the previous / where / next line can never fall below
+the fold, with script and without; the image's `sizes` hint is the same
+rule spelled in literals. The quiet view's rules are byte-identical.
+No schema, no registry, no dependency; `astro.config.mjs` untouched;
+one small pure module (`src/lib/stage-sizes.ts`) for the hint, because
+the image page, the sampler and a test all need the string.
 
 - **The transform** (`remark-pieces-blocks.mjs`). The `pause`
   descriptor, `PAUSE_SCALE`, `PAUSE_MARGIN_VMIN`, `roundUp`,
@@ -88,9 +95,9 @@ registry, no dependency; `astro.config.mjs` untouched.
 
   | rule                                       | today                                                     | after T1502                                                                                                                                                                                       |
   | ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | `.image-frame`                             | `--r`, `--q`, `--mat: min(V, H)`, `max-width`, `margin`, `padding`, `background` | `--mat: 0px`, `max-width`, `margin` — the zero is declared because `.image-frame img`'s `max-height: calc(var(--avail-h) - 2 * var(--mat))` still reads it (an undeclared `--mat` would make that `calc` invalid and drop the cap) |
+  | `.image-frame`                             | `--r`, `--q`, `--mat: min(V, H)`, `max-width`, `margin`, `padding`, `background` | `--r`, `--q` (the ratio helpers stay — the refit's width reads `--q` in both views' cascade), `--mat: 0px`, `max-width`, `margin` — the zero is declared because `.image-frame img`'s `max-height: calc(var(--avail-h) - 2 * var(--mat))` still reads it (an undeclared `--mat` would make that `calc` invalid and drop the cap) |
   | `.image-frame img`                         | the `max-height` above                                    | byte-identical: reads the whole of `--avail-h` in the normal view, `--avail-h − 2m` in the quiet view                                                                                             |
-  | `html[data-quiet] .image-frame` (new rule) | —                                                         | `--r`, `--q`, `--mat: min(V, H)` (the unchanged strings, now over the quiet stage's limits only), `padding: var(--mat)`, `background: var(--color-matte)`; placed after `html[data-quiet] .image-stage` and before the two-selector cursor rule |
+  | `html[data-quiet] .image-frame` (new rule) | —                                                         | `--mat: min(V, H)` (the unchanged string, now over the quiet stage's limits only), `padding: var(--mat)`, `background: var(--color-matte)`; placed after `html[data-quiet] .image-stage` and before the two-selector cursor rule |
   | `html[data-quiet] .image-stage`, the cursor rules | —                                                  | byte-identical                                                                                                                                                                                    |
 
   A separate rule rather than the declarations added to the existing
@@ -106,49 +113,155 @@ registry, no dependency; `astro.config.mjs` untouched.
   and divider (in the page's scoped style) keep `--color-matte` as spec
   015 left them; nothing on that page reads `--mat`.
 
-- **The cue.** `:root` gains
-  `--frame-nav-h: calc(0.78rem * 1.362 + var(--baseline) * 0.5)` beside
-  `--baseline` (one row of the nav's 0.78rem mono at JetBrains Mono
-  Variable's `normal` line-height, 1.362 measured at spec 016, plus the
-  nav's half-baseline bottom padding: 29px), and a `@media (max-width:
-  719.98px) { :root { --frame-nav-h: calc(0.78rem * 1.362 * 2 + 1rem +
-  var(--baseline) * 0.5) } }` block directly after `:root`, mirroring
-  the nav's own 719.98px query where `where` wraps to a second row over
-  its 1rem gap (62px). The base `.image-stage` rule subtracts it in all
-  three places — `--avail-h` (which the quiet frame's form H and the
-  image's height cap read) and both `min-height` lines — because a
-  min-height-only shrink would let a height-bound frame grow the stage
-  back:
+- **The stage refit** (T1503): the box hugs the frame, one rectangle
+  turned, the cue inside the height. Three facts of the file decide the
+  shape. The spacing a piece keeps between a frame and its prose is
+  `--block-margin` (`calc(var(--baseline) * 2)`, 48px), read by
+  `.piece-block { margin-block }` at ~1161 — that is the token, not a
+  new value. `html[data-quiet] .image-stage` must stay byte-identical,
+  and it redeclares `--stage-pad`, `--avail-w`, `--avail-h`, both
+  `min-height`s, `padding-inline`, `background` and `cursor` — so every
+  base declaration the normal view changes must be one the quiet rule
+  already overrides, and the normal view's frame sizing must not reach
+  the quiet frame at all. And `--header-h` is published by
+  `BaseLayout.astro`'s script from the header's measured height, with
+  `4.5rem` as the fallback that "matches the desktop size".
 
-      --avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--frame-nav-h));
-      min-height: calc(100vh - var(--header-h, 4.5rem) - var(--frame-nav-h));
-      min-height: calc(100svh - var(--header-h, 4.5rem) - var(--frame-nav-h));
+  The stage, after (the quiet rule untouched, one line of it shown to
+  say why the base's changes stop at it):
 
-  `html[data-quiet] .image-stage` redeclares `--avail-h` and both
-  min-heights without the token, as it already does, so the quiet view
-  keeps the whole viewport. The nav's rule in `[...id].astro` gains
-  `min-height: var(--frame-nav-h)` (the global `* { box-sizing:
-  border-box }` at ~140 already counts the padding in, so no
-  `box-sizing` line): a nav shorter than the reserve would leave a gap,
-  and one taller would cross the fold — the measurement checks the two
-  are equal. No `--stage-cue` intermediary: spec 016's was a switch the
-  arrival's gate flipped; with no gate the stage subtracts the token
-  itself, and the rule's prelude stays the bare `.image-stage` — no
-  attribute, no script, which is what "with and without script" means
-  in CSS. A page with no set renders no nav and the stage is the same
-  height: the cue is the token, not a measurement of a line. The width
-  formula, `--stage-pad`, `padding` and `place-items` are untouched —
-  everything else about the stage's geometry is the next spec's.
+      .image-stage {
+        --stage-pad: var(--block-margin);   /* the spacing a piece keeps between a frame and its prose */
+        --avail-w: calc(100vw - 2 * var(--page-pad));
+        --avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--frame-nav-h));
+        position: relative;
+        display: grid;
+        place-items: center;
+        padding: var(--stage-pad) var(--page-pad);
+      }
+      html[data-quiet] .image-stage { --stage-pad: clamp(0.5rem, 1.5vh, 1rem); … min-height: 100svh; … }   /* byte-identical */
 
-  Reading of AC 6, stated so the numbers can be checked: "size" is the
-  frame's box. A width-bound landscape frame's box is `--avail-w` wide
-  before and after; a height-bound frame's box is `--avail-h` tall, so
-  it is shorter by exactly the token once the cue lands. The photograph
-  inside is larger than today by the mat it no longer wears (Goal 4:
-  "the photograph's box is the frame's box") — 80px at the 40px
-  ceiling — which is why T1502 and T1503 each measure against the state
-  the previous task left, and the plan does not claim the photograph
-  itself is unchanged against `main`.
+  Gone from the base rule: both `min-height` lines (the quiet rule
+  carries its own pair, so the quiet box is still the viewport) and the
+  `var(--content-width)` cap on `--avail-w` (the quiet rule redeclares
+  the width). `--stage-pad` is set to the spacing token rather than the
+  `padding` shorthand being rewritten, because the shorthand is what
+  the quiet rule relies on to read its own pad through: one token
+  moves, the shared line stays. `place-items: center` stays and is
+  what centres the frame across the page. With no minimum height the
+  stage's box is padding + frame + padding, and the nav, then
+  `.image-head`, follow in flow.
+
+  The frame — one rectangle, turned. `--r = max(ar, 1)` and
+  `--q = min(ar, 1)` already sit on `.image-frame`. The long side is
+  `min(--avail-w, --avail-h)`; the width is that long side for a
+  landscape (`q = 1`) and long side × `ar` for a portrait (`q = ar`), so
+  one declaration covers both:
+
+      html:not([data-quiet]) .image-frame {
+        width: calc(min(var(--avail-w), var(--avail-h)) * var(--q));
+      }
+      html:not([data-quiet]) .image-frame img {
+        width: 100%;
+      }
+
+  Gated on the absence of `data-quiet` rather than declared on
+  `.image-frame` and reset in the quiet rule, because the quiet rules
+  may not change by a byte and today's quiet frame is shrink-to-fit
+  (`width: auto` on the image, the mat around it); an explicit width
+  reaching it would shrink a 3:2 at 1512×982 from 1388px to 952px.
+  Without script the attribute is never present, so the gate is the
+  normal view exactly, script or not. The image's `width: 100%` is what
+  makes the figure the sizing box: a responsive image at `width: auto`
+  takes its natural width from the `sizes` hint (spec 007's trap), and
+  the frame must be the rule's size whether or not the hint is exact.
+  Spec 013's formulas still hold and stay byte-identical: the image's
+  `max-height: calc(var(--avail-h) - 2 * var(--mat))` is
+  `--avail-h` here and never binds (height = long side × `q` / `ar` ≤
+  long side ≤ `--avail-h`); `max-width: 100%` is the figure's width;
+  the frame's base `max-width` becomes `100%` (no column cap — the
+  spec's "not capped at the text column"; the quiet list rule already
+  says `100%`).
+
+  The cue is inside `--avail-h`: `--frame-nav-h` at `:root`
+  (`calc(0.78rem * 1.362 + var(--baseline) * 0.5)`, 29px — one row of
+  the nav's 0.78rem mono at the font's `normal` line-height, measured
+  at spec 016, plus the nav's half-baseline bottom padding) and in a
+  `@media (max-width: 719.98px) { :root { … * 2 + 1rem + … } }` block
+  directly after `:root` (62px, the nav's own wrap), claimed by the
+  nav's rule as `min-height: var(--frame-nav-h)` (no `box-sizing` line:
+  the global reset at ~140 is border-box). By construction the tallest
+  frame the rule allows ends `spacing` above the nav and the nav ends
+  at the fold: header + 48 + L + 48 + 29 ≤ 100svh. A page with no set
+  renders no nav; the stage is the same height and the head follows at
+  the spacing. No `--stage-cue`: with nothing to switch, the term sits
+  in the formula.
+
+  The numbers (header at the 4.5rem fallback = 72px; the before-reads
+  record the real header at each viewport and the arithmetic is
+  re-run against it): 1512×982 — `--page-pad` 32, `--avail-w` 1448,
+  `--avail-h` 982 − 72 − 96 − 29 = 785 → L = 785, the height decides;
+  3:2 is 785 × 523, 2:3 is 523 × 785; stage 881 tall; nav bottom at
+  72 + 881 + 29 = 982. 1280×1440 — pad 32, `--avail-w` 1216,
+  `--avail-h` 1440 − 72 − 96 − 29 = 1243 → L = 1216, the width decides,
+  wider than the 1160 column; 3:2 is 1216 × 811, 2:3 is 811 × 1216.
+  375×812 — pad 16, `--avail-w` 343, `--avail-h` 812 − 72 − 96 − 62 =
+  582 → L = 343; 3:2 is 343 × 229, 2:3 is 229 × 343. On every viewport
+  the two frames are the same rectangle turned.
+
+  The `sizes` hint. A `sizes` attribute cannot read a custom property,
+  so the rule is spelled in literals by `stageSizes(ar)` in
+  `src/lib/stage-sizes.ts` — the page's stage (`[...id].astro` ~238,
+  today the static `(min-width: 1240px) 1160px, 94vw`) and the
+  sampler's stage frames (`[...surface].astro` ~363) both call it, and
+  a test evaluates it against the stylesheet:
+
+      const availW = 'calc(100vw - 2 * clamp(1rem, 3vw, 2rem))';
+      const availH = (nav) => `calc(100svh - 4.5rem - 2 * 3rem - ${nav})`;
+      const NAV = 'calc(0.78rem * 1.362 + 0.75rem)', NAV_PHONE = 'calc(0.78rem * 1.362 * 2 + 1rem + 0.75rem)';
+      const long = (nav) => `min(${availW}, ${availH(nav)})`;
+      export function stageSizes(ar) { const q = Math.min(ar, 1);
+        const w = (nav) => q === 1 ? long(nav) : `calc(${long(nav)} * ${q})`;
+        return `(max-width: 719.98px) ${w(NAV_PHONE)}, ${w(NAV)}`; }
+
+  The literals mirror `--page-pad`, `--block-margin` (3rem),
+  `--frame-nav-h` and the `--header-h` fallback; the test pins them by
+  evaluation, not by string. The hint carries the fallback header, not
+  the measured one, so where the real header is taller than 72px the
+  hint over-delivers by the difference (× `ar` for a portrait) — the
+  harmless direction, as spec 015's hints over-deliver. `min()` and
+  `calc()` with `svh` inside `sizes` is **a claim to verify**: the
+  browser's chosen `currentSrc` is read at T1503 against the rendered
+  width.
+
+  The title's block. `.image-head` is `page-head section image-head`,
+  and `.section` gives it `clamp(3.5rem, 5.5vw, 5.5rem)` of padding top
+  and bottom — the site-wide rhythm every page's sections share. The
+  spec (8e61900) wants photograph → nav line → title each one spacing
+  apart, and the title alone at one spacing where the frame has no
+  set, with the words below the title keeping their layout. Two
+  declarations in the page's scoped style do it, and neither touches
+  the shared `.section` rule (it is every page's; the image page is
+  the one page whose head follows a frame):
+
+      .image-head { padding-block-start: 0; }                 /* the stage's bottom pad is the spacing */
+      .frame-nav  { margin-block-end: var(--block-margin); }  /* the nav puts the spacing after itself */
+
+  The stage's bottom padding is the one spacing above whatever follows;
+  the nav, where it renders, carries the spacing between itself and
+  the title (a hidden nav is `display: none` and contributes no
+  margin), so the no-set page needs no second rule. The head keeps its
+  bottom padding and its hairline. The head's top is therefore
+  48 + 29 + 48 = 125px below the frame with a nav (158 on the phone),
+  48 without; the `h1`'s own top adds the eyebrow's box where the image
+  has categories, which is inside the title's block and unchanged.
+
+  Reading of AC 6, "the same rectangle turned": the frame's box. The
+  photograph on paper is larger than today's by the mat it no longer
+  wears and is otherwise resized by the rule — on the laptop a 3:2
+  gets smaller (785 wide against today's 1080 image), a 2:3 taller;
+  on the DualUp both grow. The Phase 0 report says so plainly, and
+  T1503 measures against the rule's numbers, not against `main`.
 
 - **The fixtures.** `where-the-fog-lets-go/index.md` line 68 becomes
   `::fullbleed{src="./pano.jpg" alt="The full sweep of coastline after the fog cleared"}`
@@ -261,8 +374,8 @@ Every claim above is owned by a task and a check:
   walk expects two rows, both on the quiet frame; the source-order pin
   against `.piece-block a.image-link` is deleted with the anchor); the
   pause V+H string case deleted; the stage case rewritten for the bare
-  frame, the cue's formulas (`--avail-h` and both raw `min-height`
-  lines, spec 016's regex) and the quiet rules list of three; (c) the
+  frame (today's stage formulas still pinned here — T1503 refits them)
+  and the quiet rules list of three; (c) the
   form W evaluator case deleted and the "identity" half of
   `fitsBothTight` now evaluates the pinned FORM_V at `--avail-w` = the
   box width (form W with the container's width named — the same
@@ -298,55 +411,89 @@ Every claim above is owned by a task and a check:
   the stage's `--avail-h` in px where height-bound, and the quiet view's
   reads are identical to the before reads.
 
-- **The cue** — `matte.test.mjs`, **T1503**, one case in spec 016's
-  shape: `--frame-nav-h` is `:root`'s at both widths (the two strings
-  above), declared on `:root` twice and on no other selector; the
-  stage's three formulas carry `- var(--frame-nav-h)` (pinned in the
-  stage case) and the quiet stage's body does not contain the token;
-  the stage rule's prelude is exactly `.image-stage`; the page's scoped
-  `.frame-nav` rule declares `min-height: var(--frame-nav-h)` and
-  `font-size: 0.78rem`, and the page's scoped style carries a
+- **The stage refit, pinned** — `matte.test.mjs`, **T1503**. (b) The
+  stage case, rewritten: `.image-stage` declares `--stage-pad` as
+  `var(--block-margin)`, `--avail-w` as
+  `calc(100vw - 2 * var(--page-pad))`, `--avail-h` as
+  `calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--frame-nav-h))`,
+  `display: grid`, `place-items: center`, `padding: var(--stage-pad) var(--page-pad)`,
+  and no `min-height` (the raw regex finds none in its body); the
+  rule's prelude is exactly `.image-stage`; `html[data-quiet] .image-stage`'s
+  body is byte-identical to `main`'s (pinned by reading the rule out of
+  `git show main:src/styles/global.css` in the test — or, if the test
+  must not shell out, by the exact string) and carries no
+  `--frame-nav-h`; `.image-frame` declares `--r`, `--q`, `--mat: 0px`,
+  `max-width: 100%`, `margin: 0` and nothing else; a rule with prelude
+  exactly `html:not([data-quiet]) .image-frame` declares `width` as
+  `calc(min(var(--avail-w), var(--avail-h)) * var(--q))` and nothing
+  else, and `html:not([data-quiet]) .image-frame img` declares
+  `width: 100%` and nothing else; `.image-frame img`'s body is
+  byte-identical to `main`'s. The cue case: `--frame-nav-h` is
+  `:root`'s at both widths, declared on `:root` twice and on no other
+  selector; the page's scoped `.frame-nav` rule declares
+  `min-height: var(--frame-nav-h)`, `margin-block-end: var(--block-margin)`
+  and `font-size: 0.78rem`, the page's scoped `.image-head` rule
+  declares `padding-block-start: 0`, and the page's scoped style has a
   `@media (max-width: 719.98px)` block with a `.frame-nav` rule inside
-  it — the token's two inputs, pinned where they live so the
-  derivation and the nav cannot drift apart. Then the measurement at
-  the three viewports, script on: the visible nav's `offsetHeight`
-  equals the token's computed px (29 / 29 / 62) and its
-  `getBoundingClientRect().bottom` is at most `innerHeight` at scroll 0;
-  the stage's `offsetHeight` equals `innerHeight − header − token`
-  within 0.5px, the header's `offsetHeight` recorded beside it; the
-  stage's `offsetWidth` and `left` equal the pre-edit reads. The
-  frame's box, by which limit binds it: at 1512×982 the 3:2 frame is
-  width-bound (1160 × 773 against an `--avail-h` that keeps roughly
-  50px to spare after the cue — the margin recorded with the header
-  height) and its figure and image widths equal the pre-edit reads; at
-  1512×982 and 1280×1440 the 2:3 frame is height-bound and its figure
-  is shorter by exactly the token (±0.5) and narrower by token × ar;
-  at 375×812 the 2:3 frame is **width-bound** — `--avail-w` is 343px
-  there (`100vw − 2 × page-pad` at the clamp's 1rem floor) so the frame
-  is 514.5px tall against an `--avail-h` in the 660–690px range — and
-  reads unchanged, which is AC 6's other clause seen from the other
-  side; an image page rendering no `.frame-nav` has the same stage
-  height as one with; the quiet view's stage is
-  `innerHeight` tall, as before; the stage's height read at
-  `DOMContentLoaded` equals its height after `astro:page-load` (no
-  shift). Script off (`javascript.enabled=false` in the headless
-  profile's `user.js`): the same nav-bottom read, with `--header-h` at
-  its 4.5rem fallback. Where the recipe cannot run without script the
-  implementer says so and the prelude pin stands as the proof. The
-  person attests the line above the fold on both screens at the Phase 0
+  it. (c) "one rectangle, turned": over the
+  evaluator's grid with `--header-h` absent (the 4.5rem fallback), the
+  frame's width from the rule and its height from `--ar`: width ≤
+  `--avail-w`, height ≤ `--avail-h`, `max(width, height)` equals
+  `min(--avail-w, --avail-h)` exactly, and at each viewport a ratio and
+  its reciprocal give the same two sides swapped; the image's
+  `max-height` never binds (≥ height at every point). "The sizes hint
+  agrees with the rule": `stageSizes(ar)` from `src/lib/stage-sizes.ts`
+  evaluated with `px()` (the phone branch below 720px) equals the CSS
+  width at every grid point within 1e-6 — the module's literals against
+  the stylesheet's tokens, by evaluation. The quiet view's evaluator
+  case and the off/gate identities are as T1502 left them.
+
+  Then the measurement at 1512×982, 1280×1440 and 375×812, script on,
+  scroll 0, quiet cleared, on `land-b` (3:2) and `port-a` (2:3):
+  `.site-header`'s `offsetHeight` (expected 72; if it differs the
+  expected numbers below are re-derived from it and recorded); each
+  figure's `offsetWidth`/`offsetHeight` and its image's — expected
+  785 × 523 and 523 × 785, 1216 × 811 and 811 × 1216, 343 × 229 and
+  229 × 343 (±0.5), the long and short sides equal across the pair on
+  each viewport; the figure's horizontal centre at `innerWidth / 2`;
+  the stage's `offsetHeight` = frame height + 96 and its `offsetWidth`
+  the viewport's; the visible nav's `offsetHeight` = the token (29 /
+  29 / 62), its top = the frame's bottom + 48, its bottom ≤
+  `innerHeight` (the value recorded — for the tallest frame at 1512×982
+  it is 982 exactly); `.image-head`'s top − the frame's bottom = 48 +
+  the nav's height + 48 (125 / 125 / 158), its computed
+  `padding-block-start` 0, and the `h1`'s top the eyebrow's box further
+  where present — each part recorded; a page with no `.frame-nav` (find
+  one by grep in `dist/`) has the same stage height and its head top =
+  frame bottom + 48; `img.sizes` equals `stageSizes(ar)`'s string and `img.currentSrc`
+  names the smallest srcset candidate at or above the rendered width
+  (the `min()`/`svh`-in-`sizes` claim); the quiet view's frame padding,
+  background, figure and image sizes and stage height identical to
+  T1502's after-reads (byte-identical rules, identical geometry); the
+  stage's height at `DOMContentLoaded` equals its height after
+  `astro:page-load`. Script off (`javascript.enabled=false` in the
+  profile's `user.js`): the nav's bottom at the three viewports with
+  the header at its fallback — recorded; at 375 the header may wrap
+  taller than 4.5rem, and the difference is the known limitation
+  below. The person judges the equal rectangle on both screens at the
   pause. Mutations, reverted: the token dropped from `--avail-h` → the
-  stage case fails; `--frame-nav-h` declared on `.image-stage` → the
-  twice-on-:root case fails; `min-height` removed from `.frame-nav` →
-  the nav-claims case fails; the nav's query retyped `719px` → the
-  breakpoint pin fails.
+  stage case fails; a `min-height` restored on `.image-stage` → the
+  stage case fails; `* var(--q)` dropped from the width → the
+  turned-rectangle case fails on every portrait ratio; the module's
+  `3rem` retyped `2rem` → the sizes case fails; `--frame-nav-h` declared
+  on `.image-stage` → the twice-on-:root case fails; `min-height`
+  removed from `.frame-nav` → the nav-claims case fails; the nav's
+  query retyped `719px` → the breakpoint pin fails.
 
 - **Nothing else moves** (AC 7) — **T1502** and, after its own edits,
   **T1503**, each carrying both diff lines in its Verify:
   `git diff -U0 main -- src/styles/global.css | grep '^@@'` lists every
   hunk and none falls inside `.gallery-flow`'s rules, the place wall's,
   the ground's `--color-*` lines or `--color-quiet`; `git diff main --
-  'src/pages/images/[...id].astro'` shows the `.frame-nav` rule and
-  nothing under `.compare`; `src/lib/og-card.mjs`, `public/og.jpg`,
+  'src/pages/images/[...id].astro'` shows the stage image's `sizes`
+  line, the `.frame-nav` rule and the `.image-head` rule (T1503) and
+  nothing under `.compare`, `.image-body` or the `.sec*` rules;
+  `src/lib/og-card.mjs`, `public/og.jpg`,
   `src/lib/ground.ts`, `src/lib/gallery-layout.ts`, `src/content.config.ts`
   and every page under `src/pages/` other than the two named are
   unchanged against `main`; `ground.test.mjs`, `page-head.test.mjs`,
@@ -381,9 +528,11 @@ remark-pieces-vocabulary.test.mjs                   the pause cases deleted; the
 remark-pieces-blocks.test.mjs, image-meta.test.mjs  one table row and one case deleted; one case renamed (T1501)
 src/pages/pieces/[slug].astro                       the script: holds only, data-held-active; the comment (T1502)
 src/lib/pause-shape.ts, pause-shape.test.mjs        deleted (T1502)
-src/styles/global.css                               --pause-* tokens, the pause section, the lights, form W deleted; the header rule renamed; the mat to html[data-quiet] .image-frame, .image-frame at zero; every comment that named the pause (T1502). --frame-nav-h at :root and the 719.98px query; the stage's three formulas (T1503)
-matte.test.mjs                                      rewritten as Testing strategy names it (T1502); the cue case (T1503); case (a)'s sampler exemption dropped (T1504)
-src/pages/images/[...id].astro                      .frame-nav min-height: var(--frame-nav-h) and its comment (T1503)
+src/styles/global.css                               --pause-* tokens, the pause section, the lights, form W deleted; the header rule renamed; the mat to html[data-quiet] .image-frame, .image-frame at zero; every comment that named the pause (T1502). --frame-nav-h at :root and the 719.98px query; .image-stage refit (no min-height, the spacing token, the two limits); the two html:not([data-quiet]) frame rules; the stage comment (T1503)
+matte.test.mjs                                      rewritten as Testing strategy names it (T1502); the refit's stage, frame, cue, turned-rectangle and sizes cases (T1503); case (a)'s sampler exemption dropped (T1504)
+src/lib/stage-sizes.ts                              new: stageSizes(ar), the rule in literals for the image's sizes hint (T1503)
+src/pages/images/[...id].astro                      the stage image's sizes from stageSizes(ar); .frame-nav min-height: var(--frame-nav-h) and its comment (T1503)
+src/pages/dev/matte/[...surface].astro              the stage frames' sizes from stageSizes(ratio) — one line, T1503's; the mat bar (T1504)
 src/pages/dev/matte/[...surface].astro, _sampler.ts the mat bar and its state removed; labels and comments (T1504)
 README.md, AUTHORING.md, design/brief.md, obsidian-plugin/README.md   per the spec's "The documents" (T1505)
 specs/007-held-image/spec.md, specs/015-the-hero-mat/spec.md          one status line; one non-goal line (T1505)
@@ -404,11 +553,30 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
 
 ## Known limitations
 
-- **Without script `--header-h` is its 4.5rem fallback** (spec 006):
-  the stage is the viewport below a header of that height, and the cue
-  is exact against whichever header height is in effect. If the real
-  header differs from the fallback the no-script read differs by that
-  much — pre-existing, recorded at T1503, not this spec's to change.
+- **Without script `--header-h` is its 4.5rem fallback** (spec 006),
+  and `BaseLayout.astro` says the real height "varies with width and
+  nav wrapping". The rule's available height is exact against
+  whichever header height is in effect; where the real header is
+  taller than 72px (the phone width, if the nav wraps) the no-script
+  nav line can cross the fold by the difference, and the `sizes` hint
+  — which can only carry the fallback — over-delivers by it.
+  Pre-existing, recorded at T1503 at each viewport; a CSS-known header
+  height would be its own change.
+- **The nav line's 12px bottom padding sits inside its claimed height**,
+  so the title is 48px below the nav's box and 60px below its text;
+  the token counts the padding in (spec 016's measurement), and moving
+  it would be a retune of the token and the nav together. Recorded at
+  T1503, not changed.
+- **`min()` and `svh` inside a `sizes` attribute** are supported in
+  current Firefox, Chrome and Safari; T1503 reads `currentSrc` to
+  prove the browser honoured the hint rather than falling back to
+  `100vw`. If a browser ignores it, the image over-fetches and renders
+  at the rule's size regardless (the figure sizes the image).
+- **Equal rectangle is the spec's lean, judged at the pause.** If a
+  landscape reads too small beside a portrait of the same short side,
+  the named alternative is equal area — a spec amendment (the rule
+  changes from `min(w, h)` on the long side to a fixed area), not a
+  plan decision; the report lists it under "what needs your decision".
 - **The token assumes the mono font's `normal` line-height** (1.362,
   measured at spec 016). A font change would move the nav's natural
   height and the `min-height` would only floor it; T1503's equality
@@ -419,12 +587,13 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
 - **The About page's "go-live pause"** is the one plain-word hit
   outside the test; the test's pattern is spelled for the block, and
   the close-out grep lists the hit.
-- **The stage's geometry across screen shapes** — the frame against
-  the text column on the tall screen, the words' distance from the
-  image — is the next spec's; this one changes the stage's height by
-  the token and nothing else.
+- **The stage's geometry is this spec's now** (folded in after
+  sign-off): the rule above replaces the viewport-height box; the
+  roadmap entry "The stage across screen shapes" is struck at close-out
+  (T1506). What it does not decide is the head's own distance (above).
 - **`README.md`'s tree and `CONTRIBUTING.md`** still drift elsewhere
-  (spec 015's sweep N10); T1505 removes the two pause lines and adds
+  (spec 015's sweep N10); T1505 removes the two pause lines, adds
+  `lib/stage-sizes.ts`, and adds
   nothing else.
 
 ## Resolved decisions
@@ -440,12 +609,36 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
   height cap. The form moves under `html[data-quiet] .image-frame` as
   its own rule; the cascade between the two is the state switch the
   page already has, not a second declaration on one state.
-- **The cue subtracts `--frame-nav-h` directly.** Spec 016's
-  `--stage-cue` was a switch (0px, or the token under the arrival's
-  gate); with the cue always on there is nothing to switch, and an
-  intermediary that is always equal to the token is a second name for
-  it. No `box-sizing` on the nav: the global reset already makes every
-  box border-box.
+- **The cue is a term in `--avail-h`, not a rule of its own.** Spec
+  016's `--stage-cue` was a switch (0px, or the token under the
+  arrival's gate); with the stage's box hugging the frame there is no
+  minimum height to shorten — the nav stays above the fold because the
+  frame's height is bounded by an available height that already has
+  the nav's token taken out. No `box-sizing` on the nav: the global
+  reset already makes every box border-box.
+- **The normal view's frame sizing is gated on `html:not([data-quiet])`**
+  (two rules: the figure's width, the image's `width: 100%`) rather
+  than declared on `.image-frame` and reset by the quiet rules — the
+  quiet rules must stay byte-identical, and today's quiet frame is
+  shrink-to-fit around the mat. `--stage-pad` is repointed at
+  `--block-margin` for the same reason: the quiet rule already
+  redeclares it, and the shared `padding` shorthand stays. The width
+  cap at `--content-width` and both `min-height`s leave the base rule
+  because the quiet rule carries its own of each.
+- **`stageSizes(ar)` is a module** (`src/lib/stage-sizes.ts`): a
+  `sizes` attribute cannot read custom properties, so the rule must be
+  spelled in literals somewhere; the page and the sampler both render
+  the stage, and the test must evaluate the string against the tokens.
+  Three callers — the second-caller test met. The literals are pinned
+  by evaluation so `3rem` and `calc(var(--baseline) * 2)` compare as
+  numbers.
+- **The head's top padding is zeroed in the image page's scoped style,
+  and the nav carries the spacing after itself** — not the shared
+  `.section` rule (every page's rhythm; the image page is the one whose
+  head follows a frame), not a second head rule for the no-set case
+  (a hidden nav contributes no margin, so one declaration on the nav
+  covers both), and the head's bottom padding and hairline stay
+  because the words below the title keep their layout (spec 8e61900).
 - **`data-scene-active` becomes `data-held-active`.** The spec forbids
   a `data-scene-*` attribute and asks that a rule shared with the pause
   be the held block's own, restated for it alone; the attribute was
@@ -463,10 +656,10 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
 - **The fixture's pause becomes a `fullbleed`** — the spec author's
   choice, the nearest scale; the Phase 0 pause offers the photographer
   `wide` or `single` instead, one line if he prefers.
-- **AC 6 is read as the frame's box** (above), and recorded in
-  `DECISIONS.md` at close-out rather than by editing the approved
-  spec — spec 010's precedent for a wording the numbers cannot satisfy
-  literally.
+- **The frame's "size" is the frame's box** (above), and the photograph
+  on paper is larger than today's by the mat it lost and otherwise
+  resized by the rule — said plainly in the Phase 0 report and recorded
+  in `DECISIONS.md` at close-out.
 - **`README.md`'s Matted column is dropped.** The spec asks for the
   pause row and footnote to go; a column reading "no" twelve times says
   nothing the sentence under the table does not.

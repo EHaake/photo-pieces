@@ -1,18 +1,23 @@
-# Tasks: The pause withdrawn
+# Tasks: The pause withdrawn, and the stage refit
 
-**Status**: Signed off (2026-09-22) — by the `skeptical-reviewer` at the
-top tier; three blocking findings fixed and cleared on the one
-re-review, four notes folded in, and one item the re-review carried
-(the 3:2 frame's equality at all three viewports, not one) transcribed
-from its exact text into T1503.
+**Status**: Draft — pending sign-off (amended) — signed off 2026-09-22
+by the `skeptical-reviewer` at the top tier (three blocking findings
+fixed, four notes folded in, one carried item transcribed), then
+reopened the same day when the product owner folded the stage's
+geometry into the spec: T1503 is rewritten as the stage refit, T1502
+amended in one detail (`--r`/`--q` stay on the base frame), T1505 and
+T1506 gain the refit's documents; T1500, T1501 and T1504 stand as
+signed off.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1500–T1504) — the fixtures rewritten so
 the build stays green through every task, the pause out of the
 transform and the plugin with the closed-vocabulary failure pinned, the
 stylesheet and the piece page's script cleared of it with the mat moved
-to the quiet view and `matte.test.mjs` rewritten pin by pin, the cue
-landed, and the sampler made honest — so the person attests the cue
-and the bare stage on a site with nothing of the pause left in it.
+to the quiet view and `matte.test.mjs` rewritten pin by pin, the stage
+refit (the box hugging the frame, one rectangle turned, the cue inside
+its height, the `sizes` hint on the same rule), and the sampler made
+honest — so the person judges the refit and the bare stage on a site
+with nothing of the pause left in it.
 **T1502 is marked `review: per-task`**: it is the largest deletion of
 the spec and every later task edits the same regions of the same two
 files — a token taken with the pause that the held block reads, a held
@@ -67,7 +72,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ---
 
-## Phase 0 — Foundation: the pause out, the mat to the quiet view, the cue (reviewer after the phase; `review: per-task` on T1502; walkthrough: the fog piece reads with a fullbleed panorama where its pause was, every image page opens bare on paper with the previous / where / next line ending at the fold on both screens, and a click still takes the photograph to the quiet dark in its white mat)
+## Phase 0 — Foundation: the pause out, the mat to the quiet view, the stage refit (reviewer after the phase; `review: per-task` on T1502; walkthrough: the fog piece reads with a fullbleed panorama where its pause was; every image page opens with the photograph bare and centred just below the header, a 3:2 and a 2:3 the same rectangle turned — the height deciding on the laptop, the width on the DualUp — the previous / where / next line directly beneath at a piece's spacing and ending at the fold, the title following; a click still takes the photograph to the quiet dark in its white mat; the person judges the equal rectangle on both screens)
 
 - [ ] **T1500** — The fixtures first, so the build is green at every
       later task. `src/content/pieces/where-the-fog-lets-go/index.md`
@@ -171,10 +176,12 @@ headers to confirm nothing was duplicated or dropped. -->
       its comment restated for the held block alone (the header stays
       away while a frame is parked, whichever way the reader scrolls;
       the piece page's script sets the attribute). **The mat**:
-      `.image-frame` keeps `max-width` and `margin: 0`, declares
-      `--mat: 0px` (the image's height cap still reads it), and loses
-      `--r`, `--q`, form V+H, `padding` and `background`; a **new rule**
-      `html[data-quiet] .image-frame { --r; --q; --mat: min(V, H); padding: var(--mat); background: var(--color-matte) }`
+      `.image-frame` keeps `--r`, `--q` (amended after sign-off: the
+      refit's width reads `--q` on the base frame — T1503), `max-width`
+      and `margin: 0`, declares `--mat: 0px` (the image's height cap
+      still reads it), and loses form V+H, `padding` and `background`;
+      a **new rule**
+      `html[data-quiet] .image-frame { --mat: min(V, H); padding: var(--mat); background: var(--color-matte) }`
       with the unchanged strings, placed after `html[data-quiet] .image-stage`
       and before the two-selector cursor rule, which stays
       byte-identical, as do `.image-frame img`, the zoom-in rule and the
@@ -222,7 +229,7 @@ headers to confirm nothing was duplicated or dropped. -->
       once, on the pause's anchor alone" → "form V+H is declared once,
       under html[data-quiet] .image-frame, and every other --mat in the
       file is 0px" (prelude exactly that string, `--mat` exactly
-      `min(FORM_V, FORM_H)`, `--r`/`--q` there; a walk over every
+      `min(FORM_V, FORM_H)`; a walk over every
       `--mat` declaration in the file finds that one form and otherwise
       only `0px`); "the two matted surfaces read --mat as a padding…" →
       "the one matted surface reads --mat as a padding — the quiet
@@ -234,8 +241,8 @@ headers to confirm nothing was duplicated or dropped. -->
       mat, and the image's height" → "the stage on paper is bare and the
       quiet view wears form V+H — in global.css, not on the page"
       (`.image-stage`'s `--avail-w` unchanged and `--avail-h` as today
-      — T1503 adds the cue's term; `.image-frame` declares `--mat: 0px`
-      and none of `--r`, `--q`, `padding`, `background`; `.image-frame img`'s
+      — T1503 refits the rule; `.image-frame` declares `--r`, `--q`,
+      `--mat: 0px` and neither `padding` nor `background`; `.image-frame img`'s
       `max-height` unchanged; the quiet stage's three limits unchanged;
       the quiet rules list is now three preludes, the new one between;
       the page's scoped style has no `.image-frame` rule; the zoom-in
@@ -311,96 +318,175 @@ headers to confirm nothing was duplicated or dropped. -->
       drive a browser it says so, line by line, and the Phase 0 pause
       asks the person to attest those lines._
 
-- [ ] **T1503** — The cue: one token the stage spends and the nav
-      claims. Pattern: `:root`'s `--baseline` line and the `.image-stage`
-      rule in `src/styles/global.css`; `.frame-nav` in
-      `src/pages/images/[...id].astro`; spec 016's shape, quoted in
-      plan.md (the archive is not on this branch). `src/styles/global.css`
-      `:root`, after `--baseline`:
+- [ ] **T1503** — The stage refit: the box hugs the frame, one
+      rectangle turned, the cue inside the height, the `sizes` hint on
+      the same rule. (Rewritten after sign-off, when the product owner
+      folded the stage's geometry into the spec; the cue's token and
+      the nav's claim from the signed-off line are kept inside it.)
+      Pattern: the `.image-stage` and `.image-frame` rules in
+      `src/styles/global.css` and their comment; `.piece-block`'s
+      `margin-block: var(--block-margin)` (~1161) for the spacing;
+      `src/lib/gallery-layout.ts`'s `galleryCell` for a pure module
+      whose `sizes` string a test evaluates against the CSS; plan.md's
+      "The stage refit" for the CSS and the numbers.
+      **The token.** `src/styles/global.css` `:root`, after `--baseline`:
       `--frame-nav-h: calc(0.78rem * 1.362 + var(--baseline) * 0.5);`
       with a comment (one row of the nav's 0.78rem mono at the font's
       `normal` line-height, 1.362 measured, plus its half-baseline
       bottom padding — 29px; the phone query below mirrors the nav's own
       719.98px wrap — 62px; retune both together); directly after the
       `:root` block, `@media (max-width: 719.98px) { :root { --frame-nav-h: calc(0.78rem * 1.362 * 2 + 1rem + var(--baseline) * 0.5); } }`.
-      `.image-stage`: `--avail-h` gains `- var(--frame-nav-h)` at its
-      end and both `min-height` lines gain `- var(--frame-nav-h)`; the
-      rule's prelude stays the bare `.image-stage`; the stage comment
-      gains the cue's paragraph (the stage gives up the nav's height so
-      the previous / where / next line ends at the fold, on paper,
-      always, script or not; it comes off `--avail-h` as well as the
-      min-heights because a height-bound frame would otherwise grow the
-      stage back; the quiet stage rule redeclares all three without it).
-      Nothing else in the rule moves — width, pad, padding, centring are
-      the next spec's. `src/pages/images/[...id].astro` `.frame-nav`:
-      `min-height: var(--frame-nav-h);` after `width`, with a comment
-      (the reserve the stage spends, claimed here so the two cannot
-      drift; border-box by the global reset; keep the token, the 0.78rem
-      and the 719.98px query in step). `matte.test.mjs`: the stage case
-      now expects `--avail-h` as
-      `calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--frame-nav-h))`
-      and, read raw with the `/min-height:([^;]*)/g` regex, the two
-      lines `calc(100vh - var(--header-h, 4.5rem) - var(--frame-nav-h))`
-      and the `svh` twin; the quiet stage's body does not contain
-      `--frame-nav-h` and its min-heights read `['100vh', '100svh']`;
-      **new** case in (b), "--frame-nav-h is :root's at both widths — the
-      reserve the stage spends and the nav claims": the two strings
-      above on `:root` and on the phone query's `:root`, declared on
-      `:root` twice and on no other selector; the `.image-stage` rule's
-      prelude is exactly `.image-stage`; the page's scoped `.frame-nav`
-      rule declares `min-height: var(--frame-nav-h)` and
-      `font-size: 0.78rem`, and the page's scoped style has a
+      **The stage.** `.image-stage` becomes exactly: `--stage-pad: var(--block-margin);`
+      (the spacing a piece keeps between a frame and its prose — the
+      token `.piece-block` reads; the quiet rule redeclares `--stage-pad`,
+      which is why the token moves and the shared `padding` shorthand
+      stays), `--avail-w: calc(100vw - 2 * var(--page-pad));` (the
+      `var(--content-width)` cap gone — the quiet rule redeclares the
+      width), `--avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--frame-nav-h));`,
+      `position: relative; display: grid; place-items: center; padding: var(--stage-pad) var(--page-pad);`
+      — **both `min-height` lines deleted** (the quiet rule carries its
+      own pair). `html[data-quiet] .image-stage`, the cursor rules,
+      `.image-frame img` and T1502's `html[data-quiet] .image-frame`:
+      **byte-identical**. **The frame.** `.image-frame`'s `max-width`
+      becomes `100%` (no column cap); it keeps `--r`, `--q`, `--mat: 0px`,
+      `margin: 0`. Two new rules after it and before the zoom-in rule:
+      `html:not([data-quiet]) .image-frame { width: calc(min(var(--avail-w), var(--avail-h)) * var(--q)); }`
+      and `html:not([data-quiet]) .image-frame img { width: 100%; }` —
+      gated on the absence of `data-quiet` because the quiet rules may
+      not change and today's quiet frame is shrink-to-fit around its
+      mat; the image's `width: 100%` makes the figure the sizing box
+      rather than the `sizes` hint (spec 007's trap). The stage comment
+      rewritten: the box hugs the frame at the piece's spacing; the
+      frame is one rectangle turned, long side `min(--avail-w, --avail-h)`;
+      the nav's token inside `--avail-h` is what keeps the previous /
+      where / next line above the fold for the tallest frame the rule
+      allows, script or not; the quiet view keeps its viewport box by
+      redeclaring every changed property; spec 013's `max-height` on
+      the image never binds here and stays for the quiet view.
+      **The nav and the title's block.** `src/pages/images/[...id].astro`
+      `.frame-nav`: `min-height: var(--frame-nav-h);` after `width`,
+      with a comment (the reserve the stage's height takes out, claimed
+      here so the two cannot drift; border-box by the global reset;
+      keep the token, the 0.78rem and the 719.98px query in step), and
+      `margin-block-end: var(--block-margin);` (the nav puts the piece's
+      spacing between itself and the title; a hidden nav is
+      `display: none` and adds nothing, so the no-set page needs no
+      second rule); a scoped `.image-head { padding-block-start: 0; }`
+      with a comment (the stage's bottom padding is the spacing above
+      the title's block; the shared `.section` rule stays every page's
+      rhythm, and the head keeps its bottom padding and hairline — the
+      words below the title keep their layout). **The hint.** New
+      `src/lib/stage-sizes.ts` exporting `stageSizes(ar: number): string`
+      as plan.md spells it — the rule in literals (`clamp(1rem, 3vw, 2rem)`,
+      `4.5rem`, `3rem`, the two nav strings with `0.75rem` for the
+      half-baseline), a `(max-width: 719.98px)` branch first, `× q` for
+      a portrait — with a header comment naming the four tokens it
+      mirrors and the test that pins them; `[...id].astro` ~238
+      `sizes={stageSizes(ar)}` in place of the static string;
+      `src/pages/dev/matte/[...surface].astro` ~363 likewise from the
+      frame's ratio (one line; the rest of the sampler is T1504's).
+      **The tests**, `matte.test.mjs`: the stage case rewritten —
+      `.image-stage` declares exactly the seven declarations above (the
+      `--avail-h` string pinned; `/min-height:/` finds nothing in its
+      body); `html[data-quiet] .image-stage`'s body equals `main`'s
+      byte for byte (the exact string, pasted from `main`, and it
+      carries no `--frame-nav-h`; its min-heights still read
+      `['100vh', '100svh']`); `.image-frame` declares `--r`, `--q`,
+      `--mat`, `max-width: 100%`, `margin` and nothing else; a rule
+      with prelude exactly `html:not([data-quiet]) .image-frame`
+      declares `width` as `calc(min(var(--avail-w), var(--avail-h)) * var(--q))`
+      and nothing else, and `html:not([data-quiet]) .image-frame img`
+      declares `width: 100%` and nothing else; `.image-frame img`'s
+      body equals `main`'s; the quiet rules list gains nothing (the
+      `:not` preludes do not match its regex — assert so). **New** case
+      in (b), "--frame-nav-h is :root's at both widths — the reserve the
+      stage's height takes out and the nav claims": the two strings on
+      `:root` and on the phone query's `:root`, declared on `:root`
+      twice and on no other selector; the `.image-stage` prelude exactly
+      `.image-stage`; the page's scoped `.frame-nav` rule declares
+      `min-height: var(--frame-nav-h)`, `margin-block-end: var(--block-margin)`
+      and `font-size: 0.78rem`, the scoped `.image-head` rule declares
+      `padding-block-start: 0`, and the page's scoped style has a
       `@media (max-width: 719.98px)` block with a `.frame-nav` rule
-      inside it (the token's two inputs, pinned where they live). The
-      evaluator's envs gain `--frame-nav-h` from `root`. _Verify:
-      `sh scripts/verify.sh` green;
+      inside it. **New** cases in (c): "one
+      rectangle, turned" — over the grid, `--header-h` absent (the
+      fallback), `--frame-nav-h` from `root` (the phone string below
+      720px): width from the `:not` rule, height = width / ar; width ≤
+      `--avail-w`, height ≤ `--avail-h`, `max(width, height)` equals
+      `min(--avail-w, --avail-h)` within 1e-6, a ratio and its
+      reciprocal give the same two sides swapped, and the image's
+      `max-height` ≥ height at every point; "the sizes hint agrees with
+      the rule" — `stageSizes(ratio)` from `src/lib/stage-sizes.ts`,
+      the matching media branch chosen by the viewport width, evaluated
+      with `px()`, equals the CSS width at every grid point within 1e-6.
+      The quiet evaluator case and the off/gate identities as T1502
+      left them; the evaluator's envs gain `--frame-nav-h` and
+      `--block-margin` from `root`. _Verify: `sh scripts/verify.sh`
+      green (the count recorded);
       `grep -n -- "--frame-nav-h" src/styles/global.css 'src/pages/images/[...id].astro'`
-      → the two `:root` declarations, the stage's three reads, the
-      nav's one (lines listed);
+      → the two `:root` declarations, the stage's one read, the nav's
+      one (lines listed); `grep -n "min-height" src/styles/global.css | grep -n image-stage`
+      → only the quiet rule's two;
+      `grep -rn "1160px, 94vw" src/` → 0;
       `git diff -U0 main -- src/styles/global.css | grep '^@@'` — every
       hunk listed, none inside `.gallery-flow`'s rules, the place wall's,
-      the `--color-*` lines or `--color-quiet`, none inside a
-      `.piece-held*` rule; `git diff main -- 'src/pages/images/[...id].astro'`
-      → the `.frame-nav` rule's hunk and nothing under `.compare` (the
-      hunks listed); on the dev server at 1512×982, 1280×1440 and
-      375×812, script on, at scroll 0 with the quiet state cleared: on
-      `/images/where-the-fog-lets-go/land-b/` the visible `.frame-nav`'s
-      `offsetHeight` equals the token's computed px (29 / 29 / 62) and
-      `getBoundingClientRect().bottom ≤ innerHeight` (the value
-      recorded); the stage's `offsetHeight` equals
-      `innerHeight − header.offsetHeight − token` within 0.5px, the
-      header's `offsetHeight` recorded beside it; the stage's
-      `offsetWidth` and `left` equal T1502's after-reads. The frame's
-      box by the limit that binds it: at all three viewports the 3:2
-      figure's `offsetWidth` and its image's width equal T1502's
-      after-reads — it is width-bound at each (1160 wide at 1512×982
-      and 1280×1440, 343 at 375×812; at 1512×982 its 773px height sits
-      against `--avail-h` with roughly 50px to spare after the cue — the
-      margin recorded; transcribed from the re-review's note);
-      on `…/port-a/` at 1512×982 and 1280×1440 the figure's
-      `offsetHeight` is shorter than T1502's after-read by exactly the
-      token (±0.5) and its width by token × 0.667 (height-bound there);
-      at 375×812 the 2:3 figure is **width-bound** (`--avail-w` is 343px
-      at the page-pad clamp's floor, so the frame is 514.5px tall
-      against an `--avail-h` of roughly 660–690px) and its `offsetWidth`
-      and `offsetHeight` equal T1502's after-reads — AC 6's "unchanged"
-      clause from the other side, recorded as such; an image page
-      rendering no `.frame-nav` (find one:
+      the `--color-*` lines, `--color-quiet`, a `.piece-held*` rule, the
+      `html[data-quiet] .image-stage` rule or the cursor rules;
+      `git diff main -- 'src/pages/images/[...id].astro'` → the `sizes`
+      line, the `.frame-nav` rule's hunk and the `.image-head` rule's,
+      and nothing under `.compare` (the hunks listed). On the dev server
+      at 1512×982, 1280×1440 and
+      375×812, script on, scroll 0, quiet cleared, on
+      `/images/where-the-fog-lets-go/land-b/` (3:2) and `…/port-a/`
+      (2:3): `.site-header`'s `offsetHeight` (expected 72 — if it
+      differs, re-derive the numbers below from it and record both);
+      each figure's `offsetWidth`/`offsetHeight` and its image's —
+      expected 785 × 523 and 523 × 785 at 1512×982 (the height
+      decides), 1216 × 811 and 811 × 1216 at 1280×1440 (the width
+      decides, wider than the 1160 column), 343 × 229 and 229 × 343 at
+      375×812 (±0.5), the long and short sides equal across the pair on
+      each viewport; the figure's horizontal centre = `innerWidth / 2`
+      (±0.5); the stage's `offsetHeight` = frame height + 96 and its
+      `offsetWidth` = `innerWidth`; the visible `.frame-nav`'s
+      `offsetHeight` = the token (29 / 29 / 62), its top = the frame's
+      bottom + 48, its bottom ≤ `innerHeight` (the value recorded; for
+      `port-a` at 1512×982 it is 982 exactly); `.image-head`'s top −
+      the frame's bottom = 48 + the nav's height + 48 (125 / 125 / 158,
+      ±0.5), its computed `padding-block-start` 0px, and the `h1`'s top
+      the eyebrow's box further where the image has categories — each
+      part recorded; an image page rendering no `.frame-nav` (find one:
       `grep -L 'class="frame-nav"' dist/images/*/*/index.html | head -1`)
-      has the same stage height as one with; the quiet view's stage is
-      `innerHeight` tall, equal to T1502's after-read; the stage's
-      `offsetHeight` at `DOMContentLoaded` equals its height after
-      `astro:page-load`. Script off (`user_pref("javascript.enabled", false)`
-      in the headless profile's `user.js`): the nav's bottom read at the
-      three viewports, `--header-h` at its 4.5rem fallback — recorded;
-      if the recipe cannot run without script, say so and the prelude
-      pin stands. Mutations named and reverted: `- var(--frame-nav-h)`
-      dropped from `--avail-h` → the stage case fails; `--frame-nav-h: 0px`
-      declared on `.image-stage` → the twice-on-:root case fails;
-      `min-height` removed from `.frame-nav` → the nav-claims case
-      fails; the nav's query retyped `719px` → the breakpoint pin
-      fails. The person attests the line above the fold on both screens
-      at the pause._
+      has the same stage height for its ratio and its head's top = the
+      frame's bottom + 48 (±0.5); `git diff main -- 'src/pages/images/[...id].astro'`
+      shows no hunk inside `.image-body` or `.sec*` rules (the words
+      below the title keep their layout); `img.sizes` equals `stageSizes(ar)` and
+      `img.currentSrc` names the smallest srcset candidate at or above
+      the rendered width (the `min()`/`svh`-in-`sizes` claim — if the
+      browser fell back to `100vw` the candidate is the largest, and
+      that is reported, not fixed); the quiet view's frame padding,
+      background, figure and image sizes and the stage's height
+      identical to T1502's after-reads; the stage's `offsetHeight` at
+      `DOMContentLoaded` equals its height after `astro:page-load`.
+      Script off (`user_pref("javascript.enabled", false)` in the
+      headless profile's `user.js`): the nav's bottom and the header's
+      height at the three viewports — recorded; where the header is
+      taller than 72px without script (the phone width, if the nav
+      wraps) the difference is recorded as the plan's known limitation;
+      if the recipe cannot run without script, say so and the
+      `:not([data-quiet])`/bare-`.image-stage` pins stand. Mutations
+      named and reverted, tree restored byte-identically:
+      `- var(--frame-nav-h)` dropped from `--avail-h` → the stage case
+      fails; `min-height: 100svh` restored on `.image-stage` → the stage
+      case fails; `* var(--q)` dropped from the width → the
+      turned-rectangle case fails on every portrait ratio; `3rem`
+      retyped `2rem` in `stage-sizes.ts` → the sizes case fails;
+      `--frame-nav-h: 0px` declared on `.image-stage` → the
+      twice-on-:root case fails; `min-height` removed from `.frame-nav`
+      → the nav-claims case fails; the nav's query retyped `719px` → the
+      breakpoint pin fails; `padding-block-start: 0` removed from
+      `.image-head` or `margin-block-end` from `.frame-nav` → the
+      page-pins case fails naming the declaration. The person judges
+      the equal rectangle on both screens at the pause._
 
 - [ ] **T1504** — The sampler, honest. Pattern:
       `src/pages/dev/matte/[...surface].astro` and `_sampler.ts` (spec
@@ -449,19 +535,30 @@ _(The product owner's attestation from the site under `npm run dev` on
 both screens: `/pieces/where-the-fog-lets-go/` reads on with a fullbleed
 panorama where its pause was — or he names `wide` or `single` instead,
 one line at T1500's file; `/pieces/vocabulary-sampler/` and the held
-frame's header hand-off; an image page — the stage bare on paper, the
-previous / where / next line ending at the fold at the top on the
-laptop and on the DualUp, the click into the quiet view's white mat and
-back; anything he saw that the spec did not say. The pause report says
-plainly, in its "what you can now do" item, that the photograph on
-paper is larger than before by the mat it no longer wears — 80px at
-the 40px ceiling — and that what the cue changes is the stage's
-height, which is what the spec's sizing criterion measures; and its
-"where execution deviated" item lists the two scope extensions the
-plan authorised on its own: the dev sampler's mat bar removed, and the
+frame's header hand-off; the two image pages `land-b` (3:2) and
+`port-a` (2:3), on the laptop and on the DualUp — the photograph bare
+and centred just below the header, the two frames the same rectangle
+turned (the height deciding on the laptop, the width on the DualUp),
+the previous / where / next line directly beneath at a piece's spacing
+and ending at the fold, the title following; the click into the quiet
+view's white mat and back; anything he saw that the spec did not say.
+**The judgement the spec puts here**: whether the equal rectangle reads
+right, or a landscape frame looks too small beside a portrait of the
+same short side — in which case the alternative the spec names is
+equal area, and that is a spec amendment (spec.md's AC on the rule
+kept), not a plan decision; the report lists it under "what needs your
+decision". The pause report says plainly, in its "what you can now do"
+item, that the photograph on paper is resized by the rule — on the
+laptop a 3:2 is narrower than today's (785 against 1080) and a 2:3
+taller, on the DualUp both are larger, and every frame has lost the
+80px of mat it wore — and that the title's block now follows the nav
+line at the piece's spacing (the words below it as before); and its "where
+execution deviated" item lists the two scope extensions the plan
+authorised on its own: the dev sampler's mat bar removed, and the
 README block table's Matted column dropped. Recorded here by the
 orchestrator in his words, with T1502's and T1503's numbers beside
-them, before Phase 1 is dispatched.)_
+them — and his rule kept or the one to try — before Phase 1 is
+dispatched.)_
 
 ## Phase 1 — The documents (reviewer after the phase; walkthrough: none — README, AUTHORING, the plugin's README, the brief and two earlier specs' annotations change nothing on the site; runs on without a pause)
 
@@ -478,10 +575,17 @@ them, before Phase 1 is dispatched.)_
       017)"; "Current status" (~131) reads "the spec-003 blocks and spec
       007's held block" and "the mat rule (the quiet view alone since
       spec 017)"; the image-page paragraph (~151) says the page shows the
-      photograph bare on the stage, the previous / next line above the
-      fold, and matted on the quiet dark in the quiet view — the one
-      matted surface; the tree loses `pause-shape.test.mjs` and
-      `lib/pause-shape.ts`. `AUTHORING.md`: the plugin bullet (~46)
+      photograph bare and centred just below the header, one rectangle
+      turned — its long side the smaller of the page's width and the
+      first screen's height below the header less the previous / next
+      line and a piece's frame-to-prose spacing above and below — the
+      previous / next line directly beneath at that spacing and above
+      the fold, then the title, and the photograph matted on the quiet
+      dark in the quiet view — the one matted surface; no sentence is
+      left that calls the stage a screen below the header; the tree
+      loses `pause-shape.test.mjs` and `lib/pause-shape.ts` and gains
+      `lib/stage-sizes.ts` (the stage's `sizes` rule in literals).
+      `AUTHORING.md`: the plugin bullet (~46)
       loses `::pause` from its list and the "A `::pause` previews…"
       sentence; ~183 loses `pause`; "A story is prose — no holds, no
       pauses." (~269) → "A story is prose — no holds." with the sentence
@@ -495,7 +599,10 @@ them, before Phase 1 is dispatched.)_
       the sampler-link paragraph (~555–561) deleted with its "one
       exception" framing; the never-bake rule (~598) says the mat is the
       quiet view's alone and "in the quiet view it would render
-      double-matted". `obsidian-plugin/README.md`: the table's first row
+      double-matted", and any sentence in the file describing the image
+      page's stage as a screen below the header (grep `stage` — ~600 is
+      the one hit outside the deleted section) is corrected to the rule
+      above in one clause. `obsidian-plugin/README.md`: the table's first row
       loses `::pause`. `design/brief.md` (~152): "Since spec 015 it is
       worn by the image page's stage and the quiet view" → since spec
       017 by the quiet view alone, the stage bare on paper, and the
@@ -531,13 +638,18 @@ them, before Phase 1 is dispatched.)_
       orchestrator's own part. `ROADMAP.md`: strike "The pause and the
       hero leave the site" as done at spec 017 (one clause: the block,
       its presentation and its fixtures gone; the cue kept on the paper
-      stage; the mat the quiet view's); annotate "The pause, rethought"
+      stage; the mat the quiet view's) and strike "The stage across
+      screen shapes" as done at spec 017 too (folded in after sign-off
+      at the product owner's call; the rule kept — equal rectangle, or
+      equal area if the pause chose it — named in one clause, with the
+      questions the entry left answered: equal sides, a share of the
+      screen, the width past the text column, the same distance);
+      annotate "The pause, rethought"
       (its italic gains: the block is `main`'s history up to 017's
       merge; a rework starts from that history and the archive) and
       "The mat only where the ground goes dark" (its italic gains: done
       at 017 — the stage bare on paper, the quiet view matted, pinned);
-      "The stage across screen shapes" is untouched and is the next
-      spec. `DECISIONS.md`: annotate "Spec 007" (one paragraph at its
+      `DECISIONS.md`: annotate "Spec 007" (one paragraph at its
       top: half withdrawn at 017 — the pause's decisions are history,
       the held block's stand), "Spec 015" (one clause where it defers
       the pause: withdrawn at 017 rather than reworked; the stage's mat
@@ -547,8 +659,14 @@ them, before Phase 1 is dispatched.)_
       words (from spec.md's Summary and Decided), what left and what
       stayed (the held block, `data-scene-active` renamed for it), the
       failure-by-name choice and why the closed vocabulary's own error,
-      the mat rule's one surface and the `--mat: 0px` shape, the cue
-      as one token without a switch, AC 6 read as the frame's box, the
+      the mat rule's one surface and the `--mat: 0px` shape, the stage
+      refit in his words ("centered and is as large as needs to be …
+      the title and text follows as it would in any other piece") with
+      the rule he kept at the pause and why the long side is `min` of
+      the two limits, the cue as a term inside that height rather than
+      a switch, the normal-view frame rules gated on `:not([data-quiet])`
+      so the quiet view stays byte-identical, the `sizes` hint as a
+      module, the head's own padding left to the words' layout, the
       sampler's mat bar gone, the fixture's fullbleed (or what he chose
       at the pause), and the archive as the way back. Both hand-edited
       (`npx prettier --check` clean; grep for lines beginning with a
@@ -631,11 +749,16 @@ itself for **T1502** (`review: per-task`); a design question it cannot
 triage as routine goes to the `skeptical-reviewer` at the top tier on
 a decision bundle from Plan Mode. The suite is green at the end of
 every task; the closed-vocabulary case grows its source walk at T1502,
-where it can pass. The **Phase 0 pause is the walkthrough**: the fog piece with its fullbleed panorama
-(and the offer of `wide` or `single` instead), the vocabulary sampler's
-held frame, an image page on both screens — the bare stage, the
-previous / where / next line ending at the fold, the quiet view — with
-T1502's and T1503's numbers in the report; the orchestrator does no
+where it can pass. The **Phase 0 pause is the walkthrough and the
+spec's judgement**: the fog piece with its fullbleed panorama (and the
+offer of `wide` or `single` instead), the vocabulary sampler's held
+frame, the `land-b` and `port-a` image pages on both screens — the
+frame bare and centred just below the header, the same rectangle
+turned, the previous / where / next line beneath at the piece's
+spacing and above the fold, the quiet view — with T1502's and T1503's
+numbers in the report, and the one question the spec puts to him
+there: does the equal rectangle read right, or should the next look
+try equal area (a spec amendment if so). The orchestrator does no
 browser or device checks itself. **Phase 1 has no walkthrough** and
 runs on to the close-out without stopping; the merge pause is the
 second and last.
@@ -646,8 +769,8 @@ second and last.
 > first; medium is right for this session): triage; dispatch each
 > routine task to the `sdd-implementer` on a task bundle assembled with
 > shell (the task line, the plan sections, the acceptance criteria, the
-> files, the pattern file, any recorded value — for T1503, spec 016's
-> cue as plan.md quotes it), telling it not to read plan.md, spec.md,
+> files, the pattern file, any recorded value — for T1503, plan.md's
+> "The stage refit" with its CSS and numbers), telling it not to read plan.md, spec.md,
 > or tasks.md in full; take the verification from the implementer's
 > verbatim `sh scripts/verify.sh` output, except T1502, which you re-run
 > yourself before committing (`review: per-task`); do no
@@ -657,9 +780,12 @@ second and last.
 > one review and at most one re-review, the rest logged; commit, check
 > the box, and log the tier and tokens in one shell command.
 > Involvement level is product owner: pause after Phase 0 — its report
-> names the fog piece, the sampler's held frame and an image page to
-> open on both screens, what to look for (the line above the fold, the
-> bare stage, the quiet view's mat) and the one open offer (fullbleed,
+> names the fog piece, the sampler's held frame and the two image pages
+> (`land-b`, `port-a`) to open on both screens, what to look for (the
+> frame bare and centred below the header, the same rectangle turned,
+> the line beneath at the piece's spacing and above the fold, the quiet
+> view's mat), the spec's one judgement (equal rectangle kept, or equal
+> area to try — a spec amendment) and the one open offer (fullbleed,
 > wide or single for the panorama) in plain language; Phase 1 runs on
 > without a pause; pause whenever something unexpected bears on spec
 > adherence; the same session continues after the pause when the
