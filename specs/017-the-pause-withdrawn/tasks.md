@@ -752,6 +752,17 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ### Phase 0 record (the person's walkthrough)
 
+**Attested 2026-09-22** (both screens): "Honestly looks great now. This
+is much better than before. Both 3:2, 3:2 [2:3], and panos look great,
+as do all the others I've checked. good to continue." **The rule kept:
+equal rectangle** (AC 10) — equal area is not tried. The fog piece's
+panorama stays a fullbleed. No finding reported; no deviation beyond
+the report's own list (the build's exit fixed at T1501a, the header
+fallback at T1503a, the sampler's bar and the README's Matted column).
+Numbers beside it: T1502's and T1503's records above (781 × 521 on the
+laptop, 1216 × 811 on the DualUp, the nav's bottom 981.8 of 982).
+
+
 _(The product owner's attestation from the site under `npm run dev` on
 both screens: `/pieces/where-the-fog-lets-go/` reads on with a fullbleed
 panorama where its pause was — or he names `wide` or `single` instead,

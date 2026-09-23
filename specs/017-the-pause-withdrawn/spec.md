@@ -302,9 +302,11 @@ pushed off the screen by empty space.
       browser fetches no wider a file than it renders, pinned by a test
 - [ ] The quiet view's rules and geometry are unchanged, byte-for-byte
       in the stylesheet
-- [ ] The photographer has seen both frames on both screens at the
+- [x] The photographer has seen both frames on both screens at the
       Phase 0 pause and named the rule kept (equal rectangle) or the
-      one to try (equal area), recorded in this spec
+      one to try (equal area), recorded in this spec — _2026-09-22:
+      equal rectangle kept ("Honestly looks great now … good to
+      continue"); equal area not tried_
 - [ ] The compare's fill and divider, the quiet dark, the ground and
       fills, the social images, the galleries and the place wall are
       byte-for-byte unchanged in their rules
