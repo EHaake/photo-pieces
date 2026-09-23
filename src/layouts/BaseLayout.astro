@@ -125,8 +125,12 @@ const isActive = (href: string) => {
     </footer>
 
     <script>
+      import type {
+        TransitionBeforePreparationEvent,
+        TransitionBeforeSwapEvent,
+      } from 'astro:transitions/client';
       import { IMAGE_SET_KEY, setKeyFromPath } from '../lib/image-set';
-      import { appear } from '../lib/motion';
+      import { NAME, appear, flag, reducedMotion, token } from '../lib/motion';
 
       // The appearance and the arrival (spec 018). The initial
       // astro:page-load fires on window's load, after every image
@@ -223,6 +227,184 @@ const isActive = (href: string) => {
         },
         true,
       );
+
+      // The travel (spec 018): a photograph carried between its frame and
+      // the image page's stage as one view transition. Three kinds, told
+      // apart by what was clicked, never by the paths alone — the related
+      // strip is on the image page, and a path rule would take its click
+      // for an arrow step:
+      //   in   — a frame (`.image-link`, on any page): its img wears the
+      //          name, the origin's scroll is stored for the way back;
+      //   step — an arrow (`[data-nav]`; the arrow keys click them):
+      //          nothing named unless --arrows-slide is a length, and the
+      //          next stage's file is preloaded so the cross-fade goes
+      //          from one photograph straight to the next;
+      //   out  — any other way off an image page, or a traverse from
+      //          one: the stage wears the name and lands in its cell.
+      // Each write sits where the router's order (router.js: before-
+      // preparation → startViewTransition → swap → scroll → after-swap)
+      // lets it take effect: the old page's names at before-preparation,
+      // ahead of the old snapshot; the new page's names and root
+      // attributes at before-swap, on the parsed document before it is
+      // adopted (the router copies <html>'s attributes over); the way
+      // back's scroll at after-swap, after the router's own scroll and
+      // before the new snapshot. Everything is cleared on the swap
+      // event's `finished`.
+      const ORIGIN_KEY = 'motion-origin';
+      let moving: {
+        kind: 'in' | 'step' | 'out';
+        src?: string;
+        dir?: 'prev' | 'next';
+        navigationType: string;
+        direction?: string;
+      } | null = null;
+      let landing: HTMLImageElement | null = null;
+      const named: HTMLElement[] = [];
+      const name = (el: HTMLElement | null | undefined) => {
+        if (!el) return;
+        el.style.viewTransitionName = NAME;
+        named.push(el);
+      };
+      const clear = () => {
+        for (const el of named) el.style.viewTransitionName = '';
+        named.length = 0;
+        delete document.documentElement.dataset.moving;
+        delete document.documentElement.dataset.slide;
+        moving = null;
+        landing = null;
+      };
+      const slide = () => Number.parseFloat(token('--arrows-slide')) > 0;
+      const isImagePage = (url: URL) => url.pathname.startsWith(IMAGES_PATH);
+      /** The cell in `doc` that links to `path`: the way back's landing. */
+      const cellFor = (doc: Document, path: string, base: URL) =>
+        [...doc.querySelectorAll<HTMLAnchorElement>('.image-link[href]')].find(
+          (a) => new URL(a.getAttribute('href') ?? '', base).pathname === path,
+        );
+
+      // The next stage's file, fetched before the swap: the same `sizes`
+      // the stage will carry (`100vw` in the quiet view, the value the
+      // image page's applyQuiet gives it), then srcset, then src, so the
+      // browser picks the candidate the page will request a moment later
+      // — a cache hit then, not a second request. Bounded at a second: a
+      // wait bound, not an animation's timer.
+      const preloadStage = async (doc: Document) => {
+        const next = doc.querySelector<HTMLImageElement>('.image-frame img');
+        if (!next) return;
+        const img = new Image();
+        img.sizes = document.documentElement.hasAttribute('data-quiet')
+          ? '100vw'
+          : (next.getAttribute('sizes') ?? '');
+        img.srcset = next.getAttribute('srcset') ?? '';
+        img.src = next.getAttribute('src') ?? '';
+        try {
+          await Promise.race([img.decode(), new Promise((resolve) => setTimeout(resolve, 1000))]);
+        } catch {
+          /* a broken or slow file: the stage waits in its box, as today */
+        }
+      };
+      const preloadOnLoad = (event: TransitionBeforePreparationEvent) => {
+        const load = event.loader;
+        event.loader = async () => {
+          await load();
+          await preloadStage(event.newDocument);
+        };
+      };
+
+      document.addEventListener('astro:before-preparation', (event) => {
+        // A navigation that never reached its swap leaves its names on
+        // this page; a second name would void the next transition.
+        clear();
+        if (!flag('--motion-travel') || reducedMotion()) return;
+        const source = event.sourceElement;
+        const link = source instanceof Element ? source.closest('a') : null;
+        const cell = link?.closest('.image-link');
+        const arrow = link?.closest<HTMLElement>('[data-nav]');
+        const { navigationType } = event;
+        if (cell) {
+          const img = cell.querySelector('img');
+          if (!img) return;
+          name(img);
+          moving = { kind: 'in', src: img.currentSrc, navigationType };
+          try {
+            sessionStorage.setItem(
+              ORIGIN_KEY,
+              JSON.stringify({ path: event.from.pathname, y: window.scrollY }),
+            );
+          } catch {
+            /* storage unavailable: the way back centres the cell */
+          }
+        } else if (arrow) {
+          moving = {
+            kind: 'step',
+            dir: arrow.dataset.nav === 'prev' ? 'prev' : 'next',
+            navigationType,
+          };
+          if (slide()) name(document.querySelector<HTMLElement>('.image-frame'));
+          preloadOnLoad(event);
+        } else if (isImagePage(event.from)) {
+          name(document.querySelector<HTMLElement>('.image-frame'));
+          moving = { kind: 'out', navigationType, direction: event.direction };
+          // A traverse between image pages: the kind is settled at
+          // before-swap, once the new document can be read.
+          if (isImagePage(event.to)) preloadOnLoad(event);
+        }
+      });
+
+      document.addEventListener('astro:before-swap', (event: TransitionBeforeSwapEvent) => {
+        if (!moving) return;
+        const doc = event.newDocument;
+        const cell = cellFor(doc, event.from.pathname, event.to);
+        // Between two image pages, out only on the way back to the strip
+        // the reader came through; forward, or no such cell, is a step.
+        if (moving.kind === 'out' && isImagePage(event.to)) {
+          if (!(moving.direction === 'back' && cell)) {
+            moving.kind = 'step';
+            moving.dir = moving.direction === 'back' ? 'prev' : 'next';
+          }
+        }
+        const root = doc.documentElement;
+        root.dataset.moving = moving.kind;
+        const frame = doc.querySelector<HTMLElement>('.image-frame');
+        if (moving.kind === 'in' && frame) {
+          // The understudy: the photograph the reader clicked, painted in
+          // the stage's box until the page's own file has decoded.
+          name(frame);
+          frame.dataset.understudy = '';
+          frame.style.setProperty('--understudy', `url("${moving.src}")`);
+        } else if (moving.kind === 'step' && slide() && frame) {
+          name(frame);
+          root.dataset.slide = moving.dir;
+        } else if (moving.kind === 'out') {
+          landing = cell?.querySelector('img') ?? null;
+          name(landing);
+        }
+        const record = moving;
+        const done = () => {
+          if (moving === record) clear();
+        };
+        event.viewTransition?.finished.then(done, done);
+      });
+
+      // The way back by a link lands where the reader left: the router
+      // has scrolled to the top, so the stored origin's y is restored
+      // when it is this page, else the cell is centred. A traverse keeps
+      // the router's own restored position. Registered before the
+      // listener that records lastY, so that line reads the landed
+      // position.
+      document.addEventListener('astro:after-swap', () => {
+        if (moving?.kind !== 'out' || !landing || moving.navigationType === 'traverse') return;
+        let origin: { path?: string; y?: number } | null = null;
+        try {
+          origin = JSON.parse(sessionStorage.getItem(ORIGIN_KEY) ?? 'null');
+        } catch {
+          /* storage unavailable or malformed: centre the cell */
+        }
+        if (origin?.path === location.pathname && typeof origin.y === 'number') {
+          window.scrollTo({ top: origin.y, behavior: 'instant' });
+        } else {
+          landing.scrollIntoView({ block: 'center', behavior: 'instant' });
+        }
+      });
 
       window.addEventListener('scroll', update, { passive: true });
       document.addEventListener('astro:after-swap', () => {

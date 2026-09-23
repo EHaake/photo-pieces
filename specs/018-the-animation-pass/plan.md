@@ -132,9 +132,15 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
 
   `scroll-behavior` leaves with the blanket: the site never sets it
   (the scroll settle is a non-goal), so the reset was resetting
-  nothing. The travel and the quiet growth need no rule here: the
-  script never names the photograph under reduced motion, so no group
-  moves; the quiet view's ground fade runs as a nameless view
+  nothing. One rule reaches the view transitions:
+  `::view-transition-group(*) { animation-name: none; }`. Every group
+  lands on its new box at once — the header returning from
+  `data-hidden` or `data-held-active` would otherwise slide in on its
+  own group — while `::view-transition-old(*)` / `-new(*)` inherit the
+  group's `animation-duration`, which the rule leaves set, so every
+  cross-fade keeps its length; it also makes harmless any name that
+  reaches a group under the setting (D1604, Q1). The script never
+  names the photograph under reduced motion; the quiet view's ground fade runs as a nameless view
   transition when `--rm-quiet` is 1 and as a plain toggle when it is 0.
   `0s` is the one literal the scan allows in a duration slot — a zero
   is the absence of motion, not a duration.
@@ -267,8 +273,21 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   Three navigations are told apart in `astro:before-preparation` by
   **what was clicked** (`sourceElement`), not by the paths — the
   related strip lives on the image page, so a path rule would take a
-  strip click for an arrow step — and nothing is named unless
-  `--motion-travel` is 1 and reduced motion is off:
+  strip click for an arrow step — and nothing happens unless
+  `--motion-travel` is 1. Reduced motion withholds the **names** and
+  nothing else (decision review D1604, Q1, 2026-09-23): the kinds are
+  still classified, the origin stored, `data-moving` set and cleared,
+  the step's and the way back's preloads run, the understudy painted
+  and the way back's scroll restored — none of these moves anything,
+  and without them a reduced-motion reader would see the stage blank
+  and land at the top, which AC 6 forbids and Goal 6 does not suspend.
+  `name()` is the one place the script reads the setting: under reduced
+  motion it names nothing and returns false, and `data-slide` is
+  written only when a name was given. The header's group keeps the
+  state duration on a travel
+  (`html[data-moving]::view-transition-group(site-header)` at
+  `--dur-state` / `--ease-state`) — its inherited slide, not the
+  photograph's movement:
   - **in** — `sourceElement.closest('.image-link')` exists, on any
     page (a piece's frame, a gallery cell, the wall, the related strip
     on an image page): that link's `img` (the photograph, not the cell)
@@ -327,7 +346,43 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   its own cell. Every name, `data-moving` and `data-slide` is cleared
   on the swap event's `viewTransition.finished` — `.then(clear, clear)`,
   never `.finally`, which would re-throw a skipped transition's
-  rejection. `.site-header`
+  rejection.
+
+  **The way back holds what the reader saw** (D1604, Q2). The way
+  back's landing is a lazy `img` in an adopted document: a lazy srcset
+  image is not fetched until the next rendering step's intersection
+  check, so at `astro:after-swap` it is never `complete` and its `load`
+  always comes after the first frame — every frame the reader saw
+  re-faded and the landing's new snapshot was the fill (measured at
+  T1604, all four surfaces, both screens, dev and preview). Two
+  changes, neither adding a request: (1) `motion.ts` keeps, for the
+  document's life, the frames it has shown — key
+  `<pathname>|<innerWidth>x<devicePixelRatio>|<src attribute>`,
+  recorded in `shown()` only when the image is `complete` with a
+  `naturalWidth` — and `holdShown(doc)` sets `loading="eager"` on
+  every frame image in the new document whose key is held; the layout
+  calls it in its existing `astro:before-swap` appearance listener on
+  every navigation, whatever the travel flag or the setting. Those
+  files are in the document's memory cache, so eager is a cache hit,
+  and the existing `complete` short-cut and early-`load` rule hold
+  them. (2) For every **out**, the landing `img` is set
+  `loading="eager"` and the loader is extended to preload its
+  candidate — the same `preload(img, sizes)` the step uses, given the
+  landing's own `sizes`, bounded at one second — so the landing is
+  decoded and `complete` when the new snapshot is taken. Between image
+  pages the loader preloads the landing when the new document holds
+  the cell and the traverse is `back`, else the stage.
+
+  **The compare overlays before the swap** (D1604, Q3).
+  `enhanceCompare(scope)` moves to `src/lib/compare.ts`; the layout
+  calls it at its module's evaluation (the first load — T1603c's
+  timing, unchanged) and in `astro:before-swap` on
+  `event.newDocument`, so a page the router swaps in is overlaid
+  before it is adopted, before the router's scroll and before the new
+  snapshot. The image page's module cannot do this: the router runs a
+  new page's scripts after `updateCallbackDone` (`router.js`), so its
+  first swap into a compare page would be overlaid after the snapshot.
+  The image page's script keeps no call. `.site-header`
   declares `view-transition-name: site-header`: chrome, excluded from
   the page's cross-fade and never blended with the photograph; where
   the old page had hidden it (`data-hidden`), it slides in on its own
@@ -641,11 +696,13 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
 
 ## Known limitations
 
-- **A page change under reduced motion still cross-fades** (at
-  `--dur-state`): the router has no reduced-motion path on a site
+- **A page change under reduced motion still cross-fades** (at the
+  duration it has without the setting — `--dur-move` while
+  `html[data-moving]` is set (a travel, a step, a way back),
+  `--dur-state` otherwise): the router has no reduced-motion path on a site
   without `transition:*` directives (verified in `astro/dist`). A fade,
   within Goal 6; a cut is one rule in the reduced-motion block
-  (`::view-transition-group(*) { animation-duration: 0s }`) if wanted.
+  (`::view-transition-old(*), ::view-transition-new(*) { animation-duration: 0s }`) if wanted.
 - **The gate holds frames hidden until `load` if the module never
   runs.** `html[data-motion]` is written by an inline script before
   the body; the same script releases it at `load` unless the module
@@ -654,22 +711,19 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   every frame at `load` — later than a healthy page, never hidden for
   good. Without script at all nothing is hidden, by construction and
   by the barrier.
-- **Whether a memory-cached image reads `complete` at
-  `astro:after-swap` is the browser's business.** The new document is
-  parsed by `DOMParser` (no image fetched); the fetch starts when the
-  router adopts the body, in the same task the hook runs. The design
-  covers the false case with the early-`load` rule (a `load` before
-  the first frame counts as held), and T1604 measures the count of
-  frames that still pass through `"fade"` on the way back; if a
-  browser leaves it above zero the record says which and by how much
-  — and the landing cell's snapshot is the fill until its `load`.
-  `astro dev`'s cache headers may differ from production's; the read
-  is repeated on `astro preview` if the dev number is not zero.
+- **A frame the document has shown is held on return only at the
+  same viewport.** The key includes width and pixel ratio, so after a
+  resize a returning page's frames are lazy again and fade as on a
+  first visit — the price of never fetching a candidate the page would
+  not request. (Replaces the T1604-era limitation "whether a
+  memory-cached image reads `complete` … is the browser's business",
+  refuted by T1604's measurement: the cause was the site's own
+  `loading="lazy"` — D1604, Q2.)
 - **The way back names a cell the browser may have evicted.** The new
   snapshot for **out** is the cell's live `img`; if its file is no
-  longer in cache the photograph fades to the waiting fill as it lands
-  and fades back in when the cell decodes. Rare on a page the reader
-  just left; recorded, not fixed.
+  longer in the memory cache, the landing's preload re-reads it (from
+  the HTTP cache, or the network the page would use a moment later for
+  the centred cell), bounded at one second.
 - **A frame inside the strip's scroller** travels from its clipped
   rect (the snapshot is what was visible). Recorded at T1604.
 - **The preload for an arrow step is bounded at one second**; on a

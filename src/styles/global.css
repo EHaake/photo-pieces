@@ -2159,3 +2159,53 @@ img[data-shown='rise'] {
     transform: none;
   }
 }
+
+/* T1604: the travel. The understudy — the photograph the reader saw
+   stays in the stage's box until the page's own file has decoded and
+   faded in over it: same photograph, same ratio (the frame's box is the
+   photograph's ratio on every surface), so `100% 100%` is not a
+   distortion. The layout's script sets the attribute and the property
+   on the new page's stage at the swap; appear() removes both on every
+   path that shows the image. */
+.image-frame[data-understudy] {
+  background-image: var(--understudy);
+  background-size: 100% 100%;
+  background-origin: content-box;
+  background-clip: content-box;
+  background-repeat: no-repeat;
+}
+
+/* The slide variant, built for the pause's "or slide" question: the
+   arrows' step with both stages named, the old leaving and the new
+   arriving along the direction of travel. Off at `--arrows-slide: 0px`
+   (the script names nothing then, and the root cross-fade carries the
+   photograph in its box). */
+html[data-slide='next'] {
+  --dir: -1;
+}
+
+html[data-slide='prev'] {
+  --dir: 1;
+}
+
+html[data-slide]::view-transition-old(photograph) {
+  animation: motion-slide-out var(--dur-move) var(--ease-move) both;
+}
+
+html[data-slide]::view-transition-new(photograph) {
+  animation: motion-slide-in var(--dur-move) var(--ease-move) both;
+}
+
+@keyframes motion-slide-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--arrows-slide) * var(--dir)));
+  }
+}
+
+@keyframes motion-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--arrows-slide) * var(--dir) * -1));
+  }
+}

@@ -461,7 +461,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `/images/where-the-fog-lets-go/land-b/` at both screens, before
       and after; `sh scripts/verify.sh` green._
 
-- [ ] **T1604** — **Carried from the sign-off (plan.md, items 14 and
+- [x] **T1604** — **Carried from the sign-off (plan.md, items 14 and
       16(a), binding):** a traverse between two image pages is **out**
       only when `event.direction === 'back'` and the new document holds
       the cell; a `forward` traverse between image pages is a **step**;
@@ -597,6 +597,112 @@ headers to confirm nothing was duplicated or dropped. -->
       line by line and the Phase 1 pause asks the person to attest
       those lines._
 
+- [ ] **T1604a** — Reduced motion withholds the names, nothing else
+      (decision review D1604, Q1). Footprint: `BaseLayout.astro`'s
+      travel script, `global.css` (the RM block and the Motion section),
+      `motion.test.mjs`. Script: delete `|| reducedMotion()` from the
+      `astro:before-preparation` gate; `name(el)` returns `false` and
+      does nothing when `!el || reducedMotion()`, else names and returns
+      `true`; in `astro:before-swap` the slide branch sets
+      `root.dataset.slide` only when `name(frame)` returned true;
+      comments say the setting is read in `name()` alone and why the
+      rest still runs (AC 6). CSS, inside the `prefers-reduced-motion`
+      block: `::view-transition-group(*) { animation-name: none; }`,
+      with the block comment's "need no rule" sentence replaced by
+      plan.md's wording. In the Motion section, after the
+      `html[data-moving]` rule:
+      `html[data-moving]::view-transition-group(site-header) { animation-duration: var(--dur-state); animation-timing-function: var(--ease-state); }`.
+      Test: the RM-block describe gains the group rule by name
+      (`animation-name: none` on `::view-transition-group(*)`, and no
+      `animation-duration` declared on old/new in the block); the
+      block's rule count rises to five as a deliberate addition, not a
+      weakened test. _Verify: `sh scripts/verify.sh` green (count
+      recorded); on the dev server (the BiDi recipe) with reduced motion
+      emulated, at 1512×982 and 1280×1440: gallery cell `land-b` click —
+      `html` reads `data-moving="in"` during, no element carries an
+      inline `view-transition-name`, the new figure has
+      `data-understudy` and `--understudy` at after-swap,
+      `getAnimations()` shows no effect on any
+      `::view-transition-group(...)` and shows the root's old/new at
+      480; the image page's "In the gallery" link — `scrollY` equals the
+      stored origin ±1; the `→` key — the next stage `complete` at
+      after-swap, its URL once in the resource timeline; from a gallery
+      scrolled so the header is `data-hidden`, click a cell —
+      `::view-transition-group(site-header)` has no animation, its
+      old/new have one; `data-moving` gone after `finished`. Reduced
+      motion off: the same header case — the `site-header` group's
+      animation `getTiming().duration` is 180 during an "in" travel.
+      Mutation, reverted: delete the RM group rule → the new test
+      assertion fails. T1605's Verify line "under reduced motion with
+      `--rm-quiet` `1` only the root group animates" is read as "only
+      root's old/new animate; no group animation"._
+
+- [ ] **T1604b** — The way back holds what the reader saw (decision
+      review D1604, Q2). Footprint: `src/lib/motion.ts`,
+      `BaseLayout.astro`'s script, `motion.test.mjs`. `motion.ts`: a
+      module-level `Set<string>` of shown keys
+      (`${location.pathname}|${innerWidth}x${devicePixelRatio}|${img.getAttribute('src')}`);
+      `shown(img)` adds the key only when
+      `img.complete && img.naturalWidth > 0`; export
+      `holdShown(doc: Document, pathname: string)` setting
+      `loading="eager"` on each `FRAME_IMG` in `doc` whose key, computed
+      with the destination's pathname, is held. Layout: the existing
+      `astro:before-swap` appearance listener calls
+      `holdShown(event.newDocument, event.to.pathname)`;
+      `preloadStage(doc)` becomes `preload(img, sizes)` with two callers
+      — the step's stage (sizes as today) and the out landing (the cell
+      `img`'s own `sizes`); for every **out** the loader is extended to
+      preload the landing, found with the cell lookup on
+      `event.newDocument` for `event.from.pathname`; between image
+      pages, the landing when the cell exists and `direction === 'back'`,
+      else the stage; in `astro:before-swap` the out `landing` gets
+      `loading="eager"`. Tests: a unit test on the key and on
+      `holdShown` over a parsed fixture (held key → eager; other
+      pathname, other viewport, never-loaded → untouched).
+      Pre-authorised fallback, used only if the Verify still counts
+      fades above zero: in `appear()`, a frame whose key is held and is
+      not `complete` at the hook is shown on its `load` whenever it
+      comes, never faded; record which path was needed. _Verify:
+      `sh scripts/verify.sh` green (count recorded); on the dev server
+      and on `astro preview`, 1512×982 and 1280×1440, T1604's way-back
+      reads repeated on all four surfaces (history back and the way-back
+      link) and the strip on `land-b`: at after-swap the landing
+      `complete` `true` and `data-shown=""`, the `"fade"` count 0 for
+      frames seen before the click (the `MutationObserver` log); the
+      resource timeline's entry count for every photograph URL after the
+      way back equals its count before the click; a gallery cell never
+      scrolled into view stays `loading="lazy"` and absent from the
+      timeline; the way-back link to a gallery not visited this session
+      lists the landing's candidate exactly once; resize the window on
+      the image page, then back: no cell carries `loading="eager"`
+      except the landing; with `--motion-travel: 0` on `html` the return
+      still shows 0 fades._
+
+- [ ] **T1604c** — The compare overlays before the swap (decision
+      review D1604, Q3). Footprint: new `src/lib/compare.ts`;
+      `BaseLayout.astro`'s script; `src/pages/images/[...id].astro`'s
+      script (removal only). Move `enhanceCompare` verbatim into
+      `compare.ts` as `enhanceCompare(scope: Document)` (querying
+      `scope`; the `data-js` skip unchanged); the layout imports it,
+      calls `enhanceCompare(document)` beside `appear(document)` at
+      module evaluation, and `enhanceCompare(event.newDocument)` in the
+      existing appearance `astro:before-swap` listener; the image page's
+      script loses the function, its top-level call and the `init()`
+      call, and its T1603c comment moves to `compare.ts` with one added
+      sentence on the router's script order. _Verify:
+      `sh scripts/verify.sh` green (count recorded); on the dev server
+      at 1512×982 and 1280×1440: a fresh session, `/galleries/fog-frames/`
+      → click `land-b` (the first image page visited): at
+      `astro:after-swap` the `.compare` has `data-js` and its
+      `offsetHeight` equals the enhanced first-load value (recorded),
+      and a `layout-shift` `PerformanceObserver` (with `buffered`,
+      `hadRecentInput` ignored) reports no entry after page-load; on
+      `land-b`, a related-strip click then history back: the landing
+      cell's `getBoundingClientRect().top` at after-swap equals its
+      value before the click ±1 (429 / 659 expected); the slider still
+      moves `--split` after a swap; a full load of `land-b` unchanged
+      from T1603c's numbers._
+
 - [ ] **T1605** — The quiet view as one movement. Pattern: the
       `setQuiet`/`applyQuiet` pair in `src/pages/images/[...id].astro`
       (~874–886) and the page's comment voice; plan.md's "The quiet
@@ -613,7 +719,15 @@ headers to confirm nothing was duplicated or dropped. -->
       `withTransition(() => { applyQuiet(quiet); store.set(QUIET_KEY, quiet ? '1' : null); if (quiet) window.scrollTo({ top: 0 }); }, 'quiet', reducedMotion() ? null : figure, flag('--motion-quiet') && (!reducedMotion() || flag('--rm-quiet')))`
       with `figure` the `.image-frame` looked up in the call (the
       router swaps it); `applyQuiet` and the `astro:after-swap`
-      re-apply untouched. `motion.test.mjs`: describe "(h) the quiet
+      re-apply untouched. The script gains an `astro:before-swap`
+      listener (D1604 second look): when the store says quiet and the
+      new document holds `.image-page`, its `.image-frame img` gets
+      `data-page-sizes` set to its `sizes` attribute _first_, then
+      `sizes="100vw"` — so the adopted stage never selects the page
+      candidate (Verify: an arrow in the quiet view lists no page-`sizes`
+      candidate for the next stage in the resource timeline; leaving the
+      quiet view then restores the page `sizes` and fetches nothing
+      new). `motion.test.mjs`: describe "(h) the quiet
       view's resting rules are `main`'s": the page's scoped
       `:global(html[data-quiet]) :global(.site-header), …, :global(html[data-quiet]) .quiet-toggle { display: none; }`
       and `:global(html[data-quiet]), :global(html[data-quiet] body) { background: var(--color-quiet); }`
@@ -847,6 +961,8 @@ tier if it is ever on (it is off). -->
 | T1603 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 71,717                      | Q1 strip frames own units; Q2 T1603b/c inside the spec; Q3 stagger on the fade; notes: a unit taller than viewport/threshold never arrives (read a tall grid at T1604)                                                                                                                                                                                      |
 | T1603b (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 75,510                      | done; tall box reserved at DCL on both screens (main 0×0), size equal after load, width within 0.016px of `main`; position moves 0–1.4px from sub-pixel figure drift above, identical on `main` (under the 3px rule)                                                                                                                                        |
 | T1603c (`sdd-implementer`, diagnosis)                       | `opus` (Opus 5.5)              | 54,453                      | real shift (scrollY 0): the compare's two stacked frames collapsed to one box only at `load` (the first `astro:page-load`); `enhanceCompare()` now runs at module evaluation and from `init()`, idempotent; nothing moves DCL→load at either screen; 151 article rects equal `main`'s final layout                                                          |
+| T1604 (`sdd-implementer`)                                   | `opus` (Opus 5.5)              | 200,800                     | built; 369 tests; every pseudo-element animation observed (480, move curve); way back: landing never `complete`, every seen frame re-fades (lazy cells) → T1604b; RM gate contradiction → T1604a; compare page strip way back 555px low → T1604c; no-API via prototype delete (no Firefox pref)                                                             |
+| T1604 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 110,045                     | Q1 RM withholds names only (+ group rule, header group at state duration); Q2 hold shown frames eager + preload landing; Q3 compare overlaid at before-swap from the layout; quiet-view sizes → T1605                                                                                                                                                       |
 
 _(Session-tier allowance draw noted at each pause.)_
 

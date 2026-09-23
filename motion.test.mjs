@@ -72,7 +72,9 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //     gate's `:is(...)` list is `FRAME_HOSTS`, the one list spelled
 //     twice. No markup the site ships writes the motion attributes, and
 //     the markup hooks the script leans on — the transform's two class
-//     literals, the piece row's cover box — are still there.
+//     literals, the piece row's cover box — are still there. The
+//     travel's understudy and slide rules (T1604) sit under their
+//     transient attributes, which no markup writes either.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -674,9 +676,10 @@ describe("(g) the hidden state is the script's (T1603, spec 018)", () => {
     // The allowed spellings are the scripts' writes, through `dataset`:
     // the layout's inline gate (`document.documentElement.dataset.motion
     // = ''`), and src/lib/motion.ts's `dataset.shown`, `dataset.motion`,
-    // `dataset.moving` and `dataset.understudy` — none of which is the
-    // hyphenated attribute this scan looks for.
-    const ATTR = /data-(motion|shown|moving|understudy)\b/;
+    // `dataset.moving` and `dataset.understudy`, and the layout's travel
+    // (`dataset.moving`, `dataset.understudy`, `dataset.slide`) — none
+    // of which is the hyphenated attribute this scan looks for.
+    const ATTR = /data-(motion|shown|moving|understudy|slide)\b/;
     const texts = { ...(await astroFiles()) };
     texts['remark-pieces-blocks.mjs'] = await readFile(here('./remark-pieces-blocks.mjs'), 'utf8');
     const content = async (dir) => {
@@ -694,6 +697,28 @@ describe("(g) the hidden state is the script's (T1603, spec 018)", () => {
     expect(texts['src/layouts/BaseLayout.astro']).toContain(
       "document.documentElement.dataset.motion = '';",
     );
+  });
+
+  it('the understudy and the slide rules sit under their transient attributes (T1604)', () => {
+    // The two attributes the travel's script writes for the length of a
+    // transition — never in markup, which the walk above proves — so
+    // without script neither rule can apply.
+    const understudy = top.filter((rule) => 'background-image' in declarations(rule.body));
+    const painting = understudy.filter(
+      (rule) => declarations(rule.body)['background-image'] === 'var(--understudy)',
+    );
+    expect(painting).toHaveLength(1);
+    expect(
+      splitTop(painting[0].prelude).every((one) => norm(one).includes('[data-understudy]')),
+    ).toBe(true);
+    const sliding = top.filter((rule) => /motion-slide-(in|out)\b/.test(rule.body));
+    const directed = top.filter((rule) => '--dir' in declarations(rule.body));
+    expect(sliding).toHaveLength(2);
+    expect(directed).toHaveLength(2);
+    const stray = [...sliding, ...directed]
+      .filter((rule) => !splitTop(rule.prelude).every((one) => norm(one).includes('[data-slide')))
+      .map((rule) => rule.where);
+    expect(stray).toEqual([]);
   });
 
   it("the transform's source still carries the two class literals the hooks lean on", async () => {
