@@ -185,17 +185,3 @@ The last paragraph, and the release. The frame travels away with this
 line and the next block starts at an ordinary block margin, with no
 empty stage between the final sentence and what follows.
 :::
-
-## Pause
-
-A frame too wide to hold beside words arrives below the last paragraph
-and pins at the centre, with this paragraph anchored above it for the
-whole of the pinned stretch. In the sampler the lights never go down —
-there is no script here — so the frame and its mat are judged on the
-light ground, which is where a mat is hardest to see.
-
-::pause{src="../../gallery-images/pano-3x1-01.jpg" alt="A wide panorama, the widest frame the vocabulary places"}
-
-The paragraph on the far side of the frame, anchored below it, and the
-end of the fixture. Every matted treatment above wears the mat the
-three tokens produce; the three controls wear none.

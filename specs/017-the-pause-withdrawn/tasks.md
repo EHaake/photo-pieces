@@ -81,7 +81,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the pause out, the mat to the quiet view, the stage refit (reviewer after the phase; `review: per-task` on T1502; walkthrough: the fog piece reads with a fullbleed panorama where its pause was; every image page opens with the photograph bare and centred just below the header, a 3:2 and a 2:3 the same rectangle turned — the height deciding on the laptop, the width on the DualUp — the previous / where / next line directly beneath at a piece's spacing and at or above the fold — at it where the height decides — the title following; a panorama at the box's full width; a click still takes the photograph to the quiet dark in its white mat; the person judges the equal rectangle on both screens)
 
-- [ ] **T1500** — The fixtures first, so the build is green at every
+- [x] **T1500** — The fixtures first, so the build is green at every
       later task. `src/content/pieces/where-the-fog-lets-go/index.md`
       line 68: `::pause{src="./pano.jpg" alt="The full sweep of coastline after the fog cleared"}`
       becomes `::fullbleed{…}` with the same `src` and `alt`, on the same
@@ -777,6 +777,7 @@ tier if it is ever on (it is off). -->
 | Amendment sign-off (`skeptical-reviewer`, new invocation) | top (`claude-fable-5-1`, high) | 152,025 | fix and re-review: B1 (the rule undefined for ratios beyond 3:2 — the spec's square sentence contradicted the plan's formula; settled in the spec as the L × ⅔L reference rectangle, turned), B2 (T1506's AC map at the pre-amendment numbering); nine notes |
 | Planning: amendment fixes (`sdd-planner`, resumed) | top (`claude-fable-5-1`, high) | 35,150 | B1–B2 fixed, notes folded |
 | Amendment re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 24,979 | signed off once one line is fixed: the exact-pair assertion at the grid's literal 0.667 cannot pass at 1e-6 — transcribed into T1503 and plan.md (assert on 1.5 and 1/1.5 in the case); two notes transcribed (the 1.78 mutation claim dropped; the panorama's height re-derived from its registry ratio) |
+| T1500 (`sdd-implementer`) | implementation (`opus`, high) | 28,167 | done; 87 pages, 332 tests; one blank line more deleted in matte-sampler (188) so the file does not end on a blank |
 
 _(Session-tier allowance draw noted at each pause.)_
 

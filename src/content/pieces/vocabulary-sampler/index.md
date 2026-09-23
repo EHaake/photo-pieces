@@ -228,7 +228,7 @@ chrome across the top of the picture.
 
 Nothing here moves by script. The hold is a sticky figure; the script
 on the piece page only marks that a frame is parked, which is what
-keeps the header away. The lights belong to a pause.
+keeps the header away.
 
 This paragraph exists to lengthen the scene. So does the next. The
 release is where the words end, and eight paragraphs is what a
@@ -238,48 +238,6 @@ The last paragraph. The frame lets go with this line and the section
 below begins at an ordinary block margin — no held stretch, no empty
 stage between the last word and the next thing.
 :::
-
-## Pause
-
-The pause: a frame too wide to hold beside words arrives an ordinary
-figure's margin below the last paragraph and pins at the centre, and
-this paragraph and the one on the far side of the frame pin with it,
-anchored above and below the photograph for the whole of it. The
-page's lights go down to a dark grey — the words a shade darker,
-still faintly readable, the mat keeping its white — and up again
-before the page moves on; the frame comes a little closer at the
-middle. Script-driven; without it the frame pins on the light ground.
-
-::pause{src="./pano.jpg" alt="A 3:1 placeholder"}
-
-Sample prose after the pause, carrying an inline link to [the sampler
-itself](/pieces/vocabulary-sampler/) — the lights list's check: a link
-inherits its paragraph's colour, so it fades with the words rather than
-standing out on the dark ground.
-
-## After the pause
-
-A heading follows, for the same check: headings mix from their own
-token, so this one fades in step with the paragraphs rather than
-snapping to a different shade when the lights go down.
-
-Sample prose, and here for a structural reason as much as a stylistic
-one: a pause finishes only when the end of its scene catches up with
-the pinned stage, which needs about half of the screen the stage
-leaves empty in document after it. Without words down here the piece would end while the lights were still part
-of the way up, which is what a measurement on a portrait desktop found
-before these paragraphs were written.
-
-One more, for the same reason: on a tall viewport that room is more
-than a single paragraph carries, and the need grows with the screen
-while the words do not. The sampler closes on words rather than on
-the frame, which is the rule every piece follows — never end with a
-pause.
-
-And a third, so the margin is comfortable rather than exact: a taller
-window asks for more room below the pause than the last measurement
-did, and a fixture that only just clears its own rule is a fixture
-waiting to fail.
 
 ## Borrowed
 
