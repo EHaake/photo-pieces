@@ -643,6 +643,40 @@ headers to confirm nothing was duplicated or dropped. -->
       also pins `position: relative`; the sampler's `sizes` call
       wrapped over three lines for Prettier.
 
+- [ ] **T1503a** — The header's fallback to the measured height, and
+      a guard on the build-exit fix (Phase 0 review B1 and S4).
+      **B1:** without script the tallest frame's nav line ends 3.8px
+      below the fold at 1512×982 (985.8 of 982), because the desktop
+      header is 75.8px and the fallback in `var(--header-h, 4.5rem)`
+      is 72 — Goal 5 and AC 7 say "with and without script". Change
+      the fallback to `4.75rem` in `src/styles/global.css`'s
+      `.image-stage` `--avail-h` and the `4.5rem` literal in
+      `src/lib/stage-sizes.ts` (its header comment too), and the pinned
+      `--avail-h` string in `matte.test.mjs`'s stage case; the sizes
+      case evaluates the module against the stylesheet, so it fails if
+      only one moves (mutation: move one, not the other → the sizes
+      case fails; recorded). No other `--header-h` fallback exists in
+      CSS (grep). `BaseLayout.astro`'s comment ("matches the desktop
+      size") is close-out's (S5). **S4:** a new case in
+      `remark-pieces-vocabulary.test.mjs`'s closed-vocabulary describe
+      (or `image-meta.test.mjs` — whichever file already reads the
+      repo's sources), "every Markdown glob() collection sets
+      deferRender: true — the build's exit on a transform error rests
+      on it (T1501a)": read `src/content.config.ts`, find every
+      `glob({` call, assert each carries `deferRender: true` and that
+      there are four. Mutation: one `deferRender` removed → the case
+      fails naming the collection. _Verify: `sh scripts/verify.sh`
+      green (count recorded); `grep -rn "4.5rem" src/styles/global.css src/lib/stage-sizes.ts`
+      → 0 for the fallback (any other 4.5rem listed);
+      `grep -rn "4.75rem" src/ matte.test.mjs` → the three places; on
+      the dev server at 1512×982 script off (the sandboxed-iframe
+      recipe T1503 used) on `port-a`: the nav's bottom ≤ 982 (the
+      value); script on: the same page's frame and nav as T1503
+      recorded (781 wide L, nav bottom 981.8) — unchanged, since script
+      publishes the real header; at 375×812 script off the nav's
+      bottom recorded (the phone wrap is the plan's remaining known
+      limitation)._
+
 - [x] **T1504** — The sampler, honest. Pattern:
       `src/pages/dev/matte/[...surface].astro` and `_sampler.ts` (spec
       013's, made honest at 015's T1302 — the same move, one section
@@ -936,6 +970,7 @@ tier if it is ever on (it is off). -->
 | T1502 per-task review (`skeptical-reviewer`) | implementation (`opus`, high) | 72,565 | signed off, no blocking; N1 → T1503, N2–N8 carried |
 | T1503 (`sdd-implementer`) | implementation (`opus`, high) | 146,717 | done first dispatch; header 76 not 72, L 781 at the laptop; no-script nav 3.8px under the fold there (known limitation, to the pause report); 319 tests |
 | T1504 (`sdd-implementer`) | implementation (`opus`, high) | 80,634 | done first dispatch; 319 tests |
+| Phase 0 review (`skeptical-reviewer`) | implementation (`opus`, high) | 163,719 | one blocking: B1 no-script nav 3.8px under the fold on the laptop (fallback 4.5rem vs 75.8 measured) → T1503a; S4 folded into T1503a; S1–S3, S5–S8 carried |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -967,6 +1002,25 @@ _(Session-tier allowance draw noted at each pause.)_
 - T1502 N7: only end states were measured — if any transition on the
   frame animates the quiet toggle, the mat may now snap in; a look at
   the phase walkthrough.
+- Phase 0 review S1: the DualUp with a permanent scrollbar (a mouse
+  attached) would show the frame 7.5px right of centre and 15px over
+  the stage's box — ask the person to look, do not assume overlay
+  scrollbars.
+- Phase 0 review S2: the DOMContentLoaded read cannot prove "no
+  layout shift" — `--header-h` is written by a module script that may
+  run after first paint; B1's fix zeroes the desktop jump.
+- Phase 0 review S5: stale comments for close-out — the sampler's
+  stage comment "each a viewport tall" (`[...surface].astro` ~108) and
+  `BaseLayout.astro` ~119–123 ("layouts that fill the viewport below
+  it", "matches the desktop size").
+- Phase 0 review S6: the nav token floors a one-row nav above 720px;
+  a long middle label wrapping on the laptop would push the tallest
+  frame's nav line under the fold — a look at the longest set title
+  at the walkthrough.
+- Phase 0 review S7: the close-out grep lists `src/pages/about/index.astro`'s
+  "go-live pause" explicitly.
+- Phase 0 review S8: `stageSizes` prints full-precision coefficients
+  (`0.6666666666666666`) — valid, noisy; cosmetic.
 - T1502 N8: the walk's pattern misses upper-case constants and any
   plugin stylesheet; the close-out grep must include `obsidian-plugin/`.
 

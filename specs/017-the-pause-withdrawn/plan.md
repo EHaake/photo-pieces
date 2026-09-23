@@ -543,9 +543,10 @@ Every claim above is owned by a task and a check:
   line, the `.frame-nav` rule and the `.image-head` rule (T1503) and
   nothing under `.compare`, `.image-body` or the `.sec*` rules;
   `src/lib/og-card.mjs`, `public/og.jpg`,
-  `src/lib/ground.ts`, `src/lib/gallery-layout.ts`, `src/content.config.ts`
-  and every page under `src/pages/` other than the two named are
-  unchanged against `main`; `ground.test.mjs`, `page-head.test.mjs`,
+  `src/lib/ground.ts`, `src/lib/gallery-layout.ts` and every page
+  under `src/pages/` other than the two named are unchanged against
+  `main` (`src/content.config.ts` changes at T1501a alone —
+  `deferRender: true` on the four collections); `ground.test.mjs`, `page-head.test.mjs`,
   `og.test.mjs`, `galleries.test.mjs`, `place-page.test.mjs` green and
   unedited.
 
@@ -594,8 +595,8 @@ ground literals; `--hold-margin`, `--block-margin`, `--para-gap`,
 `--tall-max`, `--strip-h`; every `.piece-held*` rule and the held
 collapses; `.image-frame img`, the zoom-in rule, `html[data-quiet]
 .image-stage` and the cursor list rule; `.gallery-flow*`, the place
-wall, the cover cards, the compare's rules; `src/content.config.ts`,
-`src/lib/images.ts`, `src/lib/gallery-layout.ts`, `src/lib/ground.ts`,
+wall, the cover cards, the compare's rules; `src/content.config.ts`
+beyond T1501a's `deferRender` lines, `src/lib/images.ts`, `src/lib/gallery-layout.ts`, `src/lib/ground.ts`,
 `src/lib/og-card.mjs`, `public/og.jpg`; `BaseLayout.astro` (which
 publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
 (amended on `main` at 7747217 before this spec).
@@ -615,7 +616,12 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
   line ends 3.8px below the fold at 1512×982 (985.8 of 982); with
   script (the normal case) it ends at 981.8. The one-number fix — the
   fallback to 4.75rem in `global.css` and `stage-sizes.ts` together —
-  is offered to the product owner at the Phase 0 pause, not made._
+  was first offered to the product owner, then made at T1503a on the
+  Phase 0 review's finding: Goal 5 says with and without script, and
+  the fallback was meant to match the desktop header (spec 006), which
+  it did not. The phone's wrapped header (136px) remains the one
+  no-script gap: there the width decides, so the nav stays above the
+  fold anyway._
 - **The nav line's 12px bottom padding sits inside its claimed height**,
   so the title is 48px below the nav's box and 60px below its text;
   the token counts the padding in (spec 016's measurement), and moving
