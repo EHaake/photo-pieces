@@ -122,18 +122,19 @@ headers to confirm nothing was duplicated or dropped. -->
       held keeps the local --ar and sizes", its pause half deleted; no
       held assertion edited. **New**, in a new
       `describe('the closed vocabulary (T1501, spec 017)')`: one case,
-      "the pause is gone: ::pause fails as an unknown block naming the
-      piece, and nothing under src/, the transform or the plugin knows
-      the word" — `Before.\n\n::pause{src="./photo.jpg" alt="x"}` rejects
+      named for what it can fail on here — "the pause is gone from the
+      vocabulary: ::pause and :::pause fail as an unknown block naming
+      the piece" — `Before.\n\n::pause{src="./photo.jpg" alt="x"}` rejects
       with `/unknown block directive "pause" — the block vocabulary is closed; known blocks: single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip, aside, row, held/`,
       the caught error's `.file` ends with `tests/fixtures/piece.md` and
       its `.line` is 3 (**verify at the task** that the harness carries
       the `VFileMessage` through; if it does not, stop and report — do
-      not pin the message alone); `:::pause{src="./photo.jpg" alt="x"}\nA caption.\n:::`
-      rejects with the same message. (The case's second clause — the
-      walk over the source for the block's spellings — is T1502's,
-      where it can pass; one case names the word, and the suite is
-      green at the end of every task.) _Verify: `sh scripts/verify.sh`
+      not pin the message alone); `Before.\n\n:::pause{src="./photo.jpg" alt="x"}\nA caption.\n:::`
+      rejects with the same message, its `.file` and `.line` (3) pinned
+      the same way. (The describe's second `it` — the walk over the
+      source for the block's spellings — is T1502's, where it can pass;
+      the describe is the one test that names the word, and the suite
+      is green at the end of every task.) _Verify: `sh scripts/verify.sh`
       green (the count recorded);
       `grep -n -i pause remark-pieces-blocks.mjs src/lib/image-meta.mjs obsidian-plugin/main.ts remark-pieces-blocks.test.mjs image-meta.test.mjs`
       → 0; `grep -n -i pause remark-pieces-vocabulary.test.mjs` → only
@@ -195,14 +196,20 @@ headers to confirm nothing was duplicated or dropped. -->
       header comment rewritten for the held block alone (the hold is
       pure CSS; the script only marks that a frame is parked). Delete
       `src/lib/pause-shape.ts` and `pause-shape.test.mjs`.
-      `remark-pieces-vocabulary.test.mjs`: T1501's closed-vocabulary
-      case gains its second clause — a walk over every text file under
-      `src/`, `remark-pieces-blocks.mjs`, `obsidian-plugin/main.ts` and
-      the root `*.test.mjs` files except this one, comments included,
-      finds no match for
+      `remark-pieces-vocabulary.test.mjs`: T1501's describe gains a
+      second `it`, "nothing under src/, the transform or the plugin
+      knows the word, and the held block's attribute is spelled once" —
+      a walk over every text file under `src/`, `remark-pieces-blocks.mjs`,
+      `obsidian-plugin/main.ts` and the root `*.test.mjs` files except
+      this one, comments included, finds no match for
       `/(::pause|piece-pause|--pause|data-pause|data-scene|pause-shape|['"]pause['"]|\bpause:\s)/i`
       (spelled for the block, not the English word:
-      `src/pages/about/index.astro` says "go-live pause" and stays).
+      `src/pages/about/index.astro` says "go-live pause" and stays);
+      and `src/styles/global.css` contains
+      `html[data-held-active] .site-header` while
+      `src/pages/pieces/[slug].astro` contains
+      `toggleAttribute('data-held-active'` — the two spellings of the
+      one attribute, pinned together.
       `matte.test.mjs`: the header comment and the constants
       (`PAUSE_ANCHOR` gone; `MATTED` is `['html[data-quiet] .image-frame']`),
       and the cases as plan.md's Testing strategy names them — **each
@@ -248,13 +255,15 @@ headers to confirm nothing was duplicated or dropped. -->
       constant; "the gate identity" → at `:root`'s tokens the quiet
       view's 3:2 frame at 1512×982 wears the 40px ceiling, the paper
       stage's wears 0, the reading-width single has no `--mat` reader.
-      **(d) new**, "worn where the ground is dark, and there is one dark
-      ground (spec 017)": every `background*` in `global.css` reading
-      `--color-quiet` sits on `html[data-quiet] .image-stage` and
-      nowhere else; `--avail-w` is published by `.image-stage` and
+      **(d) new**, "worn where the ground is dark — in global.css, one
+      dark ground (spec 017)": every `background*` in `global.css`
+      reading `--color-quiet` sits on `html[data-quiet] .image-stage`
+      and nowhere else; `--avail-w` is published by `.image-stage` and
       `html[data-quiet] .image-stage` only; `MATTED[0]` is gated by the
-      same `html[data-quiet]`. Every rewritten case keeps a name that
-      says what would fail. _Verify: **at the start of the task, before
+      same `html[data-quiet]` (the image page's scoped
+      `:global(html[data-quiet]) { background }` is the page ground
+      under the same attribute, outside this file — the name says so).
+      Every rewritten case keeps a name that says what would fail. _Verify: **at the start of the task, before
       any edit**, on the dev server at 1512×982, 1280×1440 and 375×812
       (Firefox headless via BiDi — the recipe in
       specs/015-the-hero-mat/tasks.md's T1301 record and its environment
@@ -291,9 +300,10 @@ headers to confirm nothing was duplicated or dropped. -->
       `.image-frame` → the bare-stage case fails (`px()` throws); the
       five declarations moved into the cursor list rule → "declared
       once" fails on the prelude; `--pause-depth: 0.85` re-added to
-      `:root` → the closed-vocabulary case's walk fails naming
-      `global.css`; `data-scene-active` restored in the script → the
-      walk fails naming the piece page. Where the implementer cannot
+      `:root` → the closed-vocabulary walk fails naming `global.css`;
+      `data-scene-active` restored in the script → the walk fails
+      naming the piece page; the selector alone respelled → the
+      two-string pin fails. Where the implementer cannot
       drive a browser it says so, line by line, and the Phase 0 pause
       asks the person to attest those lines._
 
@@ -334,22 +344,42 @@ headers to confirm nothing was duplicated or dropped. -->
       above on `:root` and on the phone query's `:root`, declared on
       `:root` twice and on no other selector; the `.image-stage` rule's
       prelude is exactly `.image-stage`; the page's scoped `.frame-nav`
-      rule declares `min-height: var(--frame-nav-h)`. The evaluator's
-      envs gain `--frame-nav-h` from `root`. _Verify: `sh scripts/verify.sh`
-      green; `grep -n -- "--frame-nav-h" src/styles/global.css 'src/pages/images/[...id].astro'`
+      rule declares `min-height: var(--frame-nav-h)` and
+      `font-size: 0.78rem`, and the page's scoped style has a
+      `@media (max-width: 719.98px)` block with a `.frame-nav` rule
+      inside it (the token's two inputs, pinned where they live). The
+      evaluator's envs gain `--frame-nav-h` from `root`. _Verify:
+      `sh scripts/verify.sh` green;
+      `grep -n -- "--frame-nav-h" src/styles/global.css 'src/pages/images/[...id].astro'`
       → the two `:root` declarations, the stage's three reads, the
-      nav's one (lines listed); on the dev server at 1512×982, 1280×1440
-      and 375×812, script on, at scroll 0 with the quiet state cleared:
-      on `/images/where-the-fog-lets-go/land-b/` the visible
-      `.frame-nav`'s `offsetHeight` equals the token's computed px (29 /
-      29 / 62) and `getBoundingClientRect().bottom ≤ innerHeight` (the
-      value recorded); the stage's `offsetHeight` equals
-      `innerHeight − header.offsetHeight − token` within 0.5px; the
-      stage's `offsetWidth` and `left`, and the 3:2 figure's `offsetWidth`
-      and its image's width, equal T1502's after-reads; on `…/port-a/`
-      the figure's `offsetHeight` is shorter than T1502's after-read by
-      exactly the token (±0.5) and its width by token × 0.667; an image
-      page rendering no `.frame-nav` (find one:
+      nav's one (lines listed);
+      `git diff -U0 main -- src/styles/global.css | grep '^@@'` — every
+      hunk listed, none inside `.gallery-flow`'s rules, the place wall's,
+      the `--color-*` lines or `--color-quiet`, none inside a
+      `.piece-held*` rule; `git diff main -- 'src/pages/images/[...id].astro'`
+      → the `.frame-nav` rule's hunk and nothing under `.compare` (the
+      hunks listed); on the dev server at 1512×982, 1280×1440 and
+      375×812, script on, at scroll 0 with the quiet state cleared: on
+      `/images/where-the-fog-lets-go/land-b/` the visible `.frame-nav`'s
+      `offsetHeight` equals the token's computed px (29 / 29 / 62) and
+      `getBoundingClientRect().bottom ≤ innerHeight` (the value
+      recorded); the stage's `offsetHeight` equals
+      `innerHeight − header.offsetHeight − token` within 0.5px, the
+      header's `offsetHeight` recorded beside it; the stage's
+      `offsetWidth` and `left` equal T1502's after-reads. The frame's
+      box by the limit that binds it: at 1512×982 the 3:2 figure's
+      `offsetWidth` and its image's width equal T1502's after-reads
+      (width-bound at 1160 wide, its 773px height against `--avail-h`
+      with roughly 50px to spare after the cue — the margin recorded);
+      on `…/port-a/` at 1512×982 and 1280×1440 the figure's
+      `offsetHeight` is shorter than T1502's after-read by exactly the
+      token (±0.5) and its width by token × 0.667 (height-bound there);
+      at 375×812 the 2:3 figure is **width-bound** (`--avail-w` is 343px
+      at the page-pad clamp's floor, so the frame is 514.5px tall
+      against an `--avail-h` of roughly 660–690px) and its `offsetWidth`
+      and `offsetHeight` equal T1502's after-reads — AC 6's "unchanged"
+      clause from the other side, recorded as such; an image page
+      rendering no `.frame-nav` (find one:
       `grep -L 'class="frame-nav"' dist/images/*/*/index.html | head -1`)
       has the same stage height as one with; the quiet view's stage is
       `innerHeight` tall, equal to T1502's after-read; the stage's
@@ -362,6 +392,7 @@ headers to confirm nothing was duplicated or dropped. -->
       dropped from `--avail-h` → the stage case fails; `--frame-nav-h: 0px`
       declared on `.image-stage` → the twice-on-:root case fails;
       `min-height` removed from `.frame-nav` → the nav-claims case
+      fails; the nav's query retyped `719px` → the breakpoint pin
       fails. The person attests the line above the fold on both screens
       at the pause._
 
@@ -415,7 +446,14 @@ one line at T1500's file; `/pieces/vocabulary-sampler/` and the held
 frame's header hand-off; an image page — the stage bare on paper, the
 previous / where / next line ending at the fold at the top on the
 laptop and on the DualUp, the click into the quiet view's white mat and
-back; anything he saw that the spec did not say. Recorded here by the
+back; anything he saw that the spec did not say. The pause report says
+plainly, in its "what you can now do" item, that the photograph on
+paper is larger than before by the mat it no longer wears — 80px at
+the 40px ceiling — and that what the cue changes is the stage's
+height, which is what the spec's sizing criterion measures; and its
+"where execution deviated" item lists the two scope extensions the
+plan authorised on its own: the dev sampler's mat bar removed, and the
+README block table's Matted column dropped. Recorded here by the
 orchestrator in his words, with T1502's and T1503's numbers beside
 them, before Phase 1 is dispatched.)_
 

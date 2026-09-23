@@ -199,28 +199,38 @@ Every claim above is owned by a task and a check:
 
 - **A stale pause fails by name, and nothing knows the word** —
   `remark-pieces-vocabulary.test.mjs`, **T1501**, one new case in a new
-  describe (the closed vocabulary had no test of its own): `::pause{src
-  alt}` on the third line of a body (a paragraph, a blank, the
-  directive), and `:::pause{…}\nA caption.\n:::`,
+  describe (the closed vocabulary had no test of its own), named for
+  what it can fail on at T1501 — "the pause is gone from the
+  vocabulary: ::pause and :::pause fail as an unknown block naming the
+  piece": `::pause{src alt}` on the third line of a body (a paragraph,
+  a blank, the directive), and `Before.\n\n:::pause{…}\nA caption.\n:::`,
   both reject with the message above (the leaf's error precedes the
-  form check, so the container form gets the same one); the thrown
-  `VFileMessage` names the harness's file (`tests/fixtures/piece.md`)
-  and the directive's line — **a claim to verify at the task**: if the
-  harness does not carry `.file`/`.line` through, the implementer
-  stops and reports rather than pinning the message alone. At
-  **T1502**, once the stylesheet and the piece page are clear, the same
-  case gains its second clause — a walk over `src/`, the transform,
+  form check, so the container form gets the same one); for **both**
+  rejections the thrown `VFileMessage` names the harness's file
+  (`tests/fixtures/piece.md`) and line 3 — **a claim to verify at the
+  task**: if the harness does not carry `.file`/`.line` through, the
+  implementer stops and reports rather than pinning the message alone.
+  At **T1502**, once the stylesheet and the piece page are clear, the
+  same describe gains a second `it` — "nothing under src/, the
+  transform or the plugin knows the word, and the held block's
+  attribute is spelled once": a walk over `src/`, the transform,
   `obsidian-plugin/main.ts` and the root `*.test.mjs` files except
   itself for
   `/(::pause|piece-pause|--pause|data-pause|data-scene|pause-shape|['"]pause['"]|\bpause:\s)/i`
   — the block's spellings, not the English word, because
-  `src/pages/about/index.astro` says "go-live pause" and stays. One
-  case names the word, as the spec asks; the suite is green at the end
-  of every task. The orchestrator's plain-word grep at close-out is the
-  other half. Mutation-checked: a `pause` stub restored in `BLOCKS`
-  fails this case and `image-meta.test.mjs`'s agreement case; a
-  `--pause-depth` token restored in `:root` fails the walk naming
-  `global.css`. And a negative control at the build itself:
+  `src/pages/about/index.astro` says "go-live pause" and stays — and
+  the two-string pin that `global.css` contains
+  `html[data-held-active] .site-header` and `[slug].astro` contains
+  `toggleAttribute('data-held-active'` (the one attribute the held
+  block's script writes and the stylesheet reads). The describe is the
+  one test that names the word, as the spec asks; each `it` can fail
+  for the reason its name gives at the task that adds it, and the suite
+  is green at the end of every task. The orchestrator's plain-word grep
+  at close-out is the other half. Mutation-checked: a `pause` stub
+  restored in `BLOCKS` fails the first case and `image-meta.test.mjs`'s
+  agreement case; a `--pause-depth` token restored in `:root` fails the
+  walk naming `global.css`; the selector respelled `data-scene-active`
+  fails the two-string pin. And a negative control at the build itself:
   `::pause` written back into the fog piece, `npm run build`, the error
   line recorded verbatim (file, line, the message), reverted.
 
@@ -256,10 +266,15 @@ Every claim above is owned by a task and a check:
   bare" case (m is 0 at every grid point and the image's cap is the
   whole of `--avail-h`); the off identity and the gate identity lose
   their pause and form W lines and gain the bare stage; (d) new, one
-  case: every `background*` in `global.css` that reads `--color-quiet`
-  sits on `html[data-quiet] .image-stage` and nowhere else, `--avail-w`
-  is published by `.image-stage` and the quiet stage only, and the
-  matted selector is gated by the same attribute as the dark ground.
+  case, "worn where the ground is dark — in global.css, one dark
+  ground": every `background*` in `global.css` that reads
+  `--color-quiet` sits on `html[data-quiet] .image-stage` and nowhere
+  else, `--avail-w` is published by `.image-stage` and the quiet stage
+  only, and the matted selector is gated by the same attribute as the
+  dark ground. Scoped to `global.css` by name because the image page's
+  scoped style has its own `:global(html[data-quiet]) { background:
+  var(--color-quiet) }` for the page ground behind the stage — the same
+  dark under the same attribute, outside this case's file.
   Mutations, each reverted: `padding: var(--mat)` restored on
   `.image-frame` → the one-surface walk fails naming it; `--mat: 0px`
   removed from `.image-frame` → the bare-stage case fails (`px()`
@@ -284,16 +299,29 @@ Every claim above is owned by a task and a check:
   stage's three formulas carry `- var(--frame-nav-h)` (pinned in the
   stage case) and the quiet stage's body does not contain the token;
   the stage rule's prelude is exactly `.image-stage`; the page's scoped
-  `.frame-nav` rule declares `min-height: var(--frame-nav-h)`. Then the
-  measurement at the three viewports, script on: the visible nav's
-  `offsetHeight` equals the token's computed px (29 / 29 / 62) and its
+  `.frame-nav` rule declares `min-height: var(--frame-nav-h)` and
+  `font-size: 0.78rem`, and the page's scoped style carries a
+  `@media (max-width: 719.98px)` block with a `.frame-nav` rule inside
+  it — the token's two inputs, pinned where they live so the
+  derivation and the nav cannot drift apart. Then the measurement at
+  the three viewports, script on: the visible nav's `offsetHeight`
+  equals the token's computed px (29 / 29 / 62) and its
   `getBoundingClientRect().bottom` is at most `innerHeight` at scroll 0;
   the stage's `offsetHeight` equals `innerHeight − header − token`
-  within 0.5px; the stage's `offsetWidth` and `left` equal the pre-edit
-  reads; the 3:2 figure's width and image width equal the pre-edit
-  reads; the 2:3 figure is shorter by exactly the token (±0.5) and
-  narrower by token × ar; an image page rendering no `.frame-nav` has
-  the same stage height as one with; the quiet view's stage is
+  within 0.5px, the header's `offsetHeight` recorded beside it; the
+  stage's `offsetWidth` and `left` equal the pre-edit reads. The
+  frame's box, by which limit binds it: at 1512×982 the 3:2 frame is
+  width-bound (1160 × 773 against an `--avail-h` that keeps roughly
+  50px to spare after the cue — the margin recorded with the header
+  height) and its figure and image widths equal the pre-edit reads; at
+  1512×982 and 1280×1440 the 2:3 frame is height-bound and its figure
+  is shorter by exactly the token (±0.5) and narrower by token × ar;
+  at 375×812 the 2:3 frame is **width-bound** — `--avail-w` is 343px
+  there (`100vw − 2 × page-pad` at the clamp's 1rem floor) so the frame
+  is 514.5px tall against an `--avail-h` in the 660–690px range — and
+  reads unchanged, which is AC 6's other clause seen from the other
+  side; an image page rendering no `.frame-nav` has the same stage
+  height as one with; the quiet view's stage is
   `innerHeight` tall, as before; the stage's height read at
   `DOMContentLoaded` equals its height after `astro:page-load` (no
   shift). Script off (`javascript.enabled=false` in the headless
@@ -304,9 +332,11 @@ Every claim above is owned by a task and a check:
   pause. Mutations, reverted: the token dropped from `--avail-h` → the
   stage case fails; `--frame-nav-h` declared on `.image-stage` → the
   twice-on-:root case fails; `min-height` removed from `.frame-nav` →
-  the nav-claims case fails.
+  the nav-claims case fails; the nav's query retyped `719px` → the
+  breakpoint pin fails.
 
-- **Nothing else moves** (AC 7) — **T1502**, **T1503**:
+- **Nothing else moves** (AC 7) — **T1502** and, after its own edits,
+  **T1503**, each carrying both diff lines in its Verify:
   `git diff -U0 main -- src/styles/global.css | grep '^@@'` lists every
   hunk and none falls inside `.gallery-flow`'s rules, the place wall's,
   the ground's `--color-*` lines or `--color-quiet`; `git diff main --
