@@ -213,11 +213,16 @@ pushed off the screen by empty space.
   header less the nav line's height and the two spacings, the nav
   line's height stated once as a token its own rule claims so the two
   cannot drift; no script, no measurement, no gate value; the same
-  with and without script. A 3:2 frame is that long side wide; a 2:3
-  frame is that long side tall; a square frame's side is the short
-  side. The responsive image's sizes hint follows the same rule so the
-  browser fetches the width it will show. A test pins the formula to
-  its tokens.
+  with and without script. That long side and two-thirds of it make
+  the reference rectangle — the 3:2 frame's — and every frame fits
+  inside that rectangle, turned to suit it, as large as it can while
+  touching at least one side: a 3:2 frame is the long side wide, a 2:3
+  frame the long side tall, a square frame is the short side on each
+  side, a panorama is the long side wide and shallower, a 4:5 frame
+  the short side wide. No frame is ever taller than the height rule
+  allows or wider than the page. The responsive image's sizes hint
+  follows the same rule so the browser fetches the width it will show.
+  A test pins the formula to its tokens over a spread of ratios.
 - **No layout shift.** The frame's size and place are decided by the
   stylesheet before the first paint, as today.
 - **The pause is where the photographer judges it.** The Phase 0 pause
@@ -282,7 +287,9 @@ pushed off the screen by empty space.
       photograph → nav line → title are each one spacing apart;
       measured on the laptop, the DualUp and a phone width
 - [ ] A 3:2 and a 2:3 frame on the same screen show the same long side
-      and the same short side, turned; the long side is the smaller of
+      and the same short side, turned, and every other ratio fits
+      inside that rectangle touching a side (a square at the short
+      side, a panorama at the long side); the long side is the smaller of
       the page's width less its side pads and the first screen's height
       below the header less the nav line's height and the two spacings,
       from the tokens, with and without script; on the laptop the
@@ -352,5 +359,10 @@ pushed off the screen by empty space.
   (equal sides, the galleries' own rule) rather than equal area; the
   long side from the smaller of the page's width and the first screen's
   height; the width not capped at the text column; the spacing a
-  piece's own frame-to-prose distance, fixed, not a share. The cue
-  survives inside the height rule.
+  piece's own frame-to-prose distance, fixed, not a share; every other
+  ratio fitting inside the 3:2 reference rectangle, turned (a square at
+  the short side — the sign-off caught the first wording leaving this
+  undefined; the alternative, every frame's long side at the long side,
+  would make a square larger than either 3:2 frame). The cue survives
+  inside the height rule. The pause shows him a panorama beside the
+  pair so the fit for other ratios is judged too.
