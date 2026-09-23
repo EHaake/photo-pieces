@@ -14,7 +14,9 @@ mkdir -p "$LOGDIR"
 only=${1:-all}
 
 if [ "$only" != tests ]; then
-  # The build caches rendered entries; a transform change needs the cache gone.
+  # The content store caches entry data between builds. Bodies render at
+  # page build (deferRender, src/content.config.ts), so a transform change
+  # no longer needs this; the removal stays as cheap insurance.
   rm -f node_modules/.astro/data-store.json
   { npm run build 2>&1; echo "BUILD EXIT $?"; } > "$LOGDIR/build.log"
   echo "## build (full log: $LOGDIR/build.log)"

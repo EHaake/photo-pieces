@@ -185,7 +185,7 @@ headers to confirm nothing was duplicated or dropped. -->
       001 on) was never checked against the exit code. T1501a closes
       the gap.
 
-- [ ] **T1501a** — A transform error fails `astro build`.
+- [x] **T1501a** — A transform error fails `astro build`.
       `review: per-task`. Astro's `glob()` loader catches a per-entry
       render error, logs `[ERROR] [glob-loader] Error rendering …`,
       stores the entry bodiless, and exits 0 (withastro/astro#18054, fix
@@ -207,6 +207,24 @@ headers to confirm nothing was duplicated or dropped. -->
       output — the fallback (a wrapper around `astro build`) is a
       decision, not this task. No `[ERROR]` grep is added to
       `verify.sh`: the exit code is the one mechanism._
+
+- [x] **T1501a record** — `deferRender: true` on the four collections;
+      the control with `::pause` on line 68 gave `BUILD EXIT 1`, the
+      tail `[…/where-the-fog-lets-go/index.md:68:1-68:82: Failed to
+      parse Markdown file …: unknown block directive "pause" — the
+      block vocabulary is closed; known blocks: single, fullbleed, wide,
+      tall, inset, diptych, triptych, grid, strip, aside, row, held]`
+      with `line: 68` (the file's line now, not the body's 56), then
+      `[ERROR] [vite] ✗ Build failed`; reverted, `src/content` diff
+      empty. Built fog page before/after: `srcset=` 7/7, `<img` 7/7,
+      piece-block 5/5; the place page's prose renders; postbuild counts
+      identical (87 pages, prune 43/43/0, GPS 741, dev-routes 97).
+      Reading time: the site renders none and nothing reads
+      `remarkPluginFrontmatter` — the Verify's assumption was false; the
+      implementer substituted the `srcset` check. Build time 3.16s →
+      1.4s. Orchestrator re-run: 87 pages, `BUILD EXIT 0`, `CHECK EXIT
+      0`, 320 tests, `TEST EXIT 0`. Per-task review: signed off, no
+      blocking; notes carried below.
 
 - [ ] **T1502** — The pause out of the stylesheet and the piece page's
       script, the shape module gone, the mat to the quiet view alone,
@@ -835,12 +853,27 @@ tier if it is ever on (it is off). -->
 | T1500 (`sdd-implementer`) | implementation (`opus`, high) | 28,167 | done; 87 pages, 332 tests; one blank line more deleted in matte-sampler (188) so the file does not end on a blank |
 | T1501 (`sdd-implementer`) | implementation (`opus`, high) | 73,631 | done, 320 tests; stopped on the negative control (build exits 0 on a render error) — returned as a design question, correctly |
 | Decision review: build exit on `file.fail` (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 56,655 | option D with `deferRender: true` (astro#18054); T1501a added; constitution Testing sentence and DECISIONS entry to close-out |
+| T1501a (`sdd-implementer`) | implementation (`opus`, high) | 37,196 | done; BUILD EXIT 1 on the control, line 68; 320 tests |
+| T1501a per-task review (`skeptical-reviewer`) | implementation (`opus`, high) | 29,101 | signed off, no blocking; seven notes, five carried to the sweep |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
-- _(none yet)_
+- T1501a N1: no automated guard on the build's exit — a Vitest
+  assertion that each Markdown collection sets `deferRender: true`
+  would catch the likeliest regression; otherwise the gap stands
+  recorded. (The T1501 test's name says "fail as an unknown block",
+  the transform's throw, not the build — checked, no rename needed.)
+- T1501a N2: the container form `:::pause` was not run as a build
+  control (the leaf was); run it once at the sweep.
+- T1501a N3: the Verify's "reading time renders" assumed a feature
+  the site does not have; correct the wording at close-out.
+- T1501a N5: `src/content.config.ts`'s comment names "a missing
+  image" as a case that fails the build; only the unknown directive
+  was run — narrow the comment or run it at close-out.
+- T1501a N7: `deferRender` needs astro ≥ 7.1.0; note the floor in
+  DECISIONS.md at close-out.
 
 ## Handoff note
 

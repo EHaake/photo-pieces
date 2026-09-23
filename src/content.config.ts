@@ -4,10 +4,20 @@ import { z } from 'astro/zod';
 import { CATEGORIES } from './lib/categories';
 
 // Astro 7 Content Layer API: each collection declares a `loader`.
+//
+// Every Markdown `glob()` below sets `deferRender: true` (spec 017).
+// Without it the loader renders each body itself, and when the block
+// transform throws (an unknown directive, a missing image) the loader
+// catches the error, logs `[ERROR] [glob-loader]`, stores the entry with
+// no body, and `astro build` still exits 0 — the page ships empty
+// (withastro/astro#18054). Deferred, the body renders in the Vite
+// Markdown plugin at page build, where the throw fails the build. It
+// stays after upstream's fix: it also keeps rendered bodies out of the
+// content store for a collection meant to grow for years.
 // Pieces are plain Markdown only (no MDX) so the files stay renderable
 // and editable in Obsidian — enforced here by the loader pattern.
 const pieces = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/pieces' }),
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/pieces', deferRender: true }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -29,7 +39,7 @@ const pieces = defineCollection({
 // registry's check (src/lib/images.ts) — it reports file + line; this
 // schema covers shape only. `cover` defaults to the first image.
 const galleries = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/galleries' }),
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/galleries', deferRender: true }),
   schema: z
     .object({
       title: z.string(),
@@ -64,6 +74,7 @@ const imageMeta = defineCollection({
     pattern: '{pieces,gallery-images}/**/_*.md',
     base: './src/content',
     generateId: ({ entry }) => entry.replace(/\.md$/, ''),
+    deferRender: true,
   }),
   schema: z.object({
     title: z.string().optional(),
@@ -105,6 +116,7 @@ const places = defineCollection({
     pattern: '**/[^_]*.md',
     base: './src/content/places',
     generateId: ({ entry }) => entry.replace(/\.md$/, ''),
+    deferRender: true,
   }),
   schema: z.object({
     title: z.string(),
