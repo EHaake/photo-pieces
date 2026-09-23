@@ -169,7 +169,7 @@ headers to confirm nothing was duplicated or dropped. -->
       (d) fails; `--dur-move` retyped `500ms` in `:root` alone → (a)
       fails against `EXPECTED`._
 
-- [ ] **T1601** — The scanner, the barrier, and the marker. Pattern:
+- [x] **T1601** — The scanner, the barrier, and the marker. Pattern:
       `scripts/check-no-dev-routes.mjs` (the barrier's shape: a dir
       argument, `[name]` prefixes, exit 1 naming files, one summary
       line) and `page-head.test.mjs`'s barrier describe (temp dirs,
@@ -795,16 +795,18 @@ reviewer invocations alike — any escape-hatch miss, the fallback switch
 if the top tier's budget runs out (the row and the time), and the third
 tier if it is ever on (it is off). -->
 
-| Task / invocation                                  | Tier                           | Tokens                      | Outcome / miss reason                                                                                                                                        |
-| -------------------------------------------------- | ------------------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Planning: draft (`sdd-planner`)                    | top (`claude-fable-5-1`, high) | 301,018                     | drafted; 8 deviations reported, 2 corrected the spec's router claims                                                                                         |
-| Planning: sign-off fixes (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 89,960 (cumulative 390,978) | five blocking fixed, eight notes folded                                                                                                                      |
-| Sign-off (`skeptical-reviewer`)                    | top (`claude-fable-5-1`, high) | 164,289                     | fix and re-review: 5 blocking, 8 notes                                                                                                                       |
-| Sign-off re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 32,818 (cumulative 197,107) | signed off; 4 lines carried (14–17)                                                                                                                          |
-| Step-down (the person's request, 2026-09-23)       | all rows → `opus` (Opus 5.5)   | —                           | low Fable allowance; session on `claude-opus-5-5` medium; decision review and close-out at `opus`, no override, for the rest of 018 (CLAUDE.md's role table) |
-| T1600 (`sdd-implementer`, + one fix round)         | `opus` (Opus 5.5)              | 96,822                      | done; 341 tests; `!important` 4 → 1; `.social-links a` has two properties, not three                                                                         |
-| T1600 review + decision (`skeptical-reviewer`)     | `opus` (Opus 5.5)              | 63,733                      | 2 blocking (reduced-motion cascade: social-link border fade cut; hero delays survive) → option D transcribed into plan.md                                    |
-| T1600 re-review (`skeptical-reviewer`, resumed)    | `opus` (Opus 5.5)              | 69,238 cumulative           | signed off                                                                                                                                                   |
+| Task / invocation                                           | Tier                           | Tokens                      | Outcome / miss reason                                                                                                                                                      |
+| ----------------------------------------------------------- | ------------------------------ | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Planning: draft (`sdd-planner`)                             | top (`claude-fable-5-1`, high) | 301,018                     | drafted; 8 deviations reported, 2 corrected the spec's router claims                                                                                                       |
+| Planning: sign-off fixes (`sdd-planner`, resumed)           | top (`claude-fable-5-1`, high) | 89,960 (cumulative 390,978) | five blocking fixed, eight notes folded                                                                                                                                    |
+| Sign-off (`skeptical-reviewer`)                             | top (`claude-fable-5-1`, high) | 164,289                     | fix and re-review: 5 blocking, 8 notes                                                                                                                                     |
+| Sign-off re-review (`skeptical-reviewer`, resumed)          | top (`claude-fable-5-1`, high) | 32,818 (cumulative 197,107) | signed off; 4 lines carried (14–17)                                                                                                                                        |
+| Step-down (the person's request, 2026-09-23)                | all rows → `opus` (Opus 5.5)   | —                           | low Fable allowance; session on `claude-opus-5-5` medium; decision review and close-out at `opus`, no override, for the rest of 018 (CLAUDE.md's role table)               |
+| T1600 (`sdd-implementer`, + one fix round)                  | `opus` (Opus 5.5)              | 96,822                      | done; 341 tests; `!important` 4 → 1; `.social-links a` has two properties, not three                                                                                       |
+| T1600 review + decision (`skeptical-reviewer`)              | `opus` (Opus 5.5)              | 63,733                      | 2 blocking (reduced-motion cascade: social-link border fade cut; hero delays survive) → option D transcribed into plan.md                                                  |
+| T1600 re-review (`skeptical-reviewer`, resumed)             | `opus` (Opus 5.5)              | 69,238 cumulative           | signed off                                                                                                                                                                 |
+| T1600→T1601 decision review (`skeptical-reviewer`, resumed) | `opus` (Opus 5.5)              | 78,021 cumulative           | option B: T1601 re-tokens the quiet ground's 220ms; T1605 deletes it                                                                                                       |
+| T1601 (`sdd-implementer`)                                   | `opus` (Opus 5.5)              | 74,700                      | done; 360 tests; three barrier lines; minifier drops `ease` and writes `.22s` — the source scan is what catches a bare `ease`; headless Firefox defaults to reduced motion |
 
 _(Session-tier allowance draw noted at each pause.)_
 

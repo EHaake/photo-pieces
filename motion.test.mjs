@@ -1,15 +1,20 @@
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { readFile, readdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { blocks, uncomment } from './src/lib/ground.ts';
+import { scanMotion } from './src/lib/motion-scan.mjs';
 
 // The motion grammar (spec 018, T1600): three durations, two curves,
 // and the flags and numbers the tuning envelope names — twenty custom
 // properties on :root, declared once, read by every transition and
 // animation on the site. The rule: motion answers the reader.
 //
-// Three kinds of guard here (a fourth, the literal scan, is T1601's
-// case (b)), because three different things can go wrong:
+// Five kinds of guard here, because five different things can go wrong
+// (the literal scan (b) and the built-output barrier (e) are T1601's):
 //
 // (a) The single source. `EXPECTED` below is the grammar's one other
 //     copy: a round that retunes a value moves it in :root and in its
@@ -40,6 +45,18 @@ import { blocks, uncomment } from './src/lib/ground.ts';
 //     `scroll-behavior`, a fifth rule or a changed one fails, and so
 //     does a zero laid on a fade — an opacity transition or the
 //     appearance animation — other than the --rm-appear product.
+//
+// (b) No literal duration or curve outside the token block. scanMotion
+//     (src/lib/motion-scan.mjs) over global.css and every .astro <style>
+//     block finds nothing — a literal names its file and line — and no
+//     .astro file uses Astro's `transition:` directives (Astro would
+//     inject its own literal-duration animations for one) or `autoplay`.
+//
+// (e) The barrier fails on the built output. scripts/check-motion.mjs
+//     over fixture directories: a literal in a built stylesheet or a
+//     page's <style>, a motion attribute, `autoplay`, or an inline
+//     view-transition-name each exit 1 naming the file; the same names in
+//     rule and script text only, and pagefind's own stylesheet, do not.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -398,5 +415,184 @@ describe('(d) reduced motion keeps the fades and drops the movement (T1600, spec
       return problems;
     });
     expect(found).toEqual([]);
+  });
+});
+
+describe('(b) no literal duration or curve outside the token block (T1601, spec 018)', () => {
+  const cases = [
+    ['transition: color 180ms ease', ['180ms', 'ease']],
+    ['transition: color var(--dur-state) var(--ease-state)', []],
+    ['animation: k calc(var(--dur-move) * var(--hero-enter)) var(--ease-state) both', []],
+    ['animation: k var(--d) infinite', ['infinite']],
+    ['animation-iteration-count: 3', ['3']],
+    ['animation-delay: 90ms', ['90ms']],
+    ['transition-duration: 0s', []],
+  ];
+  for (const [declaration, findings] of cases)
+    it(`\`${declaration}\` -> ${JSON.stringify(findings)}`, () => {
+      expect(scanMotion(`a {\n  ${declaration};\n}`).map((one) => one.findings)).toEqual(
+        findings.length > 0 ? [findings] : [],
+      );
+    });
+
+  it('minified `a{transition:color 180ms}` -> ["180ms"], on line 1', () => {
+    expect(scanMotion('a{transition:color 180ms}', 'x.css')).toEqual([
+      { file: 'x.css', line: 1, declaration: 'transition: color 180ms', findings: ['180ms'] },
+    ]);
+  });
+
+  it('global.css scans clean', async () => {
+    const path = 'src/styles/global.css';
+    expect(scanMotion(await readFile(here(`./${path}`), 'utf8'), path)).toEqual([]);
+  });
+
+  it('every <style> block of every src/**/*.astro scans clean — a literal names its file and line', async () => {
+    const found = [];
+    let scanned = 0;
+    for (const [path, text] of Object.entries(await astroFiles()))
+      for (const match of text.matchAll(/^<style\b[^>]*>([\s\S]*?)^<\/style>/gm)) {
+        scanned += 1;
+        // The line the block's contents start on, within the .astro file.
+        const start = text.slice(0, match.index).split('\n').length;
+        for (const one of scanMotion(match[1], path))
+          found.push(
+            `${one.file}:${start + one.line - 1}: ${one.declaration} — ${one.findings.join(', ')}`,
+          );
+      }
+    expect(scanned).toBeGreaterThan(10);
+    expect(found).toEqual([]);
+  });
+
+  it('no .astro file uses a transition: directive or autoplay', async () => {
+    const found = Object.entries(await astroFiles()).flatMap(([path, text]) => [
+      ...(/\stransition:(name|animate|persist)\b/.test(text) ? [`${path}: transition:`] : []),
+      ...(text.includes('autoplay') ? [`${path}: autoplay`] : []),
+    ]);
+    expect(found).toEqual([]);
+  });
+});
+
+describe('(e) the barrier fails on the built output (T1601, spec 018)', () => {
+  const barrier = here('./scripts/check-motion.mjs');
+  let root;
+
+  const run = (dir) => {
+    try {
+      return {
+        status: 0,
+        stdout: execFileSync(process.execPath, [barrier, dir], { encoding: 'utf8' }),
+        stderr: '',
+      };
+    } catch (error) {
+      return { status: error.status, stdout: error.stdout, stderr: error.stderr };
+    }
+  };
+
+  /** A fixture dir under `root`: `files` maps a relative path to its text. */
+  const fixture = (name, files) => {
+    const dir = join(root, name);
+    for (const [path, text] of Object.entries(files)) {
+      mkdirSync(dirname(join(dir, path)), { recursive: true });
+      writeFileSync(join(dir, path), text);
+    }
+    return dir;
+  };
+
+  const page = (head, body) =>
+    `<!doctype html>\n<html><head>${head}</head><body>${body}</body></html>\n`;
+
+  beforeAll(() => {
+    root = mkdtempSync(join(tmpdir(), 'motion-barrier-'));
+  });
+
+  afterAll(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it('a built stylesheet carrying 220ms exits 1 naming the file and "220ms"', () => {
+    const dir = fixture('css', {
+      '_astro/x.css': 'a{color:red}.b{transition:transform 220ms var(--ease-state)}',
+      'index.html': page('', '<p>x</p>'),
+    });
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      `[check-motion] literal motion in ${join(dir, '_astro', 'x.css')}`,
+    );
+    expect(result.stderr).toContain('"220ms"');
+  });
+
+  it('a page with data-shown on an img exits 1 naming the file', () => {
+    const dir = fixture('shown', {
+      'pieces/x/index.html': page('', '<img src="a.jpg" data-shown="">'),
+    });
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      `[check-motion] a frame hidden by default in ${join(dir, 'pieces', 'x', 'index.html')}: data-shown`,
+    );
+  });
+
+  it('a page with <video autoplay> exits 1 naming the file', () => {
+    const dir = fixture('autoplay', {
+      'index.html': page('', '<video autoplay src="a.mp4"></video>'),
+    });
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(join(dir, 'index.html'));
+    expect(result.stderr).toContain(': autoplay');
+  });
+
+  it('a page whose <style> carries ease exits 1 naming the file', () => {
+    const dir = fixture('inline', {
+      'index.html': page('<style>a{transition:color var(--dur-state) ease}</style>', '<p>x</p>'),
+    });
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(`[check-motion] literal motion in ${join(dir, 'index.html')}`);
+    expect(result.stderr).toContain('"ease"');
+  });
+
+  it('a figure with an inline view-transition-name exits 1 naming the file', () => {
+    const dir = fixture('named', {
+      'index.html': page(
+        '',
+        '<figure style="view-transition-name: photograph"><img src="a.jpg"></figure>',
+      ),
+    });
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      `[check-motion] an inline transition name in ${join(dir, 'index.html')}: view-transition-name`,
+    );
+  });
+
+  it('data-shown and view-transition-name in <style> and <script> text only exit 0', () => {
+    const dir = fixture('text-only', {
+      'index.html': page(
+        "<style>img[data-shown='fade']{animation:appear var(--dur-appear) var(--ease-state) both}.stage{view-transition-name:photograph}</style>",
+        '<p>x</p><script>img.setAttribute("data-shown", "fade"); el.style="view-transition-name: photograph"; const autoplay = 0;</script>',
+      ),
+    });
+    const result = run(dir);
+    expect([result.status, result.stderr]).toEqual([0, '']);
+  });
+
+  it("a clean dir exits 0 with the summary line — pagefind's stylesheet and pages, full of literals, are not read", () => {
+    const dir = fixture('clean', {
+      '_astro/site.css': 'a{transition:color var(--dur-state) var(--ease-state)}',
+      'index.html': page('<style>.x{transition-duration:0s}</style>', '<img src="a.jpg">'),
+      'pagefind/pagefind-ui.css':
+        '.pagefind-ui__result{transition:opacity .3s ease-in-out;animation:spin 1s linear infinite}',
+      'pagefind/index.html': page(
+        '<style>.p{transition:opacity 300ms ease}</style>',
+        '<img data-shown="" src="a.jpg"><video autoplay></video>',
+      ),
+    });
+    const result = run(dir);
+    expect([result.status, result.stderr]).toEqual([0, '']);
+    expect(result.stdout).toContain(
+      '[check-motion] no literal duration or curve in 2 stylesheets; no hidden frame, inline transition name or autoplay in 1 pages.',
+    );
   });
 });
