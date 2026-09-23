@@ -7,9 +7,9 @@ import { CATEGORIES } from './lib/categories';
 //
 // Every Markdown `glob()` below sets `deferRender: true` (spec 017).
 // Without it the loader renders each body itself, and when the block
-// transform throws (an unknown directive, a missing image) the loader
-// catches the error, logs `[ERROR] [glob-loader]`, stores the entry with
-// no body, and `astro build` still exits 0 — the page ships empty
+// transform throws (an unknown directive, the case run at T1501a) the
+// loader catches the error, logs `[ERROR] [glob-loader]`, stores the
+// entry with no body, and `astro build` still exits 0 — the page ships empty
 // (withastro/astro#18054). Deferred, the body renders in the Vite
 // Markdown plugin at page build, where the throw fails the build. It
 // stays after upstream's fix: it also keeps rendered bodies out of the

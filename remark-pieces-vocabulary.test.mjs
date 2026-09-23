@@ -1022,6 +1022,8 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
       const args = call === -1 ? '' : block.slice(call, close + 1);
       return { name: match[1], deferred: /deferRender:\s*true\b/.test(args), found: call !== -1 };
     });
+    // The four names are pinned on purpose: a fifth collection must be
+    // added here, so it cannot arrive without the option.
     expect(globs.map((one) => one.name)).toEqual(['pieces', 'galleries', 'imageMeta', 'places']);
     expect(config.match(/glob\(\{/g)).toHaveLength(4);
     expect(globs.filter((one) => !one.found || !one.deferred).map((one) => one.name)).toEqual([]);

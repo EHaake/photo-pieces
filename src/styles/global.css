@@ -8,10 +8,11 @@
   --color-on-accent: oklch(0.99 0.003 100);
   /* THE GROUND, and the family below it. Landed 2026-09-19 at spec
      015's gate: the candidate `paper` — oklch(0.99 0.003 100) — chosen
-     on both screens with the site seen unmatted for the first time (the
-     mat on the image page's stage and one withdrawn block, nothing
-     else; since spec 017 it is the quiet view's alone). The four fills and hairlines are not separate choices: each
-     is a fixed step from this tone (`STEPS`, src/lib/ground.ts), and
+     on both screens with the site seen unmatted for the first time —
+     the mat then on the image page's stage alone, and since spec 017
+     on its quiet view alone. The four fills and hairlines are not
+     separate choices: each is a fixed step from this tone (`STEPS`,
+     src/lib/ground.ts), and
      ground.test.mjs pins these five literals to the strings the rule
      derives — to retune, move the ground and paste what the failing
      test prints.
@@ -19,9 +20,9 @@
      The pair that bound: muted/soft at 5.05:1, the lowest of the six
      floored pairs (inline code sits on the soft fill). It clears 4.5:1,
      so --color-muted ships unchanged at oklch(0.5 0.012 250) — this
-     gate deepened nothing. White-mat-on-ground is 1.02:1 (ΔL 0.01): the
-     mat reads faintly here, and the stage's darker field is its own
-     spec (ROADMAP).
+     gate deepened nothing. White-mat-on-ground is 1.02:1 (ΔL 0.01) —
+     moot since spec 017, when the mat left the paper ground for the
+     quiet view's dark.
 
      History: spec 003 warmed the ground to oklch(0.968 0.006 95) at its
      sampler review so pure-white mattes read as mats on a gallery wall
@@ -114,8 +115,8 @@
   --tall-max: 85svh;
   --strip-h: clamp(240px, 45vh, 420px);
   /* The durational block (spec 007). --hold-margin is the held frame's
-     distance from the top edge (the photographer's decision 5: one
-     margin). */
+     distance from the top edge — spec 007's one margin, once shared
+     with its withdrawn sibling; the held frame's alone since spec 017. */
   --hold-margin: clamp(1.5rem, 5vmin, 4rem);
   /* The reading pages' head (spec 010): the padding above and below
      the head, and the gap before the body. Declared at .section's

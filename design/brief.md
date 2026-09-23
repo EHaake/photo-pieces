@@ -78,7 +78,8 @@ two disagree — so the copy can go stale in an editor, but not in a
 commit.
 
 **The ground, re-judged at spec 015's gate (2026-09-19).** Spec 015
-took the mats off every surface but the image page's stage, which left
+took the mats off every surface but the image page's stage (narrowed
+again at spec 017, to the stage's quiet view alone), which left
 the ground doing a different job: sitting directly under photographs
 and under prose rather than behind white mats. So it was judged again,
 on the unmatted pages — a piece, a gallery, a place, an image page and
@@ -98,7 +99,9 @@ spec-003 warming above is history, not the current reason for anything:
 it was done so white mats would read, and on paper the stage's mat
 stands only 1.02:1 off the ground outside the quiet view. That is
 accepted for now; the darker field the stage wants is its own spec
-(`ROADMAP.md`).
+(`ROADMAP.md`). Since then: the field was built at spec 016 as the
+hero's arrival and withdrawn with it at spec 017, and the stage on paper
+is bare — the mat is the quiet view's alone.
 
 ## Typography
 
@@ -143,7 +146,7 @@ but nothing renders as a literal object — no textures, or
 shadows standing in for a physical print, plaque, or contact sheet.
 
 **The matte carve-out (amended at spec 003 review; narrowed at spec
-015).** The photographer mattes every image they present, on every
+015, and again at spec 017).** The photographer mattes every image they present, on every
 channel — it is their presentation style, not decorative imitation of
 physicality. A flat, uniform matte field around an image is therefore
 part of this site's visual language: no shadow, no texture, no bevel,

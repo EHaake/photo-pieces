@@ -105,9 +105,10 @@ const relatedCells = set.map((image) => ({
   ...galleryCell(image.image, RELATED_SHORT_PX, RELATED_NARROW_SHORT_PX),
 }));
 
-// ---- the `stage` surface: four frames at four ratios, each a viewport
-// tall, as the image page renders them. A landscape, a portrait and a
-// near-square come from the real exports; no real export is a panorama
+// ---- the `stage` surface: four frames at four ratios, each fitting the
+// 3:2 reference rectangle turned (spec 017), as the image page renders
+// them. A landscape, a portrait and a near-square come from the real
+// exports; no real export is a panorama
 // (the widest is 3:2), so that one falls back to the gallery root's
 // placeholder set — the frame's geometry is what the stage is judged on.
 const ratioOf = (img: (typeof registry.images)[number]) => img.image.width / img.image.height;

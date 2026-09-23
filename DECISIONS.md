@@ -438,6 +438,12 @@ build on them. A wrong-typed known field is rejected with its name.
 
 ## Spec 007: the held image and the pause
 
+_Half withdrawn at spec 017 (2026-09-22): the pause left the site — its
+block, presentation, script and fixtures are `main`'s history up to that
+merge, and the decisions below that concern it are history with it. The
+held block's decisions stand; the site has one durational block. See
+"Spec 017: the pause withdrawn" below._
+
 Decisions from the exploration branch (`explore/held-block`, deleted
 at close-out) and the plan gate, recorded here because the shipped CSS
 only shows the outcome.
@@ -1074,7 +1080,9 @@ and white unless the photographer says otherwise.
 **The pause is deferred wholesale, and the held frame unmats with the
 piece.** The photographer does not like how the pause works today; its
 rework — mid-piece and as a hero presentation of one frame — is a spec of
-its own (`ROADMAP.md`, "The pause, rethought"). So the pause keeps spec
+its own (`ROADMAP.md`, "The pause, rethought"; withdrawn at spec 017
+rather than reworked, and the stage's mat narrowed to the quiet view
+there). So the pause keeps spec
 007's mat, dark ground and lights exactly, by being the one entry left on
 the two shared list rules rather than by a copy of them (a copy would be a
 second declaration of form W, which the "declared once" pin forbids); its
@@ -1164,8 +1172,8 @@ out is a bit awkward and a clumsy, at least as currently implemented."
 `archive/016-the-hero-stage` hold the spec, plan, tasks, gate records and
 code; pull request #16 is closed unmerged. What survives to main: the two
 housekeeping fixes carried from spec 015's sweep (committed directly), and
-three decisions the removal spec carries forward — the mat rule as 016
-stated it (which, with no dark ground in normal view, means the quiet view
+three decisions the removal spec — spec 017, merged — carries forward:
+the mat rule as 016 stated it (which, with no dark ground in normal view, means the quiet view
 alone and the stage bare on paper, as he asked at spec 015's gate); the cue
 (the frame nav above the fold, on the paper stage); and the held block
 unchanged. Confirmed with him the same day: the whole arrival goes, a
@@ -1183,3 +1191,128 @@ The same look raised the stage's geometry across screen shapes (the
 DualUp's landscape frames too small against the text column, portraits
 large, the words far from the image) — recorded on the roadmap as a spec
 after the removal.
+
+## Spec 017: the pause withdrawn
+
+Spec 017 takes the pause out of the site. The photographer had used it
+and the hero built on it and did not want them: "more of an obstacle to
+the enjoyment and reading experience of a piece than an improvement. The
+viewer can still click into the image to view the Quiet View." The block
+left the vocabulary — the transform's handler, its styles, the piece
+page's script, the Obsidian plugin's rendering, the fixtures and the
+documentation — and a piece that still writes it fails the build, naming
+the piece. The held block, the other half of spec 007, stays exactly as
+it was; the one attribute the two shared, `data-scene-active`, is renamed
+`data-held-active` — set for holds alone, behaviour identical and
+measured — because the spec forbids a `data-scene-*` name on the site and
+asks that a rule shared with the pause be restated for the hold alone.
+The stage was refit in the same spec, from his two other findings at the
+same look, at his call on scope: "Fold both into this spec. I think we're
+getting too narrow on specs and therefore there is a lot of unnecessary
+overhead with planning/tasks/reviews. Both of these are relevant here, so
+they should be handled together."
+
+**Withdrawn, not condemned.** The pause's code is `main`'s history up to
+this spec's merge; the hero is archived unmerged on `016-the-hero-stage`
+and its tag. A rework, if the day comes, starts from that history and the
+archive, not from a reservation in the transform — which is why a piece
+still writing `::pause` fails with the closed vocabulary's own error
+(`unknown block directive "pause" — the block vocabulary is closed; known
+blocks: …`, prefixed by the file and line) rather than a pause-specific
+message. Rendering the frame as some other treatment instead would have
+hidden a piece that needs rewriting; a message of its own would have kept
+a withdrawn name in the transform, which is what the constitution's line
+on `sequence` says not to do. Nothing else is reserved either: the leaf
+form, `dims` and the aside's mark each had one reader, the pause, and go
+with it. The fog piece's pause became a `fullbleed`, the nearest scale —
+the spec author's choice, offered to him at the Phase 0 pause with `wide`
+or `single` as the alternatives, and kept.
+
+**The mat has one surface.** The rule spec 016 stated — worn where the
+ground is dark — with no arrival means the quiet view alone, which is
+what he asked at spec 015's gate: "Stage's normal view unmatted, as it
+blends into the Paper ground tone." The stage on paper is bare like every
+other frame: its normal view declares `--mat: 0px`, spec 015's shape for
+a surface whose formula still reads the mat (here the image's height
+cap), and form V+H moves under `html[data-quiet] .image-frame` as its own
+rule. The cascade between the two is the state switch the page already
+has, not a second declaration on one state. The quiet view's rules are
+byte-identical against `main`, pinned by string.
+
+**The stage hugs the frame.** His finding on the DualUp: "the stage for
+the image's page makes it so that it is centered completely in the screen
+which pushes all other text off of the screen. This is most noticeable
+with vertical screens and the dualup display … I want it to be such that
+the image … is centered and is as large as needs to be … but that the
+title and text follows as it would in any other piece." Before, the stage
+was a box the height of the screen with the photograph centred in it: on
+a tall screen a landscape sat small in a field of empty ground with the
+title far below the fold while a portrait ran much larger. Now the box is
+the frame. The rule he kept at the Phase 0 pause is one rectangle turned:
+a 3:2 and a 2:3 are the same rectangle on its side, with equal sides —
+the galleries' own rule — rather than equal area, the alternative the
+spec named for the case where a landscape reads too small beside a
+portrait of the same short side. The rectangle's long side is the smaller
+of two limits, the page's width and the first screen's height (`min()` of
+the two), because a rectangle that must sit turned in the same space has
+to fit the tighter of them either way: on the laptop the height decides,
+on the DualUp the width. Every other ratio fits inside that reference
+rectangle, turned (a square at its short side — the sign-off caught the
+first wording leaving this undefined); a panorama takes the box's full
+width and is shallower; the width is not capped at the text column.
+Attested 2026-09-22 on both screens: "Honestly looks great now. This is
+much better than before. Both 3:2, 3:2 [2:3], and panos look great, as do
+all the others I've checked." Equal area was not tried. The numbers
+beside it: 781 × 521 on the laptop, 1216 × 811 on the DualUp, and every
+frame larger by the 80px of mat it lost — the photograph on paper is
+resized by the rule, said plainly in the pause report.
+
+**The cue is a term, not a switch.** He asked at spec 016's first look for
+a cue that there is more below — the previous / next line above the fold.
+Spec 016 built it under the arrival's gate as `--stage-cue`, a token set
+to zero or to the nav's height. With the box hugging the frame there is
+no minimum height to shorten; the nav stays above the fold because the
+frame's height is bounded by an available height that already has the
+nav's token taken out. Measured: the nav's bottom at 981.8 of 982. The
+title then follows the nav line at a piece's own frame-to-prose spacing,
+fixed, not a share — the nav carries the spacing after itself and the
+head's top padding is zeroed on this one page, while the head's bottom
+padding and hairline stay because the words below the title keep their
+layout.
+
+**Two rules of form, one deletion.** The normal view's frame sizing — the
+figure's width and the image's `width: 100%` — is gated on
+`html:not([data-quiet])` rather than declared on the frame and reset in
+the quiet view, so the quiet rules stay byte-identical and the quiet
+frame stays shrink-to-fit around its mat. A `sizes` attribute cannot read
+custom properties, so the rule is spelled in literals in one module,
+`src/lib/stage-sizes.ts`, rendered by the image page and the dev sampler
+and evaluated by the test against the tokens — three callers. And the
+sampler's mat bar is gone rather than relabelled or given a quiet toggle:
+a bar that moves nothing on the page is the trap spec 015 named, and a
+toggle would be machinery for a view the image page already shows.
+
+**"Fails the build" was never checked against the exit code.** Every
+claim since spec 001 that a transform error fails the build was read off
+the error message, not the exit. This spec's negative control — `::pause`
+written back into the fog piece — printed the closed vocabulary's message
+and `astro build` exited 0, publishing the piece with an empty body:
+Astro's `glob()` loader catches a per-entry render error, logs `[ERROR]
+[glob-loader] Error rendering …`, and stores the entry bodiless
+(withastro/astro#18054; fix pending in PR #18064). Four options at a
+decision review at the top tier: a postbuild barrier on `dist/` —
+rejected, the error never reaches `dist/` and "no block and no paragraph"
+cannot tell a failure from a short announcement; an `astro:build:done`
+hook — rejected, it sees pages, dir, assets and a logger and cannot
+observe the loader's log; accepting the logged error and softening the
+criterion — rejected, it publishes the gutted piece the spec exists to
+prevent and contradicts the constitution's "fail the build loudly"; and
+`glob({ deferRender: true })` on every Markdown collection — chosen.
+Deferred, the body renders in the Vite Markdown plugin at page build,
+where the throw propagates: measured `BUILD EXIT 1`, reporting the file's
+line (68) rather than the body's (56). The option needs astro ≥ 7.1.0
+(installed: 7.2.2); a test pins it on all four collections by name; and
+it need not be reverted when the upstream fix ships — it is also the
+documented memory-bounding choice for a collection meant to grow for
+years. The constitution's Testing section says so, in its own commit on
+`main` after this merge.
