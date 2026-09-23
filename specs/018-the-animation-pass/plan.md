@@ -331,7 +331,11 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   frame's width gate, the mat and the ground), and no rule of the
   stage's or the quiet view's changes by a byte. The page's scoped
   `transition: background-color 220ms ease` on `html, body, .image-stage`
-  and its reduced-motion `transition: none` are deleted: under a view
+  and its reduced-motion `transition: none` are deleted (until this
+  task, the rule reads `var(--dur-state) var(--ease-state)` — T1601
+  re-tokens it so the literal scan is green from the scan's own task,
+  and the ground keeps its fade at the pauses between; this task
+  deletes it as written): under a view
   transition a live background transition would run beneath the
   snapshot cross-fade and fight it; without the API the quiet view
   cuts (the reduced-motion outcome, "simply dark"). `--motion-quiet: 0`

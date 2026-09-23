@@ -210,7 +210,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `page-head.test.mjs`: the clean-run expectation reads the new
       summary; a fourth fixture dir with
       `<script data-dev-motion>localStorage.getItem("dev-motion")</script>`
-      exits 1 naming the file. `motion.test.mjs`: describe "(b) no
+      exits 1 naming the file. `src/pages/images/[...id].astro` `<style>`: the one literal the source scan finds on this branch — `transition: background-color 220ms ease;` on `:global(html), :global(body), .image-stage` — becomes `transition: background-color var(--dur-state) var(--ease-state);` (a holding edit so the scan is green from this task; T1605 deletes the rule — decision review 2026-09-23, option B). Its reduced-motion `transition: none` twin is untouched (no literal). `motion.test.mjs`: describe "(b) no
       literal duration or curve outside the token block" — the unit
       cases plan.md's Testing strategy lists (eight, each one
       declaration → the expected findings), then `scanMotion(global.css)`
@@ -230,7 +230,7 @@ headers to confirm nothing was duplicated or dropped. -->
       green with 87 pages and **three** barrier lines (the new line
       quoted); `node scripts/check-motion.mjs dist` alone → exit 0 and
       the line; `grep -rn "check-motion" package.json scripts/verify.sh`
-      → the two lines; `grep -n MARKERS scripts/check-no-dev-routes.mjs`;
+      → the two lines; `grep -n MARKERS scripts/check-no-dev-routes.mjs`; `grep -n "220ms" 'src/pages/images/[...id].astro'` → 0 lines; on the dev server, entering the quiet view on an image page, `getComputedStyle(document.body).transitionDuration` is `0.18s` (the ground still fades);
       mutations, reverted: `transition: transform 220ms ease` written
       into `src/pages/about/index.astro`'s `<style>` → the (b) source
       case fails naming the file and line, **and** `npm run build` →
@@ -568,8 +568,8 @@ headers to confirm nothing was duplicated or dropped. -->
       (~874–886) and the page's comment voice; plan.md's "The quiet
       view as one movement"; spec 017's T1502 record for the numbers
       the after-reads must equal. `[...id].astro` `<style>`: delete the
-      `:global(html), :global(body), .image-stage { transition: background-color 220ms ease; }`
-      rule and its `@media (prefers-reduced-motion: reduce)` twin; the
+      `:global(html), :global(body), .image-stage { transition: background-color var(--dur-state) var(--ease-state); }`
+      rule (`main`'s `220ms ease`, re-tokened at T1601) and its `@media (prefers-reduced-motion: reduce)` twin; the
       quiet comment above `.quiet-toggle` loses "the ground dimmed …
       cross-fade" wording if any and gains one sentence (entering and
       leaving are one view transition, the frame named for it — spec
