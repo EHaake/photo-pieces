@@ -118,8 +118,9 @@ pushed off the screen by empty space.
 
 - **The stage's mat, ground and quiet view beyond what Goals 4–6
   say.** The quiet view is untouched in every rule; the compare figure,
-  the passage and the words beneath the stage keep their own layout
-  once the stage above them is shorter.
+  the passage and the words beneath the title keep their own layout
+  once the stage above them is shorter — only the title block's top
+  spacing changes, to the piece's.
 - **A piece's frames.** The fit rules of single, wide, fullbleed, tall
   and the rest are not re-derived; the stage's rule is the stage's.
 - **The arrival, in any form.** No dark opening, no dimmed chrome, no
@@ -199,7 +200,12 @@ pushed off the screen by empty space.
   below, the spacing a piece's flow keeps between a frame and prose,
   from that token — not a share of the screen, not a new value. The
   frame is centred across the page. The nav line and the title follow
-  in flow. In the quiet view the stage keeps today's rules entirely.
+  in flow at that spacing: the title's own block adds no top padding of
+  its own above it, so the distance from the photograph to the nav line
+  is the spacing, and from the nav line to the title the spacing again
+  (the title alone at the spacing where the frame has no set). Below
+  the title, the words keep their layout. In the quiet view the stage
+  keeps today's rules entirely.
 - **One rectangle, turned.** The frame's long side is
   `min(available width, available height)` where the available width
   is the page's width less its side pads (not capped at the text
@@ -272,7 +278,9 @@ pushed off the screen by empty space.
       a piece's frame-to-prose spacing above and below, from that
       token, with no minimum height; the previous / where / next line
       (where the frame has a set) and the title follow in flow at that
-      spacing; measured on the laptop, the DualUp and a phone width
+      spacing, the title's block adding no top padding of its own, so
+      photograph → nav line → title are each one spacing apart;
+      measured on the laptop, the DualUp and a phone width
 - [ ] A 3:2 and a 2:3 frame on the same screen show the same long side
       and the same short side, turned; the long side is the smaller of
       the page's width less its side pads and the first screen's height
