@@ -959,10 +959,11 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     expect(containerError.line).toBe(3);
   });
 
-  it('nothing under src/, the transform or the plugin knows the word, and the held block\'s attribute is spelled once', () => {
+  it("nothing under src/, the transform or the plugin knows the word, and the held block's attribute is spelled once", () => {
     // Spelled for the block, not the English word: the About page's
     // "go-live pause" is prose and stays.
-    const word = /(::pause|piece-pause|--pause|data-pause|data-scene|pause-shape|['"]pause['"]|\bpause:\s)/i;
+    const word =
+      /(::pause|piece-pause|--pause|data-pause|data-scene|pause-shape|['"]pause['"]|\bpause:\s)/i;
     const walk = (dir) =>
       readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
         entry.isDirectory() ? walk(join(dir, entry.name)) : [join(dir, entry.name)],
@@ -970,7 +971,12 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     const rootTests = readdirSync('.').filter(
       (name) => name.endsWith('.test.mjs') && name !== 'remark-pieces-vocabulary.test.mjs',
     );
-    const files = [...walk('src'), 'remark-pieces-blocks.mjs', 'obsidian-plugin/main.ts', ...rootTests];
+    const files = [
+      ...walk('src'),
+      'remark-pieces-blocks.mjs',
+      'obsidian-plugin/main.ts',
+      ...rootTests,
+    ];
     const hits = [];
     let read = 0;
     for (const file of files) {
@@ -1002,7 +1008,7 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     );
   });
 
-  it('every Markdown glob() collection sets deferRender: true — the build\'s exit on a transform error rests on it (T1501a)', () => {
+  it("every Markdown glob() collection sets deferRender: true — the build's exit on a transform error rests on it (T1501a)", () => {
     // Without it the glob loader renders each body itself, catches the
     // transform's throw and stores an empty entry, and `astro build`
     // exits 0 (withastro/astro#18054).
