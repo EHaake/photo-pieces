@@ -678,7 +678,7 @@ headers to confirm nothing was duplicated or dropped. -->
       except the landing; with `--motion-travel: 0` on `html` the return
       still shows 0 fades._
 
-- [ ] **T1604c** — The compare overlays before the swap (decision
+- [x] **T1604c** — The compare overlays before the swap (decision
       review D1604, Q3). Footprint: new `src/lib/compare.ts`;
       `BaseLayout.astro`'s script; `src/pages/images/[...id].astro`'s
       script (removal only). Move `enhanceCompare` verbatim into
@@ -964,6 +964,7 @@ tier if it is ever on (it is off). -->
 | T1604 (`sdd-implementer`)                                   | `opus` (Opus 5.5)              | 200,800                     | built; 369 tests; every pseudo-element animation observed (480, move curve); way back: landing never `complete`, every seen frame re-fades (lazy cells) → T1604b; RM gate contradiction → T1604a; compare page strip way back 555px low → T1604c; no-API via prototype delete (no Firefox pref)                                                             |
 | T1604 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 110,045                     | Q1 RM withholds names only (+ group rule, header group at state duration); Q2 hold shown frames eager + preload landing; Q3 compare overlaid at before-swap from the layout; quiet-view sizes → T1605                                                                                                                                                       |
 | T1604a (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 80,266                      | done; 370 tests; RM: no group animates, root old/new 480, header old/new 180, understudy and origin scroll kept; the header-group state-duration rule is not pinned (sweep)                                                                                                                                                                                 |
+| T1604c (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 73,281                      | done; 370 tests; compare overlaid at before-swap (505 at after-swap = full load); strip way back lands at 429.43 / 658.87 exactly; Firefox 156 has no `layout-shift` entries — a per-frame position trace instead; a below-fold ≤14px mono-font move on the first swap into an image page (not this task's)                                                 |
 
 _(Session-tier allowance draw noted at each pause.)_
 

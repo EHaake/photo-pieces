@@ -130,6 +130,7 @@ const isActive = (href: string) => {
         TransitionBeforeSwapEvent,
       } from 'astro:transitions/client';
       import { IMAGE_SET_KEY, setKeyFromPath } from '../lib/image-set';
+      import { enhanceCompare } from '../lib/compare';
       import { NAME, appear, flag, reducedMotion, token } from '../lib/motion';
 
       // The appearance and the arrival (spec 018). The initial
@@ -139,10 +140,15 @@ const isActive = (href: string) => {
       // parse, before DOMContentLoaded), and again at after-swap. Before
       // a swap the old page's hooks come off and the new document's root
       // gets the gate, since the router replaces <html>'s attributes.
+      // The image page's compare is overlaid here too, and on the new
+      // document at before-swap, before it is swapped in (why, in
+      // src/lib/compare.ts).
       let teardown = appear(document);
+      enhanceCompare(document);
       document.addEventListener('astro:before-swap', (event) => {
         teardown();
         event.newDocument.documentElement.dataset.motion = '';
+        enhanceCompare(event.newDocument);
       });
       document.addEventListener('astro:after-swap', () => {
         teardown = appear(document);
