@@ -1,6 +1,10 @@
 # Plan: The animation pass
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-23) by the `skeptical-reviewer` at the
+top tier — five blocking findings fixed and eight notes folded in, then
+the re-review's four remaining lines transcribed from their exact text
+below ("Carried from the sign-off") and into T1603 and T1604; see
+tasks.md's tier log.
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -47,7 +51,8 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   imports or references it, so it is dead on this site. If a later
   Astro wires it in, its `!important` would beat this spec's
   `html[data-moving]::view-transition-group(*)` rules under reduced
-  motion — which is the outcome the spec asked for anyway.)
+  motion — which would reverse the spec's corrected line and cut the
+  quiet view's ground fade as well.)
 
 - **The grammar** (`src/styles/global.css`, `:root`, after
   `--place-wall-gap`). Three durations, two curves, and beside them the
@@ -752,3 +757,41 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   `IntersectionObserver`, `img.decode()`.
 - **`ROADMAP.md` and `DECISIONS.md` are edited on the branch** and
   reach `main` through the PR — spec 017's practice.
+
+## Carried from the sign-off (the re-review's exact text; binding on T1603 and T1604)
+
+14. **A forward traverse between two image pages can be settled as
+    `out` in the wrong direction.** plan.md "The travel", out: a
+    traverse whose `to` is an image page becomes **out** "when the new
+    document holds `.image-link[href="<from.pathname>"]`". After back
+    (B → A's strip), pressing forward (A → B) is a traverse whose new
+    document (B) will often hold A in _its_ related strip, so the rule
+    names A's cell on B and shrinks A's stage into it, while B's stage
+    arrives by the root fade — the reverse of what forward should
+    replay. Exact change, in that paragraph and in T1604's before-swap
+    settle: "**out** when `event.direction === 'back'` and the new
+    document holds the cell; a `forward` traverse between image pages
+    is a **step**." (The **in** replay on forward would need the old
+    page's strip cell plus the understudy; a step is the honest minimum
+    and forward is not in AC 6.)
+15. **The root `--motion-appear` / `--motion-arrive` toggles no longer
+    reach the covers.** The covers rule sets
+    `--motion-appear: var(--motion-appear-covers)` on the cover hosts,
+    so the host read ignores the root's value there: unchecking
+    "appearance" on the panel leaves the covers fading. AC 10's "toggles
+    each behaviour" is met for every non-cover surface, so this is a
+    switch-usability wrinkle, not a failure. Exact change, plan.md
+    "Appearance and arrival" and T1603: "a flag is off when **either**
+    the host's computed value or the root's is `0`" (two reads, one
+    `&&`), and T1603's Verify adds "with `--motion-appear: 0` on `html`
+    alone, the covers read `""` at once too".
+16. **Two implementer-facing loose ends.** (a) tasks.md T1604's
+    `moving` type literal (`{ kind; src?; dir?; navigationType }`) does
+    not include the `direction` field the same line now stores. (b)
+    `window.__motion` is set from `motion.ts`, which `astro check`
+    type-checks; it needs a
+    `declare global { interface Window { __motion?: boolean } }`
+    (DevGround's `__devGround` lives in an inline script and never met
+    the checker). Both are one line for the implementer.
+17. **Wording** — the `viewtransitions.css` parenthesis in "Two facts of
+    the router": applied above.

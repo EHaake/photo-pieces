@@ -1,6 +1,9 @@
 # Tasks: The animation pass
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-23) by the `skeptical-reviewer` at the
+top tier — five blocking findings fixed and eight notes folded in; the
+re-review's four remaining lines carried into T1603, T1604 and plan.md's
+"Carried from the sign-off" from their exact text.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1600–T1602) — the grammar's tokens and
 the flags on `:root` with every inherited transition moved onto them
@@ -305,7 +308,12 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 1 — The four behaviours (reviewer after the phase; walkthrough: on both screens, mouse and trackpad, under `npm run dev` — the fog piece `/pieces/where-the-fog-lets-go/`: its first frame's box waits in the fill and the photograph fades into it, each block below the fold appears once as it scrolls in — the diptych's two frames together — and scrolling back up moves nothing; `/galleries/fog-frames/` and `/places/the-headlands/`: click a frame and the photograph lifts from its cell into the stage while the page changes beneath it, never blank; the browser's back and the page's "In the gallery" / "At" link return it to its cell where he left it; `/images/where-the-fog-lets-go/land-b/`: the arrows and the arrow keys cross-fade one photograph into the next in the box; a click on the photograph darkens the ground and grows it into its mat as one movement, Esc or a click the same way back; the "motion" panel at the bottom left turns each of the four off and on, tries the fade alone against the fade with a rise, the surface fill against the ground, and moves the durations and curves — and with the system's reduce-motion setting on, the photographs still fade in and nothing travels, grows, rises or slides; as many rounds as it takes, each a sub-lettered task under T1606)
 
-- [ ] **T1603** — Appearance and arrival. Pattern: plan.md's
+- [ ] **T1603** — Appearance and arrival. **Carried from the sign-off
+      (plan.md, item 15, binding):** a flag is off when _either_ the
+      host's computed value or the root's is `0` (two reads, one `&&`);
+      the Verify also reads, with `--motion-appear: 0` on `html` alone,
+      that the covers read `""` at once too. Item 16(b): `motion.ts`
+      declares `Window.__motion` globally for `astro check`. Pattern: plan.md's
       "Appearance and arrival" (the CSS strings, the unit rule, the
       order of operations); `src/pages/pieces/[slug].astro`'s script
       for the reads-then-writes discipline and the `init` shape;
@@ -419,7 +427,12 @@ headers to confirm nothing was duplicated or dropped. -->
       dropped from the gate's prelude → (g)'s opacity walk fails; a
       seventh host added to the CSS list alone → the list pin fails._
 
-- [ ] **T1604** — The travel: in, out, step; the understudy; the
+- [ ] **T1604** — **Carried from the sign-off (plan.md, items 14 and
+      16(a), binding):** a traverse between two image pages is **out**
+      only when `event.direction === 'back'` and the new document holds
+      the cell; a `forward` traverse between image pages is a **step**;
+      the `moving` type literal includes the `direction` field it
+      stores. The travel: in, out, step; the understudy; the
       header's group. Pattern: `BaseLayout.astro`'s existing capture
       click handler (the one writer of `image-set`; the same
       `IMAGES_PATH` test) and its comment style; plan.md's "The travel"
@@ -782,15 +795,21 @@ reviewer invocations alike — any escape-hatch miss, the fallback switch
 if the top tier's budget runs out (the row and the time), and the third
 tier if it is ever on (it is off). -->
 
-| Task / invocation               | Tier                           | Tokens | Outcome / miss reason |
-| ------------------------------- | ------------------------------ | ------ | --------------------- |
-| Planning: draft (`sdd-planner`) | top (`claude-fable-5-1`, high) |        |                       |
+| Task / invocation                                  | Tier                           | Tokens                      | Outcome / miss reason                                                |
+| -------------------------------------------------- | ------------------------------ | --------------------------- | -------------------------------------------------------------------- |
+| Planning: draft (`sdd-planner`)                    | top (`claude-fable-5-1`, high) | 301,018                     | drafted; 8 deviations reported, 2 corrected the spec's router claims |
+| Planning: sign-off fixes (`sdd-planner`, resumed)  | top (`claude-fable-5-1`, high) | 89,960 (cumulative 390,978) | five blocking fixed, eight notes folded                              |
+| Sign-off (`skeptical-reviewer`)                    | top (`claude-fable-5-1`, high) | 164,289                     | fix and re-review: 5 blocking, 8 notes                               |
+| Sign-off re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 32,818 (cumulative 197,107) | signed off; 4 lines carried (14–17)                                  |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
-- _(none yet)_
+- Sign-off re-review 14–16 are transcribed into plan.md's "Carried from
+  the sign-off" and into T1603/T1604 as binding text; the sweep checks
+  they landed. 17 (the `viewtransitions.css` wording) is applied in
+  plan.md.
 
 ## Handoff note
 
