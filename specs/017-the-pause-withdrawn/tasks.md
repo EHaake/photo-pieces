@@ -1,6 +1,10 @@
 # Tasks: The pause withdrawn
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-22) — by the `skeptical-reviewer` at the
+top tier; three blocking findings fixed and cleared on the one
+re-review, four notes folded in, and one item the re-review carried
+(the 3:2 frame's equality at all three viewports, not one) transcribed
+from its exact text into T1503.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1500–T1504) — the fixtures rewritten so
 the build stays green through every task, the pause out of the
@@ -367,10 +371,12 @@ headers to confirm nothing was duplicated or dropped. -->
       `innerHeight − header.offsetHeight − token` within 0.5px, the
       header's `offsetHeight` recorded beside it; the stage's
       `offsetWidth` and `left` equal T1502's after-reads. The frame's
-      box by the limit that binds it: at 1512×982 the 3:2 figure's
-      `offsetWidth` and its image's width equal T1502's after-reads
-      (width-bound at 1160 wide, its 773px height against `--avail-h`
-      with roughly 50px to spare after the cue — the margin recorded);
+      box by the limit that binds it: at all three viewports the 3:2
+      figure's `offsetWidth` and its image's width equal T1502's
+      after-reads — it is width-bound at each (1160 wide at 1512×982
+      and 1280×1440, 343 at 375×812; at 1512×982 its 773px height sits
+      against `--avail-h` with roughly 50px to spare after the cue — the
+      margin recorded; transcribed from the re-review's note);
       on `…/port-a/` at 1512×982 and 1280×1440 the figure's
       `offsetHeight` is shorter than T1502's after-read by exactly the
       token (±0.5) and its width by token × 0.667 (height-bound there);
@@ -602,7 +608,10 @@ tier if it is ever on (it is off). -->
 
 | Task / invocation              | Tier                           | Tokens | Outcome / miss reason |
 | ------------------------------ | ------------------------------ | ------ | --------------------- |
-| Planning: draft (`sdd-planner`) | top (`claude-fable-5-1`, high) | _(the dispatcher records the return's figure)_ | drafted; no product question returned; one reading (AC 6) and one rename (`data-held-active`) flagged |
+| Planning: draft (`sdd-planner`) | top (`claude-fable-5-1`, high) | 318,823 | drafted; no product question returned; one reading (AC 6) and one rename (`data-held-active`) flagged |
+| Planning: fixes (`sdd-planner`, resumed) | top (`claude-fable-5-1`, high) | 14,593 | B1–B3 fixed, N1/N2/N4/N6 folded, N3/N5 into the Phase 0 record note |
+| Sign-off (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 130,852 | fix and re-review: B1 (T1503's 375×812 shrink claim could not pass — the 2:3 is width-bound there), B2 (AC 7's diff pins missing from T1503), B3 (T1501's case name claimed the source walk its body deferred); six notes |
+| Sign-off re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 11,786 | signed off; one note carried: the 3:2 equality claim narrowed to one viewport in fixing B1 though it holds at all three — transcribed into T1503 |
 
 _(Session-tier allowance draw noted at each pause.)_
 

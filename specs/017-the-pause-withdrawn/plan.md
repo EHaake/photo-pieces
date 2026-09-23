@@ -1,6 +1,11 @@
 # Plan: The pause withdrawn
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-22) — by the `skeptical-reviewer` at the
+top tier, one review and one re-review; three blocking findings fixed
+(the cue's measurement scoped to the height-bound viewports, AC 7's
+diff pins on both tasks, the closed-vocabulary case named for what it
+asserts at its commit) and four notes folded in; see tasks.md's tier
+log.
 **Implements**: spec.md in this directory
 
 ## Shape of the change
