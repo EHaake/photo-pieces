@@ -337,10 +337,7 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
         const matte = /^background/.test(property) && /--color-matte\b/.test(value);
         if (mat || matte) applying.push(`${norm(block.prelude)} { ${property} }`);
       }
-    expect(applying.sort()).toEqual([
-      `${MATTED[0]} { background }`,
-      `${MATTED[0]} { padding }`,
-    ]);
+    expect(applying.sort()).toEqual([`${MATTED[0]} { background }`, `${MATTED[0]} { padding }`]);
     // ...and nothing reads the tokens: outside :root the three are read
     // only inside a --mat value, so every surface goes through the forms
     // rather than reading the share or the clamp for itself.
