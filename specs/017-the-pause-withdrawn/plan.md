@@ -610,7 +610,12 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
   nav line can cross the fold by the difference, and the `sizes` hint
   — which can only carry the fallback — over-delivers by it.
   Pre-existing, recorded at T1503 at each viewport; a CSS-known header
-  height would be its own change.
+  height would be its own change. _Measured at T1503: the desktop
+  header is 75.8px, not 72, so without script the tallest frame's nav
+  line ends 3.8px below the fold at 1512×982 (985.8 of 982); with
+  script (the normal case) it ends at 981.8. The one-number fix — the
+  fallback to 4.75rem in `global.css` and `stage-sizes.ts` together —
+  is offered to the product owner at the Phase 0 pause, not made._
 - **The nav line's 12px bottom padding sits inside its claimed height**,
   so the title is 48px below the nav's box and 60px below its text;
   the token counts the padding in (spec 016's measurement), and moving

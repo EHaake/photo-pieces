@@ -404,7 +404,7 @@ headers to confirm nothing was duplicated or dropped. -->
       should read 017; the task line's own slip) to T1503's bundle, the
       rest below.
 
-- [ ] **T1503** — The stage refit: the box hugs the frame, one
+- [x] **T1503** — The stage refit: the box hugs the frame, one
       rectangle turned, the cue inside the height, the `sizes` hint on
       the same rule. (Rewritten after sign-off, when the product owner
       folded the stage's geometry into the spec; the cue's token and
@@ -602,6 +602,46 @@ headers to confirm nothing was duplicated or dropped. -->
       `.image-head` or `margin-block-end` from `.frame-nav` → the
       page-pins case fails naming the declaration. The person judges
       the equal rectangle on both screens at the pause._
+
+- [x] **T1503 record** — Script on, scroll 0, quiet cleared, Firefox
+      156 headless. The header is **76 / 76 / 136** (75.8 at desktop;
+      136.4 at 375, where the nav wraps), so L re-derived from it:
+      781 at 1512×982 (the plan's 785 assumed 72), 1216 at 1280×1440,
+      343 at 375×812. Frames (figure = image): land-b 781×520.7 /
+      1216×810.4 / 343×228.9; port-a 520.7×781 / 810.7×1216 /
+      228.7×343; pano (registry 2320×773, `--ar: 3`) 781×260.3 /
+      1216×404.7 / 343×114.2. The long and short sides are equal across
+      the pair on every viewport. Stage − frame = 96 on all twelve
+      reads; the nav 29 / 29 / 62 tall, its top the frame's bottom +
+      48; nav bottom for the tallest frame 981.8 of 982 at 1512, 1416.8
+      of 1440, 637.4 of 812; head top − frame bottom 125 / 125 / 158,
+      `padding-block-start` 0; the h1 46.4 below the head's top (the
+      eyebrow's box). No-nav page (`gallery/cozy-brook`, 0.698): stage
+      = frame + 96, head = frame bottom + 48 at all three. `img.sizes`
+      = `stageSizes(ar)` on all twelve; `currentSrc` the smallest
+      candidate at or above the rendered width on all twelve (828 /
+      640 at 1512; 1280 / 828 at 1280; 640 at 375 — the `min()` hint
+      honoured; a `100vw` fallback would have picked 1280 for port-a at
+      1280). Quiet reads identical to T1502's on all six; stage height
+      = `innerHeight` there. Stage height at `DOMContentLoaded` equals
+      after `astro:page-load` on all twelve (`--header-h` is set by a
+      module script before DOMContentLoaded). **Script off** (a
+      sandboxed iframe without `allow-scripts` — the `user.js` profile
+      hung BiDi): header 75.8 / 75.8 / 136.4 against the 72 fallback;
+      at 1512 the frames are 785×523.3 and 523.3×785 and **port-a's
+      nav bottom is 985.8 — 3.8px below the fold**; 1280 and 375
+      identical to script on. **Missed by the headless 15px scrollbar
+      gutter** (`scrollbar-gutter: stable`): the stage's `offsetWidth`
+      is `innerWidth − 15` and the figure's centre 748.5 at 1512, and
+      at 1280 and 375 the `100vw`-sized frames overhang the stage's
+      content box by 15px — the plan's `100vw` known limitation, moot
+      on overlay scrollbars. Eleven mutations each failed the named
+      cases (the dropped `S·r` arm and the `3 / 4` retype fail first at
+      the grid's 0.667, the loop stopping there). Implementer's verify:
+      87 pages, `BUILD EXIT 0`, `CHECK EXIT 0`, 14 files / 319 tests,
+      `TEST EXIT 0`. Deviations: the two import lines; the stage case
+      also pins `position: relative`; the sampler's `sizes` call
+      wrapped over three lines for Prettier.
 
 - [ ] **T1504** — The sampler, honest. Pattern:
       `src/pages/dev/matte/[...surface].astro` and `_sampler.ts` (spec
@@ -877,6 +917,7 @@ tier if it is ever on (it is off). -->
 | T1501a per-task review (`skeptical-reviewer`) | implementation (`opus`, high) | 29,101 | signed off, no blocking; seven notes, five carried to the sweep |
 | T1502 (`sdd-implementer`) | implementation (`opus`, high) | 137,230 | done first dispatch; BiDi before/after identical on the quiet view and the held park; 316 tests |
 | T1502 per-task review (`skeptical-reviewer`) | implementation (`opus`, high) | 72,565 | signed off, no blocking; N1 → T1503, N2–N8 carried |
+| T1503 (`sdd-implementer`) | implementation (`opus`, high) | 146,717 | done first dispatch; header 76 not 72, L 781 at the laptop; no-script nav 3.8px under the fold there (known limitation, to the pause report); 319 tests |
 
 _(Session-tier allowance draw noted at each pause.)_
 

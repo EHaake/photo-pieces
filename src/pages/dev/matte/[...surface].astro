@@ -54,6 +54,7 @@ import { getImageRegistry } from '../../../lib/images';
 import { categoryLabel } from '../../../lib/categories';
 import { formatDate } from '../../../i18n';
 import { withBase } from '../../../lib/url';
+import { stageSizes } from '../../../lib/stage-sizes';
 // Aliased: getStaticPaths' own mat table below is also called CANDIDATES
 // (spec 013's) and would shadow the import inside that function.
 import { CANDIDATES as GROUND_CANDIDATES, TODAY as GROUND_TODAY } from '../../../lib/ground';
@@ -360,7 +361,9 @@ const SURFACE_NOTE: Record<Surface, string> = {
                   alt={image.title}
                   layout="constrained"
                   width={Math.min(image.image.width, 2320)}
-                  sizes="(min-width: 1240px) 1160px, 94vw"
+                  sizes={stageSizes(
+                    Math.round((image.image.width / image.image.height) * 1000) / 1000,
+                  )}
                   loading="eager"
                 />
               </figure>

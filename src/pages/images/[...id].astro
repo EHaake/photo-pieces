@@ -32,6 +32,7 @@ import { sectionsFor } from '../../lib/image-meta.mjs';
 import { getImageRegistry } from '../../lib/images';
 import { plainText, renderMarkdown } from '../../lib/markdown';
 import { ogImageOptions } from '../../lib/og';
+import { stageSizes } from '../../lib/stage-sizes';
 import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
@@ -235,7 +236,7 @@ const indexed =
           alt={image.title}
           layout="constrained"
           width={Math.min(image.image.width, 2320)}
-          sizes="(min-width: 1240px) 1160px, 94vw"
+          sizes={stageSizes(ar)}
           loading="eager"
         />
       </figure>
@@ -607,7 +608,16 @@ const indexed =
     grid-template-columns: 1fr auto 1fr;
     gap: 1rem;
     width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    /* The reserve the stage's --avail-h takes out, claimed here so the
+       two cannot drift (border-box by the global reset: the bottom
+       padding is inside it). Keep the token, the 0.78rem below and the
+       719.98px query in step. */
+    min-height: var(--frame-nav-h);
     margin-inline: auto;
+    /* The piece's spacing between the nav and the title; a hidden nav
+       is display: none and adds nothing, so the page with no set needs
+       no second rule. */
+    margin-block-end: var(--block-margin);
     padding-block: 0 calc(var(--baseline) * 0.5);
     color: var(--color-muted);
     font-family: var(--font-mono);
@@ -636,6 +646,14 @@ const indexed =
       grid-column: 1 / -1;
       grid-row: 2;
     }
+  }
+
+  /* The stage's bottom padding is the spacing above the title's
+     block, so the head adds none of its own; the shared .section rule
+     stays every page's rhythm, and the head keeps its bottom padding
+     and hairline — the words below the title keep their layout. */
+  .image-head {
+    padding-block-start: 0;
   }
 
   /* In the piece: the passage, quoted. */
