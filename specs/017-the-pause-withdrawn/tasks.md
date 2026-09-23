@@ -891,7 +891,7 @@ dispatched.)_
 
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge)
 
-- [ ] **T1506** — Close-out. The repo-wide documents are edited by
+- [x] **T1506** — Close-out. The repo-wide documents are edited by
       `sdd-implementer-fable` — the close-out row of `CLAUDE.md`'s role
       table — on a bundle (T1505 is the pattern; the bundle carries the
       Phase 0 record, plan.md's "Resolved decisions", spec.md's
@@ -1062,6 +1062,7 @@ tier if it is ever on (it is off). -->
 | T1506 close-out (`sdd-implementer-fable`) | top (`claude-fable-5-1`, medium) | 80,100 | done first dispatch; ROADMAP, DECISIONS, the brief, five comments |
 | Pre-merge sweep (`skeptical-reviewer`) | implementation (`opus`, high) | 201,882 | one blocking: B1 plan.md's file structure vs the diff (orchestrator fixed); N1 grep and N2 control run by the orchestrator; N3/N6/N8 → T1506a; N4/N5 fixed in plan.md; N7, the rest of N8, S1/S2/S8 carried |
 | T1506a (`sdd-implementer`) | implementation (`opus`, high) | 34,080 | done first dispatch; 320 tests |
+| Sweep re-review (`skeptical-reviewer`, new invocation) | implementation (`opus`, high) | 26,180 | SIGNED OFF; two wording notes (README "they"; plan.md "(the phone)") carried |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -1128,6 +1129,18 @@ _(Session-tier allowance draw noted at each pause.)_
   (`0.6666666666666666`) — valid, noisy; cosmetic.
 - T1502 N8: the walk's pattern misses upper-case constants and any
   plugin stylesheet; the close-out grep must include `obsidian-plugin/`.
+
+**Spec 017 totals** (2026-09-22, one implementation session on
+`claude-fable-5-1` at medium): implementer 10 dispatches ≈ 717k
+(T1500–T1506a incl. the close-out at the top tier, 80k); reviewer
+(`opus`) 8 invocations ≈ 591k; top tier: planning ≈ 452k, sign-off ≈
+320k, one decision review 57k, close-out 80k; no escape-hatch miss, no
+fallback. Against spec 015's baseline (implementer 741k / 8, reviewer
+533k / 4): comparable per task, two more review invocations for the
+two decision-bearing findings (the build's exit, the header fallback).
+Every acceptance criterion checked against its record at close-out
+(AC 2 per the known limitation on the About page's plain word; AC 1's
+container form by the N2 control).
 
 ## Handoff note
 
