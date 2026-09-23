@@ -1,6 +1,13 @@
 # Tasks: The pause withdrawn, and the stage refit
 
-**Status**: Draft — pending sign-off (amended) — signed off 2026-09-22
+**Status**: Signed off (2026-09-22), twice — the plan and tasks by the
+`skeptical-reviewer` at the top tier (three blocking findings fixed,
+four notes folded, one carried item transcribed into T1503), then the
+stage refit's amendment by a second invocation at the top tier (two
+blocking findings fixed — the fit for every ratio, the acceptance-map
+renumbered — nine notes folded, and the re-review's one remaining line
+and two notes transcribed from their exact text into T1503 and
+plan.md). — signed off 2026-09-22
 by the `skeptical-reviewer` at the top tier (three blocking findings
 fixed, four notes folded in, one carried item transcribed), then
 reopened the same day when the product owner folded the stage's
@@ -425,8 +432,12 @@ headers to confirm nothing was duplicated or dropped. -->
       through the rule's own strings), height = width / ar, and the
       test's own L = min(availW, availH), S = 2L/3: for `ar ≥ 1` width
       ≤ L and height ≤ S, for `ar < 1` width ≤ S and height ≤ L, and one
-      bound tight within 1e-6; ratio 1 gives S × S; 1.5 and 0.667 give
-      L × S and S × L; 3 gives L × L/3; 0.8 gives width S; and the
+      bound tight within 1e-6; ratio 1 gives S × S; the exact swapped
+      pair is asserted on `1.5` and `1 / 1.5` evaluated in the case
+      itself (the grid's literal `0.667` gives a height 0.9995L, which
+      cannot pass at 1e-6 — that grid point is left to the fit-and-tight
+      bounds; transcribed from the re-review's exact text); 3 gives
+      L × L/3; 0.8 gives width S; and the
       image's `max-height` ≥ height at every point; "the sizes hint
       agrees with the rule" — `stageSizes(ratio)` from
       `src/lib/stage-sizes.ts` starts with the literal
@@ -454,7 +465,9 @@ headers to confirm nothing was duplicated or dropped. -->
       375×812, script on, scroll 0, quiet cleared, on
       `/images/where-the-fog-lets-go/land-b/` (3:2), `…/port-a/` (2:3)
       and `…/pano/` (3:1 — the one panorama with an image page in a
-      set; confirm its ratio from the registry): `.site-header`'s
+      set; confirm its ratio from the registry and re-derive the
+      height from it, so a 2.9:1 file is not reported as a miss):
+      `.site-header`'s
       `offsetHeight` (expected 72 — if it differs, re-derive the numbers
       below from it and record both); each figure's
       `offsetWidth`/`offsetHeight` and its image's — expected 785 × 523
@@ -498,7 +511,8 @@ headers to confirm nothing was duplicated or dropped. -->
       fails; `min-height: 100svh` restored on `.image-stage` → the stage
       case fails; the `calc(var(--S) * var(--r))` arm dropped from the
       width (a square at L × L) → the turned-rectangle case fails on
-      ratios 1, 0.8 and 1.78; `2 / 3` retyped `3 / 4` in `--S` → it
+      ratios 1 and 0.8 (invisible at 1.78, where the arm is 1.185L);
+      `2 / 3` retyped `3 / 4` in `--S` → it
       fails on ratio 1 (the test computes S itself); `3rem` retyped
       `2rem` in `stage-sizes.ts`, or its `PHONE` literal retyped
       `(max-width: 720px)` → the sizes case fails;
@@ -759,6 +773,10 @@ tier if it is ever on (it is off). -->
 | Planning: fixes (`sdd-planner`, resumed) | top (`claude-fable-5-1`, high) | 14,593 | B1–B3 fixed, N1/N2/N4/N6 folded, N3/N5 into the Phase 0 record note |
 | Sign-off (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 130,852 | fix and re-review: B1 (T1503's 375×812 shrink claim could not pass — the 2:3 is width-bound there), B2 (AC 7's diff pins missing from T1503), B3 (T1501's case name claimed the source walk its body deferred); six notes |
 | Sign-off re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 11,786 | signed off; one note carried: the 3:2 equality claim narrowed to one viewport in fixing B1 though it holds at all three — transcribed into T1503 |
+| Planning: the stage refit (`sdd-planner`, resumed, after the spec amendment) | top (`claude-fable-5-1`, high) | 73,644 + 10,357 | T1503 rewritten as the refit; one product question (the title block's own padding) returned and settled in the spec, folded in |
+| Amendment sign-off (`skeptical-reviewer`, new invocation) | top (`claude-fable-5-1`, high) | 152,025 | fix and re-review: B1 (the rule undefined for ratios beyond 3:2 — the spec's square sentence contradicted the plan's formula; settled in the spec as the L × ⅔L reference rectangle, turned), B2 (T1506's AC map at the pre-amendment numbering); nine notes |
+| Planning: amendment fixes (`sdd-planner`, resumed) | top (`claude-fable-5-1`, high) | 35,150 | B1–B2 fixed, notes folded |
+| Amendment re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 24,979 | signed off once one line is fixed: the exact-pair assertion at the grid's literal 0.667 cannot pass at 1e-6 — transcribed into T1503 and plan.md (assert on 1.5 and 1/1.5 in the case); two notes transcribed (the 1.78 mutation claim dropped; the panorama's height re-derived from its registry ratio) |
 
 _(Session-tier allowance draw noted at each pause.)_
 

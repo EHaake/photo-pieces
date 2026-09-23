@@ -1,6 +1,11 @@
 # Plan: The pause withdrawn, and the stage refit
 
-**Status**: Draft — pending sign-off (amended) — signed off 2026-09-22
+**Status**: Signed off (2026-09-22), twice — the plan by the
+`skeptical-reviewer` at the top tier, then the stage refit's amendment
+by a second invocation at the top tier; the re-review's one remaining
+line (the exact-pair assertion evaluated at 1.5 and 1/1.5, not the
+grid's 0.667) transcribed from its exact text; see tasks.md's tier
+log. — signed off 2026-09-22
 by the `skeptical-reviewer` at the top tier (three blocking findings
 fixed and four notes folded in; see tasks.md's tier log), then reopened
 the same day when the product owner folded the stage's geometry into
@@ -465,8 +470,12 @@ Every claim above is owned by a task and a check:
   --avail-h)` and S = ⅔L computed by the test itself: the frame fits
   inside the box turned (width ≤ L and height ≤ S for `ar ≥ 1`; width ≤
   S and height ≤ L for `ar < 1`) and touches a side (one of the two
-  bounds is tight within 1e-6); a square is S × S; 1.5 and 0.667 give
-  L × S and S × L; 3 gives L × L/3; 0.8 gives S wide; the image's
+  bounds is tight within 1e-6); a square is S × S; the exact swapped
+  pair L × S and S × L is asserted on `1.5` and `1 / 1.5` evaluated in
+  the case itself, not on the grid's literal `0.667`, whose height
+  0.9995L cannot pass at 1e-6 — that grid point is covered by the
+  fit-and-tight bounds alone; 3 gives L × L/3; 0.8 gives S wide; the
+  image's
   `max-height` never binds (≥ height at every point). "The sizes hint
   agrees with the rule": `stageSizes(ar)` from `src/lib/stage-sizes.ts`
   begins with the literal `(max-width: 719.98px) ` and, the branch
