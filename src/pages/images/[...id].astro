@@ -885,6 +885,28 @@ const indexed =
     if (quiet) window.scrollTo({ top: 0 });
   };
 
+  // The compare: overlay the frames and reveal the range input. The
+  // overlay is one box where the static page stacks two frames, so it
+  // must land before the page settles: the initial astro:page-load fires
+  // on window's load, after every image, and collapsing the stack there
+  // moved everything below the figure ~555px (T1603c). So it runs at the
+  // module's evaluation (after the parse, before DOMContentLoaded), as
+  // the layout's appearance hooks do, and again from init() for a page
+  // the router swaps in; a figure already overlaid is skipped, so the
+  // first load binds its range once.
+  const enhanceCompare = () => {
+    for (const figure of document.querySelectorAll<HTMLElement>('.compare')) {
+      const range = figure.querySelector<HTMLInputElement>('.compare-range');
+      if (!range || 'js' in figure.dataset) continue;
+      figure.dataset.js = '';
+      range.hidden = false;
+      const apply = () => figure.style.setProperty('--split', range.value);
+      range.addEventListener('input', apply);
+      apply();
+    }
+  };
+  enhanceCompare();
+
   const init = () => {
     const page = document.querySelector('.image-page');
     if (!page) {
@@ -920,16 +942,7 @@ const indexed =
     }
     if (store.get(QUIET_KEY)) applyQuiet(true);
 
-    // The compare: overlay the frames and reveal the range input.
-    for (const figure of document.querySelectorAll<HTMLElement>('.compare')) {
-      const range = figure.querySelector<HTMLInputElement>('.compare-range');
-      if (!range) continue;
-      figure.dataset.js = '';
-      range.hidden = false;
-      const apply = () => figure.style.setProperty('--split', range.value);
-      range.addEventListener('input', apply);
-      apply();
-    }
+    enhanceCompare();
   };
 
   document.addEventListener('keydown', (event) => {

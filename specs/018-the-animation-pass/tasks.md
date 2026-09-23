@@ -448,7 +448,7 @@ headers to confirm nothing was duplicated or dropped. -->
       has loaded; each tall's loaded rect equals `main`'s to under 1px;
       mutation (the rule reverted) → 0×0 at `DOMContentLoaded`._
 
-- [ ] **T1603c** — The image page's related strip moves at `load`
+- [x] **T1603c** — The image page's related strip moves at `load`
       (decision review 2026-09-23, Q2) — a diagnosis dispatch. First
       measure the strip in document coordinates on a fresh navigation (a
       viewport move at `load` can be scroll restoration); if the move
@@ -846,6 +846,7 @@ tier if it is ever on (it is off). -->
 | T1603 (`sdd-implementer`, + one fix round)                  | `opus` (Opus 5.5)              | 190,450                     | done after a stop on the strip unit; 368 tests, 0 hints; every host's rect equal DCL→load except two shifts identical on `main` (→ T1603b/c); at 1512 too the strip overflows (2528px) so frames 3–4 wait for the sideways scroll — the decided rule; unlinked strip branch unverified (no fixture); early-load rule on localhost can show whole pages held |
 | T1603 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 71,717                      | Q1 strip frames own units; Q2 T1603b/c inside the spec; Q3 stagger on the fade; notes: a unit taller than viewport/threshold never arrives (read a tall grid at T1604)                                                                                                                                                                                      |
 | T1603b (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 75,510                      | done; tall box reserved at DCL on both screens (main 0×0), size equal after load, width within 0.016px of `main`; position moves 0–1.4px from sub-pixel figure drift above, identical on `main` (under the 3px rule)                                                                                                                                        |
+| T1603c (`sdd-implementer`, diagnosis)                       | `opus` (Opus 5.5)              | 54,453                      | real shift (scrollY 0): the compare's two stacked frames collapsed to one box only at `load` (the first `astro:page-load`); `enhanceCompare()` now runs at module evaluation and from `init()`, idempotent; nothing moves DCL→load at either screen; 151 article rects equal `main`'s final layout                                                          |
 
 _(Session-tier allowance draw noted at each pause.)_
 
