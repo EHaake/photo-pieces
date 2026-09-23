@@ -481,6 +481,14 @@ says where each lives.
   every value, shape, fill, on/off and surface within the four
   behaviours; not a fifth behaviour, a resting state, the rule, a
   dependency or the authoring.
+- **A strip's frames arrive one by one, not as one** (implementation,
+  2026-09-23, decision review): a strip's band scrolls sideways, and the
+  browser does not fetch a frame past its edge, so waiting for the whole
+  strip left it blank on the 16:10 screen until the reader scrolled it
+  to the end; fetching early would add requests. Each strip frame
+  arrives as it enters the band's visible width. Diptychs, triptychs,
+  grids and rows still arrive as one. A round at the pause can ask for
+  the frames visible in the band to arrive together.
 - **The spec author's other leans**, open to the product owner at the
   draft: cells of one block arrive together, never staggered; the
   arrows cross-fade in place rather than slide; the hero's inherited

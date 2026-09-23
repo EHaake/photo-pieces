@@ -187,7 +187,7 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
 
       html[data-motion] :is(FRAME_HOSTS) > img:not([data-shown]) { opacity: 0; }
       html[data-motion]:not([data-quiet]) :is(FRAME_HOSTS):has(> img:not([data-shown=''])) { background-color: var(--wait-fill); }
-      img[data-shown='fade'] { animation: motion-appear var(--dur-appear) var(--ease-state) both; }
+      img[data-shown='fade'] { animation: motion-appear var(--dur-appear) var(--ease-state) both; animation-delay: calc(var(--arrive-stagger) * var(--i, 0)); }
       img[data-shown='rise'] { animation: motion-arrive var(--dur-appear) var(--ease-move) both; animation-delay: calc(var(--arrive-stagger) * var(--i, 0)); }
       @keyframes motion-appear { from { opacity: 0; } to { opacity: 1; } }
       @keyframes motion-arrive { from { opacity: 0; transform: translateY(var(--arrive-rise)); } to { opacity: 1; transform: none; } }
@@ -212,8 +212,20 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   a memory-cached image reads `complete` in the same task the router
   adopts the body — a browser detail T1604 measures rather than assumes
   (Known limitations). Every other image belongs to a **unit** — its
-  `.piece-block` when that block holds more than one image (diptych, triptych, grid, strip, row with a
-  pair), otherwise its host — and a unit is revealed as one, when
+  `.piece-block` when that block holds more than one image and the
+  image is not in a strip's band (diptych, triptych, grid, row with a
+  pair); an image inside `.piece-strip-scroll` is its own unit — its
+  `a.image-link`, or the `img` itself when it is unlinked (`alt=""`),
+  since the band is then its host and would otherwise be shared;
+  otherwise its host. A strip is excluded because its band scrolls:
+  the browser does not fetch a lazy frame beyond the band's edge, so a
+  unit spanning the band would hold every frame hidden until the reader
+  scrolled it sideways to its end, and fetching early would break AC13.
+  Each strip frame arrives as it enters the band's visible width; the
+  observer respects the scroller's clip. (Measured at T1603 on the
+  sampler at 1280×1440: a 2528px band in a 1280px scroller; decision
+  review 2026-09-23, Q1.) A broken file does not hold its unit: an
+  image's `error` counts as ready. A unit is revealed as one, when
   every image in it has decoded (`load` then `img.decode()`, never
   `decode()` before `load`, which would fetch a lazy image early) and,
   for a unit not intersecting the viewport at hook time, when one
@@ -238,10 +250,17 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   `astro:before-swap` and calls `appear(document)` again at
   `astro:after-swap`, where it also re-writes `data-motion` on the new
   document's root (the router replaces `<html>`'s attributes). The box
-  itself is reserved as today: every `Image` emits width and height and
-  every host rule already says `width: 100%; height: auto` or sizes the
-  box from `--ar` — a claim T1603 measures as equal rects at
-  `DOMContentLoaded` and after `load`.
+  itself was assumed reserved as today (every `Image` emits width and
+  height and every host rule says `width: 100%; height: auto` or sizes
+  the box from `--ar`); T1603 measured it false in two places, both
+  identical on `main` — `.piece-tall`'s host is 0×0 until its lazy image
+  loads, and the image page's related strip moves ~555px at `load` —
+  fixed at T1603b and diagnosed at T1603c (decision review 2026-09-23,
+  Q2). AC3's "zero layout shift" is measured by the platform's own
+  definition: each host's **size** equal at `DOMContentLoaded` and
+  after load, its position (in document coordinates) moved by less
+  than 3px (the Layout Instability API counts nothing smaller);
+  sub-pixel moves are recorded, not fixed.
 
 - **The travel** (`BaseLayout.astro`'s script, on the router's events;
   `src/lib/motion.ts` for `NAME`, `flag`, `token`, `reducedMotion`).

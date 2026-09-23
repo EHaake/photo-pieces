@@ -334,7 +334,7 @@ headers to confirm nothing was duplicated or dropped. -->
       early-`load` rule (a `requestAnimationFrame` settles the hook; an
       image whose `load` fires before it counts as held: `""`, no
       animation), the unit rule (a `.piece-block` holding more than
-      one `img`, else the image's host), `load`-then-`decode()` per
+      one `img`, except that an image inside `.piece-strip-scroll` is its own unit — its `a.image-link`, or the `img` when unlinked — else the image's host), `load`-then-`decode()` per
       image (never `decode()` on an image not yet loaded), one
       `IntersectionObserver` with
       `threshold: Number(token('--arrive-threshold'))`, in-view units
@@ -406,7 +406,8 @@ headers to confirm nothing was duplicated or dropped. -->
       animation frame (the log's timestamps); with `--arrive-rise: 0.5rem`
       on `html` the below-fold images read `"rise"` and
       `getAnimations()` shows `motion-arrive`; with `--arrive-stagger: 80ms`
-      the diptych's second image has computed `animation-delay` `0.08s`;
+      and `--arrive-rise: 0px` the diptych's second image has computed
+      `animation-delay` `0.08s`, likewise with `--arrive-rise: 0.5rem`;
       scrolling back to the top writes nothing (the log is silent); a
       warm reload writes `""` on every image and creates no animation.
       Without script (spec 017's sandboxed-iframe recipe): `html` has
@@ -426,6 +427,39 @@ headers to confirm nothing was duplicated or dropped. -->
       URLs (recorded). Mutations, reverted: `html[data-motion]`
       dropped from the gate's prelude → (g)'s opacity walk fails; a
       seventh host added to the CSS list alone → the list pin fails._
+
+- [ ] **T1603b** — The tall frame's box (decision review 2026-09-23,
+      Q2). Footprint: the `.piece-tall` rules in `global.css` only. The
+      unloaded `img` has no natural size, so with the anchor
+      `width: fit-content` and the image `width: auto; height: auto` the
+      host is 0×0 until load (identical on `main`). Give the frame a
+      definite width before load from its `--ar` and `--tall-max`
+      (`--ar` is on the anchor when linked, on the `img` when `alt=""`);
+      the loaded width stays what it is today — the smallest of the
+      `sizes` slot (680px above the collapse), the column, and
+      `--tall-max × --ar` — with no second literal 680 in the CSS. Stop
+      and return if the fix can only work by changing a loaded frame's
+      size or position (that goes to the person). _Verify:
+      `sh scripts/verify.sh` green; BiDi, fresh navigation, both
+      screens, on the fog piece and the sampler: every `.piece-tall`
+      host's rect at `DOMContentLoaded` non-zero and, after its image
+      loads, equal in document coordinates (`rect.top + scrollY`); the
+      document height at `DOMContentLoaded` equals it after every tall
+      has loaded; each tall's loaded rect equals `main`'s to under 1px;
+      mutation (the rule reverted) → 0×0 at `DOMContentLoaded`._
+
+- [ ] **T1603c** — The image page's related strip moves at `load`
+      (decision review 2026-09-23, Q2) — a diagnosis dispatch. First
+      measure the strip in document coordinates on a fresh navigation (a
+      viewport move at `load` can be scroll restoration); if the move
+      vanishes, record it and close. If real: find the cause and fix it
+      when the fix sits in `src/pages/images/[...id].astro` or its rules
+      in `global.css` and every loaded rect stays equal to `main`'s;
+      otherwise return the diagnosis and options. A fix touching the
+      stage's or the quiet rules (AC7's byte-identical resting states)
+      goes to the person. _Verify: the same document-coordinate read on
+      `/images/where-the-fog-lets-go/land-b/` at both screens, before
+      and after; `sh scripts/verify.sh` green._
 
 - [ ] **T1604** — **Carried from the sign-off (plan.md, items 14 and
       16(a), binding):** a traverse between two image pages is **out**
