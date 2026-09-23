@@ -4,6 +4,10 @@
 2026-09-03, amended at the visual gate 2026-09-04 (decisions 7–10) and
 attested on both screens 2026-09-05; every acceptance criterion below
 has its record in tasks.md
+**Status (2026-09-22)**: the pause half withdrawn at spec 017 — its
+block, presentation, script and fixtures left the site; the held block
+stands as specified here. Not rewritten; read the pause's clauses as
+history.
 **Depends on**: 003 (the block vocabulary; `row` is the precedent for a
 container whose body is prose beside an image), 006 (the quiet ground
 token, the header's hide-on-scroll, page-level enhancement over the

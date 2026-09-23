@@ -165,6 +165,9 @@ attached.
   spec, plan, tasks and gate records live there); the pause's code is
   main's history up to this spec. His two other findings from the same
   look stand on their own below ("The stage across screen shapes").
+  _Done at spec 017 (2026-09-22): the block, its presentation, its
+  script and its fixtures are gone; the cue is kept on the paper stage;
+  the mat is the quiet view's._
 - **The stage across screen shapes** — raised by the photographer at
   spec 016's second look (2026-09-22), on the DualUp (1280×1440): "if
   the image is horizontal, it's now too small as it seems to conform to
@@ -182,6 +185,14 @@ attached.
   Questions left for it: equal short side, area or height; a share of
   the screen rather than a pixel size; a landscape frame wider than the
   text column on a tall screen; the same distance or the same share.
+  _Done at spec 017 too, folded in after sign-off at the product owner's
+  call: the rule kept at its pause is one rectangle turned — every frame
+  fits the 3:2 reference rectangle, its long side the smaller of the
+  page's width and the first screen's height — rather than equal area,
+  which the pause could have chosen and did not. The questions above,
+  answered: equal sides; a share of the screen, not a pixel size; the
+  width past the text column; the same distance — a piece's own
+  frame-to-prose spacing._
 - **The mat only where the ground goes dark** — raised by the
   photographer at spec 015's gate (2026-09-19), after seeing the site
   unmatted on the paper tone: "Stage's normal view unmatted, as it blends
@@ -194,10 +205,12 @@ attached.
   breath, and the docs that spec 015 writes about the stage corrected.
   Not folded into 015 because the constitution keeps spec changes out of
   implementation sessions. The pause frame's own spec, which 015 also
-  defers, may be the same spec. _Done at spec 016 (the rule stated and
-  pinned, worn where the ground is dark); with the pause and the arrival
-  withdrawn (2026-09-22) the rule leaves the stage bare on paper and
-  matted in the quiet view alone — the removal spec keeps it so._
+  defers, may be the same spec. _Stated and pinned at spec 016 (worn
+  where the ground is dark), which was closed unmerged; with the pause
+  and the arrival withdrawn (2026-09-22) the rule leaves the stage bare
+  on paper and matted in the quiet view alone. Done at spec 017: the rule
+  restated and landed — the stage bare on paper, the quiet view matted,
+  pinned._
 - **The pause, rethought** — deferred wholesale at spec 015 (2026-09-19):
   the photographer does not like how the pause works today, and its rework
   is a spec of its own, in two parts — the pause mid-piece (the frame that
@@ -216,8 +229,9 @@ attached.
   lights' enumerated list of elements. Likely the same spec as the stage's
   darker field below and "the mat only where the ground goes dark" above:
   all three are about the one frame that is the whole point. _Withdrawn
-  (2026-09-22): the pause leaves the site in the removal spec above; this
-  rework is for the day it is revisited, from the archive branch._
+  (2026-09-22): the pause left the site at spec 017; the block is
+  `main`'s history up to 017's merge, and this rework, for the day it is
+  revisited, starts from that history and the archive branch._
 - **The stage's darker field** — deferred at spec 015 (2026-09-19): the
   photographer wants the image page's stage to sit in a field much darker
   than the page, near the quiet view's dark (`--color-quiet`), giving way
@@ -233,7 +247,8 @@ attached.
   asked from the other side. _Built at spec 016 as the arrival — the
   whole page dark on arrival, lightening on the reader's scroll — and
   withdrawn at its second look (2026-09-22): "the fading in and back out
-  is a bit awkward and a clumsy". Archived on `016-the-hero-stage`._
+  is a bit awkward and a clumsy"; spec 017 withdrew it with the pause.
+  Never merged: archived on `016-the-hero-stage`._
 - **Aspect-ratio treatment for packed galleries** — raised by the
   photographer at spec 011's visual gate (2026-09-09): he edits each
   image to the crop that suits its content rather than to a house

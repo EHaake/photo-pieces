@@ -46,13 +46,11 @@ Why this shape:
 - **Community plugins → Photo Pieces Blocks: enabled.** The plugin
   renders leaves: a standalone block written in leaf form (`::single`,
   `::fullbleed`, `::wide`, `::tall`, `::inset`, `::diptych`,
-  `::triptych`, `::pause`) shows its image while you write. Everything
+  `::triptych`) shows its image while you write. Everything
   else is raw text by construction — container forms (captions), and
   the container-only `grid`, `strip`, `aside`, `row`, and `held` — and
-  the site build is the truth for those. A `::pause` previews as a
-  plain image: the pin, the dim, and the frame's approach are the
-  site's alone. Live Preview only — Reading view is intentionally out
-  of scope (see `DECISIONS.md`). Build/install instructions:
+  the site build is the truth for those. Live Preview only — Reading
+  view is intentionally out of scope (see `DECISIONS.md`). Build/install instructions:
   `obsidian-plugin/README.md`.
 
 ## Piece template
@@ -180,7 +178,7 @@ shapes reach out of the folder:
 `../<other-piece-slug>/<file>` is another piece's photograph;
 `../../gallery-images/<file>` is one from the gallery root. Both work
 everywhere an image is written — every block, the `diptych` and
-`triptych` slots, `grid` and `strip` bodies, `held`, `pause`, the
+`triptych` slots, `grid` and `strip` bodies, `held`, the
 plain `![alt](…)` shorthand, and the `cover` field in frontmatter.
 Obsidian previews them as it previews any image, because the path is
 real.
@@ -266,11 +264,11 @@ plain prose is the expectation.
 label shows, `at` is the slug of a declared place, which the label
 links to — see "Places" below.
 
-**A story is prose — no holds, no pauses.** The image page renders the
-story through the same pipeline, but not through the piece page's
-script, so a `pause` written in a sidecar never dims and a `held`
-frame never keeps the header away; the bled shapes assume the piece
-page's column besides. Write those two in a piece, where they work.
+**A story is prose — no holds.** The image page renders the story
+through the same pipeline, but not through the piece page's script,
+so a `held` frame written in a sidecar never keeps the header away;
+the bled shapes assume the piece page's column besides. Write it in a
+piece, where it works.
 
 The page also quotes **the passage** of the piece the image sits in:
 the nearest paragraph before the block that first places it, plus that
@@ -301,11 +299,11 @@ one prefix, deliberately: `_land-b.md` is _about_ `land-b.jpg`, and
 from the frame's export as from any other (the build fails on GPS in
 the output either way).
 
-## The two blocks that take time
+## The block that takes time
 
-Most blocks are a shape on the page. `held` and `pause` (spec 007)
-spend the reader's scrolling instead, and each asks something of the
-writing around it.
+Most blocks are a shape on the page. `held` (spec 007) spends the
+reader's scrolling instead, and asks something of the writing around
+it.
 
 ### A held image
 
@@ -345,61 +343,15 @@ keeps its column on a portrait screen, and on a phone nothing is held
 at all. Write the body so it reads as plain paragraphs too — that is
 what a phone reader gets.
 
-### A pause
+The header stays away while any frame is held, and it stays away even
+if a keyboard reader tabs into the nav mid-hold — the links are
+focusable but off-screen until the frame lets go. Known and accepted
+(spec 007); worth remembering if a piece is nothing but held frames end
+to end.
 
-A leaf, one image, nothing else:
-
-```markdown
-::pause{src="./pano.jpg" alt="The full sweep of coastline"}
-```
-
-The frame arrives an ordinary figure's margin below the last
-paragraph, pins at the centre of the screen, and the page's lights go
-down and back up as the reader scrolls through it. The page's ground
-goes to a dark grey rather than to black, with the words a shade
-darker still — faintly there the whole way, never gone — and the
-frame's mat keeps its own colour on the dark ground, as it does in
-quiet view.
-
-**The paragraph before and the paragraph after travel with the
-frame.** They pin when it pins and stay anchored above and below it
-for the whole pause, so the words the reader was in never scroll away
-and the next ones never arrive out of an empty space. Write them as
-ordinary paragraphs — they are the piece's own prose, not captions,
-and the image page still quotes the one before as the frame's passage.
-Only a plain paragraph travels: a heading, a list, a markdown image,
-or another block next to a pause stays outside the scene and behaves
-as it always does. Put the words you want anchored immediately either
-side of the directive, with nothing between.
-
-**A pause has nothing to read.** No caption, no body — the container
-form fails the build saying so. Whatever needs saying goes in the
-paragraph before it or the paragraph after, which are the two that
-travel with it. A pause suits the frame too wide to hold beside words,
-and it costs the reader the stage's height — the frame and its two
-paragraphs — plus 1.2 screens of scrolling, so one or two in a piece
-is the dose.
-
-**Leave words after a pause.** The pause finishes when the end of
-its scene catches up with the pinned stage, which takes about half of
-the screen the stage leaves empty in document below the scene — more
-on a taller screen. So leave at least a few paragraphs after the
-directive, and never end a piece with a pause. Too close to the end
-and the page runs out first: on a tall screen the pause never
-lightens, and the piece ends with the lights part-way up. The sampler
-piece carries closing paragraphs after its pause for exactly this
-reason.
-
-The header stays away for the whole of a pause and while any frame is
-held, and it stays away even if a keyboard reader tabs into the nav
-mid-scene — the links are focusable but off-screen until the scene
-releases. Known and accepted (spec 007); worth remembering if a piece
-is nothing but held frames end to end.
-
-Neither block takes tuning attributes beyond `side` and `bleed`. The
-hold's margin, the reading measure, the pause's length, how far the
-lights go down and how close the frame comes are site knobs, so every
-hold and every pause on the site reads the same.
+`held` takes no tuning attributes beyond `side` and `bleed`; the hold's
+margin and the reading measure are site knobs, so every hold reads the
+same.
 
 ## Curating a gallery
 
@@ -552,14 +504,6 @@ vault but is not yet rewritten to its published URL
 is written. Fine to write such links now; they just aren't live on the
 site yet.
 
-The one exception in the content as written: the paragraph after the
-vocabulary sampler's pause links to the sampler itself as a
-site-absolute URL (`/pieces/vocabulary-sampler/`). That link exists to
-prove a link fades with the pause's lights, which needs a link the
-built page actually renders — and the rewrite above doesn't exist
-yet. When it does, that link becomes a vault-relative one like every
-other.
-
 ## The writing loop
 
 Obsidian on one side, a browser tab running `npm run dev` on the
@@ -596,13 +540,13 @@ history keeps every byte forever, and the build only needs enough
 pixels for its largest responsive variant. Masters live in the photo
 archive, not the repo. (Decision and numbers: `DECISIONS.md`, "Images
 stay committed to git".) And **never bake a matte into the file**:
-the site mats the frames it mats itself, and since spec 015 those are
-the image page's stage and the quiet view that grows out of it — plus
-the pause frame, until the pause gets a spec of its own. Every other
-frame, in a piece or a gallery, sits on the ground unmatted. So a baked
-mat would be the only mat in a piece, white around one photograph in a
-reading flow where nothing else has any; on the image page it would
-render double-matted, the site measuring its own share — 6% of the
+the site mats the frames it mats itself, and since spec 017 that is
+the image page's quiet view alone. Every other frame — in a piece, in
+a gallery, or on the image page's stage on paper — sits on the ground
+unmatted. So a baked mat would be the only mat in a piece, white
+around one photograph in a reading flow where nothing else has any;
+in the quiet view it would render double-matted, the site measuring
+its own share — 6% of the
 photograph's rendered short side, between 4px and 40px, spec 003 and
 spec 013 — over your baked one as if that were part of the picture; and
 anywhere it would lie to the layout math that counts the mat. Two

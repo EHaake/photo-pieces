@@ -74,6 +74,8 @@ wants is its own later spec.
   and its lights exactly as spec 007 left them; this spec does not
   touch its markup, CSS, or script. A piece with a pause therefore
   carries one matted frame until that spec lands. Stated, accepted.
+  _Answered at spec 017: the pause was withdrawn, not reworked; its
+  deferred mat went with it._
 - **The stage's darker field.** The photographer wants the image page's
   stage to sit in a field much darker than the page, close to the quiet
   view's dark, giving way to the light ground as the reader scrolls

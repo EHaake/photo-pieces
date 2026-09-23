@@ -117,11 +117,14 @@ const isActive = (href: string) => {
       const header = () => document.querySelector<HTMLElement>('.site-header');
 
       // Publish the header's real height as --header-h for layouts that
-      // fill the viewport below it (the image page's stage, spec 004).
-      // It varies with width and nav wrapping, so no token can be right
-      // everywhere; the CSS fallback matches the desktop size so the
-      // first paint is at most a few pixels off. A ResizeObserver keeps
-      // it current across resizes and router swaps.
+      // measure the viewport below it (the image page's stage, spec 004;
+      // since spec 017 the stage hugs its frame, and the frame's height
+      // is bounded by that space). It varies with width and nav
+      // wrapping, so no token can be right everywhere; the CSS fallback
+      // is 4.75rem, the measured desktop height (76px, spec 017), so the
+      // desktop's first paint matches and the wrapped phone header is
+      // the one width where it is off. A ResizeObserver keeps it
+      // current across resizes and router swaps.
       const publishHeight = () => {
         const h = header();
         if (h) document.documentElement.style.setProperty('--header-h', `${h.offsetHeight}px`);

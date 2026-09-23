@@ -8,10 +8,11 @@
   --color-on-accent: oklch(0.99 0.003 100);
   /* THE GROUND, and the family below it. Landed 2026-09-19 at spec
      015's gate: the candidate `paper` — oklch(0.99 0.003 100) — chosen
-     on both screens with the site seen unmatted for the first time (the
-     mat is the image page's stage and the pause frame now, nothing
-     else). The four fills and hairlines are not separate choices: each
-     is a fixed step from this tone (`STEPS`, src/lib/ground.ts), and
+     on both screens with the site seen unmatted for the first time —
+     the mat then on the image page's stage alone, and since spec 017
+     on its quiet view alone. The four fills and hairlines are not
+     separate choices: each is a fixed step from this tone (`STEPS`,
+     src/lib/ground.ts), and
      ground.test.mjs pins these five literals to the strings the rule
      derives — to retune, move the ground and paste what the failing
      test prints.
@@ -19,9 +20,9 @@
      The pair that bound: muted/soft at 5.05:1, the lowest of the six
      floored pairs (inline code sits on the soft fill). It clears 4.5:1,
      so --color-muted ships unchanged at oklch(0.5 0.012 250) — this
-     gate deepened nothing. White-mat-on-ground is 1.02:1 (ΔL 0.01): the
-     mat reads faintly here, and the stage's darker field is its own
-     spec (ROADMAP).
+     gate deepened nothing. White-mat-on-ground is 1.02:1 (ΔL 0.01) —
+     moot since spec 017, when the mat left the paper ground for the
+     quiet view's dark.
 
      History: spec 003 warmed the ground to oklch(0.968 0.006 95) at its
      sampler review so pure-white mattes read as mats on a gallery wall
@@ -43,28 +44,39 @@
   --prose-width: 68ch;
   --page-pad: clamp(1rem, 3vw, 2rem);
   --baseline: 1.5rem;
-  /* The two vertical rhythms the pause's stage reads (T504a review):
-     the block margin every piece block keeps, and the paragraph gap —
-     the UA's 1em made explicit, so the stage's outer margins and the
-     paragraphs agree by construction rather than by coincidence. */
+  /* The image page's previous / where / next line (spec 017): the
+     height the stage's --avail-h takes out and the nav's own rule
+     claims as its min-height, so the two cannot drift. One row of the
+     nav's 0.78rem mono at the font's `normal` line-height (1.362,
+     measured at spec 016) plus its half-baseline bottom padding — 29px.
+     The phone query after this block mirrors the nav's own 719.98px
+     wrap (two rows and the 1rem gap between them) — 62px. Retune both
+     together, with the nav's 0.78rem and its query. */
+  --frame-nav-h: calc(0.78rem * 1.362 + var(--baseline) * 0.5);
+  /* The two vertical rhythms (T504a review): the block margin every
+     piece block keeps, and the paragraph gap — the UA's 1em made
+     explicit. `p` reads --para-gap, and the held block's prose relies
+     on that idiom, so its spacing and the paragraphs' agree by
+     construction rather than by coincidence. */
   --block-margin: calc(var(--baseline) * 2);
   --para-gap: 1em;
   --hairline: 1px solid var(--color-line);
   --focus-ring: 0 0 0 3px var(--color-accent-soft);
   /* The mat (spec 003; a rule rather than a length since spec 013; the
-     hero's alone since spec 015): a flat color field around a
+     hero's since spec 015; the quiet view's alone since spec 017): a
+     flat color field around a
      photograph — the photographer's presentation style, carved out of
      the skeuomorphism ban (design/brief.md). Pure white against the
      warm page reads as a mat with no rule needed; never add shadow,
      bevel, or texture.
 
-     WHERE IT IS, since spec 015. The image page's stage and its quiet
-     view (form V+H on `.image-frame`), and the pause frame (form W, on
-     a list of one) until the pause gets a spec of its own. Every other
-     surface is unmatted — a piece's reading-flow frames, the held
-     frame, the packed galleries, the place wall, the related strip,
-     the index cover cards, the compare figure — and off means the
-     frame is the photograph.
+     WHERE IT IS, since spec 017. The image page's quiet view — form V+H
+     on `html[data-quiet] .image-frame`, over the quiet stage's limits,
+     the one place the ground goes dark. The stage on paper is bare: its
+     frame declares `--mat: 0px`. Every other surface is unmatted — a
+     piece's frames, the held frame, the packed galleries, the place
+     wall, the related strip, the index cover cards, the compare figure
+     — and off means the frame is the photograph.
 
      THE RULE, and its single source. A frame's mat is
      m = clamp(--mat-min, --mat-share × σ, --mat-max), where σ is the
@@ -73,11 +85,11 @@
      algebraically from the frame's ratio (--ar, width ÷ height, raw,
      which the transform puts on every frame) and publishes the answer
      as one computed property, --mat; the surface applies
-     `padding: var(--mat)` and reads nothing else. Two forms are left —
-     W (column-bound), on the pause's anchor, and V+H (two limits, the
-     smaller), on the stage — both in the Mattes section below, where
-     the per-surface comment says which rule each surface reads and
-     what an unmatted surface does with --mat instead.
+     `padding: var(--mat)` and reads nothing else. One form is left —
+     V+H (two limits, the smaller), on the quiet view's frame — in the
+     Mattes section below, where the per-surface comment says which
+     rule each surface reads and what an unmatted surface does with
+     --mat instead.
 
      These three tokens are declared ONLY here (matte.test.mjs pins
      that), so one number moves every mat on the site. Their values are
@@ -98,25 +110,14 @@
      was 92vh; at the second visual gate (2026-09-05, a 16:10 laptop) a
      2:3 tall was "difficult while scrolling to centre such that the
      entire image can be seen", so it now sits inside the screen with
-     the pause's room to spare — the same share the pause's frame
-     takes, (100 − 2 × 5) ÷ 1.05 ≈ 85, so the two verticals on the site
-     have one sense of air. */
+     room to spare: the screen inside a 5vmin margin with 5% to spare,
+     (100 − 2 × 5) ÷ 1.05 ≈ 85 — spec 007's number. */
   --tall-max: 85svh;
   --strip-h: clamp(240px, 45vh, 420px);
-  /* The durational blocks (spec 007). --hold-margin is the held frame's
-     distance from the top edge AND the pause's margin all round (the
-     photographer's decision 5: one margin); --pause-scale the pause's
-     approach at the middle of its stretch; --pause-stretch the pinned
-     scroll a pause takes; --pause-depth the ground's share of the way
-     to --color-quiet at full lights (the words go all the way, so they
-     sit a shade darker than the ground). The transform's pause `sizes`
-     hint mirrors --hold-margin and --pause-scale (PAUSE_MARGIN_VMIN and
-     PAUSE_SCALE in remark-pieces-blocks.mjs) — change these there too, or the hint
-     falls under and the srcset picks a soft image. */
+  /* The durational block (spec 007). --hold-margin is the held frame's
+     distance from the top edge — spec 007's one margin, once shared
+     with its withdrawn sibling; the held frame's alone since spec 017. */
   --hold-margin: clamp(1.5rem, 5vmin, 4rem);
-  --pause-scale: 1.05;
-  --pause-stretch: 120svh;
-  --pause-depth: 0.85;
   /* The reading pages' head (spec 010): the padding above and below
      the head, and the gap before the body. Declared at .section's
      value (keep the clamp in step with .section by hand), then
@@ -129,6 +130,12 @@
      value after the head on a place with no writing (no head-case
      override). Keep the clamp in step with .section by hand. */
   --place-wall-gap: clamp(3.5rem, 5.5vw, 5.5rem);
+}
+
+@media (max-width: 719.98px) {
+  :root {
+    --frame-nav-h: calc(0.78rem * 1.362 * 2 + 1rem + var(--baseline) * 0.5);
+  }
 }
 
 /* Light-only by design: the photographer controls how the work is seen,
@@ -239,12 +246,11 @@ a:not(.brand, .button):hover {
   transform: translateY(-100%);
 }
 
-/* Spec 007: while a pause is active, or any frame is held, the header
-   stays away whichever way the reader scrolls — its reveal-on-scroll-up
-   would spoil the dark, or slide over the parked frame. The piece
-   page's script sets the attribute; the header's transition makes the
-   hand-off smooth. */
-html[data-scene-active] .site-header {
+/* Spec 007: while a held frame is parked, the header stays away
+   whichever way the reader scrolls — its reveal-on-scroll-up would
+   slide over the parked frame. The piece page's script sets the
+   attribute; the header's transition makes the hand-off smooth. */
+html[data-held-active] .site-header {
   transform: translateY(-100%);
 }
 
@@ -1170,8 +1176,8 @@ a.note-row {
 
 /* Spec 004: every image is a link to its page, and the anchor is the
    layout item — the flex or grid child, the thing that floats — with
-   the image filling it; since spec 015 the only anchor that also
-   carries a mat is the pause's. background: none drops the theme's
+   the image filling it; no anchor has carried a mat since spec 017.
+   background: none drops the theme's
    gradient underline; the site's :focus-visible ring draws around the
    whole frame. */
 .piece-block a.image-link,
@@ -1653,194 +1659,6 @@ a.note-row {
   }
 }
 
-/* ---- The pause (spec 007) --------------------------------------------
-   The frame arrives in the flow after the words with an ordinary
-   block's margin — no empty stage. The scene is the stage plus the
-   stretch: the stage's own height, whatever it measures, then a
-   ::after pseudo-element --pause-stretch tall. The stage is what pins,
-   centred in the viewport, and the paragraphs before and after the
-   pause ride in it (the transform moved them there), so the words stay
-   with the frame through the stretch. The reader's progress through
-   that stretch (0 → 1 → 0, shaped by the piece page's script into
-   --pause-t on the scene and --pause-lights on <html>) drives the
-   lights and the frame's approach. Then it releases and the next
-   paragraph arrives. The frame is the largest that fits the viewport
-   inside --hold-margin with room for the approach, from its ratio; the
-   image fills it. The lights take the ground to --pause-depth of the
-   way to the quiet dark and the words all the way; the mats stay the
-   matte colour. Without script the frame pins on the light ground. */
-.piece-pause {
-  --pause-t: 0;
-  /* Form V+H (the mat rule, spec 013): two limits bind this frame, so
-     the mat is the smaller of the two forms' answers — clamp is
-     monotone, so min() of the clamped mats is the mat of the limit that
-     binds. V is form W with --avail-w in place of the container's 100%;
-     H is the held frame's form. --frame-w/--frame-h are today's
-     formulas with --mat where the fixed matte was. */
-  --r: max(var(--ar, 1), 1);
-  --q: min(var(--ar, 1), 1);
-  --avail-w: calc((100vw - 2 * var(--hold-margin)) / var(--pause-scale));
-  --avail-h: calc((100svh - 2 * var(--hold-margin)) / var(--pause-scale));
-  --mat: min(
-    clamp(
-      var(--mat-min),
-      calc(var(--avail-w) * var(--mat-share) / (var(--r) + 2 * var(--mat-share))),
-      var(--mat-max)
-    ),
-    clamp(
-      var(--mat-min),
-      calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))),
-      var(--mat-max)
-    )
-  );
-  --frame-w: min(
-    var(--avail-w),
-    calc((var(--avail-h) - 2 * var(--mat)) * var(--ar, 1) + 2 * var(--mat))
-  );
-  --frame-h: calc((var(--frame-w) - 2 * var(--mat)) / var(--ar, 1) + 2 * var(--mat));
-  display: block;
-  padding: 0;
-}
-
-/* The pinned scroll, by layout rather than by calculation: a height
-   computed from a measured stage went stale when the body font swapped
-   in (the T501a sign-off). */
-.piece-pause::after {
-  content: '';
-  display: block;
-  height: var(--pause-stretch);
-}
-
-/* Where a paragraph rides in the stage the scene's outer margin on that
-   side is the paragraph gap (--para-gap, the same token p's bottom
-   margin reads), so
-   paragraph N → anchored paragraph reads as two paragraphs; where the
-   stage is the frame alone .piece-block's margin stands. */
-.piece-pause.with-before {
-  margin-top: var(--para-gap);
-}
-
-.piece-pause.with-after {
-  margin-bottom: var(--para-gap);
-}
-
-/* The stage is the sticky element — the frame and its anchored words
-   together. display: flow-root because a sticky box makes no block
-   formatting context of its own: without it the stage's last child's
-   bottom margin would collapse out of the stage and into the scene,
-   which both shortens the stage's box and lengthens the sticky range.
-   The centring is by measurement — the script keeps --stage-h equal to
-   the stage's height (a ResizeObserver, so a font swap or a re-wrap
-   updates it); the fallback centres the frame's height, which parks the
-   stage low by half the difference. */
-.piece-pause-stage {
-  position: sticky;
-  display: flow-root;
-  top: calc((100svh - var(--stage-h, var(--frame-h))) / 2);
-}
-
-/* The stage's box is exactly its content, so the centring and the
-   stretch measure what they look at. The anchored paragraphs are plain
-   column paragraphs otherwise — no width of their own (they never leave
-   the column), and their paragraph gap collapses into the frame's block
-   margin, so the frame sits a block margin from its words. */
-.piece-pause-stage > :first-child {
-  margin-top: 0;
-}
-
-.piece-pause-stage > :last-child {
-  margin-bottom: 0;
-}
-
-/* Only the frame breaks out of the column, like width-wide's breakout,
-   centred on the viewport-centred column. */
-.piece-pause-frame {
-  width: var(--frame-w);
-  margin-block: var(--block-margin);
-  margin-inline: calc(50% - var(--frame-w) / 2);
-  transform: scale(calc(1 + (var(--pause-scale) - 1) * var(--pause-t)));
-  transform-origin: center;
-  /* No standing will-change: the piece page's script promotes the
-     frame only while its pause is active. */
-}
-
-/* The lights. While a pause is active the ground, and the words on it,
-   mix toward the quiet dark by --pause-lights — each rule from ITS OWN
-   token (the prose is muted, headings are text), so at 0 every element
-   computes to exactly its unmixed colour and nothing snaps when a pause
-   activates. The ground stops at --pause-depth of the way; the words go
-   all the way, so they sit a shade darker than the ground and stay
-   faintly there. One knob, "how dark is the ground" — scaling the
-   words' mix by the same depth would move them toward the ground
-   instead of away from it. A link inherits its paragraph's colour and
-   needs no rule. Elements outside this list stay light on the dark
-   ground — the sampler's pause is the check. */
-html[data-pause-active],
-html[data-pause-active] body {
-  background: color-mix(
-    in oklch,
-    var(--color-bg),
-    var(--color-quiet) calc(var(--pause-lights, 0) * var(--pause-depth) * 100%)
-  );
-}
-
-html[data-pause-active] .prose :is(p, li),
-html[data-pause-active] .piece-block figcaption,
-html[data-pause-active] .site-footer,
-html[data-pause-active] .site-footer a {
-  color: color-mix(
-    in oklch,
-    var(--color-muted),
-    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
-  );
-}
-
-html[data-pause-active] .prose :is(h1, h2, h3),
-html[data-pause-active] .page-head h1 {
-  color: color-mix(
-    in oklch,
-    var(--color-text),
-    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
-  );
-}
-
-/* The piece's head is never within a viewport of a pause in the
-   fixtures, but nothing enforces that, so it follows too — its lead
-   and date from the muted token, its category line from the accent. */
-html[data-pause-active] .page-head :is(.lead, .entry-meta) {
-  color: color-mix(
-    in oklch,
-    var(--color-muted),
-    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
-  );
-}
-
-html[data-pause-active] .page-head .eyebrow,
-html[data-pause-active] .page-head .eyebrow a {
-  color: color-mix(
-    in oklch,
-    var(--color-accent),
-    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
-  );
-}
-
-/* The footer's hairlines — its top rule and the social links' boxes —
-   would stay bright on the dark ground: they mix from the line token. */
-html[data-pause-active] .site-footer,
-html[data-pause-active] .social-links a {
-  border-color: color-mix(
-    in oklch,
-    var(--color-line),
-    var(--color-quiet) calc(var(--pause-lights, 0) * 100%)
-  );
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .piece-pause-frame {
-    transform: none;
-  }
-}
-
 .piece-block figcaption {
   margin-top: calc(var(--baseline) / 3);
   font-family: var(--font-mono);
@@ -1850,87 +1668,56 @@ html[data-pause-active] .social-links a {
 }
 
 /* ---- Mattes (spec 003 Phase 3; per-image since the sampler review;
-   a share of the frame since spec 013; the hero's alone since spec
-   015) -------------------------------------------------------------
-   MATTED, and this is the whole list: the image page's stage
-   (`.image-frame`, form V+H, at the end of this file) and its quiet
-   view, and the pause frame — `.piece-pause-frame`'s anchor, form W,
-   just below, on a selector list of one — until the pause gets a spec
-   of its own. The pause's mat does not dim during a pause (the
-   photographer's decision 9): a white mat on the dark ground is what
-   quiet view already does. Since spec 004 a mat sits on the image's
-   link (the layout item); a bare img — alt="" gets no link — carries
-   it itself.
+   a share of the frame since spec 013; the hero's since spec 015; the
+   quiet view's alone since spec 017) -----------------------------------
+   MATTED, and this is the whole list: the image page's quiet view —
+   `html[data-quiet] .image-frame`, form V+H, at the end of this file,
+   the one surface where the ground goes dark. The stage on paper is
+   bare since spec 017: its frame declares `--mat: 0px` and the image
+   fills the stage's limits.
 
-   UNMATTED since spec 015, which took the mat off every surface but
-   the hero's: a piece's reading-flow frames (single — the prose
-   shorthand included, single's captionless form — inset, wide,
-   diptych, triptych, grid, aside, row, held), the packed rows (the
-   galleries, the place wall, the related strip), the index cover cards
-   and the image page's compare figure. Fullbleed, tall and strip never
-   had a mat. Off means the frame is the photograph: no padding, no
-   field, nothing between the image and the page. Where a layout
-   formula still reads the mat, the surface declares `--mat: 0px` — the
-   held figure and the packed cell — so the formula includes zero from
-   the same single source and a later mat is one edit; where only the
-   padding read it, the declarations are simply gone.
+   UNMATTED: a piece's frames (single — the prose shorthand included,
+   single's captionless form — inset, wide, diptych, triptych, grid,
+   aside, row, held; fullbleed, tall and strip never had a mat), the
+   packed rows (the galleries, the place wall, the related strip), the
+   index cover cards, the image page's compare figure, and the stage
+   in its normal view. Off means the frame is the photograph: no
+   padding, no field, nothing between the image and the page. Where a
+   layout formula still reads the mat, the surface declares
+   `--mat: 0px` — the held figure, the packed cell and the stage's
+   frame — so the formula includes zero from the same single source
+   and a later mat is one edit; where only the padding read it, the
+   declarations are simply gone.
 
    THE MAT'S WIDTH (spec 013). m = clamp(--mat-min, --mat-share × σ,
    --mat-max) over the photograph's rendered short side σ; the three
-   tokens live in :root and nowhere else. No surface reads them: the
-   rule for a frame's geometry solves for m and publishes --mat, and
-   the surface applies `padding: var(--mat)`. The two forms left:
+   tokens live in :root and nothing else declares them. No surface
+   reads them: the rule for a frame's geometry solves for m and
+   publishes --mat, and the surface applies `padding: var(--mat)`. One
+   form is left:
 
-     W — column-bound: the frame fills a container of known width W, so
-         the image is W − 2m wide and σ = (W − 2m)/r with r = max(--ar,
-         1). Declared once, just below, over the pause frame's anchor
-         and nothing else.
-     V + H — two limits, the smaller: `.piece-pause` (the pause's own
-         box, above) and `.image-frame`, the stage, at the end of this
-         file.
+     V + H — two limits, the smaller: V is the column-bound form over
+         --avail-w (the frame fills a width W, so the image is W − 2m
+         wide and σ = (W − 2m)/r with r = max(--ar, 1)), H the
+         height-bound form over --avail-h. Declared once, on the quiet
+         view's frame at the end of this file.
 
-   Forms H (the held figure), R (packed rows) and P (matched heights)
-   went with their surfaces' mats at spec 015. Spec 013's plan.md
-   carries every form's string, so turning a surface back on is that
-   form restored to its element plus `padding: var(--mat)` and the
-   background — one edit per surface, as it always was.
-
-   SOURCE ORDER IS LOAD-BEARING for the pause. Narrowed to one
-   selector, the padding/background rule below is (0,2,1) — a tie with
-   `.piece-block a.image-link` above, whose `background: none` drops
-   the theme's gradient underline — so the mat's white now wins by
-   coming later in this file and by nothing else. Both rules must stay
-   below that one; matte.test.mjs pins the order. Their preludes are
-   byte-identical and the two stay separate on purpose: form W declares
-   --mat and nothing else, the rule after it is the surface applying
-   it, and merging the pair fails the "declared once" test.
+   Form W, column-bound on its own, went at spec 017 with the last
+   surface that read it; forms H (the held figure), R (packed rows) and
+   P (matched heights) went with their surfaces' mats at spec 015.
+   Spec 013's plan.md carries every form's string, so turning a surface
+   back on is that form restored to its element plus
+   `padding: var(--mat)` and the background — one edit per surface, as
+   it always was.
 
    The transform still emits --ar-sum and --n on match="height" blocks
-   and nothing reads them now that form P is gone: the transform is
-   spec 015's non-goal, so they stay, with its own stale note about the
-   mat in the `sizes` hints.
+   and nothing reads them now that form P is gone; they stay, unread.
 
    History: spec 003 gave the site a fixed matte; spec 013 turned it
    into this rule and landed it inert (share 0, floor = ceiling, every
    form a constant), and its gate (2026-09-17) set share-60 on every
    surface; spec 015 made the mat a hero treatment at those same three
-   tokens. */
-
-/* Form W. The clamp is exact because the regime depends only on known
-   lengths: 100% is the container's width, resolved against the
-   containing block as any percentage padding is. */
-.piece-pause-frame > :is(a.image-link, img) {
-  --mat: clamp(
-    var(--mat-min),
-    calc(100% * var(--mat-share) / (max(var(--ar, 1), 1) + 2 * var(--mat-share))),
-    var(--mat-max)
-  );
-}
-
-.piece-pause-frame > :is(a.image-link, img) {
-  background: var(--color-matte);
-  padding: var(--mat);
-}
+   tokens; spec 017 left it where the ground is dark. */
 
 /* ---- Galleries (spec 004) --------------------------------------------
    The brief's deliberately plain grid, shared by gallery pages and the
@@ -2059,58 +1846,63 @@ html[data-pause-active] .social-links a {
 }
 
 /* ---- The image page's stage (spec 006; moved here from the page's
-   scoped <style> at spec 013) -------------------------------------------
-   Exactly the viewport below the sticky header (which publishes its real
-   height as --header-h; the fallback matches its usual size), with the
-   frame centred in it. The image is sized inside the mat so the whole
-   frame — mat included — fits the stage with breathing room; width:auto
-   plus max constraints, never stretched or cropped, as the tall block.
-   The rules live here, not on the page, for two reasons: the mat
-   sampler must render the real stage and cannot reach a page-scoped
-   stylesheet, and form V+H belongs beside the other forms. The stage
-   publishes its two limits as lengths (--avail-w, --avail-h) so the
-   frame's mat and the image's max-height read one expression each; the
-   `vh` fallbacks are gone from those, since a fallback cannot ride a
-   custom property (svh has shipped everywhere since 2022) — the
-   min-height pair, which passes through none, keeps its. Those two
-   lengths carry no fallback, so `.image-frame` lives only inside an
-   `.image-stage`: it is one template's figure (the image page's), and
-   giving the frame a second copy of the stage's limits would be the
-   duplication this rule exists to avoid. */
+   scoped <style> at spec 013; refit at spec 017) ------------------------
+   On paper the box hugs the frame: no minimum height, one spacing above
+   the frame and one below — --block-margin, the spacing a piece keeps
+   between a frame and its prose (the token .piece-block reads), set as
+   --stage-pad so the shared `padding` line stays the one the quiet view
+   reads its own pad through. The frame, centred across the page by
+   place-items, fits the L × S box turned: in
+   `html:not([data-quiet]) .image-frame` below,
+   `--L: min(var(--avail-w), var(--avail-h))`,
+   `--S: calc(var(--L) * 2 / 3)` and
+   `width: min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)))` —
+   the two custom properties and the width are the whole of that rule —
+   so a 3:2 is L × S and a 2:3 S × L. --avail-w is the page's width less
+   its side pads, not capped at the text column; --avail-h is the first
+   screen below the sticky header (which publishes its real height as
+   --header-h; the fallback matches its usual size) less the two
+   spacings and --frame-nav-h, the nav's token: that term is what keeps
+   the previous / where / next line above the fold for the tallest
+   frame the rule allows, script or not. The nav and the title follow
+   in flow. The quiet view keeps its viewport box by redeclaring every
+   property changed here (--stage-pad, both limits, the min-height
+   pair), and the frame's sizing is gated off it. Spec 013's max-height
+   on the image never binds here (every frame's height is at most
+   L ≤ --avail-h) and stays for the quiet view. The rules live here,
+   not on the page, for two reasons: the mat sampler must render the
+   real stage and cannot reach a page-scoped stylesheet, and form V+H
+   belongs with the mat's single source. The stage publishes its two
+   limits as lengths (--avail-w, --avail-h) so the frame's width, the
+   quiet view's mat and the image's max-height read one expression
+   each; the `vh` fallbacks are gone from those, since a fallback
+   cannot ride a custom property (svh has shipped everywhere since
+   2022) — the quiet view's min-height pair, which passes through none,
+   keeps its. Those two lengths carry no fallback, so `.image-frame`
+   lives only inside an `.image-stage`: it is one template's figure
+   (the image page's), and giving the frame a second copy of the
+   stage's limits would be the duplication this rule exists to avoid. */
 .image-stage {
-  --stage-pad: clamp(1rem, 3vh, 2rem);
-  --avail-w: min(calc(100vw - 2 * var(--page-pad)), var(--content-width));
-  --avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad));
+  --stage-pad: var(--block-margin);
+  --avail-w: calc(100vw - 2 * var(--page-pad));
+  --avail-h: calc(100svh - var(--header-h, 4.75rem) - 2 * var(--stage-pad) - var(--frame-nav-h));
   position: relative;
   display: grid;
   place-items: center;
-  min-height: calc(100vh - var(--header-h, 4.5rem));
-  min-height: calc(100svh - var(--header-h, 4.5rem));
   padding: var(--stage-pad) var(--page-pad);
 }
 
-/* Form V+H (the mat rule, spec 013): width and height both bind the
-   frame, so the mat is the smaller of the two forms' answers — V is
-   form W over --avail-w, H the held frame's form over --avail-h. */
+/* The frame on paper is bare (spec 017): --mat is 0px, declared
+   because the image's max-height below reads it — an undeclared --mat
+   would make that calc invalid and drop the cap — so the image's cap is
+   the whole of --avail-h. --r and --q are the ratio helpers form V+H
+   reads in the quiet view. */
 .image-frame {
   --r: max(var(--ar, 1), 1);
   --q: min(var(--ar, 1), 1);
-  --mat: min(
-    clamp(
-      var(--mat-min),
-      calc(var(--avail-w) * var(--mat-share) / (var(--r) + 2 * var(--mat-share))),
-      var(--mat-max)
-    ),
-    clamp(
-      var(--mat-min),
-      calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))),
-      var(--mat-max)
-    )
-  );
-  max-width: min(100%, var(--content-width));
+  --mat: 0px;
+  max-width: 100%;
   margin: 0;
-  padding: var(--mat);
-  background: var(--color-matte);
 }
 
 .image-frame img {
@@ -2119,6 +1911,23 @@ html[data-pause-active] .social-links a {
   max-width: 100%;
   height: auto;
   max-height: calc(var(--avail-h) - 2 * var(--mat));
+}
+
+/* The frame on paper fits the L × S box, turned (spec 017): a 3:2 is
+   L × S, a 2:3 S × L, a square S × S, a 3:1 L wide and shallower, a
+   4:5 S wide. Gated on the absence of data-quiet because the quiet
+   rules may not change and the quiet frame is shrink-to-fit around its
+   mat. The image's width: 100% makes the figure the sizing box rather
+   than the `sizes` hint (spec 007's trap); stageSizes() in
+   src/lib/stage-sizes.ts spells the same rule in literals for it. */
+html:not([data-quiet]) .image-frame {
+  --L: min(var(--avail-w), var(--avail-h));
+  --S: calc(var(--L) * 2 / 3);
+  width: min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)));
+}
+
+html:not([data-quiet]) .image-frame img {
+  width: 100%;
 }
 
 /* The zoom cursor, once the page's script can honour the click (spec
@@ -2146,6 +1955,29 @@ html[data-quiet] .image-stage {
   padding-inline: var(--stage-pad);
   background: var(--color-quiet);
   cursor: zoom-out;
+}
+
+/* Form V+H (the mat rule, spec 013), the quiet view's alone since spec
+   017: width and height both bind the frame, so the mat is the smaller
+   of the two forms' answers — V the column-bound form over --avail-w,
+   H the height-bound form over --avail-h — both the quiet stage's
+   limits. A rule of its own: the list below exists to out-specify the
+   zoom-in rule for `cursor`, and the mat is not that. */
+html[data-quiet] .image-frame {
+  --mat: min(
+    clamp(
+      var(--mat-min),
+      calc(var(--avail-w) * var(--mat-share) / (var(--r) + 2 * var(--mat-share))),
+      var(--mat-max)
+    ),
+    clamp(
+      var(--mat-min),
+      calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))),
+      var(--mat-max)
+    )
+  );
+  padding: var(--mat);
+  background: var(--color-matte);
 }
 
 html[data-quiet] .image-frame,

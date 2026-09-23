@@ -1,5 +1,5 @@
 /**
- * The matte sampler's toolbars (spec 013's mat bar, spec 014's ground bar) —
+ * The matte sampler's toolbar (spec 014's ground bar) —
  * a DEV-ONLY module, the body of the script that src/pages/dev/matte/
  * [...surface].astro used to carry inline.
  *
@@ -20,17 +20,9 @@
  * under src/pages/ is a route except names beginning with `_`.
  */
 
-// The sampler's toolbars — page-level progressive enhancement, the only
-// script this fixture carries.
-//
-// THE MAT BAR IS THE STAGE'S (spec 015): the stage is the only section the
-// page still renders a bar for, since it is the only surface the site still
-// mats. Its five mat candidates set --mat-share / --mat-min / --mat-max on
-// that section's wrapper <section> (the frames inherit them), with two rem
-// inputs that replace the floor and ceiling on the share candidates. That
-// state is this page's, in sessionStorage. `pieces`, `galleries` and
-// `cards` render no bar, so applySurface returns on them untouched — see
-// its early return below.
+// The sampler's toolbar — page-level progressive enhancement, the only
+// script this fixture carries. The mat bar left at spec 017: nothing on the
+// page wears a mat, so it had nothing left to move.
 //
 // The GROUND is the site-wide switch's (spec 014). This bar writes
 // localStorage['dev-ground'] = { id, bg, muted, tokens } and sets the same
@@ -62,56 +54,6 @@ import {
   tokensFor,
   type Tone,
 } from '../../../lib/ground';
-
-const KEY = 'matte-sampler';
-type State = { candidates: Record<string, string>; floor: string; ceil: string };
-const read = (): State => {
-  try {
-    const raw = sessionStorage.getItem(KEY);
-    if (raw) return { candidates: {}, floor: '0.25', ceil: '2.5', ...JSON.parse(raw) };
-  } catch {
-    /* a private window with no storage still switches, it just forgets */
-  }
-  return { candidates: {}, floor: '0.25', ceil: '2.5' };
-};
-let state = read();
-const save = () => {
-  try {
-    sessionStorage.setItem(KEY, JSON.stringify(state));
-  } catch {
-    /* as above */
-  }
-};
-
-const applySurface = (section: HTMLElement) => {
-  const name = section.dataset.surface ?? '';
-  const buttons = [...section.querySelectorAll<HTMLButtonElement>('[data-candidate]')];
-  // An unmatted surface renders no bar (spec 015): nothing to read, nothing
-  // to set, and its server-rendered label — which says so — stays as it is.
-  if (buttons.length === 0) return;
-  const wanted = state.candidates[name];
-  // No stored choice yet: the surface opens where the server rendered it
-  // (the `share-60` candidate — the mat rule that ships), not on the first
-  // button in the table.
-  const button =
-    buttons.find((b) => b.dataset.candidate === wanted) ??
-    buttons.find((b) => b.dataset.start !== undefined) ??
-    buttons[0];
-  const tunable = button.dataset.tunable === 'yes';
-  const min = tunable ? `${state.floor}rem` : (button.dataset.min ?? '0px');
-  const max = tunable ? `${state.ceil}rem` : (button.dataset.max ?? '0px');
-  const share = button.dataset.share ?? '0';
-  section.style.setProperty('--mat-share', share);
-  section.style.setProperty('--mat-min', min);
-  section.style.setProperty('--mat-max', max);
-  for (const b of buttons) b.classList.toggle('is-active', b === button);
-  const label = section.querySelector<HTMLElement>('[data-label]');
-  const note = section.querySelector<HTMLElement>('.sampler-bar-head');
-  if (label) {
-    label.textContent = `${name} — ${button.dataset.note ?? ''} — ${button.dataset.candidate}: share ${share} / floor ${min} / ceiling ${max}`;
-  }
-  if (note) note.textContent = name;
-};
 
 // ---- the ground bar ----------------------------------------------------
 
@@ -297,32 +239,12 @@ const initGround = () => {
 };
 
 const init = () => {
-  const sections = [...document.querySelectorAll<HTMLElement>('.sampler-surface')];
-  if (sections.length === 0) return;
-  for (const section of sections) {
-    for (const input of section.querySelectorAll<HTMLInputElement>('[data-floor]')) {
-      input.value = state.floor;
-    }
-    for (const input of section.querySelectorAll<HTMLInputElement>('[data-ceil]')) {
-      input.value = state.ceil;
-    }
-    applySurface(section);
-  }
   initGround();
 };
 
 document.addEventListener('click', (event) => {
   const target = event.target;
   if (!(target instanceof HTMLElement)) return;
-  const candidate = target.closest<HTMLButtonElement>('[data-candidate]');
-  if (candidate) {
-    const section = candidate.closest<HTMLElement>('.sampler-surface');
-    if (!section) return;
-    state.candidates[section.dataset.surface ?? ''] = candidate.dataset.candidate ?? '';
-    save();
-    applySurface(section);
-    return;
-  }
   const ground = target.closest<HTMLButtonElement>('[data-ground]');
   if (ground) {
     const tone = {
@@ -352,24 +274,9 @@ document.addEventListener('input', (event) => {
     );
     if (out) out.value = target.value;
     selectGround(tunedTone(), 'tune');
-    return;
-  }
-  if (target.dataset.floor === undefined && target.dataset.ceil === undefined) return;
-  if (target.dataset.floor !== undefined) state.floor = target.value;
-  else state.ceil = target.value;
-  save();
-  for (const section of document.querySelectorAll<HTMLElement>('.sampler-surface')) {
-    for (const input of section.querySelectorAll<HTMLInputElement>('[data-floor]')) {
-      input.value = state.floor;
-    }
-    for (const input of section.querySelectorAll<HTMLInputElement>('[data-ceil]')) {
-      input.value = state.ceil;
-    }
-    applySurface(section);
   }
 });
 
 document.addEventListener('astro:page-load', () => {
-  state = read();
   init();
 });

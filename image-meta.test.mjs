@@ -460,15 +460,6 @@ describe('the passage by body kind (T502, spec 007)', () => {
     const body = ':::held{src="./h.jpg" alt="h"}\nOnly the body.\n:::';
     expect(passageFor(body, 'h')).toBeNull();
   });
-
-  it('a pause leaf gives the paragraph before it and no caption', () => {
-    const body = [
-      'The paragraph before the pause.',
-      '::pause{src="./pano.jpg" alt="The full sweep"}',
-      'The paragraph after.',
-    ].join('\n\n');
-    expect(passageFor(body, 'pano')).toEqual({ prose: 'The paragraph before the pause.' });
-  });
 });
 
 describe('the sections a page renders (T402)', () => {

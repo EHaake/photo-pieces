@@ -23,19 +23,18 @@ import {
 //
 // Each block is a descriptor (spec 003's block-descriptor model):
 //
-//   forms:   'leaf' | 'container' | 'both'
-//   body:    'caption' | 'prose' | 'images+caption' | 'none' (leaf-only)
+//   forms:   'container' | 'both'
+//   body:    'caption' | 'prose' | 'images+caption'
 //   attrs:   { required: [...], optional: [...], enums: { name: [...] },
 //              flags: [...] }  — a flag is valid only bare: {bleed}
 //   images:  (attrs, fail) => [{ src, alt }]  — validates and extracts
 //   classes: (attrs, ratios) => [...]  — ratios present when needsRatios
-//   sizing:  (attrs, imageIndex, ratios, dims) => ({ layout, sizes })
-//            — ratios and dims (orientation-corrected { width, height })
-//            come from the probe; an entry the probe could not read is
-//            null, which only a needsRatios block is spared (below)
+//   sizing:  (attrs, imageIndex, ratios) => ({ layout, sizes })
+//            — ratios come from the probe; an entry the probe could not
+//            read is null, which only a needsRatios block is spared (below)
 //   needsRatios: (attrs) => boolean — the block's layout cannot be drawn
-//            without the measurements (classes/sizing read ratios and
-//            dims), so a frame the probe cannot read fails the build
+//            without the measurements (classes/sizing read ratios), so
+//            a frame the probe cannot read fails the build
 //            there. The probe itself runs for EVERY block (spec 013):
 //            each frame carries its raw ratio in --ar, because the mat's
 //            width is a share of the frame's short side.
@@ -85,33 +84,12 @@ const COLLAPSE = '(min-width: 720px)';
 // a column on a portrait screen the same way).
 const isLandscape = (ratio) => ratio >= 1;
 
-// The pause frame's geometry, mirrored from global.css's tokens: the
-// hold margin (5vmin — the clamp's middle band) off both sides of the
-// limiting dimension, then room for the approach (--pause-scale 1.05).
-// So the frame is (100vw − 10vmin) ÷ 1.05 wide where the width limits
-// it, and (100vh − 10vmin) ÷ 1.05 × ratio where the height does — the
-// margin is vmin, not a share of the limiting dimension, which is why
-// the hint is a calc() and not a percentage (T504 review: a plain 86vw
-// fell 3.7% under at 1440×900). Coefficients rounded so the hint never
-// falls under: the positive term up, the subtracted term down.
-const PAUSE_SCALE = 1.05;
-const PAUSE_MARGIN_VMIN = 5;
-const roundUp = (n) => Number((Math.ceil(n * 100) / 100).toFixed(2));
-const roundDown = (n) => Number((Math.floor(n * 100) / 100).toFixed(2));
-// The frame's width as a calc() of the viewport, for a height-limited
-// frame of `ratio` (ratio = 1 gives the width-limited branch in vw).
-function pauseWidth(ratio, unit) {
-  const full = (100 / PAUSE_SCALE) * ratio;
-  const margin = ((2 * PAUSE_MARGIN_VMIN) / PAUSE_SCALE) * ratio;
-  return `calc(${roundUp(full)}${unit} - ${roundDown(margin)}vmin)`;
-}
-
 export const BLOCKS = {
   single: {
     // The directive form of the column-width image — exists so a single
     // can carry a caption; plain ![alt](./img.jpg) stays the captionless
-    // shorthand. 680px is coupled to --prose-width (68ch) minus the mat
-    // — see the coupling comment in global.css.
+    // shorthand. 680px is coupled to --prose-width (68ch) — see the
+    // coupling comment in global.css.
     forms: 'both',
     body: 'caption',
     attrs: { required: ['src', 'alt'], optional: [], enums: {} },
@@ -405,47 +383,6 @@ export const BLOCKS = {
       };
     },
   },
-
-  pause: {
-    // Spec 007: a frame too wide to hold beside words. It arrives in the
-    // flow, pins at the centre of the viewport inside the hold margin,
-    // and the page's lights go down and up as the reader scrolls
-    // through it (the piece page's script drives the progress). Leaf
-    // only — there is nothing to read while the lights are down; the
-    // leaf's neighbouring plain paragraphs ride in its stage, so the
-    // words stay anchored above and below the frame while it pins.
-    forms: 'leaf',
-    body: 'none',
-    structure: 'frame',
-    attrs: { required: ['src', 'alt'], optional: [], enums: {} },
-    images(attrs, fail) {
-      if (!attrs.src) fail('pause requires a src attribute');
-      if (attrs.alt === undefined)
-        fail('pause requires an alt attribute (use alt="" only for a truly decorative image)');
-      return [{ src: attrs.src, alt: attrs.alt }];
-    },
-    needsRatios: () => true,
-    emitsAr: () => true,
-    rawAr: true,
-    // Where the viewport is wider than the frame's ratio the frame is
-    // height-limited, so its width is the height branch × ratio;
-    // otherwise the width branch (pauseWidth above — exact in vmin,
-    // rounded never to fall under: the srcset picks the next size up
-    // from a hint, and a short hint picks a soft image). The condition
-    // is written as the frame's raw pixel dimensions: a decimal ratio
-    // is not parseable everywhere, and an unparseable media condition
-    // fails silently. The height branch ignores the mat's two edges:
-    // the true width is 2 × the mat × (1 − ratio) less, so the hint
-    // over-delivers for a landscape frame and falls under by that much
-    // for a portrait one — 2.1% at 2:3 on 1440×900 (accepted: a pause
-    // is for the wide frame).
-    // Hints for the srcset choice only — the CSS sizes the frame from
-    // --ar and the tokens.
-    sizing: (_attrs, i, ratios, dims) => ({
-      layout: 'constrained',
-      sizes: `(min-aspect-ratio: ${dims[i].width}/${dims[i].height}) ${pauseWidth(ratios[i], 'vh')}, ${pauseWidth(1, 'vw')}`,
-    }),
-  },
 };
 
 // Sizing for the pair blocks across their width variants (added at the
@@ -526,11 +463,6 @@ export function remarkPiecesBlocks() {
       let bodyProse = null;
       let bodyImages = null;
       if (node.type === 'containerDirective') {
-        if (block.forms === 'leaf') {
-          failHere(
-            `the :::${node.name} container form is not supported — use ::${node.name}{...} on its own line`,
-          );
-        }
         rejectLabel(node, failHere);
         rejectNestedBlocks(node, failHere);
         if (block.body === 'caption') caption = captionNode(node.children);
@@ -592,7 +524,7 @@ export function remarkPiecesBlocks() {
       // remote or root-absolute src, or a render with no file.path —
       // measures null and carries no --ar (the CSS falls back to 1);
       // where the block's own layout needs the numbers (needsRatios:
-      // match="height", strip, held, pause) that is still a failure.
+      // match="height", strip, held) that is still a failure.
       const needsRatios = Boolean(block.needsRatios?.(attrs));
       const dims = await probeDimensions(
         images,
@@ -636,7 +568,7 @@ export function remarkPiecesBlocks() {
           // pair) with the raw ratio.
           data: {
             pieceFrame: true,
-            hProperties: { ...block.sizing(attrs, imageIndex, ratios, dims) },
+            hProperties: { ...block.sizing(attrs, imageIndex, ratios) },
           },
         };
         // The anchor becomes the layout item, so --ar rides on it (the
@@ -661,12 +593,6 @@ export function remarkPiecesBlocks() {
         // column for text to wrap around it — so the container unwraps.
         const figure = wrapNode('figure', className, imageNodes);
         const index = parent.children.indexOf(node);
-        // Marked as the aside's own: once these paragraphs sit in the
-        // column they look like the piece's, and a following pause must
-        // not anchor them in its stage (spec 007, T501a).
-        for (const body of bodyProse) {
-          body.data = { ...body.data, pieceUnwrapped: true };
-        }
         parent.children.splice(index, 1, figure, ...bodyProse);
         continue;
       }
@@ -681,40 +607,6 @@ export function remarkPiecesBlocks() {
           ...node.data,
           hName: 'div',
           hProperties: { className, ...wrapperStyle },
-        };
-        continue;
-      }
-
-      if (block.structure === 'frame') {
-        // pause: the image in a frame the script and CSS pin and scale;
-        // the wrapper is the scene around it, and the stage inside is what
-        // pins — so the piece's own paragraph before and after the
-        // directive ride along with the frame, anchored to it (spec 007,
-        // visual gate decision 7). The wrapper is a div, not a figure,
-        // once the piece's prose lives inside it.
-        const frame = wrapNode('div', [`piece-${node.name}-frame`], imageNodes);
-        const index = parent.children.indexOf(node);
-        // The next neighbour first: removing the previous one shifts it.
-        const after = claimStageNeighbour(parent, index + 1, `piece-${node.name}-after`);
-        const before = claimStageNeighbour(parent, index - 1, `piece-${node.name}-before`);
-        node.children = [
-          wrapNode(
-            'div',
-            [`piece-${node.name}-stage`],
-            [...(before ? [before] : []), frame, ...(after ? [after] : [])],
-          ),
-        ];
-        node.data = {
-          ...node.data,
-          hName: 'div',
-          hProperties: {
-            className: [
-              ...className,
-              ...(before ? ['with-before'] : []),
-              ...(after ? ['with-after'] : []),
-            ],
-            ...wrapperStyle,
-          },
         };
         continue;
       }
@@ -747,9 +639,9 @@ export function remarkPiecesBlocks() {
     // Collected first, then measured: the visit is synchronous and the
     // probe is not, and the frame carries its --ar like every other frame
     // (spec 013). A decorative image gets no link (a link with no
-    // accessible name fails WCAG 2.4.4) but IS matted in the column, so
-    // it is measured too and wears --ar itself — the block path's alt=""
-    // case, which puts arStyle on the image node.
+    // accessible name fails WCAG 2.4.4), but it is measured too and
+    // wears --ar itself — the block path's alt="" case, which puts
+    // arStyle on the image node.
     const shorthand = [];
     visit(tree, 'image', (node, index, parent) => {
       if (!parent || parent.type === 'link' || node.data?.pieceFrame) return;
@@ -896,30 +788,6 @@ function wrapNode(hName, className, children, extraProps = {}) {
       ...(Object.keys(hProperties).length > 0 ? { hProperties } : {}),
     },
   };
-}
-
-function claimStageNeighbour(parent, index, className) {
-  // A pause anchors the piece's OWN paragraph: a plain mdast paragraph
-  // with no image in it (an image line is a block of its own), not
-  // prose an :::aside unwrapped into the column, and no directive label
-  // (defence in depth: rejectLabel fails every labelled container before
-  // this runs, so no test can reach that clause). Anything else — a
-  // heading, a list, another directive — stays put.
-  const candidate = index >= 0 ? parent.children[index] : undefined;
-  if (!candidate || candidate.type !== 'paragraph') return null;
-  if (candidate.data?.directiveLabel || candidate.data?.pieceUnwrapped) return null;
-  let hasImage = false;
-  visit(candidate, 'image', () => {
-    hasImage = true;
-  });
-  if (hasImage) return null;
-  parent.children.splice(index, 1);
-  const prior = candidate.data?.hProperties?.className ?? [];
-  candidate.data = {
-    ...candidate.data,
-    hProperties: { ...candidate.data?.hProperties, className: [...prior, className] },
-  };
-  return candidate;
 }
 
 function partitionBody(children, name, fail) {

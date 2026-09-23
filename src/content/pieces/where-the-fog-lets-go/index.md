@@ -65,7 +65,7 @@ The sea stack, top to bottom — the frame that needed to stand up.
 From the top of the bluff the whole coastline unrolled, too wide for
 any column:
 
-::pause{src="./pano.jpg" alt="The full sweep of coastline after the fog cleared"}
+::fullbleed{src="./pano.jpg" alt="The full sweep of coastline after the fog cleared"}
 
 What the panorama can't hold is the sound. Standing there, the whole
 coast unrolled and the surf arriving from every direction at once, the

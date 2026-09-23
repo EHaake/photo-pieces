@@ -180,7 +180,6 @@ describe('the ratio on every frame (T1100)', () => {
     ],
     ['strip', ':::strip\n![a](./photo.jpg)\n![b](./square.jpg)\n:::', ['--ar: 1.6', '--ar: 1']],
     ['held', ':::held{src="./photo.jpg" alt="a"}\nWords.\n:::', ['--ar: 1.6']],
-    ['pause', '::pause{src="./portrait.jpg" alt="a"}', ['--ar: 0.6667']],
   ];
 
   it.each(cases)("%s carries each frame's true ratio", async (_name, content, expected) => {
@@ -219,11 +218,9 @@ describe('the ratio on every frame (T1100)', () => {
     expect(wrapperStyle(code)).toBe('--ar-sum: 3.2667; --n: 3');
   });
 
-  it('held and pause keep the raw --ar on the wrapper as well as the frame', async () => {
+  it('held keeps the raw --ar on the wrapper as well as the frame', async () => {
     const held = await render(':::held{src="./photo.jpg" alt="a"}\nWords.\n:::');
     expect(wrapperStyle(held.code)).toBe('--ar: 1.6');
-    const pause = await render('::pause{src="./portrait.jpg" alt="a"}');
-    expect(wrapperStyle(pause.code)).toBe('--ar: 0.6667');
   });
 
   it('a frame the probe cannot read carries none — the CSS falls back to 1', async () => {

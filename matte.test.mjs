@@ -3,25 +3,28 @@ import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { galleryCell, GALLERY_STRETCH } from './src/lib/gallery-layout.ts';
 import { blocks, uncomment } from './src/lib/ground.ts';
+import { PHONE, stageSizes } from './src/lib/stage-sizes.ts';
 
 // The mat rule (spec 013, T1101; a hero treatment since spec 015,
-// T1301): one rule, declared once, resolved per geometry. A frame's mat
-// is m = clamp(--mat-min, --mat-share × σ, --mat-max) over the
+// T1301; the quiet view's alone since spec 017, T1502): one rule,
+// declared once, resolved per geometry. A frame's mat is
+// m = clamp(--mat-min, --mat-share × σ, --mat-max) over the
 // photograph's RENDERED SHORT SIDE σ — and because CSS cannot measure a
 // rendered height, each geometry solves for m algebraically from the
 // frame's ratio and publishes --mat, which the surface applies as
 // `padding: var(--mat)`.
 //
-// TWO SURFACES WEAR ONE, since spec 015: the image page's stage
-// (form V+H) and the pause frame (form W, on a selector list of one),
-// which keeps its mat until the pause gets a spec of its own. Every
-// other surface is off, and off has two shapes — `--mat: 0px` where a
-// layout formula still reads the mat (the held figure, the packed
-// cell), and nothing at all where only the padding did. Both shapes are
-// pinned below, so a padding that grows back on a surface, or a formula
-// that loses its term, fails a case that names it.
+// ONE SURFACE WEARS ONE, since spec 017: the image page's quiet view
+// (form V+H on `html[data-quiet] .image-frame`), where the ground goes
+// dark. Every other surface is off, and off has two shapes —
+// `--mat: 0px` where a layout formula still reads the mat (the held
+// figure, the packed cell, and the stage's frame on paper, whose
+// image's height cap reads it), and nothing at all where only the
+// padding did. Both shapes are pinned below, so a padding that grows
+// back on a surface, or a formula that loses its term, fails a case
+// that names it.
 //
-// Three kinds of guard, because three different things can go wrong:
+// Four kinds of guard, because four different things can go wrong:
 //
 // (a) The single source. Three tokens in :root and nowhere else: a
 //     second declaration anywhere (a surface "just overriding the
@@ -31,12 +34,12 @@ import { blocks, uncomment } from './src/lib/ground.ts';
 //     spec 009 moved the cards' mat to the span, so "cards off" is one
 //     edit.
 //
-// (b) The strings, pinned: the two forms that remain, the zeros that
-//     replaced the other three, and the absence of everything else. A
-//     form is algebra that renders; a typo in it renders too, just
-//     wrong. Whitespace-normalised, because Prettier wraps long calc()
-//     values. The walk over every rule in the file is what makes "off"
-//     a fact about the stylesheet rather than about the rules this file
+// (b) The strings, pinned: the one form that remains, the zeros that
+//     replaced the others, and the absence of everything else. A form
+//     is algebra that renders; a typo in it renders too, just wrong.
+//     Whitespace-normalised, because Prettier wraps long calc() values.
+//     The walk over every rule in the file is what makes "off" a fact
+//     about the stylesheet rather than about the rules this file
 //     happens to name.
 //
 // (c) The geometry, evaluated. The strings are pinned against the plan,
@@ -44,20 +47,27 @@ import { blocks, uncomment } from './src/lib/ground.ts';
 //     also RUN: a small evaluator substitutes var()s from :root and the
 //     case, turns CSS math into JS, and checks each form against the
 //     rule it claims to implement over a grid of ratios, shares, clamps
-//     and viewports — including the plan's central identity (form W at
-//     a height-bound frame's width returns that frame's mat), the
-//     CSS/srcset agreement for packed rows, and the off identity: at any
-//     tokens at all, the unmatted surfaces resolve to zero.
+//     and viewports — including the plan's central identity (the
+//     column-bound form at a height-bound frame's width returns that
+//     frame's mat), the CSS/srcset agreement for packed rows, and the
+//     off identity: at any tokens at all, the unmatted surfaces resolve
+//     to zero.
+//
+// (d) Where it is worn. The mat is the quiet view's because the quiet
+//     view is where the ground goes dark: the one matted rule and the
+//     one dark ground in global.css sit under the same attribute.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
-/** The one selector form W and the padding/background rule are left with
- *  (spec 015): the pause frame's anchor, or the bare img an alt="" image
- *  gets instead. */
-const PAUSE_ANCHOR = '.piece-pause-frame > :is(a.image-link, img)';
+/** The one surface that still wears a mat (spec 017): the quiet view's frame. */
+const MATTED = ['html[data-quiet] .image-frame'];
 
-/** The two surfaces that still wear a mat. */
-const MATTED = [PAUSE_ANCHOR, '.image-frame'];
+/** Form V+H's two branches — V column-bound over --avail-w, H
+ *  height-bound over --avail-h — the one form left (spec 017). */
+const FORM_H =
+  'clamp(var(--mat-min), calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))), var(--mat-max))';
+const FORM_V =
+  'clamp(var(--mat-min), calc(var(--avail-w) * var(--mat-share) / (var(--r) + 2 * var(--mat-share))), var(--mat-max))';
 
 /** The declarations of a rule body, as name -> value. Nested rules are ignored. */
 function declarations(body) {
@@ -112,6 +122,17 @@ function indexOf(list, selector, declares) {
 }
 
 const ruleFor = (list, selector, declares) => list[indexOf(list, selector, declares)];
+
+/** The stage's quiet rule and the image's rule, byte for byte as `main`
+ *  had them before spec 017 (the body `blocks()` returns, pasted): the
+ *  refit may not change the quiet view by a character. */
+const QUIET_STAGE_BODY =
+  '\n  --stage-pad: clamp(0.5rem, 1.5vh, 1rem);\n  --avail-w: calc(100vw - 2 * var(--stage-pad));\n  --avail-h: calc(100svh - 2 * var(--stage-pad));\n  min-height: 100vh;\n  min-height: 100svh;\n  padding-inline: var(--stage-pad);\n  background: var(--color-quiet);\n  cursor: zoom-out;\n';
+const FRAME_IMG_BODY =
+  '\n  display: block;\n  width: auto;\n  max-width: 100%;\n  height: auto;\n  max-height: calc(var(--avail-h) - 2 * var(--mat));\n';
+
+/** The frame's sizing on paper (spec 017): one rule, gated off the quiet view. */
+const PAPER_FRAME = 'html:not([data-quiet]) .image-frame';
 
 // ---- the evaluator (c) -------------------------------------------------
 
@@ -247,9 +268,8 @@ describe('(a) the rule has one source (T1101, spec 013)', () => {
     }
   });
 
-  it('no file under src/ outside src/pages/dev/ declares one — the sampler alone may override', () => {
+  it('no file under src/ declares one', () => {
     for (const [path, text] of Object.entries(src)) {
-      if (path.startsWith('src/pages/dev/')) continue;
       const declares = /(--mat-share|--mat-min|--mat-max)\s*:/g;
       const found = [...text.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(declares)].map((m) => m[1]);
       const allowed =
@@ -274,40 +294,42 @@ describe('(a) the rule has one source (T1101, spec 013)', () => {
 });
 
 describe('(b) every form pinned (T1101, spec 013)', () => {
-  const FORM_W =
-    'clamp(var(--mat-min), calc(100% * var(--mat-share) / (max(var(--ar, 1), 1) + 2 * var(--mat-share))), var(--mat-max))';
-  const FORM_H =
-    'clamp(var(--mat-min), calc(var(--avail-h) * var(--mat-share) * var(--q) / (1 + 2 * var(--mat-share) * var(--q))), var(--mat-max))';
-  const FORM_V =
-    'clamp(var(--mat-min), calc(var(--avail-w) * var(--mat-share) / (var(--r) + 2 * var(--mat-share))), var(--mat-max))';
-
-  it('form W is declared once, on the pause’s anchor alone (spec 015)', () => {
-    const formW = ruleFor(top, PAUSE_ANCHOR, '--mat');
-    expect(norm(formW.prelude)).toBe(PAUSE_ANCHOR);
-    expect(norm(declarations(formW.body)['--mat'])).toBe(FORM_W);
-    expect(Object.keys(declarations(formW.body))).toEqual(['--mat']);
-    // "Once", and on that one surface: no second rule anywhere in the
-    // file publishes the same string, and the one that does selects the
-    // pause's anchor and nothing beside it — a piece's frame, a cover
-    // card or the compare figure put back on this list fails here.
-    const declaringW = [...top, ...nested].filter(
-      (block) => norm(declarations(block.body)['--mat'] ?? '') === FORM_W,
-    );
-    expect(declaringW.map((block) => norm(block.prelude))).toEqual([PAUSE_ANCHOR]);
+  it('form V+H is declared once, under html[data-quiet] .image-frame, and every other --mat in the file is 0px', () => {
+    const quiet = ruleFor(top, MATTED[0], '--mat');
+    expect(norm(quiet.prelude)).toBe(MATTED[0]);
+    expect(norm(declarations(quiet.body)['--mat'])).toBe(`min(${FORM_V}, ${FORM_H})`);
+    // A rule of its own: the mat and nothing else — the cursor list
+    // after it exists to out-specify the zoom-in rule, and merging the
+    // two fails the prelude above.
+    expect(Object.keys(declarations(quiet.body))).toEqual(['--mat', 'padding', 'background']);
+    // "Once", and every other --mat a zero: the walk over every rule in
+    // the file, nested ones included, finds that one form and otherwise
+    // only 0px — the held figure, the packed cell and the stage's frame
+    // on paper. A form put back on any surface fails here by name.
+    const declaring = [...top, ...nested]
+      .filter((block) => '--mat' in declarations(block.body))
+      .map((block) => [norm(block.prelude), norm(declarations(block.body)['--mat'])]);
+    expect(declaring.filter(([, value]) => value !== '0px')).toEqual([
+      [MATTED[0], `min(${FORM_V}, ${FORM_H})`],
+    ]);
+    expect(
+      declaring
+        .filter(([, value]) => value === '0px')
+        .map(([prelude]) => prelude)
+        .sort(),
+    ).toEqual(['.gallery-flow > li', '.image-frame', '.piece-held figure']);
   });
 
-  it('the two matted surfaces read --mat as a padding — the pause’s anchor and the stage’s frame — and no other rule applies --mat or --color-matte', () => {
-    const anchor = declarations(ruleFor(top, PAUSE_ANCHOR, 'padding').body);
-    expect(anchor['padding']).toBe('var(--mat)');
-    expect(anchor['background']).toBe('var(--color-matte)');
-    const stage = declarations(ruleFor(top, '.image-frame').body);
-    expect(stage['padding']).toBe('var(--mat)');
-    expect(stage['background']).toBe('var(--color-matte)');
+  it('the one matted surface reads --mat as a padding — the quiet view’s frame — and no other rule applies --mat or --color-matte', () => {
+    const quiet = declarations(ruleFor(top, MATTED[0], 'padding').body);
+    expect(quiet['padding']).toBe('var(--mat)');
+    expect(quiet['background']).toBe('var(--color-matte)');
     // The walk, over every rule in the file, nested ones included: a
     // padding that reads --mat or a background that reads --color-matte
-    // may sit on those two selectors and nowhere else. This is what
-    // makes spec 015's "off" a fact about the stylesheet — a surface
-    // that grows its padding back shows up here by name.
+    // may sit on that one selector and nowhere else. This is what makes
+    // "off" a fact about the stylesheet — a surface that grows its
+    // padding back (the stage's frame on paper included) shows up here
+    // by name.
     const applying = [];
     for (const block of [...top, ...nested])
       for (const [property, value] of Object.entries(declarations(block.body))) {
@@ -315,12 +337,7 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
         const matte = /^background/.test(property) && /--color-matte\b/.test(value);
         if (mat || matte) applying.push(`${norm(block.prelude)} { ${property} }`);
       }
-    expect(applying.sort()).toEqual([
-      `${MATTED[1]} { background }`,
-      `${MATTED[1]} { padding }`,
-      `${MATTED[0]} { background }`,
-      `${MATTED[0]} { padding }`,
-    ]);
+    expect(applying.sort()).toEqual([`${MATTED[0]} { background }`, `${MATTED[0]} { padding }`]);
     // ...and nothing reads the tokens: outside :root the three are read
     // only inside a --mat value, so every surface goes through the forms
     // rather than reading the share or the clamp for itself.
@@ -332,15 +349,6 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
           reading.push(`${norm(block.prelude)} { ${property} }`);
     }
     expect(reading).toEqual([]);
-    // Source order is the pause's mat now (sign-off N1). Narrowed to one
-    // selector both rules are (0,2,1) — a tie with `.piece-block
-    // a.image-link`, whose `background: none` drops the theme's
-    // underline — so the white wins by coming later in the file and by
-    // nothing else. Move either rule above that one and the pause frame
-    // silently loses its mat.
-    const underline = indexOf(top, '.piece-block a.image-link');
-    expect(indexOf(top, PAUSE_ANCHOR, 'padding')).toBeGreaterThan(underline);
-    expect(indexOf(top, PAUSE_ANCHOR, '--mat')).toBeGreaterThan(underline);
   });
 
   it('the held figure at zero: --mat 0px, no --q, the box formula unchanged', () => {
@@ -355,53 +363,83 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     );
   });
 
-  it('form V+H: the pause’s two limits, its mat, and its frame', () => {
-    const pause = declarations(ruleFor(top, '.piece-pause').body);
-    expect(norm(pause['--r'])).toBe('max(var(--ar, 1), 1)');
-    expect(norm(pause['--q'])).toBe('min(var(--ar, 1), 1)');
-    expect(norm(pause['--avail-w'])).toBe(
-      'calc((100vw - 2 * var(--hold-margin)) / var(--pause-scale))',
-    );
-    expect(norm(pause['--avail-h'])).toBe(
-      'calc((100svh - 2 * var(--hold-margin)) / var(--pause-scale))',
-    );
-    expect(norm(pause['--mat'])).toBe(`min(${FORM_V}, ${FORM_H})`);
-    expect(norm(pause['--frame-w'])).toBe(
-      'min(var(--avail-w), calc((var(--avail-h) - 2 * var(--mat)) * var(--ar, 1) + 2 * var(--mat)))',
-    );
-    expect(norm(pause['--frame-h'])).toBe(
-      'calc((var(--frame-w) - 2 * var(--mat)) / var(--ar, 1) + 2 * var(--mat))',
-    );
-  });
-
-  it('form V+H: the stage’s limits, its mat, and the image’s height — in global.css, not on the page', () => {
-    const stage = declarations(ruleFor(top, '.image-stage').body);
-    expect(norm(stage['--avail-w'])).toBe(
-      'min(calc(100vw - 2 * var(--page-pad)), var(--content-width))',
-    );
-    expect(norm(stage['--avail-h'])).toBe(
-      'calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad))',
-    );
+  it('the stage on paper is bare and the quiet view wears form V+H — in global.css, not on the page', () => {
+    // The box hugs the frame (spec 017): the piece's spacing as the pad,
+    // the page's width less its side pads (no column cap), the first
+    // screen less the header, the two spacings and the nav's token — and
+    // no min-height at all (the quiet rule carries its own pair). These
+    // seven declarations and nothing else.
+    const stageRule = ruleFor(top, '.image-stage');
+    const stage = declarations(stageRule.body);
+    expect(Object.fromEntries(Object.entries(stage).map(([k, v]) => [k, norm(v)]))).toEqual({
+      '--stage-pad': 'var(--block-margin)',
+      '--avail-w': 'calc(100vw - 2 * var(--page-pad))',
+      '--avail-h':
+        'calc(100svh - var(--header-h, 4.75rem) - 2 * var(--stage-pad) - var(--frame-nav-h))',
+      position: 'relative',
+      display: 'grid',
+      'place-items': 'center',
+      padding: 'var(--stage-pad) var(--page-pad)',
+    });
+    // declarations() keeps the last of a repeated property, so the raw
+    // body is what proves both min-height lines are gone.
+    expect(stageRule.body.match(/min-height:/g)).toBeNull();
+    // The quiet stage, byte for byte as main had it: it redeclares every
+    // property the base changed, so the quiet box is still the viewport.
+    const quietStageRule = ruleFor(top, 'html[data-quiet] .image-stage');
+    expect(quietStageRule.body).toBe(QUIET_STAGE_BODY);
+    expect(quietStageRule.body).not.toContain('--frame-nav-h');
+    expect(
+      [...quietStageRule.body.matchAll(/min-height:\s*([^;]+);/g)].map((m) => norm(m[1])),
+    ).toEqual(['100vh', '100svh']);
+    // The frame on paper: the ratio helpers, a declared zero (the image's
+    // cap below reads it), no column cap, and no padding or field — a
+    // mat that grows back on paper fails here.
     const frame = declarations(ruleFor(top, '.image-frame').body);
+    expect(Object.keys(frame)).toEqual(['--r', '--q', '--mat', 'max-width', 'margin']);
     expect(norm(frame['--r'])).toBe('max(var(--ar, 1), 1)');
     expect(norm(frame['--q'])).toBe('min(var(--ar, 1), 1)');
-    expect(norm(frame['--mat'])).toBe(`min(${FORM_V}, ${FORM_H})`);
+    expect(norm(frame['--mat'])).toBe('0px');
+    expect(norm(frame['max-width'])).toBe('100%');
+    expect(norm(frame['margin'])).toBe('0');
+    // One rectangle, turned: the L × S box, gated off the quiet view.
+    const paperRule = ruleFor(top, PAPER_FRAME);
+    expect(norm(paperRule.prelude)).toBe(PAPER_FRAME);
+    const paper = declarations(paperRule.body);
+    expect(Object.fromEntries(Object.entries(paper).map(([k, v]) => [k, norm(v)]))).toEqual({
+      '--L': 'min(var(--avail-w), var(--avail-h))',
+      '--S': 'calc(var(--L) * 2 / 3)',
+      width: 'min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)))',
+    });
+    const paperImg = ruleFor(top, `${PAPER_FRAME} img`);
+    expect(norm(paperImg.prelude)).toBe(`${PAPER_FRAME} img`);
+    expect(declarations(paperImg.body)).toEqual({ width: '100%' });
+    // The image's own rule, byte for byte as main had it.
+    expect(ruleFor(top, '.image-frame img').body).toBe(FRAME_IMG_BODY);
     expect(norm(declarations(ruleFor(top, '.image-frame img').body)['max-height'])).toBe(
       'calc(var(--avail-h) - 2 * var(--mat))',
     );
-    const quiet = declarations(ruleFor(top, 'html[data-quiet] .image-stage').body);
+    const quiet = declarations(quietStageRule.body);
     expect(norm(quiet['--stage-pad'])).toBe('clamp(0.5rem, 1.5vh, 1rem)');
     expect(norm(quiet['--avail-w'])).toBe('calc(100vw - 2 * var(--stage-pad))');
     expect(norm(quiet['--avail-h'])).toBe('calc(100svh - 2 * var(--stage-pad))');
-    // Quiet view redeclares those two limits and nothing else: the base
-    // `.image-frame img` max-height above reads --avail-h, so a quiet
-    // copy of it is byte-identical duplication (T1101b deleted it, on
-    // both the page and here). These two rules, and no third.
+    // Quiet view redeclares the stage's limits, and the frame's mat
+    // under the same attribute: the base `.image-frame img` max-height
+    // above reads --avail-h and --mat, so a quiet copy of it is
+    // byte-identical duplication (T1101b deleted it, on both the page
+    // and here). These three rules, the mat's between the stage's and
+    // the cursor list, and no fourth.
+    const QUIET_RULE = /html\[data-quiet\] \.image-/;
+    // The paper frame's `:not` preludes are not quiet rules: the list
+    // below gains nothing from them.
+    expect(QUIET_RULE.test(PAPER_FRAME)).toBe(false);
+    expect(QUIET_RULE.test(`${PAPER_FRAME} img`)).toBe(false);
     const quietStage = [...top, ...nested]
       .map((block) => norm(block.prelude))
-      .filter((prelude) => /html\[data-quiet\] \.image-/.test(prelude));
+      .filter((prelude) => QUIET_RULE.test(prelude));
     expect(quietStage).toEqual([
       'html[data-quiet] .image-stage',
+      'html[data-quiet] .image-frame',
       'html[data-quiet] .image-frame, html[data-quiet] .image-stage[data-quiet-ready] .image-frame',
     ]);
     // And the page's scoped <style> styles the frame not at all — every
@@ -421,9 +459,58 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(declarations(ruleFor(top, '.image-stage[data-quiet-ready] .image-frame').body)).toEqual({
       cursor: 'zoom-in',
     });
-    expect(indexOf(top, '.image-stage[data-quiet-ready] .image-frame')).toBeLessThan(
-      indexOf(top, 'html[data-quiet] .image-frame'),
+    // Two rules now select html[data-quiet] .image-frame — the mat and
+    // the cursor list — so each is found by what it declares. The
+    // zoom-in rule comes before both; the mat's rule sits after the
+    // quiet stage and before the cursor list.
+    const zoomIn = indexOf(top, '.image-stage[data-quiet-ready] .image-frame');
+    const quietMat = indexOf(top, 'html[data-quiet] .image-frame', '--mat');
+    const quietCursor = indexOf(top, 'html[data-quiet] .image-frame', 'cursor');
+    expect(zoomIn).toBeLessThan(quietMat);
+    expect(zoomIn).toBeLessThan(quietCursor);
+    expect(indexOf(top, 'html[data-quiet] .image-stage')).toBeLessThan(quietMat);
+    expect(quietMat).toBeLessThan(quietCursor);
+  });
+
+  it("--frame-nav-h is :root's at both widths — the reserve the stage's height takes out and the nav claims", () => {
+    // One row of the nav's 0.78rem mono plus its half-baseline bottom
+    // padding; two rows and the 1rem gap below the nav's own wrap.
+    expect(norm(root['--frame-nav-h'])).toBe('calc(0.78rem * 1.362 + var(--baseline) * 0.5)');
+    const phoneQuery = top.filter((block) => norm(block.prelude) === `@media ${PHONE}`);
+    const phoneRoots = phoneQuery
+      .flatMap((block) => blocks(block.body))
+      .filter((block) => selects(block.prelude, ':root'));
+    expect(phoneRoots).toHaveLength(1);
+    expect(norm(declarations(phoneRoots[0].body)['--frame-nav-h'])).toBe(
+      'calc(0.78rem * 1.362 * 2 + 1rem + var(--baseline) * 0.5)',
     );
+    // Declared on :root twice — the base and the phone query — and on no
+    // other selector: a stage or a nav that set its own would drift.
+    const declaring = [...top, ...nested]
+      .filter((block) => '--frame-nav-h' in declarations(block.body))
+      .map((block) => norm(block.prelude));
+    expect(declaring).toEqual([':root', ':root']);
+    expect(norm(ruleFor(top, '.image-stage').prelude)).toBe('.image-stage');
+    // The nav claims the token, at the font size the token was measured
+    // at, and puts the piece's spacing between itself and the title; the
+    // head adds no top padding above the title. Each declaration by name.
+    const page = uncomment(src['src/pages/images/[...id].astro']);
+    const scoped = blocks(page.slice(page.indexOf('<style>'), page.indexOf('</style>')));
+    const nav = declarations(ruleFor(scoped, '.frame-nav').body);
+    const head = declarations(ruleFor(scoped, '.image-head').body);
+    for (const [label, value, expected] of [
+      ['.frame-nav { min-height }', nav['min-height'], 'var(--frame-nav-h)'],
+      ['.frame-nav { margin-block-end }', nav['margin-block-end'], 'var(--block-margin)'],
+      ['.frame-nav { font-size }', nav['font-size'], '0.78rem'],
+      ['.image-head { padding-block-start }', head['padding-block-start'], '0'],
+    ])
+      expect([label, value && norm(value)]).toEqual([label, expected]);
+    // The nav's own wrap sits at the query the phone token mirrors.
+    const wraps = scoped
+      .filter((block) => norm(block.prelude) === `@media ${PHONE}`)
+      .flatMap((block) => blocks(block.body))
+      .filter((block) => selects(block.prelude, '.frame-nav'));
+    expect(['the nav wraps at', PHONE, wraps.length]).toEqual(['the nav wraps at', PHONE, 1]);
   });
 
   it('the image page reads --mat nowhere: the compare is unmatted, and --color-matte is its letterbox and divider only', () => {
@@ -540,24 +627,16 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     ...extra,
   });
 
-  const formW = () => norm(declarations(ruleFor(top, PAUSE_ANCHOR, '--mat').body)['--mat']);
-
-  it('form W: m is the share of the rendered short side, at every width it is given', () => {
-    // A phone column, the prose column, the site's widest breakout: the
-    // percentage basis is whatever the frame's container happens to be.
-    for (const W of [343, 666, 1160]) {
-      for (const one of grid()) {
-        const env = envFor(one);
-        const m = px(formW(), { env, viewport: one.viewport, basis: W });
-        const sigma = (W - 2 * m) / Math.max(one.ratio, 1);
-        const want = CLAMP(one.floor, one.share * sigma, one.ceiling);
-        expect([where(`form W at ${W}px`, one), close(m, want)]).toEqual([
-          where(`form W at ${W}px`, one),
-          true,
-        ]);
-      }
-    }
-  });
+  /** --frame-nav-h at a viewport: :root's, or the phone query's :root
+   *  below 720px — the nav's own wrap. */
+  const navAt = ([width]) => {
+    if (width > 719.98) return root['--frame-nav-h'];
+    const phone = top
+      .filter((block) => norm(block.prelude) === `@media ${PHONE}`)
+      .flatMap((block) => blocks(block.body))
+      .filter((block) => selects(block.prelude, ':root'));
+    return declarations(phone[0].body)['--frame-nav-h'];
+  };
 
   it('the held frame at zero mat fits its height exactly', () => {
     const held = declarations(ruleFor(top, '.piece-held figure').body);
@@ -588,10 +667,13 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
       where(`${label} tight`, one),
       true,
     ]);
-    const fromW = px(formW(), {
-      env: { ...envFor(one) },
+    // The central identity: form V with the container's width named —
+    // --avail-w set to the frame's own width — returns the frame's mat.
+    // (Form W, column-bound on its own, was that same algebra over a
+    // percentage basis; its surface went at spec 017.)
+    const fromW = px(FORM_V, {
+      env: { ...envFor(one), '--avail-w': `${boxW}px`, '--r': 'max(var(--ar, 1), 1)' },
       viewport: one.viewport,
-      basis: boxW,
     });
     expect([where(`${label} identity`, one), close(fromW, m)]).toEqual([
       where(`${label} identity`, one),
@@ -599,40 +681,41 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     ]);
   };
 
-  it('form V+H: the pause frame takes the smaller mat, fits both limits and is tight on one', () => {
-    const pause = declarations(ruleFor(top, '.piece-pause').body);
+  it('form V+H: the quiet view’s frame takes the smaller mat, fits both limits and is tight on one', () => {
+    const quietStage = declarations(ruleFor(top, 'html[data-quiet] .image-stage').body);
+    const frame = declarations(ruleFor(top, '.image-frame').body);
+    const quiet = declarations(ruleFor(top, MATTED[0], '--mat').body);
     for (const one of grid()) {
       const env = envFor(one, {
-        '--r': pause['--r'],
-        '--q': pause['--q'],
-        '--avail-w': pause['--avail-w'],
-        '--avail-h': pause['--avail-h'],
-        '--mat': pause['--mat'],
-        '--frame-w': pause['--frame-w'],
+        '--stage-pad': quietStage['--stage-pad'],
+        '--avail-w': quietStage['--avail-w'],
+        '--avail-h': quietStage['--avail-h'],
+        '--r': frame['--r'],
+        '--q': frame['--q'],
+        '--mat': quiet['--mat'],
       });
       const at = { env, viewport: one.viewport };
-      fitsBothTight('pause', {
-        m: px(pause['--mat'], at),
-        boxW: px(pause['--frame-w'], at),
-        availW: px(pause['--avail-w'], at),
-        availH: px(pause['--avail-h'], at),
-        one,
-      });
-      // --frame-h is the frame's real height: the image plus two mats.
+      const m = px(quiet['--mat'], at);
+      const availW = px(quietStage['--avail-w'], at);
+      const availH = px(quietStage['--avail-h'], at);
+      // The stage centres a shrink-to-fit frame: the image is as large as
+      // both limits allow (max-width 100%, max-height the image's rule).
+      const boxW = Math.min(availW, (availH - 2 * m) * one.ratio + 2 * m);
       expect([
-        where('pause frame-h', one),
+        where('quiet img height', one),
         close(
-          px(pause['--frame-h'], at),
-          (px(pause['--frame-w'], at) - 2 * px(pause['--mat'], at)) / one.ratio +
-            2 * px(pause['--mat'], at),
+          px(declarations(ruleFor(top, '.image-frame img').body)['max-height'], at),
+          availH - 2 * m,
         ),
-      ]).toEqual([where('pause frame-h', one), true]);
+      ]).toEqual([where('quiet img height', one), true]);
+      fitsBothTight('quiet', { m, boxW, availW, availH, one });
     }
   });
 
-  it('form V+H: the stage frame takes the smaller mat, fits both limits and is tight on one', () => {
+  it('the stage on paper is bare: --mat is 0 at every grid point and the image’s cap is the whole of --avail-h', () => {
     const stage = declarations(ruleFor(top, '.image-stage').body);
     const frame = declarations(ruleFor(top, '.image-frame').body);
+    const cap = declarations(ruleFor(top, '.image-frame img').body)['max-height'];
     for (const one of grid()) {
       const env = envFor(one, {
         '--stage-pad': stage['--stage-pad'],
@@ -641,22 +724,115 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
         '--r': frame['--r'],
         '--q': frame['--q'],
         '--mat': frame['--mat'],
+        '--frame-nav-h': navAt(one.viewport),
       });
       const at = { env, viewport: one.viewport };
-      const m = px(frame['--mat'], at);
-      const availW = px(stage['--avail-w'], at);
-      const availH = px(stage['--avail-h'], at);
-      // The stage centres a shrink-to-fit frame: the image is as large as
-      // both limits allow (max-width 100%, max-height the image's rule).
-      const boxW = Math.min(availW, (availH - 2 * m) * one.ratio + 2 * m);
+      // Off whatever the tokens say: the frame declares the zero, so no
+      // ratio, share or clamp can put a mat back on paper. Without the
+      // declaration the cap's calc has no --mat and does not resolve.
+      expect([where('paper mat', one), px(frame['--mat'], at)]).toEqual([
+        where('paper mat', one),
+        0,
+      ]);
+      expect([where('paper cap', one), close(px(cap, at), px(stage['--avail-h'], at))]).toEqual([
+        where('paper cap', one),
+        true,
+      ]);
+    }
+  });
+
+  /** The paper frame's env at a point: the stage's limits, the ratio
+   *  helpers, the L × S rule's own strings, --header-h absent (its
+   *  4.75rem fallback) and the nav's token at the viewport's width. */
+  const paperEnv = (one, ratio = one.ratio) => {
+    const stage = declarations(ruleFor(top, '.image-stage').body);
+    const frame = declarations(ruleFor(top, '.image-frame').body);
+    const paper = declarations(ruleFor(top, PAPER_FRAME).body);
+    const env = envFor(one, {
+      '--ar': ratio,
+      '--stage-pad': stage['--stage-pad'],
+      '--avail-w': stage['--avail-w'],
+      '--avail-h': stage['--avail-h'],
+      '--r': frame['--r'],
+      '--q': frame['--q'],
+      '--mat': frame['--mat'],
+      '--frame-nav-h': navAt(one.viewport),
+      '--L': paper['--L'],
+      '--S': paper['--S'],
+    });
+    expect('--header-h' in env).toBe(false);
+    const at = { env, viewport: one.viewport };
+    const width = px(paper['width'], at);
+    // The test's own box: L the smaller limit, S two-thirds of it.
+    const L = Math.min(px(stage['--avail-w'], at), px(stage['--avail-h'], at));
+    return { at, width, height: width / ratio, L, S: (2 * L) / 3 };
+  };
+
+  it('one rectangle, turned: every frame fits the L × S box turned to suit it and touches a side', () => {
+    const cap = declarations(ruleFor(top, '.image-frame img').body)['max-height'];
+    for (const one of grid()) {
+      const { at, width, height, L, S } = paperEnv(one);
+      const [long, short] = one.ratio >= 1 ? [width, height] : [height, width];
+      expect([where('fits the box', one), long <= L + 1e-6 && short <= S + 1e-6]).toEqual([
+        where('fits the box', one),
+        true,
+      ]);
+      expect([where('touches a side', one), close(long, L) || close(short, S)]).toEqual([
+        where('touches a side', one),
+        true,
+      ]);
+      if (one.ratio === 1)
+        expect([where('square is S × S', one), close(width, S) && close(height, S)]).toEqual([
+          where('square is S × S', one),
+          true,
+        ]);
+      if (one.ratio === 3)
+        expect([where('3:1 is L × L/3', one), close(width, L) && close(height, L / 3)]).toEqual([
+          where('3:1 is L × L/3', one),
+          true,
+        ]);
+      if (one.ratio === 0.8)
+        expect([where('4:5 is S wide', one), close(width, S)]).toEqual([
+          where('4:5 is S wide', one),
+          true,
+        ]);
+      // Spec 013's cap on the image never binds on paper.
+      expect([where('max-height never binds', one), px(cap, at) >= height - 1e-6]).toEqual([
+        where('max-height never binds', one),
+        true,
+      ]);
+      // The exact pair, evaluated here rather than at the grid's 0.667:
+      // a 3:2 is L × S and a 2:3 is S × L — the reference rectangle, turned.
+      const landscape = paperEnv(one, 1.5);
+      const portrait = paperEnv(one, 1 / 1.5);
       expect([
-        where('stage img height', one),
-        close(
-          px(declarations(ruleFor(top, '.image-frame img').body)['max-height'], at),
-          availH - 2 * m,
-        ),
-      ]).toEqual([where('stage img height', one), true]);
-      fitsBothTight('stage', { m, boxW, availW, availH, one });
+        where('3:2 is L × S', one),
+        close(landscape.width, landscape.L) && close(landscape.height, landscape.S),
+      ]).toEqual([where('3:2 is L × S', one), true]);
+      expect([
+        where('2:3 is S × L', one),
+        close(portrait.width, portrait.S) && close(portrait.height, portrait.L),
+      ]).toEqual([where('2:3 is S × L', one), true]);
+    }
+  });
+
+  it('the sizes hint agrees with the rule: stageSizes(ar), at the branch the viewport selects, is the CSS width', () => {
+    expect(PHONE).toBe('(max-width: 719.98px)');
+    for (const one of grid()) {
+      const sizes = stageSizes(one.ratio);
+      expect([where('sizes query', one), sizes.startsWith('(max-width: 719.98px) ')]).toEqual([
+        where('sizes query', one),
+        true,
+      ]);
+      const [phone, wide] = splitTop(sizes.slice(`${PHONE} `.length)).map((part) => part.trim());
+      const branch = one.viewport[0] <= 719.98 ? phone : wide;
+      // px() reads vh as svh: the hint says 100vh where the rule says 100svh.
+      const hinted = px(branch, { env: {}, viewport: one.viewport });
+      const { width } = paperEnv(one);
+      expect([where('sizes = width', one), close(hinted, width)]).toEqual([
+        where('sizes = width', one),
+        true,
+      ]);
     }
   });
 
@@ -734,17 +910,18 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     }
   });
 
-  it('the off identity: at share 0 with floor = ceiling the matted forms give the mat and the unmatted surfaces give 0', () => {
+  it('the off identity: at share 0 with floor = ceiling the quiet view’s frame gives the mat and the paper stage, the held figure and the packed cell give 0', () => {
     const cell = declarations(ruleFor(top, '.gallery-flow > li').body);
     const held = declarations(ruleFor(top, '.piece-held figure').body);
-    const pause = declarations(ruleFor(top, '.piece-pause').body);
     const frame = declarations(ruleFor(top, '.image-frame').body);
+    const quiet = declarations(ruleFor(top, MATTED[0], '--mat').body);
     const stage = declarations(ruleFor(top, '.image-stage').body);
+    const quietStage = declarations(ruleFor(top, 'html[data-quiet] .image-stage').body);
     const basisOf = (flex) => splitTop(norm(flex), ' ').slice(2).join(' ');
     // Share 0 with floor = ceiling is the one setting where every form
-    // collapses to a single constant, so it separates the surfaces that
-    // read the rule from the surfaces that are off: with the tokens
-    // saying "16.8px everywhere", the two matted surfaces wear 16.8 and
+    // collapses to a single constant, so it separates the surface that
+    // reads the rule from the surfaces that are off: with the tokens
+    // saying "16.8px everywhere", the quiet view's frame wears 16.8 and
     // the unmatted ones still wear nothing, because their zero is
     // declared, not derived.
     const MAT = 16.8;
@@ -757,32 +934,30 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
         '--ar': ratio,
       };
       const at = (extra) => ({ env: { ...base, ...extra }, viewport: [1512, 982], basis: 666 });
-      // Matted: the pause's anchor (form W), the pause's own box and the
-      // stage (form V+H).
-      expect(px(formW(), at({}))).toBe(MAT);
+      // Matted: the quiet view's frame (form V+H), over the quiet limits.
       expect(
         px(
-          pause['--mat'],
+          quiet['--mat'],
           at({
-            '--r': pause['--r'],
-            '--q': pause['--q'],
-            '--avail-w': pause['--avail-w'],
-            '--avail-h': pause['--avail-h'],
+            '--r': frame['--r'],
+            '--q': frame['--q'],
+            '--stage-pad': quietStage['--stage-pad'],
+            '--avail-w': quietStage['--avail-w'],
+            '--avail-h': quietStage['--avail-h'],
           }),
         ),
       ).toBe(MAT);
+      // Off: the stage on paper, whatever the tokens.
       expect(
         px(
           frame['--mat'],
           at({
-            '--r': frame['--r'],
-            '--q': frame['--q'],
             '--stage-pad': stage['--stage-pad'],
             '--avail-w': stage['--avail-w'],
             '--avail-h': stage['--avail-h'],
           }),
         ),
-      ).toBe(MAT);
+      ).toBe(0);
       // Off: the held figure and the packed cell, whatever the tokens.
       expect(px(held['--mat'], at({ '--avail-h': held['--avail-h'] }))).toBe(0);
       const short = 460;
@@ -800,28 +975,42 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
     }
   });
 
-  it("the gate identity: at :root's tokens the stage wears the 40px ceiling and the reading-width single wears nothing", () => {
-    // The gate's number, kept: at 1512×982 the stage's 3:2 frame sits on
-    // the ceiling on both of form V+H's branches (T1104's record, Firefox
-    // 155: 40.0). Run against :root itself, so a move in the ceiling
-    // moves this number — it is the ceiling the frame sits on here;
-    // drift in the other two tokens is caught by case (a). Spec 015
-    // re-derived none of the three.
+  it("the gate identity: at :root's tokens the quiet view's frame wears the 40px ceiling, the paper stage's wears 0, and the reading-width single wears nothing", () => {
+    // The gate's number, kept: at 1512×982 the quiet view's 3:2 frame
+    // sits on the ceiling on both of form V+H's branches (T1502's read,
+    // Firefox 156: 40). Run against :root itself, so a move in the
+    // ceiling moves this number — it is the ceiling the frame sits on
+    // here; drift in the other two tokens is caught by case (a). Specs
+    // 015 and 017 re-derived none of the three.
     const stage = declarations(ruleFor(top, '.image-stage').body);
+    const quietStage = declarations(ruleFor(top, 'html[data-quiet] .image-stage').body);
     const frame = declarations(ruleFor(top, '.image-frame').body);
-    const m = px(frame['--mat'], {
+    const quiet = declarations(ruleFor(top, MATTED[0], '--mat').body);
+    const m = px(quiet['--mat'], {
       env: {
         ...root,
         '--ar': 1.5,
         '--r': frame['--r'],
         '--q': frame['--q'],
+        '--stage-pad': quietStage['--stage-pad'],
+        '--avail-w': quietStage['--avail-w'],
+        '--avail-h': quietStage['--avail-h'],
+      },
+      viewport: [1512, 982],
+    });
+    expect(m).toBe(40);
+    // The same frame on paper, at the same tokens, wears nothing.
+    const paper = px(frame['--mat'], {
+      env: {
+        ...root,
+        '--ar': 1.5,
         '--stage-pad': stage['--stage-pad'],
         '--avail-w': stage['--avail-w'],
         '--avail-h': stage['--avail-h'],
       },
       viewport: [1512, 982],
     });
-    expect(m).toBe(40);
+    expect(paper).toBe(0);
     // And the frame the same gate judged at 24.667px — the 3:2 single in
     // the reading column — has no --mat reader at all since spec 015: no
     // rule in the file applies a mat-bearing padding to a piece's
@@ -837,5 +1026,46 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
         /piece-(single|inset|wide|diptych|triptych|grid|aside|row|held)|\.prose/.test(prelude),
       );
     expect(onPieces).toEqual([]);
+  });
+});
+
+describe('(d) worn where the ground is dark (T1502, spec 017)', () => {
+  it('worn where the ground is dark — in global.css, one dark ground (spec 017)', () => {
+    // Scoped to global.css by name: the image page's scoped style has
+    // its own `:global(html[data-quiet]) { background }` for the page
+    // ground behind the stage — the same dark under the same attribute,
+    // outside this file.
+    const DARK = 'html[data-quiet] .image-stage';
+    // Every background in the file that reads --color-quiet sits on the
+    // quiet stage and nowhere else: one dark ground.
+    const dark = [];
+    for (const block of [...top, ...nested])
+      for (const [property, value] of Object.entries(declarations(block.body)))
+        if (/^background/.test(property) && /--color-quiet\b/.test(value))
+          dark.push(`${norm(block.prelude)} { ${property} }`);
+    expect(dark).toEqual([`${DARK} { background }`]);
+    // --avail-w, the limit form V reads, is published by the stage and
+    // its quiet view only — no other box offers the form a width.
+    const publishing = [...top, ...nested]
+      .filter((block) => '--avail-w' in declarations(block.body))
+      .map((block) => norm(block.prelude));
+    expect(publishing).toEqual(['.image-stage', DARK]);
+    // And the matted selector is gated by the same attribute as the dark
+    // ground: every selector of every rule that applies the mat starts
+    // with it, so a mat cannot be worn where the ground is paper.
+    const gate = (selector) => norm(selector).split(' ')[0];
+    expect(gate(MATTED[0])).toBe('html[data-quiet]');
+    expect(gate(MATTED[0])).toBe(gate(DARK));
+    const ungated = [];
+    for (const block of [...top, ...nested]) {
+      const decl = declarations(block.body);
+      const applies =
+        /var\(--mat\s*[,)]/.test(decl['padding'] ?? '') ||
+        /--color-matte\b/.test(decl['background'] ?? '');
+      if (!applies) continue;
+      for (const selector of splitTop(block.prelude))
+        if (gate(selector) !== gate(DARK)) ungated.push(norm(selector));
+    }
+    expect(ungated).toEqual([]);
   });
 });

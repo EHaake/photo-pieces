@@ -12,23 +12,14 @@
 // page's exact markup and classes, on the real exports, so the gate judges
 // the mat where it actually lives.
 //
-// THE MAT BAR IS THE STAGE'S (spec 015): the stage and the quiet view are
-// the only surfaces the site still mats, so `pieces`, `galleries` and
-// `cards` render no bar and no inline tokens — they show the unmatted state
-// by construction, being the real markup on the real stylesheet, and a bar
-// there would move nothing but the fixture piece's pause frame, the one
-// frame spec 015 defers. A bar that silently moves only the deferred frame
-// is a trap at the gate; a label saying the surface is unmatted is not.
-//
-// The candidate's three tokens therefore ride on the `stage` section's
-// wrapper <section> alone, and its frames INHERIT them: spec 013's rule
-// declares --mat-share, --mat-min and --mat-max only in :root and nothing
-// between :root and a frame redeclares them, so an inherited override
-// reaches every form. (Contrast the gallery and place-wall samplers, whose
-// knobs had to sit on the flow itself because galleryFlowStyle re-declares
-// them inline there.) With no tokens on the other three wrappers, the
-// fixture piece's pause frame wears form W from :root, exactly as it does
-// on the site.
+// THE MAT BAR IS GONE (spec 017): nothing on this page wears a mat.
+// `pieces`, `galleries` and `cards` have been unmatted since spec 015, and
+// the stage has been bare on paper since spec 017 — the mat is the quiet
+// view's, which this page does not have, so it is judged on the image page.
+// A bar here would move no frame, the trap spec 015 removed from the other
+// three sections, so no section carries a bar or inline tokens: the mat's
+// tokens are :root's alone, and every surface shows the site's state by
+// construction, being the real markup on the real stylesheet.
 //
 // The GROUND is no longer this page's to own (spec 014): the ground-tone
 // switch is site-wide — src/components/DevGround.astro applies the candidate
@@ -54,101 +45,36 @@ import { getImageRegistry } from '../../../lib/images';
 import { categoryLabel } from '../../../lib/categories';
 import { formatDate } from '../../../i18n';
 import { withBase } from '../../../lib/url';
-// Aliased: getStaticPaths' own mat table below is also called CANDIDATES
-// (spec 013's) and would shadow the import inside that function.
+import { stageSizes } from '../../../lib/stage-sizes';
+// Aliased since spec 013, when getStaticPaths carried a mat table of the
+// same name; the prefix keeps the ground's names reading as the ground's.
 import { CANDIDATES as GROUND_CANDIDATES, TODAY as GROUND_TODAY } from '../../../lib/ground';
-
-type Candidate = {
-  id: string;
-  /** --mat-share: the share of the photograph's rendered short side. */
-  share: string;
-  /** --mat-min: the floor. */
-  min: string;
-  /** --mat-max: the ceiling. */
-  max: string;
-  /** Whether the floor/ceiling inputs apply (the share candidates). */
-  tunable: boolean;
-  note: string;
-};
 
 type Surface = 'pieces' | 'galleries' | 'stage' | 'cards';
 
 export async function getStaticPaths() {
   if (!import.meta.env.DEV) return [];
-  // The five candidates the visual gate compares: no mat, spec 003's fixed
-  // mat (the gate's control — T1101's inert literals, what the site ran
-  // before the gate chose the 6% rule), and three shares with the plan's
-  // starting floor (4px) and ceiling (40px). Declared inside
-  // getStaticPaths and handed to the component as a prop (Astro runs
-  // getStaticPaths in an isolated scope where a module-level const read
-  // here is "not defined" at build time — the spec-010 gotcha). The dev
-  // server caches getStaticPaths: restart it after editing this table.
-  const TODAY = 'clamp(0.5rem, 1.4vw, 1.05rem)';
-  const FLOOR = '0.25rem'; // 4px — the plan's starting floor
-  const CEIL = '2.5rem'; // 40px — the plan's starting ceiling
-  const CANDIDATES: Candidate[] = [
-    { id: 'none', share: '0', min: '0px', max: '0px', tunable: false, note: 'no mat anywhere' },
-    {
-      id: 'today',
-      share: '0',
-      min: TODAY,
-      max: TODAY,
-      tunable: false,
-      note: "spec 003's fixed mat — the gate's control (the site now runs the 6% rule)",
-    },
-    {
-      id: 'share-25',
-      share: '0.025',
-      min: FLOOR,
-      max: CEIL,
-      tunable: true,
-      note: '2.5% of the rendered short side',
-    },
-    {
-      id: 'share-40',
-      share: '0.04',
-      min: FLOOR,
-      max: CEIL,
-      tunable: true,
-      note: '4% of the rendered short side',
-    },
-    {
-      id: 'share-60',
-      share: '0.06',
-      min: FLOOR,
-      max: CEIL,
-      tunable: true,
-      note: '6% of the rendered short side',
-    },
-  ];
   const SURFACES: Surface[] = ['pieces', 'galleries', 'stage', 'cards'];
   // The ground switch's fixed set, in the candidate table's order. It is an
   // IMPORT, which is the one thing getStaticPaths' isolated scope can see —
-  // a module-level const read here is "not defined" at build time (the
-  // spec-010 gotcha above) — and it is handed down as the `grounds` prop.
-  // The dev server caches getStaticPaths: restart it after CANDIDATES moves.
+  // a module-level const read here is "not defined" at build time, because
+  // Astro runs getStaticPaths in a scope of its own (the spec-010 gotcha) —
+  // and it is handed down as the `grounds` prop. The dev server caches getStaticPaths: restart it
+  // after the ground's CANDIDATES move.
   const GROUNDS = Object.values(GROUND_CANDIDATES);
   return [
     {
       params: { surface: undefined },
-      props: { surface: null, surfaces: SURFACES, candidates: CANDIDATES, grounds: GROUNDS },
+      props: { surface: null, surfaces: SURFACES, grounds: GROUNDS },
     },
     ...SURFACES.map((surface) => ({
       params: { surface },
-      props: { surface, surfaces: SURFACES, candidates: CANDIDATES, grounds: GROUNDS },
+      props: { surface, surfaces: SURFACES, grounds: GROUNDS },
     })),
   ];
 }
 
-const { surface, surfaces, candidates, grounds } = Astro.props;
-
-// The `stage` section — the only one with a bar since spec 015 — opens on
-// the `share-60` candidate, the 6% rule spec 013's gate chose and the stage
-// still wears, so the mat the ground gate judges is the mat the site wears.
-// (Spec 003's fixed mat is still on the bar as `today`, one button away;
-// the ids are unchanged.) The gate's recorded values live in
-// specs/015-the-hero-mat/; spec 014's gate was not answered.
-const START = candidates.find((c) => c.id === 'share-60') ?? candidates[0];
+const { surface, surfaces, grounds } = Astro.props;
 
 const registry = await getImageRegistry();
 
@@ -179,9 +105,10 @@ const relatedCells = set.map((image) => ({
   ...galleryCell(image.image, RELATED_SHORT_PX, RELATED_NARROW_SHORT_PX),
 }));
 
-// ---- the `stage` surface: four frames at four ratios, each a viewport
-// tall, as the image page renders them. A landscape, a portrait and a
-// near-square come from the real exports; no real export is a panorama
+// ---- the `stage` surface: four frames at four ratios, each fitting the
+// 3:2 reference rectangle turned (spec 017), as the image page renders
+// them. A landscape, a portrait and a near-square come from the real
+// exports; no real export is a panorama
 // (the widest is 3:2), so that one falls back to the gallery root's
 // placeholder set — the frame's geometry is what the stage is judged on.
 const ratioOf = (img: (typeof registry.images)[number]) => img.image.width / img.image.height;
@@ -211,71 +138,33 @@ const cards = set.map((img) => ({
 const shown: Surface[] = surface ? [surface] : surfaces;
 
 const title = surface ? `matte sampler — ${surface}` : 'matte sampler';
-// What each label says after the surface's name. The stage names its form,
-// because its bar can still move it; the other three say they are unmatted,
-// because nothing on the page can. (The exception is the fixture piece's
-// pause frame, which keeps form W from :root — deferred to the pause's own
-// spec, and the reason those sections carry no tokens to override it.)
-const UNMATTED =
-  "unmatted since spec 015 (the mat is the stage's; the pause frame is deferred to its own spec)";
+// What each label says after the surface's name: where its mat went.
+// Nothing on this page wears one, and nothing on it can put one back.
+const UNMATTED = 'unmatted since spec 015';
 const SURFACE_NOTE: Record<Surface, string> = {
   pieces: UNMATTED,
   galleries: UNMATTED,
-  stage: "the image page's stage (form V+H)",
+  stage: "bare on paper since spec 017 — the mat is the quiet view's, judged on the image page",
   cards: UNMATTED,
 };
 ---
 
-<BaseLayout title={title} description="Dev-only fixture for the mat's width (spec 013).">
+<BaseLayout
+  title={title}
+  description="Dev-only sampler: the four surfaces on the real stylesheet, and the ground bar."
+>
   {
     shown.map((s) => (
-      <section
-        class="sampler-surface"
-        data-surface={s}
-        style={
-          s === 'stage'
-            ? `--mat-share: ${START.share}; --mat-min: ${START.min}; --mat-max: ${START.max}`
-            : undefined
-        }
-      >
-        {s === 'stage' && (
-          <div class="sampler-bar meta" data-bar>
-            <strong class="sampler-bar-head">{s}</strong>
-            {candidates.map((c) => (
-              <button
-                type="button"
-                data-candidate={c.id}
-                data-share={c.share}
-                data-min={c.min}
-                data-max={c.max}
-                data-tunable={c.tunable ? 'yes' : 'no'}
-                data-note={c.note}
-                data-start={c.id === START.id ? '' : undefined}
-                class={c.id === START.id ? 'is-active' : undefined}
-              >
-                {c.id}
-              </button>
-            ))}
-            <label>
-              floor <input type="number" step="0.05" min="0" value="0.25" data-floor /> rem
-            </label>
-            <label>
-              ceiling <input type="number" step="0.05" min="0" value="2.5" data-ceil /> rem
-            </label>
-          </div>
-        )}
-
+      <section class="sampler-surface" data-surface={s}>
         <p class="sampler-label meta" data-label>
           {s} — {SURFACE_NOTE[s]}
-          {s === 'stage' &&
-            ` — ${START.id}: share ${START.share} / floor ${START.min} / ceiling ${START.max}`}
         </p>
 
         {s === 'pieces' && (
           /* The piece page's exact markup — article, the reading head and
              the prose column — and its scoped .piece-column rule copied
-             into this page's <style>. No piece-page script: the pause pins
-             on the light ground, which is the harder ground for a mat. */
+             into this page's <style>. No piece-page script: the fixture
+             shows the frames, not the hold's header hand-off. */
           <article>
             <header class="page-head section reading-head">
               <div class="piece-column">
@@ -360,7 +249,9 @@ const SURFACE_NOTE: Record<Surface, string> = {
                   alt={image.title}
                   layout="constrained"
                   width={Math.min(image.image.width, 2320)}
-                  sizes="(min-width: 1240px) 1160px, 94vw"
+                  sizes={stageSizes(
+                    Math.round((image.image.width / image.image.height) * 1000) / 1000,
+                  )}
                   loading="eager"
                 />
               </figure>
@@ -447,46 +338,6 @@ const SURFACE_NOTE: Record<Surface, string> = {
   .piece-column {
     max-width: var(--prose-width);
     margin-inline: auto;
-  }
-
-  .sampler-bar {
-    position: sticky;
-    top: 0;
-    z-index: 150;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-items: center;
-    padding: 0.4rem 0.8rem;
-    border-bottom: var(--hairline);
-    background: var(--color-surface);
-  }
-
-  .sampler-bar-head {
-    color: var(--color-text);
-    margin-right: 0.4rem;
-  }
-
-  .sampler-bar button {
-    padding: 0.2rem 0.5rem;
-    border: var(--hairline);
-    background: var(--color-bg);
-    color: var(--color-muted);
-    font: inherit;
-    cursor: pointer;
-  }
-
-  .sampler-bar button.is-active {
-    border-color: var(--color-accent);
-    color: var(--color-text);
-  }
-
-  .sampler-bar input {
-    width: 4.5rem;
-    padding: 0.15rem 0.3rem;
-    border: var(--hairline);
-    background: var(--color-bg);
-    font: inherit;
   }
 
   .sampler-label {
