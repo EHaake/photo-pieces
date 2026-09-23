@@ -1,4 +1,6 @@
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import remarkDirective from 'remark-directive';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { remarkPiecesBlocks } from './remark-pieces-blocks.mjs';
@@ -955,5 +957,48 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     const containerError = await failureOf(container);
     expect(containerError.file).toMatch(/tests\/fixtures\/piece\.md$/);
     expect(containerError.line).toBe(3);
+  });
+
+  it('nothing under src/, the transform or the plugin knows the word, and the held block\'s attribute is spelled once', () => {
+    // Spelled for the block, not the English word: the About page's
+    // "go-live pause" is prose and stays.
+    const word = /(::pause|piece-pause|--pause|data-pause|data-scene|pause-shape|['"]pause['"]|\bpause:\s)/i;
+    const walk = (dir) =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
+        entry.isDirectory() ? walk(join(dir, entry.name)) : [join(dir, entry.name)],
+      );
+    const rootTests = readdirSync('.').filter(
+      (name) => name.endsWith('.test.mjs') && name !== 'remark-pieces-vocabulary.test.mjs',
+    );
+    const files = [...walk('src'), 'remark-pieces-blocks.mjs', 'obsidian-plugin/main.ts', ...rootTests];
+    const hits = [];
+    let read = 0;
+    for (const file of files) {
+      const bytes = readFileSync(file);
+      // A text file has no NUL byte; the photographs under src/ do.
+      if (bytes.includes(0)) continue;
+      read += 1;
+      bytes
+        .toString('utf8')
+        .split('\n')
+        .forEach((line, index) => {
+          if (word.test(line)) hits.push(`${file}:${index + 1}: ${line.trim()}`);
+        });
+    }
+    // The walk read the stylesheet, the piece page, the transform and
+    // the plugin, not an empty list.
+    expect(read).toBeGreaterThan(40);
+    expect(files).toContain(join('src', 'styles', 'global.css'));
+    expect(files).toContain(join('src', 'pages', 'pieces', '[slug].astro'));
+    expect(hits).toEqual([]);
+
+    // The two spellings of the one attribute, pinned together: the
+    // header's rule reads what the piece page's script writes.
+    expect(readFileSync('src/styles/global.css', 'utf8')).toContain(
+      'html[data-held-active] .site-header',
+    );
+    expect(readFileSync('src/pages/pieces/[slug].astro', 'utf8')).toContain(
+      "toggleAttribute('data-held-active'",
+    );
   });
 });

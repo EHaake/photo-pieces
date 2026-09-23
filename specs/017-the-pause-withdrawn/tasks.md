@@ -226,7 +226,7 @@ headers to confirm nothing was duplicated or dropped. -->
       0`, 320 tests, `TEST EXIT 0`. Per-task review: signed off, no
       blocking; notes carried below.
 
-- [ ] **T1502** — The pause out of the stylesheet and the piece page's
+- [x] **T1502** — The pause out of the stylesheet and the piece page's
       script, the shape module gone, the mat to the quiet view alone,
       and `matte.test.mjs` rewritten. `review: per-task`. Pattern: spec
       015's T1301 line (specs/015-the-hero-mat/tasks.md) and its
@@ -383,6 +383,26 @@ headers to confirm nothing was duplicated or dropped. -->
       two-string pin fails. Where the implementer cannot
       drive a browser it says so, line by line, and the Phase 0 pause
       asks the person to attest those lines._
+
+- [x] **T1502 record** — Before/after at 1512×982, 1280×1440, 375×812
+      (Firefox 156 headless via BiDi; the header measures **76px**, not
+      the plan's 72px fallback — the page publishes `--header-h`).
+      Normal view, land-b then port-a: padding 40 → 0 (31.389 → 0;
+      12.704 → 0; 18.375 → 0), background `oklch(1 0 0)` →
+      `rgba(0, 0, 0, 0)`; the height-bound image equals `--avail-h`:
+      port-a 847.1 at 1512 (982 − 76 − 2 × 29.46), 1300 at 1280
+      (1440 − 76 − 64). Quiet view identical before and after (land-b
+      padding 40 / 40 / 12.988, port-a 35.297 / 40 / 18.786; figures
+      1389×953 / 1233×848 / 336×233 and 659×953 / 965×1408 / 336×485).
+      Held park identical: 1512 figure 0 height 428 top 49.1; 1280
+      figure 1 height 898 top 64; header `matrix(1, 0, 0, 1, 0, -75.8)`
+      both, `data-scene-active` → `data-held-active`; at 375 both held
+      figures are collapsed. Six mutations each failed the named case.
+      Orchestrator re-run: 87 pages, `BUILD EXIT 0`, `CHECK EXIT 0`, 14
+      files / 316 tests, `TEST EXIT 0`. Per-task review: signed off, no
+      blocking; eight notes — N1 (the anchor comment's "since spec 015"
+      should read 017; the task line's own slip) to T1503's bundle, the
+      rest below.
 
 - [ ] **T1503** — The stage refit: the box hugs the frame, one
       rectangle turned, the cue inside the height, the `sizes` hint on
@@ -855,6 +875,8 @@ tier if it is ever on (it is off). -->
 | Decision review: build exit on `file.fail` (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 56,655 | option D with `deferRender: true` (astro#18054); T1501a added; constitution Testing sentence and DECISIONS entry to close-out |
 | T1501a (`sdd-implementer`) | implementation (`opus`, high) | 37,196 | done; BUILD EXIT 1 on the control, line 68; 320 tests |
 | T1501a per-task review (`skeptical-reviewer`) | implementation (`opus`, high) | 29,101 | signed off, no blocking; seven notes, five carried to the sweep |
+| T1502 (`sdd-implementer`) | implementation (`opus`, high) | 137,230 | done first dispatch; BiDi before/after identical on the quiet view and the held park; 316 tests |
+| T1502 per-task review (`skeptical-reviewer`) | implementation (`opus`, high) | 72,565 | signed off, no blocking; N1 → T1503, N2–N8 carried |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -874,6 +896,20 @@ _(Session-tier allowance draw noted at each pause.)_
   was run — narrow the comment or run it at close-out.
 - T1501a N7: `deferRender` needs astro ≥ 7.1.0; note the floor in
   DECISIONS.md at close-out.
+- T1502 N2/N3: two comments in `global.css` read awkwardly or carry a
+  leftover phrase (the ground comment ~1238; `--hold-margin`'s
+  "decision 5: one margin" ~1324) — cosmetic, for close-out.
+- T1502 N4/N5: the word-walk test resolves paths from the cwd (the
+  sibling `matte.test.mjs` uses `here()`), and reads every photograph
+  under `src/` to find a NUL byte — skip by image extension.
+- T1502 N6: the two-spelling pin is a raw `toContain` and would pass
+  on commented-out text; the header's behaviour was read in the
+  browser, which is the real check.
+- T1502 N7: only end states were measured — if any transition on the
+  frame animates the quiet toggle, the mat may now snap in; a look at
+  the phase walkthrough.
+- T1502 N8: the walk's pattern misses upper-case constants and any
+  plugin stylesheet; the close-out grep must include `obsidian-plugin/`.
 
 ## Handoff note
 
