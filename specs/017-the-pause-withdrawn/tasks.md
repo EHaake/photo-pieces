@@ -102,7 +102,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `npx prettier --check` on the three files no worse than at
       `main`._
 
-- [ ] **T1501** — The pause out of the transform, the passage table and
+- [x] **T1501** — The pause out of the transform, the passage table and
       the plugin, and the closed vocabulary's failure pinned. Pattern:
       the transform's own descriptors and spec 007's T501 line
       (specs/007-held-image/tasks.md) for the shape of the cases being
@@ -166,6 +166,47 @@ headers to confirm nothing was duplicated or dropped. -->
       `pause: { forms: 'both', body: 'caption', attrs: {…}, images, sizing }`
       stub restored in `BLOCKS` → the new case fails on the first
       `rejects` and `image-meta.test.mjs`'s agreement case fails._
+
+- [x] **T1501 record** — Done as specified; 320 tests. The negative
+      control ran and the error printed as the plan said — the file
+      path, the line, the directive and the twelve known blocks — but
+      `astro build` **exited 0** and published the fog piece with an
+      empty body: Astro's `glob()` loader catches a per-entry render
+      error, logs `[ERROR] [glob-loader] Error rendering
+      where-the-fog-lets-go/index.md: Failed to parse Markdown file …
+      unknown block directive "pause" — the block vocabulary is closed;
+      known blocks: single, fullbleed, wide, tall, inset, diptych,
+      triptych, grid, strip, aside, row, held`, and stores the entry
+      bodiless (withastro/astro#18054, fix pending in PR #18064). The
+      reported line was 56 — the body's line, after the 11-line
+      frontmatter — not the file's 68. Decision review at the top tier
+      (tier log): option D, the mechanism Astro's own `deferRender`.
+      Every earlier "fails the build" claim about the transform (spec
+      001 on) was never checked against the exit code. T1501a closes
+      the gap.
+
+- [ ] **T1501a** — A transform error fails `astro build`.
+      `review: per-task`. Astro's `glob()` loader catches a per-entry
+      render error, logs `[ERROR] [glob-loader] Error rendering …`,
+      stores the entry bodiless, and exits 0 (withastro/astro#18054, fix
+      pending). Set `deferRender: true` on every Markdown `glob()`
+      collection in `src/content.config.ts` (pieces, galleries, places,
+      sidecars), with one comment naming the issue and the reason, so
+      the transform runs in the Vite markdown plugin at page build,
+      where its throw fails the build. Files: `src/content.config.ts`,
+      `scripts/verify.sh` (comment at line 17: the store still caches
+      entry data; the removal stays as cheap insurance). _Verify:
+      `sh scripts/verify.sh` green; then, with `::pause` written back
+      into `where-the-fog-lets-go/index.md`, `sh scripts/verify.sh`
+      prints `BUILD EXIT` non-zero and the tail shows the closed
+      vocabulary's message with the file path, line, and known blocks —
+      paste both, and the line number reported, verbatim; on a built
+      piece page confirm reading time renders and body images carry
+      `srcset`; the postbuild counts (prune, GPS scan) recorded. If the
+      control still exits 0 under `deferRender`, stop and return the
+      output — the fallback (a wrapper around `astro build`) is a
+      decision, not this task. No `[ERROR]` grep is added to
+      `verify.sh`: the exit code is the one mechanism._
 
 - [ ] **T1502** — The pause out of the stylesheet and the piece page's
       script, the shape module gone, the mat to the quiet view alone,
@@ -687,6 +728,20 @@ dispatched.)_
       merge; a rework starts from that history and the archive) and
       "The mat only where the ground goes dark" (its italic gains: done
       at 017 — the stage bare on paper, the quiet view matted, pinned);
+      `DECISIONS.md` also gains, inside the Spec 017 section, the
+      T1501a discovery (the "fails the build" claim was never checked
+      against the exit code from spec 001 on; withastro/astro#18054 and
+      PR #18064; the four options and why `deferRender` won; it need
+      not be reverted when the upstream fix ships), and `CLAUDE.md`'s
+      Testing section gains, after "A malformed entry should fail the
+      build loudly, not silently.", the sentence: "A transform error is
+      the same kind of failure: Astro's content loader would only log
+      it and publish the entry bodiless, so every Markdown collection
+      sets `deferRender: true` (spec 017, T1501a) and the error fails
+      the build from the page instead. That option is the mechanism
+      behind every "fails the build" claim about the transform;
+      removing it reopens the gap." — the constitution line committed
+      to `main` in its own commit after the merge, not on the branch.
       `DECISIONS.md`: annotate "Spec 007" (one paragraph at its
       top: half withdrawn at 017 — the pause's decisions are history,
       the held block's stand), "Spec 015" (one clause where it defers
@@ -778,6 +833,8 @@ tier if it is ever on (it is off). -->
 | Planning: amendment fixes (`sdd-planner`, resumed) | top (`claude-fable-5-1`, high) | 35,150 | B1–B2 fixed, notes folded |
 | Amendment re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 24,979 | signed off once one line is fixed: the exact-pair assertion at the grid's literal 0.667 cannot pass at 1e-6 — transcribed into T1503 and plan.md (assert on 1.5 and 1/1.5 in the case); two notes transcribed (the 1.78 mutation claim dropped; the panorama's height re-derived from its registry ratio) |
 | T1500 (`sdd-implementer`) | implementation (`opus`, high) | 28,167 | done; 87 pages, 332 tests; one blank line more deleted in matte-sampler (188) so the file does not end on a blank |
+| T1501 (`sdd-implementer`) | implementation (`opus`, high) | 73,631 | done, 320 tests; stopped on the negative control (build exits 0 on a render error) — returned as a design question, correctly |
+| Decision review: build exit on `file.fail` (`skeptical-reviewer`) | top (`claude-fable-5-1`, high) | 56,655 | option D with `deferRender: true` (astro#18054); T1501a added; constitution Testing sentence and DECISIONS entry to close-out |
 
 _(Session-tier allowance draw noted at each pause.)_
 

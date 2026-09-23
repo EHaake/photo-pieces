@@ -63,7 +63,6 @@ const LEAF_BLOCKS: Record<string, Extract> = {
   wide: one,
   tall: one,
   inset: one,
-  pause: one,
   diptych: (a) =>
     a.left && a.right
       ? [

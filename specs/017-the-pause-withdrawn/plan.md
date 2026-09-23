@@ -57,9 +57,18 @@ the image page, the sampler and a test all need the string.
 
       unknown block directive "pause" — the block vocabulary is closed; known blocks: single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip, aside, row, held
 
-  thrown by `file.fail(message, node)`, which carries the file path and
-  the directive's line; Astro prints them ahead of the message in the
-  build error. `BLOCK_BODIES` in `src/lib/image-meta.mjs` loses
+  Thrown by `file.fail(message, node)`, which carries the file path
+  and the directive's line. On its own, Astro's `glob()` loader would
+  only _log_ that error and publish the piece with an empty body
+  (withastro/astro#18054): every collection therefore sets
+  `deferRender: true` (T1501a), so the transform runs in the Vite
+  markdown plugin while the page is built, its error propagates, and
+  `astro build` exits non-zero with the path, line, and message in the
+  tail. The negative control's verbatim output in tasks.md (T1501a) is
+  the pin for the exit code; the unit test pins the message, file, and
+  line. Under deferred rendering the frontmatter is replaced with
+  same-count whitespace, so the line is the file's line; the eager
+  path, if ever restored, reports the body's line instead. `BLOCK_BODIES` in `src/lib/image-meta.mjs` loses
   `pause: 'none'` (the existing agreement test then holds both tables
   to twelve). Two comments in the transform stale since spec 015 — ~113
   "minus the mat" and ~749 "IS matted in the column" — are corrected
@@ -633,6 +642,15 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
   height and the `min-height` would only floor it; T1503's equality
   read is the check, and the two `:root` strings are the one place to
   retune.
+- **The build's exit on a transform error was never true before
+  T1501a** (found at T1501): Astro's `glob()` loader logs a render
+  error and exits 0 (withastro/astro#18054). `deferRender: true` is
+  the fix; the line Astro reports under the eager path is the body's,
+  not the file's — recorded, and expected to become the file's under
+  the deferred path (T1501a records what it prints). Reading time
+  (`remarkPluginFrontmatter`) and body-image `srcset` are checked on
+  the built page at T1501a, not assumed. `scripts/verify.sh`'s cache
+  comment is half-true after it; the `rm -f` stays.
 - **No test pins `data-held-active`** — none pinned `data-scene-active`
   either; the header's behaviour is read in the browser at T1502.
 - **The About page's "go-live pause"** is the one plain-word hit
@@ -720,5 +738,15 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
   branch, applied to `main` after the merge" is satisfied by the merge
   itself; a separate patch file applied afterwards is the form this
   project has declined before (spec 016's sign-off).
+- **A transform error fails the build via `deferRender: true` on all
+  four Markdown collections** (decision review at the top tier, at
+  T1501): not a `postbuild` barrier on `dist/` (the error never
+  reaches `dist/`; "no block and no paragraph" cannot tell a failure
+  from a short announcement), not an integration hook
+  (`astro:build:done` cannot observe the loader's log), not a softened
+  AC (the gutted piece is what Goal 2 exists to prevent). The fallback
+  if the control still exits 0 is a wrapper around `astro build`. The
+  option stays when upstream ships its fix — it is also the documented
+  memory-bounding choice for a collection meant to grow for years.
 - **Two stale transform comments are fixed now** (~113, ~749): spec 015
   could not touch the file; this spec does.

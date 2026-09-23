@@ -646,7 +646,7 @@ describe('image links (T310, spec 004)', () => {
   });
 });
 
-describe('held and pause: the durational blocks (T501, spec 007)', () => {
+describe('held: the durational block (T501, spec 007)', () => {
   const HELD =
     ':::held{src="./photo.jpg" alt="ridge"}\nFirst paragraph beside the frame.\n\nSecond paragraph.\n:::';
 
@@ -768,130 +768,10 @@ describe('held and pause: the durational blocks (T501, spec 007)', () => {
     );
   });
 
-  it('a pause with no neighbours: a div scene, a stage, the linked frame alone', async () => {
-    const { code } = await render('::pause{src="./photo.jpg" alt="sweep"}');
-    expect(code).toMatch(
-      /^<div class="piece-block piece-pause" style="--ar: 1\.6"><div class="piece-pause-stage"><div class="piece-pause-frame"><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_[^>]*><\/a><\/div><\/div><\/div>/,
-    );
-    expect(code).not.toContain('with-before');
-    expect(code).not.toContain('with-after');
-    expect(code).not.toContain('<figcaption');
-  });
-
-  it("pause sizes come from the frame's raw pixel dimensions and its geometry in vmin", async () => {
-    // photo.jpg is literally 8 × 5 pixels: the condition is the raw pair.
-    // The frame is (100 − 2 × 5vmin) ÷ 1.05 of the limiting dimension:
-    // height-limited, (95.238vh − 9.524vmin) × 1.6 = 152.38vh − 15.238vmin,
-    // rounded never to fall under (up, down) → 152.39vh − 15.23vmin;
-    // width-limited, 95.24vw − 9.52vmin.
-    const { code } = await render('::pause{src="./photo.jpg" alt="sweep"}');
-    expect(imageMarkers(code)[0]).toMatchObject({
-      layout: 'constrained',
-      sizes: '(min-aspect-ratio: 8/5) calc(152.39vh - 15.23vmin), calc(95.24vw - 9.52vmin)',
-    });
-    // An EXIF-rotated frame measures as it renders (400 × 600, 0.6667):
-    // 95.238 × 0.6667 = 63.49 → 63.5vh; 9.524 × 0.6667 = 6.35 → 6.34vmin.
-    const rotated = await render('::pause{src="./rotated.jpg" alt="r"}');
-    expect(imageMarkers(rotated.code)[0].sizes).toBe(
-      '(min-aspect-ratio: 400/600) calc(63.5vh - 6.34vmin), calc(95.24vw - 9.52vmin)',
-    );
-  });
-
-  it('the container form fails naming the rule', async () => {
-    await expect(
-      renderExpectingFailure(':::pause{src="./photo.jpg" alt="x"}\nA caption.\n:::'),
-    ).rejects.toThrow(/the :::pause container form is not supported — use ::pause\{\.\.\.\}/);
-  });
-
-  it('alt="" keeps a pause unlinked, --ar on the image', async () => {
-    const { code } = await render('::pause{src="./photo.jpg" alt=""}');
-    expect(code).not.toContain('image-link');
-    expect(code).toContain('<div class="piece-pause-stage"><div class="piece-pause-frame"><img');
-    expect(imageMarkers(code)[0].style).toBe('--ar: 1.6');
-  });
-
-  it('the plain paragraphs either side move into the stage, inline markup intact', async () => {
-    const { code } = await render(
-      'Before *this* one.\n\n::pause{src="./photo.jpg" alt="sweep"}\n\nAfter [a link](https://example.com) here.',
-    );
-    expect(code).toContain('<div class="piece-block piece-pause with-before with-after"');
-    expect(code).toMatch(
-      /<div class="piece-pause-stage"><p class="piece-pause-before">Before <em>this<\/em> one\.<\/p>\n?<div class="piece-pause-frame">.*?<\/div>\n?<p class="piece-pause-after">After <a href="https:\/\/example\.com">a link<\/a> here\.<\/p><\/div>/s,
-    );
-    // Moved, not copied: neither paragraph is left in the column.
-    expect(code).not.toMatch(/<p>Before /);
-    expect(code).not.toMatch(/<p>After /);
-  });
-
-  it('a heading before and a list after stay outside the scene', async () => {
-    const { code } = await render(
-      '## A heading\n\n::pause{src="./photo.jpg" alt="sweep"}\n\n- an item\n- another',
-    );
-    expect(code).toContain('<div class="piece-block piece-pause" style="--ar: 1.6">');
-    expect(code).not.toContain('with-before');
-    expect(code).not.toContain('with-after');
-    expect(code).toMatch(/<h2[^>]*>[\s\S]*?<\/h2>\n?<div class="piece-block piece-pause"/);
-    expect(code).toMatch(/<\/div>\n?<ul>/);
-  });
-
-  it('an image paragraph before a pause stays outside — it is a block of its own', async () => {
-    const { code } = await render('![x](./portrait.jpg)\n\n::pause{src="./photo.jpg" alt="sweep"}');
-    expect(code).not.toContain('with-before');
-    expect(code).toMatch(/<p><a href="\/images\/fixtures\/portrait\/"/);
-    expect(code).toMatch(/<\/p>\n?<div class="piece-block piece-pause"/);
-  });
-
-  it('another block directive after a pause stays outside', async () => {
-    const { code } = await render(
-      '::pause{src="./photo.jpg" alt="sweep"}\n\n::single{src="./photo.jpg" alt="dawn"}',
-    );
-    expect(code).not.toContain('with-after');
-    expect(code).toContain('<div class="piece-block piece-pause" style="--ar: 1.6">');
-    expect(code).toMatch(/<\/div>\n?<figure class="piece-block piece-single">/);
-  });
-
-  it('two pauses with one paragraph between: the first claims it, the second takes nothing', async () => {
-    const { code } = await render(
-      '::pause{src="./photo.jpg" alt="one"}\n\nThe words between.\n\n::pause{src="./photo.jpg" alt="two"}',
-    );
-    const scenes = [...code.matchAll(/<div class="(piece-block piece-pause[^"]*)"/g)].map(
-      (m) => m[1],
-    );
-    expect(scenes).toEqual(['piece-block piece-pause with-after', 'piece-block piece-pause']);
-    expect(code).toContain('<p class="piece-pause-after">The words between.</p>');
-    expect(code).not.toContain('piece-pause-before');
-    // The second pause's stage holds its frame alone.
-    expect(code).toMatch(
-      /<div class="piece-block piece-pause" style="--ar: 1\.6"><div class="piece-pause-stage"><div class="piece-pause-frame">/,
-    );
-  });
-
-  it("an aside's unwrapped prose is not the piece's own — a pause after it anchors nothing", async () => {
-    const { code } = await render(
-      ':::aside{src="./photo.jpg" alt="a" side="left"}\nAside words.\n:::\n\n::pause{src="./photo.jpg" alt="sweep"}',
-    );
-    expect(code).not.toContain('with-before');
-    expect(code).toContain('<p>Aside words.</p>');
-    const scene = code.slice(code.indexOf('<div class="piece-block piece-pause'));
-    expect(scene).not.toContain('Aside words.');
-  });
-
-  it('pause keeps the family error contract and the closed attribute set', async () => {
-    await expect(renderExpectingFailure('::pause{src="./photo.jpg"}')).rejects.toThrow(
-      /pause requires an alt attribute/,
-    );
-    await expect(
-      renderExpectingFailure('::pause{src="./photo.jpg" alt="x" side="left"}'),
-    ).rejects.toThrow(/unknown attribute "side" on pause — allowed: src, alt/);
-  });
-
   it('the probe failure names the block that asked, not match="height"', async () => {
     // No file path: the probe cannot resolve the image at all.
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
-      await expect(processor.render('::pause{src="./photo.jpg" alt="x"}')).rejects.toThrow(
-        /pause needs piece-relative image files to measure/,
-      );
       await expect(
         processor.render(':::held{src="./photo.jpg" alt="x"}\nText.\n:::'),
       ).rejects.toThrow(/held needs piece-relative image files to measure/);
@@ -978,7 +858,7 @@ describe('cross-piece references (T602, spec 008)', () => {
     expect(sizesOf(grid.code)).toEqual(sizesOf(localGrid.code));
   });
 
-  it('a borrowed held and a gallery-root pause keep the local --ar and sizes', async () => {
+  it('a borrowed held keeps the local --ar and sizes', async () => {
     const held = await render(':::held{src="../beta/photo.jpg" alt="ridge"}\nText.\n:::');
     const localHeld = await render(':::held{src="./photo.jpg" alt="ridge"}\nText.\n:::');
     expect(links(held.code)).toEqual([{ href: '/images/beta/photo/', style: '--ar: 1.6' }]);
@@ -988,15 +868,6 @@ describe('cross-piece references (T602, spec 008)', () => {
     expect(sizesOf(held.code)[0]).toContain('(orientation: portrait)');
     expect(sizesOf(held.code)).toEqual(sizesOf(localHeld.code));
     expect(anchorStyles(held.code)).toEqual(anchorStyles(localHeld.code));
-
-    const pause = await render('::pause{src="../../gallery-images/photo.jpg" alt="sweep"}');
-    const localPause = await render('::pause{src="./photo.jpg" alt="sweep"}');
-    expect(links(pause.code)).toEqual([{ href: '/images/gallery/photo/', style: '--ar: 1.6' }]);
-    expect(sizesOf(pause.code)[0]).toBe(
-      '(min-aspect-ratio: 8/5) calc(152.39vh - 15.23vmin), calc(95.24vw - 9.52vmin)',
-    );
-    expect(sizesOf(pause.code)).toEqual(sizesOf(localPause.code));
-    expect(anchorStyles(pause.code)).toEqual(anchorStyles(localPause.code));
   });
 
   it('the shorthand borrows from the gallery root', async () => {
@@ -1055,5 +926,34 @@ describe('cross-piece references (T602, spec 008)', () => {
   it('an empty src and a bare .. fail now, where they rendered unlinked before', async () => {
     await expect(renderExpectingFailure('![alt]()')).rejects.toThrow(shapeMessage(''));
     await expect(renderExpectingFailure('![alt](..)')).rejects.toThrow(shapeMessage('..'));
+  });
+});
+
+describe('the closed vocabulary (T1501, spec 017)', () => {
+  const unknown =
+    /unknown block directive "pause" — the block vocabulary is closed; known blocks: single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip, aside, row, held/;
+
+  // The thrown VFileMessage, so its file and line can be pinned too.
+  const failureOf = async (content) => {
+    try {
+      await renderExpectingFailure(content);
+    } catch (error) {
+      return error;
+    }
+    throw new Error('expected the render to fail');
+  };
+
+  it('the pause is gone from the vocabulary: ::pause and :::pause fail as an unknown block naming the piece', async () => {
+    const leaf = 'Before.\n\n::pause{src="./photo.jpg" alt="x"}';
+    await expect(renderExpectingFailure(leaf)).rejects.toThrow(unknown);
+    const leafError = await failureOf(leaf);
+    expect(leafError.file).toMatch(/tests\/fixtures\/piece\.md$/);
+    expect(leafError.line).toBe(3);
+
+    const container = 'Before.\n\n:::pause{src="./photo.jpg" alt="x"}\nA caption.\n:::';
+    await expect(renderExpectingFailure(container)).rejects.toThrow(unknown);
+    const containerError = await failureOf(container);
+    expect(containerError.file).toMatch(/tests\/fixtures\/piece\.md$/);
+    expect(containerError.line).toBe(3);
   });
 });
