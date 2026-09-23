@@ -265,7 +265,7 @@ the image page, the sampler and a test all need the string.
   string). `100vh`, not `svh`: inside `sizes` the small-viewport unit
   is unconfirmed and on the three viewports the two are equal. The
   hint carries the fallback header, not the measured one, so where the
-  real header is taller than 72px the hint over-delivers by the
+  real header is taller than the 76px fallback (the phone) the hint over-delivers by the
   difference (× `ar` for a portrait) — the harmless direction, as spec
   015's hints over-deliver. `min()` and `calc()` inside `sizes` is **a
   claim to verify**: the browser's chosen `currentSrc` is read at T1503
@@ -588,6 +588,9 @@ src/pages/dev/matte/[...surface].astro, _sampler.ts the mat bar and its state re
 README.md, AUTHORING.md, design/brief.md, obsidian-plugin/README.md   per the spec's "The documents" (T1505)
 specs/007-held-image/spec.md, specs/015-the-hero-mat/spec.md          one status line; one non-goal line (T1505)
 ROADMAP.md, DECISIONS.md                            close-out (T1506, implementer-edited, orchestrator-committed)
+src/content.config.ts                               deferRender: true on the four Markdown glob() collections, one comment (T1501a — found at T1501)
+scripts/verify.sh                                   the cache comment (T1501a)
+src/layouts/BaseLayout.astro                        the --header-h comment rewritten (close-out; Phase 0 review S5) — it copies the 4.75rem / 76px value; global.css and stage-sizes.ts are the source, pinned together by test
 ```
 
 Untouched, named so the reviewer can confirm the non-goals hold: the
@@ -598,8 +601,9 @@ collapses; `.image-frame img`, the zoom-in rule, `html[data-quiet]
 .image-stage` and the cursor list rule; `.gallery-flow*`, the place
 wall, the cover cards, the compare's rules; `src/content.config.ts`
 beyond T1501a's `deferRender` lines, `src/lib/images.ts`, `src/lib/gallery-layout.ts`, `src/lib/ground.ts`,
-`src/lib/og-card.mjs`, `public/og.jpg`; `BaseLayout.astro` (which
-publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
+`src/lib/og-card.mjs`, `public/og.jpg`; `BaseLayout.astro`'s script
+(which publishes `--header-h`; its comment is rewritten at close-out);
+the plugin beyond its one line; `CLAUDE.md`
 (amended on `main` at 7747217 before this spec).
 
 ## Known limitations
@@ -660,9 +664,10 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
   error and exits 0 (withastro/astro#18054). `deferRender: true` is
   the fix; the line Astro reports under the eager path is the body's,
   not the file's — recorded, and expected to become the file's under
-  the deferred path (T1501a records what it prints). Reading time
-  (`remarkPluginFrontmatter`) and body-image `srcset` are checked on
-  the built page at T1501a, not assumed. `scripts/verify.sh`'s cache
+  the deferred path (T1501a records what it prints). Body-image
+  `srcset` and the piece-block count were checked on the built page
+  at T1501a (the site renders no reading time and nothing reads
+  `remarkPluginFrontmatter` — the task's assumption was false). `scripts/verify.sh`'s cache
   comment is half-true after it; the `rm -f` stays.
 - **No test pins `data-held-active`** — none pinned `data-scene-active`
   either; the header's behaviour is read in the browser at T1502.
