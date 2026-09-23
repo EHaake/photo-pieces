@@ -111,6 +111,12 @@ CMS or backend service for v1.
   the first, automatic layer of testing for piece and gallery
   frontmatter. A malformed entry should fail the build loudly, not
   silently.
+  A transform error is the same kind of failure: Astro's content
+  loader would only log it and publish the entry bodiless, so every
+  Markdown collection sets `deferRender: true` (spec 017, T1501a) and
+  the error fails the build from the page instead. That option is the
+  mechanism behind every "fails the build" claim about the transform;
+  removing it reopens the gap.
 - For logic that schema validation doesn't cover (the remark-directive
   transform, block styling, the image pipeline), add real unit tests.
   Vitest is the natural pairing with Astro's Vite-based tooling and is
