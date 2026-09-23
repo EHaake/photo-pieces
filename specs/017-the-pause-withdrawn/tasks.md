@@ -872,6 +872,23 @@ dispatched.)_
       stage" and "the darker field the stage wants is its own spec")
       and its "narrowed at spec 015" heading — history, annotate.
 
+- [ ] **T1505a** — Phase 1 review B1 and N4: `README.md`'s image-page
+      paragraph (~146–151) says the photograph's long side is the
+      smaller of the two limits — true only at 3:2 or wider and 2:3 or
+      taller; a square is S × S (⅔ of it). Reword that one clause to
+      the rule: the photograph is fitted, turned for a portrait, inside
+      a 3:2 reference rectangle whose long side is the smaller of the
+      page's width inside its margins and the first screen's height
+      below the header less the previous / next line and a piece's
+      frame-to-prose spacing above and below — as large as it can be
+      while touching a side (a square at the short side, a panorama at
+      the long side). And (N4) the older sentence "Every page has a
+      neighbour line" (~167) gains "where the page has a set" (some
+      pages render none). Hand-edit; never rewrap. _Verify:
+      `npx prettier --check README.md` clean; the paragraph read against
+      `html:not([data-quiet]) .image-frame`'s rule (`min(L·q, S·r)`,
+      `S = ⅔L`); `sh scripts/verify.sh` green._
+
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge)
 
 - [ ] **T1506** — Close-out. The repo-wide documents are edited by
@@ -896,7 +913,11 @@ dispatched.)_
       merge; a rework starts from that history and the archive) and
       "The mat only where the ground goes dark" (its italic gains: done
       at 017 — the stage bare on paper, the quiet view matted, pinned);
-      `DECISIONS.md` also gains, inside the Spec 017 section, the
+      `design/brief.md` ~81–100 (spec 015's Palette paragraph: "every
+      surface but the image page's stage", "the darker field the stage
+      wants is its own spec") and its "narrowed at spec 015" heading
+      gain one annotation each (narrowed again at 017; the darker field
+      withdrawn with the hero). `DECISIONS.md` also gains, inside the Spec 017 section, the
       T1501a discovery (the "fails the build" claim was never checked
       against the exit code from spec 001 on; withastro/astro#18054 and
       PR #18064; the four options and why `deferRender` won; it need
@@ -1013,6 +1034,7 @@ tier if it is ever on (it is off). -->
 | T1503a (`sdd-implementer`) | implementation (`opus`, high) | 46,666 | done first dispatch; no-script nav 981.8 of 982; 320 tests |
 | Phase 0 re-review (`skeptical-reviewer`, new invocation) | implementation (`opus`, high) | 26,217 | SIGNED OFF; three notes carried |
 | T1505 (`sdd-implementer`) | implementation (`opus`, high) | 57,786 | done first dispatch; 320 tests |
+| Phase 1 review (`skeptical-reviewer`) | implementation (`opus`, high) | 48,776 | one blocking: B1 README states the long side as L for every ratio → T1505a (with N4); N1 plan.md 4.5rem drift fixed by the orchestrator; N2 to T1506; N3, N5–N8 carried |
 
 _(Session-tier allowance draw noted at each pause.)_
 
@@ -1061,6 +1083,16 @@ _(Session-tier allowance draw noted at each pause.)_
   at the walkthrough.
 - Phase 0 review S7: the close-out grep lists `src/pages/about/index.astro`'s
   "go-live pause" explicitly.
+- Phase 1 review N3: Goal 8 says the docs carry "the cue"; only the
+  README says the nav line sits inside the first screen — enough
+  under the documents bullet; noted.
+- Phase 1 review N5: AUTHORING's never-bake "layout math that counts
+  the mat" is strictly true in the quiet view only; defensible.
+- Phase 1 review N6: one long line in AUTHORING ~456 (prettier passes).
+- Phase 1 review N7: the compare's `--color-matte` fills are colour,
+  not a mat; the README's "one matted surface" holds.
+- Phase 1 review N8: confirm at the sweep that the sampler's
+  site-absolute link left with the pause section (T1500 deleted it).
 - Phase 0 review S8: `stageSizes` prints full-precision coefficients
   (`0.6666666666666666`) — valid, noisy; cosmetic.
 - T1502 N8: the walk's pattern misses upper-case constants and any

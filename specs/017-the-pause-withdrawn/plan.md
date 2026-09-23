@@ -139,7 +139,8 @@ the image page, the sampler and a test all need the string.
   already overrides, and the normal view's frame sizing must not reach
   the quiet frame at all. And `--header-h` is published by
   `BaseLayout.astro`'s script from the header's measured height, with
-  `4.5rem` as the fallback that "matches the desktop size".
+  `4.5rem` as the fallback that "matches the desktop size" — it did
+  not (75.8px measured); since T1503a the fallback is `4.75rem`.
 
   The stage, after (the quiet rule untouched, one line of it shown to
   say why the base's changes stop at it):
@@ -147,7 +148,7 @@ the image page, the sampler and a test all need the string.
       .image-stage {
         --stage-pad: var(--block-margin);   /* the spacing a piece keeps between a frame and its prose */
         --avail-w: calc(100vw - 2 * var(--page-pad));
-        --avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--frame-nav-h));
+        --avail-h: calc(100svh - var(--header-h, 4.75rem) - 2 * var(--stage-pad) - var(--frame-nav-h));
         position: relative;
         display: grid;
         place-items: center;
@@ -224,7 +225,7 @@ the image page, the sampler and a test all need the string.
   the spacing. No `--stage-cue`: with nothing to switch, the term sits
   in the formula.
 
-  The numbers (header at the 4.5rem fallback = 72px; the before-reads
+  The numbers (drafted at the 4.5rem fallback = 72px; measured 76 and the fallback moved to 4.75rem at T1503a — T1503's record has the re-derived figures; the before-reads
   record the real header at each viewport and the arithmetic is
   re-run against it): 1512×982 — `--page-pad` 32, `--avail-w` 1448,
   `--avail-h` 982 − 72 − 96 − 29 = 785 → L = 785, the height decides;
@@ -249,7 +250,7 @@ the image page, the sampler and a test all need the string.
   a test evaluates it against the stylesheet:
 
       const availW = 'calc(100vw - 2 * clamp(1rem, 3vw, 2rem))';
-      const availH = (nav) => `calc(100vh - 4.5rem - 2 * 3rem - ${nav})`;
+      const availH = (nav) => `calc(100vh - 4.75rem - 2 * 3rem - ${nav})`;
       const NAV = 'calc(0.78rem * 1.362 + 0.75rem)', NAV_PHONE = 'calc(0.78rem * 1.362 * 2 + 1rem + 0.75rem)';
       export const PHONE = '(max-width: 719.98px)';   // the nav's own query, mirrored
       const L = (nav) => `min(${availW}, ${availH(nav)})`;
