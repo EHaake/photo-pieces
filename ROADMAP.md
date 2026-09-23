@@ -345,6 +345,33 @@ attached.
   conversation that names what "modern" means for this site — which of the
   references' moves fit a photographer's site that wants the work looked at
   slowly — and amends `design/brief.md` before any spec is written.
+  _First step taken as spec 018 (2026-09-23): a considered animation
+  pass, the entry below — a subset of this direction, deliberately, not
+  the whole of it._
+- **A considered animation pass** — the next spec (018), chosen by the
+  photographer 2026-09-23: "I'd like to include … a considered animation
+  pass. … Part of this modernization will probably be to include some
+  carefully considered and implemented animations. … this
+  'modernization' endeavor is large and this next step should be a
+  subset of it, not the entire thing." The first step of "A design
+  language of its own" above, and the design conversation "Motion,
+  considered" below asked for — held in the spec session, with the
+  answers written into `design/brief.md` and the spec. Its raw material
+  is what the roadmap already holds: the two kinds of motion he named
+  (a light that breathes behind the frame on a dark ground; a scroll
+  that settles) and the image loading choreography (a fade on decode, a
+  placeholder in the ground's colour); and what the site already moves
+  without ever having decided to — the theme's staggered entrance on the
+  front door's hero, the header's slide, the quiet view's 220ms
+  cross-fade, the link underline, and Astro's `ClientRouter` in the
+  layout, which already cross-fades every page change. What the spec
+  has to settle first: whether spec 007's line — nothing moves unless
+  the reader scrolls, nothing plays — bends, and for what; what reduced
+  motion gets in each case; and the site's own motion grammar (one
+  easing, one or two durations, tokens like the mat's) so that every
+  later spec of the modernization moves the same way. What it is not:
+  the front door, the typography pass, a design-system rewrite, or
+  motion for its own sake — the entries above stay open.
 - ~~**The held image**~~ — done in spec 007: two durational blocks.
   `held` is a container whose body is the prose that passes beside a
   frame that stays — the frame left or right, at the content width or
@@ -511,7 +538,8 @@ attached.
   ground, the absence of motion, the layouts — since the answer may be
   the reading typography pass below as much as animation. "Image
   loading choreography" below (a fade on decode) is the same family and
-  would fold in.
+  would fold in. _The conversation is spec 018's, "A considered
+  animation pass" above (2026-09-23)._
 - **Output formats and a page-weight budget** — eight exports at two
   megabytes is a sixteen-megabyte piece; AVIF output and a stated
   budget per piece.
