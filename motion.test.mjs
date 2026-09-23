@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { blocks, uncomment } from './src/lib/ground.ts';
-import { FRAME_IMG, MOTION_TOKENS, ms } from './src/lib/motion.ts';
+import { FRAME_HOSTS, FRAME_IMG, MOTION_TOKENS, ms } from './src/lib/motion.ts';
 import { scanMotion } from './src/lib/motion-scan.mjs';
 
 // The motion grammar (spec 018, T1600): three durations, two curves,
@@ -64,6 +64,15 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //     as milliseconds; its `MOTION_TOKENS` — what the dev panel builds
 //     its rows from — names exactly the grammar's twenty; `FRAME_IMG` is
 //     each frame host's direct `img`.
+//
+// (g) The hidden state is the script's (T1603). Every rule in global.css
+//     that sets `opacity: 0` sits under `html[data-motion]` — the root
+//     attribute only the layout's inline script writes — or inside a
+//     @keyframes block, so without script no photograph is hidden. The
+//     gate's `:is(...)` list is `FRAME_HOSTS`, the one list spelled
+//     twice. No markup the site ships writes the motion attributes, and
+//     the markup hooks the script leans on — the transform's two class
+//     literals, the piece row's cover box — are still there.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -617,5 +626,84 @@ describe('(f) the module (T1602, spec 018)', () => {
     expect(FRAME_IMG).toBe(
       '.image-link > img, .image-frame > img, .piece-block > img, .piece-block figure > img, .piece-strip-scroll > img, .note-cover > img',
     );
+  });
+});
+
+describe("(g) the hidden state is the script's (T1603, spec 018)", () => {
+  const GATE = /^html\[data-motion\]/;
+
+  it('every rule setting opacity: 0 has a prelude beginning html[data-motion], or sits in @keyframes', () => {
+    const hiding = all.filter((rule) =>
+      declarationList(rule.body).some(([name, value]) => name === 'opacity' && norm(value) === '0'),
+    );
+    // The gate and the two keyframes' `from` at least — the walk is not
+    // vacuous.
+    expect(hiding.length).toBeGreaterThanOrEqual(3);
+    const stray = hiding
+      .filter(
+        (rule) =>
+          !rule.within.some((at) => at.startsWith('@keyframes')) &&
+          !splitTop(rule.prelude).every((selector) => GATE.test(norm(selector))),
+      )
+      .map((rule) => rule.where);
+    expect(stray).toEqual([]);
+  });
+
+  it("the gate rule's :is(...) list, split and normalised, equals FRAME_HOSTS", () => {
+    const gate = top.filter(
+      (rule) =>
+        GATE.test(norm(rule.prelude)) &&
+        declarationList(rule.body).some(([name, value]) => name === 'opacity' && value === '0'),
+    );
+    expect(gate).toHaveLength(1);
+    const prelude = norm(gate[0].prelude);
+    const at = prelude.indexOf(':is(');
+    expect(at).toBeGreaterThan(-1);
+    // The list: from `:is(` to its matching `)`.
+    let depth = 0;
+    let end = at + 3;
+    for (; end < prelude.length; end += 1) {
+      if (prelude[end] === '(') depth += 1;
+      else if (prelude[end] === ')' && --depth === 0) break;
+    }
+    const list = splitTop(prelude.slice(at + 4, end)).map(norm);
+    expect(list).toEqual(FRAME_HOSTS);
+  });
+
+  it('no .astro file, the transform, or content file writes a motion attribute in markup', async () => {
+    // The allowed spellings are the scripts' writes, through `dataset`:
+    // the layout's inline gate (`document.documentElement.dataset.motion
+    // = ''`), and src/lib/motion.ts's `dataset.shown`, `dataset.motion`,
+    // `dataset.moving` and `dataset.understudy` — none of which is the
+    // hyphenated attribute this scan looks for.
+    const ATTR = /data-(motion|shown|moving|understudy)\b/;
+    const texts = { ...(await astroFiles()) };
+    texts['remark-pieces-blocks.mjs'] = await readFile(here('./remark-pieces-blocks.mjs'), 'utf8');
+    const content = async (dir) => {
+      for (const entry of await readdir(dir, { withFileTypes: true })) {
+        const path = `${dir}/${entry.name}`;
+        if (entry.isDirectory()) await content(path);
+        else if (!/\.(jpe?g|png|webp|avif|gif|tiff?|heic)$/i.test(entry.name))
+          texts[path.slice(here('./').length)] = await readFile(path, 'utf8');
+      }
+    };
+    await content(here('./src/content'));
+    expect(Object.keys(texts).some((path) => path.startsWith('src/content/'))).toBe(true);
+    expect(Object.keys(texts).filter((path) => ATTR.test(texts[path]))).toEqual([]);
+    // The gate itself is there, in its allowed spelling.
+    expect(texts['src/layouts/BaseLayout.astro']).toContain(
+      "document.documentElement.dataset.motion = '';",
+    );
+  });
+
+  it("the transform's source still carries the two class literals the hooks lean on", async () => {
+    const source = await readFile(here('./remark-pieces-blocks.mjs'), 'utf8');
+    expect(source).toContain("'image-link'");
+    expect(source).toContain("'piece-block'");
+  });
+
+  it("PieceList.astro wraps its cover in span.note-cover — the row cover's waiting box", async () => {
+    const source = await readFile(here('./src/components/PieceList.astro'), 'utf8');
+    expect(source).toContain('class="note-cover"');
   });
 });

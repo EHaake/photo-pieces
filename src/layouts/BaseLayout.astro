@@ -74,6 +74,24 @@ const isActive = (href: string) => {
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     {imageURL && <meta name="twitter:image" content={imageURL} />}
+    {
+      /* The gate and its release (spec 018): the root attribute that hides
+        every photograph not yet shown, written before the body is parsed
+        so a photograph never paints before the script decides. If the
+        module never sets window.__motion (a stale chunk, a throw ahead of
+        appear()), the page shows every frame at load — a response to an
+        event, not a timer. */
+    }
+    <script is:inline>
+      document.documentElement.dataset.motion = '';
+      addEventListener(
+        'load',
+        () => {
+          if (!window.__motion) delete document.documentElement.dataset.motion;
+        },
+        { once: true },
+      );
+    </script>
     <slot name="head" />
     <ClientRouter />
   </head>
@@ -108,6 +126,23 @@ const isActive = (href: string) => {
 
     <script>
       import { IMAGE_SET_KEY, setKeyFromPath } from '../lib/image-set';
+      import { appear } from '../lib/motion';
+
+      // The appearance and the arrival (spec 018). The initial
+      // astro:page-load fires on window's load, after every image
+      // (router.js:414) — every photograph would already be complete —
+      // so the hooks bind here, at the module's evaluation (after the
+      // parse, before DOMContentLoaded), and again at after-swap. Before
+      // a swap the old page's hooks come off and the new document's root
+      // gets the gate, since the router replaces <html>'s attributes.
+      let teardown = appear(document);
+      document.addEventListener('astro:before-swap', (event) => {
+        teardown();
+        event.newDocument.documentElement.dataset.motion = '';
+      });
+      document.addEventListener('astro:after-swap', () => {
+        teardown = appear(document);
+      });
 
       // Header hide-on-scroll-down / reveal-on-scroll-up. Bound once at
       // module load (view transitions don't re-run this); the header is

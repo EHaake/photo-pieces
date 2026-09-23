@@ -920,6 +920,12 @@ pre code {
   background: var(--color-soft);
 }
 
+/* The piece row's cover box (spec 018): the waiting fill's host, around
+   the image the rule above sizes. */
+.note-cover {
+  display: block;
+}
+
 .highlight-card h3,
 .note-row h3 {
   max-width: 18ch;
@@ -2075,4 +2081,72 @@ html[data-moving]::view-transition-group(*) {
 .gallery-card .image-link {
   --motion-appear: var(--motion-appear-covers);
   --motion-arrive: var(--motion-arrive-covers);
+}
+
+/* T1603: the appearance and the arrival. The hidden state is the root
+   attribute the layout's inline script writes before the body is
+   parsed — `html[data-motion]` — so without script nothing is hidden,
+   and the build's motion barrier proves on dist/ that no page ships
+   the attribute. The `:is(...)` list is `FRAME_HOSTS` in
+   src/lib/motion.ts, spelled twice because CSS cannot import, and
+   pinned equal by motion.test.mjs: a host added to one and not the
+   other fails the suite. The waiting fill is on the host, not the
+   image: it stays through the fade (the image reads "fade" or "rise",
+   not "") and leaves at `data-shown=""`, which the script writes at
+   the animation's end. It is kept off the quiet view (`data-quiet`),
+   where the stage's mat is the box: the quiet rule's `background`
+   shorthand would lose its colour to this more specific fill. */
+html[data-motion]
+  :is(
+    .image-link,
+    .image-frame,
+    .piece-block,
+    .piece-block figure,
+    .piece-strip-scroll,
+    .note-cover
+  )
+  > img:not([data-shown]) {
+  opacity: 0;
+}
+
+html[data-motion]:not([data-quiet])
+  :is(
+    .image-link,
+    .image-frame,
+    .piece-block,
+    .piece-block figure,
+    .piece-strip-scroll,
+    .note-cover
+  ):has(> img:not([data-shown=''])) {
+  background-color: var(--wait-fill);
+}
+
+img[data-shown='fade'] {
+  animation: motion-appear var(--dur-appear) var(--ease-state) both;
+  animation-delay: calc(var(--arrive-stagger) * var(--i, 0));
+}
+
+img[data-shown='rise'] {
+  animation: motion-arrive var(--dur-appear) var(--ease-move) both;
+  animation-delay: calc(var(--arrive-stagger) * var(--i, 0));
+}
+
+@keyframes motion-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes motion-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(var(--arrive-rise));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }

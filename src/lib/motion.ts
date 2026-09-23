@@ -109,3 +109,212 @@ export function withTransition(
   };
   return document.startViewTransition(update).finished.then(clear, clear);
 }
+
+declare global {
+  interface Window {
+    /** Set by `appear()` the moment it binds; the layout's inline gate
+     *  reads it at `load` and releases the hidden state when it is not
+     *  set (the module never ran). */
+    __motion?: boolean;
+    /** The dev motion switch's once-only guard (DevMotion.astro's inline
+     *  applier), declared here beside `__motion` so the checker knows it. */
+    __devMotion?: boolean;
+  }
+}
+
+/** A motion flag as a surface sees it: off when **either** the host's
+ *  computed value or the root's is `0`. The covers rule points a
+ *  cover's `--motion-appear` / `--motion-arrive` at the `*-covers`
+ *  tokens, so the host read is what gives the covers their own switch;
+ *  the root read keeps the root's toggle reaching them too. */
+function on(hostStyle: CSSStyleDeclaration, name: string): boolean {
+  return hostStyle.getPropertyValue(name).trim() !== '0' && token(name) !== '0';
+}
+
+/** Whether a box intersects the viewport now. */
+function inViewport(rect: DOMRect): boolean {
+  return rect.bottom > 0 && rect.right > 0 && rect.top < innerHeight && rect.left < innerWidth;
+}
+
+/** Mark a photograph shown for good: `data-shown=""`, which lifts the
+ *  gate and the waiting fill. The one writer of the empty value — the
+ *  animation's end, the `complete` short-cut, the early-`load` rule and
+ *  the appearance-off case all come here — and so the one place a
+ *  host's `data-understudy` (the travel's) and its `--understudy` leave
+ *  with the fill, so a second visit to a stage never keeps the previous
+ *  rendering under a live photograph. */
+function shown(img: HTMLImageElement): void {
+  img.dataset.shown = '';
+  const host = img.parentElement;
+  if (host && 'understudy' in host.dataset) {
+    delete host.dataset.understudy;
+    host.style.removeProperty('--understudy');
+  }
+}
+
+/** The appearance and the arrival (spec 018). Every frame image in
+ *  `scope` (`FRAME_IMG`) waits, hidden by the stylesheet's gate while
+ *  <html> carries `data-motion`, and is shown one of three ways:
+ *
+ *  - at once (`data-shown=""`, no animation) when it is `complete` at
+ *    the hook, when its `load` fires before the first animation frame
+ *    after the hook (the browser already held the file; only the event
+ *    was late), or when `--motion-appear` is off on its host;
+ *  - as `"fade"` when its unit has decoded and the unit was in view at
+ *    the hook (or `--motion-arrive` is off on a host in it);
+ *  - below the fold, when its unit has decoded and the one
+ *    IntersectionObserver has seen it: `"rise"` when `--arrive-rise`
+ *    is above zero and reduced motion is off, else `"fade"`.
+ *
+ *  A unit is the image's `.piece-block` when that block holds more than
+ *  one `img` (a diptych, triptych, grid, row with a pair), else the
+ *  image's host; its images flip together. A strip is not a unit: its
+ *  band scrolls sideways, and a lazy frame past the band's edge is never
+ *  fetched until the reader scrolls to it — so a strip waiting for every
+ *  frame would stay blank, and fetching those frames early would add
+ *  requests the page does not make today (spec 018, AC 13). Inside the
+ *  band each image is its own unit: its `a.image-link` host when
+ *  linked, or the `img` itself when not (the band would otherwise be
+ *  the shared host). `load` comes before
+ *  `decode()` — a `decode()` on a lazy image not yet loaded would fetch
+ *  it early. `animationend` writes `""`. Every read comes before the
+ *  first write. A throw anywhere removes <html>'s `data-motion`, which
+ *  shows every photograph — the one failure that could hide one.
+ *  Returns the teardown. */
+export function appear(scope: Document | Element): () => void {
+  window.__motion = true;
+  const root = document.documentElement;
+  let live = true;
+  let frame = 0;
+  let observer: IntersectionObserver | null = null;
+  const unbind: (() => void)[] = [];
+  const teardown = () => {
+    live = false;
+    cancelAnimationFrame(frame);
+    observer?.disconnect();
+    observer = null;
+    for (const off of unbind) off();
+    unbind.length = 0;
+  };
+
+  try {
+    type Unit = {
+      el: Element;
+      images: HTMLImageElement[];
+      waiting: Set<HTMLImageElement>;
+      inView: boolean;
+      arrived: boolean;
+      revealed: boolean;
+    };
+
+    // The reads.
+    const threshold = Number(token('--arrive-threshold'));
+    const stagger = ms(token('--arrive-stagger')) > 0;
+    const rise = Number.parseFloat(token('--arrive-rise')) > 0 && !reducedMotion();
+    const frames = [...scope.querySelectorAll<HTMLImageElement>(FRAME_IMG)];
+    const units = new Map<Element, Unit>();
+    const reads = frames.map((img) => {
+      const host = img.parentElement as Element;
+      const block = img.closest('.piece-block');
+      const el = img.closest('.piece-strip-scroll')
+        ? host.matches('.image-link')
+          ? host
+          : img
+        : block && block.querySelectorAll('img').length > 1
+          ? block
+          : host;
+      const style = getComputedStyle(host);
+      let unit = units.get(el);
+      if (!unit) {
+        unit = {
+          el,
+          images: [],
+          waiting: new Set(),
+          inView: inViewport(el.getBoundingClientRect()),
+          arrived: false,
+          revealed: false,
+        };
+        units.set(el, unit);
+      }
+      unit.images.push(img);
+      if (!on(style, '--motion-arrive')) unit.inView = true;
+      return { img, unit, complete: img.complete, appearOn: on(style, '--motion-appear') };
+    });
+
+    // The writes.
+    let settled = false;
+    frame = requestAnimationFrame(() => {
+      settled = true;
+    });
+
+    const reveal = (unit: Unit) => {
+      if (!live || unit.revealed || unit.waiting.size > 0 || !(unit.inView || unit.arrived)) return;
+      unit.revealed = true;
+      const kind = unit.inView || !rise ? 'fade' : 'rise';
+      for (const img of unit.images) if (img.dataset.shown === undefined) img.dataset.shown = kind;
+    };
+
+    const ready = (unit: Unit, img: HTMLImageElement) => {
+      unit.waiting.delete(img);
+      reveal(unit);
+    };
+
+    const listen = (img: HTMLImageElement, type: string, handler: () => void) => {
+      img.addEventListener(type, handler);
+      unbind.push(() => img.removeEventListener(type, handler));
+    };
+
+    for (const { img, unit, complete, appearOn } of reads) {
+      if (stagger) img.style.setProperty('--i', String(unit.images.indexOf(img)));
+      if (complete || !appearOn) {
+        shown(img);
+        continue;
+      }
+      unit.waiting.add(img);
+      listen(img, 'animationend', () => shown(img));
+      // A broken file does not hold its unit: it is not a photograph to
+      // wait for, so its unit goes on without it.
+      listen(img, 'error', () => ready(unit, img));
+      listen(img, 'load', () => {
+        if (!live) return;
+        if (!settled) {
+          shown(img);
+          ready(unit, img);
+          return;
+        }
+        img.decode().then(
+          () => ready(unit, img),
+          () => ready(unit, img),
+        );
+      });
+    }
+
+    // Only a unit still waiting is watched: one shown whole at the hook
+    // has nothing left to arrive.
+    const below = [...units.values()].filter((unit) => !unit.inView && unit.waiting.size > 0);
+    if (below.length > 0) {
+      let remaining = below.length;
+      const byEl = new Map(below.map((unit) => [unit.el, unit]));
+      observer = new IntersectionObserver(
+        (entries, self) => {
+          for (const entry of entries) {
+            const unit = byEl.get(entry.target);
+            if (!unit || unit.arrived || !entry.isIntersecting) continue;
+            unit.arrived = true;
+            self.unobserve(entry.target);
+            remaining -= 1;
+            reveal(unit);
+          }
+          if (remaining === 0) self.disconnect();
+        },
+        { threshold },
+      );
+      for (const unit of below) observer.observe(unit.el);
+    }
+  } catch (error) {
+    delete root.dataset.motion;
+    teardown();
+    console.error(error);
+  }
+  return teardown;
+}
