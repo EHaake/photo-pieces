@@ -86,6 +86,12 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //     literals, the piece row's cover box — are still there. The
 //     travel's understudy and slide rules (T1604) sit under their
 //     transient attributes, which no markup writes either.
+//
+// (i) The quiet view's resting rules are `main`'s (T1605). The image
+//     page's chrome-hiding list and its dark ground equal `main`'s
+//     strings, pasted; the page's <style> declares no transition at all
+//     — the quiet view moves as one view change now, and a background
+//     fade beneath it would fight the snapshot cross-fade.
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -870,5 +876,50 @@ describe('(h) the way back holds what the reader saw (T1604b, spec 018)', () => 
       'eager',
       'eager',
     ]);
+  });
+});
+
+describe("(i) the quiet view's resting rules are main's (T1605, spec 018)", () => {
+  // Pasted from `main`'s src/pages/images/[...id].astro: the quiet view
+  // moves as one view change now, and the states it moves between are
+  // the same states, byte for byte (normalised for Prettier).
+  const PAGE = 'src/pages/images/[...id].astro';
+  const MAIN = [
+    [
+      ':global(html[data-quiet]) :global(.site-header), :global(html[data-quiet]) :global(.site-footer), :global(html[data-quiet]) .frame-nav, :global(html[data-quiet]) .image-head, :global(html[data-quiet]) .image-body, :global(html[data-quiet]) .quiet-toggle',
+      [['display', 'none']],
+    ],
+    [
+      ':global(html[data-quiet]), :global(html[data-quiet] body)',
+      [['background', 'var(--color-quiet)']],
+    ],
+  ];
+  let page;
+
+  beforeAll(async () => {
+    const blocks = styleBlocks(await readFile(here(`./${PAGE}`), 'utf8'));
+    page = { text: blocks.join('\n'), rules: blocks.flatMap((block) => rules(block)) };
+  });
+
+  for (const [prelude, body] of MAIN)
+    it(`\`${prelude.slice(0, 48)}…\` is main's rule`, () => {
+      const found = page.rules.filter(
+        (rule) => rule.within.length === 0 && preludeOf(rule.prelude) === prelude,
+      );
+      expect(found.length).toBe(1);
+      expect(declarationList(found[0].body).map(([name, value]) => [name, norm(value)])).toEqual(
+        body,
+      );
+    });
+
+  it("the page's <style> declares no transition and carries no 220ms", () => {
+    expect(page.rules.length).toBeGreaterThan(10);
+    const found = page.rules.flatMap((rule) =>
+      declarationList(rule.body)
+        .filter(([name]) => name.startsWith('transition'))
+        .map(([name, value]) => `${rule.where}: ${name}: ${value}`),
+    );
+    expect(found).toEqual([]);
+    expect(page.text).not.toContain('220ms');
   });
 });
