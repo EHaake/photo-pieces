@@ -378,7 +378,7 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
       '--stage-pad': 'var(--block-margin)',
       '--avail-w': 'calc(100vw - 2 * var(--page-pad))',
       '--avail-h':
-        'calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--frame-nav-h))',
+        'calc(100svh - var(--header-h, 4.75rem) - 2 * var(--stage-pad) - var(--frame-nav-h))',
       position: 'relative',
       display: 'grid',
       'place-items': 'center',
@@ -746,7 +746,7 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
 
   /** The paper frame's env at a point: the stage's limits, the ratio
    *  helpers, the L × S rule's own strings, --header-h absent (its
-   *  4.5rem fallback) and the nav's token at the viewport's width. */
+   *  4.75rem fallback) and the nav's token at the viewport's width. */
   const paperEnv = (one, ratio = one.ratio) => {
     const stage = declarations(ruleFor(top, '.image-stage').body);
     const frame = declarations(ruleFor(top, '.image-frame').body);

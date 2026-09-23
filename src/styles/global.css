@@ -1884,7 +1884,7 @@ a.note-row {
 .image-stage {
   --stage-pad: var(--block-margin);
   --avail-w: calc(100vw - 2 * var(--page-pad));
-  --avail-h: calc(100svh - var(--header-h, 4.5rem) - 2 * var(--stage-pad) - var(--frame-nav-h));
+  --avail-h: calc(100svh - var(--header-h, 4.75rem) - 2 * var(--stage-pad) - var(--frame-nav-h));
   position: relative;
   display: grid;
   place-items: center;

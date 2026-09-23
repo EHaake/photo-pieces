@@ -603,11 +603,12 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
 
 ## Known limitations
 
-- **Without script `--header-h` is its 4.5rem fallback** (spec 006),
-  and `BaseLayout.astro` says the real height "varies with width and
-  nav wrapping". The rule's available height is exact against
-  whichever header height is in effect; where the real header is
-  taller than 72px (the phone width, if the nav wraps) the no-script
+- **Without script `--header-h` is its fallback** (spec 006; 4.5rem
+  until T1503a, 4.75rem — the measured 76px — since), and
+  `BaseLayout.astro` says the real height "varies with width and nav
+  wrapping". The rule's available height is exact against whichever
+  header height is in effect; where the real header is taller than
+  the fallback (the phone width, where the nav wraps to 136px) the no-script
   nav line can cross the fold by the difference, and the `sizes` hint
   — which can only carry the fallback — over-delivers by it.
   Pre-existing, recorded at T1503 at each viewport; a CSS-known header

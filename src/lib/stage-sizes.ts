@@ -7,7 +7,7 @@
  * mirror five tokens: --page-pad (`clamp(1rem, 3vw, 2rem)`),
  * --block-margin (the stage's --stage-pad, 3rem), --frame-nav-h (both
  * widths, the half-baseline as 0.75rem), the --header-h fallback
- * (4.5rem) and the nav's own 719.98px query. matte.test.mjs ("the
+ * (4.75rem) and the nav's own 719.98px query. matte.test.mjs ("the
  * sizes hint agrees with the rule") evaluates this string against the
  * stylesheet's tokens over its grid of ratios and viewports, and pins
  * the query literal by string — retune them together.
@@ -19,7 +19,7 @@
  */
 
 const AVAIL_W = 'calc(100vw - 2 * clamp(1rem, 3vw, 2rem))';
-const availH = (nav: string) => `calc(100vh - 4.5rem - 2 * 3rem - ${nav})`;
+const availH = (nav: string) => `calc(100vh - 4.75rem - 2 * 3rem - ${nav})`;
 const NAV = 'calc(0.78rem * 1.362 + 0.75rem)';
 const NAV_PHONE = 'calc(0.78rem * 1.362 * 2 + 1rem + 0.75rem)';
 

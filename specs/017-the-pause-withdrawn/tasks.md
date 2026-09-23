@@ -643,7 +643,7 @@ headers to confirm nothing was duplicated or dropped. -->
       also pins `position: relative`; the sampler's `sizes` call
       wrapped over three lines for Prettier.
 
-- [ ] **T1503a** — The header's fallback to the measured height, and
+- [x] **T1503a** — The header's fallback to the measured height, and
       a guard on the build-exit fix (Phase 0 review B1 and S4).
       **B1:** without script the tallest frame's nav line ends 3.8px
       below the fold at 1512×982 (985.8 of 982), because the desktop
@@ -676,6 +676,21 @@ headers to confirm nothing was duplicated or dropped. -->
       publishes the real header; at 375×812 script off the nav's
       bottom recorded (the phone wrap is the plan's remaining known
       limitation)._
+
+- [x] **T1503a record** — Fallback 4.75rem in `global.css:1887`,
+      `stage-sizes.ts` and the pinned string; the deferRender guard
+      case in the closed-vocabulary describe (four collections pinned
+      by name). Script off at 1512×982, port-a: header 75.8, frame
+      520.7×781, nav bottom **981.8** of 982 (was 985.8); script on
+      unchanged (781, 981.8). Script off 375×812: header 136.4, frame
+      228.7×343, nav bottom 637.4 (width-bound). Script off 1280×1440:
+      port-a nav bottom 1416.8, land-b 1011.2, pano 605.5. Three
+      mutations each failed the named case. Verify: 87 pages, `BUILD
+      EXIT 0`, `CHECK EXIT 0`, 320 tests, `TEST EXIT 0`. Re-review:
+      signed off; notes carried (the plan's phone sentence could say
+      it does not bind at 375; the guard test pins the count on
+      purpose — comment it; `100vh` vs `100svh` is the plan's known
+      limitation).
 
 - [x] **T1504** — The sampler, honest. Pattern:
       `src/pages/dev/matte/[...surface].astro` and `_sampler.ts` (spec
@@ -971,6 +986,8 @@ tier if it is ever on (it is off). -->
 | T1503 (`sdd-implementer`) | implementation (`opus`, high) | 146,717 | done first dispatch; header 76 not 72, L 781 at the laptop; no-script nav 3.8px under the fold there (known limitation, to the pause report); 319 tests |
 | T1504 (`sdd-implementer`) | implementation (`opus`, high) | 80,634 | done first dispatch; 319 tests |
 | Phase 0 review (`skeptical-reviewer`) | implementation (`opus`, high) | 163,719 | one blocking: B1 no-script nav 3.8px under the fold on the laptop (fallback 4.5rem vs 75.8 measured) → T1503a; S4 folded into T1503a; S1–S3, S5–S8 carried |
+| T1503a (`sdd-implementer`) | implementation (`opus`, high) | 46,666 | done first dispatch; no-script nav 981.8 of 982; 320 tests |
+| Phase 0 re-review (`skeptical-reviewer`, new invocation) | implementation (`opus`, high) | 26,217 | SIGNED OFF; three notes carried |
 
 _(Session-tier allowance draw noted at each pause.)_
 

@@ -1001,4 +1001,29 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
       "toggleAttribute('data-held-active'",
     );
   });
+
+  it('every Markdown glob() collection sets deferRender: true — the build\'s exit on a transform error rests on it (T1501a)', () => {
+    // Without it the glob loader renders each body itself, catches the
+    // transform's throw and stores an empty entry, and `astro build`
+    // exits 0 (withastro/astro#18054).
+    const config = readFileSync('src/content.config.ts', 'utf8');
+    const collections = [...config.matchAll(/const (\w+) = defineCollection\(/g)];
+    const globs = collections.map((match, index) => {
+      const end = collections[index + 1]?.index ?? config.length;
+      const block = config.slice(match.index, end);
+      const call = block.indexOf('glob({');
+      // The glob call's own argument, to its balancing parenthesis
+      // (a generateId arrow inside it has parentheses of its own).
+      let close = call + 'glob'.length;
+      for (let depth = 0; close < block.length; close += 1) {
+        if (block[close] === '(') depth += 1;
+        if (block[close] === ')' && --depth === 0) break;
+      }
+      const args = call === -1 ? '' : block.slice(call, close + 1);
+      return { name: match[1], deferred: /deferRender:\s*true\b/.test(args), found: call !== -1 };
+    });
+    expect(globs.map((one) => one.name)).toEqual(['pieces', 'galleries', 'imageMeta', 'places']);
+    expect(config.match(/glob\(\{/g)).toHaveLength(4);
+    expect(globs.filter((one) => !one.found || !one.deferred).map((one) => one.name)).toEqual([]);
+  });
 });
