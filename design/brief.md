@@ -149,15 +149,13 @@ physicality. A flat, uniform matte field around an image is therefore
 part of this site's visual language: no shadow, no texture, no bevel,
 no frame — a clean color field, token-driven (width and color in
 `global.css`), applied by the site's CSS rather than baked into image
-files (decision recorded in `DECISIONS.md`). Since spec 015 it is worn
-by the image page's stage and the quiet view that grows out of it, and
-by nothing else: a piece's frames and the galleries' rows present the
-photograph on the ground, edge to edge with the page. The reason is
-that the mat is a hero treatment — it says this one photograph is the
-whole point, which is true of the stage and false of a frame passing
-under a reader's eye in a flow of prose or sitting in a packed row.
-(The pause frame keeps the mat spec 007 gave it until the pause gets a
-spec of its own.)
+files (decision recorded in `DECISIONS.md`). Since spec 017 it is worn
+by the image page's quiet view alone: the stage on paper is bare, and
+a piece's frames and the galleries' rows present the photograph on the
+ground, edge to edge with the page. The reason is that the mat is a
+hero treatment — it says this one photograph is the whole point, which
+is true of the quiet view and false of a frame passing under a
+reader's eye in a flow of prose or sitting in a packed row.
 
 ## Screens to design
 

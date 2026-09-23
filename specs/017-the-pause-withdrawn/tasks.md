@@ -796,7 +796,7 @@ dispatched.)_
 
 ## Phase 1 — The documents (reviewer after the phase; walkthrough: none — README, AUTHORING, the plugin's README, the brief and two earlier specs' annotations change nothing on the site; runs on without a pause)
 
-- [ ] **T1505** — Docs: `README.md`, `AUTHORING.md`,
+- [x] **T1505** — Docs: `README.md`, `AUTHORING.md`,
       `obsidian-plugin/README.md`, `design/brief.md`, and the two
       annotations. Pattern: spec 015's T1304 line. `README.md`: the
       block table loses its `pause` row and the `¹` footnote, and its
@@ -858,6 +858,19 @@ dispatched.)_
       `npx prettier --check README.md AUTHORING.md design/brief.md obsidian-plugin/README.md`
       clean; `sh scripts/verify.sh` green (nothing under test changes —
       the run is the record)._
+
+- [x] **T1505 record** — Six files, +83/−137. Greps: the pause in
+      the four docs → README:20 (the spec list) and README:396 ("going
+      live is paused", the deployment section — the plain word, not
+      the block); the 007 status line and the 015 non-goal line → 1
+      each; prettier clean on the four; verify 87 pages, 320 tests,
+      all `EXIT 0`. Deviations: README's "one matted surface" clause
+      sits on the paragraph's quiet-view sentence, not its first;
+      AUTHORING had no "screen below the header" sentence to correct.
+      Left for close-out: `design/brief.md` ~81–100 (spec 015's
+      Palette paragraph still says "every surface but the image page's
+      stage" and "the darker field the stage wants is its own spec")
+      and its "narrowed at spec 015" heading — history, annotate.
 
 ## Phase 2 — Close-out (the documents, the reviewer sweep, then merge)
 
@@ -999,6 +1012,7 @@ tier if it is ever on (it is off). -->
 | Phase 0 review (`skeptical-reviewer`) | implementation (`opus`, high) | 163,719 | one blocking: B1 no-script nav 3.8px under the fold on the laptop (fallback 4.5rem vs 75.8 measured) → T1503a; S4 folded into T1503a; S1–S3, S5–S8 carried |
 | T1503a (`sdd-implementer`) | implementation (`opus`, high) | 46,666 | done first dispatch; no-script nav 981.8 of 982; 320 tests |
 | Phase 0 re-review (`skeptical-reviewer`, new invocation) | implementation (`opus`, high) | 26,217 | SIGNED OFF; three notes carried |
+| T1505 (`sdd-implementer`) | implementation (`opus`, high) | 57,786 | done first dispatch; 320 tests |
 
 _(Session-tier allowance draw noted at each pause.)_
 

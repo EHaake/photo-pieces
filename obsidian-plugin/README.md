@@ -8,13 +8,13 @@ the source of truth for how anything actually renders.
 
 ## What renders, what stays raw
 
-| Syntax                                                         | In Live Preview                    |
-| -------------------------------------------------------------- | ---------------------------------- |
-| `::single` `::fullbleed` `::wide` `::tall` `::inset` `::pause` | the image                          |
-| `::diptych` `::triptych`                                       | the images side by side            |
-| `:::name … :::` container forms (captions)                     | raw text                           |
-| `:::grid` `:::strip` `:::aside` `:::row` `:::held`             | raw text                           |
-| any directive typed mid-paragraph                              | raw text (the site rejects it too) |
+| Syntax                                               | In Live Preview                    |
+| ---------------------------------------------------- | ---------------------------------- |
+| `::single` `::fullbleed` `::wide` `::tall` `::inset` | the image                          |
+| `::diptych` `::triptych`                             | the images side by side            |
+| `:::name … :::` container forms (captions)           | raw text                           |
+| `:::grid` `:::strip` `:::aside` `:::row` `:::held`   | raw text                           |
+| any directive typed mid-paragraph                    | raw text (the site rejects it too) |
 
 Attribute values may be quoted or unquoted, as on the site. Captions
 are not shown — `alt` is accessibility text, not a caption,

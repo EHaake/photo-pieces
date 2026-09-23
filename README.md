@@ -17,8 +17,8 @@ The "why" behind this project lives in these, not in this file:
 - `specs/<NNN>-<slug>/` — the spec, plan, and tasks for each build
   phase (001 foundation, 002 identity/teardown, 003 block vocabulary,
   004 galleries and image pages, 005 going live — deferred, 006 the
-  rich image page, 007 the held image and the pause, 008 cross-piece
-  image references, 009 places)
+  rich image page, 007 the held image (its pause withdrawn at 017),
+  008 cross-piece image references, 009 places)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
@@ -87,33 +87,29 @@ Three minutes apart. Captions take _inline markdown_.
 :::
 ```
 
-| Block       | Forms          | Attributes                                                                                         | Matted | Obsidian Live Preview |
-| ----------- | -------------- | -------------------------------------------------------------------------------------------------- | ------ | --------------------- |
-| `single`    | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
-| `inset`     | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
-| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                    | no     | image (leaf)          |
-| `fullbleed` | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
-| `tall`      | leaf/container | `src` `alt`                                                                                        | no     | image (leaf)          |
-| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed` | no     | images (leaf)         |
-| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                            | no     | images (leaf)         |
-| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                         | no     | raw text              |
-| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption               | no     | raw text              |
-| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                            | no     | raw text              |
-| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                       | no     | raw text              |
-| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays   | no     | raw text              |
-| `pause`     | leaf only      | `src` `alt`; no body — nothing to read                                                             | yes¹   | image (leaf)          |
+| Block       | Forms          | Attributes                                                                                         | Obsidian Live Preview |
+| ----------- | -------------- | -------------------------------------------------------------------------------------------------- | --------------------- |
+| `single`    | leaf/container | `src` `alt`                                                                                        | image (leaf)          |
+| `inset`     | leaf/container | `src` `alt`                                                                                        | image (leaf)          |
+| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                    | image (leaf)          |
+| `fullbleed` | leaf/container | `src` `alt`                                                                                        | image (leaf)          |
+| `tall`      | leaf/container | `src` `alt`                                                                                        | image (leaf)          |
+| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed` | images (leaf)         |
+| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                            | images (leaf)         |
+| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                         | raw text              |
+| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption               | raw text              |
+| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                            | raw text              |
+| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                       | raw text              |
+| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays   | raw text              |
 
-¹ the pause frame keeps the mat spec 007 gave it, until the pause gets
-a spec of its own.
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
-`single` — same rendered result. Since spec 015 the site mats only the
-image page's stage and the quiet view that grows out of it (a piece's
-pause frame excepted until its own spec): a flat
-white field 6% of that frame's rendered short side, never narrower than
-4px or wider than 40px, equal on all four sides, applied by the site's
-CSS (never bake mattes into files). A piece's frames sit on the ground
-instead, edge to edge with the page — the gutters of a pair, a grid or
-a packed gallery row show the ground between photographs, and each cell
+`single` — same rendered result. The site mats only the image page's
+quiet view (spec 015, narrowed at 017): a flat white field 6% of the
+frame's rendered short side, never narrower than 4px or wider than
+40px, equal on all four sides, applied by the site's CSS (never bake
+mattes into files). Every other frame, the image page's stage on paper
+included, sits on the ground — the gutters of a pair, a grid or a
+packed gallery row show the ground between photographs, and each cell
 is that much more picture.
 An image's `src` is `./<file>` for the piece's own photograph,
 `../<slug>/<file>` for another piece's, or
@@ -129,9 +125,8 @@ must exist, borrowed drafts fail. The sampler piece
 rendered.
 
 **Current status**: every block above is implemented — the spec-003
-blocks and spec 007's two durational ones — transform, styling,
-the mat rule (the image page's stage alone since spec 015, a piece's
-pause frame excepted until its own spec), unit tests,
+blocks and spec 007's held block — transform, styling,
+the mat rule (the quiet view alone since spec 017), unit tests,
 and the Obsidian plugin's leaf-form rendering —
 with images going through Astro's asset pipeline (hashed src,
 responsive srcset per treatment). Pieces render at
@@ -148,9 +143,12 @@ Every accepted raster (`jpg jpeg png webp avif tiff`) in a published
 piece's folder — or in the flat `src/content/gallery-images/` root for
 images that belong to no piece — gets a page at `/images/<id>/`, where
 the id is `<piece-folder>/<basename>` or `gallery/<basename>`. The
-page shows the image matted on the stage — since spec 015 the one
-matted surface on the site, a piece's pause frame excepted until the
-pause gets its own spec — its title, a wall label of exposure info
+page shows the photograph bare and centred just below the header, one
+rectangle turned — its long side the smaller of the page's width and
+the first screen's height below the header less the previous / next
+line and a piece's frame-to-prose spacing above and below — with the
+previous / next line directly beneath at that spacing and above the
+fold; then its title, a wall label of exposure info
 read from the file's EXIF (camera, lens, focal length, aperture,
 shutter, ISO, capture date), the piece it came from, the galleries it
 sits in, and an optional caption. Every image in a piece links there;
@@ -169,7 +167,8 @@ same outing, and "The print" with an enquiry link. Every page has a
 neighbour line for the set the reader is stepping through (the
 gallery, piece, or place they came from; arrow keys work), and a
 quiet view — click the photograph — that dims the ground and gives
-the frame the viewport. Rules the build enforces: piece folders
+the frame the viewport, matted on the quiet dark: the one matted
+surface on the site. Rules the build enforces: piece folders
 must be slugs and file names URL-safe (letters, digits, `.`, `-`,
 `_`), an image directly in `pieces/` or beside a flat `pieces/foo.md`
 fails, a file nested in a sub-folder is ignored with a warning (a
@@ -358,7 +357,6 @@ photo-pieces/
 ├── remark-pieces-vocabulary.test.mjs # spec-003 vocabulary suite
 ├── image-meta.test.mjs, exif.test.mjs, galleries.test.mjs # spec-004 suites
 ├── image-set.test.mjs            # the set key: gallery, piece, place
-├── pause-shape.test.mjs          # spec-007: the pause's 0 → 1 → 0 shape
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
@@ -380,7 +378,7 @@ photo-pieces/
 │   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, places, sets)
 │   ├── lib/gallery-layout.ts     # packing knobs: bleed width, gap, format-aware density (galleries); density also drives the srcset/sizes math so CSS and images can't drift; the related strip's knobs live here too; the place page's wall consumes the same width, gap, and density
 │   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
-│   ├── lib/pause-shape.ts        # the pause's lights shape (the piece page's script imports it)
+│   ├── lib/stage-sizes.ts        # the image page's stage `sizes` rule, spelled in literals
 │   ├── lib/exif.mjs              # the allowlisted EXIF reader
 │   ├── lib/categories.ts         # the category taxonomy
 │   ├── lib/ground.ts             # the ground's family: fixed steps to the fills and hairlines, the contrast readout, the gate's candidates
