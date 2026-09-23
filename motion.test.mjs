@@ -43,10 +43,13 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //
 // (d) Reduced motion keeps the fades and drops the movement. The
 //     one-millisecond blanket is gone and the block holds exactly the
-//     four rules plan.md names: a `*` prelude, a `1ms`, a
-//     `scroll-behavior`, a fifth rule or a changed one fails, and so
+//     five rules plan.md names: a `*` prelude, a `1ms`, a
+//     `scroll-behavior`, a sixth rule or a changed one fails, and so
 //     does a zero laid on a fade — an opacity transition or the
-//     appearance animation — other than the --rm-appear product.
+//     appearance animation — other than the --rm-appear product. The
+//     fifth (D1604, Q1) is pinned by name: every view-transition group
+//     loses its animation, and no duration is declared on the old and
+//     new images there, so each cross-fade keeps its length.
 //
 // (b) No literal duration or curve outside the token block. scanMotion
 //     (src/lib/motion-scan.mjs) over global.css and every .astro <style>
@@ -121,7 +124,7 @@ const REDUCED = '@media (prefers-reduced-motion: reduce)';
  *  hero lands on its end state through its flag. */
 const REDUCED_ROOT = { '--arrive-rise': '0px', '--hero-enter': '0' };
 
-/** plan.md's "Reduced motion": the four rules, preludes and bodies. */
+/** plan.md's "Reduced motion": the five rules, preludes and bodies. */
 const REDUCED_RULES = [
   { prelude: ':root', body: REDUCED_ROOT },
   {
@@ -133,6 +136,8 @@ const REDUCED_RULES = [
     prelude: "img[data-shown='fade'], img[data-shown='rise']",
     body: { 'animation-duration': 'calc(var(--dur-appear) * var(--rm-appear))' },
   },
+  // D1604, Q1: a deliberate fifth — the groups land at once.
+  { prelude: '::view-transition-group(*)', body: { 'animation-name': 'none' } },
 ];
 
 /** A rule body's declarations in order, as [name, value] pairs — a list,
@@ -373,13 +378,32 @@ describe('(d) reduced motion keeps the fades and drops the movement (T1600, spec
     return found[0];
   };
 
-  it('the block holds exactly the four rules — a fifth, a missing one or a changed one fails', () => {
+  it('the block holds exactly the five rules — a sixth, a missing one or a changed one fails', () => {
     expect(
       blocks(reduced().body).map((rule) => ({
         prelude: preludeOf(rule.prelude),
         body: declarations(rule.body),
       })),
     ).toEqual(REDUCED_RULES);
+  });
+
+  it('every view-transition group loses its animation, and no old/new duration is declared — the cross-fades keep their length (D1604, Q1)', () => {
+    const inBlock = blocks(reduced().body);
+    const group = inBlock.filter(
+      (rule) => preludeOf(rule.prelude) === '::view-transition-group(*)',
+    );
+    expect(group.map((rule) => declarations(rule.body)['animation-name'])).toEqual(['none']);
+    const oldNew = inBlock.flatMap((rule) =>
+      splitTop(rule.prelude)
+        .map(norm)
+        .filter((selector) => /::view-transition-(old|new)\(/.test(selector))
+        .flatMap((selector) =>
+          ['animation', 'animation-duration']
+            .filter((name) => name in declarations(rule.body))
+            .map((name) => `${selector} { ${name} }`),
+        ),
+    );
+    expect(oldNew).toEqual([]);
   });
 
   it('no prelude in it is the * blanket', () => {

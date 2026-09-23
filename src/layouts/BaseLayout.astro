@@ -260,10 +260,18 @@ const isActive = (href: string) => {
       } | null = null;
       let landing: HTMLImageElement | null = null;
       const named: HTMLElement[] = [];
+      // Reduced motion withholds the names and nothing else (D1604, Q1),
+      // and this is the one place the setting is read: without a name
+      // nothing travels, and every root cross-fade keeps its length. The
+      // rest still runs — the kinds, the stored origin, dataset.moving, the
+      // preloads, the understudy, the way back's scroll — because none
+      // of it moves anything, and without it a reduced-motion reader
+      // would see the stage blank and land at the top (AC 6).
       const name = (el: HTMLElement | null | undefined) => {
-        if (!el) return;
+        if (!el || reducedMotion()) return false;
         el.style.viewTransitionName = NAME;
         named.push(el);
+        return true;
       };
       const clear = () => {
         for (const el of named) el.style.viewTransitionName = '';
@@ -314,7 +322,7 @@ const isActive = (href: string) => {
         // A navigation that never reached its swap leaves its names on
         // this page; a second name would void the next transition.
         clear();
-        if (!flag('--motion-travel') || reducedMotion()) return;
+        if (!flag('--motion-travel')) return;
         const source = event.sourceElement;
         const link = source instanceof Element ? source.closest('a') : null;
         const cell = link?.closest('.image-link');
@@ -372,8 +380,9 @@ const isActive = (href: string) => {
           frame.dataset.understudy = '';
           frame.style.setProperty('--understudy', `url("${moving.src}")`);
         } else if (moving.kind === 'step' && slide() && frame) {
-          name(frame);
-          root.dataset.slide = moving.dir;
+          // The slide keyframes select on dataset.slide; with no name given
+          // (reduced motion) there is nothing for them to move.
+          if (name(frame)) root.dataset.slide = moving.dir;
         } else if (moving.kind === 'out') {
           landing = cell?.querySelector('img') ?? null;
           name(landing);

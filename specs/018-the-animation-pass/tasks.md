@@ -597,7 +597,7 @@ headers to confirm nothing was duplicated or dropped. -->
       line by line and the Phase 1 pause asks the person to attest
       those lines._
 
-- [ ] **T1604a** — Reduced motion withholds the names, nothing else
+- [x] **T1604a** — Reduced motion withholds the names, nothing else
       (decision review D1604, Q1). Footprint: `BaseLayout.astro`'s
       travel script, `global.css` (the RM block and the Motion section),
       `motion.test.mjs`. Script: delete `|| reducedMotion()` from the
@@ -963,6 +963,7 @@ tier if it is ever on (it is off). -->
 | T1603c (`sdd-implementer`, diagnosis)                       | `opus` (Opus 5.5)              | 54,453                      | real shift (scrollY 0): the compare's two stacked frames collapsed to one box only at `load` (the first `astro:page-load`); `enhanceCompare()` now runs at module evaluation and from `init()`, idempotent; nothing moves DCL→load at either screen; 151 article rects equal `main`'s final layout                                                          |
 | T1604 (`sdd-implementer`)                                   | `opus` (Opus 5.5)              | 200,800                     | built; 369 tests; every pseudo-element animation observed (480, move curve); way back: landing never `complete`, every seen frame re-fades (lazy cells) → T1604b; RM gate contradiction → T1604a; compare page strip way back 555px low → T1604c; no-API via prototype delete (no Firefox pref)                                                             |
 | T1604 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 110,045                     | Q1 RM withholds names only (+ group rule, header group at state duration); Q2 hold shown frames eager + preload landing; Q3 compare overlaid at before-swap from the layout; quiet-view sizes → T1605                                                                                                                                                       |
+| T1604a (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 80,266                      | done; 370 tests; RM: no group animates, root old/new 480, header old/new 180, understudy and origin scroll kept; the header-group state-duration rule is not pinned (sweep)                                                                                                                                                                                 |
 
 _(Session-tier allowance draw noted at each pause.)_
 

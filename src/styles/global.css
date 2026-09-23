@@ -1117,7 +1117,7 @@ a.note-row {
 }
 
 /* Reduced motion (spec 018's split): movements instant, fades kept.
-   Four rules. The underline's size change and the header's slide go
+   Five rules. The underline's size change and the header's slide go
    instant; the hero goes through its flag — --hero-enter at 0 zeroes
    its duration and its delays, so it lands on its end state; the
    arrival loses its rise; every colour change and fade keeps its
@@ -1125,9 +1125,14 @@ a.note-row {
    cuts it. Every rule here overrides its base rule at equal specificity
    by coming later in the file — keep the block after them. `0s` is the
    one literal a duration slot may carry — a zero is the absence of
-   motion, not a duration. The travel and the quiet growth need no rule:
-   the script never names the photograph under reduced motion, so no
-   group moves. */
+   motion, not a duration. One rule reaches the view transitions:
+   every group lands on its new box at once — the header returning from
+   data-hidden or data-held-active would otherwise slide in on its own
+   group — while the old and new images inherit the group's
+   animation-duration, which the rule leaves set, so every cross-fade
+   keeps its length; it also makes harmless any name that reaches a
+   group under the setting (D1604, Q1). The script never names the
+   photograph under reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   /* The arrival loses its rise; the hero lands on its end state, delays included. */
   :root {
@@ -1149,6 +1154,11 @@ a.note-row {
   img[data-shown='fade'],
   img[data-shown='rise'] {
     animation-duration: calc(var(--dur-appear) * var(--rm-appear));
+  }
+
+  /* Every group lands at once; its old and new keep their cross-fade. */
+  ::view-transition-group(*) {
+    animation-name: none;
   }
 }
 
@@ -2072,6 +2082,14 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
 html[data-moving]::view-transition-group(*) {
   animation-duration: var(--dur-move);
   animation-timing-function: var(--ease-move);
+}
+
+/* The header's group keeps the state duration on a travel: its slide
+   back from data-hidden is its inherited slide, not the photograph's
+   movement. */
+html[data-moving]::view-transition-group(site-header) {
+  animation-duration: var(--dur-state);
+  animation-timing-function: var(--ease-state);
 }
 
 /* The UA stylesheet inherits the group's duration, fill and delay into
