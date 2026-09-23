@@ -143,12 +143,15 @@ Every accepted raster (`jpg jpeg png webp avif tiff`) in a published
 piece's folder — or in the flat `src/content/gallery-images/` root for
 images that belong to no piece — gets a page at `/images/<id>/`, where
 the id is `<piece-folder>/<basename>` or `gallery/<basename>`. The
-page shows the photograph bare and centred just below the header, one
-rectangle turned — its long side the smaller of the page's width and
-the first screen's height below the header less the previous / next
-line and a piece's frame-to-prose spacing above and below — with the
-previous / next line directly beneath at that spacing and above the
-fold; then its title, a wall label of exposure info
+page shows the photograph bare and centred just below the header —
+fitted, turned for a portrait, inside a 3:2 rectangle whose long side
+is the smaller of the page's width inside its margins and the first
+screen's height below the header less the previous / next line and a
+piece's frame-to-prose spacing above and below, as large as it can be
+while touching a side (a square at the short side, a panorama at the
+long side) — with the previous / next line directly beneath at that
+spacing and above the fold; then its title, a wall label of
+exposure info
 read from the file's EXIF (camera, lens, focal length, aperture,
 shutter, ISO, capture date), the piece it came from, the galleries it
 sits in, and an optional caption. Every image in a piece links there;
@@ -164,7 +167,8 @@ link, then the sidecar's free text, when the frame names one — "How
 it was made", a raw-to-finished compare against the camera's frame,
 the passage of the piece the image sits in, related frames from the
 same outing, and "The print" with an enquiry link. Every page has a
-neighbour line for the set the reader is stepping through (the
+neighbour line, where the page has a set, for the set the reader
+is stepping through (the
 gallery, piece, or place they came from; arrow keys work), and a
 quiet view — click the photograph — that dims the ground and gives
 the frame the viewport, matted on the quiet dark: the one matted

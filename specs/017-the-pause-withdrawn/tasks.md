@@ -872,7 +872,7 @@ dispatched.)_
       stage" and "the darker field the stage wants is its own spec")
       and its "narrowed at spec 015" heading — history, annotate.
 
-- [ ] **T1505a** — Phase 1 review B1 and N4: `README.md`'s image-page
+- [x] **T1505a** — Phase 1 review B1 and N4: `README.md`'s image-page
       paragraph (~146–151) says the photograph's long side is the
       smaller of the two limits — true only at 3:2 or wider and 2:3 or
       taller; a square is S × S (⅔ of it). Reword that one clause to
@@ -1035,6 +1035,7 @@ tier if it is ever on (it is off). -->
 | Phase 0 re-review (`skeptical-reviewer`, new invocation) | implementation (`opus`, high) | 26,217 | SIGNED OFF; three notes carried |
 | T1505 (`sdd-implementer`) | implementation (`opus`, high) | 57,786 | done first dispatch; 320 tests |
 | Phase 1 review (`skeptical-reviewer`) | implementation (`opus`, high) | 48,776 | one blocking: B1 README states the long side as L for every ratio → T1505a (with N4); N1 plan.md 4.5rem drift fixed by the orchestrator; N2 to T1506; N3, N5–N8 carried |
+| T1505a (`sdd-implementer`) | implementation (`opus`, high) | 25,203 | done first dispatch; README clause reworded to the fit-inside-3:2 rule; 320 tests |
 
 _(Session-tier allowance draw noted at each pause.)_
 
