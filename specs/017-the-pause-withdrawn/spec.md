@@ -1,11 +1,16 @@
-# Spec: The pause withdrawn
+# Spec: The pause withdrawn, and the stage refit
 
 **Status**: Approved (2026-09-22) — written in the spec conversation
 with the product owner from the answers settled at spec 016's second
 look the same day (`ROADMAP.md`, "The pause and the hero leave the
 site"; `DECISIONS.md`, "Spec 016: the hero stage — built, then
 withdrawn"). The constitution's block-vocabulary clause was amended
-first, in its own commit on `main` (7747217).
+first, in its own commit on `main` (7747217). **Amended the same day,
+after sign-off and before implementation**: the stage's geometry — the
+box that hugs the frame and the sizing across screen shapes, parked on
+the roadmap as the next spec — folded in at the product owner's call
+("we're getting too narrow on specs … both of these are relevant here,
+so they should be handled together").
 **Depends on**: 007 (the pause and the held block, which this spec
 separates: one leaves, one stays), 013 and 015 (the mat rule and the
 one surface it was left on), 006 (the image page's stage, its frame
@@ -40,6 +45,17 @@ arrival that no longer exists.
 The pause is withdrawn, not condemned. Its code is `main`'s history up
 to this spec; its rework, if the day comes, starts from the archive.
 
+The stage itself is refit in the same spec, from the photographer's
+two other findings at the same look. Today the stage is a box the
+height of the screen with the photograph centred in it, so on a tall
+screen a landscape frame sits small in a field of empty ground with the
+title far below the fold, while a portrait frame runs much larger. What
+he wants: the photograph centred and as large as its rule allows, sized
+evenly across 2:3 and 3:2 and across his two screens, and the title and
+text following directly beneath it at the distance a piece keeps
+between a frame and its prose — the box hugs the frame; nothing is
+pushed off the screen by empty space.
+
 ## Goals
 
 1. **The pause leaves the vocabulary.** `pause` is no longer a block a
@@ -66,18 +82,32 @@ to this spec; its rework, if the day comes, starts from the archive.
    the frame's box, no residual padding or field. No other surface
    gains or loses anything. The rule is stated in the docs and pinned
    by a test the way spec 015 pinned the presence table.
-5. **The cue that there is more.** On the image page's normal view the
-   stage is shorter than the first screen by the frame nav's height, so
-   the previous / where / next line sits fully above the fold at the
-   top, on both of the photographer's screens, with and without script.
-   The photograph fits the shorter stage as it fits today: smaller only
-   where it is height-bound; a width-bound landscape frame does not
-   change. The quiet view keeps its own height.
-6. **Nothing else of the pause's family moves.** The quiet dark, the
+5. **The stage hugs the frame.** On the image page's normal view the
+   stage's box is the photograph plus one fixed spacing above and
+   below — the distance a piece keeps between a frame and its prose —
+   and the previous / where / next line and the title follow directly.
+   No screen-height box, no empty ground the photograph does not fill.
+   The cue survives as part of the height rule: a photograph can never
+   be so tall that the frame nav line falls below the fold on arrival,
+   on either of the photographer's screens, with and without script.
+   The quiet view keeps its own height and rules.
+6. **Sized evenly across screen shapes.** A 2:3 and a 3:2 photograph
+   are the same rectangle turned — one long side, one short side —
+   and that rectangle is as large as the screen allows: its long side
+   is the smaller of the width the page offers and the height the
+   first screen offers below the header, with the nav line and the
+   spacing taken out. On the 16:10 laptop the height decides, on the
+   DualUp the width, and a landscape frame may run wider than the text
+   column where the page has the room, as a piece's wide frame does.
+   No pixel size anywhere; the rule is a share of the screen. The
+   photographer judges the result on both screens at the phase pause,
+   with the alternative (equal area rather than equal sides) named
+   there if the equal rectangle reads wrong.
+7. **Nothing else of the pause's family moves.** The quiet dark, the
    quiet view's rules, the ground and its fills, the social images, the
    galleries, the place wall, the compare figure (its fill and divider
    white, as spec 015 left them) are unchanged.
-7. **The record tells the truth.** Spec 007's documents are annotated
+8. **The record tells the truth.** Spec 007's documents are annotated
    as half-withdrawn, not rewritten; `README.md`, `AUTHORING.md`, the
    plugin's README, and `design/brief.md` describe the site without the
    pause and with the mat rule and the cue; `DECISIONS.md` and
@@ -86,12 +116,12 @@ to this spec; its rework, if the day comes, starts from the archive.
 
 ## Non-goals
 
-- **The stage across screen shapes.** The photographer's two other
-  findings from the same look — a landscape frame too small against the
-  text column on the tall screen while portraits run large, and the
-  words too far from the image — are the next spec (`ROADMAP.md`, "The
-  stage across screen shapes"). This spec changes the stage's height by
-  exactly the cue and nothing else about its geometry.
+- **The stage's mat, ground and quiet view beyond what Goals 4–6
+  say.** The quiet view is untouched in every rule; the compare figure,
+  the passage and the words beneath the stage keep their own layout
+  once the stage above them is shorter.
+- **A piece's frames.** The fit rules of single, wide, fullbleed, tall
+  and the rest are not re-derived; the stage's rule is the stage's.
 - **The arrival, in any form.** No dark opening, no dimmed chrome, no
   fade, no tuning bar, no darker field for the stage. All of it is on
   the archive branch for the day it is revisited.
@@ -116,11 +146,14 @@ to this spec; its rework, if the day comes, starts from the archive.
   nothing in a piece pins, dims, or scales. The sample piece that had a
   pause reads on as a piece with a fullbleed panorama in its place.
 - **Arriving on an image page.** The page opens on paper, the header at
-  full strength, the photograph bare on the stage, and beneath it, above
-  the fold, the previous / where / next line. Scrolling goes straight
-  into the words. Where the frame belongs to no set the stage is the
-  same height — the cue is a fixed amount, not a measurement of a line
-  that may be hidden.
+  full strength, the photograph bare and centred across the page just
+  below the header, as large as the rule allows; directly beneath it,
+  at a piece's spacing, the previous / where / next line, then the
+  title and the words. On the laptop a 3:2 frame and a 2:3 frame show
+  the same long side and short side, turned; on the DualUp the same,
+  larger. Nothing sits below the fold that empty ground pushed there.
+  Where the frame belongs to no set the line is absent and the title
+  follows at the same spacing.
 - **The quiet view.** A click takes the photograph to the quiet dark in
   its white mat, as large as the screen allows, exactly as today; a
   click back returns to the bare stage on paper.
@@ -161,15 +194,31 @@ to this spec; its rework, if the day comes, starts from the archive.
   every other surface. The presence test's table has one matted
   surface. The compare's white fill and divider are the compare's own
   and stay.
-- **The cue is one fixed length, always on.** The stage's available
-  height on the normal view is the first screen below the header less
-  the frame nav line's height, stated once as a token the nav's own
-  rule claims, so the two cannot drift; no script, no measurement, no
-  gate value. It applies with script and without, on every image page,
-  and not in the quiet view. A test pins the stage's formula to the
-  token and the nav's height to the same token.
-- **No layout shift.** The stage's width and place are exactly today's;
-  its height is the cue's from the first paint.
+- **The box hugs the frame.** The stage on the normal view has no
+  minimum height; its box is the frame plus one spacing above and one
+  below, the spacing a piece's flow keeps between a frame and prose,
+  from that token — not a share of the screen, not a new value. The
+  frame is centred across the page. The nav line and the title follow
+  in flow. In the quiet view the stage keeps today's rules entirely.
+- **One rectangle, turned.** The frame's long side is
+  `min(available width, available height)` where the available width
+  is the page's width less its side pads (not capped at the text
+  column) and the available height is the first screen below the
+  header less the nav line's height and the two spacings, the nav
+  line's height stated once as a token its own rule claims so the two
+  cannot drift; no script, no measurement, no gate value; the same
+  with and without script. A 3:2 frame is that long side wide; a 2:3
+  frame is that long side tall; a square frame's side is the short
+  side. The responsive image's sizes hint follows the same rule so the
+  browser fetches the width it will show. A test pins the formula to
+  its tokens.
+- **No layout shift.** The frame's size and place are decided by the
+  stylesheet before the first paint, as today.
+- **The pause is where the photographer judges it.** The Phase 0 pause
+  shows both screens; if the equal rectangle reads wrong — a landscape
+  frame too small beside a portrait of the same short side — the
+  alternative named for the next look is equal area, and the choice is
+  a spec amendment, not a plan decision.
 - **The documents.** `README.md`'s block table loses its `pause` row
   and footnote, its "as of spec 007" list and its tree lose the pause's
   files, and its mat sentence reads the quiet view alone. `AUTHORING.md`
@@ -181,10 +230,12 @@ to this spec; its rework, if the day comes, starts from the archive.
   pause gains one line saying which spec answered it. `DECISIONS.md`
   gains a "Spec 017" entry in the photographer's words and annotates
   "Spec 007" and "Spec 015"; `ROADMAP.md` strikes "The pause and the
-  hero leave the site" as done here and annotates "The pause,
-  rethought" and "The mat only where the ground goes dark" with the
-  outcome — both drafted on the branch, applied to `main` after the
-  merge.
+  hero leave the site" and "The stage across screen shapes" as done
+  here and annotates "The pause, rethought" and "The mat only where
+  the ground goes dark" with the outcome — both drafted on the branch,
+  applied to `main` after the merge. `README.md`'s and `AUTHORING.md`'s
+  description of the stage (a screen below the header) is corrected to
+  the rule above.
 
 ## Fixtures and authoring requirements
 
@@ -217,15 +268,28 @@ to this spec; its rework, if the day comes, starts from the archive.
       mat, no matte fill, no residual padding; the quiet view keeps its
       white mat at spec 013's rule; no other surface changed; the
       presence test's table has one matted surface, the quiet view
-- [ ] On the image page's normal view the stage is shorter than the
-      first screen by the frame nav's height, from one token the nav's
-      own rule claims, with and without script and whether or not the
-      frame belongs to a set; the previous / where / next line sits
-      fully above the fold at the top on the 16:10 laptop and the
-      DualUp; the quiet view's height is unchanged; pinned by a test
-- [ ] The photograph's width and place on the stage are unchanged; a
-      width-bound landscape frame is the same size as before; a
-      height-bound frame is smaller by exactly the cue's share
+- [ ] On the image page's normal view the stage's box is the frame plus
+      a piece's frame-to-prose spacing above and below, from that
+      token, with no minimum height; the previous / where / next line
+      (where the frame has a set) and the title follow in flow at that
+      spacing; measured on the laptop, the DualUp and a phone width
+- [ ] A 3:2 and a 2:3 frame on the same screen show the same long side
+      and the same short side, turned; the long side is the smaller of
+      the page's width less its side pads and the first screen's height
+      below the header less the nav line's height and the two spacings,
+      from the tokens, with and without script; on the laptop the
+      height decides and on the DualUp the width, with a landscape
+      frame wider than the text column there; pinned by a test and
+      measured on both screens, the numbers recorded
+- [ ] The previous / where / next line sits fully above the fold on
+      arrival on both screens for the tallest frame the rule allows
+- [ ] The image's sizes hint gives the width the rule shows, so the
+      browser fetches no wider a file than it renders, pinned by a test
+- [ ] The quiet view's rules and geometry are unchanged, byte-for-byte
+      in the stylesheet
+- [ ] The photographer has seen both frames on both screens at the
+      Phase 0 pause and named the rule kept (equal rectangle) or the
+      one to try (equal area), recorded in this spec
 - [ ] The compare's fill and divider, the quiet dark, the ground and
       fills, the social images, the galleries and the place wall are
       byte-for-byte unchanged in their rules
@@ -266,5 +330,19 @@ to this spec; its rework, if the day comes, starts from the archive.
   spec 016 built it under the arrival only; here it is the stage's rule.
 - **The fog piece's pause becomes a fullbleed** — the spec author's
   choice for the fixture, open to the photographer.
-- **The geometry findings are the next spec** (product owner, recorded
-  on the roadmap): not folded in here, so this spec stays a removal.
+- **The stage's geometry folded in, after sign-off** (product owner,
+  2026-09-22): "the stage for the image's page makes it so that it is
+  centered completely in the screen which pushes all other text off of
+  the screen. This is most noticeable with vertical screens and the
+  dualup display … I want it to be such that the image … is centered
+  and is as large as needs to be … but that the title and text follows
+  as it would in any other piece." And on scope: "Fold both into this
+  spec. I think we're getting too narrow on specs and therefore there
+  is a lot of unnecessary overhead with planning/tasks/reviews. Both of
+  these are relevant here, so they should be handled together." The
+  spec author's leans, to be judged at the pause: one rectangle turned
+  (equal sides, the galleries' own rule) rather than equal area; the
+  long side from the smaller of the page's width and the first screen's
+  height; the width not capped at the text column; the spacing a
+  piece's own frame-to-prose distance, fixed, not a share. The cue
+  survives inside the height rule.
