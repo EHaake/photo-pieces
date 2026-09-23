@@ -87,13 +87,20 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   with its feel unchanged: `a:not(.brand, .button)` (`background-size`
   and `color` at `--dur-state --ease-state`), `.site-header`
   (`transform`, 220ms → the token's 180ms, judged at the pause),
-  `.button` and `.social-links a` (their three colour transitions), and
+  `.button` and `.social-links a` (their colour transitions — three on `.button`, two on `.social-links a`), and
   `.hero > *` — `animation: keel-enter calc(var(--dur-move) * var(--hero-enter)) var(--ease-state) both`
-  with the three delays `calc(var(--hero-stagger) * 1 | 2 | 3)`. The
-  hero's 560ms becomes the move duration's value (three durations, not
-  four — the spec's "on the order of three"); a multiplier of 0 on the
-  flag makes the animation zero-length and `both` lands it on its end
-  state, which is how "switched off" keeps the code. The page-level
+  with the three delays `calc(var(--hero-stagger) * 1 * var(--hero-enter))`,
+  `calc(var(--hero-stagger) * 2 * var(--hero-enter))`,
+  `calc(var(--hero-stagger) * 3 * var(--hero-enter))`. The hero's 560ms
+  becomes the move duration's value (three durations, not four — the
+  spec's "on the order of three"); a multiplier of 0 on the flag makes
+  the animation and its delays zero-length, and `both` lands every child
+  on its end state at once, which is how "switched off" keeps the code.
+  The delays read the flag too: a zero-length animation behind a
+  surviving delay holds its child at `from` (opacity 0) for the delay
+  and then shows it — a staggered pop, not off. Reduced motion switches
+  the entrance off through the same flag. _(T1600 review, 2026-09-23:
+  B2, the decision review's option D.)_ The page-level
   `::view-transition-group(*)` rule gives every page change's root
   cross-fade `--dur-state --ease-state` in place of the UA's 0.25s
   (old/new pseudo-elements inherit the group's duration per the UA
@@ -102,7 +109,7 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   group takes `--dur-move --ease-move`, so the page beneath lands with
   the photograph. Beside those two, `::view-transition-old(*), ::view-transition-new(*) { animation-timing-function: inherit; }`:
   the UA stylesheet inherits duration, fill and delay from the group
-  but not the timing function (csswg-drafts #11546), and `inherit` is
+  but not the timing function (csswg-drafts #11546; closed via PR #12498, which adds `inherit` to the UA sheet — the rule stays for browsers on the older sheet), and `inherit` is
   not a literal to the scanner. One rule and one attribute rather than
   a per-case duration: the simpler shape, and the token is the tunable.
   The two `*-covers` flags exist because the envelope names the covers
@@ -116,12 +123,11 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
 - **Reduced motion** (`global.css`, the `@media (prefers-reduced-motion: reduce)`
   block). The blanket `* { animation-duration: 1ms; transition-duration: 1ms; scroll-behavior: auto }`
   is replaced by the distinction the spec draws — movements instant,
-  fades kept — as five rules, pinned by string:
+  fades kept — as four rules, pinned by string:
 
-      :root { --arrive-rise: 0px; }
-      a:not(.brand, .button) { transition-property: color; }   /* the underline's size change is instant; the colour still fades */
+      :root { --arrive-rise: 0px; --hero-enter: 0; }   /* the arrival loses its rise; the hero lands on its end state, delays included */
+      a:not(.brand, .button, .social-links *) { transition-property: color; }   /* the underline's size change is instant; the colour still fades — the social links, which cancel the underline, keep their border and colour fades */
       .site-header { transition-duration: 0s; }
-      .hero > * { animation-duration: 0s; animation-delay: 0s; }
       img[data-shown='fade'], img[data-shown='rise'] { animation-duration: calc(var(--dur-appear) * var(--rm-appear)); }
 
   `scroll-behavior` leaves with the blanket: the site never sets it
@@ -132,6 +138,16 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   transition when `--rm-quiet` is 1 and as a plain toggle when it is 0.
   `0s` is the one literal the scan allows in a duration slot — a zero
   is the absence of motion, not a duration.
+  The hero goes through its flag, not a `.hero > *` rule: that rule's
+  `animation-delay: 0s` (0,1,0) lost to the `.hero > :nth-child(n)`
+  delays (0,2,0). The link rule excludes `.social-links *` at unchanged
+  specificity (0,1,1) because `.social-links a` is also (0,1,1) and the
+  later reduced-motion rule would otherwise cut its border fade. Every
+  rule here overrides its base rule at equal specificity by coming later
+  in the file, so the block stays after them. _(T1600 review,
+  2026-09-23: B1 and B2.)_ Because the dev switch writes tokens inline on
+  `<html>`, which outranks these `:root` overrides, the switch writes
+  only the tokens the person has changed (a note for T1602).
 
 - **Appearance and arrival** (`src/lib/motion.ts`'s `appear()`, called
   from `BaseLayout.astro`'s script; the CSS in a new `/* ---- Motion */`
@@ -413,7 +429,7 @@ Every claim above is owned by a task and a check:
   `<style>` block of any `.astro` file under `src/` declares one of
   them — a walk over CSS declarations, not a grep, because
   `motion.ts` and the panel carry the names as strings — except the
-  reduced-motion block's `:root { --arrive-rise: 0px }` and the covers
+  reduced-motion block's `:root { --arrive-rise: 0px; --hero-enter: 0 }` and the covers
   rule's two reads of the `*-covers` tokens (walk, matte.test.mjs
   (a)'s shape).
   (b) `scanMotion(global.css)` is empty; every `<style>` block in every
@@ -424,11 +440,11 @@ Every claim above is owned by a task and a check:
   three delays, and `keel-enter`'s body unchanged; and, by string, the
   two `::view-transition-group` rules, the old/new
   `animation-timing-function: inherit` rule and the covers rule. (d) The
-  reduced-motion block contains exactly the five rules above and no
+  reduced-motion block contains exactly the four rules above and no
   `*` prelude, no `1ms`, no `scroll-behavior`, and no rule under it
   names an `opacity` transition or the appearance animation with a
   zero. Mutations, each reverted: `220ms` restored on `.site-header` →
-  (b) fails naming the line; `--dur-state` declared on `.button` → (a)
+  (c) fails naming the rule (and (b) once T1601 lands); `--dur-state` declared on `.button` → (a)
   fails; the blanket `*` rule restored → (d) fails; `--dur-move`
   retyped `500ms` → (a) fails against `EXPECTED`.
 

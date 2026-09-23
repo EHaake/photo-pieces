@@ -130,6 +130,33 @@
      value after the head on a place with no writing (no head-case
      override). Keep the clamp in step with .section by hand. */
   --place-wall-gap: clamp(3.5rem, 5.5vw, 5.5rem);
+  /* THE MOTION GRAMMAR (spec 018). Three durations, two curves, read
+     by every transition and animation on the site; beside them the
+     flags and numbers the tuning envelope names. The dev switch sets
+     any of them on `<html>`. motion.test.mjs pins each by name — to
+     retune, move the value here and in its `EXPECTED` row, and nowhere
+     else. The rule: motion answers the reader. */
+  --dur-state: 180ms; /* a state change: hover, underline, the header's slide, a page's cross-fade */
+  --dur-move: 480ms; /* a photograph's movement: the travel, the quiet growth; the hero's entrance */
+  --dur-appear: 400ms; /* a photograph's appearance: the fade on decode, the arrival */
+  --ease-state: ease;
+  --ease-move: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-appear: 1; /* the four behaviours' flags, 1 or 0 — read by script; the code stays when one is off */
+  --motion-arrive: 1;
+  --motion-travel: 1;
+  --motion-quiet: 1;
+  --motion-appear-covers: 1; /* the covers on the three indexes and the front door: their own appearance and arrival flags */
+  --motion-arrive-covers: 1;
+  --arrive-rise: 0px; /* the arrival's shape: 0px is the fade alone, a length is the fade with a rise */
+  --arrive-threshold: 0.15; /* the share of a frame in view that counts as arrived */
+  --arrive-stagger: 0ms; /* a multi-cell block arrives as one; a stagger only if asked to see one */
+  /* the waiting box: the surface step, or var(--color-bg) for the ground itself */
+  --wait-fill: var(--color-surface);
+  --hero-enter: 1; /* the front door's inherited entrance, on the tokens; 0 turns it off */
+  --hero-stagger: 90ms;
+  --arrows-slide: 0px; /* the arrows cross-fade in place; a length is the slide variant's distance */
+  --rm-appear: 1; /* under reduced motion: 1 keeps the appearance fade's duration, 0 cuts it */
+  --rm-quiet: 1; /* under reduced motion: 1 keeps the quiet view's ground fade, 0 cuts */
 }
 
 @media (max-width: 719.98px) {
@@ -195,8 +222,8 @@ a:not(.brand, .button) {
   background-repeat: no-repeat;
   background-size: 0 1px;
   transition:
-    background-size 180ms ease,
-    color 180ms ease;
+    background-size var(--dur-state) var(--ease-state),
+    color var(--dur-state) var(--ease-state);
 }
 
 a:not(.brand, .button):hover {
@@ -236,7 +263,9 @@ a:not(.brand, .button):hover {
   padding-inline: max(var(--page-pad), calc((100% - var(--content-width)) / 2));
   background: var(--color-bg);
   border-bottom: var(--hairline);
-  transition: transform 220ms ease;
+  transition: transform var(--dur-state) var(--ease-state);
+  /* Chrome: its own group, never blended with the page's cross-fade (spec 018). */
+  view-transition-name: site-header;
 }
 
 /* Hide on scroll down, reveal on scroll up (BaseLayout's script sets the
@@ -308,19 +337,19 @@ html[data-held-active] .site-header {
 }
 
 .hero > * {
-  animation: keel-enter 560ms ease both;
+  animation: keel-enter calc(var(--dur-move) * var(--hero-enter)) var(--ease-state) both;
 }
 
 .hero > :nth-child(2) {
-  animation-delay: 90ms;
+  animation-delay: calc(var(--hero-stagger) * 1 * var(--hero-enter));
 }
 
 .hero > :nth-child(3) {
-  animation-delay: 180ms;
+  animation-delay: calc(var(--hero-stagger) * 2 * var(--hero-enter));
 }
 
 .hero > :nth-child(4) {
-  animation-delay: 270ms;
+  animation-delay: calc(var(--hero-stagger) * 3 * var(--hero-enter));
 }
 
 .section {
@@ -480,9 +509,9 @@ p {
   color: var(--color-on-accent);
   font-weight: 700;
   transition:
-    background 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease;
+    background var(--dur-state) var(--ease-state),
+    border-color var(--dur-state) var(--ease-state),
+    color var(--dur-state) var(--ease-state);
 }
 
 .button:hover {
@@ -1060,8 +1089,8 @@ a.note-row {
   color: var(--color-muted);
   background-image: none;
   transition:
-    border-color 180ms ease,
-    color 180ms ease;
+    border-color var(--dur-state) var(--ease-state),
+    color var(--dur-state) var(--ease-state);
 }
 
 .social-links a:hover {
@@ -1081,13 +1110,39 @@ a.note-row {
   }
 }
 
+/* Reduced motion (spec 018's split): movements instant, fades kept.
+   Four rules. The underline's size change and the header's slide go
+   instant; the hero goes through its flag — --hero-enter at 0 zeroes
+   its duration and its delays, so it lands on its end state; the
+   arrival loses its rise; every colour change and fade keeps its
+   duration, and the appearance fade keeps its own unless --rm-appear
+   cuts it. Every rule here overrides its base rule at equal specificity
+   by coming later in the file — keep the block after them. `0s` is the
+   one literal a duration slot may carry — a zero is the absence of
+   motion, not a duration. The travel and the quiet growth need no rule:
+   the script never names the photograph under reduced motion, so no
+   group moves. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 1ms !important;
-    scroll-behavior: auto !important;
-    transition-duration: 1ms !important;
+  /* The arrival loses its rise; the hero lands on its end state, delays included. */
+  :root {
+    --arrive-rise: 0px;
+    --hero-enter: 0;
+  }
+
+  /* The underline's size change is instant; the colour still fades — the
+     social links, which cancel the underline, keep their border and
+     colour fades. */
+  a:not(.brand, .button, .social-links *) {
+    transition-property: color;
+  }
+
+  .site-header {
+    transition-duration: 0s;
+  }
+
+  img[data-shown='fade'],
+  img[data-shown='rise'] {
+    animation-duration: calc(var(--dur-appear) * var(--rm-appear));
   }
 }
 
@@ -1984,4 +2039,40 @@ html[data-quiet] .image-frame,
 html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   max-width: 100%;
   cursor: zoom-out;
+}
+
+/* ---- Motion (spec 018) -------------------------------------------------
+   The motion that is not an inherited rule's, on the grammar's tokens
+   in :root, added task by task. T1600: the page change's cross-fade —
+   every view-transition group at the state duration, and at the move
+   duration and curve while `html[data-moving]` says a photograph is
+   travelling, stepping or growing, so the page beneath lands with it —
+   and the covers' own switch. `.note-cover` is T1603's wrapper; the
+   rule may precede the markup. */
+::view-transition-group(*) {
+  animation-duration: var(--dur-state);
+  animation-timing-function: var(--ease-state);
+}
+
+html[data-moving]::view-transition-group(*) {
+  animation-duration: var(--dur-move);
+  animation-timing-function: var(--ease-move);
+}
+
+/* The UA stylesheet inherits the group's duration, fill and delay into
+   the old and new images; it did not inherit the timing function until
+   csswg-drafts #11546, which closed via PR #12498. The rule stays for
+   browsers still on the older UA sheet. */
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-timing-function: inherit;
+}
+
+/* The covers get their own switch: the script reads the two flags from
+   the host's computed style, and custom properties inherit, so this one
+   rule points a cover's flags at the `*-covers` tokens. */
+.note-cover,
+.gallery-card .image-link {
+  --motion-appear: var(--motion-appear-covers);
+  --motion-arrive: var(--motion-arrive-covers);
 }

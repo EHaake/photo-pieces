@@ -74,7 +74,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the grammar, the scanner and barrier, the switch (reviewer after the phase; `review: per-task` on T1600; walkthrough: none — the tokens carry today's motion with its feel unchanged, the barrier and the switch move nothing on their own; the switch is judged with the behaviours at Phase 1's pause)
 
-- [ ] **T1600** — The grammar: the tokens on `:root`, every inherited
+- [x] **T1600** — The grammar: the tokens on `:root`, every inherited
       transition and animation on them, the reduced-motion split, and
       the pins. `review: per-task`. Pattern: the `:root` mat and ground
       token comments in `src/styles/global.css` (~65–103) for the
@@ -97,9 +97,9 @@ headers to confirm nothing was duplicated or dropped. -->
       cross-fade — spec 018); `.button` and `.social-links a` → their
       three properties at `var(--dur-state) var(--ease-state)`;
       `.hero > *` → `animation: keel-enter calc(var(--dur-move) * var(--hero-enter)) var(--ease-state) both;`
-      and the three `:nth-child` delays `calc(var(--hero-stagger) * 1)`,
-      `* 2`, `* 3`; `keel-enter`'s keyframes untouched. The
-      reduced-motion block replaced by exactly the five rules in
+      and the three `:nth-child` delays `calc(var(--hero-stagger) * 1 * var(--hero-enter))`,
+      `* 2 *`, `* 3 *` (the delays read the flag — T1600 review B2); `keel-enter`'s keyframes untouched. The
+      reduced-motion block replaced by exactly the four rules in
       plan.md ("Reduced motion") with a comment (movements instant,
       fades kept — spec 018's split; `0s` is the one literal a duration
       slot may carry; the travel and the growth need no rule: the
@@ -127,7 +127,7 @@ headers to confirm nothing was duplicated or dropped. -->
       in every `<style>` block of every `.astro` file under `src/` — a
       declaration walk, not a grep: `motion.ts` and the panel carry the
       names as strings — finds none of the twenty declared elsewhere
-      except the reduced-motion block's `:root { --arrive-rise: 0px }`
+      except the reduced-motion block's `:root { --arrive-rise: 0px; --hero-enter: 0 }`
       and the covers rule's `--motion-appear` / `--motion-arrive`
       reading the two `*-covers` tokens;
       describe "(c) the inherited motion reads the tokens": the six
@@ -136,7 +136,7 @@ headers to confirm nothing was duplicated or dropped. -->
       the covers rule, each by string; describe "(d) reduced
       motion keeps the fades and drops the movement": the
       `@media (prefers-reduced-motion: reduce)` block's rules are
-      exactly the five (preludes and declarations), no prelude is `*`,
+      exactly the four (preludes and declarations; five until the T1600 review's B1/B2, plan.md "Reduced motion"), no prelude is `*`,
       no declaration in it carries `1ms` or `scroll-behavior`, and no
       rule in it sets a zero on an `opacity` transition or on
       `img[data-shown='fade']` other than the `--rm-appear` product.
@@ -802,6 +802,9 @@ tier if it is ever on (it is off). -->
 | Sign-off (`skeptical-reviewer`)                    | top (`claude-fable-5-1`, high) | 164,289                     | fix and re-review: 5 blocking, 8 notes                                                                                                                       |
 | Sign-off re-review (`skeptical-reviewer`, resumed) | top (`claude-fable-5-1`, high) | 32,818 (cumulative 197,107) | signed off; 4 lines carried (14–17)                                                                                                                          |
 | Step-down (the person's request, 2026-09-23)       | all rows → `opus` (Opus 5.5)   | —                           | low Fable allowance; session on `claude-opus-5-5` medium; decision review and close-out at `opus`, no override, for the rest of 018 (CLAUDE.md's role table) |
+| T1600 (`sdd-implementer`, + one fix round)         | `opus` (Opus 5.5)              | 96,822                      | done; 341 tests; `!important` 4 → 1; `.social-links a` has two properties, not three                                                                         |
+| T1600 review + decision (`skeptical-reviewer`)     | `opus` (Opus 5.5)              | 63,733                      | 2 blocking (reduced-motion cascade: social-link border fade cut; hero delays survive) → option D transcribed into plan.md                                    |
+| T1600 re-review (`skeptical-reviewer`, resumed)    | `opus` (Opus 5.5)              | 69,238 cumulative           | signed off                                                                                                                                                   |
 
 _(Session-tier allowance draw noted at each pause.)_
 
