@@ -152,18 +152,31 @@ the image page, the sampler and a test all need the string.
   stage's box is padding + frame + padding, and the nav, then
   `.image-head`, follow in flow.
 
-  The frame — one rectangle, turned. `--r = max(ar, 1)` and
-  `--q = min(ar, 1)` already sit on `.image-frame`. The long side is
-  `min(--avail-w, --avail-h)`; the width is that long side for a
-  landscape (`q = 1`) and long side × `ar` for a portrait (`q = ar`), so
-  one declaration covers both:
+  The frame — one rectangle, turned (spec 4a89ceb). The reference
+  rectangle is L × S with L = `min(--avail-w, --avail-h)` and S = ⅔L;
+  every frame fits inside it, turned for a portrait, as large as it
+  can while touching at least one side. `--r = max(ar, 1)` and
+  `--q = min(ar, 1)` already sit on `.image-frame`, and one `min()`
+  covers every ratio: for a landscape (`q = 1`, `r = ar`) the width is
+  `min(L, S·ar)` — L for anything at or wider than 3:2, S·ar for a
+  squarer frame — and for a portrait (`q = ar`, `r = 1`) it is
+  `min(L·ar, S)` — S for anything at or taller than 2:3, L·ar for a
+  squarer one:
 
       html:not([data-quiet]) .image-frame {
-        width: calc(min(var(--avail-w), var(--avail-h)) * var(--q));
+        --L: min(var(--avail-w), var(--avail-h));
+        --S: calc(var(--L) * 2 / 3);
+        width: min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)));
       }
       html:not([data-quiet]) .image-frame img {
         width: 100%;
       }
+
+  So a 3:2 is L × S and a 2:3 is S × L (S·1.5 = L on both branches — the
+  pair is the reference rectangle itself), a square is S × S, a 3:1 is
+  L wide and L/3 tall, a 16:9 is L wide and 0.5625L tall, a 4:5 is S
+  wide and 1.25S tall. Two custom properties rather than the expression
+  inlined twice, so the ⅔ is written once.
 
   Gated on the absence of `data-quiet` rather than declared on
   `.image-frame` and reset in the quiet rule, because the quiet rules
@@ -177,8 +190,8 @@ the image page, the sampler and a test all need the string.
   the frame must be the rule's size whether or not the hint is exact.
   Spec 013's formulas still hold and stay byte-identical: the image's
   `max-height: calc(var(--avail-h) - 2 * var(--mat))` is
-  `--avail-h` here and never binds (height = long side × `q` / `ar` ≤
-  long side ≤ `--avail-h`); `max-width: 100%` is the figure's width;
+  `--avail-h` here and never binds (every frame's height is at most L
+  ≤ `--avail-h`); `max-width: 100%` is the figure's width;
   the frame's base `max-width` becomes `100%` (no column cap — the
   spec's "not capped at the text column"; the quiet list rule already
   says `100%`).
@@ -207,7 +220,12 @@ the image page, the sampler and a test all need the string.
   wider than the 1160 column; 3:2 is 1216 × 811, 2:3 is 811 × 1216.
   375×812 — pad 16, `--avail-w` 343, `--avail-h` 812 − 72 − 96 − 62 =
   582 → L = 343; 3:2 is 343 × 229, 2:3 is 229 × 343. On every viewport
-  the two frames are the same rectangle turned.
+  the two frames are the same rectangle turned; the ⅔ rule changes
+  nothing for that pair. For the other shapes the person sees: the fog
+  piece's panorama page (`/images/where-the-fog-lets-go/pano/`, 3:1,
+  the one panorama with an image page in a set) is L wide and L/3
+  tall — 785 × 262, 1216 × 405, 343 × 114 — and a square would be S × S
+  — 523, 811, 229.
 
   The `sizes` hint. A `sizes` attribute cannot read a custom property,
   so the rule is spelled in literals by `stageSizes(ar)` in
@@ -217,21 +235,26 @@ the image page, the sampler and a test all need the string.
   a test evaluates it against the stylesheet:
 
       const availW = 'calc(100vw - 2 * clamp(1rem, 3vw, 2rem))';
-      const availH = (nav) => `calc(100svh - 4.5rem - 2 * 3rem - ${nav})`;
+      const availH = (nav) => `calc(100vh - 4.5rem - 2 * 3rem - ${nav})`;
       const NAV = 'calc(0.78rem * 1.362 + 0.75rem)', NAV_PHONE = 'calc(0.78rem * 1.362 * 2 + 1rem + 0.75rem)';
-      const long = (nav) => `min(${availW}, ${availH(nav)})`;
-      export function stageSizes(ar) { const q = Math.min(ar, 1);
-        const w = (nav) => q === 1 ? long(nav) : `calc(${long(nav)} * ${q})`;
-        return `(max-width: 719.98px) ${w(NAV_PHONE)}, ${w(NAV)}`; }
+      export const PHONE = '(max-width: 719.98px)';   // the nav's own query, mirrored
+      const L = (nav) => `min(${availW}, ${availH(nav)})`;
+      export function stageSizes(ar) { const q = Math.min(ar, 1), r = Math.max(ar, 1);
+        // the rule: min(L·q, S·r) with S = ⅔L — the coefficients written as numbers
+        const w = (nav) => `min(calc(${L(nav)} * ${q}), calc(${L(nav)} * ${(2 * r) / 3}))`;
+        return `${PHONE} ${w(NAV_PHONE)}, ${w(NAV)}`; }
 
   The literals mirror `--page-pad`, `--block-margin` (3rem),
-  `--frame-nav-h` and the `--header-h` fallback; the test pins them by
-  evaluation, not by string. The hint carries the fallback header, not
-  the measured one, so where the real header is taller than 72px the
-  hint over-delivers by the difference (× `ar` for a portrait) — the
-  harmless direction, as spec 015's hints over-deliver. `min()` and
-  `calc()` with `svh` inside `sizes` is **a claim to verify**: the
-  browser's chosen `currentSrc` is read at T1503 against the rendered
+  `--frame-nav-h`, the `--header-h` fallback and the nav's query; the
+  test pins them by evaluation, not by string (the query literal by
+  string). `100vh`, not `svh`: inside `sizes` the small-viewport unit
+  is unconfirmed and on the three viewports the two are equal. The
+  hint carries the fallback header, not the measured one, so where the
+  real header is taller than 72px the hint over-delivers by the
+  difference (× `ar` for a portrait) — the harmless direction, as spec
+  015's hints over-deliver. `min()` and `calc()` inside `sizes` is **a
+  claim to verify**: the browser's chosen `currentSrc` is read at T1503
+  against the rendered
   width.
 
   The title's block. `.image-head` is `page-head section image-head`,
@@ -307,8 +330,7 @@ unknown block directive "pause" — the block vocabulary is closed; known blocks
 No barrier line changes; the build's output moves by nothing this spec
 does (87 pages; the two barriers as spec 015 left them). The test
 count falls — the pause's cases in four files and its shape suite go,
-four cases arrive (the closed-vocabulary failure, the cue's token, the
-bare stage's evaluator case, the one dark ground) — and the implementer
+the refit's and the removal's cases arrive — and the implementer
 records the number rather than this plan predicting it.
 
 ## Testing strategy
@@ -419,14 +441,15 @@ Every claim above is owned by a task and a check:
   `display: grid`, `place-items: center`, `padding: var(--stage-pad) var(--page-pad)`,
   and no `min-height` (the raw regex finds none in its body); the
   rule's prelude is exactly `.image-stage`; `html[data-quiet] .image-stage`'s
-  body is byte-identical to `main`'s (pinned by reading the rule out of
-  `git show main:src/styles/global.css` in the test — or, if the test
-  must not shell out, by the exact string) and carries no
-  `--frame-nav-h`; `.image-frame` declares `--r`, `--q`, `--mat: 0px`,
-  `max-width: 100%`, `margin: 0` and nothing else; a rule with prelude
-  exactly `html:not([data-quiet]) .image-frame` declares `width` as
-  `calc(min(var(--avail-w), var(--avail-h)) * var(--q))` and nothing
-  else, and `html:not([data-quiet]) .image-frame img` declares
+  body is byte-identical to `main`'s (the exact string, pasted from
+  `main` into the test) and carries no `--frame-nav-h`; `.image-frame`
+  declares `--r`, `--q`, `--mat: 0px`, `max-width: 100%`, `margin: 0`
+  and nothing else; a rule with prelude exactly
+  `html:not([data-quiet]) .image-frame` declares `--L` as
+  `min(var(--avail-w), var(--avail-h))`, `--S` as
+  `calc(var(--L) * 2 / 3)`, `width` as
+  `min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)))` and
+  nothing else, and `html:not([data-quiet]) .image-frame img` declares
   `width: 100%` and nothing else; `.image-frame img`'s body is
   byte-identical to `main`'s. The cue case: `--frame-nav-h` is
   `:root`'s at both widths, declared on `:root` twice and on no other
@@ -435,27 +458,32 @@ Every claim above is owned by a task and a check:
   and `font-size: 0.78rem`, the page's scoped `.image-head` rule
   declares `padding-block-start: 0`, and the page's scoped style has a
   `@media (max-width: 719.98px)` block with a `.frame-nav` rule inside
-  it. (c) "one rectangle, turned": over the
-  evaluator's grid with `--header-h` absent (the 4.5rem fallback), the
-  frame's width from the rule and its height from `--ar`: width ≤
-  `--avail-w`, height ≤ `--avail-h`, `max(width, height)` equals
-  `min(--avail-w, --avail-h)` exactly, and at each viewport a ratio and
-  its reciprocal give the same two sides swapped; the image's
+  it. (c) "one rectangle, turned": over the evaluator's grid — its
+  ratios already span 0.5, 0.667, 0.8 (4:5), 1, 1.5, 1.78 (16:9) and 3
+  — with `--header-h` absent (the 4.5rem fallback), the frame's width
+  from the rule and its height from `--ar`, with L = `min(--avail-w,
+  --avail-h)` and S = ⅔L computed by the test itself: the frame fits
+  inside the box turned (width ≤ L and height ≤ S for `ar ≥ 1`; width ≤
+  S and height ≤ L for `ar < 1`) and touches a side (one of the two
+  bounds is tight within 1e-6); a square is S × S; 1.5 and 0.667 give
+  L × S and S × L; 3 gives L × L/3; 0.8 gives S wide; the image's
   `max-height` never binds (≥ height at every point). "The sizes hint
   agrees with the rule": `stageSizes(ar)` from `src/lib/stage-sizes.ts`
-  evaluated with `px()` (the phone branch below 720px) equals the CSS
+  begins with the literal `(max-width: 719.98px) ` and, the branch
+  chosen by the viewport width, evaluated with `px()` equals the CSS
   width at every grid point within 1e-6 — the module's literals against
   the stylesheet's tokens, by evaluation. The quiet view's evaluator
   case and the off/gate identities are as T1502 left them.
 
   Then the measurement at 1512×982, 1280×1440 and 375×812, script on,
-  scroll 0, quiet cleared, on `land-b` (3:2) and `port-a` (2:3):
-  `.site-header`'s `offsetHeight` (expected 72; if it differs the
+  scroll 0, quiet cleared, on `land-b` (3:2), `port-a` (2:3) and `pano`
+  (3:1): `.site-header`'s `offsetHeight` (expected 72; if it differs the
   expected numbers below are re-derived from it and recorded); each
   figure's `offsetWidth`/`offsetHeight` and its image's — expected
   785 × 523 and 523 × 785, 1216 × 811 and 811 × 1216, 343 × 229 and
   229 × 343 (±0.5), the long and short sides equal across the pair on
-  each viewport; the figure's horizontal centre at `innerWidth / 2`;
+  each viewport, and the panorama 785 × 262, 1216 × 405, 343 × 114 (L
+  wide, at the box's width); the figure's horizontal centre at `innerWidth / 2`;
   the stage's `offsetHeight` = frame height + 96 and its `offsetWidth`
   the viewport's; the visible nav's `offsetHeight` = the token (29 /
   29 / 62), its top = the frame's bottom + 48, its bottom ≤
@@ -467,7 +495,7 @@ Every claim above is owned by a task and a check:
   one by grep in `dist/`) has the same stage height and its head top =
   frame bottom + 48; `img.sizes` equals `stageSizes(ar)`'s string and `img.currentSrc`
   names the smallest srcset candidate at or above the rendered width
-  (the `min()`/`svh`-in-`sizes` claim); the quiet view's frame padding,
+  (the `min()`-in-`sizes` claim); the quiet view's frame padding,
   background, figure and image sizes and stage height identical to
   T1502's after-reads (byte-identical rules, identical geometry); the
   stage's height at `DOMContentLoaded` equals its height after
@@ -478,14 +506,17 @@ Every claim above is owned by a task and a check:
   below. The person judges the equal rectangle on both screens at the
   pause. Mutations, reverted: the token dropped from `--avail-h` → the
   stage case fails; a `min-height` restored on `.image-stage` → the
-  stage case fails; `* var(--q)` dropped from the width → the
-  turned-rectangle case fails on every portrait ratio; the module's
-  `3rem` retyped `2rem` → the sizes case fails; `--frame-nav-h` declared
+  stage case fails; the `calc(var(--S) * var(--r))` arm dropped from
+  the width (a square at L × L) → the turned-rectangle case fails on
+  the square and on 4:5 and 16:9; `2 / 3` retyped `3 / 4` in `--S` → it
+  fails on the square (the test computes S itself); the module's
+  `3rem` retyped `2rem`, or its query literal retyped `720px` → the
+  sizes case fails; `--frame-nav-h` declared
   on `.image-stage` → the twice-on-:root case fails; `min-height`
   removed from `.frame-nav` → the nav-claims case fails; the nav's
   query retyped `719px` → the breakpoint pin fails.
 
-- **Nothing else moves** (AC 7) — **T1502** and, after its own edits,
+- **Nothing else moves** (AC 11) — **T1502** and, after its own edits,
   **T1503**, each carrying both diff lines in its Verify:
   `git diff -U0 main -- src/styles/global.css | grep '^@@'` lists every
   hunk and none falls inside `.gallery-flow`'s rules, the place wall's,
@@ -531,7 +562,7 @@ src/lib/pause-shape.ts, pause-shape.test.mjs        deleted (T1502)
 src/styles/global.css                               --pause-* tokens, the pause section, the lights, form W deleted; the header rule renamed; the mat to html[data-quiet] .image-frame, .image-frame at zero; every comment that named the pause (T1502). --frame-nav-h at :root and the 719.98px query; .image-stage refit (no min-height, the spacing token, the two limits); the two html:not([data-quiet]) frame rules; the stage comment (T1503)
 matte.test.mjs                                      rewritten as Testing strategy names it (T1502); the refit's stage, frame, cue, turned-rectangle and sizes cases (T1503); case (a)'s sampler exemption dropped (T1504)
 src/lib/stage-sizes.ts                              new: stageSizes(ar), the rule in literals for the image's sizes hint (T1503)
-src/pages/images/[...id].astro                      the stage image's sizes from stageSizes(ar); .frame-nav min-height: var(--frame-nav-h) and its comment (T1503)
+src/pages/images/[...id].astro                      the stage image's sizes from stageSizes(ar); .frame-nav min-height: var(--frame-nav-h) and margin-block-end: var(--block-margin) with their comment; .image-head { padding-block-start: 0 } (T1503)
 src/pages/dev/matte/[...surface].astro              the stage frames' sizes from stageSizes(ratio) — one line, T1503's; the mat bar (T1504)
 src/pages/dev/matte/[...surface].astro, _sampler.ts the mat bar and its state removed; labels and comments (T1504)
 README.md, AUTHORING.md, design/brief.md, obsidian-plugin/README.md   per the spec's "The documents" (T1505)
@@ -567,11 +598,22 @@ publishes `--header-h`); the plugin beyond its one line; `CLAUDE.md`
   the token counts the padding in (spec 016's measurement), and moving
   it would be a retune of the token and the nav together. Recorded at
   T1503, not changed.
-- **`min()` and `svh` inside a `sizes` attribute** are supported in
-  current Firefox, Chrome and Safari; T1503 reads `currentSrc` to
-  prove the browser honoured the hint rather than falling back to
-  `100vw`. If a browser ignores it, the image over-fetches and renders
-  at the rule's size regardless (the figure sizes the image).
+- **`min()` inside a `sizes` attribute** is supported in current
+  Firefox, Chrome and Safari; T1503 reads `currentSrc` to prove the
+  browser honoured the hint rather than falling back to `100vw`. If a
+  browser ignores it, the image over-fetches and renders at the rule's
+  size regardless (the figure sizes the image). The hint says `100vh`
+  where the stylesheet says `100svh` — equal on the three viewports;
+  `svh` inside `sizes` is unconfirmed and not needed.
+- **`rem` inside `sizes` resolves against the browser's default
+  font-size**, not `html { font-size }`, so a reader with a larger
+  default gets a hint slightly under the rendered width and a mild
+  under-fetch. Not this spec's; recorded.
+- **`100vw` includes a classic scrollbar's width** in `--avail-w` and
+  in the hint, so on a platform with a permanent scrollbar the frame
+  is up to that much wider than the visible page. Pre-existing (the
+  stage's `--avail-w` has read `100vw` since spec 013), moot on macOS's
+  overlay scrollbars; recorded, not fixed.
 - **Equal rectangle is the spec's lean, judged at the pause.** If a
   landscape reads too small beside a portrait of the same short side,
   the named alternative is equal area — a spec amendment (the rule

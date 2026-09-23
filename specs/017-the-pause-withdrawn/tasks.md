@@ -72,7 +72,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ---
 
-## Phase 0 — Foundation: the pause out, the mat to the quiet view, the stage refit (reviewer after the phase; `review: per-task` on T1502; walkthrough: the fog piece reads with a fullbleed panorama where its pause was; every image page opens with the photograph bare and centred just below the header, a 3:2 and a 2:3 the same rectangle turned — the height deciding on the laptop, the width on the DualUp — the previous / where / next line directly beneath at a piece's spacing and ending at the fold, the title following; a click still takes the photograph to the quiet dark in its white mat; the person judges the equal rectangle on both screens)
+## Phase 0 — Foundation: the pause out, the mat to the quiet view, the stage refit (reviewer after the phase; `review: per-task` on T1502; walkthrough: the fog piece reads with a fullbleed panorama where its pause was; every image page opens with the photograph bare and centred just below the header, a 3:2 and a 2:3 the same rectangle turned — the height deciding on the laptop, the width on the DualUp — the previous / where / next line directly beneath at a piece's spacing and at or above the fold — at it where the height decides — the title following; a panorama at the box's full width; a click still takes the photograph to the quiet dark in its white mat; the person judges the equal rectangle on both screens)
 
 - [ ] **T1500** — The fixtures first, so the build is green at every
       later task. `src/content/pieces/where-the-fog-lets-go/index.md`
@@ -350,15 +350,20 @@ headers to confirm nothing was duplicated or dropped. -->
       **byte-identical**. **The frame.** `.image-frame`'s `max-width`
       becomes `100%` (no column cap); it keeps `--r`, `--q`, `--mat: 0px`,
       `margin: 0`. Two new rules after it and before the zoom-in rule:
-      `html:not([data-quiet]) .image-frame { width: calc(min(var(--avail-w), var(--avail-h)) * var(--q)); }`
+      `html:not([data-quiet]) .image-frame { --L: min(var(--avail-w), var(--avail-h)); --S: calc(var(--L) * 2 / 3); width: min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r))); }`
+      (the L × S box, turned: a 3:2 is L × S, a 2:3 S × L, a square
+      S × S, a 3:1 L wide and shallower, a 4:5 S wide — spec 4a89ceb)
       and `html:not([data-quiet]) .image-frame img { width: 100%; }` —
       gated on the absence of `data-quiet` because the quiet rules may
       not change and today's quiet frame is shrink-to-fit around its
       mat; the image's `width: 100%` makes the figure the sizing box
       rather than the `sizes` hint (spec 007's trap). The stage comment
       rewritten: the box hugs the frame at the piece's spacing; the
-      frame is one rectangle turned, long side `min(--avail-w, --avail-h)`;
-      the nav's token inside `--avail-h` is what keeps the previous /
+      frame fits the L × S box turned (`--L: min(var(--avail-w), var(--avail-h))`,
+      `--S: calc(var(--L) * 2 / 3)`, `width: min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)))`
+      — the two custom properties and the `width` are the whole of the
+      `html:not([data-quiet]) .image-frame` rule); the nav's token inside
+      `--avail-h` is what keeps the previous /
       where / next line above the fold for the tallest frame the rule
       allows, script or not; the quiet view keeps its viewport box by
       redeclaring every changed property; spec 013's `max-height` on
@@ -378,9 +383,11 @@ headers to confirm nothing was duplicated or dropped. -->
       words below the title keep their layout). **The hint.** New
       `src/lib/stage-sizes.ts` exporting `stageSizes(ar: number): string`
       as plan.md spells it — the rule in literals (`clamp(1rem, 3vw, 2rem)`,
-      `4.5rem`, `3rem`, the two nav strings with `0.75rem` for the
-      half-baseline), a `(max-width: 719.98px)` branch first, `× q` for
-      a portrait — with a header comment naming the four tokens it
+      `4.5rem`, `3rem`, `100vh` not `svh`, the two nav strings with
+      `0.75rem` for the half-baseline), the exported `PHONE`
+      literal `(max-width: 719.98px)` as the first branch, the width as
+      `min(calc(L * q), calc(L * 2r/3))` with the coefficients as
+      numbers — with a header comment naming the five tokens it
       mirrors and the test that pins them; `[...id].astro` ~238
       `sizes={stageSizes(ar)}` in place of the static string;
       `src/pages/dev/matte/[...surface].astro` ~363 likewise from the
@@ -394,8 +401,10 @@ headers to confirm nothing was duplicated or dropped. -->
       `['100vh', '100svh']`); `.image-frame` declares `--r`, `--q`,
       `--mat`, `max-width: 100%`, `margin` and nothing else; a rule
       with prelude exactly `html:not([data-quiet]) .image-frame`
-      declares `width` as `calc(min(var(--avail-w), var(--avail-h)) * var(--q))`
-      and nothing else, and `html:not([data-quiet]) .image-frame img`
+      declares `--L` as `min(var(--avail-w), var(--avail-h))`, `--S` as
+      `calc(var(--L) * 2 / 3)`, `width` as
+      `min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)))` and
+      nothing else, and `html:not([data-quiet]) .image-frame img`
       declares `width: 100%` and nothing else; `.image-frame img`'s
       body equals `main`'s; the quiet rules list gains nothing (the
       `:not` preludes do not match its regex — assert so). **New** case
@@ -409,25 +418,31 @@ headers to confirm nothing was duplicated or dropped. -->
       `padding-block-start: 0`, and the page's scoped style has a
       `@media (max-width: 719.98px)` block with a `.frame-nav` rule
       inside it. **New** cases in (c): "one
-      rectangle, turned" — over the grid, `--header-h` absent (the
+      rectangle, turned" — over the grid (its `RATIOS` already hold 0.5,
+      0.667, 0.8, 1, 1.5, 1.78 and 3), `--header-h` absent (the
       fallback), `--frame-nav-h` from `root` (the phone string below
-      720px): width from the `:not` rule, height = width / ar; width ≤
-      `--avail-w`, height ≤ `--avail-h`, `max(width, height)` equals
-      `min(--avail-w, --avail-h)` within 1e-6, a ratio and its
-      reciprocal give the same two sides swapped, and the image's
-      `max-height` ≥ height at every point; "the sizes hint agrees with
-      the rule" — `stageSizes(ratio)` from `src/lib/stage-sizes.ts`,
-      the matching media branch chosen by the viewport width, evaluated
-      with `px()`, equals the CSS width at every grid point within 1e-6.
-      The quiet evaluator case and the off/gate identities as T1502
+      720px): width from the `:not` rule (its `--L` and `--S` resolved
+      through the rule's own strings), height = width / ar, and the
+      test's own L = min(availW, availH), S = 2L/3: for `ar ≥ 1` width
+      ≤ L and height ≤ S, for `ar < 1` width ≤ S and height ≤ L, and one
+      bound tight within 1e-6; ratio 1 gives S × S; 1.5 and 0.667 give
+      L × S and S × L; 3 gives L × L/3; 0.8 gives width S; and the
+      image's `max-height` ≥ height at every point; "the sizes hint
+      agrees with the rule" — `stageSizes(ratio)` from
+      `src/lib/stage-sizes.ts` starts with the literal
+      `(max-width: 719.98px) ` (and the module's `PHONE` equals it),
+      and the branch the viewport width selects, evaluated with `px()`
+      (`vh` as `svh`), equals the CSS width at every grid point within
+      1e-6. The quiet evaluator case and the off/gate identities as T1502
       left them; the evaluator's envs gain `--frame-nav-h` and
       `--block-margin` from `root`. _Verify: `sh scripts/verify.sh`
       green (the count recorded);
       `grep -n -- "--frame-nav-h" src/styles/global.css 'src/pages/images/[...id].astro'`
       → the two `:root` declarations, the stage's one read, the nav's
-      one (lines listed); `grep -n "min-height" src/styles/global.css | grep -n image-stage`
-      → only the quiet rule's two;
-      `grep -rn "1160px, 94vw" src/` → 0;
+      one (lines listed);
+      `sed -n '/^\.image-stage {/,/^}/p' src/styles/global.css | grep -c min-height`
+      → 0; `grep -rn "1160px, 94vw" src/` → 0;
+      `grep -c "100svh" src/lib/stage-sizes.ts` → 0;
       `git diff -U0 main -- src/styles/global.css | grep '^@@'` — every
       hunk listed, none inside `.gallery-flow`'s rules, the place wall's,
       the `--color-*` lines, `--color-quiet`, a `.piece-held*` rule, the
@@ -437,15 +452,19 @@ headers to confirm nothing was duplicated or dropped. -->
       and nothing under `.compare` (the hunks listed). On the dev server
       at 1512×982, 1280×1440 and
       375×812, script on, scroll 0, quiet cleared, on
-      `/images/where-the-fog-lets-go/land-b/` (3:2) and `…/port-a/`
-      (2:3): `.site-header`'s `offsetHeight` (expected 72 — if it
-      differs, re-derive the numbers below from it and record both);
-      each figure's `offsetWidth`/`offsetHeight` and its image's —
-      expected 785 × 523 and 523 × 785 at 1512×982 (the height
-      decides), 1216 × 811 and 811 × 1216 at 1280×1440 (the width
-      decides, wider than the 1160 column), 343 × 229 and 229 × 343 at
-      375×812 (±0.5), the long and short sides equal across the pair on
-      each viewport; the figure's horizontal centre = `innerWidth / 2`
+      `/images/where-the-fog-lets-go/land-b/` (3:2), `…/port-a/` (2:3)
+      and `…/pano/` (3:1 — the one panorama with an image page in a
+      set; confirm its ratio from the registry): `.site-header`'s
+      `offsetHeight` (expected 72 — if it differs, re-derive the numbers
+      below from it and record both); each figure's
+      `offsetWidth`/`offsetHeight` and its image's — expected 785 × 523
+      and 523 × 785 at 1512×982 (the height decides), 1216 × 811 and
+      811 × 1216 at 1280×1440 (the width decides, wider than the 1160
+      column), 343 × 229 and 229 × 343 at 375×812 (±0.5), the long and
+      short sides equal across the pair on each viewport (the ⅔ rule
+      changes nothing for this pair: S × 1.5 = L), and the panorama
+      785 × 262, 1216 × 405, 343 × 114 (L wide, shallower than the box);
+      the figure's horizontal centre = `innerWidth / 2`
       (±0.5); the stage's `offsetHeight` = frame height + 96 and its
       `offsetWidth` = `innerWidth`; the visible `.frame-nav`'s
       `offsetHeight` = the token (29 / 29 / 62), its top = the frame's
@@ -461,7 +480,7 @@ headers to confirm nothing was duplicated or dropped. -->
       shows no hunk inside `.image-body` or `.sec*` rules (the words
       below the title keep their layout); `img.sizes` equals `stageSizes(ar)` and
       `img.currentSrc` names the smallest srcset candidate at or above
-      the rendered width (the `min()`/`svh`-in-`sizes` claim — if the
+      the rendered width (the `min()`-in-`sizes` claim — if the
       browser fell back to `100vw` the candidate is the largest, and
       that is reported, not fixed); the quiet view's frame padding,
       background, figure and image sizes and the stage's height
@@ -477,9 +496,12 @@ headers to confirm nothing was duplicated or dropped. -->
       named and reverted, tree restored byte-identically:
       `- var(--frame-nav-h)` dropped from `--avail-h` → the stage case
       fails; `min-height: 100svh` restored on `.image-stage` → the stage
-      case fails; `* var(--q)` dropped from the width → the
-      turned-rectangle case fails on every portrait ratio; `3rem`
-      retyped `2rem` in `stage-sizes.ts` → the sizes case fails;
+      case fails; the `calc(var(--S) * var(--r))` arm dropped from the
+      width (a square at L × L) → the turned-rectangle case fails on
+      ratios 1, 0.8 and 1.78; `2 / 3` retyped `3 / 4` in `--S` → it
+      fails on ratio 1 (the test computes S itself); `3rem` retyped
+      `2rem` in `stage-sizes.ts`, or its `PHONE` literal retyped
+      `(max-width: 720px)` → the sizes case fails;
       `--frame-nav-h: 0px` declared on `.image-stage` → the
       twice-on-:root case fails; `min-height` removed from `.frame-nav`
       → the nav-claims case fails; the nav's query retyped `719px` → the
@@ -535,12 +557,14 @@ _(The product owner's attestation from the site under `npm run dev` on
 both screens: `/pieces/where-the-fog-lets-go/` reads on with a fullbleed
 panorama where its pause was — or he names `wide` or `single` instead,
 one line at T1500's file; `/pieces/vocabulary-sampler/` and the held
-frame's header hand-off; the two image pages `land-b` (3:2) and
-`port-a` (2:3), on the laptop and on the DualUp — the photograph bare
-and centred just below the header, the two frames the same rectangle
-turned (the height deciding on the laptop, the width on the DualUp),
-the previous / where / next line directly beneath at a piece's spacing
-and ending at the fold, the title following; the click into the quiet
+frame's header hand-off; the three image pages `land-b` (3:2), `port-a`
+(2:3) and `pano` (3:1), on the laptop and on the DualUp — the
+photograph bare and centred just below the header, the two frames the
+same rectangle turned (the height deciding on the laptop, the width on
+the DualUp), the panorama at the box's full width and shallower, the
+previous / where / next line directly beneath at a piece's spacing and
+at or above the fold (at it where the height decides), the title
+following; the click into the quiet
 view's white mat and back; anything he saw that the spec did not say.
 **The judgement the spec puts here**: whether the equal rectangle reads
 right, or a landscape frame looks too small beside a portrait of the
@@ -676,10 +700,15 @@ dispatched.)_
       against their records (AC 1 by T1501's case and its negative
       control; AC 2 by T1501's walk, T1502's greps and the grep below;
       AC 3 by T1501's diff and T1502's held reads; AC 4 by T1502's reads
-      and the one-surface walk; AC 5 by T1503's reads and the Phase 0
-      attestation; AC 6 by T1503's before/after arithmetic; AC 7 by
-      T1502's and T1503's empty diffs and hunk lists; AC 8 by T1500's
-      build; AC 9 by the final run and the greps below); build, tests,
+      and the one-surface walk; AC 5 by T1503's stage, nav and head
+      reads at the three viewports; AC 6 by T1503's turned-rectangle
+      case and the pair's reads on both screens; AC 7 by T1503's
+      nav-bottom reads at the three viewports and the Phase 0
+      attestation; AC 8 by the sizes case and T1503's `currentSrc`
+      read; AC 9 by the quiet rules' string pins and T1503's quiet
+      reads; AC 10 by the Phase 0 record's "rule kept" line; AC 11 by
+      T1502's and T1503's empty diffs and hunk lists; AC 12 by T1500's
+      build; AC 13 by the final run and the greps below); build, tests,
       check, GPS scan, dev-routes scan and format green with actual
       output; the PR marked ready and merged with a merge commit; the
       close-out box ticked in the same shell command as the merge
@@ -752,10 +781,11 @@ every task; the closed-vocabulary case grows its source walk at T1502,
 where it can pass. The **Phase 0 pause is the walkthrough and the
 spec's judgement**: the fog piece with its fullbleed panorama (and the
 offer of `wide` or `single` instead), the vocabulary sampler's held
-frame, the `land-b` and `port-a` image pages on both screens — the
-frame bare and centred just below the header, the same rectangle
-turned, the previous / where / next line beneath at the piece's
-spacing and above the fold, the quiet view — with T1502's and T1503's
+frame, the `land-b`, `port-a` and `pano` image pages on both screens —
+the frame bare and centred just below the header, the pair the same
+rectangle turned and the panorama at the box's width, the previous /
+where / next line beneath at the piece's spacing and at or above the
+fold, the quiet view — with T1502's and T1503's
 numbers in the report, and the one question the spec puts to him
 there: does the equal rectangle read right, or should the next look
 try equal area (a spec amendment if so). The orchestrator does no
@@ -780,10 +810,11 @@ second and last.
 > one review and at most one re-review, the rest logged; commit, check
 > the box, and log the tier and tokens in one shell command.
 > Involvement level is product owner: pause after Phase 0 — its report
-> names the fog piece, the sampler's held frame and the two image pages
-> (`land-b`, `port-a`) to open on both screens, what to look for (the
-> frame bare and centred below the header, the same rectangle turned,
-> the line beneath at the piece's spacing and above the fold, the quiet
+> names the fog piece, the sampler's held frame and the three image
+> pages (`land-b`, `port-a`, `pano`) to open on both screens, what to
+> look for (the frame bare and centred below the header, the pair the
+> same rectangle turned, the panorama at the box's width, the line
+> beneath at the piece's spacing and at or above the fold, the quiet
 > view's mat), the spec's one judgement (equal rectangle kept, or equal
 > area to try — a spec amendment) and the one open offer (fullbleed,
 > wide or single for the panorama) in plain language; Phase 1 runs on
