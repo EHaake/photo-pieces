@@ -55,7 +55,9 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   quiet view's ground fade as well.)
 
 - **The grammar** (`src/styles/global.css`, `:root`, after
-  `--place-wall-gap`). Three durations, two curves, and beside them the
+  `--place-wall-gap`). Three durations, three curves (`--ease-appear` added at the Phase 1
+  pause, D1606 Q3, so the appearance's curve moves without the
+  travel's or the hovers'), and beside them the
   flags and numbers the tuning envelope names — every one a custom
   property on `:root`, declared nowhere else, so the dev switch can set
   any of them on `<html>` and `motion.test.mjs` pins each by name and
@@ -118,7 +120,7 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   — custom properties inherit, so one rule in the Motion section,
   `.note-cover, .gallery-card .image-link { --motion-appear: var(--motion-appear-covers); --motion-arrive: var(--motion-arrive-covers); }`,
   gives the covers their own switch and any later surface gets one in
-  one line. Twenty tokens in all.
+  one line. Twenty-one tokens in all (twenty until D1606).
 
 - **Reduced motion** (`global.css`, the `@media (prefers-reduced-motion: reduce)`
   block). The blanket `* { animation-duration: 1ms; transition-duration: 1ms; scroll-behavior: auto }`
@@ -241,8 +243,8 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   `entry.intersectionRect.height >= --arrive-threshold × rootBounds.height`;
   the observer's thresholds are the token plus steps of 0.05 so a tall
   unit keeps getting callbacks (`isIntersecting` alone fires at the
-  first pixel whatever the threshold — Phase 1 review B1); the observer `unobserve`s a unit as it arrives and
-  disconnects when the last has. A unit in view at hook time gets
+  first pixel whatever the threshold — Phase 1 review B1); a unit that does not replay is `unobserve`d as it arrives (see
+  **Re-entry** below for the units that replay). A unit in view at hook time gets
   `data-shown="fade"`; one below the fold gets `"rise"` when
   `--arrive-rise` is non-zero and reduced motion is off, else `"fade"`;
   `--motion-arrive: 0` on a host treats its unit as in view;
@@ -272,6 +274,54 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   after load, its position (in document coordinates) moved by less
   than 3px (the Layout Instability API counts nothing smaller);
   sub-pixel moves are recorded, not fixed.
+
+  **Re-entry (amended at the Phase 1 pause; decision review D1606,
+  Q1).** A unit **replays** when every image in it has the appearance
+  on, its host has the arrival on (so the covers replay only when
+  `--motion-arrive-covers` is on), and the fade has a duration for this
+  reader (not `prefers-reduced-motion` with `--rm-appear: 0`: a hidden
+  frame snapping in at the threshold would be a pop). Every replaying
+  unit is observed for the page's life, whether it is complete, in view
+  or waiting at the hook. A unit that does not replay keeps the
+  once-only path: observed only when below and waiting, `unobserve`d on
+  arrival. On a callback for a replaying unit — **leave:**
+  `!entry.isIntersecting`, meaning the unit is wholly off screen: if
+  any image in it carries `data-shown`, the attribute is removed from
+  every image (the gate hides it; the waiting state's fill rule,
+  whatever it is, applies unchanged), then `revealed`, `arrived` and
+  `inView` go false; nothing is visible, so there is no fade-out; the
+  reset is skipped while `<html>` carries `data-quiet` or
+  `data-moving` (the quiet view hides the page's other frames with
+  `display: none`, which is not leaving the screen). **arrive:**
+  `arrives(entry, threshold)`, unchanged, on a unit not yet `arrived`;
+  it marks `arrived` and records `edge(entry)`. The gap between the two
+  (fully out to reset, the threshold to arrive) is the hysteresis: a
+  frame straddling an edge by less than the threshold is never reset
+  or replayed. `reveal` also counts a unit as revealed when the
+  complete short-cut has shown all of it, so a unit already shown in
+  view is left alone by its first callback, and the way back replays
+  nothing where it lands: its frames are shown `""` at the hook and are
+  on screen at the observer's first report. A replayed unit is never
+  "in view at the hook". It reads `"rise"` when rise is on and its edge
+  is `top` or `bottom`, with `--rise-sign` set inline on each image
+  (`1` from below, `-1` from above: the photograph comes in from the
+  edge it crossed); it reads `"fade"` when the edge is `side`, since a
+  frame entering a strip's band sideways does not move vertically —
+  the same rule now applies to a strip frame's first arrival.
+  `edge(entry)` (exported, pure): `side` when the unit's whole height
+  is in view and its width is clipped
+  (`intersectionRect.height >= boundingClientRect.height - 1 && intersectionRect.width < boundingClientRect.width - 1`);
+  else `top` when the unit's middle is above the root's middle; else
+  `bottom`. The keyframe reads the sign:
+  `@keyframes motion-arrive { from { opacity: 0; transform: translateY(calc(var(--arrive-rise) * var(--rise-sign, 1))); } … }`.
+  `--rise-sign` is a runtime property like `--i` and `--understudy`:
+  never in markup or `:root`, and not in the grammar's family.
+  `animationend` still writes `""` through `shown()`, so the
+  understudy, the held key and the fill's leaving are unchanged for
+  replays. With any replaying unit the observer disconnects only at
+  teardown (`astro:before-swap`); its callbacks write attributes only
+  when a unit leaves or arrives. The strips' own units and the travel
+  are untouched.
 
 - **The travel** (`BaseLayout.astro`'s script, on the router's events;
   `src/lib/motion.ts` for `NAME`, `flag`, `token`, `reducedMotion`).
@@ -455,14 +505,29 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   `<script is:inline type="module" src="/src/components/dev-motion-panel.ts">`,
   served by the dev server and never bundled (the sampler's reason,
   ground.test.mjs (h) pins the form), which at `astro:page-load`
-  builds a `<details>` panel in the page's corner from `MOTION_TOKENS`
-  in `motion.ts` — a checkbox per flag, a field per duration, curve and
-  number, a select for the arrival's shape (fade / rise, writing
-  `--arrive-rise` as `0px` or the rise field's value) and for the
-  waiting fill (surface / ground), the effective value of each token
-  read from the computed style beside it, and reset, which clears the
-  key and every inline property so the committed stylesheet is the
-  control. The panel's styles are set by the script, never a `<style>`
+  builds a `<details>` panel in the page's corner, in three parts
+  (amended at the Phase 1 pause; decision review D1606, Q2). **The
+  appearance:** one select of named settings from `APPEARANCE_PRESETS`
+  in `src/components/dev-motion-presets.ts` — a data-only module
+  imported by the panel and by `motion.test.mjs`, never by a bundled
+  script, so nothing in it ships. Each setting has a plain one-line
+  description and writes exactly `APPEARANCE_TOKENS` (`--dur-appear`,
+  `--ease-appear`, `--arrive-rise`, `--arrive-threshold`) through the
+  panel's `set`: faint (400ms, `ease`, 0px, 0.15 — as first built);
+  soft (700ms, `cubic-bezier(0.4, 0, 0.2, 1)`, 0px, 0.2); settle
+  (800ms, `cubic-bezier(0.33, 1, 0.68, 1)`, 0.75rem, 0.25); float
+  (1100ms, `cubic-bezier(0.16, 1, 0.3, 1)`, 1rem, 0.3). The select
+  shows the setting whose four values equal the effective ones, else
+  "custom". **The behaviours:** the four checkboxes (appearance,
+  arrival, travel, quiet view) and the waiting fill (surface / ground).
+  **Every value:** a nested `<details>`, collapsed by default, holding
+  the full per-token table as before — a row per `MOTION_TOKENS` entry,
+  the arrival's shape select with its rise field, the effective value
+  beside each — kept because AC 12 requires every tunable to be
+  settable from the switch. Reset clears the key and every inline
+  property, so the committed stylesheet is the control, and the select
+  then reads the committed setting. The travel's and the quiet view's
+  tokens are in no setting: he kept them as built. The panel's styles are set by the script, never a `<style>`
   block, so nothing of it can enter the bundle. Marker: the string
   `dev-motion` (the applier's attribute, the storage key, the panel's
   path); `scripts/check-no-dev-routes.mjs` scans for both markers. The
@@ -521,7 +586,7 @@ Every claim above is owned by a task and a check:
 
 - **The grammar is one set of tokens, declared once, and everything
   reads it** — `motion.test.mjs`, **T1600**. (a) `:root` declares
-  exactly the twenty names in `EXPECTED` with those values (the
+  exactly the twenty-one names in `EXPECTED` with those values (the
   table at the top of the file is the one edit a round makes beside
   the stylesheet), and no other rule in `global.css` or in any
   `<style>` block of any `.astro` file under `src/` declares one of
@@ -826,7 +891,9 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
 - **One IntersectionObserver per page, units not images** — the spec's
   "cells of one block arrive together" is a unit's property; one
   observer with `unobserve` per unit meets "disconnects from a frame
-  once it has arrived" at less cost than one observer per frame.
+  once it has arrived" at less cost than one observer per frame; since
+  the Phase 1 amendment, units that replay stay observed for the page's
+  life (the spec's Performance line amended).
 - **The understudy is the previous page's rendering as the figure's
   content-box background**, not a preload before the swap, for the
   travel in: a preload would delay the click's response by the large

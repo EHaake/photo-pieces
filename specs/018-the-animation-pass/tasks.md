@@ -834,10 +834,72 @@ headers to confirm nothing was duplicated or dropped. -->
       photograph's box at both screens, before and during the fade
       (numbers recorded); the cause named._
 
-- [ ] **T1606b** — The amendment (spec.md "Amended at the Phase 1
-      pause"): appearance on every re-entry; the panel as named
-      settings. Designed at a decision review, transcribed into plan.md,
-      then dispatched.
+- [ ] **T1606b** — Re-entry: a photograph appears each time it comes
+      on screen (plan.md "Re-entry"; decision review D1606, Q1).
+      `review: per-task`. Footprint: `src/lib/motion.ts` (`appear()`'s
+      unit state and observer; a new exported `edge()`),
+      `src/styles/global.css` (the Motion section's `motion-arrive`
+      keyframe reads `--rise-sign`), `motion.test.mjs` (new (f) cases
+      for `edge`); `BaseLayout.astro` and `holdShown` untouched.
+      _Verify: `sh scripts/verify.sh` green, (f) proving `edge` returns
+      `bottom` for a 400px unit 25% in at the viewport's foot, `top`
+      for the same at its head, `side` for a unit whose whole height is
+      in view and 30% of its width clipped, `bottom` (not `side`) for a
+      unit clipped both ways at the foot; in the browser at both
+      screens, a `MutationObserver` logging `data-shown` and
+      `--rise-sign` writes on the fog piece with rise on: a frame
+      scrolled fully past, then back down — removal at the moment its
+      rect is wholly outside, then `"rise"` with sign 1 at the
+      threshold, then `""`; scrolled back up — `"rise"` with sign −1; a
+      frame straddling the top edge scrolled back and forth by less
+      than the threshold writes nothing; the way back (history back and
+      the way-back link) from a gallery cell mid-screen — no writes
+      other than `""` on frames in view where the page lands and no
+      image animations in `document.getAnimations()` for one second
+      after the swap, and a frame below the landing, once scrolled to,
+      removed then shown `"rise"` or `"fade"`; the image page — the
+      related strip scrolled sideways shows re-entering frames as
+      `"fade"`, never `"rise"`, entering and leaving the quiet view
+      writes nothing on the strip, the stage scrolled fully off and
+      back replays; with `--motion-arrive-covers: 0` the covers never
+      reset while a gallery cell does; reduced motion with
+      `--rm-appear: 1` — re-entry writes `"fade"`, with `0` — no
+      removal ever written; after a swap no writes on the old
+      document's nodes; host sizes equal before and after a reset
+      (numbers recorded)._
+
+- [ ] **T1606c** — The appearance curve's own token and the panel as
+      named settings (plan.md "The dev switch", "The grammar"; D1606
+      Q2, Q3). `review: per-task`. Footprint: `src/styles/global.css`
+      (`:root` gains `--ease-appear` after `--ease-move`, comment "the
+      appearance's curve: the fade and the arrival; set by the panel's
+      named settings"; the Settle values in `--dur-appear: 800ms`,
+      `--arrive-rise: 0.75rem`, `--arrive-threshold: 0.25`, and
+      `--ease-appear: cubic-bezier(0.33, 1, 0.68, 1)`; the two
+      appearance rules read `var(--ease-appear)`); `src/lib/motion.ts`
+      (`MOTION_TOKENS` gains `{ name: '--ease-appear', kind: 'curve', label: 'appearance curve' }`;
+      "twenty" → "twenty-one"); `src/components/dev-motion-presets.ts`
+      (new, data only: `APPEARANCE_TOKENS` and `APPEARANCE_PRESETS` —
+      faint, soft, settle, float as plan.md lists them, each with a
+      one-line description); `src/components/dev-motion-panel.ts` (the
+      three parts); `motion.test.mjs` (the `EXPECTED` rows, the
+      "twenty-one" titles, (f) preset tests: every preset sets exactly
+      `APPEARANCE_TOKENS`, each a `MOTION_TOKENS` name of kind time,
+      curve, length, number respectively; faint equals the as-built
+      values; the committed `:root` is not pinned to equal a preset);
+      spec.md (one Decided line: the second look opens on Settle; the
+      keep is still his to name). `DevMotion.astro` untouched. _Verify:
+      `sh scripts/verify.sh` green, and the (f) preset test fails when
+      a preset names `--ease-apear`; `grep -c "var(--ease-appear)" src/styles/global.css`
+      → 2, and neither appearance rule contains `--ease-state` or
+      `--ease-move`; nothing in `dist/_astro/*.js` contains
+      `0.16, 1, 0.3, 1` or `0.4, 0, 0.2, 1`; in the browser the panel
+      opens with the select on "settle" and "every value" collapsed
+      with twenty-one rows; choosing each setting writes exactly four
+      inline properties on `<html>` and the storage key; editing a raw
+      field shows "custom"; an arriving frame's animation reads 800ms
+      and the Settle curve while `.site-header`'s transition timing is
+      still `ease` and the travel's group still `--ease-move`._
 
 ### Phase 1 record (the person's walkthrough)
 
@@ -1033,6 +1095,7 @@ tier if it is ever on (it is off). -->
 | Phase 1 review (`skeptical-reviewer`)                       | `opus` (Opus 5.5)              | 104,269                     | fix and re-review: B1 threshold inert, B2 way back names the first of two same-photograph links, B3 appearance reads before the way-back scroll → T1605a; 8 notes                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | T1605a (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 137,501                     | done; 385 tests; B1 arrival at the share (0.15 → 15.1%, 0.5 → 50.1%), too-tall rule only past reach; B2 fullbleed `land-b` named on the way back (`nth` stored); B3 in-view neighbours fade not rise, old order reproduces the rise; reload restores scroll before `appear()` (no fix); tall-fallback comment corrected                                                                                                                                                                                                                                                                                           |
 | Phase 1 re-review (`skeptical-reviewer`, resumed)           | `opus` (Opus 5.5)              | 118,716 cumulative          | signed off; for the record: a frame only glimpsed (under the threshold) is not counted shown, so not held on return (every-ratio `tall-4x5-01` at 1512)                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| D1606 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 100,605                     | replay: every off-screen frame, reset when wholly out, mirrored rise from the top, fade from the side, skipped in the quiet view and during a travel; presets faint/soft/settle/float (settle recommended); new token `--ease-appear`; T1606b then T1606c, each reviewed per-task                                                                                                                                                                                                                                                                                                                                 |
 
 _(Session-tier allowance draw noted at each pause.)_
 

@@ -231,12 +231,12 @@ later." Both stay on the roadmap.
   photograph alone, at the grammar's appearance duration. The hidden
   state is set by script, never by the stylesheet alone: without
   script every photograph is visible, pinned by a test that finds no
-  frame hidden by default in the built output. A photograph that has
-  already decoded when the script runs shows at once, with no fade
+  frame hidden by default in the built output. A photograph in view
+  that has already decoded when the script runs shows at once, with no fade
   and no rise — so returning to a page does not replay its arrivals.
 - **Arrival below the fold.** A frame not in view when the page is
   ready appears the first time it enters the viewport, once its
-  photograph has decoded — whichever comes last; it then stays. Two
+  photograph has decoded — whichever comes last; it then stays (superseded at the Phase 1 pause). Two
   candidate shapes, both built, chosen at the pause and recorded in
   this spec: a fade alone; a fade with a rise well under a line's
   height. A block with several cells (diptych, triptych, grid, strip,
@@ -290,8 +290,9 @@ later." Both stay on the roadmap.
   the ground switch and the page-head sampler did.
 - **Performance.** Nothing here adds a request or a byte to a page's
   photographs; the fades and movements run on the compositor; an
-  observer, where one is used, disconnects from a frame once it has
-  arrived. Judged smooth on both screens at the pause.
+  observer, where one is used, does work only when a frame arrives or
+  leaves, and disconnects when the page is left (amended at the Phase 1
+  pause). Judged smooth on both screens at the pause.
 - **The documents.** `design/brief.md` gains a Motion section (the
   rule, the grammar's names and values, what stayed out); spec 007's
   "Timed or automatic motion" non-goal gains one line naming this
@@ -397,8 +398,8 @@ says where each lives.
       scrolled into view, in the shape chosen at the pause, and appears
       again each time it comes back on screen after leaving it (amended
       at the Phase 1 pause — see "Amended at the Phase 1 pause"); a frame in view when the page is ready never rises; a
-      multi-cell block arrives as one; a photograph already decoded
-      when the page is ready shows at once with no animation; measured
+      multi-cell block arrives as one; a photograph in view and already
+      decoded when the page is ready shows at once with no animation; measured
       on both screens
 - [ ] Clicking a frame in a piece, a gallery, the place wall and a
       related strip carries the photograph into the stage's box in one
