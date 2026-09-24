@@ -39,13 +39,17 @@ export const MOTION_TOKENS: readonly { name: string; kind: MotionKind; label: st
   { name: '--wait-fill', kind: 'fill', label: 'waiting fill' },
   { name: '--hero-enter', kind: 'flag', label: 'hero entrance' },
   { name: '--hero-stagger', kind: 'time', label: 'hero stagger' },
-  { name: '--arrows-slide', kind: 'length', label: 'arrows slide' },
+  { name: '--arrows-slide', kind: 'flag', label: 'arrows slide' },
   { name: '--rm-appear', kind: 'flag', label: 'reduced: appearance fade' },
   { name: '--rm-quiet', kind: 'flag', label: 'reduced: quiet fade' },
 ];
 
 /** The view-transition name a moving photograph wears for the duration. */
 export const NAME = 'photograph';
+
+/** The names the arrows' slide gives the old and the new stage figure —
+ *  two, so neither group morphs; the stylesheet's slide rules spell the same. */
+export const SLIDE_NAMES = { out: 'photograph-out', in: 'photograph-in' } as const;
 
 /** The boxes a photograph waits in — see the header on the stylesheet's
  *  copy of this list. */

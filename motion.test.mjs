@@ -10,6 +10,7 @@ import {
   FRAME_HOSTS,
   FRAME_IMG,
   MOTION_TOKENS,
+  SLIDE_NAMES,
   arrivalSteps,
   arrives,
   edge,
@@ -153,7 +154,7 @@ const EXPECTED = {
   '--wait-fill': 'var(--color-bg)',
   '--hero-enter': '1',
   '--hero-stagger': '90ms',
-  '--arrows-slide': '2rem',
+  '--arrows-slide': '1',
   '--rm-appear': '1',
   '--rm-quiet': '1',
 };
@@ -732,6 +733,10 @@ describe('(f) the module (T1602, spec 018)', () => {
       expect([preset.name, Object.keys(preset.tokens)]).toEqual([preset.name, [...APPEARANCE_TOKENS]]);
   });
 
+  it('--arrows-slide is a flag — the dev panel shows it as on/off, and the layout reads it as one (T1606h)', () => {
+    expect(MOTION_TOKENS.find(({ name }) => name === '--arrows-slide')?.kind).toBe('flag');
+  });
+
   it('APPEARANCE_TOKENS are grammar tokens of kind time, curve, length and number, in that order', () => {
     const kinds = Object.fromEntries(MOTION_TOKENS.map(({ name, kind }) => [name, kind]));
     expect(APPEARANCE_TOKENS.map((name) => kinds[name])).toEqual(['time', 'curve', 'length', 'number']);
@@ -916,6 +921,41 @@ describe("(g) the hidden state is the script's (T1603, spec 018)", () => {
       .filter((rule) => !splitTop(rule.prelude).every((one) => norm(one).includes('[data-slide')))
       .map((rule) => rule.where);
     expect(stray).toEqual([]);
+    // The carousel (T1606h): the old figure and the new wear the two
+    // SLIDE_NAMES, so neither group morphs between two boxes.
+    const leaving = sliding.filter((rule) => /motion-slide-out\b/.test(rule.body));
+    const entering = sliding.filter((rule) => /motion-slide-in\b/.test(rule.body));
+    expect([leaving.length, entering.length]).toEqual([1, 1]);
+    expect(norm(leaving[0].prelude)).toContain(`::view-transition-old(${SLIDE_NAMES.out})`);
+    expect(norm(entering[0].prelude)).toContain(`::view-transition-new(${SLIDE_NAMES.in})`);
+    // The carousel holds opacity 1: each keyframe is its transform alone,
+    // the full width of the screen along the direction of travel.
+    const steps = (name) => {
+      const found = blocks(css).filter((block) => norm(block.prelude) === `@keyframes ${name}`);
+      expect([name, found.length]).toEqual([name, 1]);
+      return blocks(found[0].body).map((step) => [norm(step.prelude), declarations(step.body)]);
+    };
+    expect(steps('motion-slide-out')).toEqual([
+      ['to', { transform: 'translateX(calc(100vw * var(--dir)))' }],
+    ]);
+    expect(steps('motion-slide-in')).toEqual([
+      ['from', { transform: 'translateX(calc(100vw * var(--dir) * -1))' }],
+    ]);
+    // The header's group paints above the photographs during a slide.
+    const header = top.filter(
+      (rule) =>
+        'z-index' in declarations(rule.body) &&
+        norm(rule.prelude).includes('::view-transition-group(site-header)'),
+    );
+    expect(header.map((rule) => declarations(rule.body))).toEqual([{ 'z-index': '1' }]);
+    expect(norm(header[0].prelude)).toContain('[data-slide');
+  });
+
+  it('the layout names the slide only through SLIDE_NAMES (T1606h)', async () => {
+    const source = await readFile(here('./src/layouts/BaseLayout.astro'), 'utf8');
+    const count = (text) => source.split(text).length - 1;
+    expect([count('SLIDE_NAMES.out'), count('SLIDE_NAMES.in')]).toEqual([1, 1]);
+    expect([count('photograph-out'), count('photograph-in')]).toEqual([0, 0]);
   });
 
   it("the appearance's after-swap hook is bound after the way back's scroll and before lastY (T1605a, B3)", async () => {

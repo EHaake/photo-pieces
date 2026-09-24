@@ -133,12 +133,12 @@ const isActive = (href: string) => {
       import { enhanceCompare } from '../lib/compare';
       import {
         NAME,
+        SLIDE_NAMES,
         appear,
         flag,
         holdShown,
         inViewport,
         reducedMotion,
-        token,
         traverseKind,
         type Travel,
       } from '../lib/motion';
@@ -257,7 +257,7 @@ const isActive = (href: string) => {
       //          to that photograph was clicked are stored for the way
       //          back;
       //   step — an arrow (`[data-nav]`; the arrow keys click them):
-      //          nothing named unless --arrows-slide is a length, and the
+      //          nothing named unless --arrows-slide is 1, and the
       //          next stage's file is preloaded so the cross-fade goes
       //          from one photograph straight to the next;
       //   out  — any other way off an image page: the stage wears the
@@ -302,9 +302,9 @@ const isActive = (href: string) => {
       // scroll — because none of it moves anything, and without it a
       // reduced-motion reader would see the stage blank and land at the
       // top (AC 6).
-      const name = (el: HTMLElement | null | undefined) => {
+      const name = (el: HTMLElement | null | undefined, as: string = NAME) => {
         if (!el || reducedMotion()) return false;
-        el.style.viewTransitionName = NAME;
+        el.style.viewTransitionName = as;
         named.push(el);
         return true;
       };
@@ -316,7 +316,7 @@ const isActive = (href: string) => {
         moving = null;
         landing = null;
       };
-      const slide = () => Number.parseFloat(token('--arrows-slide')) > 0;
+      const slide = () => flag('--arrows-slide');
       const isImagePage = (url: URL) => url.pathname.startsWith(IMAGES_PATH);
       /** The page's frame links to `path`, in document order. */
       const cellsFor = (doc: Document, path: string, base: URL) =>
@@ -413,7 +413,7 @@ const isActive = (href: string) => {
           to: event.to.pathname,
           navigationType: event.navigationType,
         };
-        if (slide()) name(document.querySelector<HTMLElement>('.image-frame'));
+        if (slide()) name(document.querySelector<HTMLElement>('.image-frame'), SLIDE_NAMES.out);
         preloadOnLoad(event, 'step');
       };
       const out = (event: TransitionBeforePreparationEvent, nth?: number) => {
@@ -542,7 +542,7 @@ const isActive = (href: string) => {
         } else if (moving.kind === 'step' && !nameless && slide() && frame && moving.dir) {
           // The slide keyframes select on dataset.slide; with no name given
           // (reduced motion) there is nothing for them to move.
-          if (name(frame)) root.dataset.slide = moving.dir;
+          if (name(frame, SLIDE_NAMES.in)) root.dataset.slide = moving.dir;
         } else if (moving.kind === 'out' && cell) {
           // The landing is eager, so the file its preload decoded is
           // loaded before the new snapshot, not at the next intersection

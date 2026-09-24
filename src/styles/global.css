@@ -156,7 +156,7 @@
   --wait-fill: var(--color-bg);
   --hero-enter: 1; /* the front door's inherited entrance, on the tokens; 0 turns it off */
   --hero-stagger: 90ms;
-  --arrows-slide: 2rem; /* the arrows slide by this distance while cross-fading; 0px cross-fades in place */
+  --arrows-slide: 1; /* the arrows: 1 slides the photograph off the screen and the next one on; 0 cross-fades in place */
   --rm-appear: 1; /* under reduced motion: 1 keeps the appearance fade's duration, 0 cuts it */
   --rm-quiet: 1; /* under reduced motion: 1 keeps the quiet view's ground fade, 0 cuts */
 }
@@ -2207,11 +2207,16 @@ img[data-shown='rise'] {
   background-repeat: no-repeat;
 }
 
-/* The slide variant, built for the pause's "or slide" question: the
-   arrows' step with both stages named, the old leaving and the new
-   arriving along the direction of travel. Off at `--arrows-slide: 0px`
-   (the script names nothing then, and the root cross-fade carries the
-   photograph in its box). */
+/* The slide (T1606g; the carousel at T1606h): with `--arrows-slide: 1`
+   the arrows' step names the old stage figure `photograph-out` and the
+   new one `photograph-in` — two names, so each is a group of its own in
+   its own box and nothing morphs — and the old leaves by the screen's
+   full width along the direction of travel while the new comes in from
+   the other side, both at full opacity, the page beneath cross-fading.
+   100vw clears the viewport from any box inside it. Off at 0 (the
+   script names nothing; the root cross-fade carries the photograph in
+   its box). The names are SLIDE_NAMES in src/lib/motion.ts, pinned
+   equal by motion.test.mjs. */
 html[data-slide='next'] {
   --dir: -1;
 }
@@ -2220,24 +2225,30 @@ html[data-slide='prev'] {
   --dir: 1;
 }
 
-html[data-slide]::view-transition-old(photograph) {
+html[data-slide]::view-transition-old(photograph-out) {
   animation: motion-slide-out var(--dur-move) var(--ease-move) both;
 }
 
-html[data-slide]::view-transition-new(photograph) {
+html[data-slide]::view-transition-new(photograph-in) {
   animation: motion-slide-in var(--dur-move) var(--ease-move) both;
+}
+
+/* Groups paint in the old page's order, then the new page's own: the
+   new photograph's group is the new page's alone, so without this it
+   would pass over the header wherever the stage sits under it (a
+   traverse restoring a scroll). */
+html[data-slide]::view-transition-group(site-header) {
+  z-index: 1;
 }
 
 @keyframes motion-slide-out {
   to {
-    opacity: 0;
-    transform: translateX(calc(var(--arrows-slide) * var(--dir)));
+    transform: translateX(calc(100vw * var(--dir)));
   }
 }
 
 @keyframes motion-slide-in {
   from {
-    opacity: 0;
-    transform: translateX(calc(var(--arrows-slide) * var(--dir) * -1));
+    transform: translateX(calc(100vw * var(--dir) * -1));
   }
 }
