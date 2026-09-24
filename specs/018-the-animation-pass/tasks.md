@@ -868,6 +868,46 @@ headers to confirm nothing was duplicated or dropped. -->
       document's nodes; host sizes equal before and after a reset
       (numbers recorded)._
 
+- [ ] **T1606d** — The ghostly outline, fixed (T1606a's diagnosis;
+      decision review D1606a): the waiting fill paints while an image
+      waits or fades and leaves as a rise starts. `review: per-task`.
+      Footprint: `src/styles/global.css` (the Motion section's fill
+      rule — its `:has()` argument becomes
+      `> img:is(:not([data-shown]), [data-shown='fade'])` — and the
+      T1603 comment above it, per D1606a's text, nothing else);
+      `motion.test.mjs` ((g): the `:is(...)` reader becomes a shared
+      `isList` helper used by the gate test, plus one new test pinning
+      the fill rule's prefix `html[data-motion]:not([data-quiet]) :is(`,
+      its host list equal to `FRAME_HOSTS`, and its `:has()` argument).
+      `motion.ts`, `BaseLayout.astro` and the keyframes untouched.
+      _Verify: `sh scripts/verify.sh` green; the new test fails with
+      the `:has()` argument reverted to `> img:not([data-shown=''])`,
+      and with `.note-cover` dropped from the fill's list (both runs
+      reported, then restored); in the browser at both screens on the
+      fog piece and the fog gallery, with `--arrive-rise: 0.75rem;
+    --dur-appear: 800ms` and then `1rem; 1100ms` inline on `<html>`:
+      scroll a below-fold frame to its arrival, pause its image's
+      animation and set `currentTime` to 10%, 25%, 50% — the host's
+      computed `background-color` transparent while the image reads
+      `"rise"`; a screenshot row one pixel inside the host's top edge
+      matches the ground's computed colour within 2 per channel on each
+      ground the ground switch offers (numbers recorded); any overlap of
+      the rising photograph with a neighbouring caption or paragraph at
+      10% recorded in px; controls — at `--arrive-rise: 0px` a paused
+      `"fade"` at 50% keeps the host's `background-color` equal to
+      `--wait-fill`, a waiting host shows the fill, `""` none, the quiet
+      view never; a frame re-entering from above (`--rise-sign: -1`)
+      read the same way; the page-change check — at `astro:before-swap`
+      record the old page's shown frames' rects, in the first frame
+      after `astro:after-swap` count the new page's hosts painted with
+      the fill whose rect overlaps an old rect but differs by more than
+      3px on any edge, cache off, for the pieces index → the fog piece,
+      the fog piece → the fog gallery by a link (not the travel), and a
+      header nav hop — the count recorded (zero rules the hypothesis
+      out; non-zero adds plan.md's Known limitation "An ordinary page
+      change cross-fades onto the new page's waiting boxes" with the
+      numbers)._
+
 - [ ] **T1606c** — The appearance curve's own token and the panel as
       named settings (plan.md "The dev switch", "The grammar"; D1606
       Q2, Q3). `review: per-task`. Footprint: `src/styles/global.css`
@@ -897,7 +937,8 @@ headers to confirm nothing was duplicated or dropped. -->
       opens with the select on "settle" and "every value" collapsed
       with twenty-one rows; choosing each setting writes exactly four
       inline properties on `<html>` and the storage key; editing a raw
-      field shows "custom"; an arriving frame's animation reads 800ms
+      field shows "custom"; with Settle, a host whose image reads `"rise"` has a
+      transparent `background-color`; an arriving frame's animation reads 800ms
       and the Settle curve while `.site-header`'s transition timing is
       still `ease` and the travel's group still `--ease-move`._
 
@@ -1096,6 +1137,8 @@ tier if it is ever on (it is off). -->
 | T1605a (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 137,501                     | done; 385 tests; B1 arrival at the share (0.15 → 15.1%, 0.5 → 50.1%), too-tall rule only past reach; B2 fullbleed `land-b` named on the way back (`nth` stored); B3 in-view neighbours fade not rise, old order reproduces the rise; reload restores scroll before `appear()` (no fix); tall-fallback comment corrected                                                                                                                                                                                                                                                                                           |
 | Phase 1 re-review (`skeptical-reviewer`, resumed)           | `opus` (Opus 5.5)              | 118,716 cumulative          | signed off; for the record: a frame only glimpsed (under the threshold) is not counted shown, so not held on return (every-ratio `tall-4x5-01` at 1512)                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | D1606 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 100,605                     | replay: every off-screen frame, reset when wholly out, mirrored rise from the top, fade from the side, skipped in the quiet view and during a travel; presets faint/soft/settle/float (settle recommended); new token `--ease-appear`; T1606b then T1606c, each reviewed per-task                                                                                                                                                                                                                                                                                                                                 |
+| T1606a (`sdd-implementer`, diagnosis)                       | `opus` (Opus 5.5)              | 155,179                     | no code; committed tokens: fill == photograph box everywhere (≤0.01px); the outline is the rise moving the image over a still host fill (4.78px band at 0.5rem, 10% in); the panel's rise persists in localStorage; page-change cross-fade not ruled out                                                                                                                                                                                                                                                                                                                                                          |
+| D1606a decision review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 84,599                      | B′: fill only while waiting or fading, never under a rise → T1606d before T1606c; the fill's host list was unpinned — pinned now; page-change check instrumented                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 _(Session-tier allowance draw noted at each pause.)_
 

@@ -194,7 +194,7 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   The gate rule reads the attribute:
 
       html[data-motion] :is(FRAME_HOSTS) > img:not([data-shown]) { opacity: 0; }
-      html[data-motion]:not([data-quiet]) :is(FRAME_HOSTS):has(> img:not([data-shown=''])) { background-color: var(--wait-fill); }
+      html[data-motion]:not([data-quiet]) :is(FRAME_HOSTS):has(> img:is(:not([data-shown]), [data-shown='fade'])) { background-color: var(--wait-fill); }
       img[data-shown='fade'] { animation: motion-appear var(--dur-appear) var(--ease-state) both; animation-delay: calc(var(--arrive-stagger) * var(--i, 0)); }
       img[data-shown='rise'] { animation: motion-arrive var(--dur-appear) var(--ease-move) both; animation-delay: calc(var(--arrive-stagger) * var(--i, 0)); }
       @keyframes motion-appear { from { opacity: 0; } to { opacity: 1; } }
@@ -249,8 +249,13 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   `--arrive-rise` is non-zero and reduced motion is off, else `"fade"`;
   `--motion-arrive: 0` on a host treats its unit as in view;
   `--motion-appear: 0` on a host marks its image `""` at once. On
-  `animationend` the script writes `data-shown=""` so the fill leaves
-  with the fade. A host carrying `data-understudy` (the travel's,
+  `animationend` the script writes `data-shown=""`. The waiting fill
+  paints while an image waits or fades and leaves with the fade; under
+  `"rise"` it leaves as the image starts to move, since the host stays
+  still while the photograph travels and a fill kept beneath it shows
+  as a band the photograph has not reached (T1606a: 4.78px at 0.5rem,
+  10% in; decision review D1606a). The fill rule's `:is(...)` list is
+  pinned equal to `FRAME_HOSTS` like the gate's. A host carrying `data-understudy` (the travel's,
   below) is stripped of it and of `--understudy` on **every** path that
   writes `data-shown=""` — the `animationend`, the `complete`
   short-cut, the early-`load` rule, the appear-off case — so a second
@@ -829,7 +834,7 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
 - **The waiting fill reaches every frame through its host**; the
   hosts are the six in `FRAME_HOSTS`. A new surface that places an
   `img` outside them waits on the ground and fades without a fill —
-  the pin on the list is where it is added.
+  the pins on both lists (the gate's and the fill's) are where it is added.
 - **The quiet view without the View Transitions API cuts**, where it
   used to fade its ground over 220ms. Firefox 144+, Chrome 111+ and
   Safari 18+ have the API; the photographer's Firefox 156 does.
@@ -852,6 +857,13 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   minified one. _(Phase 0 review, 2026-09-23.)_
 
 ## Resolved decisions
+
+- **The waiting fill leaves when a rise starts** (D1606a), not at its
+  end: moving the rise onto the host would animate a figure's caption
+  and the reserved box, and a short fill fade would leave half the
+  band. The price is one frame in which a rising frame's box gives way
+  to the ground; the bare-ground fill, the photographer's other choice,
+  removes even that.
 
 - **A navigation is classified by what was clicked, not by its
   paths.** `closest('.image-link')` is a travel in from any page — the
