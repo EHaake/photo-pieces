@@ -66,17 +66,18 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
 
       --dur-state: 180ms;        /* a state change: hover, underline, the header's slide, a page's cross-fade */
       --dur-move: 480ms;         /* a photograph's movement: the travel, the quiet growth; the hero's entrance */
-      --dur-appear: 400ms;       /* a photograph's appearance: the fade on decode, the arrival */
+      --dur-appear: 800ms;       /* a photograph's appearance: the fade on decode, the arrival (400ms until T1606c) */
       --ease-state: ease;
       --ease-move: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-appear: cubic-bezier(0.33, 1, 0.68, 1);   /* the appearance's curve (T1606c, D1606 Q3) */
       --motion-appear: 1;        /* the four behaviours' flags, 1 or 0 — read by script; the code stays when one is off */
       --motion-arrive: 1;
       --motion-travel: 1;
       --motion-quiet: 1;
       --motion-appear-covers: 1; /* the covers on the three indexes and the front door: their own appearance and arrival flags */
       --motion-arrive-covers: 1;
-      --arrive-rise: 0px;        /* the arrival's shape: 0px is the fade alone, a length is the fade with a rise */
-      --arrive-threshold: 0.15;  /* the share of a frame in view that counts as arrived */
+      --arrive-rise: 0.75rem;    /* the arrival's shape: 0px is the fade alone, a length is the fade with a rise (0px until T1606c) */
+      --arrive-threshold: 0.25;  /* the share of a frame in view that counts as arrived (0.15 until T1606c) */
       --arrive-stagger: 0ms;     /* a multi-cell block arrives as one; a stagger only if asked to see one */
       --wait-fill: var(--color-surface);   /* the waiting box: the surface step, or var(--color-bg) for the ground itself */
       --hero-enter: 1;           /* the front door's inherited entrance, on the tokens; 0 turns it off */
@@ -195,8 +196,8 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
 
       html[data-motion] :is(FRAME_HOSTS) > img:not([data-shown]) { opacity: 0; }
       html[data-motion]:not([data-quiet]) :is(FRAME_HOSTS):has(> img:is(:not([data-shown]), [data-shown='fade'])) { background-color: var(--wait-fill); }
-      img[data-shown='fade'] { animation: motion-appear var(--dur-appear) var(--ease-state) both; animation-delay: calc(var(--arrive-stagger) * var(--i, 0)); }
-      img[data-shown='rise'] { animation: motion-arrive var(--dur-appear) var(--ease-move) both; animation-delay: calc(var(--arrive-stagger) * var(--i, 0)); }
+      img[data-shown='fade'] { animation: motion-appear var(--dur-appear) var(--ease-appear) both; animation-delay: calc(var(--arrive-stagger) * var(--i, 0)); }
+      img[data-shown='rise'] { animation: motion-arrive var(--dur-appear) var(--ease-appear) both; animation-delay: calc(var(--arrive-stagger) * var(--i, 0)); }
       @keyframes motion-appear { from { opacity: 0; } to { opacity: 1; } }
       @keyframes motion-arrive { from { opacity: 0; transform: translateY(var(--arrive-rise)); } to { opacity: 1; transform: none; } }
 
