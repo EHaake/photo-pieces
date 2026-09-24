@@ -799,7 +799,7 @@ headers to confirm nothing was duplicated or dropped. -->
       neighbours of the centred cell read `"fade"`, never `"rise"`;
       T1604b's and T1605's way-back reads spot-checked unchanged._
 
-- [ ] **T1606** — The first look, and the rounds. Not an
+- [x] **T1606** — The first look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 1
       pause, in the person's words, with T1603–T1605's numbers beside
       it, and the standing instruction for what follows. Each round
@@ -1103,6 +1103,21 @@ options taken — back after an arrow is the step's cross-fade; the slide
 stays one token away). Handled as T1606a (the outline, diagnosis) and T1606b (the
 amendment's design, by decision review, then implementation), then
 rounds on the named settings.
+
+**The keeps (2026-09-24), after the third look — "Looks great!
+continue":** the arrival's shape — Settle, a fade with a 0.75rem rise
+(mirrored from above), at 950ms on `cubic-bezier(0.33, 1, 0.68, 1)`,
+arriving at a quarter in view, on every re-entry; the waiting fill —
+the ground itself, no visible box; the behaviours — all four on, the
+covers too; the durations and curves — state 180ms `ease`, movement
+480ms `cubic-bezier(0.22, 1, 0.36, 1)`, appearance as above; the hero —
+its entrance kept on the tokens (480ms, 90ms stagger), left to the
+front door spec; the arrows — a full-width carousel slide
+(`--arrows-slide: 1`), back and forward following the history; reduced
+motion — fades keep their length (`--rm-appear: 1`, `--rm-quiet: 1`),
+nothing moves. The travel in and back kept as first built ("fantastic
+and perfect"). `:root`, `EXPECTED` and spec.md's Decided lines agree
+(T1606e, T1606g → T1606h's rounds; each round's test green).
 
 _(The product owner's attestation from the site under `npm run dev`
 on both screens, mouse and trackpad: the fog piece's frames waiting
