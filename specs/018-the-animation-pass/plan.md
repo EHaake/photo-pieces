@@ -299,7 +299,13 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   while `<html>` carries `data-quiet`: the quiet view hides the page's
   other frames with `display: none`, which is not leaving the screen,
   and `data-quiet` is set inside the quiet view's update, before any
-  report of that hiding. It is **not** skipped while `data-moving` is
+  report of that hiding. When `data-quiet` is removed, every replaying
+  unit is observed afresh (a `MutationObserver` on the root's
+  `data-quiet`, `unobserve` then `observe`, disconnected at teardown),
+  so a frame the quiet view hid and the exit left off screen is reset
+  there, and one on screen is left alone (T1606b review B1). `leave()`
+  also strips a host's `data-understudy` and `--understudy`, so a fade
+  cut short by scrolling away never replays over the stand-in. It is **not** skipped while `data-moving` is
   set. A page change's transition (the way back, an arrow step) is when
   the observer's first report arrives, and a frame off screen then is
   really off screen. So the held frames below the landing, made eager
@@ -321,20 +327,26 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   entered, on its first arrival and every replay: a strip's band
   scrolls sideways and snaps, and a snap step can take a frame from
   wholly out to wholly in, which no geometry tells apart from a
-  vertical entry (D1606 follow-up, 2). `edge(entry)` (exported, pure):
-  `top` when the unit's middle is above the root's middle, else
-  `bottom`. There is no geometric `side`: a `100vw` fullbleed image is
+  vertical entry (D1606 follow-up, 2). `edge(entry, last)` (exported, pure):
+  `top` when the box is clipped at the root's top only, `bottom` when
+  clipped at its foot only, else `last` — the side the unit was on when
+  last seen wholly off screen, recorded in `leave()` (and from the
+  hook's rect for a unit off screen at the hook) — so a jump that lands
+  a unit wholly in view (Page Down without smooth scrolling, find in
+  page, a hash link) still comes in from the edge it crossed (D1606b,
+  the T1606b review's F1). There is no geometric `side`: a `100vw` fullbleed image is
   wider than the viewport by a classic scrollbar, and would read as
   clipped sideways. The kind is decided at reveal, not at arrival. A
-  unit revealed while `<html>` carries `data-quiet` or
-  `data-moving="quiet"` is shown at once (`shown()` on each image, no
+  unit revealed by its arrival while `<html>` carries `data-quiet`, or
+  revealed at all while it carries `data-moving="quiet"`, is shown at
+  once (`shown()` on each image, no
   kind written): the quiet view's growth is that photograph's movement,
   entered from further down the image page, where the stage has already
   been reset, and a fade or rise inside it would be a second one. This
   applies to the quiet view only. During a page change's transition the
   stage still fades over its understudy, as the travel was built
-  (D1606 follow-up, 3). A unit still decoding when the growth ends
-  fades as usual. The keyframe reads the sign:
+  (D1606 follow-up, 3). A unit whose decode ends after the growth
+  fades as usual, quiet view or not. The keyframe reads the sign:
   `@keyframes motion-arrive { from { opacity: 0; transform: translateY(calc(var(--arrive-rise) * var(--rise-sign, 1))); } … }`.
   `--rise-sign` is a runtime property like `--i` and `--understudy`:
   never in markup or `:root`, and not in the grammar's family.

@@ -866,7 +866,12 @@ headers to confirm nothing was duplicated or dropped. -->
       frames as `"fade"`, never `"rise"`; on the fog piece with rise on,
       a fullbleed brought wholly into view by one Page Down reads
       `"rise"`; the image page — entering and leaving the quiet view
-      writes nothing on the strip, the stage scrolled fully off and
+      writes nothing on strip frames on screen at the exit, and a strip
+      frame off screen at the exit gets its removal and reads `"fade"`
+      when scrolled to (the quiet view opened with the strip in view,
+      closed, then scrolled down); a Page Down with smooth scrolling off
+      onto the fog fullbleed reads `"rise"` sign 1; (f) gains the
+      partner case wholly-in-view with `last='top'` → `top`; the stage scrolled fully off and
       back replays; the image page scrolled until the stage is off
       screen, the quiet view entered: during `data-moving="quiet"` the
       stage's image gets `""` and never `"fade"` or `"rise"`, and
@@ -897,7 +902,7 @@ headers to confirm nothing was duplicated or dropped. -->
       and with `.note-cover` dropped from the fill's list (both runs
       reported, then restored); in the browser at both screens on the
       fog piece and the fog gallery, with `--arrive-rise: 0.75rem;
-  --dur-appear: 800ms` and then `1rem; 1100ms` inline on `<html>`:
+--dur-appear: 800ms` and then `1rem; 1100ms` inline on `<html>`:
       scroll a below-fold frame to its arrival, pause its image's
       animation and set `currentTime` to 10%, 25%, 50% — the host's
       computed `background-color` transparent while the image reads
@@ -1151,6 +1156,8 @@ tier if it is ever on (it is off). -->
 | D1606 decision review (`skeptical-reviewer`)                | `opus` (Opus 5.5)              | 100,605                     | replay: every off-screen frame, reset when wholly out, mirrored rise from the top, fade from the side, skipped in the quiet view and during a travel; presets faint/soft/settle/float (settle recommended); new token `--ease-appear`; T1606b then T1606c, each reviewed per-task                                                                                                                                                                                                                                                                                                                                 |
 | T1606a (`sdd-implementer`, diagnosis)                       | `opus` (Opus 5.5)              | 155,179                     | no code; committed tokens: fill == photograph box everywhere (≤0.01px); the outline is the rise moving the image over a still host fill (4.78px band at 0.5rem, 10% in); the panel's rise persists in localStorage; page-change cross-fade not ruled out                                                                                                                                                                                                                                                                                                                                                          |
 | D1606a decision review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 84,599                      | B′: fill only while waiting or fading, never under a rise → T1606d before T1606c; the fill's host list was unpinned — pinned now; page-change check instrumented                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| T1606b (`sdd-implementer`, + one follow-up round)           | `opus` (Opus 5.5)              | 226,710                     | replay built; D1606 follow-up (110,016 cumulative reviewer): reset during page changes, strips always fade, stage at once inside the quiet growth                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| T1606b per-task review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 58,743                      | fix and re-review: B1 frames hidden by the quiet view never reset after its exit; F1 edge from last-seen side (D1606b, folded in); deviation accepted; understudy stripped on leave                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 _(Session-tier allowance draw noted at each pause.)_
 
