@@ -1026,6 +1026,14 @@ headers to confirm nothing was duplicated or dropped. -->
       the image page's way-back link lands at the stored y on the clicked
       copy (`nth` 1), dev and preview (T1606f review B1)._
 
+- [ ] **T1606g** — Round (third look, 2026-09-23): "I would like some
+      sort of animation when clicking the left or right links underneath
+      a hero image … a slide animation" → `--arrows-slide: 2rem` (the
+      distance T1606f verified). The value in `global.css`'s `:root`,
+      its `EXPECTED` row, one line in spec.md's Decided section. _Verify:
+      `sh scripts/verify.sh` green; the value agrees in the three places
+      (grep listed)._
+
 ### Phase 1 record (the person's walkthrough)
 
 **First look (2026-09-23), in the person's words** — see spec.md
