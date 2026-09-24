@@ -822,6 +822,23 @@ headers to confirm nothing was duplicated or dropped. -->
       each token's value in the three places, listed); the Phase 1
       record below filled in._
 
+- [ ] **T1606a** — The ghostly outline (the person's finding at the
+      Phase 1 pause): as a photograph fades in, an outline that often
+      does not match the photograph's shape shows. A diagnosis dispatch:
+      find the cause on the pages he walked (the fog piece, the fog
+      gallery, the headlands wall, the image pages), fix it when the
+      fix is inside the appearance's footprint (`global.css`'s Motion
+      section, `motion.ts`) and no resting geometry changes; otherwise
+      return the diagnosis and options. _Verify: `sh scripts/verify.sh`
+      green; per surface, the waiting fill's painted box equals the
+      photograph's box at both screens, before and during the fade
+      (numbers recorded); the cause named._
+
+- [ ] **T1606b** — The amendment (spec.md "Amended at the Phase 1
+      pause"): appearance on every re-entry; the panel as named
+      settings. Designed at a decision review, transcribed into plan.md,
+      then dispatched.
+
 ### Phase 1 record (the person's walkthrough)
 
 **First look (2026-09-23), in the person's words** — see spec.md
