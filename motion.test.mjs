@@ -66,7 +66,10 @@ import { APPEARANCE_PRESETS, APPEARANCE_TOKENS } from './src/components/dev-moti
 //     appearance animation — other than the --rm-appear product. The
 //     fifth (D1604, Q1) is pinned by name: every view-transition group
 //     loses its animation, and no duration is declared on the old and
-//     new images there, so each cross-fade keeps its length.
+//     new images there, so each cross-fade keeps its length. The block
+//     comes after every rule it overrides (T1608a) — each wins at equal
+//     specificity by order, and the appearance rules once came later,
+//     leaving `--rm-appear: 0` inert.
 //
 // (b) No literal duration or curve outside the token block. scanMotion
 //     (src/lib/motion-scan.mjs) over global.css and every .astro <style>
@@ -462,6 +465,50 @@ describe('(d) reduced motion keeps the fades and drops the movement (T1600, spec
     ).toEqual(REDUCED_RULES);
   });
 
+  it('the block comes after every rule it overrides — each wins at equal specificity by order (T1608a)', () => {
+    // A base rule is one outside the block that shares a selector with
+    // an RM rule and declares one of its properties, or that property's
+    // shorthand — found by walking, so a same-selector rule added after
+    // the block fails. BASES adds what that walk cannot see: the link
+    // rule's base is `a:not(.brand, .button)`, a different list of equal
+    // specificity. The group rule has no author base (animation-name is
+    // the UA sheet's), so it is not required to find one.
+    const BASES = { 'a:not(.brand, .button, .social-links *)': ['a:not(.brand, .button)'] };
+    const shorthand = (name) => name.match(/^(transition|animation)-/)?.[1];
+    const conflicts = (own, name) =>
+      name in own || (shorthand(name) !== undefined && shorthand(name) in own);
+    const inBlock = all.filter((rule) => rule.within.includes(REDUCED));
+    const outside = all.filter((rule) => !rule.within.includes(REDUCED));
+    const blockAt = all.indexOf(inBlock[0]);
+    expect(inBlock.map((rule) => preludeOf(rule.prelude))).toEqual(
+      REDUCED_RULES.map((rule) => rule.prelude),
+    );
+    const found = inBlock.map((rule) => {
+      const names = Object.keys(declarations(rule.body));
+      const selectors = splitTop(rule.prelude).map(norm);
+      const extra = BASES[preludeOf(rule.prelude)] ?? [];
+      const bases = outside.filter((base) => {
+        const own = declarations(base.body);
+        const shares =
+          splitTop(base.prelude).some((one) => selectors.includes(norm(one))) ||
+          extra.includes(preludeOf(base.prelude));
+        return shares && names.some((name) => conflicts(own, name));
+      });
+      return {
+        prelude: preludeOf(rule.prelude),
+        bases: bases.length,
+        after: bases.filter((base) => all.indexOf(base) > blockAt).map((base) => base.where),
+      };
+    });
+    expect(found).toEqual([
+      { prelude: ':root', bases: 1, after: [] },
+      { prelude: 'a:not(.brand, .button, .social-links *)', bases: 1, after: [] },
+      { prelude: '.site-header', bases: 1, after: [] },
+      { prelude: "img[data-shown='fade'], img[data-shown='rise']", bases: 2, after: [] },
+      { prelude: '::view-transition-group(*)', bases: 0, after: [] },
+    ]);
+  });
+
   it('every view-transition group loses its animation, and no old/new duration is declared — the cross-fades keep their length (D1604, Q1)', () => {
     const inBlock = blocks(reduced().body);
     const group = inBlock.filter(
@@ -724,13 +771,21 @@ describe('(f) the module (T1602, spec 018)', () => {
   });
 
   it('the named settings are faint, soft, settle and float, each with a one-line description (T1606c)', () => {
-    expect(APPEARANCE_PRESETS.map((preset) => preset.name)).toEqual(['faint', 'soft', 'settle', 'float']);
+    expect(APPEARANCE_PRESETS.map((preset) => preset.name)).toEqual([
+      'faint',
+      'soft',
+      'settle',
+      'float',
+    ]);
     for (const { description } of APPEARANCE_PRESETS) expect(description).toMatch(/^[^\n]{10,}$/);
   });
 
   it('every named setting sets exactly APPEARANCE_TOKENS — no more, no fewer, no misspelt name', () => {
     for (const preset of APPEARANCE_PRESETS)
-      expect([preset.name, Object.keys(preset.tokens)]).toEqual([preset.name, [...APPEARANCE_TOKENS]]);
+      expect([preset.name, Object.keys(preset.tokens)]).toEqual([
+        preset.name,
+        [...APPEARANCE_TOKENS],
+      ]);
   });
 
   it('--arrows-slide is a flag — the dev panel shows it as on/off, and the layout reads it as one (T1606h)', () => {
@@ -739,7 +794,12 @@ describe('(f) the module (T1602, spec 018)', () => {
 
   it('APPEARANCE_TOKENS are grammar tokens of kind time, curve, length and number, in that order', () => {
     const kinds = Object.fromEntries(MOTION_TOKENS.map(({ name, kind }) => [name, kind]));
-    expect(APPEARANCE_TOKENS.map((name) => kinds[name])).toEqual(['time', 'curve', 'length', 'number']);
+    expect(APPEARANCE_TOKENS.map((name) => kinds[name])).toEqual([
+      'time',
+      'curve',
+      'length',
+      'number',
+    ]);
   });
 
   it('faint is the appearance as first built — 400ms, ease, no rise, 0.15', () => {
@@ -869,9 +929,7 @@ describe("(g) the hidden state is the script's (T1603, spec 018)", () => {
     expect(isList(prelude)).toEqual(FRAME_HOSTS);
     // `)` then `:has(` with no space: the fill is on the host itself, not
     // on a descendant of one.
-    expect(prelude.endsWith("):has(> img:is(:not([data-shown]), [data-shown='fade']))")).toBe(
-      true,
-    );
+    expect(prelude.endsWith("):has(> img:is(:not([data-shown]), [data-shown='fade']))")).toBe(true);
   });
 
   it('no .astro file, the transform, or content file writes a motion attribute in markup', async () => {

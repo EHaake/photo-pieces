@@ -136,8 +136,8 @@
      any of them on `<html>`. motion.test.mjs pins each by name — to
      retune, move the value here and in its `EXPECTED` row, and nowhere
      else. The rule: motion answers the reader. */
-  --dur-state: 180ms; /* a state change: hover, underline, the header's slide, a page's cross-fade */
-  --dur-move: 480ms; /* a photograph's movement: the travel, the quiet growth; the hero's entrance */
+  --dur-state: 180ms; /* a state change: hover, underline, the header's slide, an ordinary page change's cross-fade */
+  --dur-move: 480ms; /* a photograph's movement: the travel, the arrows' slide, the quiet growth; the hero's entrance; the page's cross-fade beneath a travel, a step or the quiet growth */
   --dur-appear: 950ms; /* a photograph's appearance: the fade on decode, the arrival */
   --ease-state: ease;
   --ease-move: cubic-bezier(0.22, 1, 0.36, 1);
@@ -1115,52 +1115,6 @@ a.note-row {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* Reduced motion (spec 018's split): movements instant, fades kept.
-   Five rules. The underline's size change and the header's slide go
-   instant; the hero goes through its flag — --hero-enter at 0 zeroes
-   its duration and its delays, so it lands on its end state; the
-   arrival loses its rise; every colour change and fade keeps its
-   duration, and the appearance fade keeps its own unless --rm-appear
-   cuts it. Every rule here overrides its base rule at equal specificity
-   by coming later in the file — keep the block after them. `0s` is the
-   one literal a duration slot may carry — a zero is the absence of
-   motion, not a duration. One rule reaches the view transitions:
-   every group lands on its new box at once — the header returning from
-   data-hidden or data-held-active would otherwise slide in on its own
-   group — while the old and new images inherit the group's
-   animation-duration, which the rule leaves set, so every cross-fade
-   keeps its length; it also makes harmless any name that reaches a
-   group under the setting (D1604, Q1). The script never names the
-   photograph under reduced motion. */
-@media (prefers-reduced-motion: reduce) {
-  /* The arrival loses its rise; the hero lands on its end state, delays included. */
-  :root {
-    --arrive-rise: 0px;
-    --hero-enter: 0;
-  }
-
-  /* The underline's size change is instant; the colour still fades — the
-     social links, which cancel the underline, keep their border and
-     colour fades. */
-  a:not(.brand, .button, .social-links *) {
-    transition-property: color;
-  }
-
-  .site-header {
-    transition-duration: 0s;
-  }
-
-  img[data-shown='fade'],
-  img[data-shown='rise'] {
-    animation-duration: calc(var(--dur-appear) * var(--rm-appear));
-  }
-
-  /* Every group lands at once; its old and new keep their cross-fade. */
-  ::view-transition-group(*) {
-    animation-name: none;
   }
 }
 
@@ -2250,5 +2204,54 @@ html[data-slide]::view-transition-group(site-header) {
 @keyframes motion-slide-in {
   from {
     transform: translateX(calc(100vw * var(--dir) * -1));
+  }
+}
+
+/* Reduced motion (spec 018's split): movements instant, fades kept.
+   Five rules. The underline's size change and the header's slide go
+   instant; the hero goes through its flag — --hero-enter at 0 zeroes
+   its duration and its delays, so it lands on its end state; the
+   arrival loses its rise; every colour change and fade keeps its
+   duration, and the appearance fade keeps its own unless --rm-appear
+   cuts it. Every rule here overrides its base rule at equal specificity
+   by coming later in the file, so the block closes the file, after the
+   Motion section's appearance rules — motion.test.mjs pins it after
+   every rule it overrides (T1608a: before this, `--rm-appear: 0` was
+   inert, the appearance rules coming later). `0s` is the
+   one literal a duration slot may carry — a zero is the absence of
+   motion, not a duration. One rule reaches the view transitions:
+   every group lands on its new box at once — the header returning from
+   data-hidden or data-held-active would otherwise slide in on its own
+   group — while the old and new images inherit the group's
+   animation-duration, which the rule leaves set, so every cross-fade
+   keeps its length; it also makes harmless any name that reaches a
+   group under the setting (D1604, Q1). The script never names the
+   photograph under reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  /* The arrival loses its rise; the hero lands on its end state, delays included. */
+  :root {
+    --arrive-rise: 0px;
+    --hero-enter: 0;
+  }
+
+  /* The underline's size change is instant; the colour still fades — the
+     social links, which cancel the underline, keep their border and
+     colour fades. */
+  a:not(.brand, .button, .social-links *) {
+    transition-property: color;
+  }
+
+  .site-header {
+    transition-duration: 0s;
+  }
+
+  img[data-shown='fade'],
+  img[data-shown='rise'] {
+    animation-duration: calc(var(--dur-appear) * var(--rm-appear));
+  }
+
+  /* Every group lands at once; its old and new keep their cross-fade. */
+  ::view-transition-group(*) {
+    animation-name: none;
   }
 }

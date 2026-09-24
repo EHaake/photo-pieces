@@ -530,8 +530,8 @@ attached.
   conversation what "old-school" names precisely — the type, the static
   ground, the absence of motion, the layouts — since the answer may be
   the reading typography pass below as much as animation. "Image
-  loading choreography" below (a fade on decode) is the same family and
-  would fold in. _The conversation is spec 018's, "A considered
+  loading choreography" above (a fade on decode) is the same family and
+  folded in: it shipped at spec 018. _The conversation is spec 018's, "A considered
   animation pass" above (2026-09-23). The rule bent to "motion answers
   the reader" and no further: every animation answers the reader or a
   photograph loading, and nothing loops, breathes or plays by itself.

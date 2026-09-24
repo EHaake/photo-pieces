@@ -206,7 +206,7 @@ arrival are the dev switch's "settle" setting at 950ms.
   it comes in from the top — once a quarter of it is on screen, every
   time it comes back into view, scrolling down or up; the cells of one
   block arrive together, and a strip's frames one by one as each
-  enters the band.
+  enters the band, fading without the rise.
 - **Travel.** Clicking a frame carries the photograph into its page's
   stage and the way back returns it to its place, following the
   browser's history — back reverses the step taken, forward replays

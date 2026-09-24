@@ -176,12 +176,13 @@ on the site. Since spec 018 the photographs move only in answer to the
 reader or to their own loading: none pops — its box waits in the
 ground's own colour, so no box shows, until the photograph has decoded
 and fades in; below the fold it fades in with a small rise each time it
-scrolls into view, down or back up (a strip's frames one by one);
-clicking a frame carries the photograph into its page's stage and the
-way back returns it, following the browser's history; the arrows slide
-the photograph off the screen and the next one on; the quiet view grows
-the photograph into its mat as the ground darkens; and reduced motion
-keeps the fades and drops the movement. Rules the build enforces: piece
+scrolls into view, down or back up (a strip's frames arrive one by
+one, and fade without the rise); clicking a frame carries the photograph
+into its page's stage and the way back returns it, following the
+browser's history; the arrows slide the photograph off the screen and
+the next one on; the quiet view grows the photograph into its mat as the
+ground darkens; and reduced motion keeps the fades and drops the
+movement. Rules the build enforces: piece
 folders must be slugs and file names URL-safe (letters, digits, `.`,
 `-`, `_`), an image directly in `pieces/` or beside a flat
 `pieces/foo.md` fails, a file nested in a sub-folder is ignored with a
