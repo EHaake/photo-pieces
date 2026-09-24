@@ -128,7 +128,7 @@ const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 const EXPECTED = {
   '--dur-state': '180ms',
   '--dur-move': '480ms',
-  '--dur-appear': '800ms',
+  '--dur-appear': '950ms',
   '--ease-state': 'ease',
   '--ease-move': 'cubic-bezier(0.22, 1, 0.36, 1)',
   '--ease-appear': 'cubic-bezier(0.33, 1, 0.68, 1)',
@@ -141,7 +141,7 @@ const EXPECTED = {
   '--arrive-rise': '0.75rem',
   '--arrive-threshold': '0.25',
   '--arrive-stagger': '0ms',
-  '--wait-fill': 'var(--color-surface)',
+  '--wait-fill': 'var(--color-bg)',
   '--hero-enter': '1',
   '--hero-stagger': '90ms',
   '--arrows-slide': '0px',

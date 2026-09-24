@@ -132,7 +132,10 @@ const refill = (input: HTMLInputElement, value: string) => {
   if (document.activeElement !== input) input.value = value;
 };
 
-const fillChoice = () => (read().tokens['--wait-fill'] === FILLS.ground ? 'ground' : 'surface');
+/** The fill in effect: the computed value substitutes the var(), so it
+ *  matches against the ground's resolved colour, not the stored spelling. */
+const fillChoice = () =>
+  same(token('--wait-fill')) === same(token('--color-bg')) ? 'ground' : 'surface';
 
 const control = (name: string, kind: string, stored: Stored): (Node | string)[] => {
   if (kind === 'flag') {

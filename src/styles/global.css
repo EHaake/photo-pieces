@@ -138,7 +138,7 @@
      else. The rule: motion answers the reader. */
   --dur-state: 180ms; /* a state change: hover, underline, the header's slide, a page's cross-fade */
   --dur-move: 480ms; /* a photograph's movement: the travel, the quiet growth; the hero's entrance */
-  --dur-appear: 800ms; /* a photograph's appearance: the fade on decode, the arrival */
+  --dur-appear: 950ms; /* a photograph's appearance: the fade on decode, the arrival */
   --ease-state: ease;
   --ease-move: cubic-bezier(0.22, 1, 0.36, 1);
   /* the appearance's curve: the fade and the arrival; set by the panel's named settings */
@@ -152,8 +152,8 @@
   --arrive-rise: 0.75rem; /* the arrival's shape: 0px is the fade alone, a length is the fade with a rise */
   --arrive-threshold: 0.25; /* the share of a frame in view that counts as arrived */
   --arrive-stagger: 0ms; /* a multi-cell block arrives as one; a stagger only if asked to see one */
-  /* the waiting box: the surface step, or var(--color-bg) for the ground itself */
-  --wait-fill: var(--color-surface);
+  /* the waiting box: the ground itself, so no box shows; var(--color-surface) for the surface step */
+  --wait-fill: var(--color-bg);
   --hero-enter: 1; /* the front door's inherited entrance, on the tokens; 0 turns it off */
   --hero-stagger: 90ms;
   --arrows-slide: 0px; /* the arrows cross-fade in place; a length is the slide variant's distance */

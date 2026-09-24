@@ -550,7 +550,7 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   `--ease-appear`, `--arrive-rise`, `--arrive-threshold`) through the
   panel's `set`: faint (400ms, `ease`, 0px, 0.15 — as first built);
   soft (700ms, `cubic-bezier(0.4, 0, 0.2, 1)`, 0px, 0.2); settle
-  (800ms, `cubic-bezier(0.33, 1, 0.68, 1)`, 0.75rem, 0.25); float
+  (950ms since T1606e; 800ms at D1606, `cubic-bezier(0.33, 1, 0.68, 1)`, 0.75rem, 0.25); float
   (1100ms, `cubic-bezier(0.16, 1, 0.3, 1)`, 1rem, 0.3). The select
   shows the setting whose four values equal the effective ones, else
   "custom". **The behaviours:** the four checkboxes (appearance,

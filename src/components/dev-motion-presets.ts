@@ -56,7 +56,7 @@ export const APPEARANCE_PRESETS: readonly AppearancePreset[] = [
     description:
       'An unhurried fade while the photograph drifts a short way into place as you scroll to it.',
     tokens: {
-      '--dur-appear': '800ms',
+      '--dur-appear': '950ms',
       '--ease-appear': 'cubic-bezier(0.33, 1, 0.68, 1)',
       '--arrive-rise': '0.75rem',
       '--arrive-threshold': '0.25',

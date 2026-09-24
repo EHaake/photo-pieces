@@ -548,3 +548,8 @@ What changes, outside the tuning envelope and so amended here:
   from the edge the photograph crosses, arriving once a quarter of it
   is on screen. The switch offers faint (as first built), soft, settle
   and float to compare; the keep is still the photographer's to name.
+- **The appearance is Settle, a little slower** (round T1606e, second
+  look, 2026-09-23): the committed appearance is Settle at 950ms.
+- **The waiting box takes the ground's own colour** (round T1606e,
+  second look, 2026-09-23): no box is visible while a photograph loads
+  ("I don't want there to be any visible box").
