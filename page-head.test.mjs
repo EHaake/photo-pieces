@@ -64,6 +64,7 @@ describe('the dev-route barrier (T807, spec 010)', () => {
   let root;
   let withDevRoute;
   let withMarker;
+  let withMotionMarker;
   let clean;
 
   const run = (dir) => {
@@ -90,6 +91,12 @@ describe('the dev-route barrier (T807, spec 010)', () => {
       join(withMarker, 'index.html'),
       '<!doctype html>\n<script data-dev-ground>localStorage.getItem("dev-ground")</script>\n',
     );
+    withMotionMarker = join(root, 'shipped-motion');
+    mkdirSync(withMotionMarker, { recursive: true });
+    writeFileSync(
+      join(withMotionMarker, 'index.html'),
+      '<!doctype html>\n<script data-dev-motion>localStorage.getItem("dev-motion")</script>\n',
+    );
     mkdirSync(join(clean, 'pieces'), { recursive: true });
     writeFileSync(join(clean, 'pieces', 'index.html'), '<!doctype html>\n');
   });
@@ -112,11 +119,18 @@ describe('the dev-route barrier (T807, spec 010)', () => {
     expect(result.stderr).toContain(join(withMarker, 'index.html'));
   });
 
+  it('a shipped dev-motion marker (spec 018) fails with a non-zero exit and names the file', () => {
+    const result = run(withMotionMarker);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('[check-no-dev-routes] the dev motion switch shipped:');
+    expect(result.stderr).toContain(join(withMotionMarker, 'index.html'));
+  });
+
   it('a directory with no dev/ and no marker exits 0 and reports both scans', () => {
     const result = run(clean);
     expect(result.status).toBe(0);
     expect(result.stdout).toContain(
-      `[check-no-dev-routes] no dev routes in ${clean}/; no dev-ground marker in 1 files.`,
+      `[check-no-dev-routes] no dev routes in ${clean}/; no dev-ground or dev-motion marker in 1 files.`,
     );
   });
 });

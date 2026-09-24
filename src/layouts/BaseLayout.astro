@@ -11,6 +11,7 @@ import { withBase } from '../lib/url';
 import { SITE, NAV_ITEMS } from '../consts';
 import { locale, navLabel, t } from '../i18n';
 import DevGround from '../components/DevGround.astro';
+import DevMotion from '../components/DevMotion.astro';
 import SocialLinks from '../components/SocialLinks.astro';
 
 interface Props {
@@ -54,6 +55,8 @@ const isActive = (href: string) => {
 
     {/* The ground switch, spec 014 — a DEV-only constant, so the build renders nothing. */}
     {import.meta.env.DEV && <DevGround />}
+    {/* The motion switch, spec 018 — the same guard. */}
+    {import.meta.env.DEV && <DevMotion />}
 
     {/* Astro comment syntax — an HTML comment here would ship on every page. */}
     {/* Open Graph */}
@@ -71,6 +74,24 @@ const isActive = (href: string) => {
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     {imageURL && <meta name="twitter:image" content={imageURL} />}
+    {
+      /* The gate and its release (spec 018): the root attribute that hides
+        every photograph not yet shown, written before the body is parsed
+        so a photograph never paints before the script decides. If the
+        module never sets window.__motion (a stale chunk, a throw ahead of
+        appear()), the page shows every frame at load — a response to an
+        event, not a timer. */
+    }
+    <script is:inline>
+      document.documentElement.dataset.motion = '';
+      addEventListener(
+        'load',
+        () => {
+          if (!window.__motion) delete document.documentElement.dataset.motion;
+        },
+        { once: true },
+      );
+    </script>
     <slot name="head" />
     <ClientRouter />
   </head>
@@ -104,7 +125,47 @@ const isActive = (href: string) => {
     </footer>
 
     <script>
+      import type {
+        TransitionBeforePreparationEvent,
+        TransitionBeforeSwapEvent,
+      } from 'astro:transitions/client';
       import { IMAGE_SET_KEY, setKeyFromPath } from '../lib/image-set';
+      import { enhanceCompare } from '../lib/compare';
+      import {
+        NAME,
+        SLIDE_NAMES,
+        appear,
+        flag,
+        holdShown,
+        inViewport,
+        reducedMotion,
+        traverseKind,
+        type Travel,
+      } from '../lib/motion';
+
+      // The appearance and the arrival (spec 018). The initial
+      // astro:page-load fires on window's load, after every image
+      // (router.js:414) — every photograph would already be complete —
+      // so the hooks bind here, at the module's evaluation (after the
+      // parse, before DOMContentLoaded), and again at after-swap — that
+      // listener is registered below, after the way back's scroll, so
+      // appear() reads what is in view where the page lands. Before
+      // a swap the old page's hooks come off and the new document's root
+      // gets the gate, since the router replaces <html>'s attributes.
+      // The image page's compare is overlaid here too, and on the new
+      // document at before-swap, before it is swapped in (why, in
+      // src/lib/compare.ts). On every navigation, whatever the travel
+      // flag or the setting, the new document's frames this document
+      // has shown at this viewport are made eager, so the way back
+      // shows them at once instead of fading them again (holdShown).
+      let teardown = appear(document);
+      enhanceCompare(document);
+      document.addEventListener('astro:before-swap', (event) => {
+        teardown();
+        event.newDocument.documentElement.dataset.motion = '';
+        enhanceCompare(event.newDocument);
+        holdShown(event.newDocument, event.to.pathname);
+      });
 
       // Header hide-on-scroll-down / reveal-on-scroll-up. Bound once at
       // module load (view transitions don't re-run this); the header is
@@ -185,6 +246,371 @@ const isActive = (href: string) => {
         },
         true,
       );
+
+      // The travel (spec 018): a photograph carried between its frame and
+      // the image page's stage as one view transition. Three kinds, told
+      // apart by what was clicked, never by the paths alone — the related
+      // strip is on the image page, and a path rule would take its click
+      // for an arrow step:
+      //   in   — a frame (`.image-link`, on any page): its img wears the
+      //          name, the origin's scroll and which of the page's links
+      //          to that photograph was clicked are stored for the way
+      //          back;
+      //   step — an arrow (`[data-nav]`; the arrow keys click them):
+      //          nothing named unless --arrows-slide is 1, and the
+      //          next stage's file is preloaded so the cross-fade goes
+      //          from one photograph straight to the next;
+      //   out  — any other way off an image page: the stage wears the
+      //          name and lands in its cell.
+      // A traverse (browser back and forward) is classified by neither:
+      // every push classified here records on its own history entry how
+      // it was reached (`history.state.travel`, written at after-swap),
+      // and a traverse reverses (back) or replays (forward) that step —
+      // traverseKind in src/lib/motion.ts decides. On a traverse
+      // history.state is already the destination's entry, so back reads
+      // `here`, the record of the entry being left, and forward reads
+      // the destination's own.
+      // Each write sits where the router's order (router.js: before-
+      // preparation → startViewTransition → swap → scroll → after-swap)
+      // lets it take effect: the old page's names at before-preparation,
+      // ahead of the old snapshot; the new page's names and root
+      // attributes at before-swap, on the parsed document before it is
+      // adopted (the router copies <html>'s attributes over); the way
+      // back's scroll and the record at after-swap, after the router's
+      // own scroll and its push, before the new snapshot. Everything is
+      // cleared on the swap event's `finished`.
+      const ORIGIN_KEY = 'motion-origin';
+      let moving: {
+        kind: 'in' | 'step' | 'out';
+        from: string;
+        to: string;
+        nth?: number;
+        src?: string;
+        dir?: 'prev' | 'next';
+        navigationType: string;
+      } | null = null;
+      /** The current entry's record: how the reader reached this page
+       *  (it survives a reload with its entry). */
+      let here: unknown = history.state?.travel;
+      let landing: HTMLImageElement | null = null;
+      const named: HTMLElement[] = [];
+      // Reduced motion withholds the names and nothing else (D1604, Q1),
+      // and this is the one place the setting is read: without a name
+      // nothing travels, and every root cross-fade keeps its length. The
+      // rest still runs — the kinds, the records, the stored origin,
+      // dataset.moving, the preloads, the understudy, the way back's
+      // scroll — because none of it moves anything, and without it a
+      // reduced-motion reader would see the stage blank and land at the
+      // top (AC 6).
+      const name = (el: HTMLElement | null | undefined, as: string = NAME) => {
+        if (!el || reducedMotion()) return false;
+        el.style.viewTransitionName = as;
+        named.push(el);
+        return true;
+      };
+      const clear = () => {
+        for (const el of named) el.style.viewTransitionName = '';
+        named.length = 0;
+        delete document.documentElement.dataset.moving;
+        delete document.documentElement.dataset.slide;
+        moving = null;
+        landing = null;
+      };
+      const slide = () => flag('--arrows-slide');
+      const isImagePage = (url: URL) => url.pathname.startsWith(IMAGES_PATH);
+      /** The page's frame links to `path`, in document order. */
+      const cellsFor = (doc: Document, path: string, base: URL) =>
+        [...doc.querySelectorAll<HTMLAnchorElement>('.image-link[href]')].filter(
+          (a) => new URL(a.getAttribute('href') ?? '', base).pathname === path,
+        );
+      /** The stored origin of the last "in": the page, its scroll and
+       *  `nth`, the clicked link's index among that page's links to the
+       *  same photograph; null when storage is unavailable or malformed. */
+      const readOrigin = (): { path?: string; y?: number; nth?: number } | null => {
+        try {
+          return JSON.parse(sessionStorage.getItem(ORIGIN_KEY) ?? 'null');
+        } catch {
+          return null;
+        }
+      };
+      const storeOrigin = (path: string, nth: number) => {
+        try {
+          sessionStorage.setItem(ORIGIN_KEY, JSON.stringify({ path, y: window.scrollY, nth }));
+        } catch {
+          /* storage unavailable: the way back centres the cell */
+        }
+      };
+      /** The cell in `doc` (at `to`) that links to `path`: the way back's
+       *  landing. A page may place one photograph twice, so the `nth` of
+       *  those links — given (a traverse's, from its record), else, when
+       *  the stored origin is this page, the one the reader clicked, else
+       *  the first. */
+      const cellFor = (doc: Document, path: string, to: URL, nth?: number) => {
+        const cells = cellsFor(doc, path, to);
+        if (nth === undefined) {
+          const origin = readOrigin();
+          nth = origin?.path === to.pathname && typeof origin.nth === 'number' ? origin.nth : 0;
+        }
+        return cells[nth] ?? cells[0];
+      };
+
+      // A photograph of the new document, fetched before the swap: the
+      // `sizes` it will carry, then srcset, then src, so the browser
+      // picks the candidate the page will request a moment later — a
+      // cache hit then, not a second request. Bounded at a second: a
+      // wait bound, not an animation's timer.
+      const preload = async (next: HTMLImageElement, sizes: string) => {
+        const img = new Image();
+        img.sizes = sizes;
+        img.srcset = next.getAttribute('srcset') ?? '';
+        img.src = next.getAttribute('src') ?? '';
+        try {
+          await Promise.race([img.decode(), new Promise((resolve) => setTimeout(resolve, 1000))]);
+        } catch {
+          /* a broken or slow file: the frame waits in its box, as today */
+        }
+      };
+      // The loader is extended to preload what the swap will show. For
+      // an out, the landing — its cell's img (the `nth`, when given), at
+      // its own `sizes` — so it is decoded when the new snapshot is
+      // taken; with no such cell between image pages the out is a step
+      // (before-swap settles it), so the stage. For a step, the stage,
+      // at the `sizes` it will carry: `100vw` in the quiet view, the
+      // value the image page's applyQuiet gives it. For an in, nothing:
+      // the understudy covers the stage.
+      const preloadOnLoad = (
+        event: TransitionBeforePreparationEvent,
+        kind: 'step' | 'out',
+        nth?: number,
+      ) => {
+        const load = event.loader;
+        event.loader = async () => {
+          await load();
+          const doc = event.newDocument;
+          if (kind === 'out') {
+            const cell = cellFor(doc, event.from.pathname, event.to, nth)?.querySelector('img');
+            if (cell) {
+              await preload(cell, cell.getAttribute('sizes') ?? '');
+              return;
+            }
+            if (!isImagePage(event.to)) return;
+          }
+          const stage = doc.querySelector<HTMLImageElement>('.image-frame img');
+          if (!stage) return;
+          await preload(
+            stage,
+            document.documentElement.hasAttribute('data-quiet')
+              ? '100vw'
+              : (stage.getAttribute('sizes') ?? ''),
+          );
+        };
+      };
+      const step = (event: TransitionBeforePreparationEvent, dir: 'prev' | 'next') => {
+        moving = {
+          kind: 'step',
+          dir,
+          from: event.from.pathname,
+          to: event.to.pathname,
+          navigationType: event.navigationType,
+        };
+        if (slide()) name(document.querySelector<HTMLElement>('.image-frame'), SLIDE_NAMES.out);
+        preloadOnLoad(event, 'step');
+      };
+      const out = (event: TransitionBeforePreparationEvent, nth?: number) => {
+        name(document.querySelector<HTMLElement>('.image-frame'));
+        moving = {
+          kind: 'out',
+          from: event.from.pathname,
+          to: event.to.pathname,
+          nth,
+          navigationType: event.navigationType,
+        };
+        preloadOnLoad(event, 'out', nth);
+      };
+      // A traverse: the recorded step, reversed or replayed. Between two
+      // image pages in the quiet view it is a step whatever the record —
+      // the quiet view hides the strip, so neither end of an in or out
+      // is on screen. With no record for this pair of pages: between
+      // image pages a step (back → prev, forward → next), off an image
+      // page an out as by a way-back link, else nothing.
+      const traverse = (event: TransitionBeforePreparationEvent) => {
+        const back = event.direction === 'back';
+        const between = isImagePage(event.from) && isImagePage(event.to);
+        const settled = traverseKind(
+          back ? here : history.state?.travel,
+          event.direction,
+          event.from.pathname,
+          event.to.pathname,
+        );
+        const dir = settled?.dir ?? (back ? 'prev' : 'next');
+        if (between && document.documentElement.hasAttribute('data-quiet')) return step(event, dir);
+        if (!settled) {
+          if (between) step(event, dir);
+          else if (isImagePage(event.from)) out(event);
+          return;
+        }
+        if (settled.kind === 'step') return step(event, dir);
+        const nth = settled.nth ?? 0;
+        if (settled.kind === 'out') return out(event, nth);
+        // An in: the source is this page's link to the photograph. With
+        // no such link there is nothing to carry and nothing is written;
+        // between image pages it is a step. Only a photograph shown with
+        // its file can be the understudy; one not yet loaded is, between
+        // image pages, a step, and elsewhere the stage appears as on any
+        // page change. It wears the name only where the reader can see
+        // it: the stage never grows out of a cell off screen. Only a
+        // replayed in (forward) stores the origin, as a click does; a
+        // reversed one (back) never rewrites the origin the way-back link
+        // lands by.
+        const cells = cellsFor(document, event.to.pathname, event.from);
+        const img = (cells[nth] ?? cells[0])?.querySelector('img');
+        if (!img) {
+          if (between) step(event, dir);
+          return;
+        }
+        if (!img.complete || !img.naturalWidth) {
+          if (between) step(event, dir);
+          else if (!back) storeOrigin(event.from.pathname, nth);
+          return;
+        }
+        if (inViewport(img.getBoundingClientRect())) name(img);
+        moving = {
+          kind: 'in',
+          src: img.currentSrc,
+          from: event.from.pathname,
+          to: event.to.pathname,
+          nth,
+          navigationType: event.navigationType,
+        };
+        if (!back) storeOrigin(event.from.pathname, nth);
+      };
+
+      document.addEventListener('astro:before-preparation', (event) => {
+        // A navigation that never reached its swap leaves its names on
+        // this page; a second name would void the next transition.
+        clear();
+        if (!flag('--motion-travel')) return;
+        const source = event.sourceElement;
+        const link = source instanceof Element ? source.closest('a') : null;
+        const cell = link?.closest('.image-link');
+        const arrow = link?.closest<HTMLElement>('[data-nav]');
+        if (cell) {
+          const img = cell.querySelector('img');
+          if (!img) return;
+          name(img);
+          const nth = Math.max(
+            0,
+            cellsFor(document, event.to.pathname, event.from).indexOf(cell as HTMLAnchorElement),
+          );
+          moving = {
+            kind: 'in',
+            src: img.currentSrc,
+            from: event.from.pathname,
+            to: event.to.pathname,
+            nth,
+            navigationType: event.navigationType,
+          };
+          storeOrigin(event.from.pathname, nth);
+        } else if (arrow) {
+          step(event, arrow.dataset.nav === 'prev' ? 'prev' : 'next');
+        } else if (event.navigationType === 'traverse') {
+          traverse(event);
+        } else if (isImagePage(event.from)) {
+          out(event);
+        }
+      });
+
+      document.addEventListener('astro:before-swap', (event: TransitionBeforeSwapEvent) => {
+        if (!moving) return;
+        const doc = event.newDocument;
+        const cell =
+          moving.kind === 'out' ? cellFor(doc, event.from.pathname, event.to, moving.nth) : null;
+        // An out with no landing between two image pages is a step, and
+        // a nameless one: the old figure, already named, leaves on its
+        // own group, the same cross-fade in its box.
+        const nameless = moving.kind === 'out' && !cell && isImagePage(event.to);
+        if (nameless) moving.kind = 'step';
+        const root = doc.documentElement;
+        root.dataset.moving = moving.kind;
+        const frame = doc.querySelector<HTMLElement>('.image-frame');
+        if (moving.kind === 'in' && frame) {
+          // The understudy: the photograph the reader clicked, painted in
+          // the stage's box until the page's own file has decoded.
+          name(frame);
+          frame.dataset.understudy = '';
+          frame.style.setProperty('--understudy', `url("${moving.src}")`);
+        } else if (moving.kind === 'step' && !nameless && slide() && frame && moving.dir) {
+          // The slide keyframes select on dataset.slide; with no name given
+          // (reduced motion) there is nothing for them to move.
+          if (name(frame, SLIDE_NAMES.in)) root.dataset.slide = moving.dir;
+        } else if (moving.kind === 'out' && cell) {
+          // The landing is eager, so the file its preload decoded is
+          // loaded before the new snapshot, not at the next intersection
+          // check. Its index is the record's `nth`.
+          moving.nth = cellsFor(doc, event.from.pathname, event.to).indexOf(cell);
+          landing = cell.querySelector('img');
+          landing?.setAttribute('loading', 'eager');
+          name(landing);
+        }
+        const record = moving;
+        const done = () => {
+          if (moving === record) clear();
+        };
+        event.viewTransition?.finished.then(done, done);
+      });
+
+      // After the swap the router has pushed a link's entry (or moved to
+      // a traverse's), so a push records on its own entry how it was
+      // reached — only when this is still the page it was going to (a
+      // click in the frame before the swap's callback is another
+      // navigation's), and never on a traverse, whose entry keeps the
+      // record it was reached with; the router spreads history.state on
+      // its own writes, so the record lives as long as its entry. Then
+      // `here` is this entry's record.
+      // The way back by a link lands where the reader left: the router
+      // has scrolled to the top, so the stored origin's y is restored
+      // when it is this page, else the cell is centred. A traverse keeps
+      // the router's own restored position, and its landing gives up the
+      // name when that position leaves it off screen — the stage never
+      // shrinks toward a cell the reader cannot see.
+      // The order of the after-swap listeners is the point: this
+      // listener first, then the appearance's hook, so appear() reads
+      // what is in view where the page lands, not at the top (a frame in
+      // view there would otherwise be taken for one below the fold and
+      // rise — Phase 1 review B3); then, last, the listener that records
+      // lastY, so that line reads the landed position.
+      document.addEventListener('astro:after-swap', () => {
+        const arrived = moving;
+        if (arrived && arrived.navigationType !== 'traverse' && location.pathname === arrived.to) {
+          const travel: Travel = {
+            kind: arrived.kind,
+            from: arrived.from,
+            ...(arrived.nth === undefined ? {} : { nth: arrived.nth }),
+            ...(arrived.dir ? { dir: arrived.dir } : {}),
+          };
+          try {
+            history.replaceState({ ...history.state, travel }, '');
+          } catch {
+            /* history unavailable: a traverse falls back to the pages */
+          }
+        }
+        here = history.state?.travel;
+        if (arrived?.kind !== 'out' || !landing) return;
+        if (arrived.navigationType === 'traverse') {
+          if (!inViewport(landing.getBoundingClientRect())) landing.style.viewTransitionName = '';
+          return;
+        }
+        // Storage unavailable or malformed: centre the cell.
+        const origin = readOrigin();
+        if (origin?.path === location.pathname && typeof origin.y === 'number') {
+          window.scrollTo({ top: origin.y, behavior: 'instant' });
+        } else {
+          landing.scrollIntoView({ block: 'center', behavior: 'instant' });
+        }
+      });
+      document.addEventListener('astro:after-swap', () => {
+        teardown = appear(document);
+      });
 
       window.addEventListener('scroll', update, { passive: true });
       document.addEventListener('astro:after-swap', () => {

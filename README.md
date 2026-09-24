@@ -18,7 +18,8 @@ The "why" behind this project lives in these, not in this file:
   phase (001 foundation, 002 identity/teardown, 003 block vocabulary,
   004 galleries and image pages, 005 going live — deferred, 006 the
   rich image page, 007 the held image (its pause withdrawn at 017),
-  008 cross-piece image references, 009 places)
+  008 cross-piece image references, 009 places, 018 the animation
+  pass)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
@@ -170,15 +171,25 @@ same outing, and "The print" with an enquiry link. Every page in a set
 has a neighbour line for it (the
 gallery, piece, or place they came from; arrow keys work), and every
 page has a quiet view — click the photograph — that dims the ground and gives
-the frame the viewport, matted on the quiet dark: the one matted
-surface on the site. Rules the build enforces: piece folders
-must be slugs and file names URL-safe (letters, digits, `.`, `-`,
-`_`), an image directly in `pieces/` or beside a flat `pieces/foo.md`
-fails, a file nested in a sub-folder is ignored with a warning (a
-directive pointing into one fails), two files differing only by
-extension are a collision, and a `draft: true` piece unpublishes its
-images with it. Moving or renaming an image changes its URL — there
-are no redirects yet.
+the frame the viewport, matted on the quiet dark: the one matted surface
+on the site. Since spec 018 the photographs move only in answer to the
+reader or to their own loading: none pops — its box waits in the
+ground's own colour, so no box shows, until the photograph has decoded
+and fades in; below the fold it fades in with a small rise each time it
+scrolls into view, down or back up (a strip's frames arrive one by
+one, and fade without the rise); clicking a frame carries the photograph
+into its page's stage and the way back returns it, following the
+browser's history; the arrows slide the photograph off the screen and
+the next one on; the quiet view grows the photograph into its mat as the
+ground darkens; and reduced motion keeps the fades and drops the
+movement. Rules the build enforces: piece
+folders must be slugs and file names URL-safe (letters, digits, `.`,
+`-`, `_`), an image directly in `pieces/` or beside a flat
+`pieces/foo.md` fails, a file nested in a sub-folder is ignored with a
+warning (a directive pointing into one fails), two files differing only
+by extension are a collision, and a `draft: true` piece unpublishes its
+images with it. Moving or renaming an image changes its URL — there are
+no redirects yet.
 
 **Sidecar** — optional, `_<basename>.md` beside the image (the
 underscore keeps it out of the pieces collection). Every field is
@@ -360,11 +371,13 @@ photo-pieces/
 ├── remark-pieces-vocabulary.test.mjs # spec-003 vocabulary suite
 ├── image-meta.test.mjs, exif.test.mjs, galleries.test.mjs # spec-004 suites
 ├── image-set.test.mjs            # the set key: gallery, piece, place
+├── motion.test.mjs               # the motion grammar: the tokens pinned by name, no literal motion, nothing loops
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
 ├── scripts/check-no-gps.mjs      # postbuild: no GPS in any built image
 ├── scripts/check-no-dev-routes.mjs # postbuild: no dev-only routes in dist/
+├── scripts/check-motion.mjs      # postbuild: no literal duration or curve, hidden frame or autoplay in dist/
 ├── scripts/gen-og.mjs             # npm run og: rewrites public/og.jpg on the committed ground
 ├── obsidian-plugin/              # Live Preview rendering (see its README)
 ├── CLAUDE.md, ROADMAP.md, DECISIONS.md, AUTHORING.md
@@ -386,7 +399,12 @@ photo-pieces/
 │   ├── lib/categories.ts         # the category taxonomy
 │   ├── lib/ground.ts             # the ground's family: fixed steps to the fills and hairlines, the contrast readout, the gate's candidates
 │   ├── lib/og-card.mjs           # the Open Graph card — one tree and one palette for the per-piece route and `npm run og`
+│   ├── lib/motion.ts             # the motion grammar's names, read off :root: the appearance, the arrival, the travel, the quiet view
+│   ├── lib/motion-scan.mjs       # the literal-motion scan (shared by the test and the postbuild check)
+│   ├── lib/compare.ts            # the image page's compare, overlaid before the router swaps the page in
 │   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), CategoryRow
+│   ├── components/DevMotion.astro # dev-only motion switch: the named settings, the behaviours' on/off; renders nothing in a build
+│   ├── components/dev-motion-panel.ts, dev-motion-presets.ts # its panel (served, never bundled) and its named settings
 │   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
 │   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler, the place-wall sampler, the matte sampler at dev/matte/, which also carries the site-wide ground switch); postbuild fails if any reach dist/
 │   └── styles/global.css

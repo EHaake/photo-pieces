@@ -10,7 +10,8 @@
 // `{import.meta.env.DEV && ...}` in BaseLayout. It is not a route, so the
 // dist/dev/ check cannot see it; instead every .html and .js under dist/ is
 // read for the switch's marker, the string `dev-ground`, and the build fails
-// naming the files if any carries it.
+// naming the files if any carries it. Spec 018's dev motion switch is the
+// same kind of thing, with its own marker, `dev-motion`.
 //
 //   node scripts/check-no-dev-routes.mjs [dir]   # default: dist
 import { readdir, readFile } from 'node:fs/promises';
@@ -40,21 +41,26 @@ if (built.length > 0) {
   );
   process.exit(1);
 }
-const MARKER = 'dev-ground'; // the switch's script attribute and storage key
+// The ground switch's and the motion switch's markers (spec 014 and 018):
+// each is the switch's script attribute and storage key.
+const MARKERS = ['dev-ground', 'dev-motion'];
 
 const scanned = [];
-const shipped = [];
+const shipped = Object.fromEntries(MARKERS.map((marker) => [marker, []]));
 for await (const file of files(root)) {
   const ext = extname(file);
   if (ext !== '.html' && ext !== '.js') continue;
   scanned.push(file);
-  if ((await readFile(file, 'utf8')).includes(MARKER)) shipped.push(file);
+  const text = await readFile(file, 'utf8');
+  for (const marker of MARKERS) if (text.includes(marker)) shipped[marker].push(file);
 }
 
-if (shipped.length > 0) {
-  console.error(`[check-no-dev-routes] the dev ground switch shipped: ${shipped.join(', ')}`);
-  process.exit(1);
-}
+const found = MARKERS.filter((marker) => shipped[marker].length > 0);
+for (const marker of found)
+  console.error(
+    `[check-no-dev-routes] the ${marker.replace('-', ' ')} switch shipped: ${shipped[marker].join(', ')}`,
+  );
+if (found.length > 0) process.exit(1);
 console.log(
-  `[check-no-dev-routes] no dev routes in ${root}/; no ${MARKER} marker in ${scanned.length} files.`,
+  `[check-no-dev-routes] no dev routes in ${root}/; no dev-ground or dev-motion marker in ${scanned.length} files.`,
 );

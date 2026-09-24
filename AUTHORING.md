@@ -49,7 +49,11 @@ Why this shape:
   `::triptych`) shows its image while you write. Everything
   else is raw text by construction — container forms (captions), and
   the container-only `grid`, `strip`, `aside`, `row`, and `held` — and
-  the site build is the truth for those. Live Preview only — Reading
+  the site build is the truth for those. On the site, the frames you
+  place animate by the site's own rules — they fade in as they load and
+  as they scroll into view, and travel into their pages when clicked —
+  so there is nothing to author for motion, and the plugin does not
+  change. Live Preview only — Reading
   view is intentionally out of scope (see `DECISIONS.md`). Build/install instructions:
   `obsidian-plugin/README.md`.
 

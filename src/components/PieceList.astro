@@ -20,7 +20,11 @@ const { pieces } = Astro.props;
       {pieces.map((piece) => (
         <a class="note-row" href={withBase(`/pieces/${piece.id}/`)}>
           {piece.data.cover && (
-            <Image src={piece.data.cover} alt="" width={320} height={220} loading="lazy" />
+            // The cover's own box, the waiting fill's host (spec 018);
+            // the image's rule is unchanged.
+            <span class="note-cover">
+              <Image src={piece.data.cover} alt="" width={320} height={220} loading="lazy" />
+            </span>
           )}
           <div>
             <p class="meta">

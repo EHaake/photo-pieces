@@ -797,19 +797,8 @@ const indexed =
      stage). Entered by clicking the photograph (or the toggle); left by
      Esc or any click. Still a page: the URL and history don't change.
      The toggle and the zoom cursor appear only once the script can
-     honour them. */
-  :global(html),
-  :global(body),
-  .image-stage {
-    transition: background-color 220ms ease;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    :global(html),
-    :global(body),
-    .image-stage {
-      transition: none;
-    }
-  }
+     honour them. Entering and leaving are each one startViewTransition,
+     the frame named for it (spec 018); the resting rules are unchanged. */
   .quiet-toggle {
     position: absolute;
     right: var(--page-pad);
@@ -846,6 +835,7 @@ const indexed =
   // per module; `astro:page-load` fires on the first load and after
   // every ClientRouter swap, so per-page setup lives in init().
   import { IMAGE_QUIET_KEY as QUIET_KEY, IMAGE_SET_KEY as SET_KEY } from '../../lib/image-set';
+  import { flag, reducedMotion, withTransition } from '../../lib/motion';
 
   const root = document.documentElement;
 
@@ -879,10 +869,23 @@ const indexed =
       img.sizes = quiet ? '100vw' : img.dataset.pageSizes;
     }
   };
+  // Entering and leaving are one movement (spec 018): the three writes
+  // run inside one view change, the stage frame named for its duration
+  // — looked up here, since the router swaps it. Under reduced motion
+  // the frame is never named, and the change runs at all only when
+  // --rm-quiet is on (the ground fades, the frame cuts).
   const setQuiet = (quiet: boolean) => {
-    applyQuiet(quiet);
-    store.set(QUIET_KEY, quiet ? '1' : null);
-    if (quiet) window.scrollTo({ top: 0 });
+    const figure = document.querySelector<HTMLElement>('.image-frame');
+    withTransition(
+      () => {
+        applyQuiet(quiet);
+        store.set(QUIET_KEY, quiet ? '1' : null);
+        if (quiet) window.scrollTo({ top: 0 });
+      },
+      'quiet',
+      reducedMotion() ? null : figure,
+      flag('--motion-quiet') && (!reducedMotion() || flag('--rm-quiet')),
+    );
   };
 
   const init = () => {
@@ -919,17 +922,6 @@ const indexed =
       });
     }
     if (store.get(QUIET_KEY)) applyQuiet(true);
-
-    // The compare: overlay the frames and reveal the range input.
-    for (const figure of document.querySelectorAll<HTMLElement>('.compare')) {
-      const range = figure.querySelector<HTMLInputElement>('.compare-range');
-      if (!range) continue;
-      figure.dataset.js = '';
-      range.hidden = false;
-      const apply = () => figure.style.setProperty('--split', range.value);
-      range.addEventListener('input', apply);
-      apply();
-    }
   };
 
   document.addEventListener('keydown', (event) => {
@@ -946,6 +938,18 @@ const indexed =
       nav.querySelector<HTMLAnchorElement>(`[data-nav="${which}"]`)?.click();
     if (event.key === 'ArrowLeft') go('prev');
     if (event.key === 'ArrowRight') go('next');
+  });
+
+  // An arrow in the quiet view: the adopted stage image would pick its
+  // candidate at the page `sizes` before after-swap re-applies the quiet
+  // view, so the new document's stage is told `100vw` first — its page
+  // value kept where applyQuiet reads it back on leaving.
+  document.addEventListener('astro:before-swap', (event) => {
+    if (!store.get(QUIET_KEY) || !event.newDocument.querySelector('.image-page')) return;
+    const img = event.newDocument.querySelector<HTMLImageElement>('.image-frame img');
+    if (!img) return;
+    img.dataset.pageSizes = img.getAttribute('sizes') ?? '';
+    img.setAttribute('sizes', '100vw');
   });
 
   // The router replaces <html>'s attributes on every swap, so quiet

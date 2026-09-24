@@ -226,6 +226,11 @@ every agent definition defaults to the implementation tier except
 | Pre-merge sweep               | `skeptical-reviewer`    | implementation tier     | high                      |
 | Orchestration and bookkeeping | the session itself      | session tier            | medium                    |
 
+<!-- Spec 018 ran stepped down to Opus 5.5 throughout at the person's
+request (2026-09-23, low Fable allowance); restored at 018's merge,
+2026-09-24, at the person's word: "The next spec can go back to Fable
+since we're coming up on the allowance reset later today." -->
+
 **Moving a role.** Edit its row, nothing else. To step a role down,
 replace **top tier** (override) with "implementation tier (no
 override)"; the dispatch then carries no override and the agent runs at

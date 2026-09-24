@@ -1,0 +1,57 @@
+---
+// The motion switch (spec 018, T1602) — a DEV-ONLY fixture, DevGround's
+// pattern.
+//
+// src/layouts/BaseLayout.astro renders this as
+// `{import.meta.env.DEV && <DevMotion />}` — a build-time constant, so
+// `astro dev` serves it on every page and `astro build` renders nothing.
+// scripts/check-no-dev-routes.mjs is the standing check on that: it scans
+// every .html and .js under dist/ for this switch's marker, the string
+// `dev-motion` (the applier's attribute, the storage key, the panel's
+// path), and fails the build if one ships.
+//
+// Two scripts. The applier: read localStorage['dev-motion'] (JSON
+// `{ tokens, rise }`) and set each entry of `tokens` as a custom property
+// on <html>. `tokens` holds only the tokens the person changed — never the
+// whole set — because an inline property outranks the stylesheet's
+// reduced-motion :root, and a full set would hide it. No key means no
+// override: the control is the committed stylesheet. Inline and blocking
+// in the head so the first paint is already on the tuned grammar. The
+// panel (src/components/dev-motion-panel.ts) is served by the dev server,
+// never bundled — the matte sampler's reason — and builds the controls
+// at astro:page-load; it is this applier, not the panel, that runs before
+// first paint.
+---
+
+<script is:inline data-dev-motion>
+  (() => {
+    const apply = () => {
+      let stored = null;
+      try {
+        stored = localStorage.getItem('dev-motion');
+      } catch {
+        return; /* storage unavailable: the stylesheet's grammar */
+      }
+      if (!stored) return;
+      let tuned = null;
+      try {
+        tuned = JSON.parse(stored);
+      } catch {
+        return; /* a malformed key: the stylesheet's grammar */
+      }
+      const tokens = tuned && tuned.tokens;
+      if (!tokens || typeof tokens !== 'object') return;
+      for (const name of Object.keys(tokens)) {
+        document.documentElement.style.setProperty(name, tokens[name]);
+      }
+    };
+    apply();
+    // The router replaces <html>'s attributes on navigation, so the inline
+    // style has to go back on after each swap. Registered once.
+    if (!window.__devMotion) {
+      window.__devMotion = true;
+      document.addEventListener('astro:after-swap', apply);
+    }
+  })();
+</script>
+<script is:inline type="module" src="/src/components/dev-motion-panel.ts"></script>

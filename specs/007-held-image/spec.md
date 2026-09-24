@@ -98,6 +98,7 @@ shorter.
 - **Text over images**, in any shape, ever.
 - **Timed or automatic motion.** Nothing moves unless the reader
   scrolls; nothing plays.
+  _Widened at spec 018 to "motion answers the reader": every animation is a response to the reader or to a photograph finishing loading; nothing loops, breathes or plays by itself. The brief's Motion section is the rule now._
 - **The slow view** (`ROADMAP.md`) — a whole piece or gallery frame by
   frame is its own thing; this spec is two blocks inside a piece.
 - **The `sequence` block** stays reserved; the processing showcase is

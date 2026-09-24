@@ -130,6 +130,35 @@
      value after the head on a place with no writing (no head-case
      override). Keep the clamp in step with .section by hand. */
   --place-wall-gap: clamp(3.5rem, 5.5vw, 5.5rem);
+  /* THE MOTION GRAMMAR (spec 018). Three durations, three curves, read
+     by every transition and animation on the site; beside them the
+     flags and numbers the tuning envelope names. The dev switch sets
+     any of them on `<html>`. motion.test.mjs pins each by name — to
+     retune, move the value here and in its `EXPECTED` row, and nowhere
+     else. The rule: motion answers the reader. */
+  --dur-state: 180ms; /* a state change: hover, underline, the header's slide, an ordinary page change's cross-fade */
+  --dur-move: 480ms; /* a photograph's movement: the travel, the arrows' slide, the quiet growth; the hero's entrance; the page's cross-fade beneath a travel, a step or the quiet growth */
+  --dur-appear: 950ms; /* a photograph's appearance: the fade on decode, the arrival */
+  --ease-state: ease;
+  --ease-move: cubic-bezier(0.22, 1, 0.36, 1);
+  /* the appearance's curve: the fade and the arrival; set by the panel's named settings */
+  --ease-appear: cubic-bezier(0.33, 1, 0.68, 1);
+  --motion-appear: 1; /* the four behaviours' flags, 1 or 0 — read by script; the code stays when one is off */
+  --motion-arrive: 1;
+  --motion-travel: 1;
+  --motion-quiet: 1;
+  --motion-appear-covers: 1; /* the covers on the three indexes and the front door: their own appearance and arrival flags */
+  --motion-arrive-covers: 1;
+  --arrive-rise: 0.75rem; /* the arrival's shape: 0px is the fade alone, a length is the fade with a rise */
+  --arrive-threshold: 0.25; /* the share of a frame in view that counts as arrived */
+  --arrive-stagger: 0ms; /* a multi-cell block arrives as one; a stagger only if asked to see one */
+  /* the waiting box: the ground itself, so no box shows; var(--color-surface) for the surface step */
+  --wait-fill: var(--color-bg);
+  --hero-enter: 1; /* the front door's inherited entrance, on the tokens; 0 turns it off */
+  --hero-stagger: 90ms;
+  --arrows-slide: 1; /* the arrows: 1 slides the photograph off the screen and the next one on; 0 cross-fades in place */
+  --rm-appear: 1; /* under reduced motion: 1 keeps the appearance fade's duration, 0 cuts it */
+  --rm-quiet: 1; /* under reduced motion: 1 keeps the quiet view's ground fade, 0 cuts */
 }
 
 @media (max-width: 719.98px) {
@@ -195,8 +224,8 @@ a:not(.brand, .button) {
   background-repeat: no-repeat;
   background-size: 0 1px;
   transition:
-    background-size 180ms ease,
-    color 180ms ease;
+    background-size var(--dur-state) var(--ease-state),
+    color var(--dur-state) var(--ease-state);
 }
 
 a:not(.brand, .button):hover {
@@ -236,7 +265,9 @@ a:not(.brand, .button):hover {
   padding-inline: max(var(--page-pad), calc((100% - var(--content-width)) / 2));
   background: var(--color-bg);
   border-bottom: var(--hairline);
-  transition: transform 220ms ease;
+  transition: transform var(--dur-state) var(--ease-state);
+  /* Chrome: its own group, never blended with the page's cross-fade (spec 018). */
+  view-transition-name: site-header;
 }
 
 /* Hide on scroll down, reveal on scroll up (BaseLayout's script sets the
@@ -308,19 +339,19 @@ html[data-held-active] .site-header {
 }
 
 .hero > * {
-  animation: keel-enter 560ms ease both;
+  animation: keel-enter calc(var(--dur-move) * var(--hero-enter)) var(--ease-state) both;
 }
 
 .hero > :nth-child(2) {
-  animation-delay: 90ms;
+  animation-delay: calc(var(--hero-stagger) * 1 * var(--hero-enter));
 }
 
 .hero > :nth-child(3) {
-  animation-delay: 180ms;
+  animation-delay: calc(var(--hero-stagger) * 2 * var(--hero-enter));
 }
 
 .hero > :nth-child(4) {
-  animation-delay: 270ms;
+  animation-delay: calc(var(--hero-stagger) * 3 * var(--hero-enter));
 }
 
 .section {
@@ -480,9 +511,9 @@ p {
   color: var(--color-on-accent);
   font-weight: 700;
   transition:
-    background 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease;
+    background var(--dur-state) var(--ease-state),
+    border-color var(--dur-state) var(--ease-state),
+    color var(--dur-state) var(--ease-state);
 }
 
 .button:hover {
@@ -891,6 +922,12 @@ pre code {
   background: var(--color-soft);
 }
 
+/* The piece row's cover box (spec 018): the waiting fill's host, around
+   the image the rule above sizes. */
+.note-cover {
+  display: block;
+}
+
 .highlight-card h3,
 .note-row h3 {
   max-width: 18ch;
@@ -1060,8 +1097,8 @@ a.note-row {
   color: var(--color-muted);
   background-image: none;
   transition:
-    border-color 180ms ease,
-    color 180ms ease;
+    border-color var(--dur-state) var(--ease-state),
+    color var(--dur-state) var(--ease-state);
 }
 
 .social-links a:hover {
@@ -1078,16 +1115,6 @@ a.note-row {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 1ms !important;
-    scroll-behavior: auto !important;
-    transition-duration: 1ms !important;
   }
 }
 
@@ -1342,10 +1369,23 @@ a.note-row {
 
 /* Viewport-height cap for verticals. width:auto + max constraints (never
    width:100%) so the image can neither stretch nor crop — spec 003 forbids
-   both. --tall-max is a sampler-review knob. */
-.piece-tall > a.image-link {
-  width: fit-content;
-  max-width: 100%;
+   both. --tall-max is a sampler-review knob.
+   The host — the anchor, or the img itself when alt="" leaves it
+   unlinked — takes its width from --ar before the image loads (spec 018,
+   T1603b): a lazy img has no natural size until then, so a fit-content
+   host sat 0×0 and the page grew as each tall arrived. The width is the
+   one the loaded image settles at anyway — the column, or --tall-max
+   times the ratio — so nothing moves at load. The transform's sizes
+   slot never binds here: above the collapse the column (--prose-width)
+   is narrower than it, and below it 94vw is never narrower than the
+   column. A frame the probe could not read carries no --ar: the min()
+   is then invalid and the width computes to auto. The unlinked img
+   keeps its own width, as before; the linked anchor, a block, spans the
+   column with its image centred inside it — not the fit-content anchor
+   it was before spec 018, so its link and its waiting fill are
+   column-wide. */
+.piece-tall > :is(a.image-link, img) {
+  width: min(100%, var(--tall-max) * var(--ar));
   margin-inline: auto;
 }
 
@@ -1984,4 +2024,234 @@ html[data-quiet] .image-frame,
 html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   max-width: 100%;
   cursor: zoom-out;
+}
+
+/* ---- Motion (spec 018) -------------------------------------------------
+   The motion that is not an inherited rule's, on the grammar's tokens
+   in :root, added task by task. T1600: the page change's cross-fade —
+   every view-transition group at the state duration, and at the move
+   duration and curve while `html[data-moving]` says a photograph is
+   travelling, stepping or growing, so the page beneath lands with it —
+   and the covers' own switch. `.note-cover` is T1603's wrapper; the
+   rule may precede the markup. */
+::view-transition-group(*) {
+  animation-duration: var(--dur-state);
+  animation-timing-function: var(--ease-state);
+}
+
+html[data-moving]::view-transition-group(*) {
+  animation-duration: var(--dur-move);
+  animation-timing-function: var(--ease-move);
+}
+
+/* The header's group keeps the state duration on a travel: its slide
+   back from data-hidden is its inherited slide, not the photograph's
+   movement. */
+html[data-moving]::view-transition-group(site-header) {
+  animation-duration: var(--dur-state);
+  animation-timing-function: var(--ease-state);
+}
+
+/* The UA stylesheet inherits the group's duration, fill and delay into
+   the old and new images; it did not inherit the timing function until
+   csswg-drafts #11546, which closed via PR #12498. The rule stays for
+   browsers still on the older UA sheet. */
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-timing-function: inherit;
+}
+
+/* The covers get their own switch: the script reads the two flags from
+   the host's computed style, and custom properties inherit, so this one
+   rule points a cover's flags at the `*-covers` tokens. */
+.note-cover,
+.gallery-card .image-link {
+  --motion-appear: var(--motion-appear-covers);
+  --motion-arrive: var(--motion-arrive-covers);
+}
+
+/* T1603: the appearance and the arrival. The hidden state is the root
+   attribute the layout's inline script writes before the body is
+   parsed — `html[data-motion]` — so without script nothing is hidden,
+   and the build's motion barrier proves on dist/ that no page ships
+   the attribute. The `:is(...)` list is `FRAME_HOSTS` in
+   src/lib/motion.ts, spelled twice because CSS cannot import, and
+   pinned equal by motion.test.mjs: a host added to one and not the
+   other fails the suite. The rise comes in from the edge the frame
+   crossed: `--rise-sign`, 1 from below and -1 from above, is set
+   inline on the image by the script at each arrival (T1606b) — never
+   in markup or :root, like `--i`.
+   The waiting fill is on the host, not the image, and paints while an
+   image waits (no `data-shown`) or fades (`"fade"`); the script writes
+   `data-shown=""` at the animation's end and the fill is gone. Under a
+   rise (`"rise"`) it leaves as the image starts to move: the host does
+   not move, so a fill kept under a moving photograph shows as a band
+   where the photograph has not yet reached (T1606a: 4.78px at a 0.5rem
+   rise, a tenth of the way in). It is kept off the quiet view
+   (`data-quiet`), where the stage's mat is the box: the quiet rule's
+   `background` shorthand would lose its colour to this more specific
+   fill. */
+html[data-motion]
+  :is(
+    .image-link,
+    .image-frame,
+    .piece-block,
+    .piece-block figure,
+    .piece-strip-scroll,
+    .note-cover
+  )
+  > img:not([data-shown]) {
+  opacity: 0;
+}
+
+html[data-motion]:not([data-quiet])
+  :is(
+    .image-link,
+    .image-frame,
+    .piece-block,
+    .piece-block figure,
+    .piece-strip-scroll,
+    .note-cover
+  ):has(> img:is(:not([data-shown]), [data-shown='fade'])) {
+  background-color: var(--wait-fill);
+}
+
+img[data-shown='fade'] {
+  animation: motion-appear var(--dur-appear) var(--ease-appear) both;
+  animation-delay: calc(var(--arrive-stagger) * var(--i, 0));
+}
+
+img[data-shown='rise'] {
+  animation: motion-arrive var(--dur-appear) var(--ease-appear) both;
+  animation-delay: calc(var(--arrive-stagger) * var(--i, 0));
+}
+
+@keyframes motion-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes motion-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--arrive-rise) * var(--rise-sign, 1)));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* T1604: the travel. The understudy — the photograph the reader saw
+   stays in the stage's box until the page's own file has decoded and
+   faded in over it: same photograph, same ratio (the frame's box is the
+   photograph's ratio on every surface), so `100% 100%` is not a
+   distortion. The layout's script sets the attribute and the property
+   on the new page's stage at the swap; appear() removes both on every
+   path that shows the image. */
+.image-frame[data-understudy] {
+  background-image: var(--understudy);
+  background-size: 100% 100%;
+  background-origin: content-box;
+  background-clip: content-box;
+  background-repeat: no-repeat;
+}
+
+/* The slide (T1606g; the carousel at T1606h): with `--arrows-slide: 1`
+   the arrows' step names the old stage figure `photograph-out` and the
+   new one `photograph-in` — two names, so each is a group of its own in
+   its own box and nothing morphs — and the old leaves by the screen's
+   full width along the direction of travel while the new comes in from
+   the other side, both at full opacity, the page beneath cross-fading.
+   100vw clears the viewport from any box inside it. Off at 0 (the
+   script names nothing; the root cross-fade carries the photograph in
+   its box). The names are SLIDE_NAMES in src/lib/motion.ts, pinned
+   equal by motion.test.mjs. */
+html[data-slide='next'] {
+  --dir: -1;
+}
+
+html[data-slide='prev'] {
+  --dir: 1;
+}
+
+html[data-slide]::view-transition-old(photograph-out) {
+  animation: motion-slide-out var(--dur-move) var(--ease-move) both;
+}
+
+html[data-slide]::view-transition-new(photograph-in) {
+  animation: motion-slide-in var(--dur-move) var(--ease-move) both;
+}
+
+/* Groups paint in the old page's order, then the new page's own: the
+   new photograph's group is the new page's alone, so without this it
+   would pass over the header wherever the stage sits under it (a
+   traverse restoring a scroll). */
+html[data-slide]::view-transition-group(site-header) {
+  z-index: 1;
+}
+
+@keyframes motion-slide-out {
+  to {
+    transform: translateX(calc(100vw * var(--dir)));
+  }
+}
+
+@keyframes motion-slide-in {
+  from {
+    transform: translateX(calc(100vw * var(--dir) * -1));
+  }
+}
+
+/* Reduced motion (spec 018's split): movements instant, fades kept.
+   Five rules. The underline's size change and the header's slide go
+   instant; the hero goes through its flag — --hero-enter at 0 zeroes
+   its duration and its delays, so it lands on its end state; the
+   arrival loses its rise; every colour change and fade keeps its
+   duration, and the appearance fade keeps its own unless --rm-appear
+   cuts it. Every rule here overrides its base rule at equal specificity
+   by coming later in the file, so the block closes the file, after the
+   Motion section's appearance rules — motion.test.mjs pins it after
+   every rule it overrides (T1608a: before this, `--rm-appear: 0` was
+   inert, the appearance rules coming later). `0s` is the
+   one literal a duration slot may carry — a zero is the absence of
+   motion, not a duration. One rule reaches the view transitions:
+   every group lands on its new box at once — the header returning from
+   data-hidden or data-held-active would otherwise slide in on its own
+   group — while the old and new images inherit the group's
+   animation-duration, which the rule leaves set, so every cross-fade
+   keeps its length; it also makes harmless any name that reaches a
+   group under the setting (D1604, Q1). The script never names the
+   photograph under reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  /* The arrival loses its rise; the hero lands on its end state, delays included. */
+  :root {
+    --arrive-rise: 0px;
+    --hero-enter: 0;
+  }
+
+  /* The underline's size change is instant; the colour still fades — the
+     social links, which cancel the underline, keep their border and
+     colour fades. */
+  a:not(.brand, .button, .social-links *) {
+    transition-property: color;
+  }
+
+  .site-header {
+    transition-duration: 0s;
+  }
+
+  img[data-shown='fade'],
+  img[data-shown='rise'] {
+    animation-duration: calc(var(--dur-appear) * var(--rm-appear));
+  }
+
+  /* Every group lands at once; its old and new keep their cross-fade. */
+  ::view-transition-group(*) {
+    animation-name: none;
+  }
 }
