@@ -824,6 +824,16 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ### Phase 1 record (the person's walkthrough)
 
+**First look (2026-09-23), in the person's words** — see spec.md
+"Amended at the Phase 1 pause" for the full quote. Kept: the travel in
+and back ("fantastic and perfect"); strips one by one. Findings: the
+appearance too fast and too subtle; a ghostly outline that doesn't
+match the photograph as it fades in. Amendments: replay on every
+re-entry, scrolling down and up; the panel simplified to named
+settings. Handled as T1606a (the outline, diagnosis) and T1606b (the
+amendment's design, by decision review, then implementation), then
+rounds on the named settings.
+
 _(The product owner's attestation from the site under `npm run dev`
 on both screens, mouse and trackpad: the fog piece's frames waiting
 and fading, the arrivals below the fold, the diptych as one, nothing

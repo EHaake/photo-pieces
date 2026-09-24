@@ -393,9 +393,10 @@ says where each lives.
       appearance duration
 - [ ] Without script every photograph is visible: no frame in the built
       output is hidden by default — pinned by a test on `dist/`
-- [ ] A frame below the fold appears once, when it is both decoded and
-      scrolled into view, in the shape chosen at the pause, and then
-      stays; a frame in view when the page is ready never rises; a
+- [ ] A frame below the fold appears when it is both decoded and
+      scrolled into view, in the shape chosen at the pause, and appears
+      again each time it comes back on screen after leaving it (amended
+      at the Phase 1 pause — see "Amended at the Phase 1 pause"); a frame in view when the page is ready never rises; a
       multi-cell block arrives as one; a photograph already decoded
       when the page is ready shows at once with no animation; measured
       on both screens
@@ -420,7 +421,8 @@ says where each lives.
       hovers and the hero's entrance read the tokens with their feel
       unchanged
 - [ ] The dev switch toggles each behaviour, chooses the arrival's shape
-      and the waiting fill, and tunes the durations and curves on the
+      and the waiting fill, and offers a few named settings to switch
+      between for the appearance (amended at the Phase 1 pause) on the
       real pages under `astro dev`; the build's barrier proves none of
       it ships
 - [ ] The photographer has judged all four behaviours on both screens
@@ -437,6 +439,47 @@ says where each lives.
       `README.md`, `AUTHORING.md` and `design/brief.md` updated; spec
       007's document annotated; the `DECISIONS.md` and `ROADMAP.md` text
       drafted on the branch
+
+## Amended at the Phase 1 pause (2026-09-23)
+
+The photographer's walkthrough, in his words: "What I love is how when
+you click on an image on a piece, it grows into the hero stage and then
+go back (click back on the browser), it shrinks back to it's place in
+the piece. This is fantastic and perfect. The image appearance when
+scrolling down however, needs some work. For one, while I don't want
+the animation to be intrusive, right now it's too fast and subtle, I
+barely see it. Additionally, when it fades in, I can see a ghostly
+outline that often doesn't match the shape of the actual image that
+then appears. … there are too many [settings] in the motion panel and
+it's not clear what changes which. I'd like you to simplify this menu
+and/or offer specific settings I can switch between rather than
+specifying them exactly. For the film strip, I'm fine with them loading
+one by one … I also think that images shouldn't just animate when they
+first appear. It should happen every time they appear on the screen, so
+scrolling down and back up. Again, the animations need to be tweaked
+such that they are noticeable but not intrusive."
+
+What changes, outside the tuning envelope and so amended here:
+
+- **A photograph appears each time it comes on screen**, scrolling down
+  and back up — Goal 3's "once" and "it then stays" and AC 5's "once …
+  then stays" are superseded. It still never pops, and prose still
+  never animates. Assumed unless the photographer says otherwise: a
+  frame that leaves the screen resets without a visible fade-out; the
+  way back from an image page still lands on what the reader saw
+  without replaying it (the travel he called perfect); a frame in view
+  when the page is ready still fades on decode and never rises.
+- **The dev switch offers a few named settings** for the appearance,
+  each setting its duration, curve and shape together, so the
+  photographer switches between them instead of typing values; the
+  four behaviours' on/off and the fill stay; the raw values are out of
+  the way (AC 10 amended).
+- **The appearance is too quick and too faint** — a tuning question
+  answered through the named settings (the envelope's own ground).
+- **The ghostly outline** that does not match the photograph as it
+  fades in is a finding, not a round: diagnosed and fixed.
+- **The travel is kept as built**; strips arriving frame by frame are
+  kept.
 
 ## Decided (in this conversation, 2026-09-23)
 
