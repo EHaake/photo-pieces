@@ -160,6 +160,78 @@ hero treatment — it says this one photograph is the whole point, which
 is true of the quiet view and false of a frame passing under a
 reader's eye in a flow of prose or sitting in a packed row.
 
+## Motion
+
+Motion answers the reader (spec 018). Every animation on the site is a
+response to the reader — arriving, scrolling, clicking, hovering,
+going to another page — or to a photograph finishing loading. Nothing
+loops, nothing breathes, nothing plays by itself, nothing moves on a
+timer. This replaces spec 007's narrower line ("nothing moves unless
+the reader scrolls; nothing plays"), and it is pinned: the tests and
+the build fail on an iteration count, on `infinite` and on `autoplay`,
+so a later spec cannot add an idle animation without amending this
+section first.
+
+**The grammar.** Every transition and animation reads tokens declared
+once on `:root` in `global.css`, beside the mat's and the ground's; no
+literal duration or curve appears anywhere else, and the tests and
+the build fail on one. Three durations: `--dur-state` 180ms, a state
+change (a hover, an underline, the header's slide, a page's
+cross-fade);
+`--dur-move` 480ms, a photograph's movement (the travel, the growth
+into the quiet view, the front door's entrance); `--dur-appear` 950ms,
+a photograph's appearance (the fade on decode, the arrival). Three
+curves, one for each: `--ease-state` `ease`, `--ease-move`
+`cubic-bezier(0.22, 1, 0.36, 1)`, `--ease-appear`
+`cubic-bezier(0.33, 1, 0.68, 1)`. Beside them sit the rest of the
+twenty-one: the four behaviours' switches and the covers' own two
+(`--motion-appear`, `--motion-arrive`, `--motion-travel`,
+`--motion-quiet`, `--motion-appear-covers`, `--motion-arrive-covers`,
+all on); the arrival's shape (`--arrive-rise` 0.75rem,
+`--arrive-threshold` 0.25, `--arrive-stagger` 0ms); the waiting box
+(`--wait-fill`, the ground's own colour); the front door
+(`--hero-enter` on, `--hero-stagger` 90ms); the arrows
+(`--arrows-slide` on); and reduced motion (`--rm-appear` and
+`--rm-quiet`, both keeping their fades). The values are the ones the
+photographer kept by eye at the spec's pause; the appearance is the
+dev switch's "settle" setting at 950ms.
+
+**The four behaviours.**
+
+- **Appearance.** A photograph never pops: its box is reserved and
+  waits in the ground's own colour, so no box shows, and the
+  photograph fades in once it has decoded.
+- **Arrival.** A frame fades in with a 0.75rem rise — from above when
+  it comes in from the top — once a quarter of it is on screen, every
+  time it comes back into view, scrolling down or up; the cells of one
+  block arrive together, and a strip's frames one by one as each
+  enters the band.
+- **Travel.** Clicking a frame carries the photograph into its page's
+  stage and the way back returns it to its place, following the
+  browser's history — back reverses the step taken, forward replays
+  it — and on the image page the arrows slide the photograph fully off
+  the screen and the next one on while the words beneath cross-fade.
+- **The quiet view.** Clicking the photograph grows it into its mat as
+  the ground darkens, as one movement.
+
+**Reduced motion** keeps the fades at their length and drops the
+movement: nothing rises, travels, grows or slides; the arrows
+cross-fade in place.
+
+**What stayed out.** The glow — a light that breathes behind the frame
+on the dark ground — is closed by this rule (motion with no reader
+behind it) and left open for a later conversation, not decided
+against. The scroll settle is out at the photographer's call: the
+page's scroll stays the browser's — "I don't want to mess with the
+page scroll behavior at this point. I may change my mind later." The
+front door's inherited entrance stays, on the tokens, for the front
+door's own spec to decide.
+
+**The one exclusion.** Pagefind's own stylesheet
+(`pagefind-ui.css`, on the search page's results only) carries literal
+transitions of its own. It is excluded from the build's check by path
+and from the grammar's claim, which is about the site's own styles.
+
 ## Screens to design
 
 Maps to the flows in `specs/001-site-foundation/spec.md`; see that
