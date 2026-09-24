@@ -318,6 +318,17 @@ attached.
   reads every image file once per render for every block, a header-only read
   being the fix if build time ever bites. What the gate raised instead is the
   ground-tone entry above.
+- **A mobile design pass** — raised by the photographer at spec 018's
+  merge (2026-09-24): "I haven't seen the site at all on a mobile
+  device. We'll need to add that to the roadmap to do a mobile design
+  pass." Every spec so far was judged on the 16:10 laptop and the LG
+  DualUp; phones have been measured in headless runs (390×844 at
+  specs 017–018) but never looked at. The pass would walk every surface
+  on a phone — the pieces and their blocks, the galleries' packing, the
+  place wall, the image page's stage, compare, related strip and quiet
+  view, the header and nav, and 018's motion by touch (the arrows'
+  carousel, swipe-back in the browser, the appearance on a small
+  screen) — and decide what changes.
 - **The front door** — to be workshopped with the photographer
   (decided 2026-09-02): the interim homepage (spec 002) stands until
   then. The starting position: the homepage is the site's thesis —
