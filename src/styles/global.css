@@ -130,7 +130,7 @@
      value after the head on a place with no writing (no head-case
      override). Keep the clamp in step with .section by hand. */
   --place-wall-gap: clamp(3.5rem, 5.5vw, 5.5rem);
-  /* THE MOTION GRAMMAR (spec 018). Three durations, two curves, read
+  /* THE MOTION GRAMMAR (spec 018). Three durations, three curves, read
      by every transition and animation on the site; beside them the
      flags and numbers the tuning envelope names. The dev switch sets
      any of them on `<html>`. motion.test.mjs pins each by name — to
@@ -138,17 +138,19 @@
      else. The rule: motion answers the reader. */
   --dur-state: 180ms; /* a state change: hover, underline, the header's slide, a page's cross-fade */
   --dur-move: 480ms; /* a photograph's movement: the travel, the quiet growth; the hero's entrance */
-  --dur-appear: 400ms; /* a photograph's appearance: the fade on decode, the arrival */
+  --dur-appear: 800ms; /* a photograph's appearance: the fade on decode, the arrival */
   --ease-state: ease;
   --ease-move: cubic-bezier(0.22, 1, 0.36, 1);
+  /* the appearance's curve: the fade and the arrival; set by the panel's named settings */
+  --ease-appear: cubic-bezier(0.33, 1, 0.68, 1);
   --motion-appear: 1; /* the four behaviours' flags, 1 or 0 — read by script; the code stays when one is off */
   --motion-arrive: 1;
   --motion-travel: 1;
   --motion-quiet: 1;
   --motion-appear-covers: 1; /* the covers on the three indexes and the front door: their own appearance and arrival flags */
   --motion-arrive-covers: 1;
-  --arrive-rise: 0px; /* the arrival's shape: 0px is the fade alone, a length is the fade with a rise */
-  --arrive-threshold: 0.15; /* the share of a frame in view that counts as arrived */
+  --arrive-rise: 0.75rem; /* the arrival's shape: 0px is the fade alone, a length is the fade with a rise */
+  --arrive-threshold: 0.25; /* the share of a frame in view that counts as arrived */
   --arrive-stagger: 0ms; /* a multi-cell block arrives as one; a stagger only if asked to see one */
   /* the waiting box: the surface step, or var(--color-bg) for the ground itself */
   --wait-fill: var(--color-surface);
@@ -2161,12 +2163,12 @@ html[data-motion]:not([data-quiet])
 }
 
 img[data-shown='fade'] {
-  animation: motion-appear var(--dur-appear) var(--ease-state) both;
+  animation: motion-appear var(--dur-appear) var(--ease-appear) both;
   animation-delay: calc(var(--arrive-stagger) * var(--i, 0));
 }
 
 img[data-shown='rise'] {
-  animation: motion-arrive var(--dur-appear) var(--ease-move) both;
+  animation: motion-arrive var(--dur-appear) var(--ease-appear) both;
   animation-delay: calc(var(--arrive-stagger) * var(--i, 0));
 }
 

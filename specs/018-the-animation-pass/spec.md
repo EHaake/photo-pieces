@@ -541,3 +541,10 @@ What changes, outside the tuning envelope and so amended here:
   machinery, already in the layout's router, is the expected means for
   the travel, with an older browser changing pages as today; no
   animation library.
+- **The second look opens on Settle** (implementation, 2026-09-23,
+  decision review D1606 Q2 and Q3): the appearance was too quick and
+  too faint, so the committed values are the dev switch's "settle"
+  setting — an 800ms fade on its own gentle curve with a small rise
+  from the edge the photograph crosses, arriving once a quarter of it
+  is on screen. The switch offers faint (as first built), soft, settle
+  and float to compare; the keep is still the photographer's to name.

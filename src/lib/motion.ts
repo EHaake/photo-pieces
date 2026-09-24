@@ -18,7 +18,7 @@
 
 export type MotionKind = 'time' | 'curve' | 'flag' | 'length' | 'number' | 'fill';
 
-/** The twenty tokens of the grammar, in :root's order, each with what
+/** The twenty-one tokens of the grammar, in :root's order, each with what
  *  kind of value it takes and a short label for the dev panel. */
 export const MOTION_TOKENS: readonly { name: string; kind: MotionKind; label: string }[] = [
   { name: '--dur-state', kind: 'time', label: 'state change' },
@@ -26,6 +26,7 @@ export const MOTION_TOKENS: readonly { name: string; kind: MotionKind; label: st
   { name: '--dur-appear', kind: 'time', label: 'appearance' },
   { name: '--ease-state', kind: 'curve', label: 'state curve' },
   { name: '--ease-move', kind: 'curve', label: 'movement curve' },
+  { name: '--ease-appear', kind: 'curve', label: 'appearance curve' },
   { name: '--motion-appear', kind: 'flag', label: 'appearance' },
   { name: '--motion-arrive', kind: 'flag', label: 'arrival' },
   { name: '--motion-travel', kind: 'flag', label: 'travel' },

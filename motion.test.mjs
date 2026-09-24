@@ -19,9 +19,10 @@ import {
   shownKey,
 } from './src/lib/motion.ts';
 import { scanMotion } from './src/lib/motion-scan.mjs';
+import { APPEARANCE_PRESETS, APPEARANCE_TOKENS } from './src/components/dev-motion-presets.ts';
 
-// The motion grammar (spec 018, T1600): three durations, two curves,
-// and the flags and numbers the tuning envelope names — twenty custom
+// The motion grammar (spec 018, T1600): three durations, three curves,
+// and the flags and numbers the tuning envelope names — twenty-one custom
 // properties on :root, declared once, read by every transition and
 // animation on the site. The rule: motion answers the reader.
 //
@@ -78,7 +79,7 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //
 // (f) The module (T1602). src/lib/motion.ts's `ms` reads a CSS time
 //     as milliseconds; its `MOTION_TOKENS` — what the dev panel builds
-//     its rows from — names exactly the grammar's twenty; `FRAME_IMG` is
+//     its rows from — names exactly the grammar's twenty-one; `FRAME_IMG` is
 //     each frame host's direct `img`. And the arrival rule (T1605a): a
 //     unit arrives when the threshold's share of it is in view, or, too
 //     tall for that, the threshold's share of the viewport's height —
@@ -88,6 +89,11 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //     for a unit wholly in view (a jump) the side it was last seen off
 //     on — never a "side", so a fullbleed clipped sideways by a
 //     scrollbar still rises from where it came (D1606 follow-up, 2).
+//     And the panel's named settings (T1606c, D1606 Q2): each sets
+//     exactly the appearance's four tokens, each a grammar token of the
+//     kind its value is; faint is the appearance as first built. The
+//     committed :root is deliberately not pinned to equal a setting —
+//     a round may keep a value between them.
 //
 // (g) The hidden state is the script's (T1603). Every rule in global.css
 //     that sets `opacity: 0` sits under `html[data-motion]` — the root
@@ -122,17 +128,18 @@ const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 const EXPECTED = {
   '--dur-state': '180ms',
   '--dur-move': '480ms',
-  '--dur-appear': '400ms',
+  '--dur-appear': '800ms',
   '--ease-state': 'ease',
   '--ease-move': 'cubic-bezier(0.22, 1, 0.36, 1)',
+  '--ease-appear': 'cubic-bezier(0.33, 1, 0.68, 1)',
   '--motion-appear': '1',
   '--motion-arrive': '1',
   '--motion-travel': '1',
   '--motion-quiet': '1',
   '--motion-appear-covers': '1',
   '--motion-arrive-covers': '1',
-  '--arrive-rise': '0px',
-  '--arrive-threshold': '0.15',
+  '--arrive-rise': '0.75rem',
+  '--arrive-threshold': '0.25',
   '--arrive-stagger': '0ms',
   '--wait-fill': 'var(--color-surface)',
   '--hero-enter': '1',
@@ -147,7 +154,7 @@ const EXPECTED = {
 const FAMILY = /^--(dur-|ease-|motion-|arrive-|hero-|rm-)|^--wait-fill$|^--arrows-slide$/;
 
 /** The covers' own switch (the Motion section): the only rule outside
- *  :root that declares one of the twenty, and only these two readings. */
+ *  :root that declares one of the twenty-one, and only these two readings. */
 const COVERS = '.note-cover, .gallery-card .image-link';
 const COVERS_BODY = {
   '--motion-appear': 'var(--motion-appear-covers)',
@@ -702,8 +709,32 @@ describe('(f) the module (T1602, spec 018)', () => {
     expect([ms('480ms'), ms('.5s'), ms('ease')]).toEqual([480, 500, 0]);
   });
 
-  it("MOTION_TOKENS names exactly EXPECTED's twenty — a token missing from the panel or a stray one fails", () => {
+  it("MOTION_TOKENS names exactly EXPECTED's twenty-one — a token missing from the panel or a stray one fails", () => {
     expect(MOTION_TOKENS.map((entry) => entry.name).sort()).toEqual(Object.keys(EXPECTED).sort());
+  });
+
+  it('the named settings are faint, soft, settle and float, each with a one-line description (T1606c)', () => {
+    expect(APPEARANCE_PRESETS.map((preset) => preset.name)).toEqual(['faint', 'soft', 'settle', 'float']);
+    for (const { description } of APPEARANCE_PRESETS) expect(description).toMatch(/^[^\n]{10,}$/);
+  });
+
+  it('every named setting sets exactly APPEARANCE_TOKENS — no more, no fewer, no misspelt name', () => {
+    for (const preset of APPEARANCE_PRESETS)
+      expect([preset.name, Object.keys(preset.tokens)]).toEqual([preset.name, [...APPEARANCE_TOKENS]]);
+  });
+
+  it('APPEARANCE_TOKENS are grammar tokens of kind time, curve, length and number, in that order', () => {
+    const kinds = Object.fromEntries(MOTION_TOKENS.map(({ name, kind }) => [name, kind]));
+    expect(APPEARANCE_TOKENS.map((name) => kinds[name])).toEqual(['time', 'curve', 'length', 'number']);
+  });
+
+  it('faint is the appearance as first built — 400ms, ease, no rise, 0.15', () => {
+    expect(APPEARANCE_PRESETS.find((preset) => preset.name === 'faint')?.tokens).toEqual({
+      '--dur-appear': '400ms',
+      '--ease-appear': 'ease',
+      '--arrive-rise': '0px',
+      '--arrive-threshold': '0.15',
+    });
   });
 
   it('FRAME_IMG is the six hosts, each `> img`, comma-joined', () => {
