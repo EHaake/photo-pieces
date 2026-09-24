@@ -1321,3 +1321,188 @@ it need not be reverted when the upstream fix ships — it is also the
 documented memory-bounding choice for a collection meant to grow for
 years. The constitution's Testing section says so, in its own commit on
 `main` after this merge.
+
+## Spec 018: the animation pass
+
+Spec 018 gives the site a motion grammar and moves the photograph four
+ways. The photographer chose it as a first step, not the whole
+modernization: "Part of this modernization will probably be to include
+some carefully considered and implemented animations. I do want to note
+that this 'modernization' endeavor is large and this next step should
+be a subset of it, not the entire thing." Of three options for spec
+007's line — widened but closed, bent once for the glow, kept strictly
+— he took the first: **motion answers the reader.** Every animation
+answers something the reader did or a photograph finishing loading;
+nothing loops, breathes or plays by itself, and the tests and the build
+fail on an iteration count, `infinite` or `autoplay`. He took all four
+surfaces offered: a photograph that appears without popping, frames
+arriving on scroll, the travel from a frame into its page and back, and
+the quiet view as one movement. Reduced motion keeps the fades and
+drops the movement, his choice over "everything instant". The glow
+stays a later question, closed by the rule and not decided against. The
+settle is out at his call, after he had first said yes to a question he
+had taken to be about the images: "I don't want to mess with the page
+scroll behavior at this point. I may change my mind later, though, so
+please record that." And he made the spec experimental: "I don't know
+what will work best without seeing them working in person. So, I'd
+like to make sure that we can change, add and tweak certain aspects of
+the spec during implementation without requiring expensive re-planning
+etc, unless deemed absolutely necessary." The spec's envelope reads
+that as every value, shape, fill, on/off and surface within the four
+behaviours — not a fifth behaviour, a resting state, the rule, a
+dependency or the authoring. Every round at the pause stayed inside it
+except three, which amended the spec: the replay, the panel's named
+settings, and the travel following the history.
+
+**The tokens are the grammar.** Twenty-one tokens on `:root` in
+`global.css`, beside the mat's and the ground's: three durations
+(`--dur-state` 180ms, `--dur-move` 480ms, `--dur-appear` 950ms), a curve
+for each, and beside them the flags and the shape — the four
+behaviours' switches and the covers' own two, the arrival's rise,
+threshold and stagger, the waiting fill, the front door's entrance, the
+arrows' slide, and what reduced motion keeps. No literal duration or
+curve appears anywhere else: a source test scans `global.css` and every
+`.astro` `<style>`, and a build barrier scans `dist/`. The barrier sees
+what the minifier leaves — Lightning CSS writes `220ms` as `.22s` and
+drops a bare `ease` — so the source scan is the guard for curves.
+Pagefind's `pagefind-ui.css`, on the search page's results only,
+carries literal transitions of its own and is excluded from the barrier
+by path and from the grammar's claim, which is about the site's own
+styles. **Off is a flag, not a deletion** (`--motion-*: 0`,
+`--hero-enter: 0`), because the envelope says the code stays and the
+token turns it off: script-read flags are `1`/`0` strings, CSS-read
+ones multipliers in `calc()`, so a zero is honest in the stylesheet
+too. The arrival's shape is the rise token's zero rather than a shape
+flag plus a distance: one token, and the fade alone is `0px`.
+
+**Hidden before first paint, or not at all.** The hidden state is a
+root attribute gating one rule — `html[data-motion]`, written by an
+inline script before the body — rather than an attribute set on each
+image when the module runs. The module runs after the parse, and a long
+page can paint before that, so an image caught mid-paint would blink
+out when hidden; the gate hides before the first paint and the module
+releases what is already complete. The inline script also releases the
+gate at `load` if the module never ran, so a stale chunk or a throw
+shows every frame late, never hides it for good; without script nothing
+is hidden at all, and the barrier proves no page in `dist/` ships the
+attribute. The hooks bind at module time and at `astro:after-swap`, not
+at `astro:page-load`: the router fires its first `page-load` on the
+window's `load`, after every image, so binding there would make the
+appearance a no-op on every first visit.
+
+**The travel.** The browser's view transitions, already in the layout's
+router, carry it; there is no animation library and no new dependency.
+The travel in starts at the click: the photograph the reader clicked is
+painted as an understudy in the stage's box — the previous page's
+rendering as the figure's content-box background — and the page's own
+file fades in over it, because a preload would delay the click's
+response by the large file's load. The arrows' step preloads instead,
+bounded at one second, because showing a different photograph needs
+that one there. Two mechanisms for two needs, sharing no code. On the
+image page the named element is the stage's figure, so the mat arrives
+with the growth into the quiet view; on every other surface it is the
+`img`, the photograph and not its cell or label. The header has a group
+of its own, `site-header`, so it neither travels nor blends, and it
+keeps the state duration while everything else takes the move duration
+during a travel, a step or the growth. The arrows' photograph is named
+only when the slide is on; with the flag at 0 nothing is named and the
+page's cross-fade carries it in its box. The page's 220ms ground
+transition, spec 006's, is deleted rather than re-tokened: under a view
+transition it would run live beneath the snapshots and fight them, and
+without the API the quiet view cuts, which is the spec's reduced-motion
+outcome anyway. One gap is the router's: a site with no `transition:*`
+directives gets no reduced-motion path from it, so under reduced motion
+a page change still cross-fades — a fade, within the spec — and a cut
+would be one rule in the reduced-motion block if he ever wants it.
+
+**The first look (2026-09-23).** "What I love is how when you click on
+an image on a piece, it grows into the hero stage and then go back
+(click back on the browser), it shrinks back to it's place in the
+piece. This is fantastic and perfect. The image appearance when
+scrolling down however, needs some work. For one, while I don't want
+the animation to be intrusive, right now it's too fast and subtle, I
+barely see it. Additionally, when it fades in, I can see a ghostly
+outline that often doesn't match the shape of the actual image that
+then appears. … there are too many [settings] in the motion panel and
+it's not clear what changes which. I'd like you to simplify this menu
+and/or offer specific settings I can switch between rather than
+specifying them exactly. For the film strip, I'm fine with them loading
+one by one … I also think that images shouldn't just animate when they
+first appear. It should happen every time they appear on the screen, so
+scrolling down and back up." The travel and the strips arriving frame
+by frame were kept as built. The replay amended the spec: a frame
+resets without a visible fade-out once it is wholly off the screen and
+arrives again when it comes back, rising from above when it comes in
+from the top, while the way back from an image page still lands on what
+the reader saw without replaying it. The outline was diagnosed rather
+than tuned: the fill matched the photograph's box everywhere, but the
+rise moved the image over a host fill that stayed put, leaving a band
+of fill uncovered. The waiting fill now shows only while a photograph
+waits or fades, never under a rise. The dev panel became four named
+settings — faint (as first built), soft, settle and float — each
+setting duration, curve and shape together, and the second look opened
+on settle: an 800ms fade on its own curve with a 0.75rem rise, arriving
+once a quarter of the frame is on screen.
+
+**The second look (2026-09-23).** "1. Settle, but slightly slower. 2. I
+think it feels right [the travel's landing fade]. 3. I don't want there
+to be any visible box. 4. I'll go with how it is now for all 4 [the
+other speeds, the arrows' cross-fade, the front page's entrance,
+reduced motion keeping the fade's length]." The appearance went to
+950ms and the waiting fill to the ground's own colour. And a finding:
+"when viewing an images page and then clicking left or right to go to
+another image, when clicking back in the browser, the image shrinks
+down and then off the bottom of the screen … It doesn't happen when
+going forward. We should either remove that 'back' shrink if not going
+back to a piece or gallery to keep it consistent with the forward
+action, or add a left and right slide animation … when clicking into an
+image from a gallery or piece, we see that nice grow and then shrink
+when going back, but going forward again has no animation. We should
+fix that as well." The first of his two options was taken, and it
+amended the spec: the travel follows the history. Each history entry
+carries a record of how it was reached (`history.state.travel`), so
+back reverses the step taken and forward replays it — the photograph
+grows into the stage again — and back after an arrow is the arrows'
+step, not a shrink into the previous page's related strip.
+
+**The third look (2026-09-23 to 2026-09-24).** He asked for the other
+option as well — "a slide animation" on the arrows — and it was built
+as a 2rem slide while cross-fading. He then asked for more: "slide
+completely off the screen and the next one would come in off the side
+of the screen." The arrows are now a carousel: the photograph leaves by
+the full width of the screen and the next one comes in from the other
+side, both fully visible throughout, while the words beneath
+cross-fade; back and forward follow the history, and reduced motion
+still cross-fades in place. The two photographs carry separate names so
+neither morphs; one shared name was rejected because the group's resize
+distorts both photographs, one name with the group's animation off
+because it draws the old photograph at the new one's width, and a clip
+to the stage because he asked for "off the screen". Then: "Looks great!
+continue." What he kept: the arrival as settle — a fade with a 0.75rem
+rise, mirrored from above, at 950ms on `cubic-bezier(0.33, 1, 0.68,
+1)`, arriving at a quarter in view, on every re-entry; the waiting fill
+as the ground itself, no visible box; all four behaviours on, the
+covers too; state changes at 180ms `ease` and movement at 480ms
+`cubic-bezier(0.22, 1, 0.36, 1)`; the front door's entrance on the
+tokens (480ms, 90ms stagger, from the theme's 560ms), left to the front
+door's own spec; the arrows' full-width slide; reduced motion keeping
+the fades at their length with nothing moving; and the travel in and
+back as first built.
+
+**What it leaves.** An ordinary page change cross-fades onto the new
+page's waiting boxes, whose shapes rarely match the old page's
+photographs; left alone unless he names it. A frame is held shown on
+the way back only at the same viewport and the same image attributes,
+so after a resize a returning page's frames fade as on a first visit.
+The quiet view without the View Transitions API cuts where it used to
+fade its ground. The glow and the settle stay on the roadmap under
+"Motion, considered", the rest of the modernization under "A design
+language of its own".
+
+**The models.** Planning and its sign-off ran at the top tier (Fable
+5.1). From the start of implementation, 2026-09-23, the photographer
+asked for Opus 5.5 throughout, "due to low Fable allowance", for the
+rest of spec 018: every dispatch at the implementation tier, decision
+reviews and this close-out included, and the session itself on Opus
+5.5. The constitution's role table records the step-down in a comment
+beside the rows; the rows go back to the top tier only when he says so.

@@ -176,11 +176,12 @@ section first.
 once on `:root` in `global.css`, beside the mat's and the ground's; no
 literal duration or curve appears anywhere else, and the tests and
 the build fail on one. Three durations: `--dur-state` 180ms, a state
-change (a hover, an underline, the header's slide, a page's
-cross-fade);
-`--dur-move` 480ms, a photograph's movement (the travel, the growth
-into the quiet view, the front door's entrance); `--dur-appear` 950ms,
-a photograph's appearance (the fade on decode, the arrival). Three
+change (a hover, an underline, the header's slide, an ordinary page
+change's cross-fade); `--dur-move` 480ms, a photograph's movement (the
+travel, the arrows' slide, the growth into the quiet view, the front
+door's entrance) and the page's cross-fade beneath a travel, a step or
+the growth; `--dur-appear` 950ms, a photograph's appearance (the fade
+on decode, the arrival). Three
 curves, one for each: `--ease-state` `ease`, `--ease-move`
 `cubic-bezier(0.22, 1, 0.36, 1)`, `--ease-appear`
 `cubic-bezier(0.33, 1, 0.68, 1)`. Beside them sit the rest of the
@@ -193,8 +194,8 @@ all on); the arrival's shape (`--arrive-rise` 0.75rem,
 (`--hero-enter` on, `--hero-stagger` 90ms); the arrows
 (`--arrows-slide` on); and reduced motion (`--rm-appear` and
 `--rm-quiet`, both keeping their fades). The values are the ones the
-photographer kept by eye at the spec's pause; the appearance is the
-dev switch's "settle" setting at 950ms.
+photographer kept by eye at the spec's pause; the appearance and the
+arrival are the dev switch's "settle" setting at 950ms.
 
 **The four behaviours.**
 

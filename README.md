@@ -171,24 +171,24 @@ same outing, and "The print" with an enquiry link. Every page in a set
 has a neighbour line for it (the
 gallery, piece, or place they came from; arrow keys work), and every
 page has a quiet view — click the photograph — that dims the ground and gives
-the frame the viewport, matted on the quiet dark: the one matted
-surface on the site. Since spec 018 the photographs move only in
-answer to the reader or to their own loading: none pops — its box waits in the ground's own
-colour, so no box shows, until the photograph has decoded and fades
-in; below the fold it fades in with a small rise each time it scrolls
-into view, down or back up (a strip's frames one by one);
+the frame the viewport, matted on the quiet dark: the one matted surface
+on the site. Since spec 018 the photographs move only in answer to the
+reader or to their own loading: none pops — its box waits in the
+ground's own colour, so no box shows, until the photograph has decoded
+and fades in; below the fold it fades in with a small rise each time it
+scrolls into view, down or back up (a strip's frames one by one);
 clicking a frame carries the photograph into its page's stage and the
 way back returns it, following the browser's history; the arrows slide
-the photograph off the screen and the next one on; the quiet view
-grows the photograph into its mat as the ground darkens; and reduced
-motion keeps the fades and drops the movement. Rules the build
-enforces: piece folders must be slugs and file names URL-safe (letters, digits, `.`, `-`,
-`_`), an image directly in `pieces/` or beside a flat `pieces/foo.md`
-fails, a file nested in a sub-folder is ignored with a warning (a
-directive pointing into one fails), two files differing only by
-extension are a collision, and a `draft: true` piece unpublishes its
-images with it. Moving or renaming an image changes its URL — there
-are no redirects yet.
+the photograph off the screen and the next one on; the quiet view grows
+the photograph into its mat as the ground darkens; and reduced motion
+keeps the fades and drops the movement. Rules the build enforces: piece
+folders must be slugs and file names URL-safe (letters, digits, `.`,
+`-`, `_`), an image directly in `pieces/` or beside a flat
+`pieces/foo.md` fails, a file nested in a sub-folder is ignored with a
+warning (a directive pointing into one fails), two files differing only
+by extension are a collision, and a `draft: true` piece unpublishes its
+images with it. Moving or renaming an image changes its URL — there are
+no redirects yet.
 
 **Sidecar** — optional, `_<basename>.md` beside the image (the
 underscore keeps it out of the pieces collection). Every field is

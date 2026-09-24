@@ -347,31 +347,23 @@ attached.
   slowly — and amends `design/brief.md` before any spec is written.
   _First step taken as spec 018 (2026-09-23): a considered animation
   pass, the entry below — a subset of this direction, deliberately, not
-  the whole of it._
-- **A considered animation pass** — the next spec (018), chosen by the
-  photographer 2026-09-23: "I'd like to include … a considered animation
-  pass. … Part of this modernization will probably be to include some
-  carefully considered and implemented animations. … this
-  'modernization' endeavor is large and this next step should be a
-  subset of it, not the entire thing." The first step of "A design
-  language of its own" above, and the design conversation "Motion,
-  considered" below asked for — held in the spec session, with the
-  answers written into `design/brief.md` and the spec. Its raw material
-  is what the roadmap already holds: the two kinds of motion he named
-  (a light that breathes behind the frame on a dark ground; a scroll
-  that settles) and the image loading choreography (a fade on decode, a
-  placeholder in the ground's colour); and what the site already moves
-  without ever having decided to — the theme's staggered entrance on the
-  front door's hero, the header's slide, the quiet view's 220ms
-  cross-fade, the link underline, and Astro's `ClientRouter` in the
-  layout, which already cross-fades every page change. What the spec
-  has to settle first: whether spec 007's line — nothing moves unless
-  the reader scrolls, nothing plays — bends, and for what; what reduced
-  motion gets in each case; and the site's own motion grammar (one
-  easing, one or two durations, tokens like the mat's) so that every
-  later spec of the modernization moves the same way. What it is not:
-  the front door, the typography pass, a design-system rewrite, or
-  motion for its own sake — the entries above stay open.
+  the whole of it. What spec 018 took: the motion grammar (three
+  durations and three curves, declared once beside the mat's tokens)
+  and the four behaviours on it — a photograph's appearance, its
+  arrival on scroll, its travel to its page and back, the quiet view
+  as one movement — written into `design/brief.md`'s Motion section;
+  image loading choreography went with it. The rest is open: the front
+  door, the slow view, the reading typography pass, and what "modern"
+  names beyond motion._
+- ~~**A considered animation pass**~~ — done in spec 018, the first
+  step of the modernization and deliberately a subset of it: the four
+  behaviours (a photograph's appearance, its arrival on scroll, its
+  travel to its page and back, the quiet view as one movement) and the
+  site's motion grammar they and every inherited transition draw from,
+  under the rule "motion answers the reader", in `design/brief.md`'s
+  Motion section. The glow and the settle it left stay under "Motion,
+  considered" below; the rest of the modernization under "A design
+  language of its own" above.
 - ~~**The held image**~~ — done in spec 007: two durational blocks.
   `held` is a container whose body is the prose that passes beside a
   frame that stays — the frame left or right, at the content width or
@@ -512,9 +504,10 @@ attached.
 - **Reading typography pass for pieces** — measure, size, and rhythm
   were inherited from a blog theme; immersive reading wants a slightly
   narrower column, larger type, more air between blocks.
-- **Image loading choreography** — a large frame popping in
-  half-decoded breaks the spell: a fade on decode and a mat-coloured
-  placeholder.
+- ~~**Image loading choreography**~~ — done in spec 018: a
+  photograph's box waits in the ground's own colour, so no box shows,
+  and the photograph fades in once it has decoded — the placeholder in
+  the ground's family, as the photographer chose, rather than the mat's.
 - **Motion, considered** — raised by the photographer in spec 016's
   conversation (2026-09-20): the site "now feels a bit old-school", and
   he can imagine two kinds of subtle animation. (1) On a dark ground —
@@ -539,7 +532,14 @@ attached.
   the reading typography pass below as much as animation. "Image
   loading choreography" below (a fade on decode) is the same family and
   would fold in. _The conversation is spec 018's, "A considered
-  animation pass" above (2026-09-23)._
+  animation pass" above (2026-09-23). The rule bent to "motion answers
+  the reader" and no further: every animation answers the reader or a
+  photograph loading, and nothing loops, breathes or plays by itself.
+  The glow is closed by that rule — motion with no reader behind it —
+  and left for a later conversation, not decided against. The settle
+  is out at spec 018, at the photographer's call: "I don't want to mess
+  with the page scroll behavior at this point. I may change my mind
+  later" — to be revisited if he does._
 - **Output formats and a page-weight budget** — eight exports at two
   megabytes is a sixteen-megabyte piece; AVIF output and a stated
   budget per piece.
