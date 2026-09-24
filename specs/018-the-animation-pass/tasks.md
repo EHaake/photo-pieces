@@ -822,14 +822,14 @@ headers to confirm nothing was duplicated or dropped. -->
       each token's value in the three places, listed); the Phase 1
       record below filled in._
 
-- [ ] **T1606a** — The ghostly outline (the person's finding at the
+- [x] **T1606a** — The ghostly outline (the person's finding at the
       Phase 1 pause): as a photograph fades in, an outline that often
       does not match the photograph's shape shows. A diagnosis dispatch:
       find the cause on the pages he walked (the fog piece, the fog
       gallery, the headlands wall, the image pages), fix it when the
       fix is inside the appearance's footprint (`global.css`'s Motion
       section, `motion.ts`) and no resting geometry changes; otherwise
-      return the diagnosis and options. _Verify: `sh scripts/verify.sh`
+      return the diagnosis and options. _(Done as a diagnosis; fixed at T1606d.)_ _Verify: `sh scripts/verify.sh`
       green; per surface, the waiting fill's painted box equals the
       photograph's box at both screens, before and during the fade
       (numbers recorded); the cause named._
@@ -1247,6 +1247,22 @@ keeps in his words. Anything he saw that the spec did not say.)_
       `git diff main -- package.json` shows the `postbuild` line only;
       main green after the merge._
 
+- [ ] **T1608a** — Pre-merge sweep fixes. B1: the
+      `@media (prefers-reduced-motion: reduce)` block moves to the end of
+      `global.css`, after the Motion section, so it overrides the
+      appearance rules it names (`--rm-appear: 0` was inert — the base
+      `img[data-shown]` rules came later at equal specificity); a pin in
+      `motion.test.mjs` that the block's offset exceeds every base rule
+      it overrides; a browser read under reduced motion — `--rm-appear: 0`
+      inline, an in-view `"fade"` computes 0s, with 1 it is 0.95s. With
+      it, the sweep's notes: `:root` comments for `--dur-state` ("an
+      ordinary page change's cross-fade") and `--dur-move` (the arrows'
+      slide, the page's cross-fade beneath a travel); ROADMAP "Motion,
+      considered" no longer points "below" to a shipped entry; README
+      and the brief no longer suggest strip frames rise (they always
+      fade). _Verify: `sh scripts/verify.sh` green; the pin fails with
+      the block moved back; the reads recorded._
+
 ---
 
 ### The pre-merge sweep
@@ -1325,6 +1341,7 @@ tier if it is ever on (it is off). -->
 | T1607 (`sdd-implementer`)                                       | `opus` (Opus 5.5)              | 61,446                      | done; the brief's Motion section, 007's annotation, README (sentence, tree, spec list), AUTHORING; described what was kept, not the pre-pause task line; prettier clean; 407 tests                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | Phase 2 review (`skeptical-reviewer`)                           | `opus` (Opus 5.5)              | 30,940                      | signed off; notes: the brief's "settle" sentence, README long lines, the `--dur-state` examples to check — folded into the close-out                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | T1608 documents (`sdd-implementer`, close-out row stepped down) | `opus` (Opus 5.5)              | 78,903                      | ROADMAP four entries, DECISIONS "Spec 018" round by round, the Phase 2 doc fixes (brief's durations corrected: a travel's page cross-fade is at `--dur-move`); `global.css:139` comment has the same stale wording — sweep                                                                                                                                                                                                                                                                                                                                                                                        |
+| Pre-merge sweep (`skeptical-reviewer`)                          | `opus` (Opus 5.5)              | 237,454                     | fix and re-review: B1 `--rm-appear: 0` inert (RM block before the appearance rules) → T1608a; B2 T1606a unticked (ticked); B3 AC 11's screens and devices unrecorded (asked); 10 second-look notes, stale-text ones fixed                                                                                                                                                                                                                                                                                                                                                                                         |
 
 _(Session-tier allowance draw noted at each pause.)_
 
