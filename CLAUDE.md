@@ -182,24 +182,28 @@ names as models change; the roles don't. A project can move between
 profiles later — change the names here and swap the settings file, one
 commit — and the tier log shows from which spec. -->
 
-**This project runs the standard profile.**
+**This project runs the Fable profile.** (Skill reconciled
+2026-09-24: the profiles were renamed from standard/economy to
+Fable/Opus and Opus is `claude-opus-5-5` everywhere; `claude-opus-4-8`
+appears only if the person asks for it.)
 
-**Standard profile** (the default; measured on the projects the skill
-came from). Top tier `fable`; implementation tier `opus`; session tier
-`fable` at medium effort (the top and session tiers are the same model
-at different effort; the fallback session model is `claude-opus-4-8`,
-the full ID, since a previous-generation model has no short alias).
-Settings from the skill's `project/.claude/settings.json`.
+**Fable profile.** Top tier `fable`; implementation tier `opus`;
+session tier `claude-fable-5-1` at medium effort (the top and session
+tiers are the same model at different effort). The fallback session
+model is `claude-opus-5-5`. Settings from the skill's
+`project/.claude/settings.json`.
 
-**Economy profile** (a small or personal project, or one that should
-leave the top tier's separate allowance to other projects). One model
-family throughout: top tier `opus`; implementation tier `opus`; session
-tier `claude-opus-4-8` at medium effort. Nothing runs on Fable: the
-planner and sign-off dispatches carry no override, and the top-tier
-fallback below never applies. Settings from the skill's
-`project/.claude/settings.economy.json`. Move to the standard profile
-when a spec's plan is the kind a stronger planner would change — a
-sign-off that keeps finding blocking problems is the signal.
+**Opus profile.** Opus for everything: top tier `opus`;
+implementation tier `opus`; session tier `claude-opus-5-5` at medium
+effort. Every dispatch runs at high effort — the agent definitions'
+own default — and only orchestration runs at medium. Nothing runs on
+Fable: the planner and sign-off dispatches carry no override, the
+close-out goes to `sdd-implementer`, and the top-tier fallback below
+never applies. Settings from the skill's
+`project/.claude/settings.opus.json`. Neither profile is the budget
+option: Opus 5.5 costs less per token than Fable 5.1, and the two
+orchestrators measured close per task. Hard design calls lean Fable;
+well-understood building leans Opus.
 
 These names are the only place a model is spelled out; everything below
 refers to the roles.
@@ -236,9 +240,10 @@ replace **top tier** (override) with "implementation tier (no
 override)"; the dispatch then carries no override and the agent runs at
 its own default. To change the implementer, change the agent name in
 that row — both definitions stay installed, so it is a word, not a
-reinstall. Under the economy profile the top tier _is_ the
+reinstall. Under the Opus profile the top tier _is_ the
 implementation tier, so the overrides become no-ops and the close-out
-row reads `sdd-implementer`; nothing else in the table changes.
+row reads `sdd-implementer` at high; nothing else in the table
+changes.
 
 **A change the person asks for gets written here before it is acted
 on.** If they say to move a role — for one window, for this project,
@@ -268,10 +273,13 @@ setup; don't re-open it per spec.
 Close-out sits at the top tier because it writes the ROADMAP.md and
 DECISIONS.md entries, the acceptance evidence and the spec summary —
 synthesis and prose, the same work the top tier earns its place on
-everywhere else. The measured close-outs cost several times more at the
-implementation tier than at the top tier's model at medium, but those
-specs also handed close-out a pre-assembled bundle, so the gap is
-confounded: watch it in the tier log rather than trust it. -->
+everywhere else. Its cost depends mostly on its bundle, not its model.
+On the same model, one close-out that read the documents and hunted its
+own evidence cost $12.38 over 111 turns. Another, handed the evidence
+with full reads forbidden, cost $0.99 over 24 turns. So the close-out
+bundle carries per-criterion evidence, the walkthrough record, the tier
+log, the spec summary and the ROADMAP entries, and the dispatch says not
+to read spec.md, plan.md or tasks.md in full. -->
 
 - **The session runs at the session tier, at medium effort**, set in
   this repo's `.claude/settings.json` — written at project setup from
@@ -289,12 +297,12 @@ confounded: watch it in the tier log rather than trust it. -->
   bookkeeping turns and re-sends its whole context on each one — the
   dominant cost of the workflow — and it makes no design decisions: it
   assembles bundles, dispatches, verifies, commits, and reports. The
-  role never needs the top tier. Under the standard profile it sits on
-  the top tier's model because, measured, Fable 5.1 at medium in this
-  seat cost about a third per task of Opus 4.8 and its allowance held
-  (the skill's design record has the numbers); under the economy
-  profile it sits on Opus 4.8, the model whose reports read most
-  clearly to the person, and the same discipline about turns applies.
+  role never needs the top tier. Under the Fable profile it sits on
+  the top tier's model. Measured in this seat, Fable 5.1 at medium cost
+  about a third per task of Opus 4.8, and close to Opus 5.5 ($1.10
+  against $1.34) while taking about a third of the turns. The skill's
+  design record has the numbers. Under the Opus profile it sits on Opus
+  5.5, and the same discipline about turns applies.
   If it drops the protocol (a skipped review, a stale `tasks.md`
   edit, a task done by hand), the first fix is high effort, one line
   in the same file.
@@ -373,6 +381,32 @@ confounded: watch it in the tier log rather than trust it. -->
   orchestrator edits `tasks.md` or commits, and the orchestrator never
   implements second-look notes or does device or browser checks by
   hand.
+- **The close-out bundle carries the evidence**, so the close-out never
+  goes looking for it. The orchestrator assembles it with shell, as for
+  a review bundle: each acceptance criterion with the test names or
+  Done notes that satisfied it, the walkthrough list and what the
+  person said at each pause, the tier log, the spec's summary and its
+  decided lines, the `ROADMAP.md` entries this spec touches, and the
+  previous spec's `DECISIONS.md` section as the shape to copy. The
+  dispatch says not to read `spec.md`, `plan.md` or `tasks.md` in
+  full. The close-out runs before the pre-merge sweep, so the sweep
+  verifies it instead of pre-dating it.
+- **A device or browser pass runs outside the implementer.** Both
+  implementer definitions have no simulator or browser tools, so a
+  task whose Verify criterion needs one gets it from the person's
+  walkthrough at the phase pause, or from a general-purpose agent the
+  orchestrator dispatches for that check alone — never from the
+  implementer's report read as if it had looked. Such a pass costs
+  mostly re-read context, so: fold waits into the next call (`sleep 2
+  && <screenshot>`, or wait on a condition) rather than spending a turn
+  on a bare sleep; split a long pass into one dispatch per checklist
+  section, each given only its section and returning a short pass/fail
+  list; and leave the pass only what needs eyes — a check with a
+  deterministic answer (an element exists, a label reads right, a
+  click lands on the right page) goes into the automated UI tests the
+  plan names, where it runs every build for nothing. The pass keeps
+  layout, motion and feel. A smaller model or lower effort is not the
+  lever; the bill is cache reads.
 - **One implementation session per spec.** It opens when `plan.md` and
   `tasks.md` are final and ends at the merge; a phase pause is a pause
   in it, not a boundary — the person attests and says continue.
@@ -401,11 +435,11 @@ confounded: watch it in the tier log rather than trust it. -->
 - **Batch the bookkeeping**: commit, checkbox, and tier-log row in one
   shell command; bundle assembly and dispatch back to back. Every turn
   saved is one fewer re-send of the whole context.
-- **Fallback** (standard profile): if the top tier's usage budget runs
+- **Fallback** (Fable profile): if the top tier's usage budget runs
   out, dispatch the planner and sign-off at the implementation tier for
   the rest of the window (drop the override; both definitions default
-  to `opus`), switch the session itself to `claude-opus-4-8`
-  mid-session (`/model claude-opus-4-8` — one cache re-write, then
+  to `opus`), switch the session itself to `claude-opus-5-5`
+  mid-session (`/model claude-opus-5-5` — one cache re-write, then
   continue), and dispatch `sdd-implementer` for any row that names
   `sdd-implementer-fable`, including close-out. This is the whole role
   table stepped down at once, and it is the automatic form: it fires on
@@ -508,6 +542,12 @@ orchestrator re-runs the command itself before committing.
 - Open the PR as a draft immediately after pushing the branch, for a
   running diff. Only mark it ready and merge once every task in the
   spec's `tasks.md` is complete and verified.
+- Marking ready has a close-out step, before any pre-merge review
+  sweep: update `ROADMAP.md` (drop or annotate what this spec shipped,
+  add follow-ups it surfaced) and the README if user-facing behavior
+  or setup changed. README changes describing this spec's behavior
+  ride the spec branch. It is dispatched on the close-out bundle
+  described under model policy.
 - Keep AI co-authorship attribution on commits — accurate, and worth
   keeping for a project meant to demonstrate this workflow.
 - Never force-push.
