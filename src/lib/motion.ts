@@ -133,8 +133,53 @@ function on(hostStyle: CSSStyleDeclaration, name: string): boolean {
 }
 
 /** Whether a box intersects the viewport now. */
-function inViewport(rect: DOMRect): boolean {
+export function inViewport(rect: DOMRect): boolean {
   return rect.bottom > 0 && rect.right > 0 && rect.top < innerHeight && rect.left < innerWidth;
+}
+
+/** A travel record: how the reader reached a history entry (spec 018,
+ *  T1606f). The layout writes one on the entry of every push its travel
+ *  classifies — `kind` settled, `from` the pathname left, `nth` which of
+ *  a page's links to one photograph (in: the clicked link on the page
+ *  left; out: the landing on the page reached), `dir` for a step. */
+export type Travel = {
+  kind: 'in' | 'out' | 'step';
+  from: string;
+  nth?: number;
+  dir?: 'prev' | 'next';
+};
+
+const REVERSE = { in: 'out', out: 'in', step: 'step' } as const;
+const FLIP = { prev: 'next', next: 'prev' } as const;
+
+/** A traverse's kind, from the record of the step between its two
+ *  pages: on **back**, the record of the entry being left, reversed (in
+ *  → out, out → in, step → step with `dir` flipped); on **forward**, the
+ *  record of the entry reached, replayed as it was. Each keeps the
+ *  record's `nth`. The record is that step only when it is well-formed
+ *  (a known kind, a string `from`, `nth` a non-negative integer or
+ *  absent, `dir` `prev|next` or absent) and its `from` is the other end
+ *  — `toPath` on back, `fromPath` on forward; otherwise null, and the
+ *  layout falls back to what the pages alone allow. */
+export function traverseKind(
+  record: unknown,
+  direction: string | undefined,
+  fromPath: string,
+  toPath: string,
+): Omit<Travel, 'from'> | null {
+  if (!record || typeof record !== 'object') return null;
+  const { kind, from, nth, dir } = record as Record<string, unknown>;
+  if (kind !== 'in' && kind !== 'out' && kind !== 'step') return null;
+  if (typeof from !== 'string') return null;
+  if (nth !== undefined && !(typeof nth === 'number' && Number.isInteger(nth) && nth >= 0))
+    return null;
+  if (dir !== undefined && dir !== 'prev' && dir !== 'next') return null;
+  const keep = typeof nth === 'number' ? { nth } : {};
+  if (direction === 'back' && from === toPath)
+    return { kind: REVERSE[kind], ...keep, ...(dir ? { dir: FLIP[dir] } : {}) };
+  if (direction === 'forward' && from === fromPath)
+    return { kind, ...keep, ...(dir ? { dir } : {}) };
+  return null;
 }
 
 /** A shown frame's key: the page it was shown on, the viewport it was

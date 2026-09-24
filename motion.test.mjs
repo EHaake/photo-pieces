@@ -17,6 +17,7 @@ import {
   ms,
   shown,
   shownKey,
+  traverseKind,
 } from './src/lib/motion.ts';
 import { scanMotion } from './src/lib/motion-scan.mjs';
 import { APPEARANCE_PRESETS, APPEARANCE_TOKENS } from './src/components/dev-motion-presets.ts';
@@ -26,10 +27,11 @@ import { APPEARANCE_PRESETS, APPEARANCE_TOKENS } from './src/components/dev-moti
 // properties on :root, declared once, read by every transition and
 // animation on the site. The rule: motion answers the reader.
 //
-// Nine kinds of guard here, (a)–(i), because nine different things can
+// Ten kinds of guard here, (a)–(j), because ten different things can
 // go wrong (the literal scan (b) and the built-output barrier (e) are
 // T1601's, the module (f) T1602's, the hidden state (g) T1603's, the
-// way back (h) T1604b's, the quiet view (i) T1605's):
+// way back (h) T1604b's, the quiet view (i) T1605's, the travel's
+// history (j) T1606f's):
 //
 // (a) The single source. `EXPECTED` below is the grammar's one other
 //     copy: a round that retunes a value moves it in :root and in its
@@ -120,6 +122,13 @@ import { APPEARANCE_PRESETS, APPEARANCE_TOKENS } from './src/components/dev-moti
 //     strings, pasted; the page's <style> declares no transition at all
 //     — the quiet view moves as one view change now, and a background
 //     fade beneath it would fight the snapshot cross-fade.
+//
+// (j) The travel's history (T1606f, D1606f). A traverse reverses (back)
+//     or replays (forward) the step recorded on its history entry:
+//     back maps in → out, out → in, step → step with `dir` flipped;
+//     forward keeps the kind and `dir`; both keep `nth`. A record whose
+//     `from` is not the other end of this traverse, a missing record,
+//     and a malformed one are no record at all (null).
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -1087,5 +1096,73 @@ describe("(i) the quiet view's resting rules are main's (T1605, spec 018)", () =
     );
     expect(found).toEqual([]);
     expect(page.text).not.toContain('220ms');
+  });
+});
+
+describe("(j) the travel's history (T1606f, spec 018)", () => {
+  const PIECE = '/pieces/fog/';
+  const A = '/images/fog/a/';
+  const B = '/images/fog/b/';
+  // Each row: the record on the entry, the traverse, the page left, the
+  // page reached, and the kind it settles on. On back the record is the
+  // entry being left (its `from` is the page reached); on forward it is
+  // the entry reached (its `from` is the page left).
+  const TABLE = [
+    // back reverses
+    [{ kind: 'in', from: PIECE, nth: 1 }, 'back', A, PIECE, { kind: 'out', nth: 1 }],
+    [{ kind: 'out', from: A, nth: 2 }, 'back', PIECE, A, { kind: 'in', nth: 2 }],
+    [{ kind: 'step', from: A, dir: 'next' }, 'back', B, A, { kind: 'step', dir: 'prev' }],
+    [{ kind: 'step', from: B, dir: 'prev' }, 'back', A, B, { kind: 'step', dir: 'next' }],
+    // forward replays
+    [{ kind: 'in', from: PIECE, nth: 1 }, 'forward', PIECE, A, { kind: 'in', nth: 1 }],
+    [{ kind: 'out', from: A, nth: 0 }, 'forward', A, PIECE, { kind: 'out', nth: 0 }],
+    [{ kind: 'step', from: A, dir: 'next' }, 'forward', A, B, { kind: 'step', dir: 'next' }],
+    [{ kind: 'step', from: B, dir: 'prev' }, 'forward', B, A, { kind: 'step', dir: 'prev' }],
+  ];
+  for (const [record, direction, from, to, kind] of TABLE)
+    it(`${direction} over ${record.kind}${record.dir ? ` ${record.dir}` : ''} → ${kind.kind}${kind.dir ? ` ${kind.dir}` : ''}`, () => {
+      expect(traverseKind(record, direction, from, to)).toStrictEqual(kind);
+    });
+
+  it('a record whose from is not the other end of the traverse is no record', () => {
+    // Back from A to B over a record reached from the piece; forward from
+    // B to A over a record reached from the piece: the step between these
+    // two pages is not the one recorded.
+    expect(traverseKind({ kind: 'in', from: PIECE, nth: 0 }, 'back', A, B)).toBeNull();
+    expect(traverseKind({ kind: 'in', from: PIECE, nth: 0 }, 'forward', B, A)).toBeNull();
+    // The end that matches on the other direction does not on this one.
+    expect(traverseKind({ kind: 'step', from: A, dir: 'next' }, 'back', A, B)).toBeNull();
+    expect(traverseKind({ kind: 'step', from: A, dir: 'next' }, 'forward', B, A)).toBeNull();
+  });
+
+  it('a missing record is no record', () => {
+    for (const missing of [undefined, null])
+      for (const direction of ['back', 'forward'])
+        expect(traverseKind(missing, direction, A, B)).toBeNull();
+  });
+
+  it('a malformed record is no record', () => {
+    const malformed = [
+      { kind: 'hop', from: A },
+      { kind: 'in', from: A, nth: -1 },
+      { kind: 'in', from: A, nth: 1.5 },
+      { kind: 'step', from: A, dir: 'up' },
+      { kind: 'step' },
+      'step',
+    ];
+    for (const record of malformed) {
+      expect(traverseKind(record, 'back', B, A)).toBeNull();
+      expect(traverseKind(record, 'forward', A, B)).toBeNull();
+    }
+    // The same records well-formed do settle — the nulls above are the
+    // malformation's, not the pages'.
+    expect(traverseKind({ kind: 'in', from: A, nth: 1 }, 'back', B, A)).toStrictEqual({
+      kind: 'out',
+      nth: 1,
+    });
+    expect(traverseKind({ kind: 'step', from: A, dir: 'next' }, 'forward', A, B)).toStrictEqual({
+      kind: 'step',
+      dir: 'next',
+    });
   });
 });
