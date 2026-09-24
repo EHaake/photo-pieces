@@ -1119,15 +1119,13 @@ nothing moves. The travel in and back kept as first built ("fantastic
 and perfect"). `:root`, `EXPECTED` and spec.md's Decided lines agree
 (T1606e, T1606g → T1606h's rounds; each round's test green).
 
-_(The product owner's attestation from the site under `npm run dev`
-on both screens, mouse and trackpad: the fog piece's frames waiting
-and fading, the arrivals below the fold, the diptych as one, nothing
-replayed on the way back up; the travel from the fog gallery, the
-headlands wall, a piece and a related strip, and the way back by the
-browser and by the page's links; the arrows; the quiet view's one
-movement and its return; the panel's toggles, shape, fill and numbers;
-reduced motion on. The rounds as sub-lettered tasks above, and the
-keeps in his words. Anything he saw that the spec did not say.)_
+**Attestation (2026-09-24), in the person's words:** "I was judging the
+motion just on my macbook laptop and desktop mac with the dualup
+display. I haven't seen the site at all on a mobile device." Both
+screens the spec names (the 16:10 laptop and the LG DualUp); the input
+devices were not named, and he accepted the judgement as given. Mobile
+was never seen — a mobile design pass goes on the roadmap (his words:
+"We'll need to add that to the roadmap to do a mobile design pass").
 
 ## Phase 2 — The documents (reviewer after the phase; walkthrough: none — README, AUTHORING, the brief and spec 007's annotation change nothing on the site; runs on without a pause)
 
