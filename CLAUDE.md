@@ -221,7 +221,7 @@ every agent definition defaults to the implementation tier except
 | Role                          | Dispatched as           | Model                   | Effort                    |
 | ----------------------------- | ----------------------- | ----------------------- | ------------------------- |
 | Spec conversation             | the spec session itself | session tier            | high (raised per session) |
-| Plan and tasks draft          | `sdd-planner`           | **top tier** (override) | high                      |
+| Plan and tasks draft          | `sdd-planner`           | implementation tier (no override) | high            |
 | Plan and tasks sign-off       | `skeptical-reviewer`    | **top tier** (override) | high                      |
 | Decision review               | `skeptical-reviewer`    | **top tier** (override) | high                      |
 | Task implementation           | `sdd-implementer`       | implementation tier     | high                      |
@@ -233,7 +233,15 @@ every agent definition defaults to the implementation tier except
 <!-- Spec 018 ran stepped down to Opus 5.5 throughout at the person's
 request (2026-09-23, low Fable allowance); restored at 018's merge,
 2026-09-24, at the person's word: "The next spec can go back to Fable
-since we're coming up on the allowance reset later today." -->
+since we're coming up on the allowance reset later today."
+
+Trial, at the person's request on 2026-09-24, starting with the spec
+after 018 (the next one planned): the plan-and-tasks draft row runs at
+the implementation tier with no override. The sign-off stays at the top
+tier, so a planner that needed the stronger model shows up as a
+sign-off that keeps finding blocking problems. That spec's tier log
+must record the trial as starting there; revert the row only if the
+person says so. -->
 
 **Moving a role.** Edit its row, nothing else. To step a role down,
 replace **top tier** (override) with "implementation tier (no
@@ -333,13 +341,14 @@ to read spec.md, plan.md or tasks.md in full. -->
   logged as a sub-lettered task; a finding that is really the spec
   being ambiguous goes back to the person as a product question. The
   session never diagnoses in place.
-- **The top tier runs only where the role table says it does**: by
-  default the `sdd-planner` (one dispatch per spec), the
-  `skeptical-reviewer` on plan/tasks sign-off and on decision reviews,
-  and the close-out dispatch. The first three carry an explicit
-  per-call override to the top tier's name; drop the override and the
-  definition's own implementation tier applies, which is exactly what
-  stepping one of those rows down means. The agent definitions carry
+- **The top tier runs only where the role table says it does**: as
+  the table now reads, the `skeptical-reviewer` on plan/tasks sign-off
+  and on decision reviews, and the close-out dispatch (the
+  `sdd-planner` row is stepped down on trial; see the comment under
+  the table). The sign-off and decision-review dispatches carry an
+  explicit per-call override to the top tier's name; drop the override
+  and the definition's own implementation tier applies, which is
+  exactly what stepping one of those rows down means. The agent definitions carry
   `effort: high`, which overrides the session's medium, so reasoning
   stays at full strength where it matters.
 - **Spec conversations happen in a Claude Code spec session of their
