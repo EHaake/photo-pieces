@@ -82,7 +82,7 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
       --wait-fill: var(--color-surface);   /* the waiting box: the surface step, or var(--color-bg) for the ground itself */
       --hero-enter: 1;           /* the front door's inherited entrance, on the tokens; 0 turns it off */
       --hero-stagger: 90ms;
-      --arrows-slide: 0px;       /* the arrows cross-fade in place; a length is the slide variant's distance */
+      --arrows-slide: 1;         /* the arrows: 1 slides the photograph off the screen and the next on (T1606h); 0 cross-fades in place */
       --rm-appear: 1;            /* under reduced motion: 1 keeps the appearance fade's duration, 0 cuts it */
       --rm-quiet: 1;             /* under reduced motion: 1 keeps the quiet view's ground fade, 0 cuts */
 
@@ -394,9 +394,21 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
     stage is `complete` at the swap and the cross-fade goes from one
     photograph straight to the next. The same URL the page requests a
     moment later: a cache hit, not a second request (a claim T1604
-    verifies from the resource timeline, in both views). With a slide
-    distance the old and new stage figures are named and
-    `data-slide="prev|next"` selects the slide keyframes.
+    verifies from the resource timeline, in both views). With `--arrows-slide: 1`
+    the old stage figure is named `photograph-out` at
+    before-preparation and the new one `photograph-in` at before-swap
+    (`SLIDE_NAMES`, src/lib/motion.ts), and `data-slide="prev|next"`
+    selects the keyframes. The names differ on purpose: under one name
+    the group would morph the old box into the new and draw both
+    photographs at the group's changing width; two one-sided groups each
+    sit still in their own box. The old leaves by `100vw` along the
+    direction of travel and the new enters by `100vw` from the other
+    side, both at opacity 1, on `--dur-move`/`--ease-move`, while the
+    root cross-fades the page beneath; `100vw` clears the viewport from
+    any box inside it. The new photograph's group is the new page's
+    alone, so it would paint over the header;
+    `html[data-slide]::view-transition-group(site-header) { z-index: 1 }`
+    keeps the header above it (T1606h; D1606h).
   - **out** — `from` is under `/images/` and the click was neither of
     the above (the page's way-back links): the stage figure is named. A
     traverse is never classified by its source or by the pages alone;
@@ -816,8 +828,9 @@ Every claim above is owned by a task and a check:
   `performance.getEntriesByType('resource')` lists its candidate URL
   once — and once more in the quiet view, where the preload's
   candidate equals the stage's `currentSrc` under `sizes="100vw"`;
-  with `--arrows-slide: 2rem` both figures are named and the old/new
-  photograph pseudo-elements animate the slide keyframes.
+  with `--arrows-slide: 1` the old figure is named `photograph-out` and
+  the new `photograph-in`, and their pseudo-elements animate the
+  carousel keyframes.
   The header: `::view-transition-group(site-header)` present, the
   root cross-fade never includes it. With `dom.viewTransitions.enabled=false`
   in the profile: no error in the console, the page changes as on
@@ -1018,11 +1031,16 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   the photograph and pop the mat in after. On a cell the `img` is the
   photograph and the anchor is the cell (the spec: not the cell, not
   its label).
-- **The arrows name nothing by default** (`--arrows-slide: 0px`): the
-  root cross-fade is "cross-fade the photograph in its box"; naming
-  both figures would morph a 3:2 box into a 2:3 one, a movement the
-  spec says the arrows do not make. The slide variant is built on the
-  same flag with four rules and two keyframes, judged by eye.
+- **The arrows slide as a carousel** (T1606h; decision review D1606h,
+  2026-09-23). With the flag at 0 nothing is named and the root
+  cross-fade carries the photograph in its box. At 1 the two stage
+  figures carry separate names so neither morphs. One shared name was
+  rejected because the group's resize distorts both photographs; one
+  name with the group's animation off, because it draws the old
+  photograph at the new one's width; clipping to the stage, because the
+  photographer asked for "off the screen" and a group clip only wipes
+  inside the frame. The slide uses the movement duration and curve; a
+  slide-only curve is a round if asked for.
 - **`data-moving` on the root sets every group to the move duration**
   rather than a per-kind duration list: one attribute, one rule, one
   token; the page beneath the photograph lands with it. The arrows'

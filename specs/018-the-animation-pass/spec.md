@@ -562,3 +562,10 @@ What changes, outside the tuning envelope and so amended here:
   2026-09-23): on the image page, the left and right arrows move the
   photograph 2rem along the direction of travel as it cross-fades ("a
   slide animation").
+- **The arrows slide the photograph off the screen** (round T1606h,
+  third look, 2026-09-23): the photograph leaves by the full width of
+  the screen and the next one comes in from the other side, both fully
+  visible throughout, while the words beneath cross-fade — "slide
+  completely off the screen and the next one would come in off the side
+  of the screen". Supersedes the 2rem slide. Reduced motion still
+  cross-fades in place.

@@ -1034,6 +1034,48 @@ headers to confirm nothing was duplicated or dropped. -->
       `sh scripts/verify.sh` green; the value agrees in the three places
       (grep listed)._
 
+- [ ] **T1606h** — Round (third look, 2026-09-23): "I was thinking that
+      the image would slide completely off the screen and the next one
+      would come in off the side of the screen" → the arrows' slide
+      becomes a carousel (decision review D1606h): `--arrows-slide`
+      becomes a flag, 1 (on) or 0 (cross-fade in place); the old and new
+      stage figures named apart (`SLIDE_NAMES`: `photograph-out`,
+      `photograph-in`) so neither group resizes; the old leaves by
+      `100vw` along the direction of travel and the new enters by
+      `100vw` from the other side, no opacity change; the header's group
+      above them during a slide. `review: per-task`. Footprint:
+      `global.css` (the `:root` line and the Motion section's slide
+      block only); `src/lib/motion.ts` (the token's kind `flag` and
+      `SLIDE_NAMES`); `BaseLayout.astro` (the import, `name()`'s
+      parameter, `slide()` as `flag('--arrows-slide')`, the two name
+      calls, the comment); `motion.test.mjs` ((a) the `EXPECTED` row
+      `'1'`; (f) the token is kind `flag`; (g) the slide rules' preludes
+      name `SLIDE_NAMES.out`/`.in`, the keyframes are exactly the two
+      transforms with no opacity, one `z-index: 1` rule on
+      `::view-transition-group(site-header)` under `[data-slide`, and
+      the layout names the two only through `SLIDE_NAMES`). Untouched:
+      `[...id].astro`, the dev panel, every resting rule. _Verify:
+      `sh scripts/verify.sh` green; `git diff -U0 main -- src/styles/global.css | grep '^@@'`
+      hunks only at `:root` and the Motion section; control runs — (g)
+      fails with `opacity: 0` restored to `motion-slide-out`, with the CSS
+      naming `photograph` instead of `photograph-out`, and with the
+      header's `z-index` rule removed (each reported, restored); in the
+      browser (the dev panel reset first — a stored `2rem` override now
+      reads as off) at both screens, dev and preview, normal and quiet
+      views, next and prev by arrow and by key, then back and forward
+      after each: at `astro:before-swap` the old `.image-frame` named
+      `photograph-out`, the new document's `photograph-in`, `data-slide`
+      the arrow pressed (flipped on back); at `viewTransition.ready`,
+      animations paused and seeked to 0, midpoint and end — the old
+      photograph's box wholly outside `[0, innerWidth]` at the end, the
+      new one's at 0, opacity 1 at all three for both, no animation on
+      either group, the `site-header` group's `z-index` 1; a back
+      traverse to a scrolled entry with the stage under the shown
+      header — a mid-slide screenshot shows the header above the
+      photograph; the flag at 0 — nothing named, root only; reduced
+      motion — nothing named, no `data-slide`; the no-API profile — an
+      arrow step changes the page without console errors._
+
 ### Phase 1 record (the person's walkthrough)
 
 **First look (2026-09-23), in the person's words** — see spec.md
@@ -1262,6 +1304,7 @@ tier if it is ever on (it is off). -->
 | T1606f fix round (`sdd-implementer`, resumed)               | `opus` (Opus 5.5)              | 184,185 cumulative          | B1 fixed: About detour keeps the origin; way back lands at y on `nth` 1 (±0.12) both screens, dev and preview; (c)/(e) unchanged                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | T1606f re-review (`skeptical-reviewer`, resumed)            | `opus` (Opus 5.5)              | 62,638 cumulative           | signed off                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | T1606g (`sdd-implementer`, round)                           | `opus` (Opus 5.5)              | 49,163                      | `--arrows-slide: 2rem`; → key runs motion-slide-out/in with `data-slide="next"`; reduced motion: nothing named, no slide; 405 tests                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| D1606h decision review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 91,124                      | carousel feasible: two names (no group morph), 100vw, opacity 1, header z-index; `--arrows-slide` becomes a flag                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 _(Session-tier allowance draw noted at each pause.)_
 
