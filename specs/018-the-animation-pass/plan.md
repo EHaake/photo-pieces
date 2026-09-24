@@ -901,8 +901,8 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
 - **The waiting fill leaves when a rise starts** (D1606a), not at its
   end: moving the rise onto the host would animate a figure's caption
   and the reserved box, and a short fill fade would leave half the
-  band. The price is one frame in which a rising frame's box gives way
-  to the ground; the bare-ground fill, the photographer's other choice,
+  band. The price: for the whole of a rise the ground, not the fill,
+  shows where the photograph has not yet reached (T1606d review note); the bare-ground fill, the photographer's other choice,
   removes even that.
 
 - **A navigation is classified by what was clicked, not by its
