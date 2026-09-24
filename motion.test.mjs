@@ -223,6 +223,21 @@ const preludeOf = (prelude) => splitTop(prelude).map(norm).join(', ');
 const selects = (prelude, selector) =>
   splitTop(prelude).some((one) => norm(one) === norm(selector));
 
+/** The first `:is(...)` list of a prelude, from `:is(` to its matching
+ *  `)`, split at depth 0 and each entry normalised. */
+function isList(prelude) {
+  const text = norm(prelude);
+  const at = text.indexOf(':is(');
+  expect(at).toBeGreaterThan(-1);
+  let depth = 0;
+  let end = at + 3;
+  for (; end < text.length; end += 1) {
+    if (text[end] === '(') depth += 1;
+    else if (text[end] === ')' && --depth === 0) break;
+  }
+  return splitTop(text.slice(at + 4, end)).map(norm);
+}
+
 /** Every style rule in `css`, @-blocks opened recursively, each with the
  *  @-preludes it sits under (`within`) — keyframe steps included. */
 function rules(css, within = []) {
@@ -796,18 +811,22 @@ describe("(g) the hidden state is the script's (T1603, spec 018)", () => {
         declarationList(rule.body).some(([name, value]) => name === 'opacity' && value === '0'),
     );
     expect(gate).toHaveLength(1);
-    const prelude = norm(gate[0].prelude);
-    const at = prelude.indexOf(':is(');
-    expect(at).toBeGreaterThan(-1);
-    // The list: from `:is(` to its matching `)`.
-    let depth = 0;
-    let end = at + 3;
-    for (; end < prelude.length; end += 1) {
-      if (prelude[end] === '(') depth += 1;
-      else if (prelude[end] === ')' && --depth === 0) break;
-    }
-    const list = splitTop(prelude.slice(at + 4, end)).map(norm);
-    expect(list).toEqual(FRAME_HOSTS);
+    expect(isList(gate[0].prelude)).toEqual(FRAME_HOSTS);
+  });
+
+  it("the waiting fill's hosts equal FRAME_HOSTS, and it paints only while an image waits or fades — never under a rise (T1606d)", () => {
+    const fill = top.filter(
+      (rule) => declarations(rule.body)['background-color'] === 'var(--wait-fill)',
+    );
+    expect(fill).toHaveLength(1);
+    const prelude = norm(fill[0].prelude);
+    expect(prelude.startsWith('html[data-motion]:not([data-quiet]) :is(')).toBe(true);
+    expect(isList(prelude)).toEqual(FRAME_HOSTS);
+    // `)` then `:has(` with no space: the fill is on the host itself, not
+    // on a descendant of one.
+    expect(prelude.endsWith("):has(> img:is(:not([data-shown]), [data-shown='fade']))")).toBe(
+      true,
+    );
   });
 
   it('no .astro file, the transform, or content file writes a motion attribute in markup', async () => {

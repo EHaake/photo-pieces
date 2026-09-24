@@ -2121,15 +2121,20 @@ html[data-moving]::view-transition-group(site-header) {
    the attribute. The `:is(...)` list is `FRAME_HOSTS` in
    src/lib/motion.ts, spelled twice because CSS cannot import, and
    pinned equal by motion.test.mjs: a host added to one and not the
-   other fails the suite. The waiting fill is on the host, not the
-   image: it stays through the fade (the image reads "fade" or "rise",
-   not "") and leaves at `data-shown=""`, which the script writes at
-   the animation's end. It is kept off the quiet view (`data-quiet`),
-   where the stage's mat is the box: the quiet rule's `background`
-   shorthand would lose its colour to this more specific fill. The
-   rise comes in from the edge the frame crossed: `--rise-sign`, 1 from
-   below and -1 from above, is set inline on the image by the script at
-   each arrival (T1606b) — never in markup or :root, like `--i`. */
+   other fails the suite. The rise comes in from the edge the frame
+   crossed: `--rise-sign`, 1 from below and -1 from above, is set
+   inline on the image by the script at each arrival (T1606b) — never
+   in markup or :root, like `--i`.
+   The waiting fill is on the host, not the image, and paints while an
+   image waits (no `data-shown`) or fades (`"fade"`); the script writes
+   `data-shown=""` at the animation's end and the fill is gone. Under a
+   rise (`"rise"`) it leaves as the image starts to move: the host does
+   not move, so a fill kept under a moving photograph shows as a band
+   where the photograph has not yet reached (T1606a: 4.78px at a 0.5rem
+   rise, a tenth of the way in). It is kept off the quiet view
+   (`data-quiet`), where the stage's mat is the box: the quiet rule's
+   `background` shorthand would lose its colour to this more specific
+   fill. */
 html[data-motion]
   :is(
     .image-link,
@@ -2151,7 +2156,7 @@ html[data-motion]:not([data-quiet])
     .piece-block figure,
     .piece-strip-scroll,
     .note-cover
-  ):has(> img:not([data-shown=''])) {
+  ):has(> img:is(:not([data-shown]), [data-shown='fade'])) {
   background-color: var(--wait-fill);
 }
 

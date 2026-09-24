@@ -885,6 +885,17 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   failure line above shows the source spelling; the build prints the
   minified one. _(Phase 0 review, 2026-09-23.)_
 
+- **An ordinary page change cross-fades onto the new page's waiting
+  boxes.** The incoming snapshot is taken after `appear()` has hidden
+  the new page's unloaded frames, so for the root cross-fade
+  (`--dur-state`) the old page's photographs fade out over the new
+  page's fill boxes, whose shapes rarely match (T1606d, cache off, first
+  frame after `astro:after-swap`: pieces index → the fog piece 1 host
+  at 1512×982 and 2 at 1280×1440; the fog piece → the fog gallery by a
+  link 2 and 2; a header nav hop 0 and 0). Not changed unless the
+  photographer names it; the fix would keep the fill off until the
+  transition finishes.
+
 ## Resolved decisions
 
 - **The waiting fill leaves when a rise starts** (D1606a), not at its
