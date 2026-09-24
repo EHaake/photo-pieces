@@ -137,7 +137,9 @@ const isActive = (href: string) => {
       // astro:page-load fires on window's load, after every image
       // (router.js:414) — every photograph would already be complete —
       // so the hooks bind here, at the module's evaluation (after the
-      // parse, before DOMContentLoaded), and again at after-swap. Before
+      // parse, before DOMContentLoaded), and again at after-swap — that
+      // listener is registered below, after the way back's scroll, so
+      // appear() reads what is in view where the page lands. Before
       // a swap the old page's hooks come off and the new document's root
       // gets the gate, since the router replaces <html>'s attributes.
       // The image page's compare is overlaid here too, and on the new
@@ -153,9 +155,6 @@ const isActive = (href: string) => {
         event.newDocument.documentElement.dataset.motion = '';
         enhanceCompare(event.newDocument);
         holdShown(event.newDocument, event.to.pathname);
-      });
-      document.addEventListener('astro:after-swap', () => {
-        teardown = appear(document);
       });
 
       // Header hide-on-scroll-down / reveal-on-scroll-up. Bound once at
@@ -244,7 +243,9 @@ const isActive = (href: string) => {
       // strip is on the image page, and a path rule would take its click
       // for an arrow step:
       //   in   — a frame (`.image-link`, on any page): its img wears the
-      //          name, the origin's scroll is stored for the way back;
+      //          name, the origin's scroll and which of the page's links
+      //          to that photograph was clicked are stored for the way
+      //          back;
       //   step — an arrow (`[data-nav]`; the arrow keys click them):
       //          nothing named unless --arrows-slide is a length, and the
       //          next stage's file is preloaded so the cross-fade goes
@@ -293,11 +294,31 @@ const isActive = (href: string) => {
       };
       const slide = () => Number.parseFloat(token('--arrows-slide')) > 0;
       const isImagePage = (url: URL) => url.pathname.startsWith(IMAGES_PATH);
-      /** The cell in `doc` that links to `path`: the way back's landing. */
-      const cellFor = (doc: Document, path: string, base: URL) =>
-        [...doc.querySelectorAll<HTMLAnchorElement>('.image-link[href]')].find(
+      /** The page's frame links to `path`, in document order. */
+      const cellsFor = (doc: Document, path: string, base: URL) =>
+        [...doc.querySelectorAll<HTMLAnchorElement>('.image-link[href]')].filter(
           (a) => new URL(a.getAttribute('href') ?? '', base).pathname === path,
         );
+      /** The stored origin of the last "in": the page, its scroll and
+       *  `nth`, the clicked link's index among that page's links to the
+       *  same photograph; null when storage is unavailable or malformed. */
+      const readOrigin = (): { path?: string; y?: number; nth?: number } | null => {
+        try {
+          return JSON.parse(sessionStorage.getItem(ORIGIN_KEY) ?? 'null');
+        } catch {
+          return null;
+        }
+      };
+      /** The cell in `doc` (at `to`) that links to `path`: the way back's
+       *  landing. A page may place one photograph twice, so when the
+       *  stored origin is this page, the link the reader clicked — the
+       *  `nth` — else the first. */
+      const cellFor = (doc: Document, path: string, to: URL) => {
+        const cells = cellsFor(doc, path, to);
+        const origin = readOrigin();
+        const nth = origin?.path === to.pathname && typeof origin.nth === 'number' ? origin.nth : 0;
+        return cells[nth] ?? cells[0];
+      };
 
       // A photograph of the new document, fetched before the swap: the
       // `sizes` it will carry, then srcset, then src, so the browser
@@ -328,7 +349,9 @@ const isActive = (href: string) => {
           await load();
           const doc = event.newDocument;
           const between = isImagePage(event.to);
-          const cell = out ? cellFor(doc, event.from.pathname, event.to)?.querySelector('img') : null;
+          const cell = out
+            ? cellFor(doc, event.from.pathname, event.to)?.querySelector('img')
+            : null;
           if (cell && (!between || event.direction === 'back')) {
             await preload(cell, cell.getAttribute('sizes') ?? '');
             return;
@@ -360,10 +383,14 @@ const isActive = (href: string) => {
           if (!img) return;
           name(img);
           moving = { kind: 'in', src: img.currentSrc, navigationType };
+          const nth = Math.max(
+            0,
+            cellsFor(document, event.to.pathname, event.from).indexOf(cell as HTMLAnchorElement),
+          );
           try {
             sessionStorage.setItem(
               ORIGIN_KEY,
-              JSON.stringify({ path: event.from.pathname, y: window.scrollY }),
+              JSON.stringify({ path: event.from.pathname, y: window.scrollY, nth }),
             );
           } catch {
             /* storage unavailable: the way back centres the cell */
@@ -429,22 +456,25 @@ const isActive = (href: string) => {
       // The way back by a link lands where the reader left: the router
       // has scrolled to the top, so the stored origin's y is restored
       // when it is this page, else the cell is centred. A traverse keeps
-      // the router's own restored position. Registered before the
-      // listener that records lastY, so that line reads the landed
+      // the router's own restored position. The order of the after-swap
+      // listeners is the point: this scroll first, then the appearance's
+      // hook, so appear() reads what is in view where the page lands,
+      // not at the top (a frame in view there would otherwise be taken
+      // for one below the fold and rise — Phase 1 review B3); then, last,
+      // the listener that records lastY, so that line reads the landed
       // position.
       document.addEventListener('astro:after-swap', () => {
         if (moving?.kind !== 'out' || !landing || moving.navigationType === 'traverse') return;
-        let origin: { path?: string; y?: number } | null = null;
-        try {
-          origin = JSON.parse(sessionStorage.getItem(ORIGIN_KEY) ?? 'null');
-        } catch {
-          /* storage unavailable or malformed: centre the cell */
-        }
+        // Storage unavailable or malformed: centre the cell.
+        const origin = readOrigin();
         if (origin?.path === location.pathname && typeof origin.y === 'number') {
           window.scrollTo({ top: origin.y, behavior: 'instant' });
         } else {
           landing.scrollIntoView({ block: 'center', behavior: 'instant' });
         }
+      });
+      document.addEventListener('astro:after-swap', () => {
+        teardown = appear(document);
       });
 
       window.addEventListener('scroll', update, { passive: true });

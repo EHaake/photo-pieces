@@ -10,6 +10,8 @@ import {
   FRAME_HOSTS,
   FRAME_IMG,
   MOTION_TOKENS,
+  arrivalSteps,
+  arrives,
   holdShown,
   ms,
   shown,
@@ -22,9 +24,10 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 // properties on :root, declared once, read by every transition and
 // animation on the site. The rule: motion answers the reader.
 //
-// Six kinds of guard here, because six different things can go wrong
-// (the literal scan (b) and the built-output barrier (e) are T1601's,
-// the module (f) T1602's):
+// Nine kinds of guard here, (a)–(i), because nine different things can
+// go wrong (the literal scan (b) and the built-output barrier (e) are
+// T1601's, the module (f) T1602's, the hidden state (g) T1603's, the
+// way back (h) T1604b's, the quiet view (i) T1605's):
 //
 // (a) The single source. `EXPECTED` below is the grammar's one other
 //     copy: a round that retunes a value moves it in :root and in its
@@ -45,8 +48,9 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //     link underline, the button and social hovers and the hero's
 //     entrance, pinned by string — a literal restored on any of them
 //     fails naming the rule — with keel-enter's keyframes unchanged;
-//     and the page change's rules (the two group rules, the old/new
-//     timing-function inherit, the covers' switch), each by string.
+//     and the page change's rules (the three group rules — the header's
+//     own among them — the old/new timing-function inherit, the covers'
+//     switch), each by string.
 //     Whitespace-normalised, because Prettier wraps long lists.
 //
 // (d) Reduced motion keeps the fades and drops the movement. The
@@ -74,7 +78,11 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 // (f) The module (T1602). src/lib/motion.ts's `ms` reads a CSS time
 //     as milliseconds; its `MOTION_TOKENS` — what the dev panel builds
 //     its rows from — names exactly the grammar's twenty; `FRAME_IMG` is
-//     each frame host's direct `img`.
+//     each frame host's direct `img`. And the arrival rule (T1605a): a
+//     unit arrives when the threshold's share of it is in view, or, too
+//     tall for that, the threshold's share of the viewport's height —
+//     never at its first pixel — and the observer's steps keep a tall
+//     unit reporting.
 //
 // (g) The hidden state is the script's (T1603). Every rule in global.css
 //     that sets `opacity: 0` sits under `html[data-motion]` — the root
@@ -85,7 +93,16 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //     the markup hooks the script leans on — the transform's two class
 //     literals, the piece row's cover box — are still there. The
 //     travel's understudy and slide rules (T1604) sit under their
-//     transient attributes, which no markup writes either.
+//     transient attributes, which no markup writes either. The layout
+//     binds the appearance's after-swap hook after the way back's
+//     scroll and before the lastY line (T1605a), so appear() reads
+//     where the page lands.
+//
+// (h) The way back holds what the reader saw (T1604b). A frame shown
+//     with its file is keyed on its page, the viewport and the three
+//     attributes a candidate is chosen from; holdShown makes eager only
+//     a frame in the new document on a held key — the same photograph
+//     at another `sizes`, page or viewport stays lazy.
 //
 // (i) The quiet view's resting rules are `main`'s (T1605). The image
 //     page's chrome-hiding list and its dark ground equal `main`'s
@@ -370,6 +387,13 @@ describe('(c) the inherited motion reads the tokens (T1600, spec 018)', () => {
     [
       'html[data-moving]::view-transition-group(*)',
       { 'animation-duration': 'var(--dur-move)', 'animation-timing-function': 'var(--ease-move)' },
+    ],
+    [
+      'html[data-moving]::view-transition-group(site-header)',
+      {
+        'animation-duration': 'var(--dur-state)',
+        'animation-timing-function': 'var(--ease-state)',
+      },
     ],
     [
       '::view-transition-old(*), ::view-transition-new(*)',
@@ -667,6 +691,53 @@ describe('(f) the module (T1602, spec 018)', () => {
       '.image-link > img, .image-frame > img, .piece-block > img, .piece-block figure > img, .piece-strip-scroll > img, .note-cover > img',
     );
   });
+
+  // An entry as IntersectionObserver reports it, over an 800px viewport.
+  const entry = (ratio, visible, height = visible / ratio, root = { height: 800 }) => ({
+    isIntersecting: ratio > 0,
+    intersectionRatio: ratio,
+    intersectionRect: { height: visible },
+    boundingClientRect: { height },
+    rootBounds: root,
+  });
+
+  it('arrives: not at the first pixel — a 400px unit 5% in view has not arrived at 0.15 (T1605a, B1)', () => {
+    expect(arrives(entry(0.05, 20), 0.15)).toBe(false);
+    expect(arrives(entry(0.15, 60), 0.15)).toBe(true);
+  });
+
+  it('arrives: a higher threshold arrives later — 30% in view has arrived at 0.15, not at 0.5', () => {
+    expect([arrives(entry(0.3, 120), 0.15), arrives(entry(0.3, 120), 0.5)]).toEqual([true, false]);
+  });
+
+  it('arrives: a unit too tall to reach the share arrives at the share of the viewport height', () => {
+    // A 3000px unit at 0.5: at most 800/3000 of it can show. 399px in view
+    // (0.133 of it) is short of half the viewport; 400px is not.
+    expect(arrives(entry(399 / 3000, 399, 3000), 0.5)).toBe(false);
+    expect(arrives(entry(400 / 3000, 400, 3000), 0.5)).toBe(true);
+  });
+
+  it('arrives: a tall unit that can reach the share waits for it — not the viewport-height rule', () => {
+    // A 1300px unit at 0.5 can show 650px of itself in 800: 500px in view
+    // (0.385 of it) is past half the viewport but short of half the unit.
+    expect(arrives(entry(500 / 1300, 500, 1300), 0.5)).toBe(false);
+    expect(arrives(entry(0.5, 650, 1300), 0.5)).toBe(true);
+  });
+
+  it('arrives: never when not intersecting, even at a zero threshold', () => {
+    expect(arrives(entry(0, 0), 0)).toBe(false);
+  });
+
+  it('arrivalSteps: 0 to 1 by 0.05, plus the threshold, sorted, once each', () => {
+    const steps = arrivalSteps(0.33);
+    expect(steps).toHaveLength(22);
+    expect([steps[0], steps[1], steps[7], steps[8], steps.at(-1)]).toEqual([
+      0, 0.05, 0.33, 0.35, 1,
+    ]);
+    // A threshold on a step is not listed twice.
+    expect(arrivalSteps(0.15)).toHaveLength(21);
+    expect(arrivalSteps(0.15)).toContain(0.15);
+  });
 });
 
 describe("(g) the hidden state is the script's (T1603, spec 018)", () => {
@@ -757,6 +828,22 @@ describe("(g) the hidden state is the script's (T1603, spec 018)", () => {
       .filter((rule) => !splitTop(rule.prelude).every((one) => norm(one).includes('[data-slide')))
       .map((rule) => rule.where);
     expect(stray).toEqual([]);
+  });
+
+  it("the appearance's after-swap hook is bound after the way back's scroll and before lastY (T1605a, B3)", async () => {
+    const source = await readFile(here('./src/layouts/BaseLayout.astro'), 'utf8');
+    const at = (text) => {
+      const found = source.split(text).length - 1;
+      expect([text, found]).toEqual([text, 1]);
+      return source.indexOf(text);
+    };
+    // The hook, the way back's scroll and the lastY line, each once, as
+    // after-swap listeners — and the hook bound nowhere else.
+    const hook = at("'astro:after-swap', () => {\n        teardown = appear(document);");
+    const scroll = at("landing.scrollIntoView({ block: 'center', behavior: 'instant' });");
+    const last = at("'astro:after-swap', () => {\n        lastY = window.scrollY;");
+    expect(source.split('teardown = appear(document)').length - 1).toBe(2);
+    expect([scroll < hook, hook < last]).toEqual([true, true]);
   });
 
   it("the transform's source still carries the two class literals the hooks lean on", async () => {

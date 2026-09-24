@@ -169,6 +169,45 @@ export function holdShown(doc: Document, pathname: string): void {
   }
 }
 
+/** The observer's threshold list: the arrival threshold plus every step
+ *  of 0.05 from 0 to 1, so a unit keeps getting callbacks as more of it
+ *  comes into view — a unit too tall ever to reach the threshold's share
+ *  of itself still reports its visible height. Exported for the unit
+ *  test. */
+export function arrivalSteps(threshold: number): number[] {
+  const steps = Array.from({ length: 21 }, (_, i) => i / 20);
+  return [...new Set([...steps, threshold])].sort((a, b) => a - b);
+}
+
+/** Whether an observed unit has arrived (spec 018, Phase 1 review B1):
+ *  the threshold's share of the unit is in view, or — only for a unit
+ *  too tall ever to show that share (its height times the threshold
+ *  above the viewport's) — its visible height is the threshold's share
+ *  of the viewport's. Never at its first pixel: `isIntersecting`
+ *  alone turns true there whatever the threshold. Exported for the unit
+ *  test. */
+export function arrives(
+  entry: Pick<
+    IntersectionObserverEntry,
+    | 'isIntersecting'
+    | 'intersectionRatio'
+    | 'intersectionRect'
+    | 'boundingClientRect'
+    | 'rootBounds'
+  >,
+  threshold: number,
+): boolean {
+  if (!entry.isIntersecting) return false;
+  if (entry.intersectionRatio >= threshold) return true;
+  const root = entry.rootBounds;
+  // Too tall: even filling the viewport, less than the share of it shows.
+  return (
+    root !== null &&
+    entry.boundingClientRect.height * threshold > root.height &&
+    entry.intersectionRect.height >= threshold * root.height
+  );
+}
+
 /** Mark a photograph shown for good: `data-shown=""`, which lifts the
  *  gate and the waiting fill. The one writer of the empty value — the
  *  animation's end, the `complete` short-cut, the early-`load` rule and
@@ -200,8 +239,11 @@ export function shown(img: HTMLImageElement): void {
  *  - as `"fade"` when its unit has decoded and the unit was in view at
  *    the hook (or `--motion-arrive` is off on a host in it);
  *  - below the fold, when its unit has decoded and the one
- *    IntersectionObserver has seen it: `"rise"` when `--arrive-rise`
- *    is above zero and reduced motion is off, else `"fade"`.
+ *    IntersectionObserver has seen it arrive (`arrives`: the
+ *    `--arrive-threshold` share of it in view, or of the viewport's
+ *    height for a unit too tall to show that share): `"rise"` when
+ *    `--arrive-rise` is above zero and reduced motion is off, else
+ *    `"fade"`.
  *
  *  A unit is the image's `.piece-block` when that block holds more than
  *  one `img` (a diptych, triptych, grid, row with a pair), else the
@@ -336,7 +378,7 @@ export function appear(scope: Document | Element): () => void {
         (entries, self) => {
           for (const entry of entries) {
             const unit = byEl.get(entry.target);
-            if (!unit || unit.arrived || !entry.isIntersecting) continue;
+            if (!unit || unit.arrived || !arrives(entry, threshold)) continue;
             unit.arrived = true;
             self.unobserve(entry.target);
             remaining -= 1;
@@ -344,7 +386,7 @@ export function appear(scope: Document | Element): () => void {
           }
           if (remaining === 0) self.disconnect();
         },
-        { threshold },
+        { threshold: arrivalSteps(threshold) },
       );
       for (const unit of below) observer.observe(unit.el);
     }

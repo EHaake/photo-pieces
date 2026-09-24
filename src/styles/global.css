@@ -1422,8 +1422,12 @@ a.note-row {
    times the ratio — so nothing moves at load. The transform's sizes
    slot never binds here: above the collapse the column (--prose-width)
    is narrower than it, and below it 94vw is never narrower than the
-   column. A frame the probe could not read carries no --ar, so the
-   width falls back to auto, as before. */
+   column. A frame the probe could not read carries no --ar: the min()
+   is then invalid and the width computes to auto. The unlinked img
+   keeps its own width, as before; the linked anchor, a block, spans the
+   column with its image centred inside it — not the fit-content anchor
+   it was before spec 018, so its link and its waiting fill are
+   column-wide. */
 .piece-tall > :is(a.image-link, img) {
   width: min(100%, var(--tall-max) * var(--ar));
   margin-inline: auto;
