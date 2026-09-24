@@ -961,6 +961,22 @@ headers to confirm nothing was duplicated or dropped. -->
       and the Settle curve while `.site-header`'s transition timing is
       still `ease` and the travel's group still `--ease-move`._
 
+- [ ] **T1606e** — Round (second look, 2026-09-23): "Settle, but
+      slightly slower" → `--dur-appear: 950ms`; "I don't want there to be
+      any visible box" → `--wait-fill: var(--color-bg)`. The two values
+      in `global.css`'s `:root`, their `EXPECTED` rows, one line each in
+      spec.md's Decided section. _Verify: `sh scripts/verify.sh` green;
+      the values agree in the three places (grep listed)._
+
+- [ ] **T1606f** — The travel's history, fixed (the person's findings
+      at the second look): (1) an arrow step then browser back shrinks
+      the photograph into the previous page's related strip, off the
+      bottom — back after an arrow should be the step's cross-fade,
+      like forward; (2) forward again after the way back from an image
+      page does not grow the photograph into the stage — it should, as
+      the first click did. Designed at a decision review, then
+      dispatched.
+
 ### Phase 1 record (the person's walkthrough)
 
 **First look (2026-09-23), in the person's words** — see spec.md
@@ -969,7 +985,23 @@ and back ("fantastic and perfect"); strips one by one. Findings: the
 appearance too fast and too subtle; a ghostly outline that doesn't
 match the photograph as it fades in. Amendments: replay on every
 re-entry, scrolling down and up; the panel simplified to named
-settings. Handled as T1606a (the outline, diagnosis) and T1606b (the
+settings.
+
+**Second look (2026-09-23), in the person's words:** "1. Settle, but
+slightly slower. 2. I think it feels right [the travel's landing fade]. 3. I don't want there to be any visible box. 4. I'll go with how it is
+now for all 4 [the other speeds, the arrows' cross-fade, the front
+page's entrance, reduced motion keeping the fade's length]." Findings:
+"when viewing an images page and then clicking left or right to go to
+another image, when clicking back in the browser, the image shrinks down
+and then off the bottom of the screen … It doesn't happen when going
+forward. We should either remove that 'back' shrink if not going back to
+a piece or gallery to keep it consistent with the forward action, or add
+a left and right slide animation … when clicking into an image from a
+gallery or piece, we see that nice grow and then shrink when going back,
+but going forward again has no animation. We should fix that as well."
+→ T1606e (the round), T1606f (the history fixes; the first of his two
+options taken — back after an arrow is the step's cross-fade; the slide
+stays one token away). Handled as T1606a (the outline, diagnosis) and T1606b (the
 amendment's design, by decision review, then implementation), then
 rounds on the named settings.
 
