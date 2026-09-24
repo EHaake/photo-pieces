@@ -79,7 +79,7 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
       --arrive-rise: 0.75rem;    /* the arrival's shape: 0px is the fade alone, a length is the fade with a rise (0px until T1606c) */
       --arrive-threshold: 0.25;  /* the share of a frame in view that counts as arrived (0.15 until T1606c) */
       --arrive-stagger: 0ms;     /* a multi-cell block arrives as one; a stagger only if asked to see one */
-      --wait-fill: var(--color-surface);   /* the waiting box: the surface step, or var(--color-bg) for the ground itself */
+      --wait-fill: var(--color-bg);        /* the waiting box: the ground itself, no box shows (surface until T1606e) */
       --hero-enter: 1;           /* the front door's inherited entrance, on the tokens; 0 turns it off */
       --hero-stagger: 90ms;
       --arrows-slide: 1;         /* the arrows: 1 slides the photograph off the screen and the next on (T1606h); 0 cross-fades in place */
@@ -126,7 +126,7 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
 - **Reduced motion** (`global.css`, the `@media (prefers-reduced-motion: reduce)`
   block). The blanket `* { animation-duration: 1ms; transition-duration: 1ms; scroll-behavior: auto }`
   is replaced by the distinction the spec draws — movements instant,
-  fades kept — as four rules, pinned by string:
+  fades kept — as five rules (four until T1604a added the group rule), pinned by string:
 
       :root { --arrive-rise: 0px; --hero-enter: 0; }   /* the arrival loses its rise; the hero lands on its end state, delays included */
       a:not(.brand, .button, .social-links *) { transition-property: color; }   /* the underline's size change is instant; the colour still fades — the social links, which cancel the underline, keep their border and colour fades */
@@ -385,7 +385,7 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
     scroll position is stored (`sessionStorage['motion-origin'] = { path, y }`).
   - **step** — `sourceElement.closest('[data-nav]')` exists (the
     arrows; the arrow keys `.click()` them): nothing is named when
-    `--arrows-slide` is `0px`, so the root cross-fade carries the
+    `--arrows-slide` is `0` (a flag since T1606h; the carousel at 1), so the root cross-fade carries the
     photograph in its box, as today; the event's `loader` is extended
     to preload the next stage's file — an `Image` given the new
     document's stage `sizes` (or `100vw` when `html[data-quiet]` is
@@ -706,7 +706,7 @@ Every claim above is owned by a task and a check:
   three delays, and `keel-enter`'s body unchanged; and, by string, the
   two `::view-transition-group` rules, the old/new
   `animation-timing-function: inherit` rule and the covers rule. (d) The
-  reduced-motion block contains exactly the four rules above and no
+  reduced-motion block contains exactly the five rules above and no
   `*` prelude, no `1ms`, no `scroll-behavior`, and no rule under it
   names an `opacity` transition or the appearance animation with a
   zero. Mutations, each reverted: `220ms` restored on `.site-header` →
@@ -743,7 +743,7 @@ Every claim above is owned by a task and a check:
   `ms('480ms')` is 480, `ms('.5s')` 500, `ms('')` 0. Mutation: the
   gate's `html[data-motion]` prefix dropped → the opacity walk fails.
 
-- **The quiet view's rules are byte-identical** — `motion.test.mjs`,
+- **The quiet view's rules are byte-identical** — `motion.test.mjs` (describe (i); (h) is T1604b's),
   **T1605**: the page's scoped `:global(html[data-quiet]) …` `display: none`
   list and the two-selector `background: var(--color-quiet)` rule equal
   `main`'s strings (pasted); the page's `<style>` has no `transition`
@@ -857,7 +857,7 @@ Every claim above is owned by a task and a check:
 ## File structure
 
 ```
-src/styles/global.css                     :root — the twenty tokens and their comment; a: / .site-header (+ view-transition-name) / .button / .social-links a / .hero rules on the tokens; the reduced-motion block rewritten; the Motion section opened with the view-transition group rules, the old/new timing-function inherit, and the covers rule (T1600). Then the gate, the fill, the two appearance animations and keyframes (T1603), the understudy and the slide variant's rules and keyframes (T1604)
+src/styles/global.css                     :root — the twenty-one tokens (T1606c) and their comment; a: / .site-header (+ view-transition-name) / .button / .social-links a / .hero rules on the tokens; the reduced-motion block rewritten; the Motion section opened with the view-transition group rules, the old/new timing-function inherit, and the covers rule (T1600). Then the gate, the fill, the two appearance animations and keyframes (T1603), the understudy and the slide variant's rules and keyframes (T1604)
 src/lib/motion.ts                         new: MOTION_TOKENS, NAME, FRAME_HOSTS, FRAME_IMG, ms(), token(), flag(), reducedMotion(), withTransition(), appear() (T1602; appear() at T1603)
 src/lib/motion-scan.mjs                   new: scanMotion(css) — the literal, easing and iteration finder (T1601)
 scripts/check-motion.mjs                  new: the postbuild barrier over dist/ (T1601)
@@ -884,6 +884,8 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
 `package.json`'s dependencies.
 
 ## Known limitations
+
+_Files added by later decisions: `src/lib/compare.ts` (T1604c), `src/components/dev-motion-presets.ts` (T1606c). T1603b changed one `.piece-*` rule — `.piece-tall > :is(a.image-link, img)` — to reserve a tall frame's box before load, authorised at decision review D1603 Q2; loaded widths equal `main`'s within 0.016px; a linked tall frame with no `--ar` is now column-wide rather than fit-content._
 
 - **A page change under reduced motion still cross-fades** (at the
   duration it has without the setting — `--dur-move` while
@@ -921,7 +923,7 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   rect (the snapshot is what was visible). Recorded at T1604.
 - **The preload for an arrow step is bounded at one second**; on a
   slow network the step proceeds when the bound is hit, and what the
-  reader then sees is the stage's box waiting — the surface fill on
+  reader then sees is the stage's box waiting — the waiting box (the ground's own colour since T1606e) on
   paper, and in the quiet view the white mat around an empty content
   box (the fill is excluded under `data-quiet` and the understudy is
   in-only) — until the photograph decodes and fades in. A wait bound,
@@ -959,7 +961,7 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
   boxes.** The incoming snapshot is taken after `appear()` has hidden
   the new page's unloaded frames, so for the root cross-fade
   (`--dur-state`) the old page's photographs fade out over the new
-  page's fill boxes, whose shapes rarely match (T1606d, cache off, first
+  page's fill boxes, whose shapes rarely match — invisible since T1606e, when the fill became the ground's own colour (T1606d, cache off, first
   frame after `astro:after-swap`: pieces index → the fog piece 1 host
   at 1512×982 and 2 at 1280×1440; the fog piece → the fog gallery by a
   link 2 and 2; a header nav hop 0 and 0). Not changed unless the
@@ -996,8 +998,8 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
 - **The arrival's shape is the rise token's zero** (`--arrive-rise: 0px`
   is the fade alone), not a separate shape flag plus a distance: one
   token, and the switch's shape select writes it. Two fewer things to
-  keep in step. The default ships as the fade alone — the quieter of
-  the two; the pause picks.
+  keep in step. The first build shipped the fade alone; the pause kept
+  the rise (0.75rem, Settle — T1606c/e).
 - **The hidden state is a root attribute gating a stylesheet rule**
   (`html[data-motion]` written by an inline script) rather than a
   per-image attribute set when the module runs. The module runs after

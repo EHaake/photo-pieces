@@ -1369,27 +1369,7 @@ _(Session-tier allowance draw noted at each pause.)_
 
 ## Handoff note
 
-Nothing is implemented; the next session begins at **T1600** (Phase 0)
-as the orchestrator under the model policy's standard profile and its
-role table: it opens on `claude-fable-5-1` at medium effort from
-`.claude/settings.json` (`/effort status` to confirm); it dispatches
-the `sdd-implementer` one task at a time at `opus` and the
-`skeptical-reviewer` per phase at `opus`, re-running `sh scripts/verify.sh`
-itself for **T1600** (`review: per-task`); a design question it cannot
-triage as routine goes to the `skeptical-reviewer` at the top tier on
-a decision bundle from Plan Mode. The suite is green at the end of
-every task; `motion.test.mjs` grows describe by describe (a/c/d at
-T1600, b/e at T1601, f at T1602, g at T1603–T1604, h at T1605). **Phase
-0 has no walkthrough** and runs on. **The Phase 1 pause is the
-walkthrough and the spec's judgement**, over as many rounds as it
-takes: the fog piece, the fog gallery, the headlands wall, the `land-b`
-and `port-a` image pages, the quiet view, the panel, reduced motion on
-— on both screens, mouse and trackpad — with T1603–T1605's numbers in
-the report; each round is a sub-lettered task under T1606, and the
-keeps are recorded there and in spec.md's Decided section before Phase
-2 is dispatched. The orchestrator does no browser or device checks
-itself. **Phase 2 has no walkthrough** and runs on to the close-out
-without stopping; the merge pause is the second and last.
+Implemented through T1608a; the merge is the orchestrator's bookkeeping. The original handoff prompt follows for the record.
 
 > Read `CLAUDE.md` and `specs/018-the-animation-pass/{spec,plan,tasks}.md`,
 > then begin at the first unchecked task as the orchestrator under the

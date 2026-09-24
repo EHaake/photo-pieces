@@ -31,7 +31,7 @@ decodes and cuts from a gallery cell to its own page.
 
 This spec is the first step of the modernization and deliberately a
 subset of it. It does four things to the photograph and one thing to
-the site. A photograph appears once and never pops: its box waits in
+the site. A photograph appears once (each time it comes on screen, since the Phase 1 amendment) and never pops: its box waits in
 the ground's family, and the photograph fades in when it has decoded,
 or — below the fold — when the reader scrolls it into view. A
 photograph travels to its page: clicking a frame in a piece, a gallery,
@@ -75,7 +75,7 @@ later." Both stay on the roadmap.
    moves on a timer. The rule is written into the brief as the site's
    own, replacing spec 007's narrower line, and pinned so that a later
    spec cannot add an idle animation without amending it.
-3. **A photograph appears once, and never pops.** On every surface that
+3. **A photograph appears once, and never pops.** _(Amended at the Phase 1 pause: it appears each time it comes on screen.)_ On every surface that
    shows one — a piece's frames in every treatment, the held frame
    included; a gallery's rows; the place wall; the image page's stage
    and its related strip; the covers on the pieces, galleries and
@@ -98,7 +98,7 @@ later." Both stay on the roadmap.
    the piece, gallery or place the reader came from — reverses it: the
    photograph shrinks back into its cell where the reader left it. The
    arrows between image pages cross-fade the photograph in its box; no
-   travel, no slide. Every other page change keeps the cross-fade it
+   travel, no slide _(superseded at round T1606h: the arrows slide)_. Every other page change keeps the cross-fade it
    has today, on the grammar's duration. The photograph is never
    blank between the click and the stage.
 5. **The quiet view is one movement.** Clicking the photograph on its
@@ -156,7 +156,7 @@ later." Both stay on the roadmap.
 - **Any change to the vocabulary or the frames' geometry.** The eleven
   treatments, the held block, the stage's rule, the galleries' packing
   and the wall are untouched at rest; every resting state on the site
-  is byte-identical in its rules. Only the way between states is new.
+  is byte-identical in its rules. Only the way between states is new. _(One exception, recorded in Decided: T1603b reserves a tall frame's box before load.)_
 - **An animation library.** The means are the stylesheet and what the
   browser provides; a new runtime dependency is not on the table
   unless `plan.md` names one and says why, per the constitution.
@@ -168,7 +168,7 @@ later." Both stay on the roadmap.
 
 - **Reading a piece.** The page arrives with its first frame's box
   reserved; the photograph fades into it as it decodes, and the prose
-  is already there. Scrolling down, each frame appears once as it
+  is already there. Scrolling down, each frame appears (amended: each time it comes on screen) as it
   comes into view — a fade, or a fade with a small rise, as the pause
   decides — and then sits still. A diptych's two frames appear
   together. The held frame arrives like any other and then holds.
@@ -184,7 +184,7 @@ later." Both stay on the roadmap.
   were.
 - **Stepping through a set.** The arrows and the keys cross-fade one
   photograph into the next in the stage's box, the words changing
-  beneath; nothing slides.
+  beneath; nothing slides. _(Superseded at round T1606h: the arrows slide the photograph off the screen and the next on.)_
 - **The quiet view.** A click on the photograph: the ground goes dark
   and the photograph grows into its white mat as one movement. Esc or
   a click: the same movement back to the bare stage on paper.
@@ -405,7 +405,7 @@ says where each lives.
       related strip carries the photograph into the stage's box in one
       motion at the movement duration, the page cross-fading beneath;
       browser back and the image page's way-back links reverse it with
-      the scroll position restored; the arrows and arrow keys cross-fade
+      the scroll position restored; the arrows and arrow keys cross-fade (superseded at round T1606h: they slide the photograph off the screen and the next on)
       the photograph in place; the photograph is never blank between
       the click and the stage; measured on both screens; where the
       browser lacks the machinery the page changes as today
@@ -569,3 +569,8 @@ What changes, outside the tuning envelope and so amended here:
   completely off the screen and the next one would come in off the side
   of the screen". Supersedes the 2rem slide. Reduced motion still
   cross-fades in place.
+- **A tall frame reserves its box before its photograph loads**
+  (T1603b, 2026-09-23, decision review): the `.piece-tall` rule changes
+  so the box is its final size from the start — the page no longer
+  jumps as it loads (as it did on `main`); loaded widths equal `main`'s
+  within 0.016px.
