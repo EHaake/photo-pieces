@@ -294,10 +294,17 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   any image in it carries `data-shown`, the attribute is removed from
   every image (the gate hides it; the waiting state's fill rule,
   whatever it is, applies unchanged), then `revealed`, `arrived` and
-  `inView` go false; nothing is visible, so there is no fade-out; the
-  reset is skipped while `<html>` carries `data-quiet` or
-  `data-moving` (the quiet view hides the page's other frames with
-  `display: none`, which is not leaving the screen). **arrive:**
+  `inView` go false, whether or not any image carried the attribute: a
+  unit still loading must not fade in off screen. The reset is skipped
+  while `<html>` carries `data-quiet`: the quiet view hides the page's
+  other frames with `display: none`, which is not leaving the screen,
+  and `data-quiet` is set inside the quiet view's update, before any
+  report of that hiding. It is **not** skipped while `data-moving` is
+  set. A page change's transition (the way back, an arrow step) is when
+  the observer's first report arrives, and a frame off screen then is
+  really off screen. So the held frames below the landing, made eager
+  and shown `""` at the hook, are reset there and appear when scrolled
+  to (D1606 follow-up, 1). **arrive:**
   `arrives(entry, threshold)`, unchanged, on a unit not yet `arrived`;
   it marks `arrived` and records `edge(entry)`. The gap between the two
   (fully out to reset, the threshold to arrive) is the hysteresis: a
@@ -310,14 +317,24 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   "in view at the hook". It reads `"rise"` when rise is on and its edge
   is `top` or `bottom`, with `--rise-sign` set inline on each image
   (`1` from below, `-1` from above: the photograph comes in from the
-  edge it crossed); it reads `"fade"` when the edge is `side`, since a
-  frame entering a strip's band sideways does not move vertically —
-  the same rule now applies to a strip frame's first arrival.
-  `edge(entry)` (exported, pure): `side` when the unit's whole height
-  is in view and its width is clipped
-  (`intersectionRect.height >= boundingClientRect.height - 1 && intersectionRect.width < boundingClientRect.width - 1`);
-  else `top` when the unit's middle is above the root's middle; else
-  `bottom`. The keyframe reads the sign:
+  edge it crossed); a unit inside `.piece-strip-scroll` reads `"fade"` however it
+  entered, on its first arrival and every replay: a strip's band
+  scrolls sideways and snaps, and a snap step can take a frame from
+  wholly out to wholly in, which no geometry tells apart from a
+  vertical entry (D1606 follow-up, 2). `edge(entry)` (exported, pure):
+  `top` when the unit's middle is above the root's middle, else
+  `bottom`. There is no geometric `side`: a `100vw` fullbleed image is
+  wider than the viewport by a classic scrollbar, and would read as
+  clipped sideways. The kind is decided at reveal, not at arrival. A
+  unit revealed while `<html>` carries `data-quiet` or
+  `data-moving="quiet"` is shown at once (`shown()` on each image, no
+  kind written): the quiet view's growth is that photograph's movement,
+  entered from further down the image page, where the stage has already
+  been reset, and a fade or rise inside it would be a second one. This
+  applies to the quiet view only. During a page change's transition the
+  stage still fades over its understudy, as the travel was built
+  (D1606 follow-up, 3). A unit still decoding when the growth ends
+  fades as usual. The keyframe reads the sign:
   `@keyframes motion-arrive { from { opacity: 0; transform: translateY(calc(var(--arrive-rise) * var(--rise-sign, 1))); } … }`.
   `--rise-sign` is a runtime property like `--i` and `--understudy`:
   never in markup or `:root`, and not in the grammar's family.

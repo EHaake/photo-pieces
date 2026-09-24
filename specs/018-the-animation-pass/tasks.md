@@ -843,9 +843,9 @@ headers to confirm nothing was duplicated or dropped. -->
       for `edge`); `BaseLayout.astro` and `holdShown` untouched.
       _Verify: `sh scripts/verify.sh` green, (f) proving `edge` returns
       `bottom` for a 400px unit 25% in at the viewport's foot, `top`
-      for the same at its head, `side` for a unit whose whole height is
-      in view and 30% of its width clipped, `bottom` (not `side`) for a
-      unit clipped both ways at the foot; in the browser at both
+      for the same at its head, `bottom` for a unit wholly in view whose
+      width is clipped by 15px (the scrollbar case — never `side`; D1606
+      follow-up, 2); in the browser at both
       screens, a `MutationObserver` logging `data-shown` and
       `--rise-sign` writes on the fog piece with rise on: a frame
       scrolled fully past, then back down — removal at the moment its
@@ -856,12 +856,24 @@ headers to confirm nothing was duplicated or dropped. -->
       the way-back link) from a gallery cell mid-screen — no writes
       other than `""` on frames in view where the page lands and no
       image animations in `document.getAnimations()` for one second
-      after the swap, and a frame below the landing, once scrolled to,
-      removed then shown `"rise"` or `"fade"`; the image page — the
-      related strip scrolled sideways shows re-entering frames as
-      `"fade"`, never `"rise"`, entering and leaving the quiet view
+      after the swap, and a held frame below the landing (browser back,
+      the way-back link, and an arrow step between image pages) shown
+      `""` at the hook, removed within the observer's first report, and
+      on being scrolled to reading `"rise"` sign 1 (or `"fade"` for the
+      fade-alone shape), frames in view where the page lands getting no
+      removal and no animation (D1606 follow-up, 1); a strip (the sampler's at 1280) scrolled sideways, by trackpad and by instant snap steps
+      (`scrollBy({ left, behavior: 'instant' })`), shows re-entering
+      frames as `"fade"`, never `"rise"`; on the fog piece with rise on,
+      a fullbleed brought wholly into view by one Page Down reads
+      `"rise"`; the image page — entering and leaving the quiet view
       writes nothing on the strip, the stage scrolled fully off and
-      back replays; with `--motion-arrive-covers: 0` the covers never
+      back replays; the image page scrolled until the stage is off
+      screen, the quiet view entered: during `data-moving="quiet"` the
+      stage's image gets `""` and never `"fade"` or `"rise"`, and
+      `document.getAnimations()` holds no `motion-appear` or
+      `motion-arrive` animation during the transition; the travel in to
+      an image page still shows the stage `"fade"` over its understudy
+      (D1606 follow-up, 3); with `--motion-arrive-covers: 0` the covers never
       reset while a gallery cell does; reduced motion with
       `--rm-appear: 1` — re-entry writes `"fade"`, with `0` — no
       removal ever written; after a swap no writes on the old
@@ -885,7 +897,7 @@ headers to confirm nothing was duplicated or dropped. -->
       and with `.note-cover` dropped from the fill's list (both runs
       reported, then restored); in the browser at both screens on the
       fog piece and the fog gallery, with `--arrive-rise: 0.75rem;
-    --dur-appear: 800ms` and then `1rem; 1100ms` inline on `<html>`:
+  --dur-appear: 800ms` and then `1rem; 1100ms` inline on `<html>`:
       scroll a below-fold frame to its arrival, pause its image's
       animation and set `currentTime` to 10%, 25%, 50% — the host's
       computed `background-color` transparent while the image reads
