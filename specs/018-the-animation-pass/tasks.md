@@ -834,7 +834,7 @@ headers to confirm nothing was duplicated or dropped. -->
       photograph's box at both screens, before and during the fade
       (numbers recorded); the cause named._
 
-- [ ] **T1606b** — Re-entry: a photograph appears each time it comes
+- [x] **T1606b** — Re-entry: a photograph appears each time it comes
       on screen (plan.md "Re-entry"; decision review D1606, Q1).
       `review: per-task`. Footprint: `src/lib/motion.ts` (`appear()`'s
       unit state and observer; a new exported `edge()`),
@@ -867,8 +867,10 @@ headers to confirm nothing was duplicated or dropped. -->
       a fullbleed brought wholly into view by one Page Down reads
       `"rise"`; the image page — entering and leaving the quiet view
       writes nothing on strip frames on screen at the exit, and a strip
-      frame off screen at the exit gets its removal and reads `"fade"`
-      when scrolled to (the quiet view opened with the strip in view,
+      frame off screen at the exit gets its removal and appears again
+      when scrolled to (`"fade"` with rise off; the image page's related
+      frames are a `.gallery-flow`, not a strip band, so with rise on
+      they rise — as any frame) (the quiet view opened with the strip in view,
       closed, then scrolled down); a Page Down with smooth scrolling off
       onto the fog fullbleed reads `"rise"` sign 1; (f) gains the
       partner case wholly-in-view with `last='top'` → `top`; the stage scrolled fully off and
@@ -1158,6 +1160,7 @@ tier if it is ever on (it is off). -->
 | D1606a decision review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 84,599                      | B′: fill only while waiting or fading, never under a rise → T1606d before T1606c; the fill's host list was unpinned — pinned now; page-change check instrumented                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | T1606b (`sdd-implementer`, + one follow-up round)           | `opus` (Opus 5.5)              | 226,710                     | replay built; D1606 follow-up (110,016 cumulative reviewer): reset during page changes, strips always fade, stage at once inside the quiet growth                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | T1606b per-task review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 58,743                      | fix and re-review: B1 frames hidden by the quiet view never reset after its exit; F1 edge from last-seen side (D1606b, folded in); deviation accepted; understudy stripped on leave                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| T1606b fix round (`sdd-implementer`, resumed)               | `opus` (Opus 5.5)              | 254,957 cumulative          | B1 re-observe after the quiet exit (strip frames removed at exit, reappear when scrolled to); F1 Page Down smooth-off now sign 1; understudy stripped on leave; 389 tests                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 _(Session-tier allowance draw noted at each pause.)_
 

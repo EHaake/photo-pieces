@@ -12,6 +12,7 @@ import {
   MOTION_TOKENS,
   arrivalSteps,
   arrives,
+  edge,
   holdShown,
   ms,
   shown,
@@ -82,7 +83,11 @@ import { scanMotion } from './src/lib/motion-scan.mjs';
 //     unit arrives when the threshold's share of it is in view, or, too
 //     tall for that, the threshold's share of the viewport's height —
 //     never at its first pixel — and the observer's steps keep a tall
-//     unit reporting.
+//     unit reporting. And the edge a unit crossed (T1606b, D1606b):
+//     `bottom` or `top` by the one edge of the viewport clipping it, and
+//     for a unit wholly in view (a jump) the side it was last seen off
+//     on — never a "side", so a fullbleed clipped sideways by a
+//     scrollbar still rises from where it came (D1606 follow-up, 2).
 //
 // (g) The hidden state is the script's (T1603). Every rule in global.css
 //     that sets `opacity: 0` sits under `html[data-motion]` — the root
@@ -737,6 +742,30 @@ describe('(f) the module (T1602, spec 018)', () => {
     // A threshold on a step is not listed twice.
     expect(arrivalSteps(0.15)).toHaveLength(21);
     expect(arrivalSteps(0.15)).toContain(0.15);
+  });
+
+  // A 400px-tall, 1000px-wide unit over an 800px viewport, `top` its
+  // box's top edge and `seen` the intersection's width and height.
+  const crossing = (top, seen) => ({
+    boundingClientRect: { top, height: 400, width: 1000 },
+    intersectionRect: seen,
+    rootBounds: { top: 0, height: 800 },
+  });
+
+  it("edge: a 400px unit 25% in at the viewport's foot crossed the bottom, whatever side it was last on (T1606b)", () => {
+    expect(edge(crossing(700, { height: 100, width: 1000 }), 'top')).toBe('bottom');
+  });
+
+  it("edge: the same unit 25% in at the viewport's head crossed the top, whatever side it was last on", () => {
+    expect(edge(crossing(-300, { height: 100, width: 1000 }), 'bottom')).toBe('top');
+  });
+
+  it('edge: a unit wholly in view, its width clipped by 15px (a scrollbar), comes from where it was last — bottom, never a side', () => {
+    expect(edge(crossing(350, { height: 400, width: 985 }), 'bottom')).toBe('bottom');
+  });
+
+  it("edge: a unit wholly in view after a jump comes from where it was last — last 'top' gives top (D1606b)", () => {
+    expect(edge(crossing(350, { height: 400, width: 985 }), 'top')).toBe('top');
   });
 });
 

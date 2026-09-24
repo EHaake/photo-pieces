@@ -2126,7 +2126,10 @@ html[data-moving]::view-transition-group(site-header) {
    not "") and leaves at `data-shown=""`, which the script writes at
    the animation's end. It is kept off the quiet view (`data-quiet`),
    where the stage's mat is the box: the quiet rule's `background`
-   shorthand would lose its colour to this more specific fill. */
+   shorthand would lose its colour to this more specific fill. The
+   rise comes in from the edge the frame crossed: `--rise-sign`, 1 from
+   below and -1 from above, is set inline on the image by the script at
+   each arrival (T1606b) — never in markup or :root, like `--i`. */
 html[data-motion]
   :is(
     .image-link,
@@ -2174,7 +2177,7 @@ img[data-shown='rise'] {
 @keyframes motion-arrive {
   from {
     opacity: 0;
-    transform: translateY(var(--arrive-rise));
+    transform: translateY(calc(var(--arrive-rise) * var(--rise-sign, 1)));
   }
   to {
     opacity: 1;

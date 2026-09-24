@@ -208,6 +208,42 @@ export function arrives(
   );
 }
 
+/** The edge a unit crossed to arrive (spec 018, T1606b; D1606b): `top`
+ *  when its box is clipped at the root's top only, `bottom` when
+ *  clipped at the root's foot only, else `last` — the side it was on
+ *  when last seen wholly off screen — so a jump that lands a unit
+ *  wholly in view (Page Down without smooth scrolling, find in page, a
+ *  hash link) still comes in from the edge it crossed. The arrival
+ *  rises from that edge. There is no geometric "side": a
+ *  `100vw` fullbleed is wider than the viewport by a classic scrollbar
+ *  and would read as clipped sideways, and a strip's snap step takes a
+ *  frame from wholly out to wholly in — a strip's frames fade by
+ *  membership instead (D1606 follow-up, 2). Exported for the unit
+ *  test. */
+export function edge(
+  entry: Pick<IntersectionObserverEntry, 'boundingClientRect' | 'rootBounds'>,
+  last: 'top' | 'bottom',
+): 'top' | 'bottom' {
+  const box = entry.boundingClientRect;
+  const root = entry.rootBounds;
+  if (root === null) return last;
+  const atTop = box.top < root.top;
+  const atFoot = box.top + box.height > root.top + root.height;
+  if (atTop && !atFoot) return 'top';
+  if (atFoot && !atTop) return 'bottom';
+  return last;
+}
+
+/** Drop the travel's stand-in from an image's host: `data-understudy`
+ *  and `--understudy`. */
+function dropUnderstudy(img: HTMLImageElement): void {
+  const host = img.parentElement;
+  if (host && 'understudy' in host.dataset) {
+    delete host.dataset.understudy;
+    host.style.removeProperty('--understudy');
+  }
+}
+
 /** Mark a photograph shown for good: `data-shown=""`, which lifts the
  *  gate and the waiting fill. The one writer of the empty value — the
  *  animation's end, the `complete` short-cut, the early-`load` rule and
@@ -221,11 +257,7 @@ export function arrives(
 export function shown(img: HTMLImageElement): void {
   img.dataset.shown = '';
   if (img.complete && img.naturalWidth > 0) held.add(shownKey(location.pathname, img));
-  const host = img.parentElement;
-  if (host && 'understudy' in host.dataset) {
-    delete host.dataset.understudy;
-    host.style.removeProperty('--understudy');
-  }
+  dropUnderstudy(img);
 }
 
 /** The appearance and the arrival (spec 018). Every frame image in
@@ -238,12 +270,23 @@ export function shown(img: HTMLImageElement): void {
  *    was late), or when `--motion-appear` is off on its host;
  *  - as `"fade"` when its unit has decoded and the unit was in view at
  *    the hook (or `--motion-arrive` is off on a host in it);
- *  - below the fold, when its unit has decoded and the one
+ *  - off screen at the hook, when its unit has decoded and the one
  *    IntersectionObserver has seen it arrive (`arrives`: the
  *    `--arrive-threshold` share of it in view, or of the viewport's
  *    height for a unit too tall to show that share): `"rise"` when
- *    `--arrive-rise` is above zero and reduced motion is off, else
- *    `"fade"`.
+ *    `--arrive-rise` is above zero, reduced motion is off and the unit
+ *    is not in a strip's band — with `--rise-sign` set inline from the
+ *    edge it crossed (`edge`), `1` from below and `-1` from above —
+ *    else `"fade"`. A strip frame always fades: its band scrolls
+ *    sideways and snaps.
+ *
+ *  Inside the quiet view's growth the kind is none: a unit revealed
+ *  while <html> carries `data-moving="quiet"`, or revealed by its
+ *  arrival while it carries `data-quiet`, is shown at once — the growth
+ *  is that photograph's movement (the stage, reset further down the
+ *  page, arrives as the view scrolls to the top). A unit whose decode
+ *  ends after the growth fades as usual. A page change's transition is
+ *  not the quiet view: the stage still fades over its understudy.
  *
  *  A unit is the image's `.piece-block` when that block holds more than
  *  one `img` (a diptych, triptych, grid, row with a pair), else the
@@ -256,22 +299,48 @@ export function shown(img: HTMLImageElement): void {
  *  linked, or the `img` itself when not (the band would otherwise be
  *  the shared host). `load` comes before
  *  `decode()` — a `decode()` on a lazy image not yet loaded would fetch
- *  it early. `animationend` writes `""`. Every read comes before the
- *  first write. A throw anywhere removes <html>'s `data-motion`, which
- *  shows every photograph — the one failure that could hide one.
- *  Returns the teardown. */
+ *  it early. `animationend` writes `""`.
+ *
+ *  Re-entry (T1606b, D1606 Q1): a unit **replays** — appears each time
+ *  it comes on screen — when every image in it has the appearance on,
+ *  every host in it the arrival on, and the fade has a duration for
+ *  this reader (not reduced motion with `--rm-appear: 0`, where a
+ *  hidden frame would snap in at the threshold: a pop). A replaying
+ *  unit is observed for the page's life, complete, in view or waiting.
+ *  When it is wholly off screen its images lose `data-shown` (hidden by
+ *  the gate, so no fade-out) and it reads as not in view, not arrived,
+ *  not revealed — so it arrives again at the threshold, never "in view
+ *  at the hook". Not while <html> carries `data-quiet`: the quiet view
+ *  hides the page's other frames, which is not leaving the screen. It
+ *  does run while `data-moving` is set: a page change's transition is
+ *  when the first report arrives, and a held frame off screen at the
+ *  landing is really off screen (D1606 follow-up, 1). At the quiet
+ *  view's exit every replaying unit is observed afresh, so one the exit
+ *  left off screen is reset (T1606b review B1). A reset also records
+ *  the side the unit left by, for `edge`, and drops a host's stand-in.
+ *  The gap between wholly off (the reset) and the threshold
+ *  (the arrival) keeps a frame straddling an edge from replaying. A
+ *  unit that does not replay is watched only when off screen and
+ *  waiting at the hook, and let go on arrival.
+ *
+ *  Every read comes before the first write. A throw anywhere removes
+ *  <html>'s `data-motion`, which shows every photograph — the one
+ *  failure that could hide one. Returns the teardown. */
 export function appear(scope: Document | Element): () => void {
   window.__motion = true;
   const root = document.documentElement;
   let live = true;
   let frame = 0;
   let observer: IntersectionObserver | null = null;
+  let quietWatch: MutationObserver | null = null;
   const unbind: (() => void)[] = [];
   const teardown = () => {
     live = false;
     cancelAnimationFrame(frame);
     observer?.disconnect();
     observer = null;
+    quietWatch?.disconnect();
+    quietWatch = null;
     for (const off of unbind) off();
     unbind.length = 0;
   };
@@ -284,18 +353,31 @@ export function appear(scope: Document | Element): () => void {
       inView: boolean;
       arrived: boolean;
       revealed: boolean;
+      /** Every image's appearance and every host's arrival on. */
+      appearOn: boolean;
+      arriveOn: boolean;
+      replays: boolean;
+      /** Inside a strip's band: always a fade. */
+      strip: boolean;
+      /** The edge the unit last arrived across. */
+      edge: 'top' | 'bottom';
+      /** The side it was on when last seen wholly off screen. */
+      last: 'top' | 'bottom';
     };
 
     // The reads.
     const threshold = Number(token('--arrive-threshold'));
     const stagger = ms(token('--arrive-stagger')) > 0;
-    const rise = Number.parseFloat(token('--arrive-rise')) > 0 && !reducedMotion();
+    const reduced = reducedMotion();
+    const rise = Number.parseFloat(token('--arrive-rise')) > 0 && !reduced;
+    const fadeLasts = !(reduced && token('--rm-appear') === '0');
     const frames = [...scope.querySelectorAll<HTMLImageElement>(FRAME_IMG)];
     const units = new Map<Element, Unit>();
     const reads = frames.map((img) => {
       const host = img.parentElement as Element;
       const block = img.closest('.piece-block');
-      const el = img.closest('.piece-strip-scroll')
+      const strip = img.closest('.piece-strip-scroll') !== null;
+      const el = strip
         ? host.matches('.image-link')
           ? host
           : img
@@ -305,20 +387,33 @@ export function appear(scope: Document | Element): () => void {
       const style = getComputedStyle(host);
       let unit = units.get(el);
       if (!unit) {
+        const rect = el.getBoundingClientRect();
         unit = {
           el,
           images: [],
           waiting: new Set(),
-          inView: inViewport(el.getBoundingClientRect()),
+          inView: inViewport(rect),
           arrived: false,
           revealed: false,
+          appearOn: true,
+          arriveOn: true,
+          replays: false,
+          strip,
+          edge: 'bottom',
+          last: rect.bottom <= 0 ? 'top' : 'bottom',
         };
         units.set(el, unit);
       }
       unit.images.push(img);
-      if (!on(style, '--motion-arrive')) unit.inView = true;
-      return { img, unit, complete: img.complete, appearOn: on(style, '--motion-appear') };
+      const appearOn = on(style, '--motion-appear');
+      if (!appearOn) unit.appearOn = false;
+      if (!on(style, '--motion-arrive')) {
+        unit.inView = true;
+        unit.arriveOn = false;
+      }
+      return { img, unit, complete: img.complete, appearOn };
     });
+    for (const unit of units.values()) unit.replays = fadeLasts && unit.appearOn && unit.arriveOn;
 
     // The writes.
     let settled = false;
@@ -326,11 +421,48 @@ export function appear(scope: Document | Element): () => void {
       settled = true;
     });
 
-    const reveal = (unit: Unit) => {
-      if (!live || unit.revealed || unit.waiting.size > 0 || !(unit.inView || unit.arrived)) return;
+    // A unit every image of which is already shown — by the `complete`
+    // short-cut, the early-`load` rule or the appearance off — counts as
+    // revealed, so its first observer callback leaves it alone.
+    // `arrival`: the observer's arrival calls it, not a decode.
+    const reveal = (unit: Unit, arrival = false) => {
+      if (!live || unit.revealed || unit.waiting.size > 0) return;
+      if (unit.images.every((img) => img.dataset.shown !== undefined)) {
+        unit.revealed = true;
+        return;
+      }
+      if (!(unit.inView || unit.arrived)) return;
       unit.revealed = true;
-      const kind = unit.inView || !rise ? 'fade' : 'rise';
-      for (const img of unit.images) if (img.dataset.shown === undefined) img.dataset.shown = kind;
+      // Inside the quiet view's growth: at once, no second movement.
+      if (root.dataset.moving === 'quiet' || (arrival && 'quiet' in root.dataset)) {
+        for (const img of unit.images) if (img.dataset.shown === undefined) shown(img);
+        return;
+      }
+      const kind = unit.inView || !rise || unit.strip ? 'fade' : 'rise';
+      for (const img of unit.images) {
+        if (img.dataset.shown !== undefined) continue;
+        if (kind === 'rise') img.style.setProperty('--rise-sign', unit.edge === 'top' ? '-1' : '1');
+        img.dataset.shown = kind;
+      }
+    };
+
+    // Wholly off screen: hidden again, without a fade-out, to arrive anew.
+    // The side it left by is where it will come back from after a jump,
+    // and a stand-in left by a fade cut short never replays under it.
+    const leave = (unit: Unit, entry: IntersectionObserverEntry) => {
+      if ('quiet' in root.dataset) return;
+      const box = entry.boundingClientRect;
+      const bounds = entry.rootBounds;
+      if (bounds) {
+        unit.last = box.top + box.height / 2 < bounds.top + bounds.height / 2 ? 'top' : 'bottom';
+      }
+      if (unit.images.some((img) => img.dataset.shown !== undefined)) {
+        for (const img of unit.images) delete img.dataset.shown;
+      }
+      for (const img of unit.images) dropUnderstudy(img);
+      unit.revealed = false;
+      unit.arrived = false;
+      unit.inView = false;
     };
 
     const ready = (unit: Unit, img: HTMLImageElement) => {
@@ -345,12 +477,14 @@ export function appear(scope: Document | Element): () => void {
 
     for (const { img, unit, complete, appearOn } of reads) {
       if (stagger) img.style.setProperty('--i', String(unit.images.indexOf(img)));
+      // A replaying unit's image may animate on any return, so it hears
+      // its animation's end whether or not it waits now.
+      if (unit.replays || !(complete || !appearOn)) listen(img, 'animationend', () => shown(img));
       if (complete || !appearOn) {
         shown(img);
         continue;
       }
       unit.waiting.add(img);
-      listen(img, 'animationend', () => shown(img));
       // A broken file does not hold its unit: it is not a photograph to
       // wait for, so its unit goes on without it.
       listen(img, 'error', () => ready(unit, img));
@@ -367,28 +501,58 @@ export function appear(scope: Document | Element): () => void {
         );
       });
     }
+    for (const unit of units.values()) reveal(unit);
 
-    // Only a unit still waiting is watched: one shown whole at the hook
-    // has nothing left to arrive.
-    const below = [...units.values()].filter((unit) => !unit.inView && unit.waiting.size > 0);
-    if (below.length > 0) {
-      let remaining = below.length;
-      const byEl = new Map(below.map((unit) => [unit.el, unit]));
+    // Watched: every replaying unit, for the page's life; of the rest,
+    // only a unit off screen and still waiting — one shown whole at the
+    // hook has nothing left to arrive — let go as it arrives.
+    const watched = [...units.values()].filter(
+      (unit) => unit.replays || (!unit.inView && unit.waiting.size > 0),
+    );
+    if (watched.length > 0) {
+      let remaining = watched.filter((unit) => !unit.replays).length;
+      const replaying = watched.length > remaining;
+      const byEl = new Map(watched.map((unit) => [unit.el, unit]));
       observer = new IntersectionObserver(
         (entries, self) => {
           for (const entry of entries) {
             const unit = byEl.get(entry.target);
-            if (!unit || unit.arrived || !arrives(entry, threshold)) continue;
+            if (!unit) continue;
+            if (unit.replays && !entry.isIntersecting) {
+              leave(unit, entry);
+              continue;
+            }
+            if (unit.arrived || !arrives(entry, threshold)) continue;
             unit.arrived = true;
-            self.unobserve(entry.target);
-            remaining -= 1;
-            reveal(unit);
+            unit.edge = edge(entry, unit.last);
+            if (!unit.replays) {
+              self.unobserve(entry.target);
+              remaining -= 1;
+            }
+            reveal(unit, true);
           }
-          if (remaining === 0) self.disconnect();
+          if (remaining === 0 && !replaying) self.disconnect();
         },
         { threshold: arrivalSteps(threshold) },
       );
-      for (const unit of below) observer.observe(unit.el);
+      for (const unit of watched) observer.observe(unit.el);
+      // The quiet view hides the page's other frames without a report
+      // that counts (the reset is skipped under data-quiet), and its exit
+      // may leave them off screen with no new report to come: at the
+      // exit every replaying unit is observed afresh, so its initial
+      // report resets one off screen and leaves one on screen alone.
+      if (replaying) {
+        const io = observer;
+        const again = watched.filter((unit) => unit.replays).map((unit) => unit.el);
+        quietWatch = new MutationObserver((records) => {
+          if (!records.some((record) => record.oldValue !== null) || 'quiet' in root.dataset) return;
+          for (const el of again) {
+            io.unobserve(el);
+            io.observe(el);
+          }
+        });
+        quietWatch.observe(root, { attributes: true, attributeFilter: ['data-quiet'], attributeOldValue: true });
+      }
     }
   } catch (error) {
     delete root.dataset.motion;
