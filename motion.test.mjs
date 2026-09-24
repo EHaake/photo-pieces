@@ -153,7 +153,7 @@ const EXPECTED = {
   '--wait-fill': 'var(--color-bg)',
   '--hero-enter': '1',
   '--hero-stagger': '90ms',
-  '--arrows-slide': '0px',
+  '--arrows-slide': '2rem',
   '--rm-appear': '1',
   '--rm-quiet': '1',
 };

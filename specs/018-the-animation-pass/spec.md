@@ -558,3 +558,7 @@ What changes, outside the tuning envelope and so amended here:
 - **The waiting box takes the ground's own colour** (round T1606e,
   second look, 2026-09-23): no box is visible while a photograph loads
   ("I don't want there to be any visible box").
+- **The arrows slide while cross-fading** (round T1606g, third look,
+  2026-09-23): on the image page, the left and right arrows move the
+  photograph 2rem along the direction of travel as it cross-fades ("a
+  slide animation").
