@@ -452,17 +452,25 @@ const isActive = (href: string) => {
         if (settled.kind === 'step') return step(event, dir);
         const nth = settled.nth ?? 0;
         if (settled.kind === 'out') return out(event, nth);
-        // An in: the source is this page's link to the photograph. Only
-        // a photograph shown with its file can be the understudy; one not
-        // yet loaded is, between image pages, a step, and elsewhere the
-        // stage appears as on any page change. It wears the name only
-        // where the reader can see it: the stage never grows out of a
-        // cell off screen.
+        // An in: the source is this page's link to the photograph. With
+        // no such link there is nothing to carry and nothing is written;
+        // between image pages it is a step. Only a photograph shown with
+        // its file can be the understudy; one not yet loaded is, between
+        // image pages, a step, and elsewhere the stage appears as on any
+        // page change. It wears the name only where the reader can see
+        // it: the stage never grows out of a cell off screen. Only a
+        // replayed in (forward) stores the origin, as a click does; a
+        // reversed one (back) never rewrites the origin the way-back link
+        // lands by.
         const cells = cellsFor(document, event.to.pathname, event.from);
         const img = (cells[nth] ?? cells[0])?.querySelector('img');
-        if (!img?.complete || !img.naturalWidth) {
+        if (!img) {
           if (between) step(event, dir);
-          else storeOrigin(event.from.pathname, nth);
+          return;
+        }
+        if (!img.complete || !img.naturalWidth) {
+          if (between) step(event, dir);
+          else if (!back) storeOrigin(event.from.pathname, nth);
           return;
         }
         if (inViewport(img.getBoundingClientRect())) name(img);
@@ -474,7 +482,7 @@ const isActive = (href: string) => {
           nth,
           navigationType: event.navigationType,
         };
-        storeOrigin(event.from.pathname, nth);
+        if (!back) storeOrigin(event.from.pathname, nth);
       };
 
       document.addEventListener('astro:before-preparation', (event) => {
