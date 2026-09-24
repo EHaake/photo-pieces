@@ -1022,7 +1022,9 @@ headers to confirm nothing was duplicated or dropped. -->
       `complete` on (b) hold; (j) the no-API profile
       (`startViewTransition` deleted before the router loads) repeating
       (a), (c), (e) — the page changes, no console errors, the records
-      still written._
+      still written; piece → click the fullbleed `land-b` → About → back →
+      the image page's way-back link lands at the stored y on the clicked
+      copy (`nth` 1), dev and preview (T1606f review B1)._
 
 ### Phase 1 record (the person's walkthrough)
 
@@ -1248,6 +1250,7 @@ tier if it is ever on (it is off). -->
 | T1606e (`sdd-implementer`, round + panel follow-up)         | `opus` (Opus 5.5)              | 33,527                      | done; 394 tests; `--dur-appear: 950ms`, `--wait-fill: var(--color-bg)`; settle preset 950ms; the panel's fill select reads the effective colour                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | D1606f decision review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 79,679                      | a record per history entry (`history.state.travel`): back reverses, forward replays; the quiet view makes image-to-image traverses steps; supersedes item 14                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | T1606f (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 174,234                     | done; 405 tests; cases (a)–(j) at both screens, dev and preview: arrow → back a step, strip → back out into the cell, cell → back → forward grows again (understudy), fullbleed `nth` 1 both ways, off-screen landing unnamed, jumps, reload, quiet, reduced motion, no-API                                                                                                                                                                                                                                                                                                                                       |
+| T1606f per-task review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 59,913                      | fix and re-review: B1 back into an image page overwrote the stored origin (way-back link lost the reader's place); small calls 2 and 3 accepted, 1 accepted on forward only                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 _(Session-tier allowance draw noted at each pause.)_
 

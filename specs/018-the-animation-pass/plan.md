@@ -453,7 +453,9 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   understudy's, and the `img` is named only if its box intersects the
   viewport; when it is not complete, between image pages a step,
   otherwise nothing is named and the stage appears as it does on any
-  page change; a replayed in writes `motion-origin` as a click does;
+  page change; a replayed (forward) in writes `motion-origin` as a click does; a
+  reversed in (back) writes nothing — the click's origin stands — and an
+  in with no source cell at all writes nothing (T1606f review B1);
   **null**: between two image pages, a **step** (`back` → prev,
   `forward` → next); from an image page to another page, **out** as a
   way-back link (landing by `cellFor`); otherwise nothing. A click
