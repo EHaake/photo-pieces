@@ -481,6 +481,11 @@ What changes, outside the tuning envelope and so amended here:
   fades in is a finding, not a round: diagnosed and fixed.
 - **The travel is kept as built**; strips arriving frame by frame are
   kept.
+- **The travel follows the history** (second look, 2026-09-23): browser
+  forward replays the step the reader took — the photograph grows into
+  the stage again — and back after an arrow is the arrows' cross-fade,
+  not a shrink into the previous page's related strip. Back after a
+  related-strip click still shrinks into that cell, the true reverse.
 
 ## Decided (in this conversation, 2026-09-23)
 

@@ -969,13 +969,60 @@ headers to confirm nothing was duplicated or dropped. -->
       the values agree in the three places (grep listed)._
 
 - [ ] **T1606f** — The travel's history, fixed (the person's findings
-      at the second look): (1) an arrow step then browser back shrinks
-      the photograph into the previous page's related strip, off the
-      bottom — back after an arrow should be the step's cross-fade,
-      like forward; (2) forward again after the way back from an image
-      page does not grow the photograph into the stage — it should, as
-      the first click did. Designed at a decision review, then
-      dispatched.
+      at the second look; decision review D1606f): a traverse reverses
+      (back) or replays (forward) the step recorded on its history entry
+      (plan.md "The travel", _The history_). `review: per-task`.
+      Footprint: `src/lib/motion.ts` (exported pure
+      `traverseKind(record, direction, fromPath, toPath)`, the record's
+      shape check included); `src/layouts/BaseLayout.astro`'s travel
+      script only (`here`, read at module load and at after-swap; the
+      record write at after-swap guarded by `moving.to`; `moving` gains
+      `from`, `to`, `nth`; the traverse branch in before-preparation
+      replaces the `isImagePage(event.from)` traverse path;
+      `preloadOnLoad` takes the settled kind and `nth`; `cellFor` takes
+      an optional explicit `nth`; the before-swap settle reduced to "out
+      with no cell between image pages → step"; the traverse landing's
+      name withdrawn at after-swap when its box is off screen; the
+      travel comment updated); `motion.test.mjs` (new describe "(j) the
+      travel's history" — a table over `traverseKind`: back and forward
+      × in, out, step; `dir` flipped on back, kept on forward; `nth`
+      carried; a mismatched `from`, a missing record, and a malformed
+      one (unknown kind, `nth: -1`, `dir: 'up'`) each → null); spec.md
+      (one line under "Amended at the Phase 1 pause"). `[...id].astro`,
+      the CSS and the keyframes untouched. _Verify:
+      `sh scripts/verify.sh` green; control runs — (j) fails when back
+      maps to `prev` regardless of the record, when forward reverses
+      the kind, and when the `from` check is removed (all three
+      reported, then restored); in the browser at both screens, dev and
+      preview, recording at `astro:before-swap` the old page's and the
+      new document's elements with an inline `view-transition-name` and
+      `data-moving` / `data-slide`, at `viewTransition.ready`
+      `document.getAnimations()` filtered to
+      `::view-transition-group(photograph)` with durations, and after
+      each push `history.state.travel`: (a) arrow, then back —
+      `data-moving="step"`, nothing named at `--arrows-slide: 0px`, root
+      group only, the stage `img` `complete` at after-swap; with
+      `--arrows-slide: 2rem` the stage named and `data-slide` the flip of
+      the arrow pressed (both arrows); (b) related strip, then back —
+      `out`, the named new element that strip cell's `img`, its box in
+      the viewport; (c) gallery cell → back → forward — forward `in`,
+      the cell's `img` named on the gallery, the new stage figure with
+      `data-understudy` of that `currentSrc`, the photograph group at
+      480; (d) the fog piece's fullbleed `land-b` → back → forward —
+      both name the second copy (`nth` 1); (e) "In the gallery" → back
+      → forward — back `in` from the landing cell, forward `out` into
+      it; with the gallery scrolled so the cell is off screen before
+      forward, no landing named at the snapshot; (f) a two-entry jump by
+      the back menu — image→image a step, image→gallery out; (g) reload
+      on the image page, then back — still `out` into the cell; (h) the
+      quiet view on B after arriving by the strip, then back — `step`,
+      the stage preloaded at `100vw`; (i) reduced motion repeating
+      (a)–(e) — no element named anywhere, while `data-moving`, the
+      records, the understudy on (c) and the landing eager and
+      `complete` on (b) hold; (j) the no-API profile
+      (`startViewTransition` deleted before the router loads) repeating
+      (a), (c), (e) — the page changes, no console errors, the records
+      still written._
 
 ### Phase 1 record (the person's walkthrough)
 
@@ -1199,6 +1246,7 @@ tier if it is ever on (it is off). -->
 | T1606c (`sdd-implementer`)                                  | `opus` (Opus 5.5)              | 81,677                      | done; 394 tests; `--ease-appear` added, Settle committed (800ms, 0.75rem, 0.25); panel in three parts, presets never in `dist`; each setting writes exactly four tokens; under reduced motion the select reads "custom" (the forced 0px rise)                                                                                                                                                                                                                                                                                                                                                                     |
 | T1606c per-task review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 46,728                      | signed off; plan's token listing and appearance rules brought up to date; the travel's landing fade is now 800ms on the new curve — ask at the second look                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | T1606e (`sdd-implementer`, round + panel follow-up)         | `opus` (Opus 5.5)              | 33,527                      | done; 394 tests; `--dur-appear: 950ms`, `--wait-fill: var(--color-bg)`; settle preset 950ms; the panel's fill select reads the effective colour                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| D1606f decision review (`skeptical-reviewer`)               | `opus` (Opus 5.5)              | 79,679                      | a record per history entry (`history.state.travel`): back reverses, forward replays; the quiet view makes image-to-image traverses steps; supersedes item 14                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 _(Session-tier allowance draw noted at each pause.)_
 

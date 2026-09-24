@@ -398,18 +398,71 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
     distance the old and new stage figures are named and
     `data-slide="prev|next"` selects the slide keyframes.
   - **out** — `from` is under `/images/` and the click was neither of
-    the above (the page's way-back links), or the navigation is a
-    `traverse` from an image page: the stage figure is named. For a
-    traverse whose `to` is also an image page the kind is settled in
-    `astro:before-swap`: **out** when the new document holds
-    `.image-link[href="<from.pathname>"]` (the reader came through a
-    related strip and is going back to it — that cell is named), else
-    **step** (the loader has preloaded the stage as for any
-    image-to-image traverse; with a slide the direction is the event's
-    `direction`, `back` → prev, `forward` → next). In that one case the
-    old figure is named before the kind is known; when it turns out to
-    be a nameless step the figure exits on its own group instead of
-    inside the root's — the same cross-fade in its box.
+    the above (the page's way-back links): the stage figure is named. A
+    traverse is never classified by its source or by the pages alone;
+    its kind comes from the history (below).
+
+  **The history** (T1606f; decision review D1606f, 2026-09-23;
+  supersedes the sign-off's item 14 and T1604's before-swap settle). A
+  traverse replays or reverses the step the reader actually took, read
+  from the history entry, not guessed from the pages. Every push the
+  travel classifies records on its own entry how it was reached: at
+  `astro:after-swap` (the router pushed the entry in `moveToLocation`,
+  `router.js:121`, before that event), when `location.pathname` is
+  `moving.to`,
+  `history.replaceState({ ...history.state, travel: { kind, from, nth, dir } }, '')`
+  in a try/catch. `kind` is the settled kind; `from` is the pathname
+  left; `nth` is, for an **in**, the clicked link's index among the old
+  page's links to `to` (the value `motion-origin` stores), and for an
+  **out**, the landing's index among the new page's links to `from`
+  (computed at before-swap); `dir` is for a **step**. A traverse writes
+  nothing: its entry keeps the record it was reached with. The router
+  spreads `history.state` on its own writes (`events.js:113`) and the
+  state survives a reload, so the record lives exactly as long as its
+  entry. The layout keeps `here`, the current entry's record, read from
+  `history.state` when the module loads and after every swap. On a
+  traverse `history.state` is already the destination's entry
+  (`router.js:392`), so **back** reverses `here` and **forward**
+  replays `history.state.travel`.
+
+  `traverseKind(record, direction, fromPath, toPath)` in `motion.ts`
+  (pure) decides. A record is the step between the two pages only when
+  it is well-formed (a known kind, a string `from`, `nth` a
+  non-negative integer or absent, `dir` `prev|next` or absent) and its
+  `from` is the other end: `toPath` on back, `fromPath` on forward.
+  Forward replays it (in → in, out → out, step → step with its `dir`).
+  Back reverses it (in → out, out → in, step → step with `dir`
+  flipped). Each keeps the record's `nth`. Otherwise it returns null.
+  In `astro:before-preparation`, for `navigationType === 'traverse'`:
+  between two image pages while `html[data-quiet]` is set: **step**,
+  whatever the record (the quiet view hides the strip; neither end of
+  an in or out is on screen); **step**: as for an arrow (stage preload;
+  the old and new stage figures named only with a slide distance,
+  `data-slide` from the kind's `dir`); **out**: the stage figure named;
+  the loader preloads the landing `cellsFor(newDoc, from, to)[nth] ?? [0]`
+  at its own `sizes`, which is then eager and named at before-swap — if
+  the new document lacks it and `to` is an image page, it is a nameless
+  step (the stage preloaded instead; the old figure, already named,
+  leaves on its own group, the same cross-fade in its box) — and at
+  after-swap, after the router has restored the entry's scroll, the
+  landing's name is withdrawn if its box doesn't intersect the
+  viewport, so the stage never shrinks toward a cell off screen;
+  **in**: the source is the live page's
+  `cellsFor(document, to.pathname, from)[nth] ?? [0]`, its `img` — when
+  it is `complete` with a `naturalWidth`, its `currentSrc` is the
+  understudy's, and the `img` is named only if its box intersects the
+  viewport; when it is not complete, between image pages a step,
+  otherwise nothing is named and the stage appears as it does on any
+  page change; a replayed in writes `motion-origin` as a click does;
+  **null**: between two image pages, a **step** (`back` → prev,
+  `forward` → next); from an image page to another page, **out** as a
+  way-back link (landing by `cellFor`); otherwise nothing. A click
+  during the frame between `startViewTransition` and its callback is
+  guarded by writing the record only when `location.pathname` is
+  `moving.to`. Reduced motion withholds the names here as everywhere;
+  the records, kinds, preloads and understudy still run. Back after a
+  related-strip click still shrinks into the strip cell — the true
+  reverse, which AC 6 requires; forward after it now grows back out.
 
   In `astro:before-swap` the new document is dressed before it is
   swapped in (inline styles and attributes on it survive the swap;
@@ -474,9 +527,10 @@ Two facts of the router, read in `node_modules/astro/dist/transitions/`
   `loading="eager"` and the loader is extended to preload its
   candidate — the same `preload(img, sizes)` the step uses, given the
   landing's own `sizes`, bounded at one second — so the landing is
-  decoded and `complete` when the new snapshot is taken. Between image
-  pages the loader preloads the landing when the new document holds
-  the cell and the traverse is `back`, else the stage.
+  decoded and `complete` when the new snapshot is taken. For a traverse
+  the loader preloads what the settled kind shows: the landing for an
+  out, the stage for a step, nothing for an in (the understudy covers
+  it).
 
   **The compare overlays before the swap** (D1604, Q3).
   `enhanceCompare(scope)` moves to `src/lib/compare.ts`; the layout
@@ -1019,6 +1073,14 @@ rules, `.gallery-flow*`, every `.piece-*` rule, `.note-row img`, the
     is a **step**." (The **in** replay on forward would need the old
     page's strip cell plus the understudy; a step is the honest minimum
     and forward is not in AC 6.)
+    **Superseded at T1606f** (decision review D1606f, 2026-09-23). The
+    person's second look asked that browser forward replay the travel,
+    and that back after an arrow be the step's cross-fade. A traverse's
+    kind now comes from the history entry's record ("The travel",
+    _The history_), not from `direction` plus the presence of a cell.
+    Item 14's concern still holds: forward never plays a reverse,
+    because forward replays the recorded kind. Its parenthetical is now
+    what is built.
 15. **The root `--motion-appear` / `--motion-arrive` toggles no longer
     reach the covers.** The covers rule sets
     `--motion-appear: var(--motion-appear-covers)` on the cover hosts,
