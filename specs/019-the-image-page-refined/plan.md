@@ -331,6 +331,12 @@ where the simpler shape was taken it is said in one line.
   body compare, an authored mode, a private stage and the photograph
   itself are all on one fixture page.
 
+  Phase 1 review (T1708a): a sidecar stage note (and the `processing`
+  fallback) is rendered as inline Markdown through the page's existing
+  `renderMarkdown`, so `_emphasis_` reads the same in both builders —
+  AC 5's "the same block"; the enhanced live note clones the note
+  span's children rather than reading `textContent`, so a note's
+  emphasis or link survives enhancement on both surfaces.
 - **The compare's state** (`src/lib/compare.ts`, T1707) — pure
   functions and the tunables, no DOM, unit-tested:
 
@@ -794,6 +800,9 @@ feel is the person's at each pause.
   the appearance hooks). motion.test.mjs (i) green unedited (the page's
   `<style>` declares no transition).
 
+  Phase 1 review (T1708a): compare.test.mjs also pins `WORDING.compare`
+  by page source — the heading and the two labels as literal strings —
+  so a wording round is one value, one test row, one Decided line.
 - **The compare's state** — `compare.test.mjs`, **T1707**: `EXPECTED`,
   every `COMPARE` key and value verbatim, and `COMPARE_WORDING`;
   `sliderView` as a table — two stages: `p` 0, 0.5, 1 → split 0, 50, 100,
@@ -838,6 +847,9 @@ feel is the person's at each pause.
   to a full load's (T1604c's read, repeated); inside `.compare`,
   `querySelectorAll(FRAME_IMG)` is empty.
 
+  Phase 1 review (T1708a): (c) also pins the legend and control rule
+  (`.compare[data-js] .compare-legend, .compare[data-js] .compare-control`)
+  by exact body, as the envelope table's "Pinned by" column says.
 - **The loupe's file** — `loupe.test.mjs`, **T1710**: `EXPECTED`, every
   `LOUPE` key and value verbatim; `loupeImageOptions` — a 5400×3600 jpg
   → webp 5400, a 2400×1600 webp → 2399, a 20000×10000 jpg → 16383 wide,
