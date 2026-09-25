@@ -98,6 +98,14 @@ const imageMeta = defineCollection({
     filters: z.string().optional(),
     support: z.string().optional(),
     processing: z.string().optional(),
+    // Spec 019: the steps between the camera's frame and the finished
+    // photograph, in order, each a private file beside it
+    // (`_<basename>.<word>.<ext>`) with a label and an optional note. The
+    // frame and the photograph are implied, never listed; the registry
+    // checks every `file` against the photograph's own stage files.
+    stages: z
+      .array(z.object({ file: z.string(), label: z.string().min(1), note: z.string().optional() }))
+      .optional(),
     edition: z.string().optional(),
     sizes: z.string().optional(),
     paper: z.string().optional(),

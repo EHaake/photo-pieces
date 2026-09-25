@@ -7,6 +7,7 @@ import { readExposure } from './exif.mjs';
 import type { SetKind } from './image-set';
 import { byNewestPublished, byOldestPublished, isPublished } from './pieces';
 import {
+  attachPrivates,
   classifyContentImage,
   crossReferences,
   findIdCollisions,
@@ -15,6 +16,7 @@ import {
   formatExposure,
   formatGalleryProblems,
   groupByPlace,
+  hasBlock,
   homeSlugOf,
   humanizeBasename,
   ImageIdError,
@@ -31,6 +33,7 @@ import {
   placeSummary,
   privateMessage,
   referenceProblems,
+  resolveStages,
   sidecarImageId,
   validateGalleries,
 } from './image-meta.mjs';
@@ -163,6 +166,18 @@ export interface SiteImage {
    *  raw-to-finished compare; null when there is none. Never an image
    *  of the site — no id, no page. */
   before: ImageMetadata | null;
+  /** The steps between the camera's frame and the photograph (spec 019),
+   *  in the sidecar's `stages:` order — each a private file
+   *  (`_<basename>.<word>.<ext>`) with its label and note. Empty when the
+   *  sidecar lists none. Never images of the site. */
+  stages: { image: ImageMetadata; label: string; note?: string }[];
+  /** The loupe's export (`_<basename>.detail.<ext>` beside the image,
+   *  spec 019), found by name; null when there is none. Private, like
+   *  the frame. */
+  detail: ImageMetadata | null;
+  /** The story writes its own `:::compare` (spec 019), so the page's
+   *  built-in compare stands aside. */
+  storyHasCompare: boolean;
   /** Every set this image belongs to: its galleries newest first, then
    *  its home piece, then each other piece that places it, newest first
    *  (spec 008). `sets[0]` is the default the page shows. */
@@ -250,8 +265,9 @@ async function buildRegistry(): Promise<ImageRegistry> {
   const placeById = new Map(placeEntries.map((entry) => [entry.id, entry]));
 
   // Discovery: classify every file, drop nested ones with a warning,
-  // set private rasters (camera's frames, spec 006) aside for their
-  // photographs — they never get an id.
+  // set private rasters (the camera's frame, spec 006; a stage and the
+  // loupe's export, spec 019) aside for their photographs — they never
+  // get an id.
   const files: {
     key: string;
     id: string;
@@ -259,7 +275,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
     basename: string;
     pieceSlug: string | null;
   }[] = [];
-  const privates: { key: string; folder: string; target: string }[] = [];
+  const privates: { key: string; folder: string; basename: string; file: string }[] = [];
   for (const key of Object.keys(discovered).sort()) {
     const info = classifyContentImage(key) as Classified;
     if (info.nested) {
@@ -269,7 +285,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
       continue;
     }
     if (info.private) {
-      privates.push({ key, folder: info.folder, target: info.target });
+      privates.push({ key, folder: info.folder, basename: info.basename, file: info.file });
       continue;
     }
     files.push({
@@ -363,36 +379,26 @@ async function buildRegistry(): Promise<ImageRegistry> {
     known.set(file.id, status);
   }
 
-  // Camera's frames: each must sit beside its photograph — by basename,
-  // whatever the two extensions — in a folder the site knows, published
-  // or not (a frame in a draft piece's folder is fine). An orphan is
-  // the author's typo, and silence would hide it; two frames for one
-  // photograph is a choice the site can't make for them.
+  // Private files (spec 006, widened at spec 019): each must sit beside
+  // its photograph — by basename, whatever the extensions — in a folder
+  // the site knows, published or not (a frame in a draft piece's folder
+  // is fine). An orphan is the author's typo, and silence would hide it;
+  // two frames, or two detail exports, for one photograph is a choice
+  // the site can't make for them. All at once.
   const basenamesByFolder = new Map<string, Set<string>>();
   for (const file of files) {
     if (!basenamesByFolder.has(file.folder)) basenamesByFolder.set(file.folder, new Set());
     basenamesByFolder.get(file.folder)!.add(file.basename);
   }
-  const frameProblems: string[] = [];
-  const beforeByTarget = new Map<string, ImageMetadata>();
-  for (const frame of privates) {
-    const targetId = `${frame.folder}/${frame.target}`;
-    const where = frame.key.replace(/^\//, '');
-    if (!basenamesByFolder.get(frame.folder)?.has(frame.target)) {
-      frameProblems.push(
-        `${where} has no photograph: a "_" raster is the camera's frame of the image with the same name, so "${frame.target}.<ext>" should sit beside it`,
-      );
-    } else if (beforeByTarget.has(targetId)) {
-      frameProblems.push(
-        `${where} is a second camera's frame for "${targetId}" — keep one (any accepted extension)`,
-      );
-    } else {
-      beforeByTarget.set(targetId, discovered[frame.key].default);
-    }
-  }
-  if (frameProblems.length) {
+  const family = attachPrivates(privates, basenamesByFolder) as {
+    frame: Map<string, string>;
+    detail: Map<string, string>;
+    stages: Map<string, { file: string; key: string }[]>;
+    problems: string[];
+  };
+  if (family.problems.length) {
     throw new Error(
-      `[images] camera's frame${frameProblems.length > 1 ? 's' : ''}:\n${frameProblems.join('\n')}`,
+      `[images] private file${family.problems.length > 1 ? 's' : ''}:\n${family.problems.join('\n')}`,
     );
   }
 
@@ -400,6 +406,10 @@ async function buildRegistry(): Promise<ImageRegistry> {
   // not — a sidecar on a draft piece's image is fine, a typo is not).
   const sidecars = new Map<string, CollectionEntry<'imageMeta'>>();
   const orphans: string[] = [];
+  // Each sidecar's `stages:` (spec 019), checked against its photograph's
+  // own stage files; the problems of every sidecar, thrown at once.
+  const stagesById = new Map<string, SiteImage['stages']>();
+  const stageProblems: string[] = [];
   const sidecarEntries = await getCollection('imageMeta');
   for (const entry of sidecarEntries) {
     const imageId = sidecarImageId(entry.id);
@@ -409,12 +419,29 @@ async function buildRegistry(): Promise<ImageRegistry> {
       );
     } else {
       sidecars.set(imageId, entry);
+      const resolved = resolveStages(
+        entry.data.stages,
+        family.stages.get(imageId),
+        entry.filePath ?? entry.id,
+      ) as { stages: { key: string; label: string; note?: string }[]; problems: string[] };
+      stageProblems.push(...resolved.problems);
+      stagesById.set(
+        imageId,
+        resolved.stages.map(({ key, label, note }) => ({
+          image: discovered[key].default,
+          label,
+          ...(note === undefined ? {} : { note }),
+        })),
+      );
     }
   }
   if (orphans.length) {
     throw new Error(
       `[images] orphan sidecar${orphans.length > 1 ? 's' : ''}:\n${orphans.join('\n')}`,
     );
+  }
+  if (stageProblems.length) {
+    throw new Error(`[images] stages:\n${stageProblems.join('\n')}`);
   }
 
   // The slug rule (spec 009): every `at:` other than `none`, on any
@@ -682,7 +709,14 @@ async function buildRegistry(): Promise<ImageRegistry> {
           hasStory: (sidecar?.body ?? '').trim() !== '',
           record: pick(sidecar?.data, ['format', 'filters', 'support', 'processing']),
           print: pick(sidecar?.data, ['edition', 'sizes', 'paper']),
-          before: beforeByTarget.get(file.id) ?? null,
+          before: family.frame.has(file.id)
+            ? discovered[family.frame.get(file.id)!].default
+            : null,
+          stages: stagesById.get(file.id) ?? [],
+          detail: family.detail.has(file.id)
+            ? discovered[family.detail.get(file.id)!].default
+            : null,
+          storyHasCompare: hasBlock(sidecar?.body ?? '', 'compare'),
           sets,
           appearances: (appearancePieces.get(file.id) ?? []).filter(
             (other) => other.id !== piece?.id,
