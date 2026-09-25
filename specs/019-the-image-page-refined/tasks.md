@@ -321,7 +321,7 @@ headers to confirm nothing was duplicated or dropped. -->
       green (count recorded); a mutation, reverted: `restAt` changed in
       `compare.ts` alone → the `EXPECTED` case fails naming it._
 
-- [ ] **T1708** — The compare, enhanced. Pattern: the current
+- [x] **T1708** — The compare, enhanced. Pattern: the current
       `enhanceCompare` and its comment (kept: why it runs at module
       evaluation and at `astro:before-swap`), `BaseLayout.astro`'s two
       calls (unchanged), spec 018's T1604c Verify for the swap read.
@@ -359,6 +359,35 @@ headers to confirm nothing was duplicated or dropped. -->
       `FRAME_IMG` query); `git diff -U0 main -- src/styles/global.css | grep '^@@'`
       listed. Where the headless run cannot synthesise a touch drag or
       a pinch it says so line by line, and the pause asks the person._
+
+      **T1708 browser record (Firefox 156 headless via BiDi, preview
+      build at 4e6d229; identical at 1512×982 and 1280×1440 except
+      positions):** load: data-js, view slider, control Slider chosen,
+      legend Camera·Tones·Finished, handle a tabindex-0 slider, note
+      aria-live polite, captions display none, 0 animations, FRAME_IMG
+      over the compare empty. Rest: split 50, parts left/right/off,
+      valuenow 50, valuetext "Camera | Tones". Handle 44×44 (2.75rem)
+      centred on the 1px divider and on the frames (666.40×444.27):
+      1512 → cx 748.5 cy 491.28; 1280 → cx 632.5 cy 719.72; fill
+      oklch(0.99 0.003 100) (--color-bg), radius 50%, no shadow. Drags
+      at 25/50/75 → 25.01 / 50.08 / 74.99, parts off,left,right at 25
+      ("Tones | Finished"), left,right,off at 50. ← from 74.99 → 72.99
+      (step 2), focus stays; Home 0, End 100, PageDown 90. Side: fresh,
+      three motion-appear 180ms on the panes, sessionStorage
+      compare-mode=side; panes 327.2×218.13, gap 12.8 (1512: left 415
+      and 755; 1280: 299 and 639); legend buttons Camera+Tones chosen;
+      picking Finished → off,left,right. Switch: on,off,off, note
+      Camera; click → during under,in,off (in-stage motion-appear
+      180ms) → off,on,off; Space → off,off,on; Enter → on,off,off; →
+      then ← as expected; the path never changes. Stored mode: the fog
+      piece (authored switch) opens in side after the page chose it;
+      fresh openings: piece switch, page slider. Swap from fog-frames:
+      at astro:after-swap data-js, slider, compare 504 / frames 444,
+      equal to a full load; a drag after the swap → 25.01. No script
+      (sandboxed iframe): no chrome, three stacked stages, captions
+      shown. Touch-type pointer drag 20→60% → 59.98. 480px: data-narrow,
+      frames 433, side panes stacked (both 433 wide); back up: narrow
+      off, 666, still side, split 50. Nothing in the list unmeasured.
 
 - [ ] **T1709** — The first look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 1
@@ -717,6 +746,8 @@ tier if it is ever on (it is off). -->
 | T1706 static form, page section | implementation (`opus`, high) | ~130k (two rounds) | done; 493 tests; 3 compares in one shape; stopped once on matte.test.mjs (b), whose pinned page rules the plan deletes — orchestrator resolved it as a retarget to the new section with an empty --color-matte list T1708 extends, both mutations fail; carried to the pause: a sidecar stage note prints as literal text while the block renders inline Markdown (`_Fixture stage._` shows underscores); no browser read (no BiDi helper in the repo) — the person attests; stale page comments left for T1708 |
 | T1707 compare state | implementation (`opus`, high) | ~55k | done; 508 tests (+15); restAt mutation fails EXPECTED by name; switchNext and openingMode take an optional trailing argument defaulting to the constant so the no-wrap and no-remember paths are testable; restView('side') is the pair the slider shows at rest; split carries float noise at thirds (T1708 rounds where it writes it) |
 | D1708 decision review (the compare's chrome and --color-matte) | top (`fable`, high, override) | ~43k | option B: every fill in the compare section reads `--color-bg`, the ground; matte.test.mjs (b) and (d) untouched — a matte-white bar on paper is a mat by spec 017's definition, and spec 006's comment was a fact about the page's white then, not a decision; plan.md's two mentions corrected; DECISIONS.md at close-out |
+| T1708 compare enhanced | implementation (`opus`, high) | ~165k (two rounds) | done; 517 tests (+9); stopped once on D1708; no browser would start in its sandbox ("Could not find profile folder"); orchestrator miss: the D1708 plan commit (`git commit -a`) swept the implementer's uncommitted draft into aee4e7e — the decision's fills landed in 4e6d229; carried: no legend-shape pin in (c) though the envelope table names one; the legend runs left→right while the slider's track runs right→left (first stage whole at the right edge); with sideNarrow 'switch' the control would still show Side by side (not today's setting) |
+| T1708 browser pass | general-purpose (session tier, medium) | ~98k | every read taken at both viewports, recorded under T1708; the driver had four duplicate `const f` declarations, fixed in the scratchpad copy; Firefox launches via `open -na` with HOME overridden and MOZ_HEADLESS=1 (the direct binary cannot find a profile under this macOS) |
 
 _(Session-tier allowance draw noted at each pause.)_
 
