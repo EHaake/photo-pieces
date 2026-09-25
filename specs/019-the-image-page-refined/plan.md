@@ -200,7 +200,10 @@ where the simpler shape was taken it is said in one line.
      "no page ships a loupe state", and the compare's no-script pin.
   3. Every `.compare` in any page's markup — a piece's, a sidecar
      story's, the image page's section — has the one shape: its
-     class-bearing descendants, read by a small tag-depth walk from the
+     `compare-`-classed descendants and its `img`s (any other element,
+     such as a wrapper Astro's image pipeline or `pieceWrap` adds, is
+     transparent — its children count as its parent's; amended at the
+     Phase 0 review), read by a small tag-depth walk from the
      figure's open tag to its matching close, form `compare-frames` >
      two or more `compare-stage`, each `compare-pane` > `img` then
      `compare-caption` > `compare-label` and at most one `compare-note`,
@@ -212,7 +215,10 @@ where the simpler shape was taken it is said in one line.
   read from T1710 on and scan 3 a compare in the new shape from T1706 on
   (T1703 writes scan 3 against the shape in `COMPARE_CLASSES`, and it
   skips spec 006's old compare — a `.compare` holding `.compare-range`
-  — until T1706 removes it; the skip is deleted at T1706). The summary
+  — until T1706 removes it; the skip is deleted at T1706. As built the
+  one skip also cuts that old compare out of scan 2, since spec 006's
+  markup ships `compare-tag` and `compare-line`; T1706 deletes both
+  uses — amended at the Phase 0 review). The summary
   line's counts show what each scan read. The motion barrier is not edited: these
   attributes are not motion.
 
@@ -645,7 +651,7 @@ The barrier, green and failing:
 [check-private-files] a compare out of shape in dist/pieces/x/index.html: compare-stage > compare-caption before compare-pane
 [check-private-files] a detail export named outside its loupe in dist/galleries/fog-frames/index.html: /_astro/…webp
 [check-private-files] a loupe file missing from dist/: /_astro/…webp (dist/images/where-the-fog-lets-go/land-b/index.html)
-[check-private-files] a loupe file over 25 MiB: dist/_astro/…webp (31.2 MiB)
+[check-private-files] a loupe file over 25.0 MiB: dist/_astro/…webp (31.2 MiB)
 [check-private-files] a script-only state in the markup of dist/pieces/x/index.html: data-js
 ```
 

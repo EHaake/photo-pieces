@@ -288,8 +288,9 @@ headers to confirm nothing was duplicated or dropped. -->
       the closing fullbleed, one sentence of fixture prose and
       `:::compare{mode="switch"}` with `_land-b.jpg`, `_land-b.tones.jpg`
       and `land-b.jpg`, labels Camera, Tones, Finished, a fixture note
-      each. `scripts/check-private-files.mjs`: scan 3's spec-006 skip
-      deleted, and its `private-files.test.mjs` case turned from exit 0
+      each. `scripts/check-private-files.mjs`: the spec-006 skip
+      (one block, cutting the old compare from scans 2 and 3 — Phase 0
+      review) deleted, and its `private-files.test.mjs` case turned from exit 0
       to exit 1. `src/lib/compare.ts` is not touched: spec 006's
       `enhanceCompare` finds no `.compare-range` in the new markup and
       `continue`s past every figure, so it does nothing until T1708
@@ -709,6 +710,7 @@ tier if it is ever on (it is off). -->
 | T1701 private-file family | implementation (`opus`, high) | ~84k | done; 428 tests; both mutations fail the named cases; compareStages takes/returns { src, label, note } (T1702 maps key → src); resolveStages reads the photograph name from `where` |
 | T1702 registry, schema, fixtures | implementation (`opus`, high) | ~66k | done; 87 pages, 428 tests; fixture sizes: detail 125,235 B (5400×3600, flat), tones 16,333 B, sampler frame 14,962 B, test tones 472 B; all three site fixtures carry GPS; the private-file heading is now `[images] private file(s):`; second-frame line keeps attachPrivatesx27 wording (second-detail shape plus "(any accepted extension)") |
 | T1703 private-files barrier | implementation (`opus`, high) | ~57k | done; 446 tests (+18); Cloudflare Workers static assets per-file limit confirmed 25 MiB, Free and Paid, https://developers.cloudflare.com/workers/platform/limits/ (curl, 2026-09-24) — MAX_BYTES stays; the temporary spec-006 skip covers scan 2 as well as scan 3 (the old markup ships compare-tag/compare-line), one skip, T1706 deletes both uses and flips the test case to exit 1 |
+| Phase 0 review | implementation (`opus`, high) | ~96k | signed off, nothing blocking; three plan-text notes transcribed (scan 3 reads compare-classed elements and img only; the skip covers scan 2; `over 25.0 MiB`); the style-half of one barrier test cannot fail on its own, `MAX_BYTES` and the width list each spelled twice, `resolveStages` parsing `where` for the name, a live gap until T1706 (stages without a frame) — carried to the sweep; `privateTargetOf`'s remaining callers checked by the orchestrator: messages only (image-meta.mjs:365 unread target, :1118, remark-pieces-blocks.mjs:746) |
 
 _(Session-tier allowance draw noted at each pause.)_
 
