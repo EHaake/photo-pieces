@@ -131,7 +131,7 @@ headers to confirm nothing was duplicated or dropped. -->
       transform's tests); the two mutations in plan.md's first testing
       bullet named and reverted, the tree restored byte-identically._
 
-- [ ] **T1702** — The registry reads the family; the schema's `stages`;
+- [x] **T1702** — The registry reads the family; the schema's `stages`;
       the fixtures. Pattern: `src/lib/images.ts`'s camera's-frame loop
       and its orphan-sidecar collection (the all-at-once throw);
       `src/content.config.ts`'s `imageMeta` field comments;
@@ -707,6 +707,7 @@ tier if it is ever on (it is off). -->
 | Sign-off re-review | top (`fable`, high, override) | ~40k | signed off; five non-blocking lines below. Against 018: planning 390,978 at the top tier → ~434k at the implementation tier here (draft + fix round); sign-off 197,107 → ~160k |
 | T1700 constitution amendment | implementation (`opus`, high) | ~36k | done; prettier failed on a pre-existing defect (role table padding, one indented line) — fixed on `main` in c4c5e86 and merged in, not part of this task |
 | T1701 private-file family | implementation (`opus`, high) | ~84k | done; 428 tests; both mutations fail the named cases; compareStages takes/returns { src, label, note } (T1702 maps key → src); resolveStages reads the photograph name from `where` |
+| T1702 registry, schema, fixtures | implementation (`opus`, high) | ~66k | done; 87 pages, 428 tests; fixture sizes: detail 125,235 B (5400×3600, flat), tones 16,333 B, sampler frame 14,962 B, test tones 472 B; all three site fixtures carry GPS; the private-file heading is now `[images] private file(s):`; second-frame line keeps attachPrivatesx27 wording (second-detail shape plus "(any accepted extension)") |
 
 _(Session-tier allowance draw noted at each pause.)_
 
