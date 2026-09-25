@@ -79,7 +79,7 @@ headers to confirm nothing was duplicated or dropped. -->
 
 ## Phase 0 — Foundation: the constitution, the private-file family, the registry, the barrier (reviewer after the phase; walkthrough: none — the new private files have no page and the sidecar's stages are read but not yet shown; the one visible difference is the sampler's `land-b` gaining the existing two-frame compare from its new fixture frame, which is spec 006's behaviour, not something new to try; the barrier moves nothing; runs on without a pause)
 
-- [ ] **T1700** — The constitution, amended before any code, in its own
+- [x] **T1700** — The constitution, amended before any code, in its own
       commit. Pattern: plan.md's "The constitution, first" — the four
       edits verbatim. `CLAUDE.md` only: the Architecture paragraph's
       sidecar phrase ("frontmatter-only" out; "an optional sidecar
@@ -705,6 +705,7 @@ tier if it is ever on (it is off). -->
 | Plan and tasks sign-off | top (`fable`, high, override) | ~120k | blocked: B1 slider segment order (middle stage at both ends), B2 AC 6 vs the borrowed-public allowance, untested, B3 CLAUDE.md "frontmatter-only" sidecar; nine second-look notes |
 | Sign-off fixes (planner resumed) | implementation (`opus`, high) | ~60k | B1–B3 fixed; S1–S8 taken, S9 in part |
 | Sign-off re-review | top (`fable`, high, override) | ~40k | signed off; five non-blocking lines below. Against 018: planning 390,978 at the top tier → ~434k at the implementation tier here (draft + fix round); sign-off 197,107 → ~160k |
+| T1700 constitution amendment | implementation (`opus`, high) | ~36k | done; prettier failed on a pre-existing defect (role table padding, one indented line) — fixed on `main` in c4c5e86 and merged in, not part of this task |
 
 _(Session-tier allowance draw noted at each pause.)_
 
