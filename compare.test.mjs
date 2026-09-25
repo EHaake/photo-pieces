@@ -45,7 +45,8 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     rule in the compare's section animates or transitions; `--split` is
 //     registered as a number so the glide can run; and the script writes
 //     `data-settling` only when motion is not reduced (the settle is a
-//     movement), the two fades kept.
+//     movement), the two fades kept. And the legend and control rule by
+//     its exact body (T1708a): the legend's shape is that rule.
 //
 // (d) The state (T1707). `EXPECTED` below is the tunables' one other
 //     copy: every COMPARE key and value and COMPARE_WORDING, so a value
@@ -59,6 +60,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     (spec 006's compare) — and the snap, the side pair, the switch's
 //     step with and without wrapping, the view at rest per method, whose
 //     note shows, the side-by-side fit, and the method a block opens in.
+//     And the page's own words (T1708a): WORDING.compare, the section's
+//     heading and the two labels, read from the page's source as literal
+//     strings, and the template reading them from there.
 
 /** The tunables and the words, verbatim as src/lib/compare.ts carries
  *  them: to retune, move the value in src/lib/compare.ts and here. */
@@ -284,6 +288,24 @@ describe("(c) the compare's motion (T1708)", () => {
     expect(writes.length).toBeGreaterThan(0);
     expect(writes.filter((line) => !/if \(!reducedMotion\(\)\)/.test(line))).toEqual([]);
   });
+
+  it('the legend and control rule is exactly its shape (T1708a) — the legend\'s round edits it and this string', () => {
+    expect(
+      ruleAt(rulesIn(css), '.compare[data-js] .compare-legend, .compare[data-js] .compare-control'),
+    ).toEqual({
+      display: 'flex',
+      'flex-wrap': 'wrap',
+      gap: '0.25rem 1rem',
+      margin: 'calc(var(--baseline) / 3) 0 0',
+      padding: '0',
+      'list-style': 'none',
+      color: 'var(--color-muted)',
+      'font-family': 'var(--font-mono)',
+      'font-size': '0.68rem',
+      'letter-spacing': '0.04em',
+      'text-transform': 'uppercase',
+    });
+  });
 });
 
 describe('(d) the state (T1707)', () => {
@@ -296,6 +318,15 @@ describe('(d) the state (T1707)', () => {
 
   it("COMPARE_WORDING holds exactly EXPECTED's words", () => {
     expect(COMPARE_WORDING).toEqual(EXPECTED.COMPARE_WORDING);
+  });
+
+  it("the page's WORDING.compare is exactly its heading and two labels, by page source (T1708a)", () => {
+    const found = page.match(/^ {2}compare: (\{[^}\n]*\}),$/gm) ?? [];
+    expect(found).toEqual([
+      "  compare: { heading: 'Raw to finished', camera: 'Camera', finished: 'Finished' },",
+    ]);
+    expect(page).toContain('{WORDING.compare.heading}');
+    expect(page).toContain('WORDING.compare,');
   });
 
   // [p, pair, split]: the pair the frame shows with the handle at p;

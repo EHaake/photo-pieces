@@ -173,15 +173,29 @@ const recordRows = (
 // processing note — built below in the block's own markup, so the
 // transform and this page are two builders of one shape (the barrier's
 // third scan). The registry's stages carry their file as `image`.
-const compare: { src: ImageMetadata; label: string; note?: string }[] = shows('compare')
-  ? compareStages(
-      {
-        before: image.before,
-        stages: image.stages.map(({ image: src, label, note }) => ({ src, label, note })),
-        image: image.image,
-        processing: image.record.processing,
-      },
-      WORDING.compare,
+// A note is inline Markdown, as the block's is (T1708a): rendered, its
+// one paragraph's <p> unwrapped, since it sits inside the note's span.
+type CompareStage = { src: ImageMetadata; label: string; note?: string };
+const compare: CompareStage[] = shows('compare')
+  ? await Promise.all(
+      compareStages(
+        {
+          before: image.before,
+          stages: image.stages.map(({ image: src, label, note }) => ({ src, label, note })),
+          image: image.image,
+          processing: image.record.processing,
+        },
+        WORDING.compare,
+      ).map(async (stage: CompareStage) =>
+        stage.note === undefined
+          ? stage
+          : {
+              ...stage,
+              note: (await renderMarkdown(stage.note))
+                .trim()
+                .replace(/^<p>((?:(?!<\/?p>)[\s\S])*)<\/p>$/, '$1'),
+            },
+      ),
     )
   : [];
 
@@ -417,7 +431,7 @@ const indexed =
                       {note && (
                         <>
                           {' '}
-                          <span class={COMPARE_CLASSES.note}>{note}</span>
+                          <span class={COMPARE_CLASSES.note} set:html={note} />
                         </>
                       )}
                     </figcaption>

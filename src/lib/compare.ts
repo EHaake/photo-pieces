@@ -215,7 +215,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   const n = stages.length;
   const words = stages.map((stage) => ({
     label: stage.querySelector(`.${C.label}`)?.textContent?.trim() ?? '',
-    note: stage.querySelector(`.${C.note}`)?.textContent?.trim() ?? '',
+    note: stage.querySelector(`.${C.note}`),
   }));
   const make = <K extends keyof HTMLElementTagNameMap>(
     tag: K,
@@ -353,9 +353,14 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
 
     if (note !== noted) {
       noted = note;
-      const { label, note: text } = words[note];
+      const { label, note: from } = words[note];
       const parts: (string | HTMLElement)[] = [make('span', C.label, label)];
-      if (text) parts.push(' ', make('span', C.note, text));
+      if (from?.textContent?.trim()) {
+        // The note's children, cloned: its emphasis or link survives (T1708a).
+        const copy = make('span', C.note);
+        copy.append(...Array.from(from.childNodes, (child) => child.cloneNode(true)));
+        parts.push(' ', copy);
+      }
       now.replaceChildren(...parts);
     }
   };
