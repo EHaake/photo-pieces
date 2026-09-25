@@ -23,7 +23,7 @@ if [ "$only" != tests ]; then
   # Anything the registry, the transform, or Astro flagged, capped.
   grep -nE "error|Error|ERROR|warn|WARN|\[images\]|\[places\]|failed|Failed" "$LOGDIR/build.log" \
     | grep -vE "no GPS|0 errors|0 warnings" | head -n 30
-  grep -E "page\(s\) built|Indexed [0-9]+ pages|\[prune-originals\]|\[check-no-gps\]|\[check-no-dev-routes\]|\[check-motion\]|BUILD EXIT" "$LOGDIR/build.log"
+  grep -E "page\(s\) built|Indexed [0-9]+ pages|\[prune-originals\]|\[check-no-gps\]|\[check-private-files\]|\[check-no-dev-routes\]|\[check-motion\]|BUILD EXIT" "$LOGDIR/build.log"
   if ! grep -q "BUILD EXIT 0" "$LOGDIR/build.log"; then
     echo "--- last 40 lines"; tail -n 40 "$LOGDIR/build.log"
   fi
