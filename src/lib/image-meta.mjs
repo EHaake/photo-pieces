@@ -13,6 +13,8 @@
 // already be slugs so ids match Astro's piece ids without re-running
 // its slugger; that is validated here, loudly, with a rename hint.
 
+import { EMPTY_GEAR } from './gear.mjs';
+
 export const IMAGE_EXTENSIONS = Object.freeze(['jpg', 'jpeg', 'png', 'webp', 'avif', 'tiff']);
 
 /** The flat root for images that belong to no piece, and the folder
@@ -819,14 +821,17 @@ export const EXPOSURE_FIELDS = Object.freeze([
  * exifr's real value shapes: numbers for ExposureTime (seconds, e.g.
  * 0.004), FNumber, FocalLength, and ISO; a Date for DateTimeOriginal.
  * Fields absent from the file are absent from the result — the page
- * prints what exists and nothing else.
+ * prints what exists and nothing else. `gear` is the parsed gear table
+ * (gear.mjs): a camera's Model or a lens string it lists prints as its
+ * display name; one it lacks prints as today.
  */
-export function formatExposure(raw) {
+export function formatExposure(raw, gear = EMPTY_GEAR) {
   const tags = raw ?? {};
   const out = {};
-  const camera = formatCamera(tags.Make, tags.Model);
+  const camera = gear.cameras.get(cleanString(tags.Model)) ?? formatCamera(tags.Make, tags.Model);
   if (camera) out.camera = camera;
-  const lens = cleanString(tags.LensModel);
+  const lensModel = cleanString(tags.LensModel);
+  const lens = gear.lenses.get(lensModel) ?? lensModel;
   if (lens) out.lens = lens;
   if (isPositive(tags.FocalLength)) out.focalLength = `${trimNumber(tags.FocalLength)} mm`;
   if (isPositive(tags.FNumber)) out.aperture = `f/${trimNumber(tags.FNumber)}`;

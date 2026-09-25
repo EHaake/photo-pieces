@@ -4,6 +4,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { readExposure } from './exif.mjs';
+import { GEAR_FILE, parseGearTable, unknownGear } from './gear.mjs';
 import type { SetKind } from './image-set';
 import { byNewestPublished, byOldestPublished, isPublished } from './pieces';
 import {
@@ -627,16 +628,20 @@ async function buildRegistry(): Promise<ImageRegistry> {
     for (const id of shown) push(appearancePieces, id, piece);
   }
 
-  // The published set, with labels.
+  // The published set, with labels. The gear table (spec 019) names
+  // the camera and lens; each image's raw tags are kept, in file order,
+  // for the warnings below.
+  const gear = parseGearTable(await readFile(new URL(GEAR_FILE, root), 'utf8'), GEAR_FILE);
+  const rawTags: { file: string; raw: object }[] = [];
   const images = await Promise.all(
     files
       .filter((file) => known.get(file.id) === 'published')
-      .map(async (file): Promise<SiteImage> => {
+      .map(async (file, index): Promise<SiteImage> => {
         const piece = file.pieceSlug === null ? null : (pieceById.get(file.pieceSlug) ?? null);
         const sidecar = sidecars.get(file.id) ?? null;
-        const exposure = formatExposure(
-          await readExposure(fileURLToPath(new URL(`.${file.key}`, root))),
-        );
+        const raw = await readExposure(fileURLToPath(new URL(`.${file.key}`, root)));
+        rawTags[index] = { file: file.key.slice(1), raw };
+        const exposure = formatExposure(raw, gear);
         const label: ImageLabel = mergeOverrides(exposure, sidecar?.data);
         Object.assign(label, pick(sidecar?.data, ['place', 'time']));
         const inGalleries = galleries.filter((gallery) => gallery.data.images.includes(file.id));
@@ -734,6 +739,11 @@ async function buildRegistry(): Promise<ImageRegistry> {
         };
       }),
   );
+  for (const { kind, value, file } of unknownGear(rawTags, gear)) {
+    console.warn(
+      `[gear] no display name for the ${kind} "${value}" (first in ${file}) — add it to ${GEAR_FILE}`,
+    );
+  }
 
   const byId = new Map(images.map((image) => [image.id, image]));
 
