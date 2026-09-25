@@ -414,7 +414,11 @@ where the simpler shape was taken it is said in one line.
   `.compare[data-js]`: the frames one box at `aspect-ratio: var(--ar)`,
   `overflow: hidden`, the stages overlaid (`position: absolute; inset:
   0`) outside side by side, the panes' images `object-fit: contain` on
-  `--color-matte` (spec 006's letterbox, unchanged in meaning), the
+  `--color-bg` (spec 006's letterbox, unchanged in meaning: at 006 it read
+  `--color-matte` because that was the page's white; since spec 017 the
+  page's white is the paper ground and the matte token is the quiet
+  frame's alone — matte.test.mjs (b) and (d) stay unedited, as the
+  task's Verify says; decision review D1708, 2026-09-24), the
   static captions `display: none` (the legend and the live note carry
   them), `[data-part='off']` `visibility: hidden` in every view (and
   `"under"` beneath `"in"`), the slider's left stage `clip-path: inset(0 calc(100% -
