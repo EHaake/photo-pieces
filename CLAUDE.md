@@ -541,7 +541,12 @@ orchestrator re-runs the command itself before committing.
   implements part of some spec's `tasks.md`, not whether the file
   appears on a list. If it doesn't: commit it to `main`, push, and say
   so in the report. This line is the permission; don't ask for it
-  again.
+  again. The one amendment that fails the test is the one a spec
+  needs — a clause that describes a vocabulary, a rule or a file that
+  exists only on that spec's branch. It rides the branch as the spec's
+  first commit, before any code, so `main` never asserts what its own
+  code rejects, and arrives with the spec (decided at spec 019's
+  sign-off; spec 017 did the same).
 - **Branch anyway when the change wants a diff someone will look at** —
   a dependency bump, a refactor with no spec behind it, anything where
   being wrong is expensive or awkward to unwind. Use
