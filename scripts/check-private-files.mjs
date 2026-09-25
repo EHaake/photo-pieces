@@ -94,7 +94,7 @@ function compares(markup) {
   const found = [];
   const tags = [...markup.matchAll(TAG)];
   for (let i = 0; i < tags.length; i += 1) {
-    const [, closing, name, attributes] = tags[i];
+    const [, closing, , attributes] = tags[i];
     if (closing || !classesOf(attributes).includes(COMPARE_CLASSES.root)) continue;
     const top = { name: COMPARE_CLASSES.root, children: [] };
     const stack = [top]; // read nodes, innermost last
@@ -121,9 +121,6 @@ function compares(markup) {
   }
   return found;
 }
-
-const holds = (node, name) =>
-  node.children.some((child) => child.name.split('.').includes(name) || holds(child, name));
 
 /** The first way a compare departs from the one shape, or null. */
 function outOfShape(top) {
@@ -203,16 +200,8 @@ for await (const file of files(root)) {
     }
   }
 
-  let markup = text.replace(COMMENT, '').replace(SCRIPT, '').replace(STYLE, '');
-  const found = compares(markup);
-  // Temporary: spec 006's compare on the image page (a `.compare` holding
-  // `.compare-range`, with its `compare-tag` and `compare-line` spans) is
-  // skipped by the shape scan and cut from the state scan until T1706
-  // rebuilds that section in the shared shape. T1706 deletes this skip.
-  const old = found.filter(({ node }) => holds(node, 'compare-range'));
-  for (const { start, end } of [...old].reverse()) markup = markup.slice(0, start) + markup.slice(end);
-  for (const { node } of found) {
-    if (old.some((one) => one.node === node)) continue;
+  const markup = text.replace(COMMENT, '').replace(SCRIPT, '').replace(STYLE, '');
+  for (const { node } of compares(markup)) {
     shaped += 1;
     const problem = outOfShape(node);
     if (problem) problems.push(`[check-private-files] a compare out of shape in ${file}: ${problem}`);

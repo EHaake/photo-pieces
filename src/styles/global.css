@@ -2026,6 +2026,85 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   cursor: zoom-out;
 }
 
+/* ---- The compare (spec 019) ------------------------------------------
+   One block, two builders: the `:::compare` transform in a piece or a
+   sidecar story, and the image page's "Raw to finished" section, both
+   emitting one markup — so its rules live here, where a piece can reach
+   them, not in a page's scoped styles. The class names are
+   COMPARE_CLASSES (src/lib/image-meta.mjs), spelled a second time here
+   because CSS cannot import; compare.test.mjs pins that each has a rule.
+   What follows is the block's static form — the stages stacked as
+   figures in the column, each with its label and note — and that is the
+   page without script; the enhanced rules follow at T1708. The width
+   classes are COMPARE_WIDTHS: the column, or centred out of it the
+   `.piece-wide` way. */
+
+/* The figure's own margin cleared at zero specificity, so a piece's
+   `.piece-block` spacing and the width classes below still apply. */
+:where(.compare) {
+  margin: 0;
+}
+
+.compare-frames {
+  display: grid;
+  /* Prose spacing between the stages: the figure is unmatted (spec 015). */
+  gap: calc(var(--baseline) / 2);
+}
+
+.compare-stage {
+  margin: 0;
+}
+
+.compare-pane {
+  display: block;
+}
+
+.compare-pane img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The caption: the label in the mono eyebrow of spec 006's corner tag,
+   then the note in the caption style the blocks use
+   (`.piece-block figcaption`). */
+.compare-caption {
+  margin: calc(var(--baseline) / 3) 0 0;
+}
+
+.compare-label {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.compare-note {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.compare-w-column {
+  --w: 100%;
+  width: var(--w);
+  margin-inline: 0;
+}
+
+.compare-w-wide {
+  --w: min(var(--content-width), 96vw);
+  width: var(--w);
+  margin-inline: calc((100% - var(--w)) / 2);
+}
+
+.compare-w-stage {
+  --w: calc(100vw - 2 * var(--page-pad));
+  width: var(--w);
+  margin-inline: calc((100% - var(--w)) / 2);
+}
+
 /* ---- Motion (spec 018) -------------------------------------------------
    The motion that is not an inherited rule's, on the grammar's tokens
    in :root, added task by task. T1600: the page change's cross-fade —

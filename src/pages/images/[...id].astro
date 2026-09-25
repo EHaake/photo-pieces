@@ -16,6 +16,7 @@
 // Static HTML throughout; the script below is page-level enhancement:
 // the compare slider, quiet view, and set selection by route in.
 import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { CONTACT_EMAIL, SITE } from '../../consts';
@@ -28,7 +29,13 @@ import {
   relatedFlowStyle,
 } from '../../lib/gallery-layout';
 import { setKey, type SetKind } from '../../lib/image-set';
-import { sectionsFor } from '../../lib/image-meta.mjs';
+import {
+  COMPARE_CLASSES,
+  COMPARE_WIDTH,
+  compareSizes,
+  compareStages,
+  sectionsFor,
+} from '../../lib/image-meta.mjs';
 import { getImageRegistry } from '../../lib/images';
 import { plainText, renderMarkdown } from '../../lib/markdown';
 import { ogImageOptions } from '../../lib/og';
@@ -65,14 +72,7 @@ const WORDING = {
     support: 'Support',
     processing: 'Processing',
   },
-  compare: {
-    heading: 'Raw to finished',
-    before: "The camera's frame",
-    after: 'The finished photograph',
-    beforeTag: 'Camera',
-    afterTag: 'Finished',
-    reveal: 'Reveal the finished photograph',
-  },
+  compare: { heading: 'Raw to finished', camera: 'Camera', finished: 'Finished' },
   passage: { heading: 'In the piece', readInPlace: 'Read it in place →' },
   related: { heading: 'Related frames' },
   print: {
@@ -157,15 +157,32 @@ const labelRows: Row[] = placeRow.concat(
 );
 
 // "How it was made": the processing note lives with the compare when
-// the camera's frame exists (sectionsFor's rule), here otherwise.
+// the compare shows (sectionsFor's rule), here otherwise.
 const recordRows = (
   [
     ['format', image.record.format],
     ['filters', image.record.filters],
     ['support', image.record.support],
-    ['processing', image.before ? undefined : image.record.processing],
+    ['processing', shows('compare') ? undefined : image.record.processing],
   ] as const
 ).flatMap(([key, value]) => (value ? [{ term: WORDING.record[key], value }] : []));
+
+// Raw to finished (spec 019): the compare block's stages — the camera's
+// frame, the sidecar's declared stages, the photograph with its
+// processing note — built below in the block's own markup, so the
+// transform and this page are two builders of one shape (the barrier's
+// third scan). The registry's stages carry their file as `image`.
+const compare: { src: ImageMetadata; label: string; note?: string }[] = shows('compare')
+  ? compareStages(
+      {
+        before: image.before,
+        stages: image.stages.map(({ image: src, label, note }) => ({ src, label, note })),
+        image: image.image,
+        processing: image.record.processing,
+      },
+      WORDING.compare,
+    )
+  : [];
 
 const printRows = (
   [
@@ -372,47 +389,39 @@ const indexed =
       }
 
       {
-        shows('compare') && image.before && (
+        shows('compare') && (
           <section class="sec sec-compare" aria-labelledby="sec-compare">
             <h2 class="sec-title" id="sec-compare">
               {WORDING.compare.heading}
             </h2>
-            <figure class="compare" style={`--ar: ${ar}`}>
-              <div class="compare-frames">
-                <div class="compare-frame compare-before">
-                  <Image
-                    src={image.before}
-                    alt={WORDING.compare.before}
-                    layout="constrained"
-                    width={Math.min(image.before.width, 1400)}
-                    sizes="(min-width: 800px) 700px, 94vw"
-                  />
-                  <span class="compare-tag">{WORDING.compare.beforeTag}</span>
-                </div>
-                <div class="compare-frame compare-after">
-                  <Image
-                    src={image.image}
-                    alt={WORDING.compare.after}
-                    layout="constrained"
-                    width={Math.min(image.image.width, 1400)}
-                    sizes="(min-width: 800px) 700px, 94vw"
-                  />
-                  <span class="compare-tag">{WORDING.compare.afterTag}</span>
-                </div>
-                <span class="compare-line" aria-hidden="true" />
-                <input
-                  class="compare-range"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value="50"
-                  aria-label={WORDING.compare.reveal}
-                  hidden
-                />
+            <figure
+              class={`${COMPARE_CLASSES.root} ${COMPARE_CLASSES.root}-w-${COMPARE_WIDTH.page}`}
+              style={`--ar: ${ar}`}
+            >
+              <div class={COMPARE_CLASSES.frames}>
+                {compare.map(({ src, label, note }) => (
+                  <figure class={COMPARE_CLASSES.stage}>
+                    <span class={COMPARE_CLASSES.pane}>
+                      <Image
+                        src={src}
+                        alt={label}
+                        layout="constrained"
+                        width={Math.min(src.width, 1400)}
+                        sizes={compareSizes(COMPARE_WIDTH.page)}
+                      />
+                    </span>
+                    <figcaption class={COMPARE_CLASSES.caption}>
+                      <span class={COMPARE_CLASSES.label}>{label}</span>
+                      {note && (
+                        <>
+                          {' '}
+                          <span class={COMPARE_CLASSES.note}>{note}</span>
+                        </>
+                      )}
+                    </figcaption>
+                  </figure>
+                ))}
               </div>
-              {image.record.processing && (
-                <figcaption class="compare-note">{image.record.processing}</figcaption>
-              )}
             </figure>
           </section>
         )
@@ -668,126 +677,6 @@ const indexed =
   }
   .in-piece-caption {
     font-style: italic;
-  }
-
-  /* Raw to finished. Without script: the two frames stacked, before
-     above after, each labelled. With script (data-js): one box at the
-     photograph's ratio, the frames overlaid, the camera's frame
-     letterboxed if its crop differs and clipped at --split (unitless
-     0–100, so calc() multiplies a length by a number), a hairline
-     divider, and an invisible full-area range input for pointer and
-     keyboard — with the focus ring drawn on the box. */
-  .compare {
-    --split: 50;
-    /* The one place --split becomes a length: the clip and the divider
-       both read it. */
-    --split-pct: calc(var(--split) * 1%);
-    margin: 0;
-  }
-  .compare-frames {
-    display: grid;
-    /* Prose spacing, and it stays prose spacing: the figure is unmatted
-       since spec 015, and even while it was matted this gap was never
-       the mat (T1104a, the decision review of 2026-09-17) — --mat
-       carries 100%, which resolves against the reader's own containing
-       block, so it would have rendered a fraction of the figure's mat
-       rather than the mat. --mat is applied as `padding` and nowhere
-       else, on the two surfaces that still wear one. */
-    gap: calc(var(--baseline) / 2);
-  }
-  .compare-frame {
-    position: relative;
-  }
-  .compare-frame :global(img) {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  .compare-tag {
-    display: block;
-    margin-top: 0.35rem;
-    color: var(--color-muted);
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .compare-line {
-    display: none;
-  }
-  .compare-note {
-    /* Prose spacing — see .compare-frames above (T1104a, spec 015). */
-    margin: calc(var(--baseline) / 2) 0 0;
-    color: var(--color-muted);
-    font-size: 0.95rem;
-    line-height: 1.6;
-  }
-
-  .compare[data-js] .compare-frames {
-    display: block;
-    position: relative;
-    aspect-ratio: var(--ar);
-    overflow: hidden;
-  }
-  .compare[data-js] .compare-frame {
-    position: absolute;
-    inset: 0;
-  }
-  /* The letterbox fill behind a camera frame whose crop differs from
-     the finished one, and the divider below: the compare's own device
-     INSIDE its box, not a mat around a photograph (spec 015's resolved
-     decision). They read --color-matte because white is the white this
-     page has. */
-  .compare[data-js] .compare-frame :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: var(--color-matte);
-  }
-  .compare[data-js] .compare-before {
-    clip-path: inset(0 calc(100% - var(--split-pct)) 0 0);
-  }
-  .compare[data-js] .compare-tag {
-    position: absolute;
-    bottom: 0.5rem;
-    margin: 0;
-    padding: 0.15rem 0.45rem;
-    background: oklch(0 0 0 / 0.45);
-    color: white;
-    pointer-events: none;
-  }
-  .compare[data-js] .compare-before .compare-tag {
-    left: 0.5rem;
-  }
-  .compare[data-js] .compare-after .compare-tag {
-    right: 0.5rem;
-  }
-  /* The divider: the compare's device, not a mat — see the letterbox
-     fill above. */
-  .compare[data-js] .compare-line {
-    display: block;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: var(--split-pct);
-    width: 1px;
-    background: var(--color-matte);
-    box-shadow: 0 0 0 1px oklch(0 0 0 / 0.25);
-    pointer-events: none;
-  }
-  .compare-range {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    opacity: 0;
-    cursor: ew-resize;
-  }
-  .compare-frames:has(.compare-range:focus-visible) {
-    outline: 1px solid var(--color-accent);
-    outline-offset: 3px;
-    box-shadow: var(--focus-ring);
   }
 
   /* Quiet view: chrome gone, the ground dimmed to --color-quiet, the

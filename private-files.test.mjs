@@ -211,10 +211,10 @@ describe('the private-files barrier (T1703, spec 019)', () => {
       );
     });
 
-    // Temporary: spec 006's compare on the image page is skipped (and its
-    // compare-tag and compare-line spans cut from scan 2) until T1706
-    // rebuilds it; T1706 deletes the skip and turns this case to 1.
-    it("spec 006's compare (a .compare holding .compare-range) exits 0 until T1706", () => {
+    // Spec 006's compare, skipped until T1706 rebuilt the image page's
+    // section in the shared shape: now it is out of shape (scan 3) and
+    // its tag and divider are script-only states (scan 2).
+    it("spec 006's compare (a .compare holding .compare-range) fails both scans", () => {
       const old =
         '<figure class="compare"><div class="compare-frames">' +
         '<div class="compare-frame compare-before"><img src="/a.webp" alt=""><span class="compare-tag">Before</span></div>' +
@@ -223,8 +223,12 @@ describe('the private-files barrier (T1703, spec 019)', () => {
         '</div><figcaption class="compare-note">n</figcaption></figure>';
       const dir = site({ [PAGE]: html(old) });
       const result = run(dir);
-      expect(result.status).toBe(0);
-      expect(result.stdout).toContain('0 compares in one shape');
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(
+        `[check-private-files] a compare out of shape in ${join(dir, PAGE)}: compare > compare-note, not part of the shape`,
+      );
+      expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, PAGE)}: .compare-tag`);
+      expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, PAGE)}: .compare-line`);
     });
   });
 });
