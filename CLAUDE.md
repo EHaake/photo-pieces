@@ -218,17 +218,17 @@ that dispatch; without one, the agent's own frontmatter applies, and
 every agent definition defaults to the implementation tier except
 `sdd-implementer-fable`, which pins the top tier's model at medium.
 
-| Role                          | Dispatched as           | Model                   | Effort                    |
-| ----------------------------- | ----------------------- | ----------------------- | ------------------------- |
-| Spec conversation             | the spec session itself | session tier            | high (raised per session) |
-| Plan and tasks draft          | `sdd-planner`           | implementation tier (no override) | high            |
-| Plan and tasks sign-off       | `skeptical-reviewer`    | **top tier** (override) | high                      |
-| Decision review               | `skeptical-reviewer`    | **top tier** (override) | high                      |
-| Task implementation           | `sdd-implementer`       | implementation tier     | high                      |
-| Close-out task                | `sdd-implementer-fable` | top tier                | medium                    |
-| Per-task and phase review     | `skeptical-reviewer`    | implementation tier     | high                      |
-| Pre-merge sweep               | `skeptical-reviewer`    | implementation tier     | high                      |
-| Orchestration and bookkeeping | the session itself      | session tier            | medium                    |
+| Role                          | Dispatched as           | Model                             | Effort                    |
+| ----------------------------- | ----------------------- | --------------------------------- | ------------------------- |
+| Spec conversation             | the spec session itself | session tier                      | high (raised per session) |
+| Plan and tasks draft          | `sdd-planner`           | implementation tier (no override) | high                      |
+| Plan and tasks sign-off       | `skeptical-reviewer`    | **top tier** (override)           | high                      |
+| Decision review               | `skeptical-reviewer`    | **top tier** (override)           | high                      |
+| Task implementation           | `sdd-implementer`       | implementation tier               | high                      |
+| Close-out task                | `sdd-implementer-fable` | top tier                          | medium                    |
+| Per-task and phase review     | `skeptical-reviewer`    | implementation tier               | high                      |
+| Pre-merge sweep               | `skeptical-reviewer`    | implementation tier               | high                      |
+| Orchestration and bookkeeping | the session itself      | session tier                      | medium                    |
 
 <!-- Spec 018 ran stepped down to Opus 5.5 throughout at the person's
 request (2026-09-23, low Fable allowance); restored at 018's merge,
@@ -407,7 +407,7 @@ to read spec.md, plan.md or tasks.md in full. -->
   orchestrator dispatches for that check alone — never from the
   implementer's report read as if it had looked. Such a pass costs
   mostly re-read context, so: fold waits into the next call (`sleep 2
-  && <screenshot>`, or wait on a condition) rather than spending a turn
+&& <screenshot>`, or wait on a condition) rather than spending a turn
   on a bare sleep; split a long pass into one dispatch per checklist
   section, each given only its section and returning a short pass/fail
   list; and leave the pass only what needs eyes — a check with a
