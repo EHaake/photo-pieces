@@ -169,7 +169,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `git diff main -- 'src/pages/images/[...id].astro'` empty (the
       page is T1706's)._
 
-- [ ] **T1703** — The private-files barrier. Pattern:
+- [x] **T1703** — The private-files barrier. Pattern:
       `scripts/check-motion.mjs` (the dir argument, stripping `<script>`
       and `<style>` before the markup scan, `[name]` lines, `exit 1`
       naming files, one summary line) and `gps-barrier.test.mjs` (temp
@@ -708,6 +708,7 @@ tier if it is ever on (it is off). -->
 | T1700 constitution amendment | implementation (`opus`, high) | ~36k | done; prettier failed on a pre-existing defect (role table padding, one indented line) — fixed on `main` in c4c5e86 and merged in, not part of this task |
 | T1701 private-file family | implementation (`opus`, high) | ~84k | done; 428 tests; both mutations fail the named cases; compareStages takes/returns { src, label, note } (T1702 maps key → src); resolveStages reads the photograph name from `where` |
 | T1702 registry, schema, fixtures | implementation (`opus`, high) | ~66k | done; 87 pages, 428 tests; fixture sizes: detail 125,235 B (5400×3600, flat), tones 16,333 B, sampler frame 14,962 B, test tones 472 B; all three site fixtures carry GPS; the private-file heading is now `[images] private file(s):`; second-frame line keeps attachPrivatesx27 wording (second-detail shape plus "(any accepted extension)") |
+| T1703 private-files barrier | implementation (`opus`, high) | ~57k | done; 446 tests (+18); Cloudflare Workers static assets per-file limit confirmed 25 MiB, Free and Paid, https://developers.cloudflare.com/workers/platform/limits/ (curl, 2026-09-24) — MAX_BYTES stays; the temporary spec-006 skip covers scan 2 as well as scan 3 (the old markup ships compare-tag/compare-line), one skip, T1706 deletes both uses and flips the test case to exit 1 |
 
 _(Session-tier allowance draw noted at each pause.)_
 
