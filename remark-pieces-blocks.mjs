@@ -4,6 +4,10 @@ import { basename as folderOf, dirname, resolve } from 'node:path';
 import { imageMetadata } from 'astro/assets/utils';
 import { visit } from 'unist-util-visit';
 import {
+  COMPARE_CLASSES,
+  COMPARE_MODES,
+  COMPARE_WIDTH,
+  compareSizes,
   IMAGE_EXTENSIONS,
   ImageIdError,
   imageIdFor,
@@ -24,7 +28,9 @@ import {
 // Each block is a descriptor (spec 003's block-descriptor model):
 //
 //   forms:   'container' | 'both'
-//   body:    'caption' | 'prose' | 'images+caption'
+//   body:    'caption' | 'prose' | 'images+caption' | 'stages'
+//   structure: 'unwrap' | 'split' | 'scroll' | 'compare' — how the output
+//            is built; omitted, the block is one figure of its frames
 //   attrs:   { required: [...], optional: [...], enums: { name: [...] },
 //              flags: [...] }  — a flag is valid only bare: {bleed}
 //   images:  (attrs, fail) => [{ src, alt }]  — validates and extracts
@@ -66,7 +72,8 @@ import {
 // item now, and the mat sits on it (global.css).
 // Exceptions: alt="" (decorative; a link with no accessible name fails
 // WCAG 2.4.4), remote and root-absolute srcs (no page exists), formats
-// outside the registry (gif, svg), and images an author already linked.
+// outside the registry (gif, svg), images an author already linked, and
+// a compare's stages (a device, not frames).
 //
 // Single-colon text directives (`:word` mid-prose) are restored to the
 // literal text the author typed, attributes included: none of the
@@ -383,6 +390,22 @@ export const BLOCKS = {
       };
     },
   },
+
+  compare: {
+    // Spec 019: one photograph's stages, camera to finished, shown one
+    // against another by compare.ts; without script, stacked figures.
+    // The body is one stage per line — `![Label](./file.jpg) note` —
+    // and a stage may be a private file of this folder (a device, not a
+    // frame: no stage is linked, none is refused as private). The
+    // markup below the root is the image page's, class for class
+    // (COMPARE_CLASSES).
+    forms: 'container',
+    body: 'stages',
+    structure: 'compare',
+    count: { min: 2 },
+    attrs: { required: [], optional: ['mode'], enums: { mode: COMPARE_MODES } },
+    sizing: () => ({ layout: 'constrained', sizes: compareSizes(COMPARE_WIDTH.piece) }),
+  },
 };
 
 // Sizing for the pair blocks across their width variants (added at the
@@ -462,6 +485,7 @@ export function remarkPiecesBlocks() {
       let caption = null;
       let bodyProse = null;
       let bodyImages = null;
+      let stages = null;
       if (node.type === 'containerDirective') {
         rejectLabel(node, failHere);
         rejectNestedBlocks(node, failHere);
@@ -475,6 +499,7 @@ export function remarkPiecesBlocks() {
           bodyImages = partitioned.images;
           caption = captionNode(partitioned.caption);
         }
+        if (block.body === 'stages') stages = partitionStages(node.children, node.name, failHere);
       } else {
         if (block.forms === 'container') {
           failHere(
@@ -504,17 +529,32 @@ export function remarkPiecesBlocks() {
           );
         }
         images = bodyImages;
+      } else if (block.body === 'stages') {
+        if (stages.length < block.count.min) {
+          failHere(
+            `${node.name} takes two or more stages (one per line: ![Label](./file.jpg) then its note); got ${stages.length}`,
+          );
+        }
+        images = stages.map(({ src, label }) => ({ src, alt: label }));
       } else {
         images = block.images(attrs, failHere);
       }
       for (const image of images) {
         checkReferenceShape(file, image.src, failHere);
-        rejectPrivateSrc(image.src, failHere);
+        // A compare's stage may be a private file — of its own folder
+        // only; every other block refuses a private file outright.
+        if (block.body === 'stages') rejectBorrowedPrivate(image.src, failHere);
+        else rejectPrivateSrc(image.src, failHere);
         checkSrcExists(file, node, image.src);
       }
       // Spec 004: every image links to its page — the URL derives from
-      // the piece folder + basename, the same rule the registry uses.
-      const pageUrls = images.map((image) => imagePageUrl(file, image.src, failHere));
+      // the piece folder + basename, the same rule the registry uses. A
+      // compare's stages link nowhere: a link would make a switch click
+      // navigate.
+      const pageUrls =
+        block.structure === 'compare'
+          ? []
+          : images.map((image) => imagePageUrl(file, image.src, failHere));
 
       // Every block probes each image's dimensions (orientation-aware —
       // Astro swaps width/height for EXIF orientations 5–8, so a camera
@@ -534,6 +574,72 @@ export function remarkPiecesBlocks() {
         needsRatios,
       );
       const ratios = dims.map((dim) => (dim ? dim.width / dim.height : null));
+
+      if (block.structure === 'compare') {
+        // compare: the root is the figure; below it, the image page's
+        // nesting — frames > stage figures, each image in a pane span
+        // (never directly in a figure, so no stage matches FRAME_IMG and
+        // the appearance hooks leave the compare alone) and a caption of
+        // label and note. The root carries the last stage's raw ratio:
+        // the finished photograph's box.
+        const C = COMPARE_CLASSES;
+        const last = ratios.at(-1);
+        node.children = [
+          wrapNode(
+            'div',
+            [C.frames],
+            stages.map(({ src, label, note }, imageIndex) =>
+              wrapNode(
+                'figure',
+                [C.stage],
+                [
+                  wrapNode(
+                    'span',
+                    [C.pane],
+                    [
+                      {
+                        type: 'image',
+                        url: src,
+                        alt: label,
+                        // Marked, so the shorthand pass leaves it unlinked.
+                        data: {
+                          pieceFrame: true,
+                          hProperties: { ...block.sizing(attrs, imageIndex, ratios) },
+                        },
+                      },
+                    ],
+                  ),
+                  wrapNode(
+                    'figcaption',
+                    [C.caption],
+                    [
+                      wrapNode('span', [C.label], [{ type: 'text', value: label }]),
+                      ...(note.length > 0
+                        ? [{ type: 'text', value: ' ' }, wrapNode('span', [C.note], note)]
+                        : []),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ];
+        node.data = {
+          ...node.data,
+          hName: 'figure',
+          hProperties: {
+            className: [
+              'piece-block',
+              `piece-${node.name}`,
+              C.root,
+              `${C.root}-w-${COMPARE_WIDTH.piece}`,
+            ],
+            ...(last === null ? {} : { style: `--ar: ${trimNumber(last)}` }),
+            ...(attrs.mode !== undefined ? { dataMode: attrs.mode } : {}),
+          },
+        };
+        continue;
+      }
       // match="height" emits normalized --ar on the anchors — flex-grow
       // factors summing below 1 would under-fill the row — and the raw
       // ratios' sum and count on the container, which is where the row's
@@ -725,11 +831,13 @@ function checkReferenceShape(file, src, fail) {
   }
 }
 
-// Spec 006: a `_`-prefixed raster is private — the camera's frame of the
-// image with the same basename, shown only on that image's page. A piece
+// Spec 006: a `_`-prefixed raster is private — a file of the image it
+// names (spec 019: its camera's frame, a stage, or the loupe's export),
+// shown only on that image's page or as a stage of a compare. A piece
 // must not place it (it has no page to link to, and it isn't a
 // photograph the site presents), whatever the alt — so this runs before
-// the alt="" exemption, not inside imagePageUrl.
+// the alt="" exemption, not inside imagePageUrl. A compare's stages run
+// rejectBorrowedPrivate instead.
 function rejectPrivateSrc(src, fail) {
   // The basename comes from the parser (spec 008): a borrowed
   // `../beta/_land-b.jpg` must be caught too, and stripping a leading
@@ -743,8 +851,22 @@ function rejectPrivateSrc(src, fail) {
       privateMessage(
         src,
         name,
-        `place "${privateTargetOf(name)}.${ext}" here and the frame shows on its page`,
+        `place "${privateTargetOf(name)}.${ext}" here, or show it as a stage of a :::compare in this folder`,
       ),
+    );
+  }
+}
+
+// Spec 019: a compare may show a private file of its own folder only. A
+// private file of another folder is another photograph's making-of; a
+// public photograph may be borrowed as any frame is (spec 008).
+function rejectBorrowedPrivate(src, fail) {
+  const { kind, basename: name, ext } = parseReference(src);
+  if (!name || kind === 'local') return;
+  if (IMAGE_EXTENSIONS.includes(ext) && isPrivateRaster(name)) {
+    const folder = src.slice(0, src.lastIndexOf('/') + 1);
+    fail(
+      `"${src}" is a private file of another folder — a compare may show a private file only from its own folder; a public photograph may be borrowed (${folder}${privateTargetOf(name)}${src.slice(src.lastIndexOf('.'))})`,
     );
   }
 }
@@ -816,6 +938,62 @@ function partitionBody(children, name, fail) {
     images.push(...imageChildren.map((img) => ({ src: img.url, alt: img.alt ?? '' })));
   }
   return { images, caption: children.slice(i) };
+}
+
+// A compare's body, stage by stage (spec 019): every child a paragraph;
+// an image opens a stage, its text is the label, and the inline nodes up
+// to the next image are its note — so one stage per line, or stages
+// separated by blank lines, parse alike. Returns [{ src, label, note }],
+// the note an array of inline nodes, trimmed of the whitespace and line
+// breaks between stages.
+function partitionStages(children, name, fail) {
+  const stages = [];
+  const before = [];
+  for (const child of children) {
+    if (child.type !== 'paragraph') {
+      fail(`a ${name}'s body is its stages, one per line — no lists, headings or blocks inside it`);
+    }
+    // A paragraph break between stages separates notes like a line break.
+    if (stages.length > 0) stages.at(-1).note.push({ type: 'text', value: '\n' });
+    for (const inline of child.children) {
+      if (inline.type === 'image') {
+        if (!inline.alt || inline.alt.trim() === '') {
+          fail(`a ${name} stage needs its label as the image's text: ![Camera](./_land-b.jpg)`);
+        }
+        stages.push({ src: inline.url, label: inline.alt, note: [] });
+      } else if (stages.length > 0) {
+        stages.at(-1).note.push(inline);
+      } else {
+        before.push(inline);
+      }
+    }
+  }
+  const stray = before.map(plainText).join('').trim();
+  if (stray !== '') {
+    fail(`a ${name}'s body is its stages, one per line — "${stray}" comes before the first image`);
+  }
+  return stages.map((stage) => ({ ...stage, note: trimInline(stage.note) }));
+}
+
+// The text an inline node reads as, for a message.
+function plainText(node) {
+  if (typeof node.value === 'string') return node.value;
+  return (node.children ?? []).map(plainText).join('');
+}
+
+// Inline nodes without the whitespace-only text and breaks at either
+// end, and the first and last text trimmed at their outer edges.
+function trimInline(nodes) {
+  const blank = (n) => n.type === 'break' || (n.type === 'text' && n.value.trim() === '');
+  let start = 0;
+  let end = nodes.length;
+  while (start < end && blank(nodes[start])) start++;
+  while (end > start && blank(nodes[end - 1])) end--;
+  const out = nodes.slice(start, end);
+  if (out[0]?.type === 'text') out[0] = { ...out[0], value: out[0].value.trimStart() };
+  const tail = out.length - 1;
+  if (out[tail]?.type === 'text') out[tail] = { ...out[tail], value: out[tail].value.trimEnd() };
+  return out;
 }
 
 // Each image's rendered { width, height } — orientation-corrected, so a

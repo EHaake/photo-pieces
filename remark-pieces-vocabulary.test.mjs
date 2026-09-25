@@ -622,7 +622,7 @@ describe('image links (T310, spec 004)', () => {
     await expect(
       renderExpectingFailure('::single{src="./_photo.jpg" alt="The raw frame"}'),
     ).rejects.toThrow(
-      `"./_photo.jpg" is private — a file of "photo" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "photo.jpg" here and the frame shows on its page`,
+      `"./_photo.jpg" is private — a file of "photo" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "photo.jpg" here, or show it as a stage of a :::compare in this folder`,
     );
     await expect(renderExpectingFailure('![x](./_photo.jpg)')).rejects.toThrow(/is private/);
     // alt="" would skip the link (no page to link to) — the private rule
@@ -921,7 +921,7 @@ describe('cross-piece references (T602, spec 008)', () => {
 
   it("a borrowed private frame fails even where the private rule stands alone (alt='')", async () => {
     await expect(renderExpectingFailure('![](../beta/_photo.jpg)')).rejects.toThrow(
-      `"../beta/_photo.jpg" is private — a file of "photo" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "photo.jpg" here and the frame shows on its page`,
+      `"../beta/_photo.jpg" is private — a file of "photo" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "photo.jpg" here, or show it as a stage of a :::compare in this folder`,
     );
   });
 

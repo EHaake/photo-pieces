@@ -284,3 +284,209 @@ describe('fail-loudly cases', () => {
     await expect(renderExpectingFailure('::mystery{}')).rejects.toThrow(expectedPath);
   });
 });
+
+// Spec 019 (T1705): the compare block. One photograph's stages, stacked
+// as figures without script (AC 3); below the root, the image page's
+// markup class for class. tests/fixtures holds photo.jpg (8x5), its
+// camera's frame _photo.jpg and a stage _photo.tones.jpg, and
+// portrait.jpg (400x600) for a last stage whose ratio differs.
+describe('the compare block (T1705, spec 019)', () => {
+  const three = [
+    ':::compare',
+    '![Camera](./_photo.jpg) Straight out of the camera, flat profile.',
+    '![Tones](./_photo.tones.jpg) Shadows lifted, the _highlights_ held.',
+    '![Finished](./portrait.jpg) A touch of warmth.',
+    ':::',
+  ].join('\n');
+
+  // Each stage as { pane, label, note } in document order, read from the
+  // markup — the pane's content must be exactly one img.
+  const stagesOf = (code) =>
+    [
+      ...code.matchAll(
+        /<figure class="compare-stage"><span class="compare-pane">(<img [^>]*>)<\/span><figcaption class="compare-caption"><span class="compare-label">([^<]*)<\/span>(?: <span class="compare-note">(.*?)<\/span>)?<\/figcaption><\/figure>/g,
+      ),
+    ].map((m) => ({ img: m[1], label: m[2], note: m[3] }));
+
+  // The thrown VFileMessage, so the piece's file and line are pinned.
+  const failureOf = async (content, url = fileURL) => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await processor.render(content, { fileURL: url });
+    } catch (error) {
+      return error;
+    } finally {
+      spy.mockRestore();
+    }
+    throw new Error('expected the render to fail');
+  };
+
+  it('three stages render as stacked figures, each image in a pane, label and note in order', async () => {
+    const { code } = await render(three);
+    expect(code).toMatch(
+      /^<figure class="piece-block piece-compare compare compare-w-column" style="--ar: 0\.6667"><div class="compare-frames"><figure class="compare-stage">/,
+    );
+    expect(code.endsWith('</figure></div></figure>')).toBe(true);
+    const stages = stagesOf(code);
+    expect(stages.map(({ label, note }) => ({ label, note }))).toEqual([
+      { label: 'Camera', note: 'Straight out of the camera, flat profile.' },
+      { label: 'Tones', note: 'Shadows lifted, the <em>highlights</em> held.' },
+      { label: 'Finished', note: 'A touch of warmth.' },
+    ]);
+    expect((code.match(/<figure class="compare-stage">/g) ?? []).length).toBe(3);
+    // Every stage image is the optimizer's, its label as its alt, sized
+    // at the compare's width in a piece.
+    expect(imageMarkers(code)).toEqual([
+      expect.objectContaining({
+        src: './_photo.jpg',
+        alt: 'Camera',
+        layout: 'constrained',
+        sizes: '(min-width: 720px) 680px, 94vw',
+      }),
+      expect.objectContaining({
+        src: './_photo.tones.jpg',
+        alt: 'Tones',
+        sizes: '(min-width: 720px) 680px, 94vw',
+      }),
+      expect.objectContaining({
+        src: './portrait.jpg',
+        alt: 'Finished',
+        sizes: '(min-width: 720px) 680px, 94vw',
+      }),
+    ]);
+    // A device, not frames: nothing links to a page.
+    expect(code).not.toContain('image-link');
+    expect(code).not.toContain('<a ');
+    expect(code).not.toContain('data-mode');
+  });
+
+  it("the root's --ar is the last stage's, whatever the stages before it measure", async () => {
+    const landscapeLast = await render(
+      ':::compare\n![Camera](./portrait.jpg) a\n![Finished](./photo.jpg) b\n:::',
+    );
+    expect(landscapeLast.code).toMatch(/^<figure class="[^"]*" style="--ar: 1\.6">/);
+  });
+
+  it('data-mode is written only when the author writes a mode', async () => {
+    const { code } = await render(three.replace(':::compare', ':::compare{mode="switch"}'));
+    expect(code).toMatch(
+      /^<figure class="piece-block piece-compare compare compare-w-column" style="--ar: 0\.6667" data-mode="switch">/,
+    );
+  });
+
+  it('stages separated by blank lines parse like consecutive ones', async () => {
+    const spaced = await render(
+      [
+        ':::compare',
+        '![Camera](./_photo.jpg) Straight out of the camera, flat profile.',
+        '',
+        '![Tones](./_photo.tones.jpg) Shadows lifted, the _highlights_ held.',
+        '',
+        '![Finished](./portrait.jpg) A touch of warmth.',
+        ':::',
+      ].join('\n'),
+    );
+    const consecutive = await render(three);
+    expect(stagesOf(spaced.code)).toEqual(stagesOf(consecutive.code));
+    expect(stagesOf(spaced.code)).toHaveLength(3);
+  });
+
+  it('a stage with no note has a label and no note span', async () => {
+    const { code } = await render(
+      ':::compare\n![Camera](./_photo.jpg)\n![Finished](./photo.jpg) Done.\n:::',
+    );
+    expect(stagesOf(code).map(({ label, note }) => ({ label, note }))).toEqual([
+      { label: 'Camera', note: undefined },
+      { label: 'Finished', note: 'Done.' },
+    ]);
+  });
+
+  describe('the borrowing pair, from tests/pieces/alpha/', () => {
+    // Copied from remark-pieces-vocabulary.test.mjs's "cross-piece
+    // references (T602, spec 008)": the render's path is a virtual
+    // alpha/index.md beside beta/, which holds photo.jpg and _photo.jpg.
+    const alphaURL = new URL('./tests/pieces/alpha/index.md', import.meta.url);
+
+    it('a public photograph of another folder may be a stage, resolved like any borrowed frame', async () => {
+      const { code } = await processor.render(
+        ':::compare\n![Here](./photo.jpg) Ours.\n![There](../beta/photo.jpg) Theirs.\n:::',
+        { fileURL: alphaURL },
+      );
+      expect(stagesOf(code).map((s) => s.label)).toEqual(['Here', 'There']);
+      expect(imageMarkers(code).map((m) => m.src)).toEqual(['./photo.jpg', '../beta/photo.jpg']);
+      expect(code).not.toContain('image-link');
+    });
+
+    it('a private file of another folder fails, though the file exists', async () => {
+      const error = await failureOf(
+        'Text.\n\n:::compare\n![Here](./photo.jpg) Ours.\n![There](../beta/_photo.jpg) Theirs.\n:::',
+        alphaURL,
+      );
+      expect(error.message).toContain(
+        '"../beta/_photo.jpg" is a private file of another folder — a compare may show a private file only from its own folder; a public photograph may be borrowed (../beta/photo.jpg)',
+      );
+      expect(error.file).toMatch(/tests\/pieces\/alpha\/index\.md$/);
+      expect(error.line).toBe(3);
+    });
+  });
+
+  // Each failure names the piece and the line: the compare opens on
+  // line 3 below its paragraph, the shorthand image sits on its own.
+  const failures = [
+    [
+      'one stage',
+      ':::compare\n![Camera](./_photo.jpg) Flat.\n:::',
+      'compare takes two or more stages (one per line: ![Label](./file.jpg) then its note); got 1',
+    ],
+    [
+      'a missing stage file',
+      ':::compare\n![Camera](./_missing.jpg) Flat.\n![Finished](./photo.jpg) Done.\n:::',
+      "image not found: ./_missing.jpg (relative to the piece's folder)",
+    ],
+    [
+      'a stage without its label',
+      ':::compare\n![](./photo.jpg) Flat.\n![Finished](./photo.jpg) Done.\n:::',
+      "a compare stage needs its label as the image's text: ![Camera](./_land-b.jpg)",
+    ],
+    [
+      'text before the first image',
+      ':::compare\nBefore the images\n![Camera](./_photo.jpg) Flat.\n![Finished](./photo.jpg) Done.\n:::',
+      `a compare's body is its stages, one per line — "Before the images" comes before the first image`,
+    ],
+    [
+      'a list inside',
+      ':::compare\n![Camera](./_photo.jpg) Flat.\n![Finished](./photo.jpg) Done.\n\n- a list item\n:::',
+      "a compare's body is its stages, one per line — no lists, headings or blocks inside it",
+    ],
+    [
+      'an unknown mode',
+      ':::compare{mode="carousel"}\n![Camera](./_photo.jpg) Flat.\n![Finished](./photo.jpg) Done.\n:::',
+      'invalid value "carousel" for mode on compare — allowed: slider | side | switch',
+    ],
+    [
+      'a private file placed by another block, with the widened message',
+      '::single{src="./_photo.jpg" alt="x"}',
+      `"./_photo.jpg" is private — a file of "photo" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "photo.jpg" here, or show it as a stage of a :::compare in this folder`,
+    ],
+    [
+      'a private file placed as a shorthand image',
+      '![x](./_photo.jpg)',
+      `"./_photo.jpg" is private — a file of "photo" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "photo.jpg" here, or show it as a stage of a :::compare in this folder`,
+    ],
+    [
+      'a private stage inside a grid',
+      ':::grid\n![a](./_photo.tones.jpg)\n![b](./photo.jpg)\n:::',
+      `"./_photo.tones.jpg" is private — a file of "photo" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "photo.jpg" here, or show it as a stage of a :::compare in this folder`,
+    ],
+  ];
+
+  it.each(failures)(
+    '%s fails the build naming the piece and the line',
+    async (_name, content, message) => {
+      const error = await failureOf(`Text.\n\n${content}`);
+      expect(error.message).toContain(message);
+      expect(error.file).toMatch(/tests\/fixtures\/piece\.md$/);
+      expect(error.line).toBe(3);
+    },
+  );
+});

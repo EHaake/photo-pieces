@@ -444,11 +444,13 @@ describe('the passage by body kind (T502, spec 007)', () => {
     );
     expect(BLOCK_BODIES).toEqual(fromTransform);
     expect(Object.keys(BLOCK_BODIES).sort()).toEqual(Object.keys(BLOCKS).sort());
-    // And the kinds stay within the four the descriptor model documents:
-    // a fifth kind added in step on both sides would otherwise fall
-    // silently into passageFor's "no caption" default.
+    // And the kinds stay within the ones the descriptor model documents:
+    // a new kind added in step on both sides would otherwise fall
+    // silently into passageFor's "no caption" default. `stages` (spec
+    // 019, the compare) is added deliberately — it contributes no
+    // caption, pinned below.
     for (const kind of Object.values(BLOCK_BODIES)) {
-      expect(['caption', 'prose', 'images+caption', 'none']).toContain(kind);
+      expect(['caption', 'prose', 'images+caption', 'stages', 'none']).toContain(kind);
     }
   });
 
@@ -490,6 +492,18 @@ describe('the passage by body kind (T502, spec 007)', () => {
       ':::compare\n![Camera](./_land-b.jpg)\nStraight from the card.\n![Finished](./land-b.jpg)\nThe print.\n:::',
     ].join('\n\n');
     expect(passageFor(body, 'land-b')).toEqual({ prose: 'Before the compare.' });
+  });
+
+  it('a stages body (the compare, T1705) contributes no caption', () => {
+    // The notes sit on their own lines, so a caption-bodied reading would
+    // quote them: only the body kind keeps them out.
+    expect(BLOCK_BODIES.compare).toBe('stages');
+    const body = [
+      'Before the compare.',
+      ':::compare{mode="side"}\n![Camera](./_land-b.jpg)\nStraight from the card.\n\n![Finished](./land-b.jpg)\nThe print.\n:::',
+    ].join('\n\n');
+    expect(passageFor(body, 'land-b')).toEqual({ prose: 'Before the compare.' });
+    expect(passageFor(body, '_land-b')).toEqual({ prose: 'Before the compare.' });
   });
 });
 
