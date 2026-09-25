@@ -453,7 +453,7 @@ re-implementation. The plan says where each lives.
       stages in order, and the finished photograph last; a sidecar story
       that writes its own `compare` suppresses the automatic section —
       pinned
-- [ ] A `compare` with one stage, a missing stage file, a stage borrowed
+- [ ] A `compare` with one stage, a missing stage file, a private stage borrowed
       from another folder, or a private file placed by any other block
       fails the build naming the piece and the file; a private file
       with no photograph beside it still fails — pinned

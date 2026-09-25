@@ -7,7 +7,8 @@ first, in its own commit; the private-file family as pure rules with
 the compare's shared shape beside them; the registry reading stages and
 the detail export, with the fixtures that exercise both; and the
 private-files barrier that makes "a detail export is named nowhere but
-its loupe" and "no page ships a script-only state" facts of every build
+its loupe", "no page ships a script-only state" and "every compare has
+the one shape" facts of every build
 — so the block, the page's section and the loupe are built on rules
 that are already tested and a barrier that already runs.
 **T1705 is marked `review: per-task`**: the transform's `compare` is
@@ -79,8 +80,12 @@ headers to confirm nothing was duplicated or dropped. -->
 ## Phase 0 — Foundation: the constitution, the private-file family, the registry, the barrier (reviewer after the phase; walkthrough: none — the new private files have no page and the sidecar's stages are read but not yet shown; the one visible difference is the sampler's `land-b` gaining the existing two-frame compare from its new fixture frame, which is spec 006's behaviour, not something new to try; the barrier moves nothing; runs on without a pause)
 
 - [ ] **T1700** — The constitution, amended before any code, in its own
-      commit. Pattern: plan.md's "The constitution, first" — the three
-      edits verbatim. `CLAUDE.md` only: the block-vocabulary clause's
+      commit. Pattern: plan.md's "The constitution, first" — the four
+      edits verbatim. `CLAUDE.md` only: the Architecture paragraph's
+      sidecar phrase ("frontmatter-only" out; "an optional sidecar
+      (`_<basename>.md`) whose frontmatter overrides it and whose body is
+      the photograph's story (spec 006), and from spec 019 whose
+      `stages:` declare its processing" in), the block-vocabulary clause's
       list ("as of spec 019: … and one interactive block, compare …"),
       the `sequence` sentence replaced by its retirement, the
       interactive-block sentence ("an _interactive_ block — `compare`,
@@ -90,7 +95,9 @@ headers to confirm nothing was duplicated or dropped. -->
       _Verify: `grep -n "as of spec 019" CLAUDE.md` → 1 line;
       `grep -n "sequence" CLAUDE.md` → the retirement sentence only;
       `grep -n "_<basename>.detail" CLAUDE.md` → 1 line;
-      `grep -n "carousel/slider" CLAUDE.md` → 0; `git diff --stat` →
+      `grep -n "carousel/slider" CLAUDE.md` → 0;
+      `grep -n "frontmatter-only" CLAUDE.md` → 0 matches;
+      `grep -n "declare its processing" CLAUDE.md` → 1; `git diff --stat` →
       `CLAUDE.md` alone; `npx prettier --check CLAUDE.md` clean;
       `sh scripts/verify.sh tests` green (nothing under test changes —
       the run is the record). The orchestrator commits this task alone,
@@ -107,7 +114,7 @@ headers to confirm nothing was duplicated or dropped. -->
       messages only; say so in its comment); `privateMessage`'s sentence
       and `validateGalleries`' private line naming the family;
       `attachPrivates(privates, basenamesByFolder)`;
-      `resolveStages(listed, own, where)` with the five problem lines
+      `resolveStages(listed, own, where)` with the four `stages` problem lines
       from plan.md's "Failure messages"; `COMPARE_MODES`,
       `COMPARE_CLASSES`, `COMPARE_WIDTHS`, `COMPARE_WIDTH`,
       `compareSizes(width)`; `compareStages(…, words)`;
@@ -150,7 +157,9 @@ headers to confirm nothing was duplicated or dropped. -->
       `where-the-fog-lets-go/_land-b.md`: `stages:` with one entry —
       `_land-b.tones.jpg`, label `Tones`, note "Shadows lifted on the
       ridge, the fog's highlights held. _Fixture stage._" _Verify:
-      `sh scripts/verify.sh` green, the page count unchanged; `node -e`
+      `sh scripts/verify.sh` green, the page count unchanged; the byte
+      size of each new fixture recorded (`_land-b.detail.jpg` above all:
+      a flat field may compress to almost nothing); `node -e`
       with `exifr.gps` over the three new site fixtures → each carries
       GPS (so the barrier and the GPS scan are proving something);
       temporary edits, each built and reverted, the build's tail
@@ -166,13 +175,18 @@ headers to confirm nothing was duplicated or dropped. -->
       naming files, one summary line) and `gps-barrier.test.mjs` (temp
       dirs, `execFileSync`, the outcomes). Plan: "The private-files
       barrier" and its failure lines. New `scripts/check-private-files.mjs [dir]`
-      with the two scans, `MAX_BYTES = 25 * 1024 * 1024` with a comment
-      naming its source; the header comment says what each scan proves
-      and why it reads declared URLs rather than emitted names.
+      with the three scans, `MAX_BYTES = 25 * 1024 * 1024` with a
+      comment naming its source; scan 3's expected shape from
+      `COMPARE_CLASSES` (imported from `src/lib/image-meta.mjs`), read by
+      a small tag-depth walk, with the temporary skip for a `.compare`
+      holding `.compare-range` (spec 006's, until T1706) and a comment
+      saying T1706 deletes it; the header comment says what each scan
+      proves and why scan 1 reads declared URLs rather than emitted
+      names.
       `package.json` `postbuild`: `&& node scripts/check-private-files.mjs`
       after `check-no-gps`; `scripts/verify.sh`'s summary grep gains
-      `|\[check-private-files\]`. New `private-files.test.mjs`: the ten
-      cases in plan.md's third testing bullet. Check Cloudflare's
+      `|\[check-private-files\]`. New `private-files.test.mjs`: every
+      case in plan.md's third testing bullet, scans 1 to 3. Check Cloudflare's
       Workers static-assets per-file limit in its documentation and
       record the figure and the page here; if it cannot be checked,
       record that and keep 25 MiB. _Verify: `sh scripts/verify.sh`
@@ -184,7 +198,7 @@ headers to confirm nothing was duplicated or dropped. -->
       figure in `[...id].astro` → the build's barrier names an image
       page and `BUILD EXIT` is non-zero (the tail pasted)._
 
-## Phase 1 — The label and the compare (reviewer after the phase; `review: per-task` on T1705; walkthrough: under `npm run dev`, on both screens with a mouse and a trackpad, and on a phone — the ten real photographs' image pages (the gallery-root exports, reached from the galleries) read `Sony α7R V`, `Sony FE 16-35mm f/2.8 GM II`, `Tamron 50-400mm f/4.5-6.3 Di III VC VXD`, `Pentax K-1` and the rest where the camera's strings were, and `dock-b` still prints its own sidecar names; on `/images/where-the-fog-lets-go/land-b/`, "Raw to finished" shows the photograph with a divider and a round handle at its centre, the legend Camera · Tones · Finished beneath it with the showing pair marked, and the note of the step beneath; drag the handle across with the mouse, the trackpad and a finger, and with the arrow keys once it has focus; "Side by side" puts two neighbouring stages next to each other, the legend choosing which, and on the phone they stack; "Switch" shows one stage whole and a click, a tap, Space, Enter or → brings the next in with a quick fade, the legend and the note following; `/images/vocabulary-sampler/land-b/` shows two stages, Camera and Finished, as the page did before; the fog piece's closing compare opens in Switch, and a method chosen on the image page is the one it opens in for the rest of the visit; with script off the stages stand stacked with their labels and notes; as many rounds as it takes, each a sub-lettered task under T1709)
+## Phase 1 — The label and the compare (reviewer after the phase; `review: per-task` on T1705; walkthrough: under `npm run dev`, on both screens with a mouse and a trackpad, and on a phone — the ten real photographs' image pages (the gallery-root exports, reached from the galleries) read `Sony α7R V`, `Sony FE 16-35mm f/2.8 GM II`, `Tamron 50-400mm f/4.5-6.3 Di III VC VXD`, `Pentax K-1` and the rest where the camera's strings were, and `dock-b` still prints its own sidecar names; on `/images/where-the-fog-lets-go/land-b/`, "Raw to finished" shows the photograph with a divider and a round handle at its centre, the legend Camera · Tones · Finished beneath it with the showing pair marked, and the note of the step beneath; drag the handle across with the mouse, the trackpad and a finger, and with the arrow keys once it has focus — at the right edge the camera's frame fills the box, at the left edge the finished photograph, and Tones shows as one half of a pair in between; "Side by side" puts two neighbouring stages next to each other, the legend choosing which, and on the phone they stack; "Switch" shows one stage whole and a click, a tap, Space, Enter or → brings the next in with a quick fade, the legend and the note following; `/images/vocabulary-sampler/land-b/` shows two stages, Camera and Finished, as the page did before; the fog piece's closing compare opens in Switch, and a method chosen on the image page is the one it opens in for the rest of the visit; with script off the stages stand stacked with their labels and notes; as many rounds as it takes, each a sub-lettered task under T1709)
 
 - [ ] **T1704** — Gear names. Pattern: `parseImagePath`'s error style
       and `formatExposure`/`formatCamera` in `image-meta.mjs`;
@@ -241,7 +255,11 @@ headers to confirm nothing was duplicated or dropped. -->
       may land alone); image-meta.test.mjs's "the passage by body kind"
       kinds list gains `stages` — a deliberate addition — with a
       `passageFor` case that a compare contributes no caption. Tests:
-      T1705's testing bullet in full. _Verify:
+      T1705's testing bullet in full, the borrowing pair among them —
+      `../beta/photo.jpg` as a stage renders (a public photograph,
+      spec 008's path) and `../beta/_photo.jpg` fails with the
+      borrowed-private line though the file exists (AC 6 as narrowed:
+      only a borrowed _private_ stage fails). _Verify:
       `sh scripts/verify.sh` green (count recorded) — re-run by the
       orchestrator before committing; the mutation named and reverted;
       `grep -n "rejectPrivateSrc(" remark-pieces-blocks.mjs` → the block
@@ -270,9 +288,18 @@ headers to confirm nothing was duplicated or dropped. -->
       the closing fullbleed, one sentence of fixture prose and
       `:::compare{mode="switch"}` with `_land-b.jpg`, `_land-b.tones.jpg`
       and `land-b.jpg`, labels Camera, Tones, Finished, a fixture note
-      each. New `compare.test.mjs`, describe "(a) one shape, spelled
-      once": plan.md's T1706 source pins. _Verify: `sh scripts/verify.sh`
-      green (count recorded); the built-page reads in plan.md's T1706
+      each. `scripts/check-private-files.mjs`: scan 3's spec-006 skip
+      deleted, and its `private-files.test.mjs` case turned from exit 0
+      to exit 1. `src/lib/compare.ts` is not touched: spec 006's
+      `enhanceCompare` finds no `.compare-range` in the new markup and
+      `continue`s past every figure, so it does nothing until T1708
+      replaces it — read, not assumed (below). New `compare.test.mjs`,
+      describe "(a) one shape, spelled once": plan.md's T1706 source
+      pins. _Verify: `sh scripts/verify.sh`
+      green (count recorded) with the barrier's line counting the
+      site's compares in one shape; in the browser on `land-b` and the
+      fog piece, the console holds no error and every compare stands
+      stacked; the built-page reads in plan.md's T1706
       bullet, each greped and quoted (land-b three stages, the
       sampler's two, `port-a` none, the fog piece's `data-mode`, no
       Processing row on land-b); the temporary story compare → section
@@ -302,9 +329,14 @@ headers to confirm nothing was duplicated or dropped. -->
       three views on T1707's functions, the pointer, key and click
       handling, the module-level `resize` listener, the stored choice
       per `COMPARE.remember`, `data-settling` only when
-      `!reducedMotion()` (imported from `./motion`), `data-fresh` per
-      `COMPARE.modeFade`; the comment extended with what the static HTML
-      is and what the script adds. `src/pages/images/[...id].astro`'s
+      `!reducedMotion()` (imported from `./motion`), `data-fresh` on
+      every mode change; the comment extended with what the static HTML
+      is and what the script adds. The calls stay where they are — the
+      layout's module evaluation and `astro:before-swap` on the new
+      document, the last moment before the snapshot and the router's
+      scroll; `astro:after-swap` is only where the Verify reads the
+      result — and the `resize` listener is bound once at module
+      evaluation. `src/pages/images/[...id].astro`'s
       `keydown`: return for a target inside `.compare`, beside the
       input guard. `global.css`: `:root` gains `--compare-handle: 2.75rem;`
       and `--compare-handle-radius: 50%;` after the motion tokens under
@@ -333,9 +365,11 @@ headers to confirm nothing was duplicated or dropped. -->
       it. The questions the spec puts to him here, in plain language:
       the gear names as they read; the handle (size, shape); the legend
       and the method control (words, placement; whether the corner tags
-      come back); the slider across three stages — the literal geometry
-      as built, where neither end stage fills the frame, against each
-      stage whole at its stop (plan.md, Known limitations); continuous
+      come back); the slider across three stages — as built, the first
+      stage whole at the right edge and the last at the left, a middle
+      stage only ever half of a pair and both halves changing at each
+      stop, against each stage whole at its stop with the next wiping
+      in (plan.md, Known limitations); continuous
       or snapping; which pair at rest; the default method and whether
       his choice should be remembered, and for how long; side by side on
       the phone (stack, or switch); the switch's keys and whether it
@@ -352,13 +386,14 @@ headers to confirm nothing was duplicated or dropped. -->
 
 _Filled in at the pause._
 
-## Phase 2 — The loupe (reviewer after the phase; walkthrough: under `npm run dev` on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/`, enter the quiet view; the cursor over the photograph says zoom, over the mat it still says leave; click a corner and the photograph grows to full detail around that point while the mat and the dark ground stay where they are, soft at first and then sharp as the larger export fades in; drag to move around it, scroll or pinch (trackpad and phone) to zoom between the fit and full detail, + and − to zoom, the arrows to pan; Esc or a click without dragging goes back to the fit, Esc again back to the page; at the fit the arrows step to the next photograph as before; on `/images/where-the-fog-lets-go/port-a/`, which has no larger export and whose own file is already at full detail on both his screens, the quiet view is exactly as before and a click leaves it; with the system's reduce-motion setting on, the zoom jumps rather than grows and the sharp export still fades in; optionally, in the browser's network panel, the larger export is requested only at the first zoom and once; as many rounds as it takes, each a sub-lettered task under T1713)
+## Phase 2 — The loupe (reviewer after the phase; walkthrough: under `npm run dev` on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/`, enter the quiet view; the cursor over the photograph says zoom, over the mat it still says leave; click a corner and the photograph grows to full detail around that point while the mat and the dark ground stay where they are, soft at first and then sharp as the larger export fades in; drag to move around it, scroll or pinch (trackpad and phone) to zoom between the fit and full detail, + and − to zoom, the arrows to pan; Esc or a click without dragging goes back to the fit, Esc again back to the page; at the fit the arrows step to the next photograph as before; on `/images/where-the-fog-lets-go/land-a/` (a 1800×1200 placeholder with no larger export, whose own file is already past full detail at its quiet size on both his screens — the number T1712 recorded, quoted in the report; if that read found it ready, the report names the page T1712 found not ready instead) the quiet view is exactly as before and a click leaves it, while some real portrait exports on the laptop do get a loupe from their own file (T1712's numbers); the question put to him: at the fit, a click on the photograph now zooms and a click on the mat or the dark ground leaves — is that the right reading of "a click at the fit steps back out", or should a single click keep leaving and the loupe open another way; with the system's reduce-motion setting on, the zoom jumps rather than grows and the sharp export still fades in; optionally, in the browser's network panel, the larger export is requested only at the first zoom and once; as many rounds as it takes, each a sub-lettered task under T1713)
 
 - [ ] **T1710** — The loupe's file on the page. Pattern: `src/lib/og.ts`
       (`ogImageOptions` and its comment) and `og.test.mjs`; the page's
       `og` `getImage` call. Plan: "The loupe's file". New
       `src/lib/loupe.ts`: `LOUPE` as plan.md spells it (each key's
-      comment), `loupeImageOptions(source)` with its comment (why webp
+      comment; no quality key — the stage's default, so Astro can serve
+      one file where the widths meet), `loupeImageOptions(source)` with its comment (why webp
       at full size, the 16383px edge, the passthrough case). The page's
       frontmatter: the two lines in plan.md; the `.image-stage` div's
       four `data-loupe-*` attributes. New `loupe.test.mjs`: `EXPECTED`
@@ -370,8 +405,11 @@ _Filled in at the pause._
       file present in `dist/_astro/` with its byte size recorded, `exifr`
       (`gps: true`) over that file reads nothing, the detail original
       absent (the pruner's counts before and after, recorded),
-      `port-a`'s attributes; `withoutDetail: false` built once and
-      reverted → `port-a` carries none; the stage's `<img>` and `srcset`
+      the fog piece's `land-a`'s attributes; `withoutDetail: false`
+      built once and reverted → `land-a` carries none; the size and file
+      count of `dist/_astro/` on `main` and after this task, and how many
+      own-file loupe URLs equal a stage `srcset` candidate (recorded —
+      the own-file loupes' cost); the stage's `<img>` and `srcset`
       on land-b byte-identical to `main`'s except the new attributes on
       its parent (`git diff --no-index` of the two `<figure>`s,
       recorded)._
@@ -402,12 +440,26 @@ _Filled in at the pause._
       and acting on its effect; `setQuiet(false)` calling `reset()`.
       `global.css`: a new `/* ---- The loupe (spec 019) ---- */` section
       after the quiet rules (before the Motion section) with the seven
-      rules exactly as plan.md spells them and a header comment.
+      rules exactly as plan.md spells them and a header comment; and,
+      inside the reduced-motion block at the file's end, the sixth rule
+      `.loupe-detail { animation-duration: calc(var(--dur-appear) * var(--rm-appear)); }`
+      with the block's comment updated ("Six rules", the detail export's
+      fade following the frames'). `motion.test.mjs` (d): `REDUCED_RULES`
+      gains the rule, the order case's expected list gains
+      `{ prelude: '.loupe-detail', bases: 1, after: [] }`, and the case
+      names say six — a deliberate addition the count exists to notice,
+      not a loosened test; nothing else in the file changes.
       `loupe.test.mjs`: describe "(c) the loupe's rules" — each by
       string. _Verify: `sh scripts/verify.sh` green (count recorded)
-      with the barrier's line; motion.test.mjs and matte.test.mjs green
-      unedited; `git diff -U0 main -- src/styles/global.css | grep '^@@'`
-      → the new section's hunk only beside T1706/T1708's (listed); the
+      with the barrier's line; matte.test.mjs green unedited;
+      `git diff main -- motion.test.mjs` shows (d)'s additions only;
+      mutation, reverted: the RM rule moved above the loupe section →
+      the order case fails naming it; in the browser under reduced
+      motion with `--rm-appear: 0` inline, the detail's animation
+      computes 0s, and with 1, 950ms;
+      `git diff -U0 main -- src/styles/global.css | grep '^@@'`
+      → the new section's hunk and the one RM-block line beside
+      T1706/T1708's (listed); the
       browser reads in plan.md's T1712 bullet at 1512×982 and
       1280×1440, each recorded here (the resource timeline before and
       after the first and second zoom, the point-under-pointer offset,
@@ -415,17 +467,25 @@ _Filled in at the pause._
       image's, the frame's padding and background while zoomed, the
       detail's animation, the pan clamp, the wheel and two-pointer
       scale, the keys, the two-level Escape, the 480ms transition and
-      its absence under reduced motion, `port-a` not ready, no script).
+      its absence under reduced motion, no script; `fullScale` at both
+      viewports for `land-a`, for one real 2560px portrait export and
+      one real 2560px landscape export — the numbers the Phase 2 report
+      quotes, and the not-ready control it names).
       What headless cannot drive (a real trackpad pinch) is said line
       by line for the pause._
 
 - [ ] **T1713** — The second look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 2
-      pause, as T1709's. The spec's questions here: how the loupe opens
-      (a click, a double click, a pinch only); the zoom range — full
-      detail at one image pixel per device pixel, and whether a
-      photograph without a larger export should get a loupe at all on
-      his screens, where most have no detail to add; the gestures and
+      pause, as T1709's. The spec's questions here: the click at the
+      fit — the photograph zooms, the mat and the ground leave (plan.md,
+      Resolved decisions: a reading of Goal 4's "a click at the fit
+      steps back out") — or a single click keeps leaving and the loupe
+      opens another way; how the loupe opens (a click, a double click, a
+      pinch only); the zoom range — full detail at one image pixel per
+      device pixel, and whether a photograph without a larger export
+      should get a loupe at all on his screens, where the landscape
+      exports have no detail to add and some portraits do (T1712's
+      numbers); the gestures and
       keys; the zoom's and the fade's durations; the loupe's window (the
       photograph's own box, as built, or the whole screen — plan.md,
       Resolved decisions); the recommended size for the larger export
@@ -568,8 +628,8 @@ _Filled in at the pause._
       what the plan chose and why (the family read by one function with
       the frame first; the shape spelled once; the page building the
       block's markup; the chrome script-built with an ARIA handle; the
-      stages unlinked; the literal slider geometry and what the pause
-      kept; the switch's fade-in-over in place of an `opacity: 0` rule;
+      stages unlinked; the slider's segments indexed from the right, so
+      each end shows an end stage whole, and what the pause kept; the switch's fade-in-over in place of an `opacity: 0` rule;
       the loupe as an overlay in the photograph's own box; the loupe
       file as a webp transform and the barrier reading declared URLs;
       the gear table as Markdown in the content folder; tunables as
@@ -585,11 +645,14 @@ _Filled in at the pause._
       state tables, T1708's browser reads and the Phase 1 record; AC 5
       by T1701's `sectionsFor` and `compareStages` cases and T1706's
       three page reads and the story edit; AC 6 by T1705's failure cases
-      and T1702's orphan edit; AC 7 by T1701's gallery case, the
+      — the borrowed private stage failing though its file exists, beside
+      the borrowed public photograph rendering as a stage, the pair that
+      shows the rule is the narrowed one — and T1702's orphan edit; AC 7 by T1701's gallery case, the
       barrier's scan 1 with its tests and T1712's resource timeline and
       the Phase 2 record; AC 8 by T1711's reducer cases, T1712's reads
       and the Phase 2 record; AC 9 by the barrier's scan 2 and T1712's
-      no-script read; AC 10 by motion.test.mjs unedited, compare.test.mjs
+      no-script read; AC 10 by motion.test.mjs (unedited but for
+      T1712's sixth reduced-motion rule), compare.test.mjs
       (c), loupe.test.mjs (c) and the motion barrier's line; AC 11 by
       the Phase 3 record; AC 12 by T1700's commit (its hash and its
       place before T1701's) and T1715's greps; AC 13 by T1716's reads

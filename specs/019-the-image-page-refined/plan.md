@@ -21,18 +21,28 @@ any quiet-view rule. No dependency is added.
 
 Nothing here changes at rest what spec 018 pinned: the quiet view's
 rules, the mat, the stage, `FRAME_HOSTS`, the motion grammar, the
-reduced-motion block (its five rules), the scanner and the motion
-barrier are untouched, and their tests pass unedited. Every new
-movement is a rule on the grammar's tokens or a script gate on
-`reducedMotion()`, which is spec 018's own split (the travel withholds
-names in script; nothing is added to the reduced-motion block).
+scanner and the motion barrier are untouched, and their tests pass
+unedited. The reduced-motion block gains one rule, deliberately — the
+detail export's fade reading `--rm-appear`, as the frames' fade does —
+and motion.test.mjs (d)'s expected rules rise from five to six with it
+(T1712). Every other new movement is a rule on the grammar's tokens or
+a script gate on `reducedMotion()`, spec 018's own split (the travel
+withholds names in script).
 
 The constitution has no "Scale" section (as at spec 018); the five
 tests from the planner brief are applied at each choice below, and
 where the simpler shape was taken it is said in one line.
 
 - **The constitution, first** (`CLAUDE.md`, T1700, its own commit on
-  this branch before any code). Three edits, exact text:
+  this branch before any code). Four edits, exact text:
+  - The Architecture paragraph's "an optional frontmatter-only sidecar
+    (`_<basename>.md`) that overrides it" (whatever its exact wording
+    around the phrase, the phrase "frontmatter-only" goes) becomes "an
+    optional sidecar (`_<basename>.md`) whose frontmatter overrides it
+    and whose body is the photograph's story (spec 006), and from spec
+    019 whose `stages:` declare its processing" — the registry reads the
+    body (`storyHasCompare`) and the stages, so the constitution may not
+    call the sidecar frontmatter-only.
   - The block-vocabulary clause's list becomes "as of spec 019: single,
     fullbleed, wide, tall, inset, diptych, triptych, grid, strip, aside,
     row, one durational block, held, and one interactive block, compare
@@ -155,7 +165,10 @@ where the simpler shape was taken it is said in one line.
   the same field half-processed — a new `{ tones: true }` option between
   `flat` and none) and `_land-b.detail.jpg` (5400×3600, the photograph's
   field at three times its size), both carrying `TRAFALGAR_GPS` like the
-  frame, so the GPS barrier proves both are stripped on `dist/`; and
+  frame, so the GPS barrier proves both are stripped on `dist/` (the
+  detail fixture's byte size is recorded at T1702: a flat placeholder
+  field compresses to little, so it proves the mechanics, not the
+  loupe's cost — that is judged on the real piece); and
   `tests/fixtures/_photo.tones.jpg` for the transform's tests; and
   `vocabulary-sampler/_land-b.jpg` (the fog piece's frame, same
   options), so one photograph on the site has a camera's frame and
@@ -164,7 +177,7 @@ where the simpler shape was taken it is said in one line.
   fixtures stay fixtures: `Fixture` EXIF, the sidecar's _Fixture_ prose.
 
 - **The private-files barrier** (`scripts/check-private-files.mjs`,
-  T1703; `postbuild` after the GPS scan). Two scans over `dist/`,
+  T1703; `postbuild` after the GPS scan). Three scans over `dist/`,
   `dist/pagefind/` excluded:
   1. Every `/images/**/index.html` stage carrying `data-loupe-detail`
      names its loupe file in `data-loupe-src`; that file must exist
@@ -185,11 +198,22 @@ where the simpler shape was taken it is said in one line.
      `compare-control`, `compare-now`, `compare-tag`, `loupe`,
      `loupe-layer`, `loupe-base` or `loupe-detail`. This is AC 9's
      "no page ships a loupe state", and the compare's no-script pin.
+  3. Every `.compare` in any page's markup — a piece's, a sidecar
+     story's, the image page's section — has the one shape: its
+     class-bearing descendants, read by a small tag-depth walk from the
+     figure's open tag to its matching close, form `compare-frames` >
+     two or more `compare-stage`, each `compare-pane` > `img` then
+     `compare-caption` > `compare-label` and at most one `compare-note`,
+     and nothing else. This makes "two builders, one shape" a fact of
+     every build rather than a one-time grep.
 
   Built in the foundation, like spec 018's barrier: its temp-dir tests
-  prove it can fail from its first commit, and scan 1 has a detail
-  export to read from T1710 on (vacuous until then, which the summary
-  line's counts show). The motion barrier is not edited: these
+  prove it can fail from its first commit; scan 1 has a detail export to
+  read from T1710 on and scan 3 a compare in the new shape from T1706 on
+  (T1703 writes scan 3 against the shape in `COMPARE_CLASSES`, and it
+  skips spec 006's old compare — a `.compare` holding `.compare-range`
+  — until T1706 removes it; the skip is deleted at T1706). The summary
+  line's counts show what each scan read. The motion barrier is not edited: these
   attributes are not motion.
 
 - **Gear names** (`src/content/gear.md`, `src/lib/gear.mjs`,
@@ -308,7 +332,6 @@ where the simpler shape was taken it is said in one line.
         sliderStep: 0.02,          // an arrow key's step along the track (Page Up/Down: five steps)
         sideMinPx: 280,            // the narrowest a stage may be shown side by side
         sideNarrow: 'stack',       // where two won't fit: 'stack' them, or yield to 'switch'
-        switchStart: 0,            // the stage the switch opens on (0 the first; -1 the last)
         switchWraps: true,         // the last stage advances to the first
         switchOnClick: true,       // a click or a tap on the frame advances
         switchKeys: [' ', 'Enter', 'ArrowRight'],
@@ -316,33 +339,42 @@ where the simpler shape was taken it is said in one line.
         legend: 'below',           // 'below' or 'above' the frame
         control: 'with-legend',    // the method control: 'with-legend' (the legend's row) or 'above'
         cornerTags: false,         // spec 006's corner tags, returned on the showing stages
-        modeFade: true,            // a mode change fades the new view in (off: a cut)
       } as const;
       export const COMPARE_WORDING = { modes: { slider: 'Slider', side: 'Side by side', switch: 'Switch' }, control: 'How to compare', legend: 'Stages', handle: 'Move between the stages' };
       export const COMPARE_MODE_KEY = 'compare-mode';
 
   `openingMode(authored, stored)` — the stored choice if remembering and
   valid, else the author's `data-mode`, else `defaultMode`.
-  `sliderView(p, n)` — the spec's geometry read literally: the track
-  `p ∈ [0, 1]` is the frame's width, the handle sits on the divider at
-  `p`, the stops are at `k / (n − 1)`, and the frame shows the pair of
-  the segment the handle is in, the earlier on the left:
+  `sliderView(p, n)` — the spec's geometry: the track `p ∈ [0, 1]` is
+  the frame's width, the handle sits on the divider at `p`, the stops
+  are at `k / (n − 1)`, the frame shows the pair of the segment the
+  handle is in with the earlier stage on the left, and the segments are
+  indexed **from the right**, so the handle at the right edge shows the
+  first stage whole and at the left edge the last:
   `{ left: i, right: i + 1, split: 100 p }` with
-  `i = min(⌊p (n − 1)⌋, n − 2)`. For two stages this is today's compare
-  exactly. `snapTo(p, n)`, `sidePair(k, n)` (stage `k` and the next; the
-  last with the one before), `switchNext(i, n, dir)` (wrapping per
-  `switchWraps`), `restView(mode, n)` (the side pair and the switch
-  stage derived from `restAt` and `switchStart`), `noteIndex(mode,
-  view)` (slider and side: the pair's later stage — the step being
-  shown; switch: the stage), and `sideFits(width)`. What the literal
-  geometry means for three stages is in Known limitations; changing it
-  is one function and its table, a round the envelope allows.
+  `i = n − 2 − min(⌊p (n − 1)⌋, n − 2)`. Exactly at an interior stop the
+  floor puts the handle in the segment to the stop's right (for three
+  stages, `p = 0.5` → the pair (0, 1) at 50). For two stages `i` is
+  always 0 — today's compare exactly. `snapTo(p, n)`, `sidePair(k, n)`
+  (stage `k` and the next; the last with the one before),
+  `switchNext(i, n, dir)` (wrapping per `switchWraps`), `restView(mode,
+  n)` (the slider's position and the side pair from `restAt`; the switch
+  opens on the first stage), `noteIndex(mode, view)` (slider and side:
+  the pair's later stage — the step being shown; switch: the stage), and
+  `sideFits(width)`. What the geometry leaves inherent is in Known
+  limitations; changing it is one function and its table, a round the
+  envelope allows.
 
 - **The compare, enhanced** (`src/lib/compare.ts`'s `enhanceCompare`,
   `global.css`, T1708). Called exactly where it is called today — the
   layout's module evaluation and `astro:before-swap` on the new
   document, for the reason `compare.ts`'s comment gives (T1603c,
-  T1604c) — and skipping a figure already carrying `data-js`. Per
+  T1604c): before-swap is the last moment before the new snapshot and
+  the router's scroll, so the box is final when they are taken;
+  `astro:after-swap` would be too late for both, and it is used only by
+  the Verify, as the moment to read the result. It skips a figure
+  already carrying `data-js`; the module-level `resize` listener is
+  bound once, at module evaluation. Per
   `.compare` with two or more stages it reads each stage's label and
   note, then builds, all script-only: the method control (three
   `button`s, `aria-pressed`), the legend (`ol.compare-legend`, one item
@@ -397,9 +429,10 @@ where the simpler shape was taken it is said in one line.
   held beneath as `"under"`, and on `animationend` they become `"on"`
   and `"off"` — an opaque photograph dissolving in over another is the
   cross-fade. The stage a block opens on is `"on"`, never `"in"`, so
-  nothing fades at load. A mode change, when `COMPARE.modeFade` is on
-  (the default), sets `data-fresh` on the root until the panes'
-  `animationend`, so the new view fades in from the ground. Both reuse
+  nothing fades at load. A mode change sets `data-fresh` on the root
+  until the panes' `animationend`, so the new view fades in from the
+  ground (not a flag: no envelope line asks for a cut, and one would be
+  a round deleting a line). Both reuse
   spec 018's `motion-appear` keyframes. No new rule sets `opacity: 0`,
   which matters twice over: motion.test.mjs (g) requires every such
   rule to begin `html[data-motion]` _and_ finds exactly one such rule
@@ -423,13 +456,16 @@ where the simpler shape was taken it is said in one line.
         dragSlop: 4,           // px a press may move and still be a click
         zoomInKeys: ['+', '='],
         zoomOutKeys: ['-', '_'],
-        quality: 90,           // the loupe file's encode
       } as const;
 
   `loupeImageOptions(source)` in `ogImageOptions`' shape: webp at the
   source's full size — a format change, so a real transform that strips
   metadata — capped at WebP's 16383px edge, and one pixel less when the
-  source is already webp (the passthrough og.ts guards). The page:
+  source is already webp (the passthrough og.ts guards). No quality is
+  given, the same default the stage's `<Image>` uses, so where the full
+  size equals a stage candidate's width (a source of 2320px or less)
+  Astro can serve one file for both; the growth of `dist/_astro/` that
+  the own-file loupes cost is measured and recorded at T1710. The page:
 
       const loupeSource = image.detail ?? (LOUPE.withoutDetail ? image.image : null);
       const loupe = loupeSource ? await getImage(loupeImageOptions(loupeSource)) : null;
@@ -493,15 +529,28 @@ where the simpler shape was taken it is said in one line.
       .loupe-base, .loupe-detail { position: absolute; inset: 0; width: 100%; height: 100%; }
       .loupe-detail { animation: motion-appear var(--dur-appear) var(--ease-appear) both; }
 
-  `data-glide` is written for a discrete zoom (open, a key, close) only
-  when `!reducedMotion()`, and removed on `transitionend`; a drag, a
-  wheel and a pinch follow the hand without it. Under reduced motion
-  the zoom cuts and the detail export still fades in (spec 018's split).
+  and, inside the reduced-motion block at the file's end (so it wins by
+  order, as T1608a's pin requires of every rule there), a sixth rule
+  beside the frames' appearance:
+
+      .loupe-detail { animation-duration: calc(var(--dur-appear) * var(--rm-appear)); }
+
+  motion.test.mjs (d)'s `REDUCED_RULES` and its order expectation gain
+  this rule and the block's comment says six — a deliberate addition
+  the count exists to notice, not a loosened test. `data-glide` is
+  written for a discrete zoom (open, a key, close) only when
+  `!reducedMotion()`, and removed on `transitionend`; a drag, a wheel
+  and a pinch follow the hand without it. Under reduced motion the zoom
+  cuts and the detail export fades in exactly as the frames do, on
+  `--rm-appear` (spec 018's split).
   The detail image is inserted only once decoded and its animation's
   `both` fill starts it at opacity 0, so there is no `opacity: 0` rule.
   Without script there is no `data-loupe-ready`, no `.loupe`, and the
   quiet view is today's. A photograph whose gain is below `minGain`
-  keeps today's quiet view exactly: any click leaves.
+  keeps today's quiet view exactly: any click leaves. For a
+  loupe-ready photograph a click on the photograph opens the loupe and
+  a click on the mat or the ground leaves the quiet view — a reading of
+  Goal 4 (see Resolved decisions).
 
 - **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, `styles.css`,
   T1714). A second pattern beside `DIRECTIVE_PATTERN`, for the one
@@ -545,7 +594,7 @@ where the simpler shape was taken it is said in one line.
   | the loupe without a detail export                                          | `LOUPE.withoutDetail`                                                                              | `EXPECTED`                                  |
   | recommended detail size                                                    | the one AUTHORING.md sentence                                                                      | T1715's grep                                |
   | each duration's token                                                      | the five motion rules (switch, mode change, settle: state; zoom: move; detail: appear)             | (c) rule strings in both tests              |
-  | reduced-motion split per movement                                          | the script gates (`data-settling`, `data-glide` on `!reducedMotion()`); fades have none            | the gate's unit case in each test           |
+  | reduced-motion split per movement                                          | the script gates (`data-settling`, `data-glide` on `!reducedMotion()`); the detail fade's RM rule on `--rm-appear` | the gate's unit case in each test           |
   | the section's heading, the block's words                                   | the page's `WORDING.compare`; `COMPARE_WORDING`                                                    | compare.test.mjs (page source, `EXPECTED`)  |
   | sidecar field names; the note's fallback to `processing:`                  | `content.config.ts`'s `stages`; `compareStages()`                                                  | image-meta.test.mjs                         |
 
@@ -564,7 +613,7 @@ compare takes two or more stages (one per line: ![Label](./file.jpg) then its no
 a compare's body is its stages, one per line — "Before the images" comes before the first image
 a compare's body is its stages, one per line — no lists, headings or blocks inside it
 a compare stage needs its label as the image's text: ![Camera](./_land-b.jpg)
-"../beta/_photo.jpg" is a private file of another folder — a compare may show a private file only from its own folder; a public photograph may be borrowed
+"../beta/_photo.jpg" is a private file of another folder — a compare may show a private file only from its own folder; a public photograph may be borrowed (../beta/photo.jpg)
 "./_land-b.tones.jpg" is private — a file of "land-b" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "land-b.jpg" here, or show it as a stage of a :::compare in this folder
 image not found: ./_land-b.tones.jpg (relative to the piece's folder)
 invalid value "carousel" for mode on compare — allowed: slider | side | switch
@@ -592,7 +641,8 @@ The table and the warning:
 The barrier, green and failing:
 
 ```
-[check-private-files] N loupe files on M image pages, K of them detail exports named nowhere else; no compare or loupe state in P pages.
+[check-private-files] N loupe files on M image pages, K of them detail exports named nowhere else; C compares in one shape; no compare or loupe state in P pages.
+[check-private-files] a compare out of shape in dist/pieces/x/index.html: compare-stage > compare-caption before compare-pane
 [check-private-files] a detail export named outside its loupe in dist/galleries/fog-frames/index.html: /_astro/…webp
 [check-private-files] a loupe file missing from dist/: /_astro/…webp (dist/images/where-the-fog-lets-go/land-b/index.html)
 [check-private-files] a loupe file over 25 MiB: dist/_astro/…webp (31.2 MiB)
@@ -622,7 +672,7 @@ feel is the person's at each pause.
   no `land-b` (orphan); `privateTargetOf('_land-b.tones') === 'land-b'`;
   `attachPrivates` returns the frame, the detail, the stages in name
   order, and one problem each for an orphan, a second frame, a second
-  detail; `resolveStages` keeps the sidecar's order and fails the five
+  detail; `resolveStages` keeps the sidecar's order and fails the four
   cases above with their lines; `validateGalleries` refuses
   `x/_land-b.detail` naming `x/land-b`; `compareStages` puts the frame
   first, the photograph last with `processing` as its note, and omits
@@ -652,7 +702,12 @@ feel is the person's at each pause.
   (a sparse file) → 1; `data-js` on a figure → 1; `class="loupe"` → 1;
   `data-js` and `.loupe` in `<script>` and `<style>` text only → 0; a
   loupe URL without `data-loupe-detail` also in a `srcset` → 0 (the
-  own-file loupe may share a candidate, by Astro's dedupe).
+  own-file loupe may share a candidate, by Astro's dedupe); scan 3 — a
+  compare in the shape with two and with three stages → 0, a stage
+  without `compare-pane` → 1, a caption before its pane → 1, one stage
+  → 1, a stray element with a class inside the frames → 1, a note
+  without a label → 1, a compare holding `.compare-range` (spec 006's)
+  → 0 until T1706 deletes that skip and turns the case to 1.
 
 - **Gear names** — `gear.test.mjs`, **T1704**: the parser (the
   committed table parses; a malformed line, a line before any section
@@ -679,9 +734,18 @@ feel is the person's at each pause.
   label and note in order (no-script: stacked figures, AC 3); the root's
   `--ar` is the last stage's; `data-mode` present only when written; no
   `a.image-link` inside; a note with `_emphasis_` keeps it; stages
-  separated by blank lines parse like consecutive ones. Failures, each
-  naming `tests/fixtures/piece.md` and the line: one stage;
-  `./_missing.jpg`; `../beta/_photo.jpg`; `![](./photo.jpg)`; text
+  separated by blank lines parse like consecutive ones. **The borrowing
+  pair**, rendered from a piece in `tests/pieces/alpha/`, beside which
+  `tests/pieces/beta/` holds both `photo.jpg` and `_photo.jpg` on disk
+  (the implementer copies how the suite's spec-008 borrowing cases set
+  the render's path, and names the case it copied): a compare with
+  `./photo.jpg` and `../beta/photo.jpg` — a public photograph borrowed
+  by spec 008's path — renders, two stages, the borrowed image's `src`
+  resolved like any borrowed frame; the same compare with
+  `../beta/_photo.jpg` fails naming the file with the borrowed-private
+  line — the file exists, so the refusal is the rule, not a missing
+  file. Failures, each naming the piece and the line: one stage;
+  `./_missing.jpg`; the borrowed private above; `![](./photo.jpg)`; text
   before the first image; a list inside; `mode="carousel"`;
   `::single{src="./_photo.jpg" alt="x"}` still fails with the widened
   message; a shorthand `![x](./_photo.jpg)` still fails; a private stage
@@ -695,7 +759,13 @@ feel is the person's at each pause.
 - **The page's section is the block** — **T1706**: the built
   `land-b` page's section holds `figure.compare.compare-w-column` with
   three stages labelled Camera, Tones, Finished and Finished's note the
-  sidecar's `processing` (grep of `dist/`, recorded); "How it was made"
+  sidecar's `processing` (grep of `dist/`, recorded); the barrier's
+  scan 3 counts every compare on the site in one shape, its old-compare
+  skip deleted and that test case turned to 1; spec 006's
+  `enhanceCompare`, still in place until T1708, finds no
+  `.compare-range` in the new markup and skips every figure (its
+  `continue`), so the stacked form shows and no script throws — read in
+  the browser console on `land-b` and the fog piece; "How it was made"
   on that page has no Processing row; `vocabulary-sampler/land-b`'s
   section holds two stages, Camera and Finished; `port-a` has no
   section; the fog
@@ -713,9 +783,13 @@ feel is the person's at each pause.
 - **The compare's state** — `compare.test.mjs`, **T1707**: `EXPECTED`,
   every `COMPARE` key and value verbatim, and `COMPARE_WORDING`;
   `sliderView` as a table — two stages: `p` 0, 0.5, 1 → split 0, 50, 100,
-  pair (0, 1) throughout; three stages: 0.25 → (0, 1) at 25; 0.5 →
-  (1, 2) at 50; 0.75 → (1, 2) at 75; 1 → (1, 2) at 100; four stages at
-  the stops; `snapTo`; `sidePair` for first, middle and last;
+  pair (0, 1) throughout (unchanged from spec 006); three stages: 0 →
+  (1, 2) at 0 (the last stage whole); 0.25 → (1, 2) at 25; 0.5 — the
+  interior stop, which belongs to the segment on its right — → (0, 1)
+  at 50; 0.75 → (0, 1) at 75; 1 → (0, 1) at 100 (the first stage
+  whole); four stages at 0, each interior stop, and 1 (the last whole
+  at 0, the first at 1, each interior stop the pair to its right);
+  `snapTo`; `sidePair` for first, middle and last;
   `switchNext` at the end with and without wrapping, and backwards from
   the first; `restView` per mode; `noteIndex` per mode; `sideFits` at
   `2 × sideMinPx` ± 1; `openingMode` for stored/authored/default and an
@@ -726,8 +800,8 @@ feel is the person's at each pause.
   once, in `:root`), (c) the three motion rules by string and the
   `@property --split` block; motion.test.mjs green unedited — (a) the
   family untouched, (b) the source scan over the new rules, (d) the
-  five-rule reduced-motion block, (g) the `opacity: 0` walk finding the
-  new rule under `html[data-motion]`; the build's motion and
+  five-rule reduced-motion block, (g) the `opacity: 0` walk and its one
+  gate unchanged (no new rule sets `opacity: 0`); the build's motion and
   private-files barriers green. In the browser, at 1512×982 and
   1280×1440, on `/images/where-the-fog-lets-go/land-b/` and the fog
   piece: the control, legend, handle and live note exist only with
@@ -758,9 +832,12 @@ feel is the person's at each pause.
   barrier's line counts one detail export, `check-no-gps` green with the
   GPS-bearing detail fixture (and `exifr` over the emitted file reads no
   GPS — recorded), the detail's original is absent from `dist/_astro/`
-  (the pruner's line counts it), `port-a`'s stage carries a loupe file
-  and no `data-loupe-detail`, and with `withoutDetail: false` (temporary)
-  `port-a`'s stage carries none.
+  (the pruner's line counts it), the fog piece's `land-a`'s stage
+  carries a loupe file and no `data-loupe-detail`, and with
+  `withoutDetail: false` (temporary) it carries none; the size and file
+  count of `dist/_astro/` before and after this task (the own-file
+  loupes' cost) and how many own-file loupe URLs equal a stage `srcset`
+  candidate (Astro's dedupe, measured, not assumed).
 
 - **The loupe's state** — `loupe.test.mjs`, **T1711**: `fullScale`
   (5400 over a 1400px fit at dpr 2 → 1.93; 1800 over 1400 at 2 → 0.64,
@@ -774,8 +851,13 @@ feel is the person's at each pause.
   (close); and (c) the loupe's CSS rules by string, the glide on
   `--dur-move`/`--ease-move`, the detail on `--dur-appear`/`--ease-appear`.
 
-- **The loupe, wired** — **T1712**: motion.test.mjs and matte.test.mjs
-  green unedited (the quiet rules, the mat, the stage); in the browser,
+- **The loupe, wired** — **T1712**: matte.test.mjs green unedited (the
+  quiet rules, the mat, the stage); motion.test.mjs green with one
+  deliberate edit — (d)'s `REDUCED_RULES` and its order expectation gain
+  `.loupe-detail { animation-duration: calc(var(--dur-appear) * var(--rm-appear)) }`
+  (`bases: 1`, `after: []`) and the "five rules" names say six — and a
+  mutation: the rule moved above its base → the order case fails; in
+  the browser,
   at both viewports, on `land-b` in the quiet view: the stage carries
   `data-loupe-ready`; the resource timeline holds no loupe URL before the
   first click and exactly one after it and after a second zoom; a click
@@ -790,8 +872,16 @@ feel is the person's at each pause.
   fit, Escape again → the page; a click zoomed without movement → the
   fit; during a click zoom `getAnimations()` holds a 480ms transform
   transition, and under reduced motion none (the detail's fade still
-  950ms); on `port-a` at 1512×982 (dpr 2) the stage is not
-  loupe-ready and a click leaves the quiet view as on `main`; without
+  950ms); the not-ready control is chosen by computation, not assumed:
+  the fog piece's `land-a` (the 1800×1200 placeholder; at the quiet fit
+  about 1,300 CSS px wide on both screens, so `fullScale` ≈ 0.7 at 2×)
+  has its `fullScale` read at both viewports and recorded, is not
+  loupe-ready, and a click leaves the quiet view as on `main`; the same
+  read is recorded for one real 2560px portrait export and one real
+  2560px landscape export (a portrait's quiet fit on the laptop is
+  narrow, so its gain can pass `minGain` — the Phase 2 walkthrough
+  quotes these numbers, and if `land-a` reads ready, the report names
+  a page this read found not ready instead); without
   script, no `data-loupe-ready` and the quiet view as on `main`.
 
 - **Obsidian** — `obsidian-plugin.test.mjs`, **T1714**:
@@ -803,9 +893,10 @@ feel is the person's at each pause.
   `git diff -U0 main -- src/styles/global.css | grep '^@@'`: no hunk
   inside `.image-stage`, `.image-frame`, `.image-frame img`, the
   `html:not([data-quiet])` or `html[data-quiet]` rules, the Motion
-  section, the reduced-motion block, or the `:root` motion tokens;
-  `matte.test.mjs`, `motion.test.mjs`, `ground.test.mjs`,
-  `galleries.test.mjs`, `place-page.test.mjs` green and unedited.
+  section, the reduced-motion block (save T1712's one added rule), or
+  the `:root` motion tokens; `matte.test.mjs`, `ground.test.mjs`,
+  `galleries.test.mjs`, `place-page.test.mjs` green and unedited, and
+  `motion.test.mjs` unedited but for T1712's (d) addition.
 
 - Existing suites stay green; build with its four barriers (GPS, dev routes, motion, private files); `astro
   check`; Prettier on every touched file.
@@ -821,7 +912,7 @@ scripts/gen-placeholders.mjs              PRIVATES: the tones stage and the deta
 src/content/pieces/where-the-fog-lets-go/ _land-b.tones.jpg, _land-b.detail.jpg (generated); _land-b.md stages (T1702); index.md's compare (T1706)
 src/content/pieces/vocabulary-sampler/    _land-b.jpg (generated — a frame and nothing else) (T1702)
 tests/fixtures/_photo.tones.jpg           generated (T1702)
-scripts/check-private-files.mjs           new: the barrier (T1703)
+scripts/check-private-files.mjs           new: the barrier's three scans (T1703); scan 3's spec-006 skip deleted (T1706)
 package.json, scripts/verify.sh           postbuild; the two grep additions (T1703, T1704)
 private-files.test.mjs                    new (T1703)
 src/content/gear.md                       new: the table (T1704)
@@ -836,6 +927,7 @@ src/lib/compare.ts                        COMPARE, COMPARE_WORDING, COMPARE_MODE
 compare.test.mjs                          new (T1706–T1708)
 src/lib/loupe.ts                          new: LOUPE, loupeImageOptions (T1710); fullScale, zoomAbout, clampPan, loupeReduce (T1711); createLoupe (T1712)
 loupe.test.mjs                            new (T1710–T1712)
+motion.test.mjs                           (d): the sixth reduced-motion rule, deliberately (T1712)
 obsidian-plugin/compare.ts, main.ts, styles.css   the compare widget (T1714)
 obsidian-plugin.test.mjs                  new (T1714)
 AUTHORING.md, README.md, obsidian-plugin/README.md   T1715
@@ -846,7 +938,7 @@ ROADMAP.md, DECISIONS.md                  close-out (T1718)
 Untouched, named so the reviewer can confirm the non-goals hold:
 `src/lib/exif.mjs` (the allowlist and `gps: false`); `src/lib/motion.ts`,
 `src/lib/motion-scan.mjs`, `scripts/check-motion.mjs`; the reduced-motion
-block and the Motion section of `global.css`; every `.image-stage`,
+block's five existing rules and the Motion section of `global.css`; every `.image-stage`,
 `.image-frame` and quiet rule; `src/layouts/BaseLayout.astro` (it already
 calls `enhanceCompare` where it must); the galleries, the place wall, the
 front door, the piece page and its script, the sets and the arrows;
@@ -854,27 +946,25 @@ front door, the piece page and its script, the sets and the arrows;
 
 ## Known limitations
 
-- **The slider's geometry for three or more stages, read literally.**
-  With the handle on the divider, the stops on the frame's width and the
-  earlier stage always on the left, the pair changes at each stop, both
-  halves at once, and for three stages neither the camera's frame nor
-  the finished photograph ever fills the frame (at the far left the
-  second stage fills it; at the far right the next-to-last). Two stages
-  are today's compare exactly. The alternative — each stage whole at its
-  stop, the next wiping in over it — is continuous but needs the later
-  stage on the left or the handle off the divider; it is one function,
-  `sliderView`, and a round inside the envelope. The pause is where this
-  is judged, as the spec says.
-- **On a 2× screen the loupe may not exist for a photograph without a
-  detail export.** Full detail is one image pixel to one device pixel;
-  the site's 2560px exports shown at a ~1400px quiet fit on the 16:10
-  laptop are already past that, so `fullScale` is under 1 and those
-  photographs keep today's quiet view. `LOUPE.pixelRatio` (a looser
-  "full detail") and `minGain` are the envelope's zoom range.
-- **The detail export's fade does not read `--rm-appear`.** It keeps
-  `--dur-appear` under reduced motion (the committed `--rm-appear` is
-  1, so the outcome matches the frames'); reading it would take a sixth
-  rule in the reduced-motion block, which this spec leaves at five.
+- **What the slider's geometry leaves inherent for three or more
+  stages.** The ends are right: the handle at the right edge shows the
+  first stage whole, at the left edge the last, for every count. What no
+  arrangement with the handle on the divider can avoid: a middle stage
+  is never shown whole (it is always one half of a pair), and at each
+  interior stop both halves change at once — the pair (i, i + 1) hands
+  to (i − 1, i). Two stages are today's compare exactly. The
+  alternative — each stage whole at its stop, the next wiping in over
+  it — is continuous but takes the handle off the divider; it is one
+  function, `sliderView`, and a round inside the envelope. The pause is
+  where this is judged, as the spec says.
+- **On a 2× screen many photographs without a detail export get no
+  loupe.** Full detail is one image pixel to one device pixel. A
+  landscape 2560px export shown about 1,300 CSS px wide in the quiet
+  view is already past that at 2× (`fullScale` ≈ 0.98), so it keeps
+  today's quiet view; a 2560px-tall portrait, whose quiet fit on the
+  laptop is short and narrow, can pass `minGain` (≈ 1.5). T1712 records
+  the numbers. `LOUPE.pixelRatio` (a looser "full detail") and
+  `minGain` are the envelope's zoom range.
 - **25 MiB per file.** The deploy target's static-asset limit applies
   to the loupe file; the barrier fails a larger one. The limit is
   Cloudflare's documented figure as of T1703's check (recorded there);
@@ -901,7 +991,8 @@ front door, the piece page and its script, the sets and the arrows;
 - **The page builds the block's markup itself** rather than rendering a
   generated `:::compare` through Markdown: the site's Markdown pipeline
   optimises images only inside content collections, and the page needs
-  `<Image>`. Two builders, one shape, pinned.
+  `<Image>`. Two builders, one shape, pinned on every build by the
+  barrier's scan 3.
 - **The chrome is script-built.** The static HTML is only the stacked
   figures, so without script nothing dead ships and the barrier can
   prove it; the handle is an ARIA slider on a `span`, not an invisible
@@ -913,10 +1004,10 @@ front door, the piece page and its script, the sets and the arrows;
 - **The switch's cross-fade is kept under reduced motion.** Goal 5 and
   spec 018's rule keep fades; the Design requirement's "or a cut under
   reduced motion" is the other reading, and one reduced-motion rule if
-  the pause asks for it (which would make the block six rules — a
+  the pause asks for it (which would make the block seven rules — a
   deliberate change to motion.test.mjs (d)).
 - **A mode change moves the geometry at once and fades the new view in**
-  (`COMPARE.modeFade`); morphing one layout into the other would need a
+  (`data-fresh`, always — no envelope line asks for a cut); morphing one layout into the other would need a
   view transition for a change inside one figure, and a view transition
   here would also cross-fade the page around it.
 - **The switch's cross-fade is a fade-in over the held stage**, not two
@@ -927,6 +1018,16 @@ front door, the piece page and its script, the sets and the arrows;
   not zoomed with the photograph" read as the window, not the page. A
   loupe filling the screen is a change to `createLoupe`'s placement,
   judged at the pause.
+- **At the fit, a click on the photograph opens the loupe and a click
+  on the mat or the ground leaves the quiet view.** Goal 4 says both "a
+  click or a tap on the photograph zooms" and "a click at the fit steps
+  back out"; they cannot both hold for the same click, so this is a
+  reading: the photograph zooms, everything around it leaves, and once
+  zoomed a click without movement returns to the fit. A photograph that
+  is not loupe-ready keeps today's "any click leaves". It is put to the
+  person at the Phase 2 pause; `LOUPE.opensOn` (`dblclick`, `gesture`)
+  is the envelope's alternative if he wants a single click to keep
+  leaving.
 - **The loupe is an overlay, not a transform of the stage image**, so
   nothing spec 018 or the mat rule pinned moves, and removing it
   restores the page byte for byte.
