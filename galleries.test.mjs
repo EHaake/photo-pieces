@@ -99,7 +99,7 @@ describe('gallery validation (T305)', () => {
     expect(problems.map((p) => [p.line, p.reason])).toEqual([
       [
         5,
-        '"a-piece/_land-b" is a camera\'s frame, not an image of the site — list "a-piece/land-b" instead',
+        '"a-piece/_land-b" is private — a file of "land-b" (its camera\'s frame, a stage, or the loupe\'s export), not an image of the site: list "a-piece/land-b" instead',
       ],
     ]);
   });
