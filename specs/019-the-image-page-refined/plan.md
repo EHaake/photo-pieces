@@ -423,7 +423,7 @@ where the simpler shape was taken it is said in one line.
   photograph's ratio, the line and the handle at `left:
   var(--split-pct)`. The handle: a disc of `--compare-handle`
   (2.75rem, a fingertip) with `border-radius: var(--compare-handle-radius)`
-  (50%), filled `--color-matte`, a 1px `--color-text` hairline, no
+  (50%), filled `--color-bg` (the spec's 'the ground's family'), a 1px `--color-text` hairline (D1708), no
   shadow, the focus ring the site draws. `--split` and `--split-pct`
   move here from the page, with one `@property --split { syntax:
   '<number>'; inherits: true; initial-value: 50; }` so the snap can

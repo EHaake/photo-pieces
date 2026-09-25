@@ -14,7 +14,8 @@
 // nothing but its file renders the 004 baseline.
 //
 // Static HTML throughout; the script below is page-level enhancement:
-// the compare slider, quiet view, and set selection by route in.
+// quiet view and set selection by route in. The compare is enhanced by
+// the layout's script (src/lib/compare.ts), since pieces carry it too.
 import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { render } from 'astro:content';
@@ -226,8 +227,9 @@ const sets = image.sets.map((set) => ({
 // The frame's ratio (width / height, raw, rounded as galleryCell's),
 // carried by the stage's figure and the compare figure: the stage's mat
 // is form V+H, which reads --ar to solve for m (spec 013), and the
-// compare box's aspect-ratio takes the same decimal (it accepts a
-// number) — the compare figure itself is unmatted since spec 015.
+// enhanced compare's one box takes the same decimal as its aspect-ratio
+// (it accepts a number) — without script the stages stack at their own
+// ratios. The compare figure itself is unmatted since spec 015.
 const ar = Math.round((image.image.width / image.image.height) * 1000) / 1000;
 
 // The search index takes pages with something to find: a story, a
@@ -724,6 +726,7 @@ const indexed =
   // per module; `astro:page-load` fires on the first load and after
   // every ClientRouter swap, so per-page setup lives in init().
   import { IMAGE_QUIET_KEY as QUIET_KEY, IMAGE_SET_KEY as SET_KEY } from '../../lib/image-set';
+  import { COMPARE_CLASSES } from '../../lib/image-meta.mjs';
   import { flag, reducedMotion, withTransition } from '../../lib/motion';
 
   const root = document.documentElement;
@@ -815,9 +818,12 @@ const indexed =
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && root.hasAttribute('data-quiet')) setQuiet(false);
-    // Inputs keep their own arrow keys (the compare slider above all).
+    // Inputs keep their own arrow keys, and so does the compare: its
+    // handle, its switch and its buttons take the keys they use, and an
+    // arrow anywhere inside it never steps the set.
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)
       return;
+    if (event.target instanceof Element && event.target.closest(`.${COMPARE_CLASSES.root}`)) return;
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     const nav = document.querySelector<HTMLElement>('.frame-nav:not([hidden])');
     if (!nav) return;

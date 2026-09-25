@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -31,6 +31,21 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     page's own <style> holds no compare rule, since a piece could not
 //     reach it; and no compare class is a frame host, so the stage
 //     images stay outside the appearance hooks.
+//
+// (b) The handle's tokens (T1708). `TOKENS` below is the handle's size
+//     and shape, the tuning envelope's one place for them: each declared
+//     once, in global.css's :root, at its value, and nowhere else in any
+//     stylesheet; and the handle's rule reads both, so a token left
+//     declared but unread fails too.
+//
+// (c) The compare's motion (T1708). Three rules and nothing else, each
+//     by its string: the switch's arriving stage fading in over the
+//     leaving one, a mode change's fade, and a snap's glide — spec 018's
+//     state duration and curve and its motion-appear keyframes; no other
+//     rule in the compare's section animates or transitions; `--split` is
+//     registered as a number so the glide can run; and the script writes
+//     `data-settling` only when motion is not reduced (the settle is a
+//     movement), the two fades kept.
 //
 // (d) The state (T1707). `EXPECTED` below is the tunables' one other
 //     copy: every COMPARE key and value and COMPARE_WORDING, so a value
@@ -72,6 +87,13 @@ const EXPECTED = {
   },
 };
 
+/** The handle's size and shape, verbatim as global.css's :root carries
+ *  them: to retune, move the value there and here. */
+const TOKENS = {
+  '--compare-handle': '2.75rem',
+  '--compare-handle-radius': '50%',
+};
+
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 const PAGE = 'src/pages/images/[...id].astro';
 
@@ -85,13 +107,60 @@ const preludes = (css) =>
   );
 /** A class token in a selector, not a prefix of a longer one. */
 const classIn = (name) => new RegExp(`\\.${name}(?![\\w-])`);
+/** One line, one space, no padding inside parens. */
+const norm = (text) =>
+  text.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')').trim();
+/** Every rule in `css`, @-blocks opened, with the @-preludes it sits
+ *  under and its declarations as [name, value] pairs, in order. */
+const rulesIn = (css, within = []) =>
+  blocks(css).flatMap(({ prelude, body }) => {
+    const rule = { prelude: norm(prelude), within, body };
+    const nested = prelude.startsWith('@') ? rulesIn(body, [...within, norm(prelude)]) : [];
+    return [rule, ...nested];
+  });
+const declarationPairs = (body) =>
+  body
+    .replace(/\{[^{}]*\}/g, '')
+    .split(';')
+    .filter((part) => part.includes(':'))
+    .map((part) => [
+      part.slice(0, part.indexOf(':')).trim(),
+      norm(part.slice(part.indexOf(':') + 1)),
+    ]);
+/** The one top-level rule whose prelude is exactly `prelude`. */
+const ruleAt = (rules, prelude) => {
+  const found = rules.filter((rule) => rule.within.length === 0 && rule.prelude === prelude);
+  expect([prelude, found.length]).toEqual([prelude, 1]);
+  return Object.fromEntries(declarationPairs(found[0].body));
+};
+/** The compare's section of global.css, from its header to the Motion section's. */
+const compareSection = (raw) => {
+  const from = raw.indexOf('/* ---- The compare (spec 019)');
+  const to = raw.indexOf('/* ---- Motion (spec 018)');
+  expect([from > -1, to > from]).toEqual([true, true]);
+  return uncomment(raw.slice(from, to));
+};
+/** Every `.astro` file under src/, path -> contents. */
+async function astroFiles(dir = here('./src'), out = {}) {
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const path = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) await astroFiles(path, out);
+    else if (entry.name.endsWith('.astro'))
+      out[path.slice(here('./').length)] = await readFile(path, 'utf8');
+  }
+  return out;
+}
 
 let page;
 let css;
+let raw;
+let script;
 
 beforeAll(async () => {
   page = await readFile(here(`./${PAGE}`), 'utf8');
-  css = uncomment(await readFile(here('./src/styles/global.css'), 'utf8'));
+  raw = await readFile(here('./src/styles/global.css'), 'utf8');
+  css = uncomment(raw);
+  script = await readFile(here('./src/lib/compare.ts'), 'utf8');
 });
 
 describe('(a) one shape, spelled once', () => {
@@ -137,6 +206,83 @@ describe('(a) one shape, spelled once', () => {
 
   it('no compare class is a frame host, so the stage images stay outside the appearance hooks', () => {
     expect(FRAME_HOSTS.filter((host) => /compare/.test(host))).toEqual([]);
+  });
+});
+
+describe("(b) the handle's tokens (T1708)", () => {
+  it(':root declares each of TOKENS once, at its value', () => {
+    const declared = rulesIn(css)
+      .filter((rule) => rule.within.length === 0 && rule.prelude === ':root')
+      .flatMap((rule) => declarationPairs(rule.body))
+      .filter(([name]) => name in TOKENS);
+    expect(declared).toEqual(Object.entries(TOKENS));
+  });
+
+  it('no other rule in global.css or in any .astro <style> declares one', async () => {
+    const styles = Object.entries(await astroFiles()).flatMap(([path, text]) =>
+      styleBlocks(text).flatMap((block) =>
+        rulesIn(block).map((rule) => ({ ...rule, prelude: `${path}: ${rule.prelude}` })),
+      ),
+    );
+    const stray = [...rulesIn(css), ...styles]
+      .filter((rule) => !(rule.within.length === 0 && rule.prelude === ':root'))
+      .flatMap((rule) =>
+        declarationPairs(rule.body)
+          .filter(([name]) => name in TOKENS)
+          .map(([name, value]) => `${rule.prelude} { ${name}: ${value} }`),
+      );
+    expect(stray).toEqual([]);
+  });
+
+  it("the handle's rule reads both: its size from --compare-handle, its shape from --compare-handle-radius", () => {
+    const handle = ruleAt(rulesIn(css), '.compare[data-js] .compare-handle');
+    expect([handle.width, handle.height, handle['border-radius']]).toEqual([
+      'var(--compare-handle)',
+      'var(--compare-handle)',
+      'var(--compare-handle-radius)',
+    ]);
+  });
+});
+
+describe("(c) the compare's motion (T1708)", () => {
+  const STATE = 'var(--dur-state) var(--ease-state)';
+  const MOTION = [
+    [
+      ".compare[data-view='switch'] .compare-stage[data-part='in']",
+      { 'z-index': '1', animation: `motion-appear ${STATE} both` },
+    ],
+    ['.compare[data-fresh] .compare-pane', { animation: `motion-appear ${STATE} both` }],
+    ['.compare[data-settling]', { transition: `--split ${STATE}` }],
+  ];
+
+  for (const [prelude, body] of MOTION)
+    it(`${prelude} is exactly ${JSON.stringify(body)} — a literal, a new token or a changed curve fails`, () => {
+      expect(ruleAt(rulesIn(css), prelude)).toEqual(body);
+    });
+
+  it("no other rule in the compare's section animates or transitions — the three are all its motion", () => {
+    const moving = rulesIn(compareSection(raw))
+      .filter((rule) =>
+        declarationPairs(rule.body).some(([name]) => /^(animation|transition)/.test(name)),
+      )
+      .map((rule) => rule.prelude);
+    expect(moving).toEqual(MOTION.map(([prelude]) => prelude));
+  });
+
+  it('--split is registered as a number, inherited, at 50 — so the glide can run', () => {
+    const found = rulesIn(css).filter((rule) => rule.prelude === '@property --split');
+    expect(found.length).toEqual(1);
+    expect(Object.fromEntries(declarationPairs(found[0].body))).toEqual({
+      syntax: "'<number>'",
+      inherits: 'true',
+      'initial-value': '50',
+    });
+  });
+
+  it('the script writes data-settling only behind !reducedMotion() — the settle is a movement', () => {
+    const writes = script.split('\n').filter((line) => /dataset\.settling\s*=/.test(line));
+    expect(writes.length).toBeGreaterThan(0);
+    expect(writes.filter((line) => !/if \(!reducedMotion\(\)\)/.test(line))).toEqual([]);
   });
 });
 

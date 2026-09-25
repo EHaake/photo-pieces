@@ -513,7 +513,7 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(['the nav wraps at', PHONE, wraps.length]).toEqual(['the nav wraps at', PHONE, 1]);
   });
 
-  it('the image page reads --mat nowhere: the compare is unmatted, and its section reads --color-matte only where the plan says (none yet)', async () => {
+  it('the image page reads --mat nowhere: the compare is unmatted, and its section reads --color-matte only where the plan says', async () => {
     // The compare figure lost its mat with every other non-hero surface
     // (spec 015). Since spec 019 (T1706) the compare's rules live in
     // global.css's "The compare (spec 019)" section, where a piece's
@@ -532,7 +532,8 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
       const matte = [];
       for (const block of all)
         for (const [property, value] of Object.entries(declarations(block.body))) {
-          if (/var\(--mat\s*[,)]/.test(value)) reading.push(`${norm(block.prelude)} { ${property} }`);
+          if (/var\(--mat\s*[,)]/.test(value))
+            reading.push(`${norm(block.prelude)} { ${property} }`);
           if (/--color-matte\b/.test(value)) matte.push(norm(block.prelude));
         }
       return { all, reading, matte };
@@ -551,8 +552,13 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     const section = reads(blocks(uncomment(raw.slice(from, to))));
     expect(section.all.length).toBeGreaterThan(0);
     expect(section.reading).toEqual([]);
-    // T1708 extends this list with the letterbox and divider rules it adds.
-    expect(section.matte.sort()).toEqual([]);
+    // The enhanced block (T1708): the letterbox behind each stage, the
+    // divider, and the handle's fill — the ground's matte, not a mat.
+    expect(section.matte.sort()).toEqual([
+      '.compare[data-js] .compare-handle',
+      '.compare[data-js] .compare-line',
+      '.compare[data-js] .compare-pane img',
+    ]);
     const compare = declarations(ruleFor(section.all, ':where(.compare)').body);
     expect(Object.keys(compare)).not.toContain('padding');
     expect(Object.keys(compare)).not.toContain('background');
