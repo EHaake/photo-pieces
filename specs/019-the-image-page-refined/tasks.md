@@ -231,7 +231,7 @@ headers to confirm nothing was duplicated or dropped. -->
       (the page named); `dist/images/gallery/dock-b/index.html` still
       carries the sidecar's camera and lens._
 
-- [ ] **T1705** — The `compare` block in the transform. `review: per-task`.
+- [x] **T1705** — The `compare` block in the transform. `review: per-task`.
       Pattern: the `grid` and `strip` descriptors, `partitionBody`, and
       the `scroll` structure's branch in `remark-pieces-blocks.mjs`;
       remark-pieces-blocks.test.mjs's render helper and its failure
@@ -712,6 +712,8 @@ tier if it is ever on (it is off). -->
 | T1703 private-files barrier | implementation (`opus`, high) | ~57k | done; 446 tests (+18); Cloudflare Workers static assets per-file limit confirmed 25 MiB, Free and Paid, https://developers.cloudflare.com/workers/platform/limits/ (curl, 2026-09-24) — MAX_BYTES stays; the temporary spec-006 skip covers scan 2 as well as scan 3 (the old markup ships compare-tag/compare-line), one skip, T1706 deletes both uses and flips the test case to exit 1 |
 | Phase 0 review | implementation (`opus`, high) | ~96k | signed off, nothing blocking; three plan-text notes transcribed (scan 3 reads compare-classed elements and img only; the skip covers scan 2; `over 25.0 MiB`); the style-half of one barrier test cannot fail on its own, `MAX_BYTES` and the width list each spelled twice, `resolveStages` parsing `where` for the name, a live gap until T1706 (stages without a frame) — carried to the sweep; `privateTargetOf`'s remaining callers checked by the orchestrator: messages only (image-meta.mjs:365 unread target, :1118, remark-pieces-blocks.mjs:746) |
 | T1704 gear names | implementation (`opus`, high) | ~74k | done; 471 tests (+25); the mutation fails the repo case naming cozy-brook.jpg and the build prints one [gear] line; latourelle-glow reads Sony α7R V / Sony FE 16-35mm f/2.8 GM II; dock-b keeps its sidecar names; the bundle was cut short by the Phase 0 plan amendment shifting line numbers — the implementer read four plan ranges directly; bundles now slice by header |
+| T1705 compare block | implementation (`opus`, high) | ~97k | done; 488 tests (+17); the pieceFrame mutation fails five named cases; compare sits after held in the table (the vocabulary test pins the order); partitionStages takes the directive name as partitionBody does |
+| T1705 per-task review | implementation (`opus`, high) | ~55k | signed off, nothing blocking; two lines added to plan.md's "The block" (no note → label span alone; the stage img carries no --ar); carried: the label-missing line prints the plan's literal example, a later paragraph without an image joins the previous note (AUTHORING.md should say so, T1715), a linked or reference-style image before the first stage is silently dropped, a same-folder `../own/_x.jpg` may read as a borrow |
 
 _(Session-tier allowance draw noted at each pause.)_
 

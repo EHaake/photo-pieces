@@ -295,7 +295,11 @@ where the simpler shape was taken it is said in one line.
         </div>
       </figure>
 
-  The image sits in a `span`, not directly in a `figure`, so no stage
+  A stage with no note renders the label span alone — no empty note
+  span and no separating space; the stage `<img>` carries only its
+  sizing props, no `--ar` of its own (the root's is the box); the
+  page's section builds both the same way (T1705 review). The image
+  sits in a `span`, not directly in a `figure`, so no stage
   image matches `FRAME_IMG` (`.piece-block figure > img`): the compare's
   images stay outside the appearance hooks, as spec 018 decided of
   spec 006's compare. The vocabulary's unknown-directive message lists
