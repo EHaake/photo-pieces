@@ -266,7 +266,7 @@ headers to confirm nothing was duplicated or dropped. -->
       loop's and the shorthand pass's calls, and none on the compare
       path._
 
-- [ ] **T1706** — The block's static form on both surfaces; the image
+- [x] **T1706** — The block's static form on both surfaces; the image
       page's section built as the block; the fog piece's compare.
       Pattern: the page's current `sec-compare` section and its scoped
       `.compare*` rules (what moves and what goes); `.piece-wide` in
@@ -714,6 +714,7 @@ tier if it is ever on (it is off). -->
 | T1704 gear names | implementation (`opus`, high) | ~74k | done; 471 tests (+25); the mutation fails the repo case naming cozy-brook.jpg and the build prints one [gear] line; latourelle-glow reads Sony α7R V / Sony FE 16-35mm f/2.8 GM II; dock-b keeps its sidecar names; the bundle was cut short by the Phase 0 plan amendment shifting line numbers — the implementer read four plan ranges directly; bundles now slice by header |
 | T1705 compare block | implementation (`opus`, high) | ~97k | done; 488 tests (+17); the pieceFrame mutation fails five named cases; compare sits after held in the table (the vocabulary test pins the order); partitionStages takes the directive name as partitionBody does |
 | T1705 per-task review | implementation (`opus`, high) | ~55k | signed off, nothing blocking; two lines added to plan.md's "The block" (no note → label span alone; the stage img carries no --ar); carried: the label-missing line prints the plan's literal example, a later paragraph without an image joins the previous note (AUTHORING.md should say so, T1715), a linked or reference-style image before the first stage is silently dropped, a same-folder `../own/_x.jpg` may read as a borrow |
+| T1706 static form, page section | implementation (`opus`, high) | ~130k (two rounds) | done; 493 tests; 3 compares in one shape; stopped once on matte.test.mjs (b), whose pinned page rules the plan deletes — orchestrator resolved it as a retarget to the new section with an empty --color-matte list T1708 extends, both mutations fail; carried to the pause: a sidecar stage note prints as literal text while the block renders inline Markdown (`_Fixture stage._` shows underscores); no browser read (no BiDi helper in the repo) — the person attests; stale page comments left for T1708 |
 
 _(Session-tier allowance draw noted at each pause.)_
 
