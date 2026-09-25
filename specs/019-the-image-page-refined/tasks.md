@@ -307,7 +307,7 @@ headers to confirm nothing was duplicated or dropped. -->
       absent, reverted; `git diff -U0 main -- src/styles/global.css | grep '^@@'`
       → hunks only in the new section (listed)._
 
-- [ ] **T1707** — The compare's state, pure. Pattern:
+- [x] **T1707** — The compare's state, pure. Pattern:
       `src/lib/image-set.ts` for a small typed module; motion.test.mjs's
       `EXPECTED` table and its header comment's voice. Plan: "The
       compare's state". `src/lib/compare.ts`: `COMPARE`,
@@ -715,6 +715,7 @@ tier if it is ever on (it is off). -->
 | T1705 compare block | implementation (`opus`, high) | ~97k | done; 488 tests (+17); the pieceFrame mutation fails five named cases; compare sits after held in the table (the vocabulary test pins the order); partitionStages takes the directive name as partitionBody does |
 | T1705 per-task review | implementation (`opus`, high) | ~55k | signed off, nothing blocking; two lines added to plan.md's "The block" (no note → label span alone; the stage img carries no --ar); carried: the label-missing line prints the plan's literal example, a later paragraph without an image joins the previous note (AUTHORING.md should say so, T1715), a linked or reference-style image before the first stage is silently dropped, a same-folder `../own/_x.jpg` may read as a borrow |
 | T1706 static form, page section | implementation (`opus`, high) | ~130k (two rounds) | done; 493 tests; 3 compares in one shape; stopped once on matte.test.mjs (b), whose pinned page rules the plan deletes — orchestrator resolved it as a retarget to the new section with an empty --color-matte list T1708 extends, both mutations fail; carried to the pause: a sidecar stage note prints as literal text while the block renders inline Markdown (`_Fixture stage._` shows underscores); no browser read (no BiDi helper in the repo) — the person attests; stale page comments left for T1708 |
+| T1707 compare state | implementation (`opus`, high) | ~55k | done; 508 tests (+15); restAt mutation fails EXPECTED by name; switchNext and openingMode take an optional trailing argument defaulting to the constant so the no-wrap and no-remember paths are testable; restView('side') is the pair the slider shows at rest; split carries float noise at thirds (T1708 rounds where it writes it) |
 
 _(Session-tier allowance draw noted at each pause.)_
 
