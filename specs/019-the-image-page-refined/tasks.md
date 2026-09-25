@@ -103,7 +103,7 @@ headers to confirm nothing was duplicated or dropped. -->
       the run is the record). The orchestrator commits this task alone,
       before T1701 is dispatched._
 
-- [ ] **T1701** — The private-file family and the compare's shared
+- [x] **T1701** — The private-file family and the compare's shared
       shape, as pure rules. Pattern: `sectionsFor`, `validateGalleries`
       and `passageFor` in `src/lib/image-meta.mjs` for the functions'
       shape and comment voice; image-meta.test.mjs's describes for the
@@ -706,6 +706,7 @@ tier if it is ever on (it is off). -->
 | Sign-off fixes (planner resumed) | implementation (`opus`, high) | ~60k | B1–B3 fixed; S1–S8 taken, S9 in part |
 | Sign-off re-review | top (`fable`, high, override) | ~40k | signed off; five non-blocking lines below. Against 018: planning 390,978 at the top tier → ~434k at the implementation tier here (draft + fix round); sign-off 197,107 → ~160k |
 | T1700 constitution amendment | implementation (`opus`, high) | ~36k | done; prettier failed on a pre-existing defect (role table padding, one indented line) — fixed on `main` in c4c5e86 and merged in, not part of this task |
+| T1701 private-file family | implementation (`opus`, high) | ~84k | done; 428 tests; both mutations fail the named cases; compareStages takes/returns { src, label, note } (T1702 maps key → src); resolveStages reads the photograph name from `where` |
 
 _(Session-tier allowance draw noted at each pause.)_
 
