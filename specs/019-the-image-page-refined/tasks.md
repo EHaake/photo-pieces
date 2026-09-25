@@ -412,7 +412,7 @@ headers to confirm nothing was duplicated or dropped. -->
       place, its test row and spec.md's Decided line (a `grep` of each,
       listed); the Phase 1 record below filled in._
 
-- [ ] **T1708a** — Phase 1 review fixes. (1) `compare.test.mjs`: a
+- [x] **T1708a** — Phase 1 review fixes. (1) `compare.test.mjs`: a
       page-source case pinning `WORDING.compare` (the heading and the
       two labels as literal strings) and a (c)-style exact-body case
       for the legend/control rule in `global.css` — the two pins the
@@ -766,6 +766,7 @@ tier if it is ever on (it is off). -->
 | T1708 compare enhanced | implementation (`opus`, high) | ~165k (two rounds) | done; 517 tests (+9); stopped once on D1708; no browser would start in its sandbox ("Could not find profile folder"); orchestrator miss: the D1708 plan commit (`git commit -a`) swept the implementer's uncommitted draft into aee4e7e — the decision's fills landed in 4e6d229; carried: no legend-shape pin in (c) though the envelope table names one; the legend runs left→right while the slider's track runs right→left (first stage whole at the right edge); with sideNarrow 'switch' the control would still show Side by side (not today's setting) |
 | T1708 browser pass | general-purpose (session tier, medium) | ~98k | every read taken at both viewports, recorded under T1708; the driver had four duplicate `const f` declarations, fixed in the scratchpad copy; Firefox launches via `open -na` with HOME overridden and MOZ_HEADLESS=1 (the direct binary cannot find a profile under this macOS) |
 | Phase 1 review | implementation (`opus`, high) | ~142k | blocked once: the envelope table names two pins (the legend rule's strings; WORDING.compare by page source) that compare.test.mjs lacks — a plan-bullet defect, fixed as T1708a with the sidecar-note Markdown gap (the reviewer's recommendation: renderMarkdown, the live note cloning children); pause questions: the legend reads left→right while the track runs right→left; the 1px --color-bg divider on a bright photograph; sweep notes: matte (b)'s scan is section-bounded, AC 4's "page tests" are unit tables plus a browser record, unused envelope branches (cornerTags, 'above', remember 'always', sideNarrow 'switch') to prune at close-out, CLICK_SLOP_PX outside COMPARE, the switch frame's missing accessible name, aria-current on two stops, gear.mjs's duplicate cleaner and `in SECTIONS` |
+| T1708a review fixes | implementation (`opus`, high) | ~46k | done; 519 tests (+2); both mutations fail the named case; land-b reads <em>Fixture stage.</em>; a multi-paragraph sidecar note would keep its <p>s inside the span (single paragraph unwrapped by regex) — sweep note; the live note clone has no DOM test |
 
 _(Session-tier allowance draw noted at each pause.)_
 
