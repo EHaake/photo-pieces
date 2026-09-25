@@ -1,6 +1,6 @@
 # Tasks: The image page, refined
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1700–T1703) — the constitution amended
 first, in its own commit; the private-file family as pure rules with
@@ -701,12 +701,20 @@ tier if it is ever on (it is off). -->
 
 | Task / invocation | Tier | Tokens | Outcome / miss reason |
 | ----------------- | ---- | ------ | --------------------- |
+| Plan and tasks draft (2026-09-24) | implementation (`opus`, high, no override — first run of the stepped-down row) | ~374k | drafted; 19 tasks in six phases; 12 deviations reported, all judged inside the envelope or plan defects at sign-off |
+| Plan and tasks sign-off | top (`fable`, high, override) | ~120k | blocked: B1 slider segment order (middle stage at both ends), B2 AC 6 vs the borrowed-public allowance, untested, B3 CLAUDE.md "frontmatter-only" sidecar; nine second-look notes |
+| Sign-off fixes (planner resumed) | implementation (`opus`, high) | ~60k | B1–B3 fixed; S1–S8 taken, S9 in part |
+| Sign-off re-review | top (`fable`, high, override) | ~40k | signed off; five non-blocking lines below. Against 018: planning 390,978 at the top tier → ~434k at the implementation tier here (draft + fix round); sign-off 197,107 → ~160k |
 
 _(Session-tier allowance draw noted at each pause.)_
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
-_None yet._
+- Spec.md AC 6 was narrowed by one word ("a _private_ stage borrowed from another folder") to match its own Authoring rule; carried to the person in the spec-conformance summary for his approval, not passed silently.
+- Scan 3's "class-bearing descendants … and nothing else" should be defined as the `COMPARE_CLASSES` nesting, tolerant of any class Astro's Markdown image pipeline or `pieceWrap` adds, or T1706 fails on markup the plan didn't anticipate (implementer's footprint at T1703/T1706).
+- `attachPrivates` names a second-frame problem but "Failure messages" lists no second-frame line (only second-detail); the implementer writes it in the second-detail's shape (T1702).
+- Closed at sign-off bookkeeping: `tests/pieces/beta/photo.jpg` and `_photo.jpg` both exist on disk (T1705's borrowing pair needs no new fixture); the fog piece has `land-a` (the Phase 2 control exists).
+- The spec is internally inconsistent on the switch under reduced motion (Goal 5 keeps fades; Design requirements say "or a cut"); the plan follows Goal 5, inside the envelope's reduced-motion split. Named in the spec-conformance summary.
 
 ## Handoff note
 

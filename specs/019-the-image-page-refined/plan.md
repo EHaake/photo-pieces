@@ -1,6 +1,6 @@
 # Plan: The image page, refined
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log.
 **Implements**: spec.md in this directory
 
 ## Shape of the change
