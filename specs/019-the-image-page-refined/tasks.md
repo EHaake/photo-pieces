@@ -584,7 +584,7 @@ images.
 
 ## Phase 2 — The loupe (reviewer after the phase; walkthrough: under `npm run dev` on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/`, enter the quiet view; the cursor over the photograph says zoom, over the mat it still says leave; click a corner and the photograph grows to full detail around that point while the mat and the dark ground stay where they are, soft at first and then sharp as the larger export fades in; drag to move around it, scroll or pinch (trackpad and phone) to zoom between the fit and full detail, + and − to zoom, the arrows to pan; Esc or a click without dragging goes back to the fit, Esc again back to the page; at the fit the arrows step to the next photograph as before; on `/images/where-the-fog-lets-go/land-a/` (a 1800×1200 placeholder with no larger export, whose own file is already past full detail at its quiet size on both his screens — the number T1712 recorded, quoted in the report; if that read found it ready, the report names the page T1712 found not ready instead) the quiet view is exactly as before and a click leaves it, while some real portrait exports on the laptop do get a loupe from their own file (T1712's numbers); the question put to him: at the fit, a click on the photograph now zooms and a click on the mat or the dark ground leaves — is that the right reading of "a click at the fit steps back out", or should a single click keep leaving and the loupe open another way; with the system's reduce-motion setting on, the zoom jumps rather than grows and the sharp export still fades in; optionally, in the browser's network panel, the larger export is requested only at the first zoom and once; as many rounds as it takes, each a sub-lettered task under T1713)
 
-- [ ] **T1710** — The loupe's file on the page. Pattern: `src/lib/og.ts`
+- [x] **T1710** — The loupe's file on the page. Pattern: `src/lib/og.ts`
       (`ogImageOptions` and its comment) and `og.test.mjs`; the page's
       `og` `getImage` call. Plan: "The loupe's file". New
       `src/lib/loupe.ts`: `LOUPE` as plan.md spells it (each key's
@@ -927,6 +927,7 @@ tier if it is ever on (it is off). -->
 | T1709h any stage any step | implementation (`opus`, high) | ~43k | done; 529 tests; worst case two clicks either way round; the hidden handlex27s aria-valuetext goes stale in side by side — sweep note |
 | T1709i small handle | implementation (`opus`, high) | ~42k | done; 530 tests; 24×24, accent border, bars 8×1 at ±1.5px from centre |
 | T1709j label · note | implementation (`opus`, high) | ~44k | done; 531 tests; label-to-note gap 22.85px, the space character plus margin on the label side (asymmetric by ~4px) — note |
+| T1710 loupe file | implementation (`opus`, high) | ~75k + ~20k | done; 535 tests; land-b loupe 39,702 B (5400×3600 webp, flat fixture); dist/_astro main 781 files / 35.45 MB → after 837 / 40.25 MB (+37 files, +4.75 MB, the 62 own-file loupes 4.84 MB, none sharing a stage srcset file — fit/position enter the stage hash); the constrained layout emitted nine unnamed sizes per getImage until layout none (plan amended); og.ts has the same waste — sweep note; exifr cannot open webp (check-no-gps reads through sharp) |
 
 _(Session-tier allowance draw noted at each pause.)_
 
