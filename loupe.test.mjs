@@ -36,8 +36,9 @@ import {
 //     + still open, the wheel reaching 1 (close).
 //
 // (c) The loupe's rules (T1712). The loupe's section of global.css holds
-//     exactly its seven rules, each by its string: the ready
-//     photograph's cursor and touch hand-off, the overlay, the drag's
+//     exactly its eight rules, each by its string: the ready
+//     photograph's cursor and touch hand-off, the open loupe's frame
+//     without its mat (T1713b; its --mat zeroed, T1713c), the overlay, the drag's
 //     cursor, the layer's origin, the glide on spec 018's move duration
 //     and curve, the two images filling the layer, and the detail file's
 //     appearance on the appearance duration and curve — so a literal, a
@@ -533,10 +534,10 @@ describe("(c) the loupe's rules (T1712)", () => {
       'html[data-quiet] .image-stage[data-loupe-ready] .image-frame img',
       { cursor: 'zoom-in', 'touch-action': 'none' },
     ],
-    ['html[data-quiet] .image-stage[data-loupe-open] .image-frame', { padding: '0' }],
+    // T1713c: the open loupe takes the whole frame — the mat's token zeroed, so the image's caps let it grow into the mat's box.
     [
-      '.image-stage:has(> .loupe[data-glide]) .image-frame',
-      { transition: 'padding var(--dur-move) var(--ease-move)' },
+      'html[data-quiet] .image-stage[data-loupe-open] .image-frame',
+      { padding: '0', '--mat': '0px' },
     ],
     [
       '.loupe',
@@ -560,20 +561,19 @@ describe("(c) the loupe's rules (T1712)", () => {
       expect(ruleAt(rulesIn(css), prelude)).toEqual(body);
     });
 
-  it("the loupe's section holds exactly the nine rules, in order — a rule added there fails", () => {
+  it("the loupe's section holds exactly the eight rules, in order — a rule added there fails", () => {
     expect(rulesIn(loupeSection(raw)).map((rule) => rule.prelude)).toEqual(
       RULES.map(([prelude]) => prelude),
     );
   });
 
-  it("no other rule in the loupe's section animates or transitions — the glide, the mat's padding under it and the detail's fade are all its motion", () => {
+  it("no other rule in the loupe's section animates or transitions — the glide and the detail's fade are all its motion; the mat goes and returns at once (T1713c)", () => {
     const moving = rulesIn(loupeSection(raw))
       .filter((rule) =>
         declarationPairs(rule.body).some(([name]) => /^(animation|transition)/.test(name)),
       )
       .map((rule) => rule.prelude);
     expect(moving).toEqual([
-      '.image-stage:has(> .loupe[data-glide]) .image-frame',
       '.loupe[data-glide] .loupe-layer',
       '.loupe-detail',
     ]);

@@ -304,8 +304,11 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(Object.keys(declarations(quiet.body))).toEqual(['--mat', 'padding', 'background']);
     // "Once", and every other --mat a zero: the walk over every rule in
     // the file, nested ones included, finds that one form and otherwise
-    // only 0px — the held figure, the packed cell and the stage's frame
-    // on paper. A form put back on any surface fails here by name.
+    // only 0px — the held figure, the packed cell, the stage's frame
+    // on paper, and the open loupe's frame (spec 019, T1713c: the one
+    // assignment on the quiet frame besides the form, zeroing it while
+    // the loupe takes the whole frame). A form put back on any surface
+    // fails here by name.
     const declaring = [...top, ...nested]
       .filter((block) => '--mat' in declarations(block.body))
       .map((block) => [norm(block.prelude), norm(declarations(block.body)['--mat'])]);
@@ -317,7 +320,12 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
         .filter(([, value]) => value === '0px')
         .map(([prelude]) => prelude)
         .sort(),
-    ).toEqual(['.gallery-flow > li', '.image-frame', '.piece-held figure']);
+    ).toEqual([
+      '.gallery-flow > li',
+      '.image-frame',
+      '.piece-held figure',
+      'html[data-quiet] .image-stage[data-loupe-open] .image-frame',
+    ]);
   });
 
   it('the one matted surface reads --mat as a padding — the quiet view’s frame — and no other rule applies --mat or --color-matte', () => {
@@ -431,7 +439,8 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     // the cursor list, the loupe's ready photograph after them (spec 019,
     // T1712: a deliberate fourth), the open loupe's frame without its mat
     // (spec 019, T1713b: a deliberate fifth — padding 0, reading no
-    // --mat), and no sixth.
+    // --mat; T1713c: and --mat 0px, so the photograph grows into the
+    // mat's box), and no sixth.
     const QUIET_RULE = /html\[data-quiet\] \.image-/;
     // The paper frame's `:not` preludes are not quiet rules: the list
     // below gains nothing from them.

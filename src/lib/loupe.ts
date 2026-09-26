@@ -21,7 +21,7 @@ export const LOUPE = {
   panStep: 0.15, // an arrow pans this share of the view
   dragSlop: 4, // px a press may move and still be a click
   pan: 'follow', // 'follow' (zoomed, the mouse's place over the box is the place shown) or 'drag' (only a drag pans)
-  mat: 'off', // 'off' (while the loupe is open the quiet frame drops its mat) or 'kept' (the mat stays)
+  mat: 'off', // 'off' (while the loupe is open the quiet frame drops its mat and the loupe takes its whole box) or 'kept' (the mat stays)
   zoomInKeys: ['+', '='],
   zoomOutKeys: ['-', '_'],
 } as const;
@@ -270,11 +270,17 @@ export type Loupe = {
  * `div.loupe-layer` whose `translate(tx, ty) scale(s)` it writes. So
  * the frame and the dark ground are not zoomed, nothing spec 018 or the
  * mat rule pinned on the stage image moves, and taking the overlay down
- * restores the page as it was. Under `LOUPE.mat: 'off'` the stage
- * carries `data-loupe-open` while zoomed, and the quiet frame drops its
- * mat (global.css): the frame collapses onto the photograph, which
- * neither moves nor grows, so the overlay's box is still the image's.
- * The attribute goes on close and on reset, and the mat returns. The layer holds
+ * restores the page as it was. Under `LOUPE.mat: 'off'` the open loupe
+ * takes the whole frame (T1713c): an action that opens it sets
+ * `data-loupe-open` on the stage first, and the quiet frame drops its
+ * mat and zeroes its `--mat` (global.css), so the photograph grows into
+ * the mat's box, ratio kept; the rect read then forces the layout, the
+ * action is taken again over the grown box — its point at the same
+ * place in the photograph, `fullScale` of the grown width — and the
+ * overlay is built over it. While open every box is the grown one. The
+ * attribute goes when the overlay comes down — on close once the glide
+ * to the fit has landed, and on reset — and the mat returns with the
+ * photograph at its fit size. The layer holds
  * `img.loupe-base`, the stage image's `currentSrc` — already decoded, so
  * no request and nothing to wait for — and, once decoded,
  * `img.loupe-detail`, which fades in over it (its CSS animation).
@@ -297,9 +303,9 @@ export type Loupe = {
  * move duration — `data-glide`, written only when motion is not
  * reduced, removed on `transitionend`; a drag, the wheel and a pinch
  * follow the hand without it. A close that glides takes the overlay
- * down when it lands; without the glide, at once. The mat's padding
- * moves only while the overlay glides (global.css), so it shrinks and
- * returns under the glide and jumps with the hand.
+ * down when it lands; without the glide, at once. The mat does not
+ * move: it goes at once as the loupe opens and returns at once as it
+ * comes down.
  */
 export function createLoupe(stage: HTMLElement): Loupe | null {
   const img = stage.querySelector<HTMLImageElement>('.image-frame img');
@@ -317,7 +323,7 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
   let spread = 0; // the two pointers' distance at the last pinch step
   let gestureScale = 0; // a Safari gesture's scale at its last step; 0 when none is in hand
 
-  /** The photograph's box on screen; its size is the box at the fit. */
+  /** The photograph's box on screen; its size is the box at s = 1 — the fit, or while open under `mat: 'off'` the grown box. */
   const photo = () => img.getBoundingClientRect();
   const pointIn = (event: Pick<MouseEvent, 'clientX' | 'clientY'>, at = photo()): LoupePoint => ({
     x: event.clientX - at.left,
@@ -348,9 +354,11 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
     );
   };
 
+  /** The overlay down, and the mat back with it. */
   const takeDown = () => {
     overlay?.loupe.remove();
     overlay = null;
+    stage.removeAttribute('data-loupe-open');
   };
 
   /** The glide landed: at the fit, the overlay comes down. */
@@ -407,19 +415,43 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
     } else if (state.level === 'fit') takeDown();
   };
 
-  /** One action through the state machine, and the view it leaves written. */
-  const run = (action: LoupeAction, glide: boolean): LoupeStep => {
+  /** The state machine's context from the photograph's box as it is now: forces the layout. */
+  const context = (): LoupeContext => {
     const at = photo();
-    const step = loupeReduce(state, action, {
+    return {
       box: { width: at.width, height: at.height },
       full: fullScale({ natural, fit: at.width, dpr: window.devicePixelRatio || 1 }),
-    });
+    };
+  };
+  /** The action's point moved from one box to another, at the same fraction of it: the same place in the photograph. */
+  const along = (action: LoupeAction, from: LoupeBox, to: LoupeBox): LoupeAction => {
+    if (!('point' in action)) return action;
+    const k = (a: number, b: number) => (a > 0 ? b / a : 1);
+    const point = {
+      x: action.point.x * k(from.width, to.width),
+      y: action.point.y * k(from.height, to.height),
+    };
+    return { ...action, point };
+  };
+
+  /** One action through the state machine, and the view it leaves written. */
+  const run = (action: LoupeAction, glide: boolean): LoupeStep => {
+    const ctx = context();
+    let step = loupeReduce(state, action, ctx);
+    if (step.effect === 'open' && !stage.hasAttribute('data-loupe-open')) {
+      // The mat goes first (T1713c): the photograph grows into its box, and
+      // the action is taken again over the grown box, which the overlay is
+      // built over. Under 'kept' the box is the same and so is the step.
+      if (LOUPE.mat === 'off') stage.toggleAttribute('data-loupe-open', true);
+      const grown = context();
+      step = loupeReduce(state, along(action, ctx.box, grown.box), grown);
+      // Full detail no larger than the grown box: nothing opens, and the mat stays (the same frame, no paint between).
+      if (step.effect !== 'open') stage.removeAttribute('data-loupe-open');
+    }
     const moved = step.state.view !== state.view || step.state.level !== state.level;
     state = step.state;
     if (step.effect === 'open') build();
     if (overlay && moved) write(glide);
-    // After write(): the glide is in place before the mat's padding changes, so the padding moves with it.
-    if (LOUPE.mat === 'off') stage.toggleAttribute('data-loupe-open', state.level === 'zoomed');
     const press = state.press;
     overlay?.loupe.toggleAttribute('data-dragging', Boolean(press?.dragged && press.down));
     return step;
@@ -430,7 +462,6 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
     pointers.clear();
     spread = 0;
     gestureScale = 0;
-    stage.removeAttribute('data-loupe-open');
     takeDown();
   };
 

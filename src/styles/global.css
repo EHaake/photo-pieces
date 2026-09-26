@@ -2039,12 +2039,14 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
    transform it writes, with the page's file (`.loupe-base`) and, once
    decoded, the loupe file (`.loupe-detail`) — so the frame and the dark
    ground are not zoomed. While the loupe is open the script marks the
-   stage `data-loupe-open` (LOUPE.mat: 'off') and the quiet frame drops
-   its mat: the frame is shrink-to-fit and the image's cap reads the
-   frame's --mat, so the frame collapses onto the photograph, which
-   neither moves nor grows, and the dark ground shows where the mat was.
-   The rule reads no --mat. On close the attribute goes and the mat
-   returns. Without script none of this exists and the quiet view is
+   stage `data-loupe-open` (LOUPE.mat: 'off') and the open loupe takes
+   the whole frame (T1713c): the frame drops its mat and zeroes its
+   --mat, so the image's caps, which read the frame's --mat, let the
+   photograph grow into the space the mat had, ratio kept, and the
+   loupe is built over that grown box. The rule reads no --mat; its
+   zero is the one assignment besides the forms. On close, once the
+   loupe is back at the fit, the attribute goes and the mat returns
+   with the photograph at its fit size. Without script none of this exists and the quiet view is
    what it was.
    The cursor says what a click will do: zoom-in on a ready photograph,
    zoom-out on the loupe (a click returns to the fit), grabbing while a
@@ -2060,11 +2062,8 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
    on the appearance duration, from opacity 0 by the animation's `both`
    fill — it is inserted only once decoded — never a pop. Under reduced
    motion it fades as the frames do, on --rm-appear (the block at the
-   file's end). The mat shrinks and returns under the glide: the frame's
-   padding transitions on the move duration only while the overlay
-   glides — so not on entering the quiet view, nor on a resize, and
-   never under reduced motion, where `data-glide` is never written; a
-   drag, the wheel and a pinch move it with the hand. */
+   file's end). The mat does not move: it goes at once as the loupe
+   opens, under the glide, and returns at once when it has closed. */
 html[data-quiet] .image-stage[data-loupe-ready] .image-frame img {
   cursor: zoom-in;
   touch-action: none;
@@ -2072,10 +2071,7 @@ html[data-quiet] .image-stage[data-loupe-ready] .image-frame img {
 
 html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   padding: 0;
-}
-
-.image-stage:has(> .loupe[data-glide]) .image-frame {
-  transition: padding var(--dur-move) var(--ease-move);
+  --mat: 0px;
 }
 
 .loupe {
