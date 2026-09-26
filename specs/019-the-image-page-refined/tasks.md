@@ -1074,7 +1074,7 @@ headers'.
       `npx prettier --check AUTHORING.md README.md
       obsidian-plugin/README.md` clean; `sh scripts/verify.sh` green._
 
-- [ ] **T1728a** — Phase 3a review fixes. B1: the envelope row "where a
+- [x] **T1728a** — Phase 3a review fixes. B1: the envelope row "where a
       `side` stacks" names compare.test.mjs (e) by string but no case
       pins it — add an (e) case pinning `.piece-side { container:
       compare-side / inline-size }`, `.piece-side .compare-frames {
@@ -1358,6 +1358,7 @@ tier if it is ever on (it is off). -->
 | T1727 plugin side and slider | implementation (`opus`, high) | ~34k | done; 628 tests (+3); plugin build exit 0; the widgetx27s data-block stays `compare` for all three |
 | T1728 documents again | implementation (`opus`, high) | ~57k | done; prettier clean; sentences beyond the three named spots corrected where side and slider made them false (listed in its report); the plugin draws a side or slider at any stage count, only the build enforces two — README says so |
 | Phase 3a review | implementation (`opus`, high) | ~153k | blocked once: B1 the side's stacking literal has no (e) pin though the envelope table names one (T1728a); fix-now: choose() leaves data-settling set after a mid-settle method change; stale (c) opening comment; pause: hide vs quiet at the ends (hiding drops keyboard focus), the clipped focus ring, trackpad momentum vs the 150ms settle, the slider's note, land-b's photograph twice; sweep: the wheel's px-per-line conversion spelled twice (loupe.ts, compare.ts), the two scripted blocks pinned only by one-off reads (the fixed slider's store, the arrows at the ends), a post-build one-srcset assertion on land-b would pin 'fetched once' for real, 'exactly two' hardcoded |
+| T1728a review fixes | implementation (`opus`, high) | ~36k | done; 629 tests (+1); 560→600 fails the new case by name; compare.test.mjs not prettier-clean on the branch (six lines in (c)/(d)) — sweep note |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_
