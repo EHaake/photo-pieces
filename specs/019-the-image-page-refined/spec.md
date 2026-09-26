@@ -589,3 +589,6 @@ re-implementation. The plan says where each lives.
   the mouse, tracking the pointer's place on the unzoomed photograph;
   a click without movement zooms back out; touch keeps the drag. The
   mat goes while the loupe is open, the loupe filling the frame.
+- **Round T1713c (2026-09-26)** — while zoomed, the loupe is the full
+  area the mat and photograph had; nothing of the unzoomed photograph
+  shows around it.

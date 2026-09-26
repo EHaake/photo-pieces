@@ -730,6 +730,21 @@ images.
       image's (the mat gone, the photograph unmoved), 40px after close;
       the padding transition 480ms, none under reduced motion._
 
+- [ ] **T1713c** — Round: the zoomed loupe is the full area ("there
+      is still a matte sized frame around the zoomed in image that
+      shows the unzoomed image which makes it look broken. We need
+      the zoomed in loupe view to be the full area"). Plan: the T1713c
+      paragraph. `global.css`: the fifth quiet rule gains `--mat: 0px`,
+      the padding transition rule removed; `loupe.ts`: the attribute
+      set and layout forced before the overlay is built from the
+      grown box; tests: (c) pins, matte (b) as needed, the reducer's
+      box unchanged in kind. _Verify: green; BiDi at 1280×1440 (the
+      width-bound case) and 1512×982 on land-b: while open the loupe's
+      rect equals the image's equals the frame's, the frame's rect
+      equal to the quiet frame's outer rect before opening (the mat's
+      box), no stage image visible outside the loupe; after close the
+      fit rect and 40px mat return; s = fullScale of the grown box._
+
 ### Phase 2 record (the person's walkthrough)
 
 **First look (2026-09-26).** The click at the fit "is fine"; what he
@@ -739,7 +754,11 @@ loupe without a larger export ("Keep it"), the zoom range, the
 gestures and keys, the durations. The window: "Maybe remove the matte
 when zooming in." The recommended larger export: 4000px on the long
 edge, "limited by the camera's resolution" (AUTHORING.md, T1715).
-Rounds: T1713a, T1713b.
+Rounds: T1713a, T1713b. **Second look:** the mouse tracking "works";
+removing the mat "introduced a different issue where there is still a
+matte sized frame around the zoomed in image that shows the unzoomed
+image … We need the zoomed in loupe view to be the full area." Round:
+T1713c.
 
 ## Phase 3 — Obsidian and the documents (reviewer after the phase; walkthrough: in Obsidian, with the rebuilt plugin installed as its README says — the fog piece's closing `:::compare` shows its three stages as images with their labels beneath in Live Preview, and turns back into its text when the cursor enters it; a leaf block like `::fullbleed` renders as before; `AUTHORING.md`'s new parts — the block, the stages, the larger export, the gear table — read as the rest of that document does and tell him what he needs to finish his piece)
 

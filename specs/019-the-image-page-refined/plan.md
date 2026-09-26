@@ -715,6 +715,27 @@ where the simpler shape was taken it is said in one line.
   paragraph had the loupe filling the mat's box — measured impossible
   without resizing the stage image.)
 
+  **Round T1713c (2026-09-26).** The mat-off round left a band: on a
+  screen where the photograph is width-bound (the DualUp), the image
+  grows when the padding goes, and the overlay placed from the old
+  rect shows the unzoomed image around it. The person: "We need the
+  zoomed in loupe view to be the full area." So, under `mat: 'off'`,
+  the open loupe takes the whole frame: the rule becomes
+  `html[data-quiet] .image-stage[data-loupe-open] .image-frame
+  { padding: 0; --mat: 0px; }` (the mat's token zeroed on that
+  surface, so the image's caps let the photograph fill the space the
+  mat had, ratio kept — the fifth quiet rule as before; if matte (b)'s
+  "no other rule applies --mat" reads an assignment as a read, the
+  case names this rule as the one allowed assignment); the padding
+  transition is removed (the mat goes at once, under the glide, and
+  returns at once on close); `createLoupe` sets `data-loupe-open`
+  first, forces layout, then reads the image's rect and builds the
+  overlay from the grown box — `fullScale` for the zoom target is of
+  that box; readiness (`data-loupe-ready`) is still judged on the fit
+  before opening. On close the overlay glides to s = 1 over the grown
+  box, then the attribute goes and the mat returns with the image at
+  its fit size. The follow rule's fractions are of the grown box.
+
 - **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, `styles.css`,
   T1714). A second pattern beside `DIRECTIVE_PATTERN`, for the one
   container the plugin renders: `^:::compare(\{[^}]*\})?[ \t]*\n([\s\S]*?)\n:::[ \t]*$`
