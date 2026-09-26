@@ -983,7 +983,7 @@ headers'.
       `sh scripts/verify.sh` green (count recorded); both mutations
       named and reverted, each failing its case by name._
 
-- [ ] **T1725** — The slider block, enhanced. Pattern: T1708's
+- [x] **T1725** — The slider block, enhanced. Pattern: T1708's
       `enhance()` and T1709d's legend in `compare.ts`; compare.test.mjs
       (c)'s exact-body cases. Plan: "The slider block, enhanced".
       `compare.ts`: the `fixed` branch as plan.md describes, the
@@ -995,6 +995,19 @@ headers'.
       recorded); the BiDi reads in T1725's bullet at 1512×982 and
       1280×1440, each recorded here; a touch-type pointer drag
       synthesised, or said line by line where it cannot be._
+
+      _Recorded (T1725, Firefox 156 headless, the fog piece's slider,
+      identical at 1512×982 and 1280×1440):_ `data-js`,
+      `data-view="slider"`, no control, no hint, no legend button, no
+      slot; legend "Camera" and "Finished" with the dot before the
+      second; at rest split 50, `aria-valuetext` "Camera | Finished",
+      divider at 333 of 666; drags to 25/50/75 → 24.94 / 50 / 75.06
+      (whole-pixel pointer), Camera left each time; ← moves
+      `aria-valuenow` by 2; the live note Finished's; a BiDi touch
+      pointer drag 30→70% → 69.96; `compare-mode` null before and after,
+      a stored `side` leaves the block a slider while the page's
+      compare opens in side by side; script off: stacked (Camera 666×500
+      at y 0, Finished at y 537 at 1512).
 
 - [ ] **T1726** — The filmstrip, enhanced. Pattern: T1708's slider in
       `enhance()` (the pointer capture, `slide`, the settle behind
@@ -1305,6 +1318,7 @@ tier if it is ever on (it is off). -->
 | D1723 decision review (one URL per stage across the page's two builders) | top (`fable`, high, override) | ~111k | option B made structural: `stageImageOptions(surface)` spelled once in image-meta.mjs, the transform's `stageSizing` and the page's `getImage` both read it, `<Image>` leaves the section (it hashes fit: cover and position: center; getImage never reads image.objectFit — verified in Astro's sources); scan 4 stays URL-keyed, the one-URL fact pinned at the source by test (a) and observed on the built land-b page; the plan's "scan 4 fails otherwise" was a wrong claim; stays in T1723 |
 | T1723 side static form, fixtures, page stage images | implementation (`opus`, high) | ~64k + ~110k (two rounds, D1723 between) | done; 612 tests (+2); stopped once on the plan's shared-files premise (D1723); one srcset per stage on both pages; the section's raw <img> also carries Astro's scoped class and cid attribute (request-identical to the story's); a stage's sizes follow the surface not the width class (the side at wide still carries column sizes — what keeps one list); prettier flags pre-existing lines in compare.test.mjs and [...id].astro — sweep note |
 | T1724 filmstrip state | implementation (`opus`, high) | ~57k | done; 618 tests (+6); both mutations fail by name; stripEnds defaults wraps to COMPARE.stripWraps as switchNext does; prettier flags compare.ts and compare.test.mjs at HEAD already — sweep note |
+| T1725 slider block enhanced | implementation (`opus`, high) | ~71k | done; 619 tests (+1); reads at both screens recorded; refit() still writes data-narrow on a narrow fixed block (every [data-narrow] rule is side-scoped, no visible effect) — note; no script-level pin on the fixed branch beyond the CSS body and the browser reads — sweep note |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_
