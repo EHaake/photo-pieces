@@ -480,7 +480,7 @@ headers to confirm nothing was duplicated or dropped. -->
       left/right on T and C and the hint flipping; the wipe shows T
       left of the divider._
 
-- [ ] **T1709e** — Finding: the Finished stage has no corner caption
+- [x] **T1709e** — Finding: the Finished stage has no corner caption
       inside the image while the others do. Diagnose in `compare.ts`
       and the compare CSS; fix if routine. _Verify: green; BiDi: with
       `cornerTags` as set, every showing stage's tag state listed per
@@ -853,6 +853,7 @@ tier if it is ever on (it is off). -->
 | T1709b wide round | implementation (`opus`, high) | ~36k | done; 523 tests; compare 1160px (176px margins) on both pages at 1512×982, text column 666px; the enhanced compare is 833px tall against a 982px viewport — watch at the pause |
 | T1709c side-only wide | implementation (`opus`, high) | ~45k | done; 523 tests; 666 / 1160 / 666 / 666 on both pages; the swap keys on the view shown, so a narrow side that yielded to switch would keep the column — moot with stack; the swap has only the EXPECTED pin and the browser read |
 | T1709d ordered picking | implementation (`opus`, high) | ~93k | done; 525 tests; the hint sits after the control (the root is a 1fr auto grid, so anything among legend and control needs grid-column 1/-1); bold follows aria-pressed in the switch too; the live note follows the right slot; ordered pairs are not all reachable in two clicks (unordered are) |
+| T1709e Finished caption finding | implementation (`opus`, high) | ~40k | diagnosed, no site defect: the corner text is painted into the placeholder pixels by gen-placeholders (camera "4:3 · camera", tones "3:2 · tones", finished only "3:2"); no corner tags drawn (cornerTags false), captions display none, no pseudo-elements; nothing changed |
 
 _(Session-tier allowance draw noted at each pause.)_
 
