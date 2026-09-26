@@ -2178,8 +2178,10 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   visibility: hidden;
 }
 
-/* The slider: the earlier stage left of the divider, clipped over the
-   later one; a vertical swipe still scrolls the page. */
+/* The slider: the left side's stage left of the divider, clipped over
+   the right side's, which is clipped to the right of it — so a side left
+   empty (T1709g) is the bare ground; a vertical swipe still scrolls the
+   page. */
 .compare[data-view='slider'] .compare-frames {
   cursor: ew-resize;
   touch-action: pan-y;
@@ -2188,6 +2190,10 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
 .compare[data-view='slider'] .compare-stage[data-part='left'] {
   z-index: 1;
   clip-path: inset(0 calc(100% - var(--split-pct)) 0 0);
+}
+
+.compare[data-view='slider'] .compare-stage[data-part='right'] {
+  clip-path: inset(0 0 0 var(--split-pct));
 }
 
 .compare[data-js] .compare-line {
@@ -2223,7 +2229,7 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
 
 /* Side by side: the pair in two columns, each pane at the photograph's
    ratio; one column where two won't fit. A stage not shown sits hidden
-   in the first cell. */
+   in the first cell, so an empty side is the ground. */
 .compare[data-view='side'] .compare-frames {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2301,9 +2307,28 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   font-weight: 700;
 }
 
+/* A legend button is two lines (T1709g): the stage's label, and beneath
+   it the side tag's row, always there — a blank while the stage holds no
+   side — with the label's bold width reserved by a hidden copy, so a
+   pick moves nothing. */
+.compare[data-js] .compare-legend button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: start;
+}
+
+.compare[data-js] .compare-legend button::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 700;
+}
+
 /* A picked stage's side tag, "left" or "right", quieter than its label;
-   the hint after the legend names the side the next pick takes. The
-   switch picks no pair: no tags there, and no hint. */
+   the hint beneath the legend names the side the next pick takes. The
+   switch picks no pair: its tag rows blank, and no hint. */
 .compare[data-js] .compare-slot {
   color: var(--color-muted);
   font-weight: 400;

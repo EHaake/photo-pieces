@@ -46,7 +46,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     registered as a number so the glide can run; and the script writes
 //     `data-settling` only when motion is not reduced (the settle is a
 //     movement), the two fades kept. And the legend and control rule by
-//     its exact body (T1708a): the legend's shape is that rule.
+//     its exact body (T1708a): the legend's shape is that rule, and the
+//     legend button's two lines (T1709g), label over its side tag's
+//     row, the label's bold width reserved.
 //
 // (d) The state (T1707). `EXPECTED` below is the tunables' one other
 //     copy: every COMPARE key and value and COMPARE_WORDING, so a value
@@ -55,9 +57,11 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     reads, each case named for what fails it: the slider two-way
 //     (T1709a) — one pair at every p, the divider at p — and the pair a
 //     legend click picks as a table, every click on three and four
-//     stages (a stage in the pair leaves it; another replaces the member
-//     picked longer ago and becomes the newer; shown in stage order), and
-//     every pair within two clicks of rest — and the side
+//     stages from every state, a side empty or not (T1709g: the stage
+//     takes the next side and next flips; the side it left empties; a
+//     click on the stage already on the next side does nothing), and
+//     every pair within two clicks of rest, either way round within
+//     three — and the side
 //     pair, the switch's step with and without wrapping, the view at rest
 //     per method and per rest pair, whose note shows, the side-by-side
 //     fit, and the method a block opens in.
@@ -314,6 +318,22 @@ describe("(c) the compare's motion (T1708)", () => {
       'text-transform': 'uppercase',
     });
   });
+
+  it("a legend button is two lines, its label's bold width reserved (T1709g) — so a pick moves nothing", () => {
+    expect(ruleAt(rulesIn(css), '.compare[data-js] .compare-legend button')).toEqual({
+      display: 'flex',
+      'flex-direction': 'column',
+      'align-items': 'flex-start',
+      'text-align': 'start',
+    });
+    expect(ruleAt(rulesIn(css), '.compare[data-js] .compare-legend button::after')).toEqual({
+      content: 'attr(data-label)',
+      height: '0',
+      overflow: 'hidden',
+      visibility: 'hidden',
+      'font-weight': '700',
+    });
+  });
 });
 
 describe('(d) the state (T1707)', () => {
@@ -360,15 +380,25 @@ describe('(d) the state (T1707)', () => {
       [1 / 3, [1, 3], 33.333333],
       [1, [1, 3], 100],
     ]);
+    // A side left empty stays empty; the divider still follows p (T1709g).
+    expect([0.25, 0.75].map((p) => view(p, { left: 2, right: null }))).toEqual([
+      [0.25, [2, null], 25],
+      [0.75, [2, null], 75],
+    ]);
+    expect(view(0.5, { left: null, right: 1 })).toEqual([0.5, [null, 1], 50]);
   });
 
-  // [pair before as [left, right, next], stage clicked, pair after], for
-  // every pair, either side next, and every click: a stage in the pair
-  // leaves it; another takes the next side, and next flips.
+  // [sides before as [left, right, next], stage clicked, sides after],
+  // for every state — every pair, and every one stage with the other
+  // side empty (null) — either side next, and every click (T1709g): the
+  // stage takes the next side and next flips; if it held the other side,
+  // that side empties; a click on the stage already on the next side
+  // does nothing. Both sides empty is not a state: a click fills one.
   const picks = (n) => {
     const rows = [];
-    for (let left = 0; left < n; left++)
-      for (let right = 0; right < n; right++)
+    const sides = [null, ...Array.from({ length: n }, (_, i) => i)];
+    for (const left of sides)
+      for (const right of sides)
         if (left !== right)
           for (const next of ['left', 'right'])
             for (let k = 0; k < n; k++) {
@@ -378,159 +408,269 @@ describe('(d) the state (T1707)', () => {
     return rows;
   };
 
-  it('pickSlot on three stages: every click on every pair, either side next', () => {
+  it('pickSlot on three stages: every click on every state, a side empty or not, either side next', () => {
     expect(picks(3)).toEqual([
+      [[null, 0, 'left'], 0, [0, null, 'right']],
+      [[null, 0, 'left'], 1, [1, 0, 'right']],
+      [[null, 0, 'left'], 2, [2, 0, 'right']],
+      [[null, 0, 'right'], 0, [null, 0, 'right']],
+      [[null, 0, 'right'], 1, [null, 1, 'left']],
+      [[null, 0, 'right'], 2, [null, 2, 'left']],
+      [[null, 1, 'left'], 0, [0, 1, 'right']],
+      [[null, 1, 'left'], 1, [1, null, 'right']],
+      [[null, 1, 'left'], 2, [2, 1, 'right']],
+      [[null, 1, 'right'], 0, [null, 0, 'left']],
+      [[null, 1, 'right'], 1, [null, 1, 'right']],
+      [[null, 1, 'right'], 2, [null, 2, 'left']],
+      [[null, 2, 'left'], 0, [0, 2, 'right']],
+      [[null, 2, 'left'], 1, [1, 2, 'right']],
+      [[null, 2, 'left'], 2, [2, null, 'right']],
+      [[null, 2, 'right'], 0, [null, 0, 'left']],
+      [[null, 2, 'right'], 1, [null, 1, 'left']],
+      [[null, 2, 'right'], 2, [null, 2, 'right']],
+      [[0, null, 'left'], 0, [0, null, 'left']],
+      [[0, null, 'left'], 1, [1, null, 'right']],
+      [[0, null, 'left'], 2, [2, null, 'right']],
+      [[0, null, 'right'], 0, [null, 0, 'left']],
+      [[0, null, 'right'], 1, [0, 1, 'left']],
+      [[0, null, 'right'], 2, [0, 2, 'left']],
       [[0, 1, 'left'], 0, [0, 1, 'left']],
-      [[0, 1, 'left'], 1, [0, 1, 'left']],
+      [[0, 1, 'left'], 1, [1, null, 'right']],
       [[0, 1, 'left'], 2, [2, 1, 'right']],
-      [[0, 1, 'right'], 0, [0, 1, 'right']],
+      [[0, 1, 'right'], 0, [null, 0, 'left']],
       [[0, 1, 'right'], 1, [0, 1, 'right']],
       [[0, 1, 'right'], 2, [0, 2, 'left']],
       [[0, 2, 'left'], 0, [0, 2, 'left']],
       [[0, 2, 'left'], 1, [1, 2, 'right']],
-      [[0, 2, 'left'], 2, [0, 2, 'left']],
-      [[0, 2, 'right'], 0, [0, 2, 'right']],
+      [[0, 2, 'left'], 2, [2, null, 'right']],
+      [[0, 2, 'right'], 0, [null, 0, 'left']],
       [[0, 2, 'right'], 1, [0, 1, 'left']],
       [[0, 2, 'right'], 2, [0, 2, 'right']],
-      [[1, 0, 'left'], 0, [1, 0, 'left']],
+      [[1, null, 'left'], 0, [0, null, 'right']],
+      [[1, null, 'left'], 1, [1, null, 'left']],
+      [[1, null, 'left'], 2, [2, null, 'right']],
+      [[1, null, 'right'], 0, [1, 0, 'left']],
+      [[1, null, 'right'], 1, [null, 1, 'left']],
+      [[1, null, 'right'], 2, [1, 2, 'left']],
+      [[1, 0, 'left'], 0, [0, null, 'right']],
       [[1, 0, 'left'], 1, [1, 0, 'left']],
       [[1, 0, 'left'], 2, [2, 0, 'right']],
       [[1, 0, 'right'], 0, [1, 0, 'right']],
-      [[1, 0, 'right'], 1, [1, 0, 'right']],
+      [[1, 0, 'right'], 1, [null, 1, 'left']],
       [[1, 0, 'right'], 2, [1, 2, 'left']],
       [[1, 2, 'left'], 0, [0, 2, 'right']],
       [[1, 2, 'left'], 1, [1, 2, 'left']],
-      [[1, 2, 'left'], 2, [1, 2, 'left']],
+      [[1, 2, 'left'], 2, [2, null, 'right']],
       [[1, 2, 'right'], 0, [1, 0, 'left']],
-      [[1, 2, 'right'], 1, [1, 2, 'right']],
+      [[1, 2, 'right'], 1, [null, 1, 'left']],
       [[1, 2, 'right'], 2, [1, 2, 'right']],
-      [[2, 0, 'left'], 0, [2, 0, 'left']],
+      [[2, null, 'left'], 0, [0, null, 'right']],
+      [[2, null, 'left'], 1, [1, null, 'right']],
+      [[2, null, 'left'], 2, [2, null, 'left']],
+      [[2, null, 'right'], 0, [2, 0, 'left']],
+      [[2, null, 'right'], 1, [2, 1, 'left']],
+      [[2, null, 'right'], 2, [null, 2, 'left']],
+      [[2, 0, 'left'], 0, [0, null, 'right']],
       [[2, 0, 'left'], 1, [1, 0, 'right']],
       [[2, 0, 'left'], 2, [2, 0, 'left']],
       [[2, 0, 'right'], 0, [2, 0, 'right']],
       [[2, 0, 'right'], 1, [2, 1, 'left']],
-      [[2, 0, 'right'], 2, [2, 0, 'right']],
+      [[2, 0, 'right'], 2, [null, 2, 'left']],
       [[2, 1, 'left'], 0, [0, 1, 'right']],
-      [[2, 1, 'left'], 1, [2, 1, 'left']],
+      [[2, 1, 'left'], 1, [1, null, 'right']],
       [[2, 1, 'left'], 2, [2, 1, 'left']],
       [[2, 1, 'right'], 0, [2, 0, 'left']],
       [[2, 1, 'right'], 1, [2, 1, 'right']],
-      [[2, 1, 'right'], 2, [2, 1, 'right']],
+      [[2, 1, 'right'], 2, [null, 2, 'left']],
     ]);
   });
 
-  it('pickSlot on four stages: every click on every pair, either side next', () => {
+  it('pickSlot on four stages: every click on every state, a side empty or not, either side next', () => {
     expect(picks(4)).toEqual([
+      [[null, 0, 'left'], 0, [0, null, 'right']],
+      [[null, 0, 'left'], 1, [1, 0, 'right']],
+      [[null, 0, 'left'], 2, [2, 0, 'right']],
+      [[null, 0, 'left'], 3, [3, 0, 'right']],
+      [[null, 0, 'right'], 0, [null, 0, 'right']],
+      [[null, 0, 'right'], 1, [null, 1, 'left']],
+      [[null, 0, 'right'], 2, [null, 2, 'left']],
+      [[null, 0, 'right'], 3, [null, 3, 'left']],
+      [[null, 1, 'left'], 0, [0, 1, 'right']],
+      [[null, 1, 'left'], 1, [1, null, 'right']],
+      [[null, 1, 'left'], 2, [2, 1, 'right']],
+      [[null, 1, 'left'], 3, [3, 1, 'right']],
+      [[null, 1, 'right'], 0, [null, 0, 'left']],
+      [[null, 1, 'right'], 1, [null, 1, 'right']],
+      [[null, 1, 'right'], 2, [null, 2, 'left']],
+      [[null, 1, 'right'], 3, [null, 3, 'left']],
+      [[null, 2, 'left'], 0, [0, 2, 'right']],
+      [[null, 2, 'left'], 1, [1, 2, 'right']],
+      [[null, 2, 'left'], 2, [2, null, 'right']],
+      [[null, 2, 'left'], 3, [3, 2, 'right']],
+      [[null, 2, 'right'], 0, [null, 0, 'left']],
+      [[null, 2, 'right'], 1, [null, 1, 'left']],
+      [[null, 2, 'right'], 2, [null, 2, 'right']],
+      [[null, 2, 'right'], 3, [null, 3, 'left']],
+      [[null, 3, 'left'], 0, [0, 3, 'right']],
+      [[null, 3, 'left'], 1, [1, 3, 'right']],
+      [[null, 3, 'left'], 2, [2, 3, 'right']],
+      [[null, 3, 'left'], 3, [3, null, 'right']],
+      [[null, 3, 'right'], 0, [null, 0, 'left']],
+      [[null, 3, 'right'], 1, [null, 1, 'left']],
+      [[null, 3, 'right'], 2, [null, 2, 'left']],
+      [[null, 3, 'right'], 3, [null, 3, 'right']],
+      [[0, null, 'left'], 0, [0, null, 'left']],
+      [[0, null, 'left'], 1, [1, null, 'right']],
+      [[0, null, 'left'], 2, [2, null, 'right']],
+      [[0, null, 'left'], 3, [3, null, 'right']],
+      [[0, null, 'right'], 0, [null, 0, 'left']],
+      [[0, null, 'right'], 1, [0, 1, 'left']],
+      [[0, null, 'right'], 2, [0, 2, 'left']],
+      [[0, null, 'right'], 3, [0, 3, 'left']],
       [[0, 1, 'left'], 0, [0, 1, 'left']],
-      [[0, 1, 'left'], 1, [0, 1, 'left']],
+      [[0, 1, 'left'], 1, [1, null, 'right']],
       [[0, 1, 'left'], 2, [2, 1, 'right']],
       [[0, 1, 'left'], 3, [3, 1, 'right']],
-      [[0, 1, 'right'], 0, [0, 1, 'right']],
+      [[0, 1, 'right'], 0, [null, 0, 'left']],
       [[0, 1, 'right'], 1, [0, 1, 'right']],
       [[0, 1, 'right'], 2, [0, 2, 'left']],
       [[0, 1, 'right'], 3, [0, 3, 'left']],
       [[0, 2, 'left'], 0, [0, 2, 'left']],
       [[0, 2, 'left'], 1, [1, 2, 'right']],
-      [[0, 2, 'left'], 2, [0, 2, 'left']],
+      [[0, 2, 'left'], 2, [2, null, 'right']],
       [[0, 2, 'left'], 3, [3, 2, 'right']],
-      [[0, 2, 'right'], 0, [0, 2, 'right']],
+      [[0, 2, 'right'], 0, [null, 0, 'left']],
       [[0, 2, 'right'], 1, [0, 1, 'left']],
       [[0, 2, 'right'], 2, [0, 2, 'right']],
       [[0, 2, 'right'], 3, [0, 3, 'left']],
       [[0, 3, 'left'], 0, [0, 3, 'left']],
       [[0, 3, 'left'], 1, [1, 3, 'right']],
       [[0, 3, 'left'], 2, [2, 3, 'right']],
-      [[0, 3, 'left'], 3, [0, 3, 'left']],
-      [[0, 3, 'right'], 0, [0, 3, 'right']],
+      [[0, 3, 'left'], 3, [3, null, 'right']],
+      [[0, 3, 'right'], 0, [null, 0, 'left']],
       [[0, 3, 'right'], 1, [0, 1, 'left']],
       [[0, 3, 'right'], 2, [0, 2, 'left']],
       [[0, 3, 'right'], 3, [0, 3, 'right']],
-      [[1, 0, 'left'], 0, [1, 0, 'left']],
+      [[1, null, 'left'], 0, [0, null, 'right']],
+      [[1, null, 'left'], 1, [1, null, 'left']],
+      [[1, null, 'left'], 2, [2, null, 'right']],
+      [[1, null, 'left'], 3, [3, null, 'right']],
+      [[1, null, 'right'], 0, [1, 0, 'left']],
+      [[1, null, 'right'], 1, [null, 1, 'left']],
+      [[1, null, 'right'], 2, [1, 2, 'left']],
+      [[1, null, 'right'], 3, [1, 3, 'left']],
+      [[1, 0, 'left'], 0, [0, null, 'right']],
       [[1, 0, 'left'], 1, [1, 0, 'left']],
       [[1, 0, 'left'], 2, [2, 0, 'right']],
       [[1, 0, 'left'], 3, [3, 0, 'right']],
       [[1, 0, 'right'], 0, [1, 0, 'right']],
-      [[1, 0, 'right'], 1, [1, 0, 'right']],
+      [[1, 0, 'right'], 1, [null, 1, 'left']],
       [[1, 0, 'right'], 2, [1, 2, 'left']],
       [[1, 0, 'right'], 3, [1, 3, 'left']],
       [[1, 2, 'left'], 0, [0, 2, 'right']],
       [[1, 2, 'left'], 1, [1, 2, 'left']],
-      [[1, 2, 'left'], 2, [1, 2, 'left']],
+      [[1, 2, 'left'], 2, [2, null, 'right']],
       [[1, 2, 'left'], 3, [3, 2, 'right']],
       [[1, 2, 'right'], 0, [1, 0, 'left']],
-      [[1, 2, 'right'], 1, [1, 2, 'right']],
+      [[1, 2, 'right'], 1, [null, 1, 'left']],
       [[1, 2, 'right'], 2, [1, 2, 'right']],
       [[1, 2, 'right'], 3, [1, 3, 'left']],
       [[1, 3, 'left'], 0, [0, 3, 'right']],
       [[1, 3, 'left'], 1, [1, 3, 'left']],
       [[1, 3, 'left'], 2, [2, 3, 'right']],
-      [[1, 3, 'left'], 3, [1, 3, 'left']],
+      [[1, 3, 'left'], 3, [3, null, 'right']],
       [[1, 3, 'right'], 0, [1, 0, 'left']],
-      [[1, 3, 'right'], 1, [1, 3, 'right']],
+      [[1, 3, 'right'], 1, [null, 1, 'left']],
       [[1, 3, 'right'], 2, [1, 2, 'left']],
       [[1, 3, 'right'], 3, [1, 3, 'right']],
-      [[2, 0, 'left'], 0, [2, 0, 'left']],
+      [[2, null, 'left'], 0, [0, null, 'right']],
+      [[2, null, 'left'], 1, [1, null, 'right']],
+      [[2, null, 'left'], 2, [2, null, 'left']],
+      [[2, null, 'left'], 3, [3, null, 'right']],
+      [[2, null, 'right'], 0, [2, 0, 'left']],
+      [[2, null, 'right'], 1, [2, 1, 'left']],
+      [[2, null, 'right'], 2, [null, 2, 'left']],
+      [[2, null, 'right'], 3, [2, 3, 'left']],
+      [[2, 0, 'left'], 0, [0, null, 'right']],
       [[2, 0, 'left'], 1, [1, 0, 'right']],
       [[2, 0, 'left'], 2, [2, 0, 'left']],
       [[2, 0, 'left'], 3, [3, 0, 'right']],
       [[2, 0, 'right'], 0, [2, 0, 'right']],
       [[2, 0, 'right'], 1, [2, 1, 'left']],
-      [[2, 0, 'right'], 2, [2, 0, 'right']],
+      [[2, 0, 'right'], 2, [null, 2, 'left']],
       [[2, 0, 'right'], 3, [2, 3, 'left']],
       [[2, 1, 'left'], 0, [0, 1, 'right']],
-      [[2, 1, 'left'], 1, [2, 1, 'left']],
+      [[2, 1, 'left'], 1, [1, null, 'right']],
       [[2, 1, 'left'], 2, [2, 1, 'left']],
       [[2, 1, 'left'], 3, [3, 1, 'right']],
       [[2, 1, 'right'], 0, [2, 0, 'left']],
       [[2, 1, 'right'], 1, [2, 1, 'right']],
-      [[2, 1, 'right'], 2, [2, 1, 'right']],
+      [[2, 1, 'right'], 2, [null, 2, 'left']],
       [[2, 1, 'right'], 3, [2, 3, 'left']],
       [[2, 3, 'left'], 0, [0, 3, 'right']],
       [[2, 3, 'left'], 1, [1, 3, 'right']],
       [[2, 3, 'left'], 2, [2, 3, 'left']],
-      [[2, 3, 'left'], 3, [2, 3, 'left']],
+      [[2, 3, 'left'], 3, [3, null, 'right']],
       [[2, 3, 'right'], 0, [2, 0, 'left']],
       [[2, 3, 'right'], 1, [2, 1, 'left']],
-      [[2, 3, 'right'], 2, [2, 3, 'right']],
+      [[2, 3, 'right'], 2, [null, 2, 'left']],
       [[2, 3, 'right'], 3, [2, 3, 'right']],
-      [[3, 0, 'left'], 0, [3, 0, 'left']],
+      [[3, null, 'left'], 0, [0, null, 'right']],
+      [[3, null, 'left'], 1, [1, null, 'right']],
+      [[3, null, 'left'], 2, [2, null, 'right']],
+      [[3, null, 'left'], 3, [3, null, 'left']],
+      [[3, null, 'right'], 0, [3, 0, 'left']],
+      [[3, null, 'right'], 1, [3, 1, 'left']],
+      [[3, null, 'right'], 2, [3, 2, 'left']],
+      [[3, null, 'right'], 3, [null, 3, 'left']],
+      [[3, 0, 'left'], 0, [0, null, 'right']],
       [[3, 0, 'left'], 1, [1, 0, 'right']],
       [[3, 0, 'left'], 2, [2, 0, 'right']],
       [[3, 0, 'left'], 3, [3, 0, 'left']],
       [[3, 0, 'right'], 0, [3, 0, 'right']],
       [[3, 0, 'right'], 1, [3, 1, 'left']],
       [[3, 0, 'right'], 2, [3, 2, 'left']],
-      [[3, 0, 'right'], 3, [3, 0, 'right']],
+      [[3, 0, 'right'], 3, [null, 3, 'left']],
       [[3, 1, 'left'], 0, [0, 1, 'right']],
-      [[3, 1, 'left'], 1, [3, 1, 'left']],
+      [[3, 1, 'left'], 1, [1, null, 'right']],
       [[3, 1, 'left'], 2, [2, 1, 'right']],
       [[3, 1, 'left'], 3, [3, 1, 'left']],
       [[3, 1, 'right'], 0, [3, 0, 'left']],
       [[3, 1, 'right'], 1, [3, 1, 'right']],
       [[3, 1, 'right'], 2, [3, 2, 'left']],
-      [[3, 1, 'right'], 3, [3, 1, 'right']],
+      [[3, 1, 'right'], 3, [null, 3, 'left']],
       [[3, 2, 'left'], 0, [0, 2, 'right']],
       [[3, 2, 'left'], 1, [1, 2, 'right']],
-      [[3, 2, 'left'], 2, [3, 2, 'left']],
+      [[3, 2, 'left'], 2, [2, null, 'right']],
       [[3, 2, 'left'], 3, [3, 2, 'left']],
       [[3, 2, 'right'], 0, [3, 0, 'left']],
       [[3, 2, 'right'], 1, [3, 1, 'left']],
       [[3, 2, 'right'], 2, [3, 2, 'right']],
-      [[3, 2, 'right'], 3, [3, 2, 'right']],
+      [[3, 2, 'right'], 3, [null, 3, 'left']],
     ]);
   });
 
-  it('pickSlot: a click outside the pair changes it, the clicked stage on the side that was next, and no two do the same thing', () => {
+  it('pickSlot: a click puts the stage on the side that was next and flips next, empties the side it left, and no two clicks do the same thing', () => {
     for (const n of [3, 4]) {
-      const byPair = new Map();
+      const byState = new Map();
       for (const [before, k, after] of picks(n)) {
-        if (before.slice(0, 2).includes(k)) continue;
-        expect([before, k, after]).not.toEqual([before, k, before]);
         const side = before[2] === 'left' ? 0 : 1;
-        expect([before, k, after[side], after[1 - side]]).toEqual([before, k, k, before[1 - side]]);
-        byPair.set(`${before}`, [...(byPair.get(`${before}`) ?? []), `${after}`]);
+        if (before[side] === k) {
+          // The stage already on the next side: nothing changes.
+          expect([before, k, after]).toEqual([before, k, before]);
+          continue;
+        }
+        const kept = before[1 - side] === k ? null : before[1 - side];
+        expect([before, k, after[side], after[1 - side], after[2]]).toEqual([
+          before,
+          k,
+          k,
+          kept,
+          side === 0 ? 'right' : 'left',
+        ]);
+        byState.set(`${before}`, [...(byState.get(`${before}`) ?? []), `${after}`]);
       }
-      for (const [before, after] of byPair) expect([before, new Set(after).size]).toEqual([before, after.length]);
+      for (const [before, after] of byState) expect([before, new Set(after).size]).toEqual([before, after.length]);
     }
   });
 
@@ -542,34 +682,51 @@ describe('(d) the state (T1707)', () => {
     ]);
   });
 
+  // The pairs reached from rest within `clicks` clicks, as "left,right"
+  // (either way round folded to one when `folded`), a side empty skipped.
+  const reachable = (n, clicks, folded) => {
+    let states = [{ ...restView('side', n, 'ends'), next: 'left' }];
+    const reached = new Set();
+    for (let step = 0; step <= clicks; step++) {
+      for (const { left, right } of states)
+        if (left !== null && right !== null)
+          reached.add(folded ? `${Math.min(left, right)},${Math.max(left, right)}` : `${left},${right}`);
+      states = states.flatMap((state) => Array.from({ length: n }, (_, k) => pickSlot(state, k)));
+    }
+    return [...reached].sort();
+  };
+  const pairs = (n, folded) => {
+    const all = [];
+    for (let l = 0; l < n; l++)
+      for (let r = 0; r < n; r++) if (folded ? l < r : l !== r) all.push(`${l},${r}`);
+    return all;
+  };
+
   it('pickSlot: from rest every pair of three and of four stages is within two clicks', () => {
+    for (const n of [3, 4]) expect([n, reachable(n, 2, true)]).toEqual([n, pairs(n, true)]);
+  });
+
+  it('pickSlot: from rest every pair either way round is within three clicks — and the first stage left of another than the last takes all three', () => {
     for (const n of [3, 4]) {
-      const start = { ...restView('side', n, 'ends'), next: 'left' };
-      const reached = new Set();
-      const see = ({ left, right }) => reached.add(`${Math.min(left, right)},${Math.max(left, right)}`);
-      see(start);
-      for (let a = 0; a < n; a++) {
-        const one = pickSlot(start, a);
-        see(one);
-        for (let b = 0; b < n; b++) see(pickSlot(one, b));
-      }
-      const all = [];
-      for (let l = 0; l < n; l++) for (let r = l + 1; r < n; r++) all.push(`${l},${r}`);
-      expect([n, [...reached].sort()]).toEqual([n, all]);
+      expect([n, reachable(n, 3, false)]).toEqual([n, pairs(n, false)]);
+      const late = pairs(n, false).filter((pair) => !reachable(n, 2, false).includes(pair));
+      expect([n, late]).toEqual([n, Array.from({ length: n - 2 }, (_, b) => `0,${b + 1}`)]);
     }
   });
 
-  it('pickSlot from rest on three stages: Tones goes left (T | F), then Camera right (T | C), then Finished left (F | C)', () => {
+  it('pickSlot from rest on three stages: Finished goes left and the right empties (F | –), Tones fills it (F | T), Finished again does nothing, Tones moves left (T | –), Camera right (T | C)', () => {
     let pair = { left: 0, right: 2, next: 'left' };
     const seen = [];
-    for (const k of [1, 0, 2]) {
+    for (const k of [2, 1, 2, 1, 0]) {
       pair = pickSlot(pair, k);
       seen.push([k, pair]);
     }
     expect(seen).toEqual([
-      [1, { left: 1, right: 2, next: 'right' }],
+      [2, { left: 2, right: null, next: 'right' }],
+      [1, { left: 2, right: 1, next: 'left' }],
+      [2, { left: 2, right: 1, next: 'left' }],
+      [1, { left: 1, right: null, next: 'right' }],
       [0, { left: 1, right: 0, next: 'left' }],
-      [2, { left: 2, right: 0, next: 'right' }],
     ]);
   });
 
@@ -615,6 +772,12 @@ describe('(d) the state (T1707)', () => {
     expect(noteIndex('slider', { left: 1, right: 2, split: 20 })).toEqual(2);
     expect(noteIndex('side', { left: 0, right: 1 })).toEqual(1);
     expect(noteIndex('switch', { stage: 2 })).toEqual(2);
+  });
+
+  it('noteIndex: none while the right side is empty, whatever holds the left (T1709g)', () => {
+    expect(noteIndex('slider', { left: 2, right: null, split: 50 })).toEqual(null);
+    expect(noteIndex('side', { left: 0, right: null })).toEqual(null);
+    expect(noteIndex('side', { left: null, right: 1 })).toEqual(1);
   });
 
   it('sideFits: two stages fit from 2 × sideMinPx, not a pixel under', () => {

@@ -46,15 +46,17 @@ export const COMPARE_MODE_KEY = 'compare-mode';
 export type CompareMode = keyof typeof COMPARE_WORDING.modes;
 /** Two stages, one each side. */
 export type ComparePair = { left: number; right: number };
+/** The two sides as the legend leaves them: a side may be empty (`null`) until a pick fills it. */
+export type CompareSides = { left: number | null; right: number | null };
 /** A side of the pair. */
 export type CompareSlot = keyof typeof COMPARE_WORDING.slots;
-/** The pair as the legend picked it, left and right, and the side the next pick takes. */
-export type CompareSlots = ComparePair & { next: CompareSlot };
-/** The slider's pair and the divider's position, 0–100. */
-export type SliderView = ComparePair & { split: number };
+/** The sides as the legend picked them, left and right, and the side the next pick takes. */
+export type CompareSlots = CompareSides & { next: CompareSlot };
+/** The slider's sides and the divider's position, 0–100. */
+export type SliderView = CompareSides & { split: number };
 /** The switch's one showing stage. */
 export type SwitchView = { stage: number };
-export type CompareView = SliderView | ComparePair | SwitchView;
+export type CompareView = SliderView | CompareSides | SwitchView;
 
 /** A string that names one of the three methods. */
 const isMode = (value: unknown): value is CompareMode =>
@@ -71,22 +73,27 @@ export function openingMode(
   return COMPARE.defaultMode;
 }
 
-/** The slider at `p` ∈ [0, 1], wiping between `pair`: the divider at `p`, the pair's left stage left of it. */
-export function sliderView(p: number, pair: ComparePair): SliderView {
+/** The slider at `p` ∈ [0, 1], wiping between `pair`: the divider at `p`, the left side's stage left of it (an empty side the bare ground). */
+export function sliderView(p: number, pair: CompareSides): SliderView {
   const at = Math.min(1, Math.max(0, p));
   return { left: pair.left, right: pair.right, split: 100 * at };
 }
 
 /**
- * The pair after a legend click on stage `k`: a stage already in the pair
- * leaves it as it is; another takes the `next` side, and `next` flips —
- * so the picks go left, then right, and every pair is two clicks away.
+ * The sides after a legend click on stage `k` (T1709g): it takes the
+ * `next` side and `next` flips; if it held the other side, that side
+ * empties until a later pick fills it — so a stage moves sides. A click
+ * on the stage already on the `next` side does nothing. The picks go
+ * left, then right, and every pair, either way round, is two clicks away.
  */
 export function pickSlot(pair: CompareSlots, k: number): CompareSlots {
-  if (k === pair.left || k === pair.right) return pair;
-  return pair.next === 'left'
-    ? { left: k, right: pair.right, next: 'right' }
-    : { left: pair.left, right: k, next: 'left' };
+  const { next } = pair;
+  if (pair[next] === k) return pair;
+  const other: CompareSlot = next === 'left' ? 'right' : 'left';
+  const kept = pair[other] === k ? null : pair[other];
+  return next === 'left'
+    ? { left: k, right: kept, next: 'right' }
+    : { left: kept, right: k, next: 'left' };
 }
 
 /** Side by side from stage `k`: it and the next, the last with the one before. */
@@ -130,9 +137,9 @@ export function restView(
   return mode === 'slider' ? sliderView(COMPARE.restAt, pair) : pair;
 }
 
-/** The stage whose note is shown: the pair's right stage, or the switch's stage. */
-export function noteIndex(mode: CompareMode, view: CompareView): number {
-  return mode === 'switch' ? (view as SwitchView).stage : (view as ComparePair).right;
+/** The stage whose note is shown: the right side's stage (none while it is empty), or the switch's stage. */
+export function noteIndex(mode: CompareMode, view: CompareView): number | null {
+  return mode === 'switch' ? (view as SwitchView).stage : (view as CompareSides).right;
 }
 
 /** Whether a frame `width` px wide holds two stages side by side. */
@@ -148,10 +155,12 @@ export function sideFits(width: number): boolean {
  * dead in it. Everything else is built here, per `.compare` with two or
  * more stages: the method control (three buttons), the legend (one
  * button per stage, marking what shows: in the slider and side by side it
- * picks the one pair both show, left then right, by `pickSlot` — the
- * picked buttons tagged with their side, a hint after the legend naming
- * the side the next pick takes — the first stage left and the last right
- * at rest; in the switch it goes to the stage, untagged and unhinted),
+ * picks the sides both show, left then right, by `pickSlot` — a side left
+ * empty by a stage that moved shows the bare ground; each button is two
+ * lines, its label over its side tag's row, always there and blank while
+ * the stage holds no side; a hint after the legend names the side the
+ * next pick takes — the first stage left and the last right at rest; in
+ * the switch it goes to the stage, its tag rows blank and no hint),
  * the divider and the handle
  * (an ARIA slider), the live note, and the corner tags when
  * `COMPARE.cornerTags`; and the state the CSS reads — `data-js`,
@@ -212,6 +221,13 @@ const CLICK_SLOP_PX = 4;
 /** A number as written to `--split` and `aria-valuenow`: two places, no float noise. */
 const round = (value: number) => Math.round(value * 100) / 100;
 
+/** The side tag's row while its stage holds no side: a blank that keeps the row's height. */
+const BLANK = '\u00a0';
+
+/** The stages on the sides, left then right, an empty side skipped. */
+const onSides = (pair: CompareSides) =>
+  [pair.left, pair.right].filter((one): one is number => one !== null);
+
 /** Where the reader's choice is kept, per `COMPARE.remember`. */
 function modeStore(): Storage | null {
   try {
@@ -267,7 +283,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   /** The switch's leaving stage while the arriving one fades in over it. */
   let leaving: number | null = null;
   let fits = true;
-  let noted = -1;
+  let noted: number | null = -1;
   // The width class the surface wrote, read once; side by side swaps it for `COMPARE.sideWidth`'s.
   const surfaceWidth = [...root.classList].find((name) => name.startsWith(`${C.root}-w-`)) ?? '';
   const sideWidth = `${C.root}-w-${COMPARE.sideWidth}`;
@@ -326,19 +342,23 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     if (element.dataset.part !== part) element.dataset.part = part;
   };
 
+  // Each legend button is two lines: its label, and beneath it the side
+  // tag's row, always there — blank while the stage holds no side — so a
+  // pick moves nothing; `data-label` lets the stylesheet reserve the
+  // label's bold width.
+  const slotTags = words.map(() => make('span', 'compare-slot', BLANK));
   legend.append(
     ...words.map(({ label }, i) => {
       const item = make('li', 'compare-stop');
       const button = make('button', undefined, label);
       button.type = 'button';
+      button.dataset.label = label;
+      button.append(' ', slotTags[i]);
       button.addEventListener('click', () => pick(i));
       item.append(button);
       return item;
     }),
   );
-  // Each legend button's side tag, attached while the button is picked.
-  const slotTags = words.map(() => make('span', 'compare-slot'));
-  const tagged: (CompareSlot | null)[] = words.map(() => null);
 
   const render = () => {
     const showing = view();
@@ -353,23 +373,24 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
       }
     }
     let shown: number[];
-    let note: number;
+    let note: number | null;
     if (showing === 'slider') {
       const at = sliderView(p, picked);
       const split = String(round(at.split));
       root.style.setProperty('--split', split);
       handle.setAttribute('aria-valuenow', split);
-      handle.setAttribute('aria-valuetext', `${words[at.left].label} | ${words[at.right].label}`);
+      shown = onSides(at);
+      // The stages the divider wipes between, or the one alone while a side is empty.
+      handle.setAttribute('aria-valuetext', shown.map((i) => words[i].label).join(' | '));
       stages.forEach((one, i) =>
         setPart(one, i === at.left ? 'left' : i === at.right ? 'right' : 'off'),
       );
-      shown = [at.left, at.right];
       note = noteIndex('slider', at);
     } else if (showing === 'side') {
       stages.forEach((one, i) =>
         setPart(one, i === picked.left ? 'left' : i === picked.right ? 'right' : 'off'),
       );
-      shown = [picked.left, picked.right];
+      shown = onSides(picked);
       note = noteIndex('side', picked);
     } else {
       stages.forEach((one, i) =>
@@ -386,20 +407,12 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     else frames.removeAttribute('tabindex');
 
     [...legend.children].forEach((item, i) => {
-      const button = item.firstElementChild;
-      button?.setAttribute('aria-pressed', String(shown.includes(i)));
-      // The picked buttons' side tags; none in the switch.
+      item.firstElementChild?.setAttribute('aria-pressed', String(shown.includes(i)));
+      // The side tag's row names the side the stage holds; blank otherwise, and in the switch.
       const slot =
         showing === 'switch' ? null : i === picked.left ? 'left' : i === picked.right ? 'right' : null;
-      if (slot === tagged[i]) return;
-      tagged[i] = slot;
-      if (slot === null) {
-        slotTags[i].previousSibling?.remove(); // the space before it
-        slotTags[i].remove();
-      } else {
-        slotTags[i].textContent = COMPARE_WORDING.slots[slot];
-        if (slotTags[i].parentNode !== button) button?.append(' ', slotTags[i]);
-      }
+      const tag = slot === null ? BLANK : COMPARE_WORDING.slots[slot];
+      if (slotTags[i].textContent !== tag) slotTags[i].textContent = tag;
     });
     // The hint names the side the next pick takes (hidden in the switch by the stylesheet).
     const next = `${COMPARE_WORDING.next} ${COMPARE_WORDING.slots[picked.next]}`;
@@ -410,15 +423,19 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
 
     if (note !== noted) {
       noted = note;
-      const { label, note: from } = words[note];
-      const parts: (string | HTMLElement)[] = [make('span', C.label, label)];
-      if (from?.textContent?.trim()) {
-        // The note's children, cloned: its emphasis or link survives (T1708a).
-        const copy = make('span', C.note);
-        copy.append(...Array.from(from.childNodes, (child) => child.cloneNode(true)));
-        parts.push(' ', copy);
+      // The right side is empty: the note is blank until a pick fills it.
+      if (note === null) now.replaceChildren();
+      else {
+        const { label, note: from } = words[note];
+        const parts: (string | HTMLElement)[] = [make('span', C.label, label)];
+        if (from?.textContent?.trim()) {
+          // The note's children, cloned: its emphasis or link survives (T1708a).
+          const copy = make('span', C.note);
+          copy.append(...Array.from(from.childNodes, (child) => child.cloneNode(true)));
+          parts.push(' ', copy);
+        }
+        now.replaceChildren(...parts);
       }
-      now.replaceChildren(...parts);
     }
   };
 
