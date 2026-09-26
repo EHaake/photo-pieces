@@ -1250,7 +1250,7 @@ front door, the piece page and its script, the sets and the arrows;
 
 ## Amendment (2026-09-26): the stage's share, the pair blocks, the filmstrip
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-26) by the `skeptical-reviewer` at the top tier — one blocking finding fixed and re-reviewed (the DualUp portrait's expected box, computed with the wrong available height), eight second-look notes taken; nothing open for the sweep from this sign-off.
 **Implements**: spec.md's sections marked _(amended 2026-09-26)_ —
 Goal 2's filmstrip, Goals 7–9, Entities, the flows "Looking through
 every stage", "Arriving at the photograph" and "Writing a pair", the

@@ -13,8 +13,8 @@ the stage's share of the screen, the pair blocks `side` and `slider`,
 and the filmstrip as a fourth method — the paragraph "Amended after
 Phase 3" in the Summary, Goals 8 and 9, and the sections marked
 _(amended 2026-09-26)_. The amended sections were re-planned as
-plan.md's "Amendment (2026-09-26)" and tasks.md's Phase 3a, signed off
-at the top tier.
+plan.md's "Amendment (2026-09-26)" and tasks.md's Phase 3a
+(T1719–T1729), signed off at the top tier the same day.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
