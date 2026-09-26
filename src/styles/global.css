@@ -2447,14 +2447,26 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 }
 
 /* The filmstrip's arrows: the handle's look — a flat disc of the ground
-   with an accent hairline and an accent glyph in the mono face, no
-   shadow — at the frame's sides, 0.5rem in, vertically centred; muted
-   where there is nowhere to go and COMPARE.stripEnds keeps them
-   (aria-disabled); only in the filmstrip. */
+   with an accent hairline, no shadow — at the frame's sides, 0.5rem in,
+   vertically centred; muted where there is nowhere to go and
+   COMPARE.stripEnds keeps them (aria-disabled); only in the filmstrip.
+   T1729a: inside, a chevron drawn as the handle draws its "=" — no glyph
+   font (JetBrains Mono's subsets carry no ← or →, so the glyph was the
+   system mono's). The button's ← / → stays in the markup at font-size 0
+   (the aria-label names it); the ::before is a square a quarter of the
+   disc, 1px of currentColor on two sides — so the muted rule mutes it —
+   turned 45° (→) or −135° (←) and slid back a quarter of its side less
+   half a stroke, which puts its ink on the disc's centre (measured).
+   The grid centres by place-content: the zero-height text is a second
+   row, and place-items would split the height between the two. A grid
+   display outranks the `hidden` attribute, so the rule after the
+   directions hands it back. */
 .compare[data-js] .compare-arrow {
   position: absolute;
   top: 50%;
   z-index: 3;
+  display: grid;
+  place-content: center;
   box-sizing: border-box;
   width: var(--compare-handle);
   height: var(--compare-handle);
@@ -2463,19 +2475,36 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   border-radius: var(--compare-handle-radius);
   background: var(--color-bg);
   color: var(--color-accent);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0;
   line-height: 1;
   transform: translateY(-50%);
   cursor: pointer;
+}
+
+.compare[data-js] .compare-arrow::before {
+  content: '';
+  box-sizing: border-box;
+  width: calc(var(--compare-handle) / 4);
+  height: calc(var(--compare-handle) / 4);
+  border-block-start: 1px solid currentColor;
+  border-inline-end: 1px solid currentColor;
+  transform: rotate(45deg) translate(calc(-25% + 0.5px), calc(25% - 0.5px));
 }
 
 .compare[data-js] .compare-arrow[data-dir='back'] {
   left: 0.5rem;
 }
 
+.compare[data-js] .compare-arrow[data-dir='back']::before {
+  transform: rotate(-135deg) translate(calc(-25% + 0.5px), calc(25% - 0.5px));
+}
+
 .compare[data-js] .compare-arrow[data-dir='next'] {
   right: 0.5rem;
+}
+
+.compare[data-js] .compare-arrow[hidden] {
+  display: none;
 }
 
 .compare[data-js] .compare-arrow[aria-disabled='true'] {

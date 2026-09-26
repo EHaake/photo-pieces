@@ -1015,6 +1015,8 @@ describe('(e) the pair blocks and the filmstrip (the amendment)', () => {
       position: 'absolute',
       top: '50%',
       'z-index': '3',
+      display: 'grid',
+      'place-content': 'center',
       'box-sizing': 'border-box',
       width: 'var(--compare-handle)',
       height: 'var(--compare-handle)',
@@ -1023,20 +1025,38 @@ describe('(e) the pair blocks and the filmstrip (the amendment)', () => {
       'border-radius': 'var(--compare-handle-radius)',
       background: 'var(--color-bg)',
       color: 'var(--color-accent)',
-      'font-family': 'var(--font-mono)',
-      'font-size': '0.75rem',
+      'font-size': '0',
       'line-height': '1',
       transform: 'translateY(-50%)',
       cursor: 'pointer',
     });
+    // T1729a: the chevron, drawn — no glyph font; currentColor, so the muted rule mutes it
+    const nudge = 'translate(calc(-25% + 0.5px), calc(25% - 0.5px))';
+    expect([
+      ruleAt(rulesIn(css), '.compare[data-js] .compare-arrow::before'),
+      ruleAt(rulesIn(css), ".compare[data-js] .compare-arrow[data-dir='back']::before"),
+    ]).toEqual([
+      {
+        content: "''",
+        'box-sizing': 'border-box',
+        width: 'calc(var(--compare-handle) / 4)',
+        height: 'calc(var(--compare-handle) / 4)',
+        'border-block-start': '1px solid currentColor',
+        'border-inline-end': '1px solid currentColor',
+        transform: `rotate(45deg) ${nudge}`,
+      },
+      { transform: `rotate(-135deg) ${nudge}` },
+    ]);
     expect([
       ruleAt(rulesIn(css), ".compare[data-js] .compare-arrow[data-dir='back']"),
       ruleAt(rulesIn(css), ".compare[data-js] .compare-arrow[data-dir='next']"),
+      ruleAt(rulesIn(css), '.compare[data-js] .compare-arrow[hidden]'),
       ruleAt(rulesIn(css), ".compare[data-js] .compare-arrow[aria-disabled='true']"),
       ruleAt(rulesIn(css), ".compare[data-js]:not([data-view='filmstrip']) .compare-arrow"),
     ]).toEqual([
       { left: '0.5rem' },
       { right: '0.5rem' },
+      { display: 'none' },
       { 'border-color': 'var(--color-muted)', color: 'var(--color-muted)', cursor: 'default' },
       { display: 'none' },
     ]);
