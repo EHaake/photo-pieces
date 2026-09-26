@@ -528,7 +528,7 @@ headers to confirm nothing was duplicated or dropped. -->
       colour the accent, the two bars' rects inside it, still centred
       on the divider._
 
-- [ ] **T1709j** — Round: space and a divider between the label and
+- [x] **T1709j** — Round: space and a divider between the label and
       its note ("CAMERA and then the tagline are … too close together,
       there needs to be some more space between them and/or a dividing
       character"). Plan: the T1709j paragraph. `global.css`: the one
@@ -920,6 +920,7 @@ tier if it is ever on (it is off). -->
 | T1709g empty sides, tags beneath | implementation (`opus`, high) | ~98k | done; 529 tests; data-label (a script-written attribute, not a state) not on the barrier list — sweep note; with sides kept apart some arrangements take three clicks (the first stage on the left of a middle stage); narrow stacked side by side with an empty right shows one pane; the switch keeps blank tag rows |
 | T1709h any stage any step | implementation (`opus`, high) | ~43k | done; 529 tests; worst case two clicks either way round; the hidden handlex27s aria-valuetext goes stale in side by side — sweep note |
 | T1709i small handle | implementation (`opus`, high) | ~42k | done; 530 tests; 24×24, accent border, bars 8×1 at ±1.5px from centre |
+| T1709j label · note | implementation (`opus`, high) | ~44k | done; 531 tests; label-to-note gap 22.85px, the space character plus margin on the label side (asymmetric by ~4px) — note |
 
 _(Session-tier allowance draw noted at each pause.)_
 
