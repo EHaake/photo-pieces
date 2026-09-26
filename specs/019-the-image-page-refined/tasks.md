@@ -971,7 +971,7 @@ headers'.
       `_Z1L8xdw`, Finished both `_22INTs`). Barrier: 6 compares, 14
       stage images. 612 tests; 784 images in dist (13 fewer).
 
-- [ ] **T1724** — The filmstrip's state, pure. Pattern: T1707 in
+- [x] **T1724** — The filmstrip's state, pure. Pattern: T1707 in
       `compare.ts` and compare.test.mjs (d). Plan: "The filmstrip's
       state". `compare.ts`: the six `COMPARE` keys and the words
       exactly as plan.md spells them, each commented; `stripAt`,
@@ -1304,6 +1304,7 @@ tier if it is ever on (it is off). -->
 | T1722 barrier scan 4 | implementation (`opus`, high) | ~47k | done; 610 tests (+7); summary today: "3 compares in one shape; 8 stage images, one candidate list per file"; a stage shown by two blocks counts twice; a src-only pane keyed by its src; only the first clashing URL reported |
 | D1723 decision review (one URL per stage across the page's two builders) | top (`fable`, high, override) | ~111k | option B made structural: `stageImageOptions(surface)` spelled once in image-meta.mjs, the transform's `stageSizing` and the page's `getImage` both read it, `<Image>` leaves the section (it hashes fit: cover and position: center; getImage never reads image.objectFit — verified in Astro's sources); scan 4 stays URL-keyed, the one-URL fact pinned at the source by test (a) and observed on the built land-b page; the plan's "scan 4 fails otherwise" was a wrong claim; stays in T1723 |
 | T1723 side static form, fixtures, page stage images | implementation (`opus`, high) | ~64k + ~110k (two rounds, D1723 between) | done; 612 tests (+2); stopped once on the plan's shared-files premise (D1723); one srcset per stage on both pages; the section's raw <img> also carries Astro's scoped class and cid attribute (request-identical to the story's); a stage's sizes follow the surface not the width class (the side at wide still carries column sizes — what keeps one list); prettier flags pre-existing lines in compare.test.mjs and [...id].astro — sweep note |
+| T1724 filmstrip state | implementation (`opus`, high) | ~57k | done; 618 tests (+6); both mutations fail by name; stripEnds defaults wraps to COMPARE.stripWraps as switchNext does; prettier flags compare.ts and compare.test.mjs at HEAD already — sweep note |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_
