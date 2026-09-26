@@ -1300,7 +1300,10 @@ simpler shape was taken the bullet says so.
   `html:not([data-quiet]) .image-frame` — is deleted and replaced by
   one rule per shape:
 
-      /* :root, beside --frame-nav-h */
+      /* :root, beside --frame-nav-h; the comment above them says a share
+         is at most 1 — a portrait share over 1 makes the frame taller
+         than --avail-h and pushes the nav off the first screen, and a
+         landscape share over 1 only runs into the frame's max-width */
       --stage-share-landscape: 1; /* a landscape's width: this share of the stage's available width */
       --stage-share-portrait: 1; /* a portrait's (and by STAGE_SQUARE a square's) height: this share of the available height */
 
@@ -1313,8 +1316,8 @@ simpler shape was taken the bullet says so.
 
   `--avail-w` and `--avail-h` are the stage's, unchanged (the page
   less its side pads; the first screen below the header less the two
-  spacings and `--frame-nav-h`), so the frame's height is at most
-  `--avail-h` in both rules — the nav line stays on the first screen
+  spacings and `--frame-nav-h`), so while each share is at most 1 the
+  frame's height is at most `--avail-h` in both rules — the nav line stays on the first screen
   and spec 013's cap on the image still never binds. The shape is read
   at build time: `stage-sizes.ts` gains
 
@@ -1358,14 +1361,18 @@ simpler shape was taken the bullet says so.
   | Screen    | Ratio | Share rule at 1 (w × h) | Bound by        | Spec 017 (w × h) | At 0.9 (w × h) |
   | --------- | ----- | ----------------------- | --------------- | ---------------- | -------------- |
   | 1512×982  | 3:2   | 1171.5 × 781.0          | height          | 781.0 × 520.7    | 1171.5 × 781.0 |
-  | 1512×982  | 2:3   | 520.7 × 781.0           | portrait share  | 520.7 × 780.6    | 468.8 × 702.9  |
+  | 1512×982  | 2:3   | 520.7 × 781.0           | portrait share  | 520.7 × 781.0    | 468.6 × 702.9  |
   | 1280×1440 | 3:2   | 1216.0 × 810.7          | landscape share | 1216.0 × 810.7   | 1094.4 × 729.6 |
-  | 1280×1440 | 2:3   | 810.3 × 1215.5          | portrait share  | 810.7 × 1215.5   | 743.8 × 1115.1 |
+  | 1280×1440 | 2:3   | 826.0 × 1239.0          | portrait share  | 810.7 × 1216.0   | 743.4 × 1115.1 |
 
-  At 1 the share rule differs from spec 017's in one box of the four —
-  the laptop's landscape, which grows from 781 to 1171.5 wide — and
-  the other three stay within a pixel of what he sees today; the
-  share is the lever he asked for, tuned at the pause.
+  (2:3 at exactly ⅔, which is what T1720's matte.test case evaluates
+  to ±0.1px; a page's written `--ar` of 0.667 reads up to 0.4px wider,
+  inside the browser read's ±1px.) At 1 the share rule differs from spec 017's
+  in two boxes of the four — the laptop's landscape grows from 781 to
+  1171.5 wide and the DualUp's portrait from 1216 to 1239 tall (spec
+  017 bound it by the width, the share rule by the height); the other
+  two stay within a pixel of what he sees today. The share is the
+  lever he asked for, tuned at the pause.
 
 - **The pair blocks in the transform, and the fourth mode**
   (`remark-pieces-blocks.mjs`, `src/lib/image-meta.mjs`, T1721). Two
@@ -1423,7 +1430,12 @@ simpler shape was taken the bullet says so.
   at `aspect-ratio: var(--ar)`, the image `object-fit: contain` on
   `--color-bg` — and the static form adds `.piece-side { container:
   compare-side / inline-size; }`, `.piece-side .compare-frames {
-  grid-template-columns: 1fr 1fr; }` and `@container compare-side
+  grid-template-columns: 1fr 1fr; }` (the grid itself and its gap
+  are the static `.compare-frames` rule's — `display: grid; gap:
+  calc(var(--baseline) / 2)`, global.css ~2129, under no `data-js` —
+  so the side's two columns need only the template; the enhanced
+  `[data-view='side']` frames rule is never matched by a block without
+  script) and `@container compare-side
   (width < 560px) { .piece-side .compare-frames {
   grid-template-columns: 1fr; } }` (560px = 2 × `sideMinPx`, the
   compare's own threshold at opening; the side's is its own tunable
@@ -1500,7 +1512,13 @@ simpler shape was taken the bullet says so.
   `sideWidth`. Movement: a page (arrow, key, legend) writes
   `data-paging`, the settle after a drag or a wheel writes
   `data-settling` — each only when `!reducedMotion()`, so under reduced
-  motion both cut — and `transitionend` on `--strip-at` clears both.
+  motion both cut, and each only when the target differs from the
+  current `at` (the slider's settle guard, `if (to === p) return`,
+  T1708): a key or a legend click at an end of a strip that does not
+  wrap, or a settle already on a stage, writes neither, since no
+  transition would run to clear it and the next drag would lag the
+  hand — and `transitionend` on `--strip-at` clears both; a drag's
+  `pointerdown` clears both too.
   CSS:
 
       :root { --compare-peek: 0px; }   /* how far each neighbour shows beyond the frame's edge */
@@ -1606,9 +1624,16 @@ advice, and its pins stay unedited.
   share or the other bound, the cap never binds; and the table above
   at the fallback header (76px), 3:2 and 2:3 at 1512×982 and
   1280×1440, to ±0.1px. "stageShape": 1.5 landscape, 0.667 portrait,
-  1 → `STAGE_SQUARE`; the page's and the sampler's source write
-  `data-shape={stageShape(`. The sizes-hint case runs as it is over
-  `paperEnv` reading the rule of the ratio's shape. Mutations: a share
+  and 1 → the literal `'portrait'` in the test's row — not the
+  imported `STAGE_SQUARE`, which would move both sides of the
+  assertion (a square round edits this row, as every envelope row is
+  edited); the page's and the sampler's source write
+  `data-shape={stageShape(`. The `paperEnv` helper (matte.test.mjs
+  ~777–799) is retargeted with the case: it now picks the
+  `${PAPER_FRAME}[data-shape='…']` rule by `stageShape(ratio)` and
+  drops `--L`/`--S` from its env (the evaluator already honours
+  `var(--ar, 1)` and reads the shares from `:root`), and the
+  sizes-hint case then runs unchanged over it. Mutations: a share
   moved in `:root` alone → the token pin and "sizes = width" fail;
   `STAGE_SQUARE` flipped → "stageShape" fails. In the browser (BiDi)
   at both screens on a 3:2 and a 2:3 page: the frame's rect against the
@@ -1735,7 +1760,8 @@ block; `content.config.ts`; `src/lib/images.ts`.
   against 1216) are smaller than under spec 017, and a phone's
   landscape narrows (322px on a 390px phone against 358). The spec
   opens both shares at 1 for that reason (Decided, 2026-09-26), where
-  only the laptop's landscape moves; the Phase 3a look puts the
+  the laptop's landscape and the DualUp's portrait grow and nothing
+  shrinks; the Phase 3a look puts the
   numbers to him before any share is lowered.
 - **The first screen weighs more on the laptop**: a larger landscape
   picks a larger candidate (the 2320px one where 1668 served).
@@ -1774,4 +1800,10 @@ block; `content.config.ts`; `src/lib/images.ts`.
   finger does (one pointer path).
 - **The filmstrip's settle reuses `data-settling`** in a rule of its
   own, so the slider's pinned rule is unedited.
+- **The slider block's note is the live note of its second stage** — a
+  reading: the spec says "the pair's note" (Goal 9, Entities), "the
+  live note" (Design requirements) and "the note following" (AC 17);
+  the compare's live note, following the right side, satisfies all
+  three with no new markup. Showing both stages' notes is the
+  alternative, put to him at the Phase 3a look.
 - **No new dependency.**

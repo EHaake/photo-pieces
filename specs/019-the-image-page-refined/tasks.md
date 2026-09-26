@@ -52,12 +52,12 @@ measure the person attests at the pause on his two screens (the 16:10
 laptop, 1512×982 at 2×, and the LG DualUp, 1280×1440 at 2×), with a
 mouse, a trackpad and a phone. **The tuning envelope** (spec.md): a
 round at a pause is one sub-lettered task under that phase's look task
-(T1709, T1713, T1717) — the value set in its one place as plan.md's
-"The tuning envelope, placed" names it, the matching row of its test
+(T1709, T1713, T1729, T1717) — the value set in its one place as plan.md's
+"The tuning envelope, placed" (and its amendment table) names it, the matching row of its test
 updated, one line in spec.md's Decided section, `sh scripts/verify.sh`
 green — dispatched as routine and reviewed with the phase against the
 outcome the spec records. A round that wants what the envelope sends to
-the ordinary path (a fourth method, a second block, the private-file
+the ordinary path (a fifth method, a fourth block that takes stages, the private-file
 rule widened further, the loupe elsewhere, a dependency, tiles, the
 wall label beyond its two values) stops and goes to the person as a
 spec amendment. One implementation session runs the whole spec: a phase
@@ -826,7 +826,7 @@ T1713c. **Third look:** "Looks good, continue." Phase 2 closed.
 
 _Filled in at the pause._
 
-## Phase 3a — The amendment: the stage's share, the pair blocks, the filmstrip (reviewer after the phase; `review: per-task` on T1721; walkthrough: under `npm run dev`, on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/` (a 3:2) and on a 2:3 page, the photograph now takes a share of the screen: on the laptop the horizontal one fills the height below the header, about 1,170 wide where it was 780, the vertical the same 520 × 780 it was; on the DualUp both as before (the horizontal 1,216 wide, the vertical 1,216 tall) — the nav line under it on the first screen and the title one piece-spacing below the nav on both; the shares open at one, so the question is whether either should come down (at nine tenths three of these four would be smaller than before — plan.md's table), and whether a square goes with the verticals; the quiet view and the loupe exactly as before; on the fog piece, after the switch compare, a side block — Camera and Tones beside each other, each with its label and note beneath, nothing to choose, the same with script off, stacked on the phone — and a slider block — the handle at the centre, Camera left and Finished right, "Camera · Finished" fixed beneath and the note, no method words, dragged by mouse, trackpad, finger and the arrow keys, stacked with script off; every compare's method words gain "Filmstrip": one stage in the frame, arrows at its sides (none before the first, none after the last), ← → Home End once it has focus, a two-finger sideways scroll on the trackpad and a swipe on the phone that follow the hand and settle on the nearest stage, a legend click that slides there, the note following — the strip slides, it does not fade, and it stops at the last; land-b's page carries a slider in its story above the "Raw to finished" section, and the browser's network panel shows each stage file requested once there and on the fog piece; in Obsidian, the fog piece's side and slider show as its compare does; as many rounds as it takes, each a sub-lettered task under T1729)
+## Phase 3a — The amendment: the stage's share, the pair blocks, the filmstrip (reviewer after the phase; `review: per-task` on T1721; walkthrough: under `npm run dev`, on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/` (a 3:2) and on a 2:3 page, the photograph now takes a share of the screen: on the laptop the horizontal one fills the height below the header, about 1,170 wide where it was 780, the vertical the same 520 × 780 it was; on the DualUp the horizontal 1,216 wide as before, the vertical 1,239 tall where it was 1,216 — the nav line under it on the first screen and the title one piece-spacing below the nav on both; the shares open at one, so the question is whether either should come down (at nine tenths three of these four would be smaller than before — plan.md's table), and whether a square goes with the verticals; the quiet view and the loupe exactly as before; on the fog piece, after the switch compare, a side block — Camera and Tones beside each other, each with its label and note beneath, nothing to choose, the same with script off, stacked on the phone — and a slider block — the handle at the centre, Camera left and Finished right, "Camera · Finished" fixed beneath and the note, no method words, dragged by mouse, trackpad, finger and the arrow keys, stacked with script off; every compare's method words gain "Filmstrip": one stage in the frame, arrows at its sides (none before the first, none after the last), ← → Home End once it has focus, a two-finger sideways scroll on the trackpad and a swipe on the phone that follow the hand and settle on the nearest stage, a legend click that slides there, the note following — the strip slides, it does not fade, and it stops at the last; land-b's page carries a slider in its story above the "Raw to finished" section, and the browser's network panel shows each stage file requested once there and on the fog piece; in Obsidian, the fog piece's side and slider show as its compare does; as many rounds as it takes, each a sub-lettered task under T1729)
 
 **Status**: Draft — pending sign-off. Plan: "Amendment (2026-09-26)"
 and its sections. The spec amendment's three changes, folded in after
@@ -840,8 +840,7 @@ tuning pause like Phase 1's and 2's: a round is one sub-lettered task
 under T1729, per the cadence paragraph and plan.md's "The tuning
 envelope, placed (amendment)"; a round that wants a fifth method or a
 fourth block that takes stages goes to the person as a spec amendment
-(spec.md's amended "ordinary path" list, which outranks the preamble's
-older wording). Task ids continue from T1718; the phase order is the
+(spec.md's amended "ordinary path" list, as the preamble now reads). Task ids continue from T1718; the phase order is the
 headers'.
 
 - [ ] **T1719** — The constitution, amended again, in its own commit
@@ -979,7 +978,9 @@ headers'.
       view in `render()`, the arrows, `--i` and `--strip-at`, the
       keys, the drag, the wheel and its idle settle, the legend's
       paging, `data-paging` and `data-settling` behind
-      `!reducedMotion()`, the width swap per `stripWidth`; the
+      `!reducedMotion()` and only when the target differs from `at`
+      (a key at an end writes neither — a BiDi read), the width swap
+      per `stripWidth`; the
       comment's list of what the script builds and writes. `global.css`:
       `:root`'s `--compare-peek` beside the handle's tokens (their
       comment extended), `@property --strip-at`, the filmstrip, arrow
@@ -1016,13 +1017,20 @@ headers'.
       implementation task: the orchestrator's record of the Phase 3a
       pause, in the person's words, with T1720's, T1725's and T1726's
       numbers beside it. The questions, in plain language: the two
-      shares — opening at one, where only the laptop's landscape
-      moves (781 → 1171 wide); at nine tenths three of the four boxes
+      shares — opening at one, where the laptop's landscape and the
+      DualUp's portrait grow (781 → 1171 wide; 1216 → 1239 tall) and
+      nothing shrinks; at nine tenths three of the four boxes
       he knows would be smaller than before (plan.md's table) — and
       whether a square is sized with the verticals or the horizontals;
       whether the title now sits where he wants it; the side block (its
       width, where it stacks); the slider block (its width, its fixed
-      legend's look); the filmstrip — its arrows (where, their look,
+      legend's look, and its note: the second stage's, as built, or
+      both stages'); land-b's page, which now shows the photograph
+      twice — the story's slider over the camera's frame and the
+      finished photograph, then "Raw to finished" over all three
+      stages — because only a compare in the story makes the section
+      step aside: is that right, or should a side or a slider in the
+      story do the same (a spec amendment if so); the filmstrip — its arrows (where, their look,
       hidden or quiet at the ends), its keys, whether it wraps, whether
       a sliver of each neighbour shows, whether the sideways scroll
       should move it, its width; the slide's and the settle's

@@ -874,7 +874,9 @@ _Amended 2026-09-26:_
   at nine tenths three of the four boxes he knows would shrink — the
   laptop's portrait 781 → 703 tall, the DualUp's landscape 1216 →
   1094 wide and its portrait 1216 → 1115 tall — while at one none
-  shrinks and the laptop's landscape grows 781 → 1171 wide); spec
+  shrinks and two grow: the laptop's landscape 781 → 1171 wide, the
+  DualUp's portrait 1216 → 1239 tall, bound now by the height rather
+  than the width; the sign-off's correction); spec
   017's rectangle-turned rule replaced outright, not layered on. **Side by
   side as its own block, and the slider alone for one pair** — from
   the Phase 1 record: "side by side as its own block … the slider
