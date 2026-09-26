@@ -897,3 +897,8 @@ _Amended 2026-09-26:_
   its direct manipulation. **AC 4** noted as superseded by the Phase 1
   rounds. All three judged at the new phase's pause on the fixtures,
   then again on his piece.
+- **T1729a (Phase 3a pause, 2026-09-26).** The filmstrip's arrows are
+  drawn in CSS as the handle's "=" is — a chevron of two 1px strokes in
+  the accent, centred in the disc — not a font glyph (the mono face has
+  none, and a system fallback drew them off-centre). The disc's ring,
+  fill and colour stay the handle's.

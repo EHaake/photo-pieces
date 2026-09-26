@@ -1088,6 +1088,23 @@ headers'.
       `sh scripts/verify.sh` green (count recorded); 560 changed →
       the new case fails by name, reverted._
 
+- [x] **T1729a** — Round (Phase 3a pause, first look, 2026-09-26): the
+      filmstrip's arrows looked cheap, the glyph off-centre. Cause: the
+      mono face carries no ← → glyphs, so a system fallback drew them
+      (Menlo in Firefox), off-centre by up to 1.5 × 2.5px. The arrow
+      rules only: the chevron drawn in CSS as the handle draws its
+      "=" — a `calc(var(--compare-handle) / 4)` square, 1px
+      `currentColor` on `border-block-start` and `border-inline-end`,
+      `rotate(45deg)` next / `rotate(-135deg)` back, then `translate(calc(-25%
+      + 0.5px), calc(25% - 0.5px))`; the button `display: grid;
+      place-content: center; padding: 0; font-size: 0` (the text keeps
+      the name through `aria-label`); a `[hidden] { display: none }`
+      rule (grid outranks the UA's hidden). Ring, fill and colour
+      unchanged — measured equal to the handle's already. (e) pins by
+      body. _Recorded:_ ink centroid vs the ring's centre +0.2/−0.19 × 0
+      at both screens; muted computes `oklch(0.5 0.012 250)` on ring
+      and chevron; 629 tests.
+
 - [ ] **T1729** — The amendment's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3a
       pause, in the person's words, with T1720's, T1725's and T1726's
@@ -1360,6 +1377,7 @@ tier if it is ever on (it is off). -->
 | Phase 3a review | implementation (`opus`, high) | ~153k | blocked once: B1 the side's stacking literal has no (e) pin though the envelope table names one (T1728a); fix-now: choose() leaves data-settling set after a mid-settle method change; stale (c) opening comment; pause: hide vs quiet at the ends (hiding drops keyboard focus), the clipped focus ring, trackpad momentum vs the 150ms settle, the slider's note, land-b's photograph twice; sweep: the wheel's px-per-line conversion spelled twice (loupe.ts, compare.ts), the two scripted blocks pinned only by one-off reads (the fixed slider's store, the arrows at the ends), a post-build one-srcset assertion on land-b would pin 'fetched once' for real, 'exactly two' hardcoded |
 | T1728a review fixes | implementation (`opus`, high) | ~36k | done; 629 tests (+1); 560→600 fails the new case by name; compare.test.mjs not prettier-clean on the branch (six lines in (c)/(d)) — sweep note |
 | Phase 3a re-review | implementation (`opus`, high) | ~5k | signed off; notes 3–8 of the first review to the sweep |
+| T1729a arrows' look round | implementation (`opus`, high) | ~83k + ~70k (two passes) | done; 629 tests; first pass centred the fallback glyph with a Menlo-tuned nudge and found the mono face has no arrow glyphs; second pass drew the chevron in CSS; a 'lighter' ask conflicts with 'match the handle' (measured equal) — put to the person |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_ Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
