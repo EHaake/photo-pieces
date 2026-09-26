@@ -492,7 +492,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `compareStages`; the page-source pin's row. _Verify: green; the
       built land-b page's Camera note greped._
 
-- [ ] **T1709g** — Round: a picked stage may move to the other side,
+- [x] **T1709g** — Round: a picked stage may move to the other side,
       leaving its old side empty until the next pick ("you can't select
       an already selected one … maybe in this case you just have an
       empty selection until the partner is selected. I actually like
@@ -877,6 +877,7 @@ tier if it is ever on (it is off). -->
 | T1709d ordered picking | implementation (`opus`, high) | ~93k | done; 525 tests; the hint sits after the control (the root is a 1fr auto grid, so anything among legend and control needs grid-column 1/-1); bold follows aria-pressed in the switch too; the live note follows the right slot; ordered pairs are not all reachable in two clicks (unordered are) |
 | T1709e Finished caption finding | implementation (`opus`, high) | ~40k | diagnosed, no site defect: the corner text is painted into the placeholder pixels by gen-placeholders (camera "4:3 · camera", tones "3:2 · tones", finished only "3:2"); no corner tags drawn (cornerTags false), captions display none, no pseudo-elements; nothing changed |
 | T1709f camera note | implementation (`opus`, high) | ~27k | done; 526 tests; land-b and the sampler read the note |
+| T1709g empty sides, tags beneath | implementation (`opus`, high) | ~98k | done; 529 tests; data-label (a script-written attribute, not a state) not on the barrier list — sweep note; with sides kept apart some arrangements take three clicks (the first stage on the left of a middle stage); narrow stacked side by side with an empty right shows one pane; the switch keeps blank tag rows |
 
 _(Session-tier allowance draw noted at each pause.)_
 
