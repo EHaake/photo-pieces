@@ -565,3 +565,5 @@ re-implementation. The plan says where each lives.
 - **Round T1709h (2026-09-25)** — any stage may be picked at any step:
   picking the stage already on the next side keeps it there and moves
   the next pick to the other side.
+- **Round T1709i (2026-09-25)** — the handle is a small 24px circle
+  outlined in the accent colour with a "=" inside.

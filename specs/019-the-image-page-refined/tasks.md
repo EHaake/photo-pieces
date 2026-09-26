@@ -519,6 +519,15 @@ headers to confirm nothing was duplicated or dropped. -->
       left) click Camera → unchanged sides, next right; click Tones → C
       | T._
 
+- [ ] **T1709i** — Round: the handle "significantly smaller. Maybe a
+      small circle with a '=' inside whose outline uses the site's
+      accent color". Plan: the T1709i paragraph. `global.css`: the
+      token to 1.5rem; the handle rule's border in `--color-accent`,
+      the two bars; compare.test.mjs (b): `TOKENS` and the rule pin.
+      _Verify: green; BiDi at 1512×982: the handle 24×24, border
+      colour the accent, the two bars' rects inside it, still centred
+      on the divider._
+
 ### Phase 1 record (the person's walkthrough)
 
 **First look (2026-09-25).** The three-way slider: "I don't like the
@@ -545,7 +554,9 @@ actually like that second idea better"; the left/right tags "cause
 things to jump around … should be underneath their selections". Round:
 T1709g. **Fourth look:** "Almost! … you can't pick the same image for
 the next pick … Allow the same image to be picked at any stage." Round:
-T1709h. The decision list is still deferred.
+T1709h. **Fifth look:** "Perfect" — one more: the handle "should be
+significantly smaller … a small circle with a '=' inside whose outline
+uses the site's accent color." Round: T1709i. Then the decision list.
 
 ## Phase 2 — The loupe (reviewer after the phase; walkthrough: under `npm run dev` on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/`, enter the quiet view; the cursor over the photograph says zoom, over the mat it still says leave; click a corner and the photograph grows to full detail around that point while the mat and the dark ground stay where they are, soft at first and then sharp as the larger export fades in; drag to move around it, scroll or pinch (trackpad and phone) to zoom between the fit and full detail, + and − to zoom, the arrows to pan; Esc or a click without dragging goes back to the fit, Esc again back to the page; at the fit the arrows step to the next photograph as before; on `/images/where-the-fog-lets-go/land-a/` (a 1800×1200 placeholder with no larger export, whose own file is already past full detail at its quiet size on both his screens — the number T1712 recorded, quoted in the report; if that read found it ready, the report names the page T1712 found not ready instead) the quiet view is exactly as before and a click leaves it, while some real portrait exports on the laptop do get a loupe from their own file (T1712's numbers); the question put to him: at the fit, a click on the photograph now zooms and a click on the mat or the dark ground leaves — is that the right reading of "a click at the fit steps back out", or should a single click keep leaving and the loupe open another way; with the system's reduce-motion setting on, the zoom jumps rather than grows and the sharp export still fades in; optionally, in the browser's network panel, the larger export is requested only at the first zoom and once; as many rounds as it takes, each a sub-lettered task under T1713)
 

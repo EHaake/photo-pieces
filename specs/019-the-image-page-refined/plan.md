@@ -526,6 +526,13 @@ where the simpler shape was taken it is said in one line.
   non-breaking space) so nothing shifts; the hint line stays beneath
   the legend. The switch is unchanged.
 
+  **Round T1709i (2026-09-25).** The handle is small: `--compare-handle:
+  1.5rem` (24px), still a circle, its 1px border in `--color-accent`
+  on the ground, and a "=" drawn inside as two short horizontal bars
+  (`::before` and `::after`, `--color-accent`, each about a third of
+  the diameter wide and 1px tall, centred, a few px apart) — no glyph
+  font. compare.test.mjs (b) pins the token and the handle rule's body.
+
 - **The loupe's file** (`src/lib/loupe.ts`, the image page's
   frontmatter, T1710). `LOUPE` holds the loupe's tunables:
 
