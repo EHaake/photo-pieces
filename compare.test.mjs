@@ -103,7 +103,7 @@ const EXPECTED = {
 /** The handle's size and shape, verbatim as global.css's :root carries
  *  them: to retune, move the value there and here. */
 const TOKENS = {
-  '--compare-handle': '2.75rem',
+  '--compare-handle': '1.5rem',
   '--compare-handle-radius': '50%',
 };
 
@@ -254,6 +254,36 @@ describe("(b) the handle's tokens (T1708)", () => {
       'var(--compare-handle)',
       'var(--compare-handle-radius)',
     ]);
+  });
+
+  it('the handle is a flat disc on the divider with an accent hairline, an "=" of two accent bars inside (T1709i)', () => {
+    expect(ruleAt(rulesIn(css), '.compare[data-js] .compare-handle')).toEqual({
+      position: 'absolute',
+      top: '50%',
+      left: 'var(--split-pct)',
+      'z-index': '3',
+      'box-sizing': 'border-box',
+      width: 'var(--compare-handle)',
+      height: 'var(--compare-handle)',
+      border: '1px solid var(--color-accent)',
+      'border-radius': 'var(--compare-handle-radius)',
+      background: 'var(--color-bg)',
+      transform: 'translate(-50%, -50%)',
+    });
+    const bar = (top) => ({
+      content: "''",
+      position: 'absolute',
+      top,
+      left: '50%',
+      width: 'calc(var(--compare-handle) / 3)',
+      height: '1px',
+      background: 'var(--color-accent)',
+      transform: 'translateX(-50%)',
+    });
+    expect([
+      ruleAt(rulesIn(css), '.compare[data-js] .compare-handle::before'),
+      ruleAt(rulesIn(css), '.compare[data-js] .compare-handle::after'),
+    ]).toEqual([bar('calc(50% - 2px)'), bar('calc(50% + 1px)')]);
   });
 });
 
