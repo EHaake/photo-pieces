@@ -736,14 +736,21 @@ export function compareSizes(width) {
 
 /**
  * The image page's compare, as `{ src, label, note? }[]`: the camera's
- * frame first (labelled `words.camera`, no note) when there is one, the
- * declared stages in order, and the photograph last (labelled
+ * frame first (labelled `words.camera`, with `words.cameraNote` when
+ * given) when there is one, the declared stages in order, and the photograph last (labelled
  * `words.finished`) with the processing note — the one place the
  * `processing:` fallback is written.
  */
-export function compareStages({ before, stages, image, processing }, { camera, finished }) {
+export function compareStages(
+  { before, stages, image, processing },
+  { camera, cameraNote, finished },
+) {
   const list = [];
-  if (before) list.push({ src: before, label: camera });
+  if (before) {
+    const first = { src: before, label: camera };
+    if (cameraNote !== undefined) first.note = cameraNote;
+    list.push(first);
+  }
   for (const stage of stages ?? []) {
     const entry = { src: stage.src, label: stage.label };
     if (stage.note !== undefined) entry.note = stage.note;

@@ -1128,6 +1128,18 @@ describe('the private-file family (T1701, spec 019)', () => {
     ]);
   });
 
+  it("compareStages gives the camera's frame the camera note when one is given (T1709f)", () => {
+    expect(
+      compareStages(
+        { before: 'raw', stages: [], image: 'final', processing: 'Lifted the shadows.' },
+        { ...words, cameraNote: 'Straight out of camera.' },
+      ),
+    ).toEqual([
+      { src: 'raw', label: 'Camera', note: 'Straight out of camera.' },
+      { src: 'final', label: 'Finished', note: 'Lifted the shadows.' },
+    ]);
+  });
+
   it('compareStages omits the frame when there is none', () => {
     expect(
       compareStages(

@@ -328,10 +328,10 @@ describe('(d) the state (T1707)', () => {
     expect(COMPARE_WORDING).toEqual(EXPECTED.COMPARE_WORDING);
   });
 
-  it("the page's WORDING.compare is exactly its heading and two labels, by page source (T1708a)", () => {
+  it("the page's WORDING.compare is exactly its heading, two labels and the camera's note, by page source (T1708a, T1709f)", () => {
     const found = page.match(/^ {2}compare: (\{[^}\n]*\}),$/gm) ?? [];
     expect(found).toEqual([
-      "  compare: { heading: 'Raw to finished', camera: 'Camera', finished: 'Finished' },",
+      "  compare: { heading: 'Raw to finished', camera: 'Camera', cameraNote: 'The RAW file straight out of camera — no edits, no adjustments', finished: 'Finished' },",
     ]);
     expect(page).toContain('{WORDING.compare.heading}');
     expect(page).toContain('WORDING.compare,');
