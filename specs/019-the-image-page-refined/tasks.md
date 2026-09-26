@@ -466,7 +466,7 @@ headers to confirm nothing was duplicated or dropped. -->
       compare box 666 in slider and switch, 1160 in side, 666 again
       after leaving side; mutation `sideWidth` → `EXPECTED` fails._
 
-- [ ] **T1709d** — Round: the pair picked in order, left then right,
+- [x] **T1709d** — Round: the pair picked in order, left then right,
       with the picked stages marked ("it's not clear which I'm
       selecting for which side … bold or darken the text for a selected
       one and some additional indicator that a second click selects the
@@ -852,6 +852,7 @@ tier if it is ever on (it is off). -->
 | T1709a two-way slider round | implementation (`opus`, high) | ~82k + ~40k (two rounds) | done; 523 tests; the orchestratorx27s first pairing rule (nearest member) could never reach Tones | Finished — the implementer caught it; corrected to "replace the older pick"; orchestrator miss again: 4ffc0e8 (`commit -a`) swept the first-rule draft — explicit paths from now on; dead `.compare-legend [aria-current]` selector left in the legend rule (pinned by (c)) — sweep note |
 | T1709b wide round | implementation (`opus`, high) | ~36k | done; 523 tests; compare 1160px (176px margins) on both pages at 1512×982, text column 666px; the enhanced compare is 833px tall against a 982px viewport — watch at the pause |
 | T1709c side-only wide | implementation (`opus`, high) | ~45k | done; 523 tests; 666 / 1160 / 666 / 666 on both pages; the swap keys on the view shown, so a narrow side that yielded to switch would keep the column — moot with stack; the swap has only the EXPECTED pin and the browser read |
+| T1709d ordered picking | implementation (`opus`, high) | ~93k | done; 525 tests; the hint sits after the control (the root is a 1fr auto grid, so anything among legend and control needs grid-column 1/-1); bold follows aria-pressed in the switch too; the live note follows the right slot; ordered pairs are not all reachable in two clicks (unordered are) |
 
 _(Session-tier allowance draw noted at each pause.)_
 
