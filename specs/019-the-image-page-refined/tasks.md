@@ -689,7 +689,7 @@ images.
       names the keeps they are recorded here and Phase 3 is dispatched.
       _Verify: as T1709's, for the loupe's values._
 
-- [ ] **T1712a** — Phase 2 review fixes. (1) `LOUPE.opensOn`
+- [x] **T1712a** — Phase 2 review fixes. (1) `LOUPE.opensOn`
       semantics: `'gesture'` means a click on the photograph leaves
       and the wheel, a pinch or + opens (the reducer's fit click →
       `leave-quiet`), with a case; `'dblclick'` withdrawn from the
@@ -946,6 +946,7 @@ tier if it is ever on (it is off). -->
 | T1711 loupe state | implementation (`opus`, high) | ~58k | done; 563 tests (+28); every fit→zoomed step (wheel, pinch, key) returns open; click decided after press/move/release by dragSlop; arrows move the view the way they point; in dblclick mode a double click while zoomed would close then reopen — T1712 or a round if the pause picks dblclick |
 | T1712 loupe wired | implementation (`opus`, high) | ~127k + ~60k (two rounds) | done; 573 tests (+10); stopped once on matte (b)'s quiet-list count vs the plan's cursor rule — resolved as a deliberate fourth by name (plan noted); the loupe section sits before the compare section (compare.test slices compare → Motion); wheel deltaMode converted; a dblclick listener so opensOn can be retuned; no real 2560px export exists — the Phase 2 report quotes 2000px numbers |
 | Phase 2 review | implementation (`opus`, high) | ~133k | signed off, nothing blocking; fix-now as T1712a: opensOn's 'gesture' didn't leave on click as the plan claimed and 'dblclick' cannot coexist with "a click leaves"; Safari's trackpad pinch arrives as gesture events, untaken; loupe.ts's shared-file comment stale; docs: two "matte unedited" lines corrected; pause: own-file loupes at 2000px exports (portrait 1.13 on the laptop only), minGain and withoutDetail together; sweep: motion (d)'s fifth/sixth labels, the data-glide gate test's shape, no automated pin on the page wiring, pinch false leaves touch-action none, snap's inline round untested, the :root "fingertip" comment stale; the browser records were not in the bundle (check 6 unreviewed — the sweep bundle carries them) |
+| T1712a review fixes | implementation (`opus`, high) | ~60k | done; 572 tests; dblclick action removed outright; the zoom-in cursor does not depend on opensOn (moot at click) — note; a real Safari trackpad pinch needs the walkthrough |
 
 _(Session-tier allowance draw noted at each pause.)_
 
