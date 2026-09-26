@@ -592,3 +592,4 @@ re-implementation. The plan says where each lives.
 - **Round T1713c (2026-09-26)** — while zoomed, the loupe is the full
   area the mat and photograph had; nothing of the unzoomed photograph
   shows around it.
+- **Phase 2 closed (2026-09-26)** — "Looks good, continue."

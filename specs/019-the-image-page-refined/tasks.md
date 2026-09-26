@@ -670,7 +670,7 @@ images.
       What headless cannot drive (a real trackpad pinch) is said line
       by line for the pause._
 
-- [ ] **T1713** — The second look, and the rounds. Not an
+- [x] **T1713** — The second look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 2
       pause, as T1709's. The spec's questions here: the click at the
       fit — the photograph zooms, the mat and the ground leave (plan.md,
@@ -758,7 +758,7 @@ Rounds: T1713a, T1713b. **Second look:** the mouse tracking "works";
 removing the mat "introduced a different issue where there is still a
 matte sized frame around the zoomed in image that shows the unzoomed
 image … We need the zoomed in loupe view to be the full area." Round:
-T1713c.
+T1713c. **Third look:** "Looks good, continue." Phase 2 closed.
 
 ## Phase 3 — Obsidian and the documents (reviewer after the phase; walkthrough: in Obsidian, with the rebuilt plugin installed as its README says — the fog piece's closing `:::compare` shows its three stages as images with their labels beneath in Live Preview, and turns back into its text when the cursor enters it; a leaf block like `::fullbleed` renders as before; `AUTHORING.md`'s new parts — the block, the stages, the larger export, the gear table — read as the rest of that document does and tell him what he needs to finish his piece)
 
