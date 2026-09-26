@@ -1,13 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { BLOCKS } from './remark-pieces-blocks.mjs';
 import {
+  attachPrivates,
   BLOCK_BODIES,
   classifyContentImage,
+  COMPARE_WIDTH,
+  COMPARE_WIDTHS,
+  compareSizes,
+  compareStages,
   crossReferences,
   findIdCollisions,
   firstAltFor,
   formatCollision,
   groupByPlace,
+  hasBlock,
   humanizeBasename,
   imageIdFor,
   imageUrlFor,
@@ -22,10 +28,13 @@ import {
   placeOf,
   placeProblems,
   placeSummary,
+  privateRole,
   privateTargetOf,
   referenceProblems,
   referencesImage,
+  resolveStages,
   sectionsFor,
+  validateGalleries,
 } from './src/lib/image-meta.mjs';
 
 // Spec 004's pure core. The registry (`src/lib/images.ts`) and the
@@ -211,6 +220,20 @@ describe('first alt in a piece body (T302)', () => {
     expect(firstAltFor('Nothing here.', 'land-a')).toBeUndefined();
     expect(firstAltFor('![Similar](./land-ab.jpg)', 'land-a')).toBeUndefined();
   });
+
+  it("a compare's stage label is not the title: the held block's alt wins over a compare written first (T1701, spec 019)", () => {
+    const body = [
+      ':::compare\n![Camera](./_land-b.jpg)\nStraight from the card.\n![Finished](./land-b.jpg)\nThe print.\n:::',
+      ':::held{src="./land-b.jpg" alt="The ridgeline at dawn"}\nWords beside it.\n:::',
+    ].join('\n\n');
+    expect(firstAltFor(body, 'land-b')).toBe('The ridgeline at dawn');
+  });
+
+  it('a compare as the only reference gives no title (T1701, spec 019)', () => {
+    const body =
+      ':::compare\n![Camera](./_land-b.jpg)\nStraight from the card.\n![Finished](./land-b.jpg)\nThe print.\n:::';
+    expect(firstAltFor(body, 'land-b')).toBeUndefined();
+  });
 });
 
 describe('humanized filename (T302)', () => {
@@ -294,7 +317,7 @@ describe('private rasters (T401)', () => {
 
   it('parseImagePath refuses to mint an id for a private raster (the transform checks earlier, with the same sentence)', () => {
     expect(() => imageIdFor('/src/content/pieces/a-piece/_land-b.jpg')).toThrow(
-      /"_land-b\.jpg" is private — the camera's frame of "land-b", not an image of the site/,
+      `"_land-b.jpg" is private — a file of "land-b" (its camera's frame, a stage, or the loupe's export), not an image of the site: it has no page and can't be placed in a piece or a gallery`,
     );
     expect(() => parseImagePath('/src/content/gallery-images/_dock-b.png')).toThrow(/is private/);
   });
@@ -421,11 +444,13 @@ describe('the passage by body kind (T502, spec 007)', () => {
     );
     expect(BLOCK_BODIES).toEqual(fromTransform);
     expect(Object.keys(BLOCK_BODIES).sort()).toEqual(Object.keys(BLOCKS).sort());
-    // And the kinds stay within the four the descriptor model documents:
-    // a fifth kind added in step on both sides would otherwise fall
-    // silently into passageFor's "no caption" default.
+    // And the kinds stay within the ones the descriptor model documents:
+    // a new kind added in step on both sides would otherwise fall
+    // silently into passageFor's "no caption" default. `stages` (spec
+    // 019, the compare) is added deliberately — it contributes no
+    // caption, pinned below.
     for (const kind of Object.values(BLOCK_BODIES)) {
-      expect(['caption', 'prose', 'images+caption', 'none']).toContain(kind);
+      expect(['caption', 'prose', 'images+caption', 'stages', 'none']).toContain(kind);
     }
   });
 
@@ -459,6 +484,26 @@ describe('the passage by body kind (T502, spec 007)', () => {
     // prose — the whole point of the body-kind rule.
     const body = ':::held{src="./h.jpg" alt="h"}\nOnly the body.\n:::';
     expect(passageFor(body, 'h')).toBeNull();
+  });
+
+  it("a compare's stage notes are not the photograph's caption (T1701, spec 019)", () => {
+    const body = [
+      'Before the compare.',
+      ':::compare\n![Camera](./_land-b.jpg)\nStraight from the card.\n![Finished](./land-b.jpg)\nThe print.\n:::',
+    ].join('\n\n');
+    expect(passageFor(body, 'land-b')).toEqual({ prose: 'Before the compare.' });
+  });
+
+  it('a stages body (the compare, T1705) contributes no caption', () => {
+    // The notes sit on their own lines, so a caption-bodied reading would
+    // quote them: only the body kind keeps them out.
+    expect(BLOCK_BODIES.compare).toBe('stages');
+    const body = [
+      'Before the compare.',
+      ':::compare{mode="side"}\n![Camera](./_land-b.jpg)\nStraight from the card.\n\n![Finished](./land-b.jpg)\nThe print.\n:::',
+    ].join('\n\n');
+    expect(passageFor(body, 'land-b')).toEqual({ prose: 'Before the compare.' });
+    expect(passageFor(body, '_land-b')).toEqual({ prose: 'Before the compare.' });
   });
 });
 
@@ -505,6 +550,27 @@ describe('the sections a page renders (T402)', () => {
     const note = { ...empty, record: { processing: 'Lifted the shadows.' } };
     expect(sectionsFor(note)).toEqual(['label', 'record']);
     expect(sectionsFor({ ...note, before: { src: 'x' } })).toEqual(['label', 'compare']);
+  });
+
+  it('declared stages alone show the compare, and it takes the processing note (T1701, spec 019)', () => {
+    const staged = {
+      ...empty,
+      record: { processing: 'Lifted the shadows.' },
+      stages: [{ key: 'k', label: 'Tones' }],
+    };
+    expect(sectionsFor(staged)).toEqual(['label', 'compare']);
+  });
+
+  it("a story that writes its own compare suppresses the page's and hands the note to the record (T1701, spec 019)", () => {
+    const own = {
+      ...empty,
+      hasStory: true,
+      storyHasCompare: true,
+      record: { processing: 'Lifted the shadows.' },
+      before: { src: 'x' },
+      stages: [{ key: 'k', label: 'Tones' }],
+    };
+    expect(sectionsFor(own)).toEqual(['story', 'label', 'record']);
   });
 });
 
@@ -885,5 +951,222 @@ describe('places (T701, spec 009)', () => {
         dates,
       ),
     ).toBe('2 outings · 7 frames · 2019–2026');
+  });
+});
+
+describe('the private-file family (T1701, spec 019)', () => {
+  const folder = ['land-b', 'land.b', 'land'];
+
+  it("_X beside X is the camera's frame", () => {
+    expect(privateRole('_land-b', folder)).toEqual({ role: 'frame', target: 'land-b' });
+  });
+
+  it('_X.word beside X is a stage of X', () => {
+    expect(privateRole('_land-b.tones', folder)).toEqual({
+      role: 'stage',
+      target: 'land-b',
+      word: 'tones',
+    });
+  });
+
+  it("_X.detail beside X is the loupe's detail export", () => {
+    expect(privateRole('_land-b.detail', new Set(folder))).toEqual({
+      role: 'detail',
+      target: 'land-b',
+      word: 'detail',
+    });
+  });
+
+  it('_land.b beside land.b is its frame, not stage b of land (frame first)', () => {
+    expect(privateRole('_land.b', folder)).toEqual({ role: 'frame', target: 'land.b' });
+  });
+
+  it('a _ file whose photograph is not beside it is an orphan', () => {
+    expect(privateRole('_land-b.tones', ['land-c'])).toEqual({ role: 'orphan', target: 'land-b' });
+    expect(privateRole('_land-b.tones', undefined)).toEqual({ role: 'orphan', target: 'land-b' });
+  });
+
+  it('privateTargetOf strips the _ and a trailing .word (messages only)', () => {
+    expect(privateTargetOf('_land-b.tones')).toBe('land-b');
+    expect(privateTargetOf('_land-b.detail')).toBe('land-b');
+    expect(privateTargetOf('_land-b')).toBe('land-b');
+  });
+
+  const priv = (folderName, file) => ({
+    key: `/src/content/pieces/${folderName}/${file}`,
+    folder: folderName,
+    basename: file.slice(0, file.lastIndexOf('.')),
+    file,
+  });
+
+  it('attachPrivates gives the frame, the detail and the stages in file-name order', () => {
+    const out = attachPrivates(
+      [
+        priv('x', '_land-b.tones.jpg'),
+        priv('x', '_land-b.jpg'),
+        priv('x', '_land-b.detail.png'),
+        priv('x', '_land-b.dodge.jpg'),
+      ],
+      new Map([['x', new Set(['land-b'])]]),
+    );
+    expect(out.problems).toEqual([]);
+    expect(out.frame).toEqual(new Map([['x/land-b', '/src/content/pieces/x/_land-b.jpg']]));
+    expect(out.detail).toEqual(new Map([['x/land-b', '/src/content/pieces/x/_land-b.detail.png']]));
+    expect(out.stages).toEqual(
+      new Map([
+        [
+          'x/land-b',
+          [
+            { file: '_land-b.dodge.jpg', key: '/src/content/pieces/x/_land-b.dodge.jpg' },
+            { file: '_land-b.tones.jpg', key: '/src/content/pieces/x/_land-b.tones.jpg' },
+          ],
+        ],
+      ]),
+    );
+  });
+
+  it('attachPrivates reports an orphan, a second frame and a second detail, one line each', () => {
+    const out = attachPrivates(
+      [
+        priv('x', '_land-b.jpg'),
+        priv('x', '_land-b.png'),
+        priv('x', '_land-b.detail.jpg'),
+        priv('x', '_land-b.detail.png'),
+        priv('x', '_land-c.tones.jpg'),
+      ],
+      new Map([['x', new Set(['land-b'])]]),
+    );
+    expect(out.problems).toEqual([
+      'src/content/pieces/x/_land-b.png is a second camera\'s frame for "x/land-b" — keep one (any accepted extension)',
+      'src/content/pieces/x/_land-b.detail.png is a second detail export for "x/land-b" — keep one',
+      'src/content/pieces/x/_land-c.tones.jpg has no photograph: a "_" file belongs to the photograph it names, so "land-c.<ext>" should sit beside it (its camera\'s frame is _land-c.<ext>, a stage _land-c.<word>.<ext>, the loupe\'s export _land-c.detail.<ext>)',
+    ]);
+    expect(out.frame.get('x/land-b')).toBe('/src/content/pieces/x/_land-b.jpg');
+    expect(out.detail.get('x/land-b')).toBe('/src/content/pieces/x/_land-b.detail.jpg');
+  });
+
+  const where = 'src/content/pieces/x/_land-b.md';
+  const own = [
+    { file: '_land-b.dodge.jpg', key: 'k-dodge' },
+    { file: '_land-b.tones.jpg', key: 'k-tones' },
+  ];
+
+  it("resolveStages keeps the sidecar's order, not the file order", () => {
+    expect(
+      resolveStages(
+        [
+          { file: '_land-b.tones.jpg', label: 'Tones', note: 'The curve.' },
+          { file: '_land-b.dodge.jpg', label: 'Dodge' },
+        ],
+        own,
+        where,
+      ),
+    ).toEqual({
+      stages: [
+        { key: 'k-tones', label: 'Tones', note: 'The curve.' },
+        { key: 'k-dodge', label: 'Dodge' },
+      ],
+      problems: [],
+    });
+  });
+
+  it('resolveStages fails a non-stage, the frame, the detail export and a name listed twice, each with its line', () => {
+    const out = resolveStages(
+      [
+        { file: '_land-b.tone.jpg', label: 'Typo' },
+        { file: '_land-b.jpg', label: 'Camera' },
+        { file: '_land-b.detail.jpg', label: 'Detail' },
+        { file: '_land-b.tones.jpg', label: 'Tones' },
+        { file: '_land-b.tones.jpg', label: 'Tones again' },
+      ],
+      own,
+      where,
+    );
+    expect(out.problems).toEqual([
+      'src/content/pieces/x/_land-b.md: stages lists "_land-b.tone.jpg", which is not a stage of "land-b" — a stage is _land-b.<word>.<ext> beside the photograph',
+      'src/content/pieces/x/_land-b.md: stages lists "_land-b.jpg", the camera\'s frame — it is always the first stage; leave it out',
+      'src/content/pieces/x/_land-b.md: stages lists "_land-b.detail.jpg", the loupe\'s export — not a stage',
+      'src/content/pieces/x/_land-b.md: stages lists "_land-b.tones.jpg" twice',
+    ]);
+    expect(out.stages).toEqual([{ key: 'k-tones', label: 'Tones' }]);
+  });
+
+  it('a gallery listing a detail export is refused, naming its photograph', () => {
+    const problems = validateGalleries(
+      [
+        {
+          id: 'g',
+          filePath: 'g.md',
+          source: 'images:\n  - x/_land-b.detail\n',
+          images: ['x/_land-b.detail'],
+        },
+      ],
+      new Map([['x/land-b', 'published']]),
+    );
+    expect(problems.map((p) => p.reason)).toEqual([
+      '"x/_land-b.detail" is private — a file of "land-b" (its camera\'s frame, a stage, or the loupe\'s export), not an image of the site: list "x/land-b" instead',
+    ]);
+  });
+
+  const words = { camera: 'Camera', finished: 'Finished' };
+
+  it("compareStages puts the camera's frame first and the photograph last with the processing note", () => {
+    expect(
+      compareStages(
+        {
+          before: 'raw',
+          stages: [{ src: 'tones', label: 'Tones', note: 'The curve.' }],
+          image: 'final',
+          processing: 'Lifted the shadows.',
+        },
+        words,
+      ),
+    ).toEqual([
+      { src: 'raw', label: 'Camera' },
+      { src: 'tones', label: 'Tones', note: 'The curve.' },
+      { src: 'final', label: 'Finished', note: 'Lifted the shadows.' },
+    ]);
+  });
+
+  it("compareStages gives the camera's frame the camera note when one is given (T1709f)", () => {
+    expect(
+      compareStages(
+        { before: 'raw', stages: [], image: 'final', processing: 'Lifted the shadows.' },
+        { ...words, cameraNote: 'Straight out of camera.' },
+      ),
+    ).toEqual([
+      { src: 'raw', label: 'Camera', note: 'Straight out of camera.' },
+      { src: 'final', label: 'Finished', note: 'Lifted the shadows.' },
+    ]);
+  });
+
+  it('compareStages omits the frame when there is none', () => {
+    expect(
+      compareStages(
+        { before: null, stages: [{ src: 'tones', label: 'Tones' }], image: 'final' },
+        words,
+      ),
+    ).toEqual([
+      { src: 'tones', label: 'Tones' },
+      { src: 'final', label: 'Finished' },
+    ]);
+  });
+
+  it('hasBlock finds a :::compare container, not a ::compare leaf or the word in prose', () => {
+    expect(hasBlock('Words.\n\n:::compare\n![A](./_a.jpg)\n![B](./a.jpg)\n:::', 'compare')).toBe(
+      true,
+    );
+    expect(hasBlock('::compare{src="./a.jpg"}', 'compare')).toBe(false);
+    expect(hasBlock('I would compare the two.\n\ncompare', 'compare')).toBe(false);
+    expect(hasBlock(':::held{src="./a.jpg"}\nWords.\n:::', 'compare')).toBe(false);
+  });
+
+  it("the compare's widths: every surface's width is an allowed one, and each has its sizes hint", () => {
+    for (const width of Object.values(COMPARE_WIDTH)) {
+      expect(COMPARE_WIDTHS).toContain(width);
+    }
+    expect(compareSizes('column')).toBe('(min-width: 720px) 680px, 94vw');
+    expect(compareSizes('wide')).toBe('(min-width: 1240px) 1160px, 96vw');
+    expect(compareSizes('stage')).toBe('100vw');
   });
 });

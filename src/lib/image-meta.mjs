@@ -13,6 +13,8 @@
 // already be slugs so ids match Astro's piece ids without re-running
 // its slugger; that is validated here, loudly, with a rename hint.
 
+import { EMPTY_GEAR } from './gear.mjs';
+
 export const IMAGE_EXTENSIONS = Object.freeze(['jpg', 'jpeg', 'png', 'webp', 'avif', 'tiff']);
 
 /** The flat root for images that belong to no piece, and the folder
@@ -27,22 +29,59 @@ const SLUG = /^[a-z0-9-]+$/;
 const BASENAME = /^[A-Za-z0-9._-]+$/;
 
 /**
- * Private rasters (spec 006): a raster whose basename starts with `_`
- * is not an image of the site — it is the camera's frame of the image
- * with the same basename (`_land-b.jpg` beside `land-b.jpg`), the
- * underscore rule the sidecar (`_land-b.md`) already uses. No id, no
- * page, never in a gallery, never referenced from a piece; the
- * registry attaches it to its target for the raw-to-finished compare.
+ * Private rasters (spec 006, widened at spec 019): a raster whose
+ * basename starts with `_` is not an image of the site — it is a file of
+ * the photograph it names, the underscore rule the sidecar
+ * (`_land-b.md`) already uses. The family: the camera's frame
+ * (`_land-b.jpg`), a stage (`_land-b.tones.jpg`) and the loupe's detail
+ * export (`_land-b.detail.jpg`). No id, no page, never in a gallery;
+ * the registry attaches each to its photograph (`attachPrivates`).
  */
 const PRIVATE = /^_/;
+
+/** The stage word that names the loupe's detail export, not a stage. */
+export const DETAIL_WORD = 'detail';
 
 export function isPrivateRaster(basename) {
   return PRIVATE.test(String(basename));
 }
 
-/** `_land-b` → `land-b`: the basename of the image a private raster belongs to. */
+/**
+ * `_land-b` → `land-b`, `_land-b.tones` → `land-b`: the basename of the
+ * photograph a private raster names, read from the name alone — strip
+ * the `_`, then a trailing `.<word>`. Messages only: without the folder
+ * it can't tell `_land.b` (the frame of `land.b`) from stage `b` of
+ * `land`, so anything that attaches a file uses `privateRole`.
+ */
 export function privateTargetOf(basename) {
-  return String(basename).replace(PRIVATE, '');
+  return String(basename)
+    .replace(PRIVATE, '')
+    .replace(/\.[^.]*$/, '');
+}
+
+/**
+ * What a private raster is, given the public basenames of its folder:
+ * `{ role, target, word? }`. `_X` with `X` public is the camera's frame
+ * of `X`; otherwise `X` split at its last dot, `T.W` with `T` public,
+ * is stage `W` of `T` — or its detail export when `W` is `detail`;
+ * anything else is an orphan, whose `target` is the name's best guess
+ * for the message. Frame first, because a basename may hold dots:
+ * `_land.b` beside `land.b` is that photograph's frame, not stage `b`
+ * of `land`.
+ */
+export function privateRole(basename, publicBasenames) {
+  const own = publicBasenames instanceof Set ? publicBasenames : new Set(publicBasenames ?? []);
+  const name = String(basename).replace(PRIVATE, '');
+  if (own.has(name)) return { role: 'frame', target: name };
+  const dot = name.lastIndexOf('.');
+  if (dot > 0) {
+    const target = name.slice(0, dot);
+    const word = name.slice(dot + 1);
+    if (word && own.has(target)) {
+      return { role: word === DETAIL_WORD ? 'detail' : 'stage', target, word };
+    }
+  }
+  return { role: 'orphan', target: privateTargetOf(basename) };
 }
 
 /**
@@ -53,7 +92,99 @@ export function privateTargetOf(basename) {
 export function privateMessage(file, basename, hint) {
   const target = privateTargetOf(basename);
   const advice = hint ?? "it has no page and can't be placed in a piece or a gallery";
-  return `"${file}" is private — the camera's frame of "${target}", not an image of the site: ${advice}`;
+  return `"${file}" is private — a file of "${target}" (its camera's frame, a stage, or the loupe's export), not an image of the site: ${advice}`;
+}
+
+/**
+ * Attaches a folder's private rasters to their photographs (spec 019).
+ * `privates` is `{ key, folder, basename, file }[]`, `basenamesByFolder`
+ * maps a folder segment to its public basenames. Returns three maps
+ * keyed by the photograph's id — `frame` and `detail` to one file's
+ * key, `stages` to `{ file, key }[]` in file-name order — and the
+ * `problems`: an orphan, a second frame, a second detail export, one
+ * line each, in the order the files came, so the caller fails the build
+ * with all of them at once.
+ */
+export function attachPrivates(privates, basenamesByFolder) {
+  const frame = new Map();
+  const detail = new Map();
+  const stages = new Map();
+  const problems = [];
+  for (const { key, folder, basename, file } of privates) {
+    const where = String(key).replace(/^\//, '');
+    const { role, target } = privateRole(basename, basenamesByFolder.get(folder));
+    const id = `${folder}/${target}`;
+    if (role === 'orphan') {
+      problems.push(
+        `${where} has no photograph: a "_" file belongs to the photograph it names, so "${target}.<ext>" should sit beside it (its camera's frame is _${target}.<ext>, a stage _${target}.<word>.<ext>, the loupe's export _${target}.${DETAIL_WORD}.<ext>)`,
+      );
+    } else if (role === 'frame') {
+      if (frame.has(id)) {
+        problems.push(
+          `${where} is a second camera's frame for "${id}" — keep one (any accepted extension)`,
+        );
+      } else frame.set(id, key);
+    } else if (role === 'detail') {
+      if (detail.has(id)) {
+        problems.push(`${where} is a second detail export for "${id}" — keep one`);
+      } else detail.set(id, key);
+    } else {
+      const list = stages.get(id) ?? [];
+      list.push({ file, key });
+      stages.set(id, list);
+    }
+  }
+  for (const list of stages.values()) {
+    list.sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0));
+  }
+  return { frame, detail, stages, problems };
+}
+
+/**
+ * Checks a sidecar's `stages:` against the photograph's own stage
+ * files and returns them in the sidecar's order. `listed` is the
+ * sidecar's `{ file, label, note? }[]`, `own` the photograph's stage
+ * files as `attachPrivates` gives them (`{ file, key }[]`), `where` the
+ * sidecar's path — whose name, by the underscore rule, is the
+ * photograph's. A listed `file` must be one of `own` by exact name; the
+ * camera's frame and the detail export fail with their own line, a
+ * name listed twice fails once, anything else is "not a stage of".
+ */
+export function resolveStages(listed, own, where) {
+  const target = String(where).split('/').at(-1).replace(/\.md$/, '').replace(PRIVATE, '');
+  const byFile = new Map((own ?? []).map((stage) => [stage.file, stage.key]));
+  const stages = [];
+  const problems = [];
+  const seen = new Map();
+  for (const entry of listed ?? []) {
+    const file = String(entry.file);
+    const count = seen.get(file) ?? 0;
+    seen.set(file, count + 1);
+    if (count > 0) {
+      if (count === 1) problems.push(`${where}: stages lists "${file}" twice`);
+      continue;
+    }
+    const dot = file.lastIndexOf('.');
+    const base = dot > 0 ? file.slice(0, dot) : file;
+    const ext = dot > 0 ? file.slice(dot + 1).toLowerCase() : '';
+    const raster = IMAGE_EXTENSIONS.includes(ext);
+    if (raster && base === `_${target}`) {
+      problems.push(
+        `${where}: stages lists "${file}", the camera's frame — it is always the first stage; leave it out`,
+      );
+    } else if (raster && base === `_${target}.${DETAIL_WORD}`) {
+      problems.push(`${where}: stages lists "${file}", the loupe's export — not a stage`);
+    } else if (byFile.has(file)) {
+      const stage = { key: byFile.get(file), label: entry.label };
+      if (entry.note !== undefined) stage.note = entry.note;
+      stages.push(stage);
+    } else {
+      problems.push(
+        `${where}: stages lists "${file}", which is not a stage of "${target}" — a stage is _${target}.<word>.<ext> beside the photograph`,
+      );
+    }
+  }
+  return { stages, problems };
 }
 
 export class ImageIdError extends Error {
@@ -268,11 +399,17 @@ export function formatCollision({ id, files }) {
  * `leftAlt|centerAlt|rightAlt`. References to other folders (any `/`
  * beyond a leading `./`) never match. Undefined when the body never
  * names the image with a non-empty alt — the image page then falls
- * back to the humanized filename.
+ * back to the humanized filename. References inside a `:::compare`
+ * container don't count (spec 019).
  */
 export function firstAltFor(body, basename) {
-  for (const ref of imageReferences(body)) {
-    if (refersTo(ref.src, basename) && ref.alt) return ref.alt;
+  for (const block of splitBlocks(body)) {
+    // A compare's image text is a stage's label ("Finished"), not the
+    // photograph's title (spec 019), so its references are skipped.
+    if (block.kind === 'container' && blockName(block.text) === 'compare') continue;
+    for (const ref of imageReferences(block.text)) {
+      if (refersTo(ref.src, basename) && ref.alt) return ref.alt;
+    }
   }
   return undefined;
 }
@@ -405,7 +542,8 @@ export function nearest(list, id, limit) {
 
 /**
  * What each block's container body is (spec 007): a caption, the
- * piece's own prose, or images then a caption. The transform's
+ * piece's own prose, images then a caption, or a compare's stages
+ * (spec 019 — their notes are not the photograph's caption). The transform's
  * descriptor table is the vocabulary's source of truth; this map
  * mirrors it here because this module must stay Astro-free, and a
  * test asserts the two agree — names and kinds.
@@ -423,6 +561,7 @@ export const BLOCK_BODIES = Object.freeze({
   aside: 'prose',
   row: 'prose',
   held: 'prose',
+  compare: 'stages',
 });
 
 // The body kinds whose non-image lines are a caption. A prose body is
@@ -512,6 +651,17 @@ function blockName(text) {
   return /^:::([A-Za-z][\w-]*)/.exec(text)?.[1] ?? '';
 }
 
+/**
+ * Whether this markdown writes a `:::name` container (spec 019) — read
+ * through the same block split the passage uses, so a leaf `::name` or
+ * the word in prose doesn't count.
+ */
+export function hasBlock(text, name) {
+  return splitBlocks(text).some(
+    (block) => block.kind === 'container' && blockName(block.text) === name,
+  );
+}
+
 function kindOf(text) {
   if (text.startsWith(':::')) return 'container';
   if (text.startsWith('::')) return 'leaf';
@@ -523,27 +673,93 @@ function kindOf(text) {
 /**
  * The image page's sections, in the spec's reading order, for one
  * image — the single statement of "renders when, and only when". The
- * label is always present. The processing note has one home: it
- * belongs to the compare when the camera's frame exists, and to the
- * record otherwise, so a record of processing alone doesn't render a
- * section beside the compare that already carries it.
+ * label is always present. The compare shows when the camera's frame
+ * or a declared stage exists and the story doesn't write its own
+ * `:::compare` (spec 019). The processing note has one home: it belongs
+ * to the compare when the compare shows, and to the record otherwise,
+ * so a record of processing alone doesn't render a section beside the
+ * compare that already carries it.
  */
 export function sectionsFor(image) {
   const has = (value) => typeof value === 'string' && value.trim() !== '';
   const record = image.record ?? {};
   const print = image.print ?? {};
+  const compareShown =
+    (Boolean(image.before) || (image.stages?.length ?? 0) > 0) && !image.storyHasCompare;
   const recordShown =
     [record.format, record.filters, record.support].some(has) ||
-    (!image.before && has(record.processing));
+    (!compareShown && has(record.processing));
   const sections = [];
   if (image.hasStory) sections.push('story');
   sections.push('label');
   if (recordShown) sections.push('record');
-  if (image.before) sections.push('compare');
+  if (compareShown) sections.push('compare');
   if (image.passage) sections.push('passage');
   if (image.related?.length) sections.push('related');
   if ([print.edition, print.sizes, print.paper].some(has)) sections.push('print');
   return sections;
+}
+
+/**
+ * The compare's shared shape (spec 019), one spelling each, imported by
+ * the transform, the image page and the compare script: its methods,
+ * the class names its markup carries, and the widths it may take.
+ */
+export const COMPARE_MODES = Object.freeze(['slider', 'side', 'switch']);
+export const COMPARE_CLASSES = Object.freeze({
+  root: 'compare',
+  frames: 'compare-frames',
+  stage: 'compare-stage',
+  pane: 'compare-pane',
+  caption: 'compare-caption',
+  label: 'compare-label',
+  note: 'compare-note',
+});
+export const COMPARE_WIDTHS = Object.freeze(['column', 'wide', 'stage']);
+/** Tunable: the compare's width per surface. */
+export const COMPARE_WIDTH = Object.freeze({ piece: 'column', page: 'column' });
+
+const COMPARE_SIZES = Object.freeze({
+  column: '(min-width: 720px) 680px, 94vw',
+  wide: '(min-width: 1240px) 1160px, 96vw',
+  stage: '100vw',
+});
+
+/** The `sizes` hint for a compare at one of `COMPARE_WIDTHS`. */
+export function compareSizes(width) {
+  const sizes = COMPARE_SIZES[width];
+  if (sizes === undefined) {
+    throw new Error(`unknown compare width "${width}" — allowed: ${COMPARE_WIDTHS.join(' | ')}`);
+  }
+  return sizes;
+}
+
+/**
+ * The image page's compare, as `{ src, label, note? }[]`: the camera's
+ * frame first (labelled `words.camera`, with `words.cameraNote` when
+ * given) when there is one, the declared stages in order, and the photograph last (labelled
+ * `words.finished`) with the processing note — the one place the
+ * `processing:` fallback is written.
+ */
+export function compareStages(
+  { before, stages, image, processing },
+  { camera, cameraNote, finished },
+) {
+  const list = [];
+  if (before) {
+    const first = { src: before, label: camera };
+    if (cameraNote !== undefined) first.note = cameraNote;
+    list.push(first);
+  }
+  for (const stage of stages ?? []) {
+    const entry = { src: stage.src, label: stage.label };
+    if (stage.note !== undefined) entry.note = stage.note;
+    list.push(entry);
+  }
+  const last = { src: image, label: finished };
+  if (typeof processing === 'string' && processing.trim() !== '') last.note = processing;
+  list.push(last);
+  return list;
 }
 
 // Every image reference in document order, as `{ src, alt, index, shape }`:
@@ -614,14 +830,17 @@ export const EXPOSURE_FIELDS = Object.freeze([
  * exifr's real value shapes: numbers for ExposureTime (seconds, e.g.
  * 0.004), FNumber, FocalLength, and ISO; a Date for DateTimeOriginal.
  * Fields absent from the file are absent from the result — the page
- * prints what exists and nothing else.
+ * prints what exists and nothing else. `gear` is the parsed gear table
+ * (gear.mjs): a camera's Model or a lens string it lists prints as its
+ * display name; one it lacks prints as today.
  */
-export function formatExposure(raw) {
+export function formatExposure(raw, gear = EMPTY_GEAR) {
   const tags = raw ?? {};
   const out = {};
-  const camera = formatCamera(tags.Make, tags.Model);
+  const camera = gear.cameras.get(cleanString(tags.Model)) ?? formatCamera(tags.Make, tags.Model);
   if (camera) out.camera = camera;
-  const lens = cleanString(tags.LensModel);
+  const lensModel = cleanString(tags.LensModel);
+  const lens = gear.lenses.get(lensModel) ?? lensModel;
   if (lens) out.lens = lens;
   if (isPositive(tags.FocalLength)) out.focalLength = `${trimNumber(tags.FocalLength)} mm`;
   if (isPositive(tags.FNumber)) out.aperture = `f/${trimNumber(tags.FNumber)}`;
@@ -699,7 +918,11 @@ export function validateGalleries(galleries, known) {
       let reason;
       if (occurrence > 0) reason = `"${imageId}" is listed more than once`;
       else if (isPrivateRaster(imageId.split('/').at(-1)))
-        reason = `"${imageId}" is a camera's frame, not an image of the site — list "${privateTargetImageId(imageId)}" instead`;
+        reason = privateMessage(
+          imageId,
+          imageId.split('/').at(-1),
+          `list "${privateTargetImageId(imageId)}" instead`,
+        );
       else if (status === undefined)
         reason = `"${imageId}" is not an image on the site${nearestHint(imageId, known)}`;
       else if (status === 'draft')

@@ -46,8 +46,10 @@ CMS or backend service for v1.
   in a published piece's folder and in `src/content/gallery-images/`,
   giving each image a stable id (`<folder>/<basename>`), a page at
   `/images/<id>/`, exposure metadata read from the file's EXIF, and an
-  optional frontmatter-only sidecar (`_<basename>.md`) that overrides
-  it. Galleries are the opposite kind of thing: a separate,
+  optional sidecar (`_<basename>.md`) whose frontmatter overrides it
+  and whose body is the photograph's story (spec 006), and from spec
+  019 whose `stages:` declare its processing. Galleries are the
+  opposite kind of thing: a separate,
   hand-_curated_ collection of ordered image ids — never auto-generated
   from the registry — each tagged with a category. An image belongs to
   at most one piece, by folder; galleries reference images, not pieces,
@@ -63,9 +65,11 @@ CMS or backend service for v1.
   from camera metadata, and never from the sidecar's free-text
   `place`, which stays prose for the wall label.
 - **Closed block vocabulary**: image treatments inside a piece's body are
-  limited to a defined set of directive-backed treatments — as of spec
-  017: single, fullbleed, wide, tall, inset, diptych, triptych, grid,
-  strip, aside, row, and one durational block, held, with captions via
+  limited to a defined set of directive-backed treatments — as of spec 019:
+  single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip,
+  aside, row, one durational block, held, and one interactive block,
+  compare (an ordered list of a photograph's stages — each an image, a
+  label and a note — looked at three ways), with captions via
   the container form; the site mats only the image page's quiet view
   (spec 015, narrowed at 017: the mat is worn where the ground is dark)
   — a piece's frames and the stage on paper sit unmatted on the ground.
@@ -74,18 +78,20 @@ CMS or backend service for v1.
   that still writes it fails the build as any unknown directive does,
   naming the piece. Its code is `main`'s history up to spec 017, and
   the hero stage built on it is archived unmerged on
-  `016-the-hero-stage`. A `sequence` treatment is a roadmap candidate
-  whose presentation is undecided; it is not in the vocabulary and the
-  transform reserves nothing for it — see `ROADMAP.md`. Adding a new
+  `016-the-hero-stage`. The `sequence` reservation, carried since spec
+  003, was retired at spec 019: an ordered list of image-and-label
+  pairs for a processing narrative is what `compare` with stages is.
+  Adding a new
   treatment means deliberately adding a new directive + presentation
   contract — a handler in the remark transform (the vocabulary's single
   source of truth) plus the CSS that styles its output — not writing
   one-off markup inline. There are deliberately no per-block `.astro`
   components: mapping rendered elements to components is an MDX-only
   feature, and pieces are plain `.md` by hard rule. For the same reason
-  a future _interactive_ block (`sequence`'s carousel/slider candidates)
-  must be built as page-level progressive enhancement over the
-  transform's HTML — `.md` content cannot mount islands. The Obsidian
+  an _interactive_ block — `compare`, and any after it — is built as
+  page-level progressive enhancement over the
+  transform's HTML — `.md` content cannot mount islands, and without
+  script its content stands as plain figures. The Obsidian
   plugin and the site CSS mirror the transform's vocabulary by
   convention (see `DECISIONS.md` on the accepted approximation).
 - **Theme boundary**: global chrome (nav, footer, base typography and
@@ -100,7 +106,15 @@ CMS or backend service for v1.
   (spec 004), using Astro's built-in image handling — no external store
   required to start. A piece's folder is public territory: every
   accepted image in it gets a page, referenced by the body or not, and
-  images under a `draft: true` piece are unpublished with it. Not the final
+  images under a `draft: true` piece are unpublished with it. A raster
+  whose name starts with `_` is private, never an image of the site —
+  no id, no page, never in a gallery: `_<basename>.<ext>` is that
+  photograph's camera's frame (spec 006), `_<basename>.<word>.<ext>` a
+  stage of its processing, and `_<basename>.detail.<ext>` a larger
+  export for the image page's loupe alone, fetched only when the loupe
+  opens (spec 019). A private file sits beside its photograph and may
+  be placed in a body only as a stage of a `compare` block in its own
+  folder. Not the final
   architecture: migrate to an external store once repo size or clone
   speed becomes a real, not hypothetical, problem. See `plan.md` for
   the reasoning.

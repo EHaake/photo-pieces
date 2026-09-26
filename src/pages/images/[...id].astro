@@ -14,8 +14,10 @@
 // nothing but its file renders the 004 baseline.
 //
 // Static HTML throughout; the script below is page-level enhancement:
-// the compare slider, quiet view, and set selection by route in.
+// quiet view and set selection by route in. The compare is enhanced by
+// the layout's script (src/lib/compare.ts), since pieces carry it too.
 import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { CONTACT_EMAIL, SITE } from '../../consts';
@@ -28,8 +30,15 @@ import {
   relatedFlowStyle,
 } from '../../lib/gallery-layout';
 import { setKey, type SetKind } from '../../lib/image-set';
-import { sectionsFor } from '../../lib/image-meta.mjs';
+import {
+  COMPARE_CLASSES,
+  COMPARE_WIDTH,
+  compareSizes,
+  compareStages,
+  sectionsFor,
+} from '../../lib/image-meta.mjs';
 import { getImageRegistry } from '../../lib/images';
+import { LOUPE, loupeImageOptions } from '../../lib/loupe';
 import { plainText, renderMarkdown } from '../../lib/markdown';
 import { ogImageOptions } from '../../lib/og';
 import { stageSizes } from '../../lib/stage-sizes';
@@ -65,14 +74,7 @@ const WORDING = {
     support: 'Support',
     processing: 'Processing',
   },
-  compare: {
-    heading: 'Raw to finished',
-    before: "The camera's frame",
-    after: 'The finished photograph',
-    beforeTag: 'Camera',
-    afterTag: 'Finished',
-    reveal: 'Reveal the finished photograph',
-  },
+  compare: { heading: 'Raw to finished', camera: 'Camera', cameraNote: 'The RAW file straight out of camera — no edits, no adjustments', finished: 'Finished' },
   passage: { heading: 'In the piece', readInPlace: 'Read it in place →' },
   related: { heading: 'Related frames' },
   print: {
@@ -119,6 +121,12 @@ const description =
 // ogImageOptions for the passthrough case the scan caught.
 const og = await getImage(ogImageOptions(image.image));
 
+// The loupe's file (spec 019): the detail export, else the photograph's
+// own file. Named only in the stage's data attributes, which fetch
+// nothing; the script reads them when the loupe opens.
+const loupeSource = image.detail ?? (LOUPE.withoutDetail ? image.image : null);
+const loupe = loupeSource ? await getImage(loupeImageOptions(loupeSource)) : null;
+
 // The wall label: only what exists. Order is the label's reading order;
 // place and time head it (spec 006). Exposure rows are kept out of the
 // search index — they are tokens, not text to find.
@@ -157,15 +165,46 @@ const labelRows: Row[] = placeRow.concat(
 );
 
 // "How it was made": the processing note lives with the compare when
-// the camera's frame exists (sectionsFor's rule), here otherwise.
+// the compare shows (sectionsFor's rule), here otherwise.
 const recordRows = (
   [
     ['format', image.record.format],
     ['filters', image.record.filters],
     ['support', image.record.support],
-    ['processing', image.before ? undefined : image.record.processing],
+    ['processing', shows('compare') ? undefined : image.record.processing],
   ] as const
 ).flatMap(([key, value]) => (value ? [{ term: WORDING.record[key], value }] : []));
+
+// Raw to finished (spec 019): the compare block's stages — the camera's
+// frame, the sidecar's declared stages, the photograph with its
+// processing note — built below in the block's own markup, so the
+// transform and this page are two builders of one shape (the barrier's
+// third scan). The registry's stages carry their file as `image`.
+// A note is inline Markdown, as the block's is (T1708a): rendered, its
+// one paragraph's <p> unwrapped, since it sits inside the note's span.
+type CompareStage = { src: ImageMetadata; label: string; note?: string };
+const compare: CompareStage[] = shows('compare')
+  ? await Promise.all(
+      compareStages(
+        {
+          before: image.before,
+          stages: image.stages.map(({ image: src, label, note }) => ({ src, label, note })),
+          image: image.image,
+          processing: image.record.processing,
+        },
+        WORDING.compare,
+      ).map(async (stage: CompareStage) =>
+        stage.note === undefined
+          ? stage
+          : {
+              ...stage,
+              note: (await renderMarkdown(stage.note))
+                .trim()
+                .replace(/^<p>((?:(?!<\/?p>)[\s\S])*)<\/p>$/, '$1'),
+            },
+      ),
+    )
+  : [];
 
 const printRows = (
   [
@@ -209,8 +248,9 @@ const sets = image.sets.map((set) => ({
 // The frame's ratio (width / height, raw, rounded as galleryCell's),
 // carried by the stage's figure and the compare figure: the stage's mat
 // is form V+H, which reads --ar to solve for m (spec 013), and the
-// compare box's aspect-ratio takes the same decimal (it accepts a
-// number) — the compare figure itself is unmatted since spec 015.
+// enhanced compare's one box takes the same decimal as its aspect-ratio
+// (it accepts a number) — without script the stages stack at their own
+// ratios. The compare figure itself is unmatted since spec 015.
 const ar = Math.round((image.image.width / image.image.height) * 1000) / 1000;
 
 // The search index takes pages with something to find: a story, a
@@ -221,7 +261,13 @@ const indexed =
 
 <BaseLayout title={image.title} description={description} ogType="article" image={og.src}>
   <article class="image-page" data-pagefind-body={indexed || undefined}>
-    <div class="image-stage">
+    <div
+      class="image-stage"
+      data-loupe-src={loupe?.src}
+      data-loupe-w={loupe?.attributes.width}
+      data-loupe-h={loupe?.attributes.height}
+      data-loupe-detail={Boolean(loupe && image.detail) || undefined}
+    >
       <figure class="image-frame" style={`--ar: ${ar}`}>
         {
           /* Width capped at 2× the content width: enough for a retina
@@ -372,47 +418,39 @@ const indexed =
       }
 
       {
-        shows('compare') && image.before && (
+        shows('compare') && (
           <section class="sec sec-compare" aria-labelledby="sec-compare">
             <h2 class="sec-title" id="sec-compare">
               {WORDING.compare.heading}
             </h2>
-            <figure class="compare" style={`--ar: ${ar}`}>
-              <div class="compare-frames">
-                <div class="compare-frame compare-before">
-                  <Image
-                    src={image.before}
-                    alt={WORDING.compare.before}
-                    layout="constrained"
-                    width={Math.min(image.before.width, 1400)}
-                    sizes="(min-width: 800px) 700px, 94vw"
-                  />
-                  <span class="compare-tag">{WORDING.compare.beforeTag}</span>
-                </div>
-                <div class="compare-frame compare-after">
-                  <Image
-                    src={image.image}
-                    alt={WORDING.compare.after}
-                    layout="constrained"
-                    width={Math.min(image.image.width, 1400)}
-                    sizes="(min-width: 800px) 700px, 94vw"
-                  />
-                  <span class="compare-tag">{WORDING.compare.afterTag}</span>
-                </div>
-                <span class="compare-line" aria-hidden="true" />
-                <input
-                  class="compare-range"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value="50"
-                  aria-label={WORDING.compare.reveal}
-                  hidden
-                />
+            <figure
+              class={`${COMPARE_CLASSES.root} ${COMPARE_CLASSES.root}-w-${COMPARE_WIDTH.page}`}
+              style={`--ar: ${ar}`}
+            >
+              <div class={COMPARE_CLASSES.frames}>
+                {compare.map(({ src, label, note }) => (
+                  <figure class={COMPARE_CLASSES.stage}>
+                    <span class={COMPARE_CLASSES.pane}>
+                      <Image
+                        src={src}
+                        alt={label}
+                        layout="constrained"
+                        width={Math.min(src.width, 1400)}
+                        sizes={compareSizes(COMPARE_WIDTH.page)}
+                      />
+                    </span>
+                    <figcaption class={COMPARE_CLASSES.caption}>
+                      <span class={COMPARE_CLASSES.label}>{label}</span>
+                      {note && (
+                        <>
+                          {' '}
+                          <span class={COMPARE_CLASSES.note} set:html={note} />
+                        </>
+                      )}
+                    </figcaption>
+                  </figure>
+                ))}
               </div>
-              {image.record.processing && (
-                <figcaption class="compare-note">{image.record.processing}</figcaption>
-              )}
             </figure>
           </section>
         )
@@ -670,126 +708,6 @@ const indexed =
     font-style: italic;
   }
 
-  /* Raw to finished. Without script: the two frames stacked, before
-     above after, each labelled. With script (data-js): one box at the
-     photograph's ratio, the frames overlaid, the camera's frame
-     letterboxed if its crop differs and clipped at --split (unitless
-     0–100, so calc() multiplies a length by a number), a hairline
-     divider, and an invisible full-area range input for pointer and
-     keyboard — with the focus ring drawn on the box. */
-  .compare {
-    --split: 50;
-    /* The one place --split becomes a length: the clip and the divider
-       both read it. */
-    --split-pct: calc(var(--split) * 1%);
-    margin: 0;
-  }
-  .compare-frames {
-    display: grid;
-    /* Prose spacing, and it stays prose spacing: the figure is unmatted
-       since spec 015, and even while it was matted this gap was never
-       the mat (T1104a, the decision review of 2026-09-17) — --mat
-       carries 100%, which resolves against the reader's own containing
-       block, so it would have rendered a fraction of the figure's mat
-       rather than the mat. --mat is applied as `padding` and nowhere
-       else, on the two surfaces that still wear one. */
-    gap: calc(var(--baseline) / 2);
-  }
-  .compare-frame {
-    position: relative;
-  }
-  .compare-frame :global(img) {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  .compare-tag {
-    display: block;
-    margin-top: 0.35rem;
-    color: var(--color-muted);
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .compare-line {
-    display: none;
-  }
-  .compare-note {
-    /* Prose spacing — see .compare-frames above (T1104a, spec 015). */
-    margin: calc(var(--baseline) / 2) 0 0;
-    color: var(--color-muted);
-    font-size: 0.95rem;
-    line-height: 1.6;
-  }
-
-  .compare[data-js] .compare-frames {
-    display: block;
-    position: relative;
-    aspect-ratio: var(--ar);
-    overflow: hidden;
-  }
-  .compare[data-js] .compare-frame {
-    position: absolute;
-    inset: 0;
-  }
-  /* The letterbox fill behind a camera frame whose crop differs from
-     the finished one, and the divider below: the compare's own device
-     INSIDE its box, not a mat around a photograph (spec 015's resolved
-     decision). They read --color-matte because white is the white this
-     page has. */
-  .compare[data-js] .compare-frame :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: var(--color-matte);
-  }
-  .compare[data-js] .compare-before {
-    clip-path: inset(0 calc(100% - var(--split-pct)) 0 0);
-  }
-  .compare[data-js] .compare-tag {
-    position: absolute;
-    bottom: 0.5rem;
-    margin: 0;
-    padding: 0.15rem 0.45rem;
-    background: oklch(0 0 0 / 0.45);
-    color: white;
-    pointer-events: none;
-  }
-  .compare[data-js] .compare-before .compare-tag {
-    left: 0.5rem;
-  }
-  .compare[data-js] .compare-after .compare-tag {
-    right: 0.5rem;
-  }
-  /* The divider: the compare's device, not a mat — see the letterbox
-     fill above. */
-  .compare[data-js] .compare-line {
-    display: block;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: var(--split-pct);
-    width: 1px;
-    background: var(--color-matte);
-    box-shadow: 0 0 0 1px oklch(0 0 0 / 0.25);
-    pointer-events: none;
-  }
-  .compare-range {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    opacity: 0;
-    cursor: ew-resize;
-  }
-  .compare-frames:has(.compare-range:focus-visible) {
-    outline: 1px solid var(--color-accent);
-    outline-offset: 3px;
-    box-shadow: var(--focus-ring);
-  }
-
   /* Quiet view: chrome gone, the ground dimmed to --color-quiet, the
      frame as large as the viewport allows with a small margin — the
      photograph on a dark wall (the stage's and the frame's own quiet
@@ -835,9 +753,16 @@ const indexed =
   // per module; `astro:page-load` fires on the first load and after
   // every ClientRouter swap, so per-page setup lives in init().
   import { IMAGE_QUIET_KEY as QUIET_KEY, IMAGE_SET_KEY as SET_KEY } from '../../lib/image-set';
+  import { COMPARE_CLASSES } from '../../lib/image-meta.mjs';
+  import { createLoupe, type Loupe } from '../../lib/loupe';
   import { flag, reducedMotion, withTransition } from '../../lib/motion';
 
   const root = document.documentElement;
+
+  // The loupe (spec 019): this page's controller, made in init() when the
+  // stage names a loupe file; the stage's clicks and the keys ask it
+  // first in the quiet view.
+  let loupe: Loupe | null = null;
 
   const store = {
     get: (key: string) => {
@@ -868,6 +793,7 @@ const indexed =
       img.dataset.pageSizes ??= img.sizes;
       img.sizes = quiet ? '100vw' : img.dataset.pageSizes;
     }
+    if (quiet) loupe?.refresh();
   };
   // Entering and leaving are one movement (spec 018): the three writes
   // run inside one view change, the stage frame named for its duration
@@ -875,6 +801,7 @@ const indexed =
   // the frame is never named, and the change runs at all only when
   // --rm-quiet is on (the ground fades, the frame cuts).
   const setQuiet = (quiet: boolean) => {
+    if (!quiet) loupe?.reset();
     const figure = document.querySelector<HTMLElement>('.image-frame');
     withTransition(
       () => {
@@ -889,6 +816,7 @@ const indexed =
   };
 
   const init = () => {
+    loupe = null;
     const page = document.querySelector('.image-page');
     if (!page) {
       // Quiet view lives between image pages only.
@@ -905,7 +833,10 @@ const indexed =
     if (match) for (const nav of navs) nav.hidden = nav !== match;
 
     // Quiet view: the photograph itself is the way in (photographer,
-    // visual gate T409a), the toggle a second one; any click leaves.
+    // visual gate T409a), the toggle a second one. In it the loupe hears
+    // a click first: on a loupe-ready photograph it zooms, and zoomed a
+    // click steps back to the fit; every other click — the mat, the
+    // ground, a photograph that is not loupe-ready — leaves.
     const toggle = document.querySelector<HTMLButtonElement>('[data-quiet-toggle]');
     if (toggle) {
       toggle.hidden = false;
@@ -914,21 +845,42 @@ const indexed =
     const stage = document.querySelector<HTMLElement>('.image-stage');
     if (stage) {
       stage.dataset.quietReady = '';
+      if (stage.dataset.loupeSrc) loupe = createLoupe(stage);
       stage.addEventListener('click', (event) => {
         const target = event.target as HTMLElement;
         if (target.closest('[data-quiet-toggle]')) return;
-        if (root.hasAttribute('data-quiet')) setQuiet(false);
-        else if (target.closest('.image-frame')) setQuiet(true);
+        if (root.hasAttribute('data-quiet')) {
+          if ((loupe?.click(event) ?? 'leave-quiet') === 'leave-quiet') setQuiet(false);
+        } else if (target.closest('.image-frame')) setQuiet(true);
       });
     }
     if (store.get(QUIET_KEY)) applyQuiet(true);
   };
 
   document.addEventListener('keydown', (event) => {
+    // The loupe hears a key first in the quiet view (spec 019): zoomed,
+    // Escape steps back to the fit, the arrows pan and the zoom keys zoom;
+    // at the fit a zoom key opens it. What it hands back — Escape leaving
+    // the quiet view, an arrow stepping the set — is the lines below, as
+    // it was before; so is a key the loupe does not take.
+    if (
+      loupe &&
+      root.hasAttribute('data-quiet') &&
+      !(event.altKey || event.ctrlKey || event.metaKey)
+    ) {
+      const effect = loupe.key(event);
+      if (effect === 'open' || effect === 'close' || effect === 'none') {
+        event.preventDefault();
+        return;
+      }
+    }
     if (event.key === 'Escape' && root.hasAttribute('data-quiet')) setQuiet(false);
-    // Inputs keep their own arrow keys (the compare slider above all).
+    // Inputs keep their own arrow keys, and so does the compare: its
+    // handle, its switch and its buttons take the keys they use, and an
+    // arrow anywhere inside it never steps the set.
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)
       return;
+    if (event.target instanceof Element && event.target.closest(`.${COMPARE_CLASSES.root}`)) return;
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     const nav = document.querySelector<HTMLElement>('.frame-nav:not([hidden])');
     if (!nav) return;
@@ -958,5 +910,8 @@ const indexed =
   document.addEventListener('astro:after-swap', () => {
     if (store.get(QUIET_KEY) && document.querySelector('.image-page')) applyQuiet(true);
   });
+  // A resize takes the loupe back to the fit and re-reads whether the
+  // photograph is loupe-ready at its new quiet fit.
+  window.addEventListener('resize', () => loupe?.refresh());
   document.addEventListener('astro:page-load', init);
 </script>

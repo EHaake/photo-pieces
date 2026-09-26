@@ -15,6 +15,10 @@ processing: >-
 edition: Open edition, signed on the back
 sizes: 12 × 18, 16 × 24, and 24 × 36 inches
 paper: Hahnemühle Photo Rag Baryta
+stages:
+  - file: _land-b.tones.jpg
+    label: Tones
+    note: Shadows lifted on the ridge, the fog's highlights held. _Fixture stage._
 ---
 
 I had been standing in the same place for an hour when the far bank

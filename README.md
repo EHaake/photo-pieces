@@ -19,7 +19,7 @@ The "why" behind this project lives in these, not in this file:
   004 galleries and image pages, 005 going live — deferred, 006 the
   rich image page, 007 the held image (its pause withdrawn at 017),
   008 cross-piece image references, 009 places, 018 the animation
-  pass)
+  pass, 019 the image page, refined)
 - `design/brief.md` — visual and interaction direction
 - `DECISIONS.md` — tooling comparisons and naming rationale (why this
   theme, why not a CMS, why this repo name)
@@ -78,7 +78,7 @@ plain Markdown:
 Everything else in the closed block vocabulary uses directive syntax.
 A block is a leaf (`::name{...}` on its own line) or a container
 whose body carries a caption — or, for `aside`, `row`, and `held`,
-the prose beside the frame:
+the prose beside the frame, and for `compare`, its stages:
 
 ```md
 ::wide{src="./photo-2.jpg" alt="The playa at dusk"}
@@ -102,6 +102,7 @@ Three minutes apart. Captions take _inline markdown_.
 | `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                            | raw text              |
 | `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                       | raw text              |
 | `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays   | raw text              |
+| `compare`   | container only | `mode=slider\|side\|switch`; body: 2+ stages, one per line: `![Label](./file.jpg)` then its note   | stages, labels below  |
 
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
 `single` — same rendered result. The site mats only the image page's
@@ -126,9 +127,9 @@ must exist, borrowed drafts fail. The sampler piece
 rendered.
 
 **Current status**: every block above is implemented — the spec-003
-blocks and spec 007's held block — transform, styling,
+blocks, spec 007's held block and spec 019's compare — transform, styling,
 the mat rule (the quiet view alone since spec 017), unit tests,
-and the Obsidian plugin's leaf-form rendering —
+and the Obsidian plugin's leaf-form rendering (and the compare's stages) —
 with images going through Astro's asset pipeline (hashed src,
 responsive srcset per treatment). Pieces render at
 `/pieces/<slug>/`, list at `/pieces/` (in the nav), and feed the
@@ -154,7 +155,8 @@ long side) — with the previous / next line directly beneath at that
 spacing and above the fold; then its title, a wall label of
 exposure info
 read from the file's EXIF (camera, lens, focal length, aperture,
-shutter, ISO, capture date), the piece it came from, the galleries it
+shutter, ISO, capture date — since spec 019 the camera and lens by the
+names in `src/content/gear.md`, not as the camera wrote them), the piece it came from, the galleries it
 sits in, and an optional caption. Every image in a piece links there;
 so does every gallery cell. A piece is not limited to the photographs
 in its own folder: since spec 008 it may place another piece's or a
@@ -165,14 +167,33 @@ it exists: the image's
 own story (the sidecar body, ahead of the label), place and time at
 the label's head — the place being the declared place's title as a
 link, then the sidecar's free text, when the frame names one — "How
-it was made", a raw-to-finished compare against the camera's frame,
+it was made", "Raw to finished" — a compare of the photograph's
+stages: the camera's frame labelled Camera, the stages its sidecar
+lists under their own labels (Tones, say), the photograph labelled
+Finished; three ways to see it, a slider wiping between two stages
+(Camera | Finished at rest, the legend of stages beneath picking the
+pair), side by side (the same pair, running wider than the column), and
+a switch (one stage at a time); the reader's choice held for the tab's
+session (spec 019, which also brings the same compare into a piece as a
+`:::compare` block) —
 the passage of the piece the image sits in, related frames from the
 same outing, and "The print" with an enquiry link. Every page in a set
 has a neighbour line for it (the
 gallery, piece, or place they came from; arrow keys work), and every
 page has a quiet view — click the photograph — that dims the ground and gives
 the frame the viewport, matted on the quiet dark: the one matted surface
-on the site. Since spec 018 the photographs move only in answer to the
+on the site. Since spec 019 a click on the photograph there opens the
+loupe: it zooms to full detail — one pixel of the file to one pixel of
+the screen, read from the photograph's larger export
+(`_<basename>.detail.<ext>`) where there is one, else from its own file
+where that has detail to add — and follows the mouse, tracking the
+pointer's place on the unzoomed photograph; a click without moving
+zooms back out, a click around it leaves the quiet view, the wheel, a
+pinch and the `+` and `-` keys zoom between, the arrows pan, and on
+touch a drag pans.
+While the loupe is open the mat goes and the photograph grows into the
+freed space with its shape kept; nothing of the unzoomed photograph
+shows around it. Since spec 018 the photographs move only in answer to the
 reader or to their own loading: none pops — its box waits in the
 ground's own colour, so no box shows, until the photograph has decoded
 and fades in; below the fold it fades in with a small rise each time it
@@ -214,6 +235,10 @@ format: Digital, full-frame # "How it was made": format, filters, support, proce
 filters: None
 support: Tripod
 processing: Single frame; shadows lifted on the ridge.
+stages: # "Raw to finished": the steps between the camera's frame and the photograph
+  - file: _land-b.tones.jpg
+    label: Tones
+    note: Shadows lifted on the ridge, the fog's highlights held.
 edition: Open edition # "The print": edition, sizes, paper
 sizes: 12 × 18, 16 × 24 inches
 paper: Hahnemühle Photo Rag Baryta
@@ -223,12 +248,28 @@ The story, in the photographer's words — ordinary markdown.
 
 A sidecar naming an image that doesn't exist fails the build.
 
-**The camera's frame** — `_<basename>.<ext>` beside the photograph
-(`_land-b.jpg` beside `land-b.jpg`) is its unprocessed frame, shown
-only as the "before" of that page's compare. Any raster with a
-leading underscore is private: no page, never in a gallery, and a
-piece that places one fails the build; a frame with no photograph
-beside it fails too. See `AUTHORING.md` for the export.
+**Private files** — rasters beside a photograph, named for it with a
+leading underscore (spec 006, widened at spec 019): its camera's frame
+`_<basename>.<ext>` (`_land-b.jpg` beside `land-b.jpg`), the first
+stage of its page's compare; a stage `_<basename>.<word>.<ext>`
+(`_land-b.tones.jpg`, any word but `detail`), shown where the sidecar's
+`stages:` lists it (a `file`, a `label`, an optional one-paragraph
+`note`; the frame and the finished photograph are implied) or a
+`:::compare` places it; and the loupe's larger export
+`_<basename>.detail.<ext>`. None is an image of the site: no page,
+never in a gallery, and a piece may place one only as a stage of a
+`:::compare` in its own folder — anywhere else fails the build, as do a
+private file with no photograph beside it, a second frame or larger
+export for one photograph, and a sidecar listing a file that is not
+one of its photograph's stages. See `AUTHORING.md` for the exports,
+the larger one's size and its 25 MiB ceiling.
+
+**Gear names** — `src/content/gear.md`, edited by hand: one line per
+EXIF string under `## Cameras` or `## Lenses`,
+``- `ILCE-7RM4` = Sony α7R IV``, and the wall label prints the name.
+A malformed line fails the build naming the line; a string the table
+lacks warns once (`[gear]`) and prints as it did before the table. A
+sidecar's `camera:` or `lens:` still wins.
 
 **Gallery** — `src/content/galleries/<slug>.md`, a hand-curated,
 ordered list of image ids with one category; `cover` defaults to the
@@ -372,10 +413,15 @@ photo-pieces/
 ├── image-meta.test.mjs, exif.test.mjs, galleries.test.mjs # spec-004 suites
 ├── image-set.test.mjs            # the set key: gallery, piece, place
 ├── motion.test.mjs               # the motion grammar: the tokens pinned by name, no literal motion, nothing loops
+├── compare.test.mjs, loupe.test.mjs # the compare's and the loupe's rules, each tunable pinned by its round
+├── gear.test.mjs                 # the gear table: its parse, its failures, the label's lookup, the warning
+├── private-files.test.mjs        # the private-files barrier, run against fixture directories
+├── obsidian-plugin.test.mjs      # the plugin's reading of a compare body; Live Preview itself is attested by eye
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
 ├── scripts/check-no-gps.mjs      # postbuild: no GPS in any built image
+├── scripts/check-private-files.mjs # postbuild: every loupe file present and under 25 MiB, a larger export named nowhere else, every compare in one shape, no script-only state in the markup
 ├── scripts/check-no-dev-routes.mjs # postbuild: no dev-only routes in dist/
 ├── scripts/check-motion.mjs      # postbuild: no literal duration or curve, hidden frame or autoplay in dist/
 ├── scripts/gen-og.mjs             # npm run og: rewrites public/og.jpg on the committed ground
@@ -386,10 +432,11 @@ photo-pieces/
 ├── src/
 │   ├── consts.ts                 # site identity
 │   ├── content.config.ts         # pieces, galleries, imageMeta, places collections
-│   ├── content/pieces/           # one folder per piece + its images (+ _sidecars, _camera's frames)
+│   ├── content/pieces/           # one folder per piece + its images (+ _sidecars, _private files: camera's frames, stages, larger exports)
 │   ├── content/gallery-images/   # images that belong to no piece
 │   ├── content/galleries/        # one file per gallery
 │   ├── content/places/           # one file per place
+│   ├── content/gear.md           # the gear table: EXIF camera and lens strings to the label's names
 │   ├── lib/pieces.ts             # the one published-pieces query
 │   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, places, sets)
 │   ├── lib/gallery-layout.ts     # packing knobs: bleed width, gap, format-aware density (galleries); density also drives the srcset/sizes math so CSS and images can't drift; the related strip's knobs live here too; the place page's wall consumes the same width, gap, and density
@@ -401,7 +448,9 @@ photo-pieces/
 │   ├── lib/og-card.mjs           # the Open Graph card — one tree and one palette for the per-piece route and `npm run og`
 │   ├── lib/motion.ts             # the motion grammar's names, read off :root: the appearance, the arrival, the travel, the quiet view
 │   ├── lib/motion-scan.mjs       # the literal-motion scan (shared by the test and the postbuild check)
-│   ├── lib/compare.ts            # the image page's compare, overlaid before the router swaps the page in
+│   ├── lib/compare.ts            # the compare, a piece's and the image page's: its tunables, its rules, the enhanced block, built before the router swaps a page in
+│   ├── lib/loupe.ts              # the loupe: its tunables, its file's getImage() options, its state, the quiet view's controller
+│   ├── lib/gear.mjs              # the gear table's parser and the unknown strings the build warns of
 │   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), CategoryRow
 │   ├── components/DevMotion.astro # dev-only motion switch: the named settings, the behaviours' on/off; renders nothing in a build
 │   ├── components/dev-motion-panel.ts, dev-motion-presets.ts # its panel (served, never bundled) and its named settings

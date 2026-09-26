@@ -2,17 +2,21 @@ import { Plugin, TFile, editorInfoField, editorLivePreviewField } from 'obsidian
 import { EditorView, Decoration, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
+import { COMPARE_PATTERN, parseCompareBody } from './compare';
 
 // Live Preview rendering for the LEAF form of the site's standalone image
 // blocks: while writing, `::single{src="./a.jpg" alt="…"}` shows the image
 // instead of raw directive text. Deliberately approximate — not styled to
 // match the site (see DECISIONS.md at the repo root).
 //
-// Mirrors the vocabulary in remark-pieces-blocks.mjs by convention. What
-// stays raw text on purpose: the `:::name … :::` container forms (captions),
-// grid, strip, aside, row, held — multi-line bodies are out of scope for this
-// plugin's regex approach. Raw text is honest: the site build is the
-// source of truth for what those render as.
+// Mirrors the vocabulary in remark-pieces-blocks.mjs by convention. One
+// container renders: `:::compare`, shown as its stages' images with each
+// label beneath (its body read by compare.ts); the methods, the handle and
+// the loupe are the site's. What stays raw text on purpose: every other
+// `:::name … :::` container form (captions), grid, strip, aside, row, held —
+// multi-line bodies are otherwise out of scope for this plugin's regex
+// approach. Raw text is honest: the site build is the source of truth for
+// what those render as.
 //
 // The regex is anchored to a whole line (`m` flag): a directive typed
 // mid-paragraph does NOT render here, because the real pipeline does not
@@ -23,7 +27,8 @@ import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
 // wrong path shows "image not found" here too, rather than a same-named
 // file from some other folder.
 
-type Image = { src: string; alt: string };
+// `label` is set for a compare's stages only: shown beneath the image.
+type Image = { src: string; alt: string; label?: string };
 type Extract = (attrs: Record<string, string>) => Image[] | null;
 
 type Resolved =
@@ -108,7 +113,10 @@ class BlockWidget extends WidgetType {
       other.block === this.block &&
       other.images.length === this.images.length &&
       other.images.every(
-        (img, i) => img.src === this.images[i].src && img.alt === this.images[i].alt,
+        (img, i) =>
+          img.src === this.images[i].src &&
+          img.alt === this.images[i].alt &&
+          img.label === this.images[i].label,
       )
     );
   }
@@ -117,9 +125,17 @@ class BlockWidget extends WidgetType {
     const wrapper = document.createElement('div');
     wrapper.addClass('photo-pieces-preview');
     wrapper.dataset.block = this.block;
-    if (this.images.length > 1) wrapper.addClass('photo-pieces-preview-row');
+    if (this.block === 'compare') wrapper.addClass('photo-pieces-preview-compare');
+    else if (this.images.length > 1) wrapper.addClass('photo-pieces-preview-row');
 
-    for (const { src, alt } of this.images) {
+    for (const { src, alt, label } of this.images) {
+      // A compare's stage: the image (or its "not found") with its label beneath.
+      let parent: HTMLElement = wrapper;
+      if (label !== undefined) {
+        parent = document.createElement('div');
+        parent.addClass('photo-pieces-stage');
+        wrapper.appendChild(parent);
+      }
       const resolved = resolveRelative(src, this.sourcePath);
       const file =
         resolved.kind === 'name'
@@ -134,15 +150,21 @@ class BlockWidget extends WidgetType {
         const missing = document.createElement('div');
         missing.addClass('photo-pieces-missing');
         missing.setText(`[${this.block}: image not found — ${src}]`);
-        wrapper.appendChild(missing);
-        continue;
+        parent.appendChild(missing);
+      } else {
+        const img = document.createElement('img');
+        img.src = this.plugin.app.vault.getResourcePath(file);
+        // alt is accessibility text, not a caption — captions live in the
+        // container form, which this plugin leaves as raw text.
+        img.alt = alt;
+        parent.appendChild(img);
       }
-      const img = document.createElement('img');
-      img.src = this.plugin.app.vault.getResourcePath(file);
-      // alt is accessibility text, not a caption — captions live in the
-      // container form, which this plugin leaves as raw text.
-      img.alt = alt;
-      wrapper.appendChild(img);
+      if (label !== undefined) {
+        const caption = document.createElement('div');
+        caption.addClass('photo-pieces-stage-label');
+        caption.setText(label);
+        parent.appendChild(caption);
+      }
     }
     return wrapper;
   }
@@ -162,29 +184,55 @@ function buildDecorations(state: EditorState, plugin: Plugin): DecorationSet {
   const info = state.field(editorInfoField, false);
   const sourcePath = info?.file?.path ?? '';
 
-  const builder = new RangeSetBuilder<Decoration>();
   const text = state.doc.toString(); // whole doc — fine at piece scale
-  const re = new RegExp(DIRECTIVE_PATTERN, 'gm');
   const sel = state.selection.ranges;
+  // Leave raw syntax visible and editable while the cursor is on it —
+  // same convention Obsidian's own live preview uses for embeds.
+  const cursorInside = (start: number, end: number) =>
+    sel.some((r) => r.from <= end && r.to >= start);
 
+  // Two passes, one per pattern; the builder needs its ranges in order.
+  const found: { start: number; end: number; block: string; images: Image[] }[] = [];
+
+  // A compare's whole block, fence to fence. Its span is claimed whether
+  // or not it renders, so no line inside it is read as a leaf block.
+  const compares: { start: number; end: number }[] = [];
+  const compareRe = new RegExp(COMPARE_PATTERN, 'gm');
   let m: RegExpExecArray | null;
+  while ((m = compareRe.exec(text))) {
+    const start = m.index;
+    const end = start + m[0].length;
+    compares.push({ start, end });
+    if (cursorInside(start, end)) continue;
+
+    const stages = parseCompareBody(m[2]);
+    if (stages.length === 0) continue; // no stages: stay raw
+    const images = stages.map(({ src, label }) => ({ src, alt: label, label }));
+    found.push({ start, end, block: 'compare', images });
+  }
+
+  const re = new RegExp(DIRECTIVE_PATTERN, 'gm');
   while ((m = re.exec(text))) {
     const start = m.index;
     const end = start + m[0].length;
 
-    // Leave raw syntax visible and editable while the cursor is on it —
-    // same convention Obsidian's own live preview uses for embeds.
-    const cursorInside = sel.some((r) => r.from <= end && r.to >= start);
-    if (cursorInside) continue;
+    if (compares.some((c) => start < c.end && end > c.start)) continue;
+    if (cursorInside(start, end)) continue;
 
     const images = LEAF_BLOCKS[m[1]](parseAttrs(m[2]));
     if (!images) continue; // required attributes missing: stay raw
 
+    found.push({ start, end, block: m[1], images });
+  }
+
+  found.sort((a, b) => a.start - b.start);
+  const builder = new RangeSetBuilder<Decoration>();
+  for (const { start, end, block, images } of found) {
     builder.add(
       start,
       end,
       Decoration.replace({
-        widget: new BlockWidget(m[1], images, sourcePath, plugin),
+        widget: new BlockWidget(block, images, sourcePath, plugin),
         block: true,
       }),
     );

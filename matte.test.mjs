@@ -304,8 +304,11 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(Object.keys(declarations(quiet.body))).toEqual(['--mat', 'padding', 'background']);
     // "Once", and every other --mat a zero: the walk over every rule in
     // the file, nested ones included, finds that one form and otherwise
-    // only 0px — the held figure, the packed cell and the stage's frame
-    // on paper. A form put back on any surface fails here by name.
+    // only 0px — the held figure, the packed cell, the stage's frame
+    // on paper, and the open loupe's frame (spec 019, T1713c: the one
+    // assignment on the quiet frame besides the form, zeroing it while
+    // the loupe takes the whole frame). A form put back on any surface
+    // fails here by name.
     const declaring = [...top, ...nested]
       .filter((block) => '--mat' in declarations(block.body))
       .map((block) => [norm(block.prelude), norm(declarations(block.body)['--mat'])]);
@@ -317,7 +320,12 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
         .filter(([, value]) => value === '0px')
         .map(([prelude]) => prelude)
         .sort(),
-    ).toEqual(['.gallery-flow > li', '.image-frame', '.piece-held figure']);
+    ).toEqual([
+      '.gallery-flow > li',
+      '.image-frame',
+      '.piece-held figure',
+      'html[data-quiet] .image-stage[data-loupe-open] .image-frame',
+    ]);
   });
 
   it('the one matted surface reads --mat as a padding — the quiet view’s frame — and no other rule applies --mat or --color-matte', () => {
@@ -427,8 +435,13 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     // under the same attribute: the base `.image-frame img` max-height
     // above reads --avail-h and --mat, so a quiet copy of it is
     // byte-identical duplication (T1101b deleted it, on both the page
-    // and here). These three rules, the mat's between the stage's and
-    // the cursor list, and no fourth.
+    // and here). These four rules, the mat's between the stage's and
+    // the cursor list, the loupe's ready photograph after them (spec 019,
+    // T1712: a deliberate fourth), the open loupe's frame without its mat
+    // (spec 019, T1713b: a deliberate fifth — padding 0, reading no
+    // --mat; T1713c: and --mat 0px, so the photograph grows into the
+    // freed space with its shape kept, nothing of the unzoomed photograph
+    // showing around it), and no sixth.
     const QUIET_RULE = /html\[data-quiet\] \.image-/;
     // The paper frame's `:not` preludes are not quiet rules: the list
     // below gains nothing from them.
@@ -441,6 +454,8 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
       'html[data-quiet] .image-stage',
       'html[data-quiet] .image-frame',
       'html[data-quiet] .image-frame, html[data-quiet] .image-stage[data-quiet-ready] .image-frame',
+      'html[data-quiet] .image-stage[data-loupe-ready] .image-frame img',
+      'html[data-quiet] .image-stage[data-loupe-open] .image-frame',
     ]);
     // And the page's scoped <style> styles the frame not at all — every
     // frame rule is here, the zoom-in cursor included. A scoped copy
@@ -513,36 +528,51 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(['the nav wraps at', PHONE, wraps.length]).toEqual(['the nav wraps at', PHONE, 1]);
   });
 
-  it('the image page reads --mat nowhere: the compare is unmatted, and --color-matte is its letterbox and divider only', () => {
+  it('the image page reads --mat nowhere: the compare is unmatted, and its section reads --color-matte nowhere (none, D1708)', async () => {
     // The compare figure lost its mat with every other non-hero surface
-    // (spec 015). What keeps --color-matte is the compare's own device
-    // inside its box — the letterbox fill behind a camera frame whose
-    // crop differs, and the slider's divider — neither of which is a
-    // field around a photograph. The gap and the note's margin were
-    // already prose spacing, not the mat (T1104a): --mat carries 100%,
-    // and a percentage resolves against the READER's containing block,
-    // so they would have rendered a fraction of the figure's mat.
+    // (spec 015). Since spec 019 (T1706) the compare's rules live in
+    // global.css's "The compare (spec 019)" section, where a piece's
+    // compare can reach them, and the page's scoped <style> holds none:
+    // so the page's own rules read neither --mat nor --color-matte, and
+    // the section reads no --mat and --color-matte only in the rules
+    // listed below. The prose spacing between stages was never the mat
+    // (T1104a): --mat carries 100%, and a percentage resolves against
+    // the READER's containing block.
+    const reads = (list) => {
+      const all = [
+        ...list,
+        ...list.filter((one) => one.prelude.startsWith('@')).flatMap((one) => blocks(one.body)),
+      ];
+      const reading = [];
+      const matte = [];
+      for (const block of all)
+        for (const [property, value] of Object.entries(declarations(block.body))) {
+          if (/var\(--mat\s*[,)]/.test(value)) reading.push(`${norm(block.prelude)} { ${property} }`);
+          if (/--color-matte\b/.test(value)) matte.push(norm(block.prelude));
+        }
+      return { all, reading, matte };
+    };
+
     const page = uncomment(src['src/pages/images/[...id].astro']);
-    const scoped = blocks(page.slice(page.indexOf('<style>'), page.indexOf('</style>')));
-    const all = [
-      ...scoped,
-      ...scoped.filter((one) => one.prelude.startsWith('@')).flatMap((one) => blocks(one.body)),
-    ];
-    const reading = [];
-    const matte = [];
-    for (const block of all)
-      for (const [property, value] of Object.entries(declarations(block.body))) {
-        if (/var\(--mat\s*[,)]/.test(value)) reading.push(`${norm(block.prelude)} { ${property} }`);
-        if (/--color-matte\b/.test(value)) matte.push(norm(block.prelude));
-      }
-    expect(reading).toEqual([]);
-    const compare = declarations(ruleFor(all, '.compare').body);
+    const scoped = reads(blocks(page.slice(page.indexOf('<style>'), page.indexOf('</style>'))));
+    expect(scoped.all.length).toBeGreaterThan(0);
+    expect(scoped.reading).toEqual([]);
+    expect(scoped.matte).toEqual([]);
+
+    const raw = await readFile(here('./src/styles/global.css'), 'utf8');
+    const from = raw.indexOf('/* ---- The compare (spec 019)');
+    const to = raw.indexOf('/* ---- Motion (spec 018)');
+    expect([from > -1, to > from]).toEqual([true, true]);
+    const section = reads(blocks(uncomment(raw.slice(from, to))));
+    expect(section.all.length).toBeGreaterThan(0);
+    expect(section.reading).toEqual([]);
+    // The section reads --color-matte nowhere, by decision D1708: the
+    // mat's white is the quiet frame's alone (spec 017); the letterbox,
+    // the divider and the handle read --color-bg.
+    expect(section.matte.sort()).toEqual([]);
+    const compare = declarations(ruleFor(section.all, ':where(.compare)').body);
     expect(Object.keys(compare)).not.toContain('padding');
     expect(Object.keys(compare)).not.toContain('background');
-    expect(matte.sort()).toEqual([
-      '.compare[data-js] .compare-frame :global(img)',
-      '.compare[data-js] .compare-line',
-    ]);
   });
 
   it('the cover card’s span reads no mat: a block box, the cover’s ratio, nothing else', () => {

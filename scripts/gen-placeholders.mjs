@@ -8,6 +8,7 @@
 //   node scripts/gen-placeholders.mjs            # everything
 //   node scripts/gen-placeholders.mjs pieces     # the fixture pieces only
 //   node scripts/gen-placeholders.mjs gallery    # src/content/gallery-images only
+//   node scripts/gen-placeholders.mjs frames     # the private files (camera's frames, stages, detail exports)
 //   node scripts/gen-placeholders.mjs fixtures   # the tests/ fixtures only
 //
 // Idempotent: rewrites every placeholder in place.
@@ -95,6 +96,9 @@ const TRAFALGAR_GPS = {
 // tests/gallery-images the gallery root.
 const FIXTURES = [
   ['tests/fixtures/square.jpg', 200, 200, 'slate', '1:1', {}],
+  // A stage of the hand-made photo.jpg (spec 019), for the transform's
+  // compare cases.
+  ['tests/fixtures/_photo.tones.jpg', 8, 5, 'sage', '', {}, { tones: true }],
   ['tests/pieces/alpha/photo.jpg', 8, 5, 'sage', '', {}],
   ['tests/pieces/beta/photo.jpg', 8, 5, 'sage', '', {}],
   ['tests/pieces/beta/_photo.jpg', 8, 5, 'fog', '', {}],
@@ -132,18 +136,48 @@ const GALLERY_IMAGES = [
   ],
 ];
 
-// Camera's frames (spec 006): a private raster `_<basename>.jpg` beside
-// its photograph, shown only on that image's page as the "before" of
-// the raw-to-finished compare. Deliberately a different crop (4:3
-// against the 3:2 photograph) so the page's letterbox path is
-// exercised, flattened to read as unprocessed, and carrying GPS so the
-// post-build scan has a real block to find if a private raster ever
-// reaches the output untouched — which it did once, at T403, when the
-// registry imported it before any page rendered it (the pruner's rule
-// changed for that; DECISIONS.md).
-const FRAMES = [
+// Private files (spec 006, widened at spec 019): rasters beside their
+// photograph, never images of the site. The camera's frame
+// `_<basename>.jpg` is the "before" of the raw-to-finished compare —
+// deliberately a different crop (4:3 against the 3:2 photograph) so the
+// page's letterbox path is exercised, flattened to read as unprocessed.
+// A stage `_<basename>.<word>.jpg` is a step between the two, half
+// processed; the loupe's export `_<basename>.detail.jpg` is the
+// photograph's field at three times its size. vocabulary-sampler's
+// land-b has a camera's frame and nothing else. Every one carries GPS
+// so the post-build scan has a real block to find if a private raster
+// ever reaches the output untouched — which it did once, at T403, when
+// the registry imported it before any page rendered it (the pruner's
+// rule changed for that; DECISIONS.md).
+const PRIVATES = [
   [
     'src/content/pieces/where-the-fog-lets-go/_land-b.jpg',
+    1600,
+    1200,
+    'slate',
+    '4:3 · camera',
+    { ...exif('24', '11', '1/60', '200', '2026:08:28 07:02:40'), ...TRAFALGAR_GPS },
+    { flat: true },
+  ],
+  [
+    'src/content/pieces/where-the-fog-lets-go/_land-b.tones.jpg',
+    1800,
+    1200,
+    'slate',
+    '3:2 · tones',
+    { ...exif('24', '11', '1/60', '200', '2026:08:28 07:02:40'), ...TRAFALGAR_GPS },
+    { tones: true },
+  ],
+  [
+    'src/content/pieces/where-the-fog-lets-go/_land-b.detail.jpg',
+    5400,
+    3600,
+    'slate',
+    '3:2 · detail',
+    { ...exif('24', '11', '1/60', '200', '2026:08:28 07:02:40'), ...TRAFALGAR_GPS },
+  ],
+  [
+    'src/content/pieces/vocabulary-sampler/_land-b.jpg',
     1600,
     1200,
     'slate',
@@ -232,6 +266,10 @@ async function writePlaceholder(path, w, h, palette, label, meta, options = {}) 
   if (options.flat) {
     // The unprocessed look: colour drained, shadows lifted, no punch.
     image = image.modulate({ saturation: 0.3, brightness: 1.08 }).linear(0.75, 32);
+  } else if (options.tones) {
+    // Halfway there: half the colour drained, half the lift, half the
+    // flattening.
+    image = image.modulate({ saturation: 0.65, brightness: 1.04 }).linear(0.875, 16);
   }
   // The output format follows the extension: every placeholder is a
   // jpeg but the borrowed-non-raster fixture, which has to be a real
@@ -260,15 +298,15 @@ if (target === 'all' || target === 'gallery') {
 }
 
 if (target === 'all' || target === 'frames') {
-  for (const [path, w, h, palette, label, meta, options] of FRAMES) {
+  for (const [path, w, h, palette, label, meta, options] of PRIVATES) {
     await writePlaceholder(path, w, h, palette, label, meta, options);
-    console.log("wrote camera's frame →", path);
+    console.log('wrote private file →', path);
   }
 }
 
 if (target === 'all' || target === 'fixtures') {
-  for (const [path, w, h, palette, label, meta] of FIXTURES) {
-    await writePlaceholder(path, w, h, palette, label, meta);
+  for (const [path, w, h, palette, label, meta, options] of FIXTURES) {
+    await writePlaceholder(path, w, h, palette, label, meta, options);
     console.log('wrote fixture →', path);
   }
 }

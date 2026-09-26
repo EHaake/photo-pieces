@@ -46,10 +46,12 @@ Why this shape:
 - **Community plugins → Photo Pieces Blocks: enabled.** The plugin
   renders leaves: a standalone block written in leaf form (`::single`,
   `::fullbleed`, `::wide`, `::tall`, `::inset`, `::diptych`,
-  `::triptych`) shows its image while you write. Everything
-  else is raw text by construction — container forms (captions), and
-  the container-only `grid`, `strip`, `aside`, `row`, and `held` — and
-  the site build is the truth for those. On the site, the frames you
+  `::triptych`) shows its image while you write, and one container,
+  `:::compare`, shows its stages' images with their labels beneath.
+  Everything else is raw text by construction — the other container
+  forms (captions), and the container-only `grid`, `strip`, `aside`,
+  `row`, and `held` — and the site build is the truth for those, as it
+  is for how a compare actually behaves. On the site, the frames you
   place animate by the site's own rules — they fade in as they load and
   as they scroll into view, and travel into their pages when clicked —
   so there is nothing to author for motion, and the plugin does not
@@ -164,9 +166,12 @@ the piece's text references it. Consequences worth internalizing:
 - **The folder name must be a slug** (`lowercase-with-hyphens`), as
   they all are already — the build says so, with the fix, if not.
 - **An underscore makes a file private.** `_land-b.jpg` beside
-  `land-b.jpg` is that photograph's camera's frame (spec 006): it gets
-  no page, can't be listed in a gallery, and a piece that places it
-  fails the build. See "The camera's frame" below.
+  `land-b.jpg` is that photograph's camera's frame (spec 006);
+  `_land-b.tones.jpg` is one of its stages, and `_land-b.detail.jpg`
+  its larger export for the loupe (spec 019). None gets a page or can
+  be listed in a gallery, and a piece may place one only as a stage of
+  a `compare` in the same folder — anywhere else fails the build. See
+  "The private files" below.
 
 ### Borrowing a photograph
 
@@ -229,6 +234,38 @@ field is silently ignored (Obsidian adds properties of its own, so the
 schema can't be strict); a field of the wrong type fails the build
 naming it.
 
+### Gear names
+
+The label prints the camera and the lens by name rather than as the
+camera wrote them: `ILCE-7RM4` in the file reads "Sony α7R IV" on the
+page. The names live in one hand-edited file, `src/content/gear.md` —
+it opens in the vault as a note, and nothing regenerates it — one line
+per string, under `## Cameras` or `## Lenses`:
+
+```markdown
+## Cameras
+
+- `ILCE-7RM4` = Sony α7R IV
+
+## Lenses
+
+- `FE 16-35mm F2.8 GM II` = Sony FE 16-35mm f/2.8 GM II
+```
+
+A dash, the string exactly as the file's EXIF carries it in backticks,
+an equals sign, then the name to print. A camera is keyed by its model
+alone, and its line is the whole name. The file's title and a
+paragraph may sit above the first list; inside a list, only entries,
+blank lines and one-line `<!-- … -->` comments. **A malformed table
+fails the build** — a line in any other shape, or a string listed
+twice in one list — naming the file and the line. **A string the
+table lacks only warns**: the build prints one `[gear]` line for each,
+naming the first file that carries it, and the label prints what it
+printed before the table existed until a line is added. A sidecar's
+own `camera:` or `lens:` still wins over the table. The table is read
+where the image registry is built, so restart `npm run dev` to see an
+edit, as for a new image ("The writing loop" below).
+
 ### The rich page's fields and the story
 
 Since spec 006 the same sidecar carries everything else an image's
@@ -288,20 +325,160 @@ The page's headings and row names ("How it was made", "Ask about a
 print"…) live in one block at the top of
 `src/pages/images/[...id].astro` — retune them there.
 
-### The camera's frame
+## The private files
 
-To show the raw-to-finished compare, export the camera's frame — the
-unprocessed file, at web size like everything else — and drop it
-beside the photograph under the same name with a leading underscore:
-`_land-b.jpg` beside `land-b.jpg` (any accepted extension; the two
-need not match). Nothing to declare: the site finds it. One frame per
-photograph. The frame is private — no page, never in a gallery, never
-placed in a piece; a frame with no photograph beside it fails the
-build naming the file, as a stray sidecar does. Two relations share
-one prefix, deliberately: `_land-b.md` is _about_ `land-b.jpg`, and
-`_land-b.jpg` is _the raw of_ `land-b.jpg`. Strip location metadata
-from the frame's export as from any other (the build fails on GPS in
-the output either way).
+A photograph can carry three kinds of private file: rasters beside it,
+named for it, with a leading underscore (spec 006, widened at spec
+019). Any accepted extension, and it need not match the photograph's.
+
+- **The camera's frame** — `_land-b.jpg` beside `land-b.jpg`: the
+  unprocessed file, at web size like everything else. One per
+  photograph. Nothing to declare: the site finds it, and it is the
+  first stage of the compare on the photograph's page.
+- **A stage** — `_land-b.tones.jpg`: one step between the camera's
+  frame and the finished photograph, the word after the basename
+  naming it for you (`tones`, `crop`, `dodge` — any word but
+  `detail`). As many as the photograph took. A stage shows where you
+  put it: in a `compare` block, or on the image page when the sidecar
+  lists it.
+- **The larger export** — `_land-b.detail.jpg`: the finished
+  photograph exported bigger, for the loupe alone. One per photograph,
+  found by name like the frame ("The larger export" below).
+
+Two relations share one prefix, deliberately: `_land-b.md` is _about_
+`land-b.jpg`, and every `_land-b…` raster is _part of the making of_
+it. None of them is an image of the site — no page, never in a
+gallery — and the one place a piece may write one is as a stage of a
+`compare` in its own folder. The build fails, naming the file:
+
+- a private file with no photograph beside it (`_land-c.tones.jpg`
+  with no `land-c.jpg`), as a stray sidecar does;
+- a second camera's frame, or a second larger export, for one
+  photograph;
+- a private file placed anywhere else — another block, the plain
+  `![alt](…)` shorthand, a `cover` — or listed in a gallery;
+- a private file of another folder in a `compare`: a piece may borrow
+  another piece's finished photograph, not its making-of.
+
+Strip location metadata from every one of these exports as from any
+other (the build fails on GPS in the output either way).
+
+### A compare in a piece
+
+A `compare` shows one photograph's stages one against another — the
+camera's frame, the steps between, the finished photograph:
+
+```markdown
+:::compare{mode="slider"}
+![Camera](./_land-b.jpg) Straight out of the camera, flat profile.
+![Tones](./_land-b.tones.jpg) Shadows lifted on the ridge, the fog's highlights held.
+![Finished](./land-b.jpg) A touch of warmth over the whole frame.
+:::
+```
+
+Container form only, one stage per line. **A stage is an image whose
+text is its label, the text to the next image its note** — a label of
+a word or two, which is also the image's alt text, and a note of a
+sentence or a short paragraph, inline markdown allowed. A later
+paragraph without an image joins the previous note, so a blank line
+between stages changes nothing, and text written after the last stage
+becomes the finished stage's note: the block has no caption of its
+own. The build fails on
+
+- fewer than two stages;
+- a stage without its label — `![](./_land-b.jpg)`;
+- anything in the body but stages: text before the first image, a
+  list, a heading, another block;
+- a missing file, or a private file from another folder. A private
+  file comes from the block's own folder (`./_land-b.jpg`); a public
+  photograph may be borrowed by path, as anywhere ("Borrowing a
+  photograph" above).
+
+A stage links nowhere, and its label never becomes the photograph's
+title on its page: a compare's image text names a stage, it does not
+describe the photograph.
+
+`mode` picks the way the compare opens: `slider` (the default),
+`side`, or `switch`. The reader can change it with the "How to
+compare" control on the row beneath, and their choice holds for every
+compare they open in that tab, outranking the `mode` written, until
+the tab closes. The three ways:
+
+- **Slider** — two stages in one frame, wiping between them: drag the
+  handle, or use the arrow keys. At rest it shows the first stage
+  against the last — Camera | Finished above — with the handle in the
+  middle. The legend of stage names beneath picks the pair: the first
+  click sets the left side, the next the right, and any stage can be
+  picked at any step, so every pair is two clicks away.
+- **Side by side** — the same pair next to each other, picked in the
+  legend the same way, and the one way that runs wider than the text
+  column. Where two won't fit — on a phone — they stack.
+- **Switch** — one stage at a time, in the column: a click or tap on
+  the photograph, Space, Enter or → moves to the next, ← steps back,
+  and the last wraps to the first.
+
+Without script the compare is its stages one under another, each with
+its label and note. In Obsidian's Live Preview it shows its stages'
+images in a row, each with its label beneath — no notes, no slider;
+put the cursor in the block and it turns back into its text, and a
+file that isn't there shows the dashed "not found" box.
+
+A piece may write several compares over the same stages — Camera
+against Finished early on, Tones against Finished further down, each
+a subset. They ask for the same files, so a reader downloads each
+stage once. The same block in a sidecar's story puts the compare in
+the writing, and the page's own "Raw to finished" section steps aside.
+
+### Stages on the image page
+
+Without writing a block, a photograph's page shows its compare in a
+"Raw to finished" section whenever it has a camera's frame or its
+sidecar lists a stage. List the stages in the sidecar:
+
+```yaml
+stages:
+  - file: _land-b.tones.jpg
+    label: Tones
+    note: Shadows lifted on the ridge, the fog's highlights held.
+```
+
+and drop `_land-b.tones.jpg` beside the photograph. The section shows
+the camera's frame first when there is one, labelled Camera, with the
+site's own note ("The RAW file straight out of camera — no edits, no
+adjustments"); then the listed stages in the order written; then the
+finished photograph, labelled Finished, whose note is the sidecar's
+`processing:` line when it has one. It is the same compare as the
+block, with the same three ways; it opens as the slider unless the
+reader has already chosen another way in that tab.
+
+`label` is required, `note` optional. **A note is one paragraph**,
+inline markdown allowed. The frame and the finished photograph are
+implied — never list them. A listed `file` that is not a stage of this
+photograph — a typo, another photograph's stage, the camera's frame,
+the larger export — fails the build naming the sidecar, and so does a
+file listed twice. A stage file the sidecar doesn't list stays off the
+page; a `compare` in a piece can still show it.
+
+### The larger export
+
+In the quiet view, a click on the photograph opens the loupe: it zooms
+to full detail, one pixel of the file to one pixel of the screen, and
+follows the mouse. By default it reads the photograph's own file, and
+only where that file has detail to add at the screen's size. For more,
+export the finished photograph larger as `_land-b.detail.jpg` beside
+`land-b.jpg`. Nothing to declare: the loupe finds it, and nothing else
+uses it — the build checks that no page, feed or gallery names it.
+
+- **Size** — 4000px on the long edge is the recommendation, limited
+  by the camera's resolution: a sensor with fewer pixels than that
+  gives what it has. The size is your call per photograph.
+- **Location** — strip it on export, as for every file ("Metadata:
+  EXIF, then a sidecar" above); the build's GPS check covers the
+  loupe's file like every image it ships.
+- **The ceiling** — the site makes the loupe's file from the export at
+  its full size, and the host takes no file over 25 MiB (Cloudflare
+  Workers static assets' per-file limit): the build fails naming the
+  file if one comes out larger. A 4000px export is far below it.
 
 ## The block that takes time
 
@@ -543,7 +720,9 @@ long edge, 1–3MB. Never RAW files or full-resolution masters: git
 history keeps every byte forever, and the build only needs enough
 pixels for its largest responsive variant. Masters live in the photo
 archive, not the repo. (Decision and numbers: `DECISIONS.md`, "Images
-stay committed to git".) And **never bake a matte into the file**:
+stay committed to git".) The one larger file is the loupe's export,
+at most one per photograph, about 4000px — "The larger export" above.
+And **never bake a matte into the file**:
 the site mats the frames it mats itself, and since spec 017 that is
 the image page's quiet view alone. Every other frame — in a piece, in
 a gallery, or on the image page's stage on paper — sits on the ground

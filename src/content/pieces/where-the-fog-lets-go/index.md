@@ -76,3 +76,13 @@ morning belonged to the people who came early and stood in the gray
 without knowing if it would open.
 
 ::fullbleed{src="./land-b.jpg" alt="The headlands in full light, edge to edge"}
+
+The bank that let go first, from the camera to the print, one step at
+a time. _Fixture prose — the compare below is invented, a test of the
+block on a real page._
+
+:::compare{mode="switch"}
+![Camera](./_land-b.jpg) Straight out of the camera, the flat profile. _Fixture note._
+![Tones](./_land-b.tones.jpg) Shadows lifted on the ridge, the fog's highlights held. _Fixture note._
+![Finished](./land-b.jpg) Warmed a touch, and printed from. _Fixture note._
+:::
