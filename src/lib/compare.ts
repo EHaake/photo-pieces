@@ -43,6 +43,8 @@ export const COMPARE_MODE_KEY = 'compare-mode';
 export type CompareMode = keyof typeof COMPARE_WORDING.modes;
 /** Two stages, the earlier on the left. */
 export type ComparePair = { left: number; right: number };
+/** The pair as the legend picked it: the member picked longer ago, and the newer. */
+export type ComparePick = { older: number; newer: number };
 /** The slider's pair and the divider's position, 0–100. */
 export type SliderView = ComparePair & { split: number };
 /** The switch's one showing stage. */
@@ -71,14 +73,18 @@ export function sliderView(p: number, pair: ComparePair): SliderView {
 }
 
 /**
- * The pair after a legend click on stage `k` of `n`: a stage already in
- * the pair leaves it as it is; another replaces the member nearer to it
- * in stage order, the later on a tie; the pair is kept in stage order.
+ * The pair after a legend click on stage `k`: a stage already in the pair
+ * leaves it as it is; another replaces the member picked longer ago, and
+ * the clicked stage becomes the newer — so every pair is two clicks away.
  */
-export function pickPair(pair: ComparePair, k: number, n: number): ComparePair {
-  if (k === pair.left || k === pair.right || k < 0 || k >= n) return pair;
-  const kept = Math.abs(k - pair.left) < Math.abs(k - pair.right) ? pair.right : pair.left;
-  return { left: Math.min(kept, k), right: Math.max(kept, k) };
+export function pickPair(pair: ComparePick, k: number): ComparePick {
+  if (k === pair.older || k === pair.newer) return pair;
+  return { older: pair.newer, newer: k };
+}
+
+/** A picked pair as the views show it: in stage order, the earlier on the left. */
+export function pairOf(pick: ComparePick): ComparePair {
+  return { left: Math.min(pick.older, pick.newer), right: Math.max(pick.older, pick.newer) };
 }
 
 /** Side by side from stage `k`: it and the next, the last with the one before. */
@@ -140,7 +146,8 @@ export function sideFits(width: number): boolean {
  * dead in it. Everything else is built here, per `.compare` with two or
  * more stages: the method control (three buttons), the legend (one
  * button per stage, marking what shows: in the slider and side by side it
- * picks the one pair both show, by `pickPair`; in the switch it goes to
+ * picks the one pair both show, by `pickPair`, the first stage the older
+ * pick at rest; in the switch it goes to
  * the stage), the divider and the handle
  * (an ARIA slider), the live note, and the corner tags when
  * `COMPARE.cornerTags`; and the state the CSS reads — `data-js`,
@@ -250,7 +257,8 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   // show, the divider's position; the switch's stage.
   let mode = openingMode(root.dataset.mode, readMode());
   let p = COMPARE.restAt;
-  let pair: ComparePair = restView('side', n);
+  const rest = restView('side', n);
+  let picked: ComparePick = { older: rest.left, newer: rest.right }; // the earlier stage the older pick
   let stage = restView('switch', n).stage;
   /** The switch's leaving stage while the arriving one fades in over it. */
   let leaving: number | null = null;
@@ -321,6 +329,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     if (root.dataset.view !== showing) root.dataset.view = showing;
     let shown: number[];
     let note: number;
+    const pair = pairOf(picked);
     if (showing === 'slider') {
       const at = sliderView(p, pair);
       const split = String(round(at.split));
@@ -391,7 +400,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   const pick = (i: number) => {
     if (view() === 'switch') go(i);
     else {
-      pair = pickPair(pair, i, n);
+      picked = pickPair(picked, i);
       render();
     }
   };

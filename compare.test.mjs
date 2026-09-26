@@ -6,6 +6,7 @@ import {
   COMPARE_WORDING,
   noteIndex,
   openingMode,
+  pairOf,
   pickPair,
   restView,
   sideFits,
@@ -55,8 +56,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     reads, each case named for what fails it: the slider two-way
 //     (T1709a) — one pair at every p, the divider at p — and the pair a
 //     legend click picks as a table, every click on three and four
-//     stages (a stage in the pair leaves it; another replaces the nearer
-//     member, the later on a tie; the pair in stage order) — and the side
+//     stages (a stage in the pair leaves it; another replaces the member
+//     picked longer ago and becomes the newer; shown in stage order), and
+//     every pair within two clicks of rest — and the side
 //     pair, the switch's step with and without wrapping, the view at rest
 //     per method and per rest pair, whose note shows, the side-by-side
 //     fit, and the method a block opens in.
@@ -355,76 +357,145 @@ describe('(d) the state (T1707)', () => {
     ]);
   });
 
-  // [pair before, stage clicked, pair after], for every pair and every
-  // click: a stage in the pair leaves it; another replaces the member
-  // nearer to it in stage order, the later on a tie; left < right.
+  // [pick before as [older, newer], stage clicked, pick after, the pair
+  // shown in stage order], for every pick and every click: a stage in the
+  // pair leaves it; another replaces the older and becomes the newer.
   const picks = (n) => {
     const rows = [];
-    for (let left = 0; left < n; left++)
-      for (let right = left + 1; right < n; right++)
-        for (let k = 0; k < n; k++) {
-          const next = pickPair({ left, right }, k, n);
-          rows.push([[left, right], k, [next.left, next.right]]);
-        }
+    for (let older = 0; older < n; older++)
+      for (let newer = 0; newer < n; newer++)
+        if (older !== newer)
+          for (let k = 0; k < n; k++) {
+            const next = pickPair({ older, newer }, k);
+            const shown = pairOf(next);
+            rows.push([[older, newer], k, [next.older, next.newer], [shown.left, shown.right]]);
+          }
     return rows;
   };
 
-  it('pickPair on three stages: every click on every pair', () => {
+  it('pickPair on three stages: every click on every pick', () => {
     expect(picks(3)).toEqual([
-      [[0, 1], 0, [0, 1]],
-      [[0, 1], 1, [0, 1]],
-      [[0, 1], 2, [0, 2]],
-      [[0, 2], 0, [0, 2]],
-      [[0, 2], 1, [0, 1]],
-      [[0, 2], 2, [0, 2]],
-      [[1, 2], 0, [0, 2]],
-      [[1, 2], 1, [1, 2]],
-      [[1, 2], 2, [1, 2]],
+      [[0, 1], 0, [0, 1], [0, 1]],
+      [[0, 1], 1, [0, 1], [0, 1]],
+      [[0, 1], 2, [1, 2], [1, 2]],
+      [[0, 2], 0, [0, 2], [0, 2]],
+      [[0, 2], 1, [2, 1], [1, 2]],
+      [[0, 2], 2, [0, 2], [0, 2]],
+      [[1, 0], 0, [1, 0], [0, 1]],
+      [[1, 0], 1, [1, 0], [0, 1]],
+      [[1, 0], 2, [0, 2], [0, 2]],
+      [[1, 2], 0, [2, 0], [0, 2]],
+      [[1, 2], 1, [1, 2], [1, 2]],
+      [[1, 2], 2, [1, 2], [1, 2]],
+      [[2, 0], 0, [2, 0], [0, 2]],
+      [[2, 0], 1, [0, 1], [0, 1]],
+      [[2, 0], 2, [2, 0], [0, 2]],
+      [[2, 1], 0, [1, 0], [0, 1]],
+      [[2, 1], 1, [2, 1], [1, 2]],
+      [[2, 1], 2, [2, 1], [1, 2]],
     ]);
   });
 
-  it('pickPair on four stages: every click on every pair', () => {
+  it('pickPair on four stages: every click on every pick', () => {
     expect(picks(4)).toEqual([
-      [[0, 1], 0, [0, 1]],
-      [[0, 1], 1, [0, 1]],
-      [[0, 1], 2, [0, 2]],
-      [[0, 1], 3, [0, 3]],
-      [[0, 2], 0, [0, 2]],
-      [[0, 2], 1, [0, 1]],
-      [[0, 2], 2, [0, 2]],
-      [[0, 2], 3, [0, 3]],
-      [[0, 3], 0, [0, 3]],
-      [[0, 3], 1, [1, 3]],
-      [[0, 3], 2, [0, 2]],
-      [[0, 3], 3, [0, 3]],
-      [[1, 2], 0, [0, 2]],
-      [[1, 2], 1, [1, 2]],
-      [[1, 2], 2, [1, 2]],
-      [[1, 2], 3, [1, 3]],
-      [[1, 3], 0, [0, 3]],
-      [[1, 3], 1, [1, 3]],
-      [[1, 3], 2, [1, 2]],
-      [[1, 3], 3, [1, 3]],
-      [[2, 3], 0, [0, 3]],
-      [[2, 3], 1, [1, 3]],
-      [[2, 3], 2, [2, 3]],
-      [[2, 3], 3, [2, 3]],
+      [[0, 1], 0, [0, 1], [0, 1]],
+      [[0, 1], 1, [0, 1], [0, 1]],
+      [[0, 1], 2, [1, 2], [1, 2]],
+      [[0, 1], 3, [1, 3], [1, 3]],
+      [[0, 2], 0, [0, 2], [0, 2]],
+      [[0, 2], 1, [2, 1], [1, 2]],
+      [[0, 2], 2, [0, 2], [0, 2]],
+      [[0, 2], 3, [2, 3], [2, 3]],
+      [[0, 3], 0, [0, 3], [0, 3]],
+      [[0, 3], 1, [3, 1], [1, 3]],
+      [[0, 3], 2, [3, 2], [2, 3]],
+      [[0, 3], 3, [0, 3], [0, 3]],
+      [[1, 0], 0, [1, 0], [0, 1]],
+      [[1, 0], 1, [1, 0], [0, 1]],
+      [[1, 0], 2, [0, 2], [0, 2]],
+      [[1, 0], 3, [0, 3], [0, 3]],
+      [[1, 2], 0, [2, 0], [0, 2]],
+      [[1, 2], 1, [1, 2], [1, 2]],
+      [[1, 2], 2, [1, 2], [1, 2]],
+      [[1, 2], 3, [2, 3], [2, 3]],
+      [[1, 3], 0, [3, 0], [0, 3]],
+      [[1, 3], 1, [1, 3], [1, 3]],
+      [[1, 3], 2, [3, 2], [2, 3]],
+      [[1, 3], 3, [1, 3], [1, 3]],
+      [[2, 0], 0, [2, 0], [0, 2]],
+      [[2, 0], 1, [0, 1], [0, 1]],
+      [[2, 0], 2, [2, 0], [0, 2]],
+      [[2, 0], 3, [0, 3], [0, 3]],
+      [[2, 1], 0, [1, 0], [0, 1]],
+      [[2, 1], 1, [2, 1], [1, 2]],
+      [[2, 1], 2, [2, 1], [1, 2]],
+      [[2, 1], 3, [1, 3], [1, 3]],
+      [[2, 3], 0, [3, 0], [0, 3]],
+      [[2, 3], 1, [3, 1], [1, 3]],
+      [[2, 3], 2, [2, 3], [2, 3]],
+      [[2, 3], 3, [2, 3], [2, 3]],
+      [[3, 0], 0, [3, 0], [0, 3]],
+      [[3, 0], 1, [0, 1], [0, 1]],
+      [[3, 0], 2, [0, 2], [0, 2]],
+      [[3, 0], 3, [3, 0], [0, 3]],
+      [[3, 1], 0, [1, 0], [0, 1]],
+      [[3, 1], 1, [3, 1], [1, 3]],
+      [[3, 1], 2, [1, 2], [1, 2]],
+      [[3, 1], 3, [3, 1], [1, 3]],
+      [[3, 2], 0, [2, 0], [0, 2]],
+      [[3, 2], 1, [2, 1], [1, 2]],
+      [[3, 2], 2, [3, 2], [2, 3]],
+      [[3, 2], 3, [3, 2], [2, 3]],
     ]);
   });
 
-  it('pickPair: no click on a stage outside the pair leaves it unchanged, and no two do the same thing', () => {
+  it('pickPair: no click on a stage outside the pair leaves the shown pair unchanged, and no two do the same thing', () => {
     for (const n of [3, 4]) {
-      const rows = picks(n);
-      for (const [before, k, after] of rows) {
+      const byPick = new Map();
+      for (const [before, k, , shown] of picks(n)) {
         if (before.includes(k)) continue;
-        expect([before, k, after]).not.toEqual([before, k, before]);
-        expect([before, k, after.includes(k)]).toEqual([before, k, true]);
+        const was = pairOf({ older: before[0], newer: before[1] });
+        expect([before, k, shown]).not.toEqual([before, k, [was.left, was.right]]);
+        expect([before, k, shown.includes(k)]).toEqual([before, k, true]);
+        byPick.set(`${before}`, [...(byPick.get(`${before}`) ?? []), `${shown}`]);
       }
-      const byPair = new Map();
-      for (const [before, k, after] of rows)
-        if (!before.includes(k)) byPair.set(`${before}`, [...(byPair.get(`${before}`) ?? []), `${after}`]);
-      for (const [before, afters] of byPair) expect([before, new Set(afters).size]).toEqual([before, afters.length]);
+      for (const [before, shown] of byPick) expect([before, new Set(shown).size]).toEqual([before, shown.length]);
     }
+  });
+
+  it('pickPair: from rest (the first stage the older pick, the last the newer) every pair of three and of four stages is within two clicks', () => {
+    for (const n of [3, 4]) {
+      const rest = restView('side', n, 'ends');
+      const start = { older: rest.left, newer: rest.right };
+      const reached = new Set();
+      const see = (pick) => {
+        const { left, right } = pairOf(pick);
+        reached.add(`${left},${right}`);
+      };
+      see(start);
+      for (let a = 0; a < n; a++) {
+        const one = pickPair(start, a);
+        see(one);
+        for (let b = 0; b < n; b++) see(pickPair(one, b));
+      }
+      const all = [];
+      for (let l = 0; l < n; l++) for (let r = l + 1; r < n; r++) all.push(`${l},${r}`);
+      expect([n, [...reached].sort()]).toEqual([n, all]);
+    }
+  });
+
+  it('pickPair from rest on three stages: Tones replaces Camera (T | F), then Camera replaces Finished (C | T), then Finished (C | F)', () => {
+    let pick = { older: 0, newer: 2 };
+    const seen = [];
+    for (const k of [1, 0, 2]) {
+      pick = pickPair(pick, k);
+      seen.push([k, pairOf(pick)]);
+    }
+    expect(seen).toEqual([
+      [1, { left: 1, right: 2 }],
+      [0, { left: 0, right: 1 }],
+      [2, { left: 0, right: 2 }],
+    ]);
   });
 
   it('sidePair is stage k and the next — the last stage with the one before', () => {
