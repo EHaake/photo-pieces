@@ -687,6 +687,29 @@ where the simpler shape was taken it is said in one line.
   hash); the sentence in "The loupe's file" claiming it could is
   superseded by the T1710 note.
 
+  **Rounds T1713a–b (Phase 2 pause, 2026-09-26).** (a) `LOUPE.pan:
+  'follow'` (the other value `'drag'`, the loupe as first built): when
+  zoomed, a mouse pointer's position over the box sets the pan
+  directly — the pointer at fraction (fx, fy) of the box shows the
+  view at `tx = fx · w(1 − s)`, `ty = fy · h(1 − s)`, so the pointer
+  at the centre shows the centre and at the bottom right the bottom
+  right, as if reading the unzoomed photograph — a new reducer action
+  `hover` (`pointerType` mouse only; touch and pen keep the drag);
+  a click without movement still closes; the arrows still pan and
+  the next hover overrides them; under `'drag'` nothing changes.
+  (b) `LOUPE.window: 'frame'` (the other value `'photo'`, as first
+  built): while the loupe is open the stage carries `data-loupe-open`
+  (a state attribute, on the barrier's list) and the quiet frame drops
+  its mat — `html[data-quiet] .image-stage[data-loupe-open] .image-frame
+  { padding: 0; }` (a fifth quiet rule, by name in matte (b); it reads
+  no `--mat`, so the one-matted-surface case still holds) — and the
+  overlay is placed from the frame's rect, so the loupe fills the box
+  the mat had; on close the mat returns. Removing the mat's padding
+  moves the photograph's edge by the mat's width; that jump happens
+  under the glide (a transition on the frame's padding reads
+  `--dur-move`, none under reduced motion). The plan's earlier
+  "the mat and the ground stay" is superseded by this round.
+
 - **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, `styles.css`,
   T1714). A second pattern beside `DIRECTIVE_PATTERN`, for the one
   container the plugin renders: `^:::compare(\{[^}]*\})?[ \t]*\n([\s\S]*?)\n:::[ \t]*$`

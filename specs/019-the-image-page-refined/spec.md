@@ -579,3 +579,13 @@ re-implementation. The plan says where each lives.
 - **Phase 1 closed (2026-09-25)** — the fade stays at 180ms; "the
   design on this is settled." Several compares through one piece,
   each a subset of the same stages, are expected in his writing.
+- **Phase 2 keeps (2026-09-26)** — a click on the photograph at the
+  fit zooms, a click around it leaves; a photograph without a larger
+  export keeps its loupe where its own file has detail to add; full
+  detail is one image pixel per screen pixel; the gestures and keys;
+  480ms glide, 950ms fade; the recommended larger export is 4000px on
+  the long edge, limited by the camera's resolution.
+- **Rounds T1713a–b (2026-09-26)** — when zoomed, the loupe follows
+  the mouse, tracking the pointer's place on the unzoomed photograph;
+  a click without movement zooms back out; touch keeps the drag. The
+  mat goes while the loupe is open, the loupe filling the frame.

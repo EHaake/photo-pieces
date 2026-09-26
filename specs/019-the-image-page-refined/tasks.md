@@ -704,9 +704,42 @@ images.
       1.5 then 1.8 in the browser scales the loupe by 1.5 then 1.2
       (recorded at 1512×982)._
 
+- [ ] **T1713a** — Round: the loupe follows the mouse ("simply
+      moving the mouse across the image moves the loupe, and it should
+      track relative to the unzoomed image … when the mouse is in the
+      center, the zoomed in loupe should be in the center … Then a
+      click zooms back out"). Plan: rounds paragraph (a). `loupe.ts`:
+      `LOUPE.pan: 'follow'`, the `hover` action and its reducer case,
+      `createLoupe` sending `pointermove` without a press as `hover`
+      for a mouse; `loupe.test.mjs`: `EXPECTED`, hover cases (centre →
+      centre, corners → corners, clamped), the drag value's cases kept
+      under `'drag'`. _Verify: green; `pan` mutation → EXPECTED fails;
+      BiDi at 1512×982: with the loupe open, a mouse move to the box's
+      centre gives tx = w(1−s)/2, to the bottom-right corner w(1−s),
+      to the top-left 0; a click without movement closes._
+
+- [ ] **T1713b** — Round: the mat goes while zoomed ("Maybe remove
+      the matte when zooming in"). Plan: rounds paragraph (b).
+      `loupe.ts`: `LOUPE.window: 'frame'`, `data-loupe-open` on the
+      stage while open, the overlay from the frame's rect under
+      `'frame'`; `global.css`: the fifth quiet rule and the padding
+      transition; barrier lists; matte (b)'s quiet list (a deliberate
+      fifth); `loupe.test.mjs` (c) pins the rules; the padding
+      transition reads the move token (motion barrier). _Verify: green;
+      BiDi: the frame's padding 0 and the loupe's rect equal to the
+      frame's while open, 40px and gone after close; under reduced
+      motion no transition._
+
 ### Phase 2 record (the person's walkthrough)
 
-_Filled in at the pause._
+**First look (2026-09-26).** The click at the fit "is fine"; what he
+doesn't like is dragging: the loupe should follow the mouse, tracking
+"relative to the unzoomed image", a click zooming back out. Keeps: the
+loupe without a larger export ("Keep it"), the zoom range, the
+gestures and keys, the durations. The window: "Maybe remove the matte
+when zooming in." The recommended larger export: 4000px on the long
+edge, "limited by the camera's resolution" (AUTHORING.md, T1715).
+Rounds: T1713a, T1713b.
 
 ## Phase 3 — Obsidian and the documents (reviewer after the phase; walkthrough: in Obsidian, with the rebuilt plugin installed as its README says — the fog piece's closing `:::compare` shows its three stages as images with their labels beneath in Live Preview, and turns back into its text when the cursor enters it; a leaf block like `::fullbleed` renders as before; `AUTHORING.md`'s new parts — the block, the stages, the larger export, the gear table — read as the rest of that document does and tell him what he needs to finish his piece)
 
