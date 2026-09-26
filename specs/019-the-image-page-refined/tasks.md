@@ -704,7 +704,7 @@ images.
       1.5 then 1.8 in the browser scales the loupe by 1.5 then 1.2
       (recorded at 1512×982)._
 
-- [ ] **T1713a** — Round: the loupe follows the mouse ("simply
+- [x] **T1713a** — Round: the loupe follows the mouse ("simply
       moving the mouse across the image moves the loupe, and it should
       track relative to the unzoomed image … when the mouse is in the
       center, the zoomed in loupe should be in the center … Then a
@@ -980,6 +980,7 @@ tier if it is ever on (it is off). -->
 | T1712 loupe wired | implementation (`opus`, high) | ~127k + ~60k (two rounds) | done; 573 tests (+10); stopped once on matte (b)'s quiet-list count vs the plan's cursor rule — resolved as a deliberate fourth by name (plan noted); the loupe section sits before the compare section (compare.test slices compare → Motion); wheel deltaMode converted; a dblclick listener so opensOn can be retuned; no real 2560px export exists — the Phase 2 report quotes 2000px numbers |
 | Phase 2 review | implementation (`opus`, high) | ~133k | signed off, nothing blocking; fix-now as T1712a: opensOn's 'gesture' didn't leave on click as the plan claimed and 'dblclick' cannot coexist with "a click leaves"; Safari's trackpad pinch arrives as gesture events, untaken; loupe.ts's shared-file comment stale; docs: two "matte unedited" lines corrected; pause: own-file loupes at 2000px exports (portrait 1.13 on the laptop only), minGain and withoutDetail together; sweep: motion (d)'s fifth/sixth labels, the data-glide gate test's shape, no automated pin on the page wiring, pinch false leaves touch-action none, snap's inline round untested, the :root "fingertip" comment stale; the browser records were not in the bundle (check 6 unreviewed — the sweep bundle carries them) |
 | T1712a review fixes | implementation (`opus`, high) | ~60k | done; 572 tests; dblclick action removed outright; the zoom-in cursor does not depend on opensOn (moot at click) — note; a real Safari trackpad pinch needs the walkthrough |
+| T1713a follow the mouse | implementation (`opus`, high) | ~62k | done; 577 tests (+5); a hover during the open glide snaps the view to the end (as a drag does) — may show at the walkthrough; a mouse drag still pans under follow; the personx27s own astro dev holds 4321 — previews use 4322 |
 
 _(Session-tier allowance draw noted at each pause.)_
 
