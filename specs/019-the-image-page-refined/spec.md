@@ -6,7 +6,15 @@ what may change there without re-planning. Written in the spec
 conversation with the product owner, who chose it over the roadmap's
 mobile pass and front door: "I'd like to do a mobile pass later once
 we have some real content. I'd like to instead focus on expanding and
-refining the image detail page."
+refining the image detail page." **Amended 2026-09-26**, after the
+Phase 3 pause and before the real piece, with three changes the Phase
+1 look held for the ordinary path (each beyond the tuning envelope):
+the stage's share of the screen, the pair blocks `side` and `slider`,
+and the filmstrip as a fourth method — the paragraph "Amended after
+Phase 3" in the Summary, Goals 8 and 9, and the sections marked
+_(amended 2026-09-26)_. The amended sections were re-planned as
+plan.md's "Amendment (2026-09-26)" and tasks.md's Phase 3a, signed off
+at the top tier.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
@@ -68,6 +76,29 @@ Everything here is additive and optional per image, as spec 006's
 sections are. A photograph with nothing but its file renders the page
 it renders today, with better gear names.
 
+**Amended after Phase 3 (2026-09-26).** Three things the photographer
+asked for at the Phase 1 look reached beyond the envelope and were held
+("there may be more amendments to the spec coming so let's get through
+the rest first"); with Phases 0–3 signed off they are folded in here,
+before his piece, so the last pause judges them on a real photograph
+too. **The photograph is too small in the page's normal view.** Spec
+017's rule fits every frame to one rectangle turned, its long side the
+smaller of the screen's two extents — so on the 16:10 laptop a
+horizontal photograph is bound by the screen's height and sits
+narrower than the wide compare beneath it, white around it and the
+title far below. The stage becomes viewport-aware on both axes: a
+photograph takes a set share of the screen whatever its ratio and the
+screen's — a landscape large on the 16:10 laptop, a portrait large on
+the LG DualUp — with the target share per orientation as tunables.
+**Side by side as a block of its own, and the slider alone for one
+pair.** He writes several compares through a piece — raw against
+finished first, then raw against each stage — and for those a fixed
+pair with no method control is what the writing wants: a `side` block
+(two stages beside each other, nothing to choose) and a `slider` block
+(one wipe between two stages, nothing to choose). **A filmstrip.** A
+fourth method of the compare that pages or scrolls through every
+stage in order, for the block that carries all of them.
+
 ## Goals
 
 1. **Gear names a reader knows.** The wall label's camera and lens rows
@@ -81,7 +112,8 @@ it renders today, with better gear names.
    on the page. The fixtures' invented strings get entries, so a clean
    build warns about nothing.
 
-2. **The compare is a block, with stages and three methods.** A
+2. **The compare is a block, with stages and three methods** — four,
+   from the 2026-09-26 amendment. A
    `compare` block, written in a piece or in a sidecar story, shows an
    ordered list of two or more stages of one photograph — each an
    image, a label and a note — and lets the reader look at them three
@@ -94,11 +126,19 @@ it renders today, with better gear names.
      the same size; the stops choose which two.
    - **Switch**: one stage at a time, filling the frame; a click, a tap
      or a key advances to the next and the label says which is showing.
+   - **Filmstrip** _(amended 2026-09-26)_: the stages in one row at the
+     frame's size, one in the frame at a time; the reader pages or
+     scrolls through every stage in order — arrows at the frame's
+     sides, keys, a swipe or a horizontal scroll — and the strip slides
+     rather than fades, so the sequence reads as a sequence.
    A legend names the stages in every method, and the note of the stage
    (or the pair) showing sits beneath the frame. The author's `mode`
    chooses the method the block opens in; the reader's choice holds for
    the visit. Without script the stages stand stacked as plain figures
-   with their labels and notes, as spec 006's compare does today.
+   with their labels and notes, as spec 006's compare does today. (The
+   Phase 1 rounds made the slider two-way on a picked pair; see the
+   Decided section, which outranks the first draft above where they
+   differ.)
 
 3. **The image page's compare is the same block, fed by files.** A
    photograph with a camera's frame beside it (`_land-b.jpg`) keeps
@@ -142,7 +182,34 @@ it renders today, with better gear names.
    the transform is the single source of truth for the block's shape;
    the site's CSS and the Obsidian plugin mirror it by the existing
    convention. A piece that writes a malformed `compare` fails the build
-   naming the piece, as any other block does.
+   naming the piece, as any other block does. _(Amended 2026-09-26.)_
+   The same holds for the amendment: the constitution's clause names
+   `side` and `slider` and the compare's fourth method, and its images
+   paragraph names the three blocks a private file may sit in, in one
+   commit before the amendment's first implementation task; a
+   malformed `side` or `slider` fails the build naming the piece.
+
+8. **The photograph takes its share of the screen** _(amended
+   2026-09-26)_. In the page's normal view the photograph is sized to
+   a set share of the first screen, whatever its ratio and the
+   screen's: a landscape photograph to a share of the screen's width,
+   a portrait (and a square) to a share of its height, each bounded by
+   the other axis so the whole photograph shows below the header with
+   the nav line under it, as today. The two shares are tunables. The
+   nav line and the title follow at the piece's frame-to-prose
+   spacing and no further. The quiet view, its mat and the loupe are
+   untouched.
+
+9. **A pair, fixed: the `side` and `slider` blocks** _(amended
+   2026-09-26)_. Two blocks with the compare's stage syntax and exactly
+   two stages, for the writing that wants one look and nothing to
+   choose. `side` shows the two beside each other at the same size,
+   each with its label and note beneath, and needs no script. `slider`
+   shows one wipe between the two, the handle and the divider as the
+   compare's, the two labels fixed beneath as its legend, the note of
+   the pair beneath that; without script the two stand stacked. Neither
+   carries a method control or a picking legend. A private file may sit
+   in either, from its own folder, exactly as in a `compare`.
 
 ## Non-goals
 
@@ -153,12 +220,18 @@ it renders today, with better gear names.
   That is its own spec; this one commits detail exports beside their
   photographs like every other file, and `ROADMAP.md` notes that the
   day has moved closer.
-- **The page's layout beyond the compare.** The story beside the
+- **The page's layout beyond the compare and the stage's size.** The
+  story beside the
   photograph on wide screens, a jump line for long pages, and the wall
   label's shape were candidates in this conversation and are left to a
   follow-up roadmap entry, so this spec is judged on the photograph and
   its processing alone. The compare's own width is in scope (Design
-  requirements).
+  requirements), and from 2026-09-26 so is the stage's size in the
+  normal view (Goal 8) — the words' distance from the frame included,
+  nothing else of the page's flow.
+- **A thumbnail strip, or a fifth method.** The filmstrip's index is
+  the legend the compare already has; it draws no thumbnails. Its
+  panes are the stages at the frame's size.
 - **Gear pages.** The name table is a flat lookup, shaped so that the
   roadmap's gear entry can absorb it later (a gear file "declares the
   strings it answers to"); no page, no link, no slug for gear in this
@@ -193,10 +266,31 @@ it renders today, with better gear names.
   stage) and `_land-b.detail.jpg` (the loupe's export, below) are all
   one family, all private, none an image of the site.
 - **Compare** — an ordered list of two or more stages of one
-  photograph, a method (slider, side by side, switch) and the method it
+  photograph, a method (slider, side by side, switch, and from
+  2026-09-26 filmstrip) and the method it
   opens in. In a body it is the `compare` block; on the image page it is
   built from the sidecar's stages, the camera's frame first and the
   finished photograph last.
+- **Filmstrip** _(amended 2026-09-26)_ — the compare's fourth method:
+  the stages in one row at the frame's size, the showing stage in the
+  frame and its neighbours beyond the frame's edges; paged by arrows,
+  keys, a swipe or a horizontal scroll; the legend its index. Written
+  as `mode="filmstrip"`.
+- **Side block** _(amended 2026-09-26)_ — `:::side`: exactly two
+  stages, written as a compare's are, shown beside each other at the
+  same size, each with its label and note; no method, no script. Not a
+  `diptych`: a diptych places two public images of any ratio under one
+  caption; a `side` places two stages of one photograph, private files
+  allowed, each captioned by its own label and note.
+- **Slider block** _(amended 2026-09-26)_ — `:::slider`: exactly two
+  stages, the compare's slider alone — the first stage left of the
+  divider, the second right, the two labels fixed as the legend, the
+  pair's note beneath. No method control, no picking.
+- **The stage's shares** _(amended 2026-09-26)_ — two numbers, the
+  landscape share (of the first screen's width, for a photograph wider
+  than tall) and the portrait share (of the first screen's height, for
+  a photograph taller than wide, or square), sizing the photograph in
+  the page's normal view. Tunables.
 - **Detail export** — `_<basename>.detail.<ext>`: a larger private
   export of the photograph, for the loupe alone, found automatically
   like the camera's frame. Its size is the photographer's call per
@@ -206,7 +300,9 @@ it renders today, with better gear names.
   basename, and nothing else; placing one in a piece fails the build. Now
   a private file is the camera's frame (`_land-b.jpg`), a stage or the
   detail export (`_land-b.<word>.jpg`), and it may be placed in exactly
-  one place: as a stage of a `compare` block in its own folder. A private
+  one kind of place: as a stage of a `compare` block in its own folder
+  — from 2026-09-26, of a `compare`, `side` or `slider` block in its
+  own folder, the three blocks that take stages. A private
   file whose photograph does not exist beside it still fails the build
   naming the file; a `_` file placed in any other block, or by any other
   piece, still fails.
@@ -230,6 +326,25 @@ They pick "Side by side" from the block's small control and the two
 neighbouring stages sit beside each other; they pick "Switch" and one
 stage fills the frame, a click advancing to the next. On a phone the
 handle follows a finger and a tap switches.
+
+### Looking through every stage _(amended 2026-09-26)_
+
+On the block that carries all the stages the reader picks "Filmstrip".
+One stage fills the frame; an arrow at either side, the arrow keys, a
+swipe on the phone or a two-finger scroll on the trackpad slide the
+strip to the next stage, the legend's mark and the note moving with
+it. The strip slides, it does not fade: the reader sees the frames go
+by in order. It stops at the last stage.
+
+### Arriving at the photograph _(amended 2026-09-26)_
+
+The reader lands on an image page on the laptop: a horizontal
+photograph spans most of the screen's width below the header, the nav
+line and the title close beneath it; a vertical one stands most of the
+screen's height. On the DualUp, turned tall, a vertical photograph
+spans most of the height and a horizontal most of the width. On both
+the whole photograph is on the first screen with the nav line under
+it, as before. In the quiet view nothing is different.
 
 ### Looking closer
 
@@ -257,6 +372,31 @@ One stage per line: the image, its label as the image's text, its note
 after it. Live Preview shows the three images with their labels; the
 site shows the compare. The same block in a sidecar's story puts the
 compare in the writing and the page's automatic section steps aside.
+
+### Writing a pair _(amended 2026-09-26)_
+
+Further down the same piece, where the writing wants one fixed look:
+
+```markdown
+:::side
+![Camera](./_land-b.jpg) Straight out of the camera, flat profile.
+![Tones](./_land-b.tones.jpg) Shadows lifted on the ridge, the fog's highlights held.
+:::
+
+:::slider
+![Camera](./_land-b.jpg) Straight out of the camera, flat profile.
+![Finished](./land-b.jpg) A touch of warmth over the whole frame.
+:::
+```
+
+The `side` shows the two beside each other, each with its label and
+note beneath, and nothing to choose; the `slider` shows one wipe
+between the two with the handle at its centre, Camera left and
+Finished right, the labels fixed beneath, and nothing to choose. Both
+take exactly two stages; a third fails the build naming the piece.
+Live Preview shows each as it shows a compare. Several blocks over the
+same stages ask for the same files, so a reader downloads each stage
+once.
 
 ### Declaring stages for the page
 
@@ -300,7 +440,54 @@ output.
   width. Whatever is chosen, the three methods share it, and side by
   side never shows the two stages at less than a useful size — where
   the column is too narrow for two, side by side stacks them or yields
-  to switch (decided at the pause).
+  to switch (decided at the pause). _(Amended 2026-09-26, after the
+  Phase 1 rounds set the width per method — side by side wide, the
+  slider and the switch in the column.)_ The filmstrip takes the
+  switch's width; the `side` block takes side by side's, the `slider`
+  block the slider's; each is one value per surface in the envelope.
+- **The stage's size** _(amended 2026-09-26)_. In the page's normal
+  view the frame's width is the landscape share of the first screen's
+  available width for a photograph wider than tall, and for one taller
+  than wide, or square, the frame's height is the portrait share of
+  the first screen's available height — "available" as the stage
+  already measures it: the page's width less its side pads; the first
+  screen below the header less the stage's spacing and the nav line —
+  and in either case the frame is then bounded by the other axis, so
+  the whole photograph shows with the nav line under it. One rule,
+  two numbers, and nothing else of spec 017's fit survives: the
+  rectangle turned, and the equal-sides answer, are replaced. The white
+  above and below the frame is the piece's frame-to-prose spacing
+  (the stage's spacing today) and no more: the nav line and the
+  title follow at that distance on both screens. The `sizes` hint
+  states the same rule in literals, as it does today, and the mat
+  sampler renders the real stage. The quiet view's box, its mat and
+  the loupe read none of this. The shares open at nine tenths each and
+  are tuned at the pause.
+- **The filmstrip** _(amended 2026-09-26)_. One row of panes at the
+  frame's size, the frame showing one stage whole; the neighbours sit
+  beyond the frame's edges (whether a sliver of each shows is a
+  tunable, opening at none). Two arrows at the frame's sides, drawn as
+  the site's — flat, the ground's family, no shadow — previous and
+  next, each hidden or quiet at its end since the strip does not wrap
+  (a tunable, as the switch's); the arrow keys and Home/End when the
+  block has focus; a swipe on touch, and a horizontal wheel or
+  trackpad scroll, which follow the hand and settle on the nearest
+  stage on release. The legend marks the showing stage and a click on
+  a stage slides to it; the note beneath is the showing stage's. Paging
+  is a movement on the move duration; the settle after a swipe is a
+  movement on the state duration, like the slider's snap; under
+  reduced motion both cut to the stage. Nothing autoplays.
+- **The pair blocks** _(amended 2026-09-26)_. `side`: the two panes at
+  the photograph's ratio and the same size, the label · note of each
+  beneath its pane in the caption style, no control, no legend, no
+  live note; where two won't fit at a useful size they stack, as the
+  compare's side by side does. `slider`: the compare's slider — the
+  divider, the handle, the first stage left and the second right, the
+  same drag, touch and arrow keys — with a fixed legend of the two
+  labels beneath (left · right, not buttons) and the live note; no
+  method control. Both read as the compare reads, from the same
+  stylesheet rules; neither introduces a look the compare does not
+  have.
 - **The slider with stages.** One track, N−1 wipes laid end to end,
   the stops evenly spaced; the frame under the divider at any moment
   shows two neighbouring stages, the earlier on the left. Dragging past
@@ -344,11 +531,17 @@ output.
   conversation (the Decided section), plus `ILCE-7M5` → `Sony α7 V`.
 - **The `compare` block**: container form only; one stage per line as
   the flow above shows; `mode` optional (`slider` default, `side`,
-  `switch`); two stages at minimum; every stage in the block's own
+  `switch`, and from 2026-09-26 `filmstrip`); two stages at minimum; every stage in the block's own
   folder (a private file may not be borrowed across pieces; a public
   photograph may, by spec 008's paths). A block with one stage, a stage
   whose file is missing, or a private file placed outside a `compare`
+  (from 2026-09-26: outside a `compare`, `side` or `slider`)
   fails the build naming the piece and the file.
+- **The `side` and `slider` blocks** _(amended 2026-09-26)_: container
+  form only; the compare's stage lines, exactly two; no attributes.
+  One stage or three fails the build naming the piece and the count; a
+  missing file and a borrowed private file fail as the compare's do.
+  Any attribute fails as an unknown attribute does today.
 - **The sidecar**: an optional `stages:` list, each with `file`,
   `label` and `note` (`note` optional); the camera's frame and the
   finished photograph are never listed, they are implied; a listed
@@ -362,7 +555,17 @@ output.
 - **The constitution** is amended before the first task: the
   block-vocabulary clause names `compare` and retires the `sequence`
   reservation; the images paragraph names the private-file family
-  (camera's frame, stages, detail export).
+  (camera's frame, stages, detail export). _(Amended 2026-09-26.)_
+  Before the amendment's first implementation task it is amended
+  again, in its own commit: the clause names `side` and `slider`
+  (`side` a plain figure block, `slider` an interactive one) and the
+  compare's four ways; the images paragraph names the three blocks a
+  private file may sit in.
+- **The documents, again** _(amended 2026-09-26)_: `AUTHORING.md` and
+  the README gain the two blocks and the filmstrip, and the README's
+  sentence on the stage's size states the share rule; the plugin's
+  README notes that Live Preview shows a `side` and a `slider` as it
+  shows a `compare`.
 
 ## The tuning envelope
 
@@ -401,7 +604,14 @@ as a routine task:
   page's wording block and the block's own;
 - the sidecar's field names (`stages`, `file`, `label`, `note`) and the
   note's fallback to `processing:`, before the real piece is written
-  against them.
+  against them;
+- _(amended 2026-09-26)_ the stage's two shares, and whether a square
+  is sized as a portrait or a landscape; the filmstrip's arrows (their
+  place, their shape, whether they hide at the ends), its keys, whether
+  it wraps, the neighbours' sliver, and whether a wheel scrolls it; the
+  width of the filmstrip and of each pair block per surface, among the
+  vocabulary's widths; the `slider` block's fixed legend's shape; where
+  a `side` stacks.
 
 **As many rounds as it takes.** A pause may run several looks; each
 round is a sub-lettered task, reviewed with the phase, and the phase's
@@ -411,7 +621,8 @@ against the first draft of it.
 **What still needs the ordinary path** — a spec amendment, the planner
 re-dispatched on the changed section, and a sign-off:
 
-- a fourth method, or a second new block;
+- a fourth method, or a second new block — _(amended 2026-09-26)_ now
+  a fifth method, or a fourth block that takes stages;
 - a change to the private-file rule beyond what Entities states, or a
   private file placed by any block but `compare`;
 - the loupe on any surface but the quiet view;
@@ -440,13 +651,18 @@ re-implementation. The plan says where each lives.
 - [ ] `:::compare` with two or more stages renders, without script, the
       stages stacked as figures with their labels and notes, in order —
       pinned by a transform test
-- [ ] With script the block offers slider, side by side and switch; the
+- [ ] ~~With script the block offers slider, side by side and switch; the
       slider has a visible centred handle that drags with mouse, touch
       and arrow keys; with three stages one sweep passes through all
       three with the labels as stops; side by side shows two
       neighbouring stages; switch shows one and advances on click, tap
       and key; the note beneath is the showing stage's — the mechanics
-      pinned by page tests, the feel judged at the pause
+      pinned by page tests, the feel judged at the pause~~ — **superseded
+      by the Phase 1 rounds** (T1709a, d, g, h; Decided): the slider
+      is two-way on a picked pair, the legend picks the pair in order
+      for the slider and side by side alike; the rest of the line
+      (the handle, the switch, the note) stands and was attested at
+      the Phase 1 pause
 - [ ] The image page's "Raw to finished" is the `compare` block: a
       photograph with only a camera's frame shows two stages as today;
       a sidecar with `stages:` shows the camera's frame, the declared
@@ -486,6 +702,48 @@ re-implementation. The plan says where each lives.
       remain marked as fixtures
 - [ ] The build's GPS scan finds no GPS block in any image in `dist/`,
       the detail exports included — the existing barrier, re-run
+
+_Amended 2026-09-26:_
+
+- [ ] In the page's normal view a photograph wider than tall has the
+      landscape share of the available width, bounded by the available
+      height, and one taller than wide (or square) the portrait share
+      of the available height, bounded by the available width — the
+      rule pinned by the existing sizes-hint test over its grid of
+      ratios and viewports against the stylesheet's rule, and the
+      frame's box read in the browser at 1512×982 and 1280×1440 for a
+      3:2 and a 2:3 and recorded; the nav line and the title sit at the
+      frame-to-prose spacing beneath the frame at both — read and
+      recorded; the quiet view's and the loupe's tests pass unchanged;
+      the size judged at the pause on both screens
+- [ ] `:::side` with two stages renders them beside each other, each
+      with its label and note, script or not; with one stage or three
+      the build fails naming the piece and the count; a private stage
+      of its own folder is allowed and one of another folder fails —
+      pinned by transform tests and a built page
+- [ ] `:::slider` with two stages renders, without script, the two
+      stacked as figures; with script, the handle and the divider wipe
+      between the first stage left and the second right with mouse,
+      touch and arrow keys, the two labels fixed beneath and the note
+      following, and no method control is offered — the mechanics
+      pinned by page tests, the feel at the pause
+- [ ] The compare offers Filmstrip as a fourth method: one stage in
+      the frame, arrows, keys and a swipe or horizontal scroll page
+      through every stage in order without wrapping, the legend marks
+      the showing stage and a click on it slides there, the note
+      follows; the slide reads the move duration and the settle the
+      state duration, and reduced motion cuts both — the state pinned
+      by unit tables, the wiring by page tests, the feel at the pause
+- [ ] A stage shown by several blocks of one page — a `compare`, a
+      `side`, a `slider` in any mix — resolves to one URL, so it is
+      fetched once — pinned on a built page
+- [ ] The constitution names `side`, `slider` and the compare's four
+      ways, amended in its own commit before the amendment's first
+      implementation task; `AUTHORING.md`, the README and the plugin's
+      README describe the two blocks, the filmstrip and the stage's
+      share; the plugin shows a `side` and a `slider` as it shows a
+      `compare` in Live Preview — checked by the photographer at the
+      pause
 
 ## Decided (in this conversation, 2026-09-24)
 
@@ -597,3 +855,35 @@ re-implementation. The plan says where each lives.
   sweep and neighbouring pairs: the slider is two-way on a picked
   pair.
 - **Phase 2 closed (2026-09-26)** — "Looks good, continue."
+- **The amendment (2026-09-26), after the Phase 3 pause** — the three
+  changes the Phase 1 look held for the ordinary path, folded in before
+  the real piece. **The stage's share** — his words at the Phase 1
+  look and in the amendment's brief: horizontals "sit smaller than the
+  compare beneath them with white around and the title far below"; the
+  stage should be "viewport-aware on both axes, so a photograph takes a
+  set share of the screen whatever its ratio and the screen's
+  (landscape large on the 16:10 MacBook, portrait large on the LG
+  DualUp), with the target share per orientation as tunables". The
+  session's rule, to be seen: a landscape sized by a share of the
+  width, a portrait or a square by a share of the height, each bounded
+  by the other axis; both shares opening at nine tenths; spec 017's
+  rectangle-turned rule replaced outright, not layered on. **Side by
+  side as its own block, and the slider alone for one pair** — from
+  the Phase 1 record: "side by side as its own block … the slider
+  usable on its own for one pair", for the several compares he writes
+  through a piece, "raw to finished first, then raw to stage 1 …",
+  with no duplicate images loaded. The session's call: two blocks,
+  named by the words he already writes as `mode` values, `side` and
+  `slider`, each taking exactly two stages and no attributes, `side`
+  static and `slider` the compare's slider without its control — not
+  an attribute on `compare`, because he asked for blocks and the
+  writing reads better as `:::side` than as a compare told what not
+  to offer. **A filmstrip** — from the Phase 1 record: "any number of
+  stages with a final filmstrip view that pages or scrolls through
+  them (a fourth method)". The session's shape, to be seen: a sliding
+  strip of the stages at the frame's size, arrows, keys, swipe and
+  horizontal scroll, the legend as its index, no wrap, no thumbnails;
+  distinct from the switch in its movement (a slide, not a fade) and
+  its direct manipulation. **AC 4** noted as superseded by the Phase 1
+  rounds. All three judged at the new phase's pause on the fixtures,
+  then again on his piece.
