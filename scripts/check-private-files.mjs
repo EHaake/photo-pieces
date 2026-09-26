@@ -33,6 +33,16 @@
 // as its parent's. Two builders (the transform and the image page) make
 // the markup; this makes their agreement a fact of every build.
 //
+// Fourth scan, one candidate list per stage file: on each page, every
+// candidate URL of every stage image (a compare pane's img — its
+// `srcset`'s URLs, or its `src` when it has none) maps to the `srcset`
+// and `sizes` pair it first appeared in, and a stage image whose
+// candidate is already mapped to a different pair fails. One page may
+// show a stage in several blocks; identical `srcset` and `sizes` give the
+// browser one choice at a viewport, so the file is fetched once. Keyed by
+// URL equality alone, like the first scan it assumes nothing about how
+// files are named; a URL shared with an img outside a compare is not read.
+//
 // `<dir>/pagefind/` is excluded: pagefind's index is a third party's.
 //
 //   node scripts/check-private-files.mjs [dir]   # default: dist
@@ -79,17 +89,19 @@ const hasAttribute = (attributes, name) => new RegExp(`\\s${name}(?=[\\s=/>]|$)`
 const STATE_ATTRIBUTES = [
   'data-js', 'data-view', 'data-narrow', 'data-settling', 'data-fresh',
   'data-part', 'data-loupe-ready', 'data-loupe-open', 'data-glide', 'data-dragging',
+  'data-paging',
 ];
 const STATE_CLASSES = new Set([
   'compare-line', 'compare-handle', 'compare-legend', 'compare-stop', 'compare-control',
-  'compare-now', 'compare-tag', 'compare-slot', 'compare-hint',
+  'compare-now', 'compare-tag', 'compare-slot', 'compare-hint', 'compare-arrow',
   'loupe', 'loupe-layer', 'loupe-base', 'loupe-detail',
 ]);
 
 /**
  * Every element with `class` token `root`, walked by tag depth from its
  * open tag to its matching close: `{ start, end, node }`, the node tree
- * holding only `compare-…`-classed elements and `img`.
+ * holding only `compare-…`-classed elements and `img`, each `img` node
+ * keeping its `src`, `srcset` and `sizes`.
  */
 function compares(markup) {
   const found = [];
@@ -110,7 +122,17 @@ function compares(markup) {
       const own = classesOf(attrs).filter((token) => token.startsWith('compare-'));
       const lower = tag.toLowerCase();
       const read = lower === 'img' || own.length > 0;
-      const node = read ? { name: lower === 'img' ? 'img' : own.join('.'), children: [] } : null;
+      const node = !read
+        ? null
+        : lower === 'img'
+          ? {
+              name: 'img',
+              children: [],
+              src: attribute(attrs, 'src') ?? '',
+              srcset: attribute(attrs, 'srcset') ?? '',
+              sizes: attribute(attrs, 'sizes') ?? '',
+            }
+          : { name: own.join('.'), children: [] };
       if (node) stack[stack.length - 1].children.push(node);
       if (VOID.has(lower) || whole.endsWith('/>')) continue;
       open.push(node);
@@ -122,6 +144,22 @@ function compares(markup) {
   }
   return found;
 }
+
+/** Every stage image of a compare: each `img` node whose parent is a pane. */
+function stageImages(node) {
+  const found = [];
+  for (const child of node.children) {
+    if (node.name === COMPARE_CLASSES.pane && child.name === 'img') found.push(child);
+    else found.push(...stageImages(child));
+  }
+  return found;
+}
+
+/** A stage image's candidate URLs: its `srcset`'s, or its `src` when it has none. */
+const candidates = ({ src, srcset }) =>
+  srcset.trim()
+    ? srcset.split(',').map((entry) => entry.trim().split(/\s+/)[0]).filter(Boolean)
+    : [src].filter(Boolean);
 
 /** The first way a compare departs from the one shape, or null. */
 function outOfShape(top) {
@@ -182,6 +220,7 @@ const loupes = []; // { url, file, detail }
 let imagePages = 0;
 let pages = 0;
 let shaped = 0;
+let stages = 0;
 const imagesDir = join(root, 'images') + sep;
 
 for await (const file of files(root)) {
@@ -202,10 +241,21 @@ for await (const file of files(root)) {
   }
 
   const markup = text.replace(COMMENT, '').replace(SCRIPT, '').replace(STYLE, '');
+  const lists = new Map(); // candidate URL → the srcset+sizes pair it first appeared in
   for (const { node } of compares(markup)) {
     shaped += 1;
     const problem = outOfShape(node);
     if (problem) problems.push(`[check-private-files] a compare out of shape in ${file}: ${problem}`);
+    for (const img of stageImages(node)) {
+      stages += 1;
+      const pair = JSON.stringify([img.srcset, img.sizes]);
+      const urls = candidates(img);
+      const clash = urls.find((url) => lists.has(url) && lists.get(url) !== pair);
+      if (clash) {
+        problems.push(`[check-private-files] one stage, two candidate lists in ${file}: ${clash} (its srcset or sizes differ)`);
+      }
+      for (const url of urls) if (!lists.has(url)) lists.set(url, pair);
+    }
   }
 
   const states = new Set();
@@ -244,5 +294,5 @@ if (problems.length > 0) {
   process.exit(1);
 }
 console.log(
-  `[check-private-files] ${loupes.length} loupe files on ${imagePages} image pages, ${details} of them detail exports named nowhere else; ${shaped} compares in one shape; no compare or loupe state in ${pages} pages.`,
+  `[check-private-files] ${loupes.length} loupe files on ${imagePages} image pages, ${details} of them detail exports named nowhere else; ${shaped} compares in one shape; ${stages} stage images, one candidate list per file; no compare or loupe state in ${pages} pages.`,
 );

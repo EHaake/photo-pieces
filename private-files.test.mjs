@@ -23,6 +23,10 @@ const stage = (url, detail = true) =>
 const part = (label, note) =>
   `<div class="compare-stage"><div class="compare-pane"><img src="/_astro/${label}.webp" alt="" class="astro-img"></div>` +
   `<figcaption class="compare-caption"><span class="compare-label">${label}</span>${note ? `<span class="compare-note">${note}</span>` : ''}</figcaption></div>`;
+/** A stage whose pane img carries a candidate list. */
+const listed = (label, srcset, sizes) =>
+  `<div class="compare-stage"><div class="compare-pane"><img src="/_astro/${label}.webp" srcset="${srcset}" sizes="${sizes}" alt=""></div>` +
+  `<figcaption class="compare-caption"><span class="compare-label">${label}</span></figcaption></div>`;
 const compare = (inner) => `<figure class="compare" data-mode="slider"><div class="compare-frames">${inner}</div></figure>`;
 
 describe('the private-files barrier (T1703, spec 019)', () => {
@@ -101,7 +105,7 @@ describe('the private-files barrier (T1703, spec 019)', () => {
       const result = run(dir);
       expect(result.status).toBe(0);
       expect(result.stdout).toContain(
-        '[check-private-files] 1 loupe files on 1 image pages, 1 of them detail exports named nowhere else; 0 compares in one shape; no compare or loupe state in 2 pages.',
+        '[check-private-files] 1 loupe files on 1 image pages, 1 of them detail exports named nowhere else; 0 compares in one shape; 0 stage images, one candidate list per file; no compare or loupe state in 2 pages.',
       );
     });
 
@@ -156,6 +160,32 @@ describe('the private-files barrier (T1703, spec 019)', () => {
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, 'index.html')}: .compare-slot`);
       expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, 'index.html')}: .compare-hint`);
+    });
+
+    it('data-paging (the filmstrip\'s paging state, T1722) fails', () => {
+      const dir = site({ 'pieces/x/index.html': html('<figure class="stage" data-paging><img src="/a.webp" alt=""></figure>') });
+      const result = run(dir);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(
+        `[check-private-files] a script-only state in the markup of ${join(dir, 'pieces/x/index.html')}: data-paging`,
+      );
+    });
+
+    it('class="compare-arrow" (the filmstrip\'s arrows, T1722) fails', () => {
+      const dir = site({ 'index.html': html('<button class="compare-arrow" type="button">next</button>') });
+      const result = run(dir);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, 'index.html')}: .compare-arrow`);
+    });
+
+    it('data-paging and .compare-arrow named only inside <script> exit 0', () => {
+      const dir = site({
+        'index.html': html(
+          `<script>figure.setAttribute('data-paging', ''); nav.innerHTML = '<button class="compare-arrow" data-paging></button>';</script><p>ok</p>`,
+        ),
+      });
+      const result = run(dir);
+      expect(result.status).toBe(0);
     });
 
     it('data-js and .loupe named only inside <script> and <style> exit 0', () => {
@@ -246,6 +276,62 @@ describe('the private-files barrier (T1703, spec 019)', () => {
       );
       expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, PAGE)}: .compare-tag`);
       expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, PAGE)}: .compare-line`);
+    });
+  });
+
+  describe('scan 4: one candidate list per stage file per page', () => {
+    const PIECE = 'pieces/x/index.html';
+    const SRCSET = '/_astro/a.400.webp 400w, /_astro/a.800.webp 800w';
+    const SIZES = '(min-width: 60rem) 50vw, 100vw';
+
+    it('two compares whose stage images share URLs with identical srcset and sizes exit 0 with the count', () => {
+      const dir = site({
+        [PIECE]: html(
+          compare(listed('a', SRCSET, SIZES) + part('b')) + compare(listed('a', SRCSET, SIZES) + part('c')),
+        ),
+      });
+      const result = run(dir);
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('2 compares in one shape; 4 stage images, one candidate list per file;');
+    });
+
+    it('the same URL in two stage images with different sizes fails, naming the page and the URL', () => {
+      const dir = site({
+        [PIECE]: html(
+          compare(listed('a', SRCSET, SIZES) + part('b')) + compare(listed('a', SRCSET, '100vw') + part('c')),
+        ),
+      });
+      const result = run(dir);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(
+        `[check-private-files] one stage, two candidate lists in ${join(dir, PIECE)}: /_astro/a.400.webp (its srcset or sizes differ)`,
+      );
+    });
+
+    it('the same URL in two stage images with different srcset fails, naming the page and the URL', () => {
+      const dir = site({
+        [PIECE]: html(
+          compare(listed('a', SRCSET, SIZES) + part('b')) +
+            compare(listed('a', '/_astro/a.800.webp 800w, /_astro/a.1600.webp 1600w', SIZES) + part('c')),
+        ),
+      });
+      const result = run(dir);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(
+        `[check-private-files] one stage, two candidate lists in ${join(dir, PIECE)}: /_astro/a.800.webp (its srcset or sizes differ)`,
+      );
+    });
+
+    it('a URL shared by a stage image and an img outside any compare exits 0', () => {
+      const dir = site({
+        [PIECE]: html(
+          compare(listed('a', SRCSET, SIZES) + part('b')) +
+            `<figure class="single"><img src="/_astro/a.800.webp" srcset="/_astro/a.800.webp 800w" sizes="100vw" alt=""></figure>`,
+        ),
+      });
+      const result = run(dir);
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('1 compares in one shape; 2 stage images, one candidate list per file;');
     });
   });
 });
