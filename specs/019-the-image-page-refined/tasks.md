@@ -762,7 +762,7 @@ T1713c. **Third look:** "Looks good, continue." Phase 2 closed.
 
 ## Phase 3 — Obsidian and the documents (reviewer after the phase; walkthrough: in Obsidian, with the rebuilt plugin installed as its README says — the fog piece's closing `:::compare` shows its three stages as images with their labels beneath in Live Preview, and turns back into its text when the cursor enters it; a leaf block like `::fullbleed` renders as before; `AUTHORING.md`'s new parts — the block, the stages, the larger export, the gear table — read as the rest of that document does and tell him what he needs to finish his piece)
 
-- [ ] **T1714** — The plugin shows a compare. Pattern: `LEAF_BLOCKS`,
+- [x] **T1714** — The plugin shows a compare. Pattern: `LEAF_BLOCKS`,
       `BlockWidget` and `buildDecorations` in `obsidian-plugin/main.ts`;
       its `.photo-pieces-preview-row` rule in `styles.css`. Plan:
       "Obsidian". New `obsidian-plugin/compare.ts` (no `obsidian`
@@ -1002,6 +1002,7 @@ tier if it is ever on (it is off). -->
 | T1713a follow the mouse | implementation (`opus`, high) | ~62k | done; 577 tests (+5); a hover during the open glide snaps the view to the end (as a drag does) — may show at the walkthrough; a mouse drag still pans under follow; the personx27s own astro dev holds 4321 — previews use 4322 |
 | T1713b mat off while zoomed | implementation (`opus`, high) | ~59k + ~40k (two rounds) | done; 581 tests; stopped once: the orchestratorx27s first paragraph had the loupe filling the matx27s box, impossible without resizing the stage image — corrected to option 1; the padding transition is keyed to the overlayx27s glide, not quiet view, so entering quiet and resizing stay still; no seventh reduced-motion rule; a width-bound photograph (a panorama on a narrow screen) might grow when the mat goes — unmeasured, walkthrough |
 | T1713c full area | implementation (`opus`, high) | ~85k | done; 580 tests; the grown box is the stagex27s available area, not the matx27s box (a 3:2 photograph can match the old frame on one axis only: 1280×1440 width, 13px bands top and bottom; 1512×982 height, 20px wider each side); a photograph ready at the fit but not over the grown box opens nothing (attribute removed in the same task); the attribute lives with the overlay |
+| T1714 plugin compare | implementation (`opus`, high) | ~44k | done; 584 tests (+4); plugin build exit 0; a leaf line inside a compare span is never decorated; a compare with no images stays raw |
 
 _(Session-tier allowance draw noted at each pause.)_
 
