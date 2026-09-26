@@ -647,7 +647,7 @@ images.
       not a loosened test; nothing else in the file changes.
       `loupe.test.mjs`: describe "(c) the loupe's rules" — each by
       string. _Verify: `sh scripts/verify.sh` green (count recorded)
-      with the barrier's line; matte.test.mjs green unedited;
+      with the barrier's line; matte.test.mjs green with one deliberate addition (the fourth quiet rule, T1712);
       `git diff main -- motion.test.mjs` shows (d)'s additions only;
       mutation, reverted: the RM rule moved above the loupe section →
       the order case fails naming it; in the browser under reduced
@@ -688,6 +688,21 @@ images.
       that AUTHORING.md will state. Rounds as `T1713a`, `b`, …; when he
       names the keeps they are recorded here and Phase 3 is dispatched.
       _Verify: as T1709's, for the loupe's values._
+
+- [ ] **T1712a** — Phase 2 review fixes. (1) `LOUPE.opensOn`
+      semantics: `'gesture'` means a click on the photograph leaves
+      and the wheel, a pinch or + opens (the reducer's fit click →
+      `leave-quiet`), with a case; `'dblclick'` withdrawn from the
+      union and the comment corrected (the zoom-in key opens under
+      every value). (2) Safari's `gesturechange`: the ratio of
+      successive `event.scale` into `pinch`, `preventDefault` on all
+      three gesture events, bound with the wheel over the photograph.
+      (3) `loupe.ts`'s comment no longer claims the loupe can share a
+      stage's file. Plan: the T1712a paragraph. _Verify: green (count);
+      the (b) case for `'gesture'` fails if the branch returns `stay`
+      (mutation, reverted); a synthesised `gesturechange` with scale
+      1.5 then 1.8 in the browser scales the loupe by 1.5 then 1.2
+      (recorded at 1512×982)._
 
 ### Phase 2 record (the person's walkthrough)
 
@@ -930,6 +945,7 @@ tier if it is ever on (it is off). -->
 | T1710 loupe file | implementation (`opus`, high) | ~75k + ~20k | done; 535 tests; land-b loupe 39,702 B (5400×3600 webp, flat fixture); dist/_astro main 781 files / 35.45 MB → after 837 / 40.25 MB (+37 files, +4.75 MB, the 62 own-file loupes 4.84 MB, none sharing a stage srcset file — fit/position enter the stage hash); the constrained layout emitted nine unnamed sizes per getImage until layout none (plan amended); og.ts has the same waste — sweep note; exifr cannot open webp (check-no-gps reads through sharp) |
 | T1711 loupe state | implementation (`opus`, high) | ~58k | done; 563 tests (+28); every fit→zoomed step (wheel, pinch, key) returns open; click decided after press/move/release by dragSlop; arrows move the view the way they point; in dblclick mode a double click while zoomed would close then reopen — T1712 or a round if the pause picks dblclick |
 | T1712 loupe wired | implementation (`opus`, high) | ~127k + ~60k (two rounds) | done; 573 tests (+10); stopped once on matte (b)'s quiet-list count vs the plan's cursor rule — resolved as a deliberate fourth by name (plan noted); the loupe section sits before the compare section (compare.test slices compare → Motion); wheel deltaMode converted; a dblclick listener so opensOn can be retuned; no real 2560px export exists — the Phase 2 report quotes 2000px numbers |
+| Phase 2 review | implementation (`opus`, high) | ~133k | signed off, nothing blocking; fix-now as T1712a: opensOn's 'gesture' didn't leave on click as the plan claimed and 'dblclick' cannot coexist with "a click leaves"; Safari's trackpad pinch arrives as gesture events, untaken; loupe.ts's shared-file comment stale; docs: two "matte unedited" lines corrected; pause: own-file loupes at 2000px exports (portrait 1.13 on the laptop only), minGain and withoutDetail together; sweep: motion (d)'s fifth/sixth labels, the data-glide gate test's shape, no automated pin on the page wiring, pinch false leaves touch-action none, snap's inline round untested, the :root "fingertip" comment stale; the browser records were not in the bundle (check 6 unreviewed — the sweep bundle carries them) |
 
 _(Session-tier allowance draw noted at each pause.)_
 

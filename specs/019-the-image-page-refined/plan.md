@@ -672,6 +672,21 @@ where the simpler shape was taken it is said in one line.
   spelled. The loupe section sits after the quiet rules and before
   the compare section (compare.test.mjs slices compare → Motion).
 
+  Phase 2 review (T1712a, 2026-09-25): (N1) `LOUPE.opensOn` is
+  `'click'` (a click on the photograph zooms) or `'gesture'` (a click
+  on the photograph leaves the quiet view as before; the wheel, a
+  pinch or + opens the loupe) — the reducer's `click` at the fit
+  returns `leave-quiet` under `'gesture'`, with a test; `'dblclick'`
+  is withdrawn, since the first click of a double click would leave
+  before the dblclick event arrives. (N2) Safari reports a trackpad
+  pinch as `gesturestart` / `gesturechange` / `gestureend`, not
+  ctrl+wheel: `createLoupe` feeds the ratio of successive
+  `event.scale` values into the `pinch` action and prevents the
+  default, so the page does not zoom instead. (N4) No own-file loupe
+  shares a file with its stage (fit/position enter the stage's
+  hash); the sentence in "The loupe's file" claiming it could is
+  superseded by the T1710 note.
+
 - **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, `styles.css`,
   T1714). A second pattern beside `DIRECTIVE_PATTERN`, for the one
   container the plugin renders: `^:::compare(\{[^}]*\})?[ \t]*\n([\s\S]*?)\n:::[ \t]*$`
@@ -978,7 +993,7 @@ feel is the person's at each pause.
   (close); and (c) the loupe's CSS rules by string, the glide on
   `--dur-move`/`--ease-move`, the detail on `--dur-appear`/`--ease-appear`.
 
-- **The loupe, wired** — **T1712**: matte.test.mjs green unedited (the
+- **The loupe, wired** — **T1712**: matte.test.mjs green with one deliberate addition (the fourth quiet rule, by name) (the
   quiet rules, the mat, the stage); motion.test.mjs green with one
   deliberate edit — (d)'s `REDUCED_RULES` and its order expectation gain
   `.loupe-detail { animation-duration: calc(var(--dur-appear) * var(--rm-appear)) }`
