@@ -902,3 +902,8 @@ _Amended 2026-09-26:_
   the accent, centred in the disc — not a font glyph (the mono face has
   none, and a system fallback drew them off-centre). The disc's ring,
   fill and colour stay the handle's.
+- **T1729b (Phase 3a pause, 2026-09-26).** A sideways trackpad gesture
+  on the filmstrip pages exactly one stage in its direction, on the move
+  duration; the rest of the gesture, momentum included, is ignored
+  until it has been quiet. (The hand-following scroll stays a tunable,
+  off.) A swipe by finger still follows the hand and settles nearest.

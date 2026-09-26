@@ -1105,6 +1105,25 @@ headers'.
       at both screens; muted computes `oklch(0.5 0.012 250)` on ring
       and chevron; 629 tests.
 
+- [x] **T1729b** — Round (Phase 3a pause, first look, 2026-09-26): a
+      trackpad gesture landed between stages too easily; he wants a
+      sideways gesture to move one whole stage. `COMPARE.stripWheel`
+      becomes `false | 'follow' | 'page'`, opening at `'page'`: the first
+      sideways wheel event of a gesture at or past `stripWheelStepPx`
+      (new, 4) pages one stage through `page()` and the gesture is then
+      ignored, momentum included, until `stripWheelIdleMs` of quiet (any
+      wheel event restarts it); `'follow'` is the hand-tracking path as
+      built at T1726; a gesture at an end does nothing. Pure
+      `stripWheelStep(mode, gated, deltaX, threshold)` pinned by a (d)
+      table; `EXPECTED` updated; AUTHORING.md's filmstrip sentence.
+      _Recorded (1512×982, land-b's section):_ a decaying burst
+      40,30,20,10,5,2 → one page with `data-paging`, at 1; a second burst
+      after 150ms → 2; at the last, nothing; leftward → 1; a single 3px
+      event → nothing; a vertical burst not prevented, nothing; a
+      25-event momentum tail over 600ms → one page. 630 tests. The 4px
+      threshold is reasoned (settling fingers send 1–3px; a tilt wheel
+      16px), not measured — his trackpad judges it.
+
 - [ ] **T1729** — The amendment's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3a
       pause, in the person's words, with T1720's, T1725's and T1726's
@@ -1378,6 +1397,7 @@ tier if it is ever on (it is off). -->
 | T1728a review fixes | implementation (`opus`, high) | ~36k | done; 629 tests (+1); 560→600 fails the new case by name; compare.test.mjs not prettier-clean on the branch (six lines in (c)/(d)) — sweep note |
 | Phase 3a re-review | implementation (`opus`, high) | ~5k | signed off; notes 3–8 of the first review to the sweep |
 | T1729a arrows' look round | implementation (`opus`, high) | ~83k + ~70k (two passes) | done; 629 tests; first pass centred the fallback glyph with a Menlo-tuned nudge and found the mono face has no arrow glyphs; second pass drew the chevron in CSS; a 'lighter' ask conflicts with 'match the handle' (measured equal) — put to the person |
+| T1729b wheel pages one stage | implementation (`opus`, high) | ~64k | done; 630 tests (+1); both mutations fail by name; the gate restarts on any wheel event (vertical too) so a tail's drift cannot end it early |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_ Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
