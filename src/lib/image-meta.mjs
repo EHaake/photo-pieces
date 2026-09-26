@@ -717,7 +717,7 @@ export const COMPARE_CLASSES = Object.freeze({
 });
 export const COMPARE_WIDTHS = Object.freeze(['column', 'wide', 'stage']);
 /** Tunable: the compare's width per surface. */
-export const COMPARE_WIDTH = Object.freeze({ piece: 'column', page: 'column' });
+export const COMPARE_WIDTH = Object.freeze({ piece: 'wide', page: 'wide' });
 
 const COMPARE_SIZES = Object.freeze({
   column: '(min-width: 720px) 680px, 94vw',
