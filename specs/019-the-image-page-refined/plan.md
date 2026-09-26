@@ -508,6 +508,7 @@ where the simpler shape was taken it is said in one line.
   gains `cameraNote: 'The RAW file straight out of camera — no edits,
   no adjustments'`, the camera stage's note on the page (the
   photograph's own `processing:` stays the finished stage's).
+  _(Amendment 2026-09-26: the filmstrip's width is `COMPARE.stripWidth`, the pair blocks' `PAIR_WIDTH` — see "Amendment (2026-09-26)".)_
 
   **Round T1709g (Phase 1 pause, third look, 2026-09-25).** A slot may
   be empty: the state is `{ left: number | null, right: number | null,
@@ -786,6 +787,7 @@ where the simpler shape was taken it is said in one line.
   `.compare-legend` rules and the pinned strings beside them. The
   slider's geometry is a function: its round edits `sliderView` and its
   table. Both are the smallest honest unit.
+  _(Amendment 2026-09-26: the amended envelope's rows are a second table, "The tuning envelope, placed (amendment)".)_
 
 ## Failure messages and notes
 
@@ -1244,4 +1246,532 @@ front door, the piece page and its script, the sets and the arrows;
   place pinned by name; spec 018's panel existed because its tokens were
   CSS and needed trying live — these are mostly script behaviour, tried
   by editing a value and reloading `npm run dev`.
+- **No new dependency.**
+
+## Amendment (2026-09-26): the stage's share, the pair blocks, the filmstrip
+
+**Status**: Draft — pending sign-off
+**Implements**: spec.md's sections marked _(amended 2026-09-26)_ —
+Goal 2's filmstrip, Goals 7–9, Entities, the flows "Looking through
+every stage", "Arriving at the photograph" and "Writing a pair", the
+Design requirements "Width", "The stage's size", "The filmstrip" and
+"The pair blocks", the Authoring requirements, the envelope's new
+bullet, and the six criteria under "_Amended 2026-09-26:_" (AC 15–20
+here, numbered on from AC 14).
+
+Three additions to a built spec, in the same arrangement as the rest:
+one CSS rule and its `sizes` mirror for the stage; two descriptors in
+the transform that reuse the compare's structure and markup; one more
+view in `enhanceCompare`. No dependency. Everything above this section
+stands except two statements this section supersedes, deliberately:
+"Nothing else moves"' ban on hunks in the paper frame's rule (T1720
+replaces `html:not([data-quiet]) .image-frame`; `.image-stage`,
+`.image-frame`, `.image-frame img`, every quiet rule and the loupe
+section stay untouched, and their pins in matte.test.mjs pass
+unedited), and the compare's "three motion rules and nothing else"
+(five, T1726). The five scale tests are applied as before; where the
+simpler shape was taken the bullet says so.
+
+### Shape of the change (amendment)
+
+- **The constitution, again** (`CLAUDE.md`, T1719, its own commit
+  before T1720, on this branch for the reason "The constitution,
+  first" gives). Three edits, exact text:
+  - The block-vocabulary list's tail "and one interactive block,
+    compare (an ordered list of a photograph's stages — each an image,
+    a label and a note — looked at three ways), with captions via the
+    container form;" becomes "and three blocks that take a
+    photograph's stages (each an image, a label and a note): compare,
+    an interactive block that looks at an ordered list of them four
+    ways, and two that hold a pair — side, the two beside each other
+    as plain figures, and slider, an interactive wipe between them —
+    with captions via the container form;".
+  - "an _interactive_ block — `compare`, and any after it — is built
+    as" becomes "an _interactive_ block — `compare` and `slider`, and
+    any after them — is built as".
+  - The Images paragraph's "may be placed in a body only as a stage of
+    a `compare` block in its own folder." becomes "may be placed in a
+    body only as a stage of a `compare`, `side` or `slider` block —
+    the three blocks that take stages — in its own folder."
+
+- **The stage's share** (`src/styles/global.css`,
+  `src/lib/stage-sizes.ts`, the image page, the mat sampler, T1720).
+  Spec 017's rule — `--L`, `--S` and `width: min(L·q, S·r)` on
+  `html:not([data-quiet]) .image-frame` — is deleted and replaced by
+  one rule per shape:
+
+      /* :root, beside --frame-nav-h */
+      --stage-share-landscape: 1; /* a landscape's width: this share of the stage's available width */
+      --stage-share-portrait: 1; /* a portrait's (and by STAGE_SQUARE a square's) height: this share of the available height */
+
+      html:not([data-quiet]) .image-frame[data-shape='landscape'] {
+        width: min(calc(var(--avail-w) * var(--stage-share-landscape)), calc(var(--avail-h) * var(--ar, 1)));
+      }
+      html:not([data-quiet]) .image-frame[data-shape='portrait'] {
+        width: min(calc(var(--avail-h) * var(--stage-share-portrait) * var(--ar, 1)), var(--avail-w));
+      }
+
+  `--avail-w` and `--avail-h` are the stage's, unchanged (the page
+  less its side pads; the first screen below the header less the two
+  spacings and `--frame-nav-h`), so the frame's height is at most
+  `--avail-h` in both rules — the nav line stays on the first screen
+  and spec 013's cap on the image still never binds. The shape is read
+  at build time: `stage-sizes.ts` gains
+
+      export const STAGE_SQUARE = 'portrait';   // tunable: a square is sized as a 'portrait' or a 'landscape'
+      export const STAGE_SHARE = { landscape: 1, portrait: 1 } as const;   // mirrors :root's two tokens
+      export function stageShape(ar: number): 'landscape' | 'portrait'   // ar > 1 landscape, < 1 portrait, 1 → STAGE_SQUARE
+
+  and the page's stage figure and the sampler's both write
+  `data-shape={stageShape(ar)}` beside `--ar`. Why an attribute and
+  not CSS math: the rule is discontinuous at the square whenever the
+  two shares differ (with the portrait share at 0.9, at 1512×982 a
+  1.001 frame is 782px wide by the landscape rule, a 1.0 frame 703 by
+  the portrait one — at the opening shares of 1 the two expressions
+  agree at the square, but the shares are tunables) and no
+  `min`/`max`/`clamp` expression is; `sign()`
+  could, but the square's side would then be an edit to the rule and
+  matte.test.mjs's evaluator would have to learn it — the attribute
+  keeps the square one value and each rule one line of the spec's
+  words. `stageSizes(ar)` spells the rule of `stageShape(ar)` in
+  literals, the shares from `STAGE_SHARE`: landscape
+  `min(calc(AVAIL_W * 1), calc(availH(nav) * ar))`, portrait
+  `min(calc(availH(nav) * <1·ar>), AVAIL_W)`, at both nav branches
+  as today. The token and the literal stay one by the existing
+  evaluation ("the sizes hint agrees with the rule" reads the shares
+  from `:root`) and by a pin that `STAGE_SHARE` equals the two tokens.
+  The stage section's comment (global.css ~1893–1929) is rewritten for
+  the share rule; the comments on `.image-stage` and the quiet rules
+  keep their words. The spacing needs no rule: the stage hugs the
+  frame (`--stage-pad` = `--block-margin` above and below), the nav's
+  `margin-block-end` is `--block-margin` and `.image-head` adds no top
+  padding, so the nav line sits one frame-to-prose spacing under the
+  frame and the title one under the nav — the spec's "no further",
+  read (T1720 measures it). The stage `<img>` keeps its 2320px cap:
+  the laptop's landscape at 1171.5 CSS px asks 2343 device px, 1%
+  over it.
+
+  Expected boxes at `:root`'s opening shares of 1 (header 76px, nav
+  29px, pads 32px; spec 017's rule beside them, and the boxes at nine
+  tenths, for the pause):
+
+  | Screen    | Ratio | Share rule at 1 (w × h) | Bound by        | Spec 017 (w × h) | At 0.9 (w × h) |
+  | --------- | ----- | ----------------------- | --------------- | ---------------- | -------------- |
+  | 1512×982  | 3:2   | 1171.5 × 781.0          | height          | 781.0 × 520.7    | 1171.5 × 781.0 |
+  | 1512×982  | 2:3   | 520.7 × 781.0           | portrait share  | 520.7 × 780.6    | 468.8 × 702.9  |
+  | 1280×1440 | 3:2   | 1216.0 × 810.7          | landscape share | 1216.0 × 810.7   | 1094.4 × 729.6 |
+  | 1280×1440 | 2:3   | 810.3 × 1215.5          | portrait share  | 810.7 × 1215.5   | 743.8 × 1115.1 |
+
+  At 1 the share rule differs from spec 017's in one box of the four —
+  the laptop's landscape, which grows from 781 to 1171.5 wide — and
+  the other three stay within a pixel of what he sees today; the
+  share is the lever he asked for, tuned at the pause.
+
+- **The pair blocks in the transform, and the fourth mode**
+  (`remark-pieces-blocks.mjs`, `src/lib/image-meta.mjs`, T1721). Two
+  descriptors after `compare`, the compare's structure reused whole:
+
+      side:   { forms: 'container', body: 'stages', structure: 'compare', count: { min: 2, max: 2 },
+                attrs: { required: [], optional: [], enums: {} }, sizing: stageSizing }
+      slider: { …the same… }
+
+  `stageSizing` is the compare's existing sizing function, named once
+  and shared by the three descriptors, so every stage image in a body
+  carries `compareSizes(COMPARE_WIDTH.piece)` whatever block holds it
+  (AC 19). The count check reads `max` when present: `min === max`
+  says "takes exactly two stages". The `compare` branch builds all
+  three: root classes `piece-block piece-<name> compare
+  compare-w-<width>` with `<width>` = `PAIR_WIDTH[name] ??
+  COMPARE_WIDTH.piece`; below the root the one shape, class for class;
+  `data-mode` only on a compare that wrote one. One shape, one root
+  class, told apart by the `piece-<name>` class every block already
+  carries — no new attribute, and the barrier's scan 3 and the plugin
+  keep one rule (simpler than three root classes, which would need
+  scan 3 and `enhanceCompare` to learn a list). `rejectBorrowedPrivate`
+  takes the block's name so its line reads "a side may show…";
+  `validateAttributes`, when a block allows none, says "side takes no
+  attributes". `image-meta.mjs`: `COMPARE_MODES` gains `'filmstrip'`
+  (so the transform's `mode` enum does); `PAIR_WIDTH =
+  Object.freeze({ side: 'wide', slider: 'column' })` — the pair
+  blocks' width, one value each (side by side's and the slider's
+  kept widths; bodies are their only surface); `BLOCK_BODIES` gains
+  `side: 'stages'`, `slider: 'stages'` in the descriptors' commit;
+  `firstAltFor` skips a container whose `BLOCK_BODIES` kind is
+  `'stages'` (not only `compare`), since a stage's image text is its
+  label. `hasBlock(story, 'compare')` stays the section's suppressor:
+  the spec steps the section aside for a story's `compare` only, so a
+  story's `side` or `slider` shows beside the section — the case
+  AC 19 pins.
+
+- **The barrier: one file per stage** (`scripts/check-private-files.mjs`,
+  T1722). Scan 2's lists gain `data-paging` and the class
+  `compare-arrow` (T1726's script-only state). A fourth scan, in the
+  same pass: `compares()` keeps each pane `img`'s `srcset` and `sizes`;
+  per page, every candidate URL of every stage image maps to the
+  `srcset`+`sizes` pair it first appeared in, and a stage image whose
+  candidate is already mapped to a different pair fails. Identical
+  `srcset` and `sizes` at one viewport give the browser one choice, so
+  "one candidate list per stage file per page" is "fetched once"
+  (AC 19); keyed by URL equality alone, it stays name-independent like
+  scan 1. The summary line gains "S stage images, one candidate list
+  per file".
+
+- **The side block's static form, the fixtures, the page's stage
+  images** (`global.css`, `src/lib/compare.ts`, the fixtures, the
+  image page, T1723). `side` is final without script: the side-by-side
+  view's rules take `.piece-side` into their selector lists — the pane
+  at `aspect-ratio: var(--ar)`, the image `object-fit: contain` on
+  `--color-bg` — and the static form adds `.piece-side { container:
+  compare-side / inline-size; }`, `.piece-side .compare-frames {
+  grid-template-columns: 1fr 1fr; }` and `@container compare-side
+  (width < 560px) { .piece-side .compare-frames {
+  grid-template-columns: 1fr; } }` (560px = 2 × `sideMinPx`, the
+  compare's own threshold at opening; the side's is its own tunable
+  from here). Each stage's caption stays shown, label · note beneath
+  its pane (T1709j's dot). `enhanceCompare` skips `.piece-side` (one
+  line), so no script touches it. The page's section drops
+  `width={Math.min(src.width, 1400)}` from its stage `<Image>`: the
+  transform's Markdown images request the source's own width, and the
+  two builders must request the same transforms for a story's block and
+  the section to share files (scan 4 fails otherwise). Fixtures: the
+  fog piece, after its compare, gains a fixture sentence, `:::side`
+  (Camera, Tones) and `:::slider` (Camera, Finished); `_land-b.md`'s
+  story gains, at its end, a fixture sentence and `:::slider` (Camera,
+  Finished) — so the land-b page holds both builders over two stages
+  on every build.
+
+- **The filmstrip's state** (`src/lib/compare.ts`, T1724). `COMPARE`
+  gains, each with its comment:
+
+      stripWraps: false,          // the filmstrip's last stage pages on to the first
+      stripEnds: 'hide',          // an arrow with nowhere to go: 'hide' it, or 'quiet' (muted, aria-disabled)
+      stripKeys: { back: ['ArrowLeft'], next: ['ArrowRight'], first: ['Home'], last: ['End'] },
+      stripWheel: true,           // a horizontal wheel or trackpad scroll moves the strip
+      stripWheelIdleMs: 150,      // a wheel's end: the strip settles after this long without one
+      stripWidth: 'surface',      // the width class the filmstrip wears: 'surface' (the block's own, as the switch) or one of COMPARE_WIDTHS
+
+  `COMPARE_WORDING.modes` gains `filmstrip: 'Filmstrip'` (the control's
+  fourth word) and `strip: { back: 'Previous stage', next: 'Next
+  stage' }` (the arrows' names). Pure: `stripAt(from, by, n)` — the
+  strip's position, clamped to `[0, n − 1]`; `stripSettle(at, n)` —
+  the nearest stage (`Math.round`, clamped); `stripEnds(stage, n,
+  wraps)` — `{ back, next }`, whether each arrow has somewhere to go.
+  Stepping reuses `switchNext(i, n, dir, COMPARE.stripWraps)` — a
+  second caller, not a second function. `restView('filmstrip', n)` is
+  `{ stage: 0 }` and `noteIndex('filmstrip', view)` the stage, as the
+  switch's. The strip and the switch show one `stage`: entering the
+  filmstrip opens on the switch's stage and back.
+
+- **The slider block, enhanced** (`compare.ts`, `global.css`, T1725).
+  `enhance()` reads `fixed = root.classList.contains('piece-slider')`:
+  the mode is `'slider'` whatever is stored or authored, nothing is
+  read from or written to the store, no method control and no hint are
+  built, and the legend is two `li.compare-stop`, each its label as
+  text — no buttons, no side tags; the pair is `restView('slider', 2)`
+  (first left, second right) and never changes; the handle, the drag,
+  the touch, the keys and the live note are the compare's, the note
+  the second stage's (`noteIndex`). CSS, one rule on the legend's
+  existing row (its 1rem gap): `.piece-slider .compare-stop +
+  .compare-stop::before { content: '·'; margin-inline-end: 1rem;
+  color: var(--color-muted); }` — "Camera · Finished", T1709j's dot;
+  the fixed legend's shape, pinned by body.
+
+- **The filmstrip, enhanced** (`compare.ts`, `global.css`, T1726). The
+  fourth view of `render()`. The script writes `--i: k` on each stage
+  and `--strip-at` (the strip's position, a number) on the root; the
+  showing stage is `stripSettle(at)`, its part `"on"`, every other
+  `"strip"` (visible, off the frame); the legend's buttons go to a
+  stage, marking the showing one; no side tags, no hint (the switch's
+  hint rule takes the filmstrip into its list); the note is the
+  showing stage's. Two `button.compare-arrow` (`data-dir="back"` /
+  `"next"`, `aria-label` from `COMPARE_WORDING.strip`, text `←` / `→`)
+  are appended to the frames, per `stripEnds` hidden (`'hide'`) or
+  `aria-disabled` (`'quiet'`). The frames take `tabindex="0"`; a
+  `stripKeys` key steps, goes first or last, and stops propagating. A
+  pointer drag (touch or mouse — one path, as the slider's) follows
+  the hand: `at = stripAt(start, −dx / width, n)`, no transition; on
+  release `stripSettle`. A `wheel` listener on the frames (non-passive,
+  its `deltaMode` converted as the loupe's is) acts only in the
+  filmstrip, with `stripWheel`, and when `|deltaX| > |deltaY|`:
+  `preventDefault`, `at = stripAt(at, deltaX / width, n)`, and the
+  settle after `stripWheelIdleMs` with no wheel. A click on the frame
+  does nothing (the spec lists arrows, keys, swipe, scroll and legend).
+  The width class swaps per `stripWidth` as side by side's does per
+  `sideWidth`. Movement: a page (arrow, key, legend) writes
+  `data-paging`, the settle after a drag or a wheel writes
+  `data-settling` — each only when `!reducedMotion()`, so under reduced
+  motion both cut — and `transitionend` on `--strip-at` clears both.
+  CSS:
+
+      :root { --compare-peek: 0px; }   /* how far each neighbour shows beyond the frame's edge */
+      @property --strip-at { syntax: '<number>'; inherits: true; initial-value: 0; }
+      .compare[data-view='filmstrip'] .compare-frames { overflow: visible; clip-path: inset(0 calc(-1 * var(--compare-peek))); touch-action: pan-y; }
+      .compare[data-view='filmstrip'] .compare-stage { transform: translateX(calc((var(--i) - var(--strip-at)) * 100%)); }
+      .compare[data-paging] { transition: --strip-at var(--dur-move) var(--ease-move); }
+      .compare[data-view='filmstrip'][data-settling] { transition: --strip-at var(--dur-state) var(--ease-state); }
+
+  plus the arrows' rules — the handle's look: a `--compare-handle`
+  disc, 1px `--color-accent` border, `--color-bg` fill, accent glyph in
+  the mono face, no shadow; at the frame's sides, 0.5rem in, vertically
+  centred; muted when `aria-disabled`; `display: none` outside the
+  filmstrip. The strip is a transitioned registered property, not
+  native scrolling: a smooth scroll or `scroll-snap` settles on the
+  browser's curve and cannot read `--dur-move`. The settle rule is
+  scoped to the filmstrip so the slider's pinned `.compare[data-settling]`
+  stays byte for byte. No rule sets `opacity: 0`; no reduced-motion
+  rule is added (the gates are in script, spec 018's split).
+
+- **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, T1727).
+  `COMPARE_PATTERN` becomes `STAGES_PATTERN`,
+  `^:::(?:compare|side|slider)(\{[^}]*\})?[ \t]*\n([\s\S]*?)\n:::[ \t]*$`
+  — the group numbers unchanged, `:::sidebar` not matched; `main.ts`
+  imports it under the new name and renders all three with the
+  compare's widget and class; comments say "the three blocks that take
+  stages".
+
+- **The documents, again** (T1728): `AUTHORING.md` — "A compare in a
+  piece" gains `mode="filmstrip"` and what it does; a new "A pair: side
+  and slider" section after it (the flow's example verbatim, exactly
+  two stages, no attributes, a private file from its own folder, the
+  same files fetched once however many blocks show them); the private
+  files' text names the three blocks. `README.md` — the image page's
+  stage sentence (~149) states the share rule; the vocabulary table
+  gains `side` and `slider`, the compare's `mode` list `filmstrip`.
+  `obsidian-plugin/README.md` — the table's rows for `:::side` and
+  `:::slider`, shown as a compare is. `ROADMAP.md` and `DECISIONS.md`
+  at close-out (T1718, amended).
+
+### The tuning envelope, placed (amendment)
+
+The envelope's amended bullet, row by row; a round is the value, its
+row in the named test, and one Decided line in spec.md, as above.
+
+| Envelope item                                        | One place                                                                                           | Pinned by                                                           |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| the stage's two shares                               | `--stage-share-landscape`, `--stage-share-portrait` (`:root`); `STAGE_SHARE` mirrors them            | matte.test.mjs "the stage's shares", "the sizes hint agrees with the rule" |
+| a square as a portrait or a landscape                | `STAGE_SQUARE` (stage-sizes.ts)                                                                     | matte.test.mjs "stageShape"                                         |
+| the filmstrip's arrows: place and shape              | the `.compare[data-js] .compare-arrow` rules                                                        | compare.test.mjs (e) rule bodies                                    |
+| the arrows at the ends; wrapping                     | `COMPARE.stripEnds`; `COMPARE.stripWraps`                                                           | `EXPECTED`                                                          |
+| the filmstrip's keys; whether a wheel scrolls it     | `COMPARE.stripKeys`; `COMPARE.stripWheel` (and `stripWheelIdleMs`)                                  | `EXPECTED`                                                          |
+| the neighbours' sliver                               | `--compare-peek` (`:root`)                                                                          | compare.test.mjs `TOKENS`                                           |
+| the filmstrip's width                                | `COMPARE.stripWidth`                                                                                | `EXPECTED`                                                          |
+| each pair block's width                              | `PAIR_WIDTH` (image-meta.mjs)                                                                       | image-meta.test.mjs; the transform's side/slider shape cases        |
+| the `slider` block's fixed legend's shape            | the `.piece-slider .compare-stop + .compare-stop::before` rule                                      | compare.test.mjs (e) rule body                                      |
+| where a `side` stacks                                | the `@container compare-side (width < 560px)` literal                                               | compare.test.mjs (e) by string                                      |
+| the filmstrip's durations                            | the two strip motion rules (page: move; settle: state)                                              | compare.test.mjs (c) rule strings                                   |
+
+`stripWheelIdleMs` is not an envelope item; it sits in `COMPARE` so no
+constant hides outside it (the Phase 1 review's note on
+`CLICK_SLOP_PX`).
+
+### Failure messages (amendment)
+
+The transform, through `file.fail`, naming the piece and the line:
+
+```
+side takes exactly two stages (one per line: ![Label](./file.jpg) then its note); got 3
+slider takes exactly two stages (one per line: ![Label](./file.jpg) then its note); got 1
+unknown attribute "mode" on side — side takes no attributes
+"../beta/_photo.jpg" is a private file of another folder — a slider may show a private file only from its own folder; a public photograph may be borrowed (../beta/photo.jpg)
+invalid value "carousel" for mode on compare — allowed: slider | side | switch | filmstrip
+```
+
+The barrier:
+
+```
+[check-private-files] one stage, two candidate lists in dist/images/where-the-fog-lets-go/land-b/index.html: /_astro/…webp (its srcset or sizes differ)
+[check-private-files] a script-only state in the markup of dist/pieces/x/index.html: data-paging
+[check-private-files] N loupe files on M image pages, K of them detail exports named nowhere else; C compares in one shape; S stage images, one candidate list per file; no compare or loupe state in P pages.
+```
+
+The refusal of a private file in any other block keeps its hint ("…or
+show it as a stage of a :::compare in this folder"): still true
+advice, and its pins stay unedited.
+
+### Testing strategy (amendment)
+
+- **The constitution** — **T1719**: the three edits greped verbatim;
+  the commit touches `CLAUDE.md` alone and precedes T1720's.
+
+- **The stage's share** — matte.test.mjs, **T1720**. (b): the two
+  shape rules' declarations exactly (the `--L`/`--S` pin goes with the
+  rule it pinned); the two tokens declared once, on `:root`, at `1`;
+  `STAGE_SHARE` equal to them; `.image-stage`, `.image-frame`,
+  `.image-frame img` and the quiet list unedited. (c): "one rectangle,
+  turned" is replaced — its rule is the one the spec removes, so this
+  is a retargeted test, not a weakened one — by "the stage's share":
+  over the grid, the evaluated width equals the share rule computed in
+  the test from the stage's limits and `:root`'s shares for
+  `stageShape(ratio)`, the frame fits both limits and touches its
+  share or the other bound, the cap never binds; and the table above
+  at the fallback header (76px), 3:2 and 2:3 at 1512×982 and
+  1280×1440, to ±0.1px. "stageShape": 1.5 landscape, 0.667 portrait,
+  1 → `STAGE_SQUARE`; the page's and the sampler's source write
+  `data-shape={stageShape(`. The sizes-hint case runs as it is over
+  `paperEnv` reading the rule of the ratio's shape. Mutations: a share
+  moved in `:root` alone → the token pin and "sizes = width" fail;
+  `STAGE_SQUARE` flipped → "stageShape" fails. In the browser (BiDi)
+  at both screens on a 3:2 and a 2:3 page: the frame's rect against the
+  table (±1px, the real header measured), frame bottom → nav top and
+  nav bottom → head top (each `--block-margin`, 48px ± 1), the stage
+  image's `currentSrc` width; the quiet view's frame rect equal to
+  `main`'s at the same viewport.
+
+- **The pair blocks' shape and failures** —
+  remark-pieces-blocks.test.mjs, **T1721**, the compare cases'
+  helper and fixtures: `:::side` with two stages →
+  `figure.piece-block.piece-side.compare.compare-w-wide` > frames > two
+  stages, labels and notes in order, no `data-mode`, no link;
+  `:::slider` the same with `piece-slider` and `compare-w-column`; each
+  stage `img`'s `sizes` equal to a compare's; one and three stages each
+  fail naming the count; `mode="slider"` on `side` fails with the
+  no-attributes line; an own-folder private stage renders; the
+  borrowed private fails naming the block though the file exists, the
+  borrowed public renders; `:::compare{mode="filmstrip"}` renders with
+  `data-mode="filmstrip"`, `mode="carousel"`'s line lists four.
+  image-meta.test.mjs: the agreement case with the two new bodies;
+  `PAIR_WIDTH`'s values in `COMPARE_WIDTHS`; `firstAltFor` skipping a
+  `side` that comes first; `passageFor` giving no caption for a
+  `slider`. remark-pieces-vocabulary.test.mjs: the known-blocks list
+  ends `…held, compare, side, slider`. Mutation: the `max` check
+  dropped → the three-stage case fails.
+
+- **One file per stage** — private-files.test.mjs, **T1722**, T1703's
+  temp-dir shape: two compares whose stage images share URLs with
+  identical `srcset` and `sizes` → 0 and the summary's count; the same
+  URL in two stage images with different `sizes` → 1; with different
+  `srcset` → 1, both naming the page and the URL; a URL shared by a
+  stage image and a non-stage `img` → 0; `data-paging` and
+  `class="compare-arrow"` in markup → 1 each, and in `<script>` text
+  only → 0.
+
+- **The side's static form; one file on a built page** — **T1723**:
+  the build's barrier line counts the three new blocks among its
+  compares (before and after recorded) and the stage images; greped from `dist/`: the fog piece's side and slider (their
+  root classes, two stages each) and every `_land-b.jpg` stage image
+  on the fog piece and on land-b carrying one `srcset` string
+  (quoted); mutation: the 1400 cap restored → scan 4 fails naming
+  land-b (pasted), reverted. compare.test.mjs (a): the section's stage
+  `<Image>` passes no `width`; `enhanceCompare` skips `.piece-side`. In
+  the browser at 1512×982: the side's two panes at equal widths and one
+  top, captions shown, no `data-js`, script on or off; at 480px
+  stacked; the resource timeline on the fog piece and on land-b holds
+  one request per stage file.
+
+- **The filmstrip's state** — compare.test.mjs (d), **T1724**:
+  `EXPECTED` with the six keys and the words; `stripAt` (adds, clamps
+  both ends), `stripSettle` (0.49 → 0, 0.5 → 1, clamps), `stripEnds`
+  at first, middle, last, and wrapping; `switchNext` with `stripWraps`
+  at both ends; `restView` and `noteIndex` for the filmstrip; the
+  control's modes equal `COMPARE_MODES` in order. Mutations:
+  `stripWraps` flipped → `EXPECTED` fails by name; `stripSettle` by
+  `Math.floor` → the 0.5 case fails.
+
+- **The slider block** — **T1725**: compare.test.mjs (e): the fixed
+  legend's rule by exact body. In the browser at both screens on
+  the fog piece's slider: `data-js`, `data-view="slider"`, no
+  `.compare-control`, no `.compare-hint`, no `button` in the legend,
+  legend text "Camera", "Finished"; split 50 at rest, drags at
+  25/50/75 set it and the parts (Camera left), ← moves `aria-valuenow`
+  by 2; the note Finished's; `sessionStorage`'s `compare-mode` unchanged
+  by it, and a stored `side` does not change it; no script: stacked.
+
+- **The filmstrip, enhanced** — **T1726**: compare.test.mjs (b)
+  `TOKENS` gains `--compare-peek: 0px`, read by the frames rule; (c)
+  `MOTION` gains the two rules and "the five are all its motion", the
+  `@property --strip-at` block, and `data-paging` and `data-settling`
+  written only behind `!reducedMotion()`; (e) the arrows' rules by
+  body. motion.test.mjs green unedited. In the browser at both screens
+  on land-b's section: Filmstrip → `data-view`, `--strip-at` 0, stage
+  k's rect at `k × w` from the frame's left, back arrow hidden; next →
+  `data-paging` and a 480ms transition on `--strip-at`, then 1, note
+  Tones; →, End, Home; at the last, next hidden; a legend click slides
+  back; a synthesised pointer drag of −0.6w → 0.6 while held, settling
+  to 1 on release with `data-settling` and 180ms; a synthesised wheel
+  of `deltaX` 0.4w → +0.4, settling after the idle; a vertical wheel
+  moves nothing; under reduced motion (the `ui.prefersReducedMotion`
+  pref) no `data-paging`, no transition, the cut; `--compare-peek`
+  set to 2rem inline → the neighbours' 32px showing beyond each edge
+  (rects), reverted; no script: stacked.
+
+- **Obsidian** — obsidian-plugin.test.mjs, **T1727**: the pattern
+  matches `:::side` and `:::slider` blocks whole and not `:::sidebar`;
+  the compare cases unchanged.
+
+- **The documents** — **T1728**: greps and Prettier, as T1715.
+
+### File structure (amendment)
+
+```
+CLAUDE.md                                 the vocabulary clause, the interactive sentence, the images paragraph (T1719, its own commit)
+src/styles/global.css                     :root: the two stage shares (T1720), --compare-peek (T1726); the stage's paper rule and its comment (T1720); the side's static rules (T1723); the slider block's legend (T1725); the filmstrip, its arrows, @property --strip-at, two motion rules (T1726)
+src/lib/stage-sizes.ts                    STAGE_SQUARE, STAGE_SHARE, stageShape, stageSizes retuned (T1720)
+src/pages/images/[...id].astro            data-shape on the stage figure (T1720); the section's stage <Image> without width (T1723)
+src/pages/dev/matte/[...surface].astro    data-shape on the sampler's stage figure (T1720)
+matte.test.mjs                            (b) the shape rules and the shares; (c) "the stage's share" in place of "one rectangle, turned" (T1720)
+src/lib/image-meta.mjs                    COMPARE_MODES + filmstrip, PAIR_WIDTH, BLOCK_BODIES side/slider, firstAltFor's skip by kind (T1721)
+remark-pieces-blocks.mjs                  side and slider, stageSizing, the count's max, the borrowed line's block name, the no-attributes line (T1721)
+remark-pieces-blocks.test.mjs, image-meta.test.mjs, remark-pieces-vocabulary.test.mjs   T1721's cases
+scripts/check-private-files.mjs           scan 2's two names, scan 4 (T1722)
+private-files.test.mjs                    T1722's cases
+src/content/pieces/where-the-fog-lets-go/ index.md's side and slider; _land-b.md's story slider (T1723)
+src/lib/compare.ts                        the side skip (T1723); COMPARE's strip keys, the words, stripAt/stripSettle/stripEnds (T1724); the fixed slider (T1725); the filmstrip view (T1726)
+compare.test.mjs                          (a) T1723; (d) T1724; (e) new, T1725–T1726; (b), (c) T1726
+obsidian-plugin/compare.ts, main.ts       STAGES_PATTERN (T1727)
+obsidian-plugin.test.mjs                  T1727's cases
+AUTHORING.md, README.md, obsidian-plugin/README.md   T1728
+```
+
+Untouched, as above, and now also: the quiet rules, `.image-stage`,
+`.image-frame`, `.image-frame img` and the loupe section of
+`global.css`; `src/lib/loupe.ts`; `motion.test.mjs`; the reduced-motion
+block; `content.config.ts`; `src/lib/images.ts`.
+
+### Known limitations (amendment)
+
+- **A share below 1 shrinks boxes he knows** (the table above): at
+  nine tenths the laptop's portrait (703 tall against 781) and both
+  on the DualUp (a 3:2 1094 wide against 1216, a 2:3 1115 tall
+  against 1216) are smaller than under spec 017, and a phone's
+  landscape narrows (322px on a 390px phone against 358). The spec
+  opens both shares at 1 for that reason (Decided, 2026-09-26), where
+  only the laptop's landscape moves; the Phase 3a look puts the
+  numbers to him before any share is lowered.
+- **The first screen weighs more on the laptop**: a larger landscape
+  picks a larger candidate (the 2320px one where 1668 served).
+- **`sizes` follows `COMPARE_WIDTH` per surface.** A round that sets
+  the piece's and the page's widths apart makes land-b's story slider
+  and its section two candidate lists of one stage; scan 4 then fails
+  naming the page, and that round sets one hint for both.
+- **The side's stacking is CSS, the compare's side by side script**:
+  both open at 560px and are separate tunables from here.
+- **A settle is by position**: the nearest stage on release, no
+  flick; a wheel's end is inferred from `stripWheelIdleMs` of quiet
+  (browsers send no end event). A wrapping strip, if a round turns it
+  on, slides back across every stage.
+- **A real trackpad's horizontal scroll and a real swipe** are
+  synthesised in the headless reads; the person attests them.
+
+### Resolved decisions (amendment)
+
+- **The stage's shape is read at build time** (`data-shape` from
+  `stageShape`), because the share rule is discontinuous at the square;
+  see the bullet.
+- **The shares are `:root` tokens, mirrored in `stage-sizes.ts`** and
+  held to them by evaluation, the arrangement `stageSizes` already has
+  with five tokens.
+- **The pair blocks are the compare's markup**, one root class and one
+  shape, told apart by `piece-side` / `piece-slider`; scan 3 and the
+  plugin keep one rule, and the image page builds neither.
+- **`side` has no script at all**; its stacking is a container query.
+- **"Fetched once" is pinned as one candidate list per stage file per
+  page** (scan 4), and the page's stage images request what the
+  transform's do; the story's `side` or `slider` does not suppress the
+  section, as the spec says only a `compare` does.
+- **The filmstrip moves a registered property on the tokens**, not the
+  browser's scroll; the switch and the filmstrip share one showing
+  stage; a click on its frame does nothing; a mouse drags it as a
+  finger does (one pointer path).
+- **The filmstrip's settle reuses `data-settling`** in a rule of its
+  own, so the slider's pinned rule is unedited.
 - **No new dependency.**

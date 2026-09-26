@@ -250,7 +250,9 @@ stage in order, for the block that carries all of them.
 - **Zoom on the piece page or in a gallery.** The loupe lives in the
   quiet view of the image page only.
 - **Any change to the front door, the galleries, the place wall, the
-  stage on paper, the mat rule, the sets or the arrows.**
+  mat rule, the sets or the arrows** — and, until the 2026-09-26
+  amendment, the stage on paper; its size is Goal 8's now, its
+  bareness and its place in the page unchanged.
 
 ## Entities
 
@@ -461,8 +463,10 @@ output.
   title follow at that distance on both screens. The `sizes` hint
   states the same rule in literals, as it does today, and the mat
   sampler renders the real stage. The quiet view's box, its mat and
-  the loupe read none of this. The shares open at nine tenths each and
-  are tuned at the pause.
+  the loupe read none of this. The shares open at one — the whole
+  available extent along the photograph's long axis, so no frame is
+  smaller than under spec 017's rule and the laptop's landscape grows —
+  and are tuned at the pause.
 - **The filmstrip** _(amended 2026-09-26)_. One row of panes at the
   frame's size, the frame showing one stage whole; the neighbours sit
   beyond the frame's edges (whether a sliver of each shows is a
@@ -866,8 +870,12 @@ _Amended 2026-09-26:_
   DualUp), with the target share per orientation as tunables". The
   session's rule, to be seen: a landscape sized by a share of the
   width, a portrait or a square by a share of the height, each bounded
-  by the other axis; both shares opening at nine tenths; spec 017's
-  rectangle-turned rule replaced outright, not layered on. **Side by
+  by the other axis; both shares opening at one (planning's numbers:
+  at nine tenths three of the four boxes he knows would shrink — the
+  laptop's portrait 781 → 703 tall, the DualUp's landscape 1216 →
+  1094 wide and its portrait 1216 → 1115 tall — while at one none
+  shrinks and the laptop's landscape grows 781 → 1171 wide); spec
+  017's rectangle-turned rule replaced outright, not layered on. **Side by
   side as its own block, and the slider alone for one pair** — from
   the Phase 1 record: "side by side as its own block … the slider
   usable on its own for one pair", for the several compares he writes

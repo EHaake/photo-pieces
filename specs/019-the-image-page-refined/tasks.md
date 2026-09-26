@@ -1,6 +1,6 @@
 # Tasks: The image page, refined
 
-**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log.
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted 2026-09-26 — pending sign-off.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1700–T1703) — the constitution amended
 first, in its own commit; the private-file family as pure rules with
@@ -826,6 +826,221 @@ T1713c. **Third look:** "Looks good, continue." Phase 2 closed.
 
 _Filled in at the pause._
 
+## Phase 3a — The amendment: the stage's share, the pair blocks, the filmstrip (reviewer after the phase; `review: per-task` on T1721; walkthrough: under `npm run dev`, on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/` (a 3:2) and on a 2:3 page, the photograph now takes a share of the screen: on the laptop the horizontal one fills the height below the header, about 1,170 wide where it was 780, the vertical the same 520 × 780 it was; on the DualUp both as before (the horizontal 1,216 wide, the vertical 1,216 tall) — the nav line under it on the first screen and the title one piece-spacing below the nav on both; the shares open at one, so the question is whether either should come down (at nine tenths three of these four would be smaller than before — plan.md's table), and whether a square goes with the verticals; the quiet view and the loupe exactly as before; on the fog piece, after the switch compare, a side block — Camera and Tones beside each other, each with its label and note beneath, nothing to choose, the same with script off, stacked on the phone — and a slider block — the handle at the centre, Camera left and Finished right, "Camera · Finished" fixed beneath and the note, no method words, dragged by mouse, trackpad, finger and the arrow keys, stacked with script off; every compare's method words gain "Filmstrip": one stage in the frame, arrows at its sides (none before the first, none after the last), ← → Home End once it has focus, a two-finger sideways scroll on the trackpad and a swipe on the phone that follow the hand and settle on the nearest stage, a legend click that slides there, the note following — the strip slides, it does not fade, and it stops at the last; land-b's page carries a slider in its story above the "Raw to finished" section, and the browser's network panel shows each stage file requested once there and on the fog piece; in Obsidian, the fog piece's side and slider show as its compare does; as many rounds as it takes, each a sub-lettered task under T1729)
+
+**Status**: Draft — pending sign-off. Plan: "Amendment (2026-09-26)"
+and its sections. The spec amendment's three changes, folded in after
+the Phase 3 pause and before the real piece, so Phase 4 judges them on
+his photograph too. Foundational within the phase, and ordered first:
+T1719 (the constitution, alone in its commit), T1721 (the transform's
+two descriptors and the fourth mode — the markup every later task
+reads; `review: per-task`) and T1722 (the barrier that makes "one file
+per stage" a fact of every build). The pause after this phase is a
+tuning pause like Phase 1's and 2's: a round is one sub-lettered task
+under T1729, per the cadence paragraph and plan.md's "The tuning
+envelope, placed (amendment)"; a round that wants a fifth method or a
+fourth block that takes stages goes to the person as a spec amendment
+(spec.md's amended "ordinary path" list, which outranks the preamble's
+older wording). Task ids continue from T1718; the phase order is the
+headers'.
+
+- [ ] **T1719** — The constitution, amended again, in its own commit
+      before T1720. Pattern: T1700 and plan.md's "The constitution,
+      first". Plan: "The constitution, again" — the three edits
+      verbatim. `CLAUDE.md` only. Prettier on it (T1700's note: the
+      role table's padding). _Verify: over `tr -s '\n ' ' ' < CLAUDE.md`
+      (the prose wraps), `grep -o` finds "three blocks that take a
+      photograph's stages", "and any after them" and "the three blocks
+      that take stages" once each, and "looked at three ways" not at
+      all; `git show --stat HEAD` lists `CLAUDE.md` alone;
+      `sh scripts/verify.sh` green (nothing under test changes — the
+      run is the record)._
+
+- [ ] **T1720** — The stage's share. Pattern: the paper rule it
+      replaces and its comment in `global.css`; `src/lib/stage-sizes.ts`
+      as it is (the literals' comment); matte.test.mjs's "one
+      rectangle, turned", "the sizes hint agrees with the rule" and its
+      (a) token pins. Plan: "The stage's share" and T1720's testing
+      bullet. `global.css`: `:root` gains the two share tokens after
+      `--frame-nav-h`'s block, under a comment (what they size; that
+      `stage-sizes.ts` mirrors them and matte.test.mjs pins both); the
+      `html:not([data-quiet]) .image-frame` rule deleted and the two
+      `[data-shape]` rules written as plan.md spells them; the stage
+      section's comment rewritten for the share rule (the L × S text
+      out). `stage-sizes.ts`: `STAGE_SQUARE`, `STAGE_SHARE`,
+      `stageShape`, `stageSizes` retuned, the header comment (the rule,
+      the tokens it mirrors, now seven). `[...id].astro` and the mat
+      sampler: `data-shape={stageShape(ar)}` on the stage figure.
+      `matte.test.mjs`: (b) and (c) per T1720's bullet — "one
+      rectangle, turned" replaced by "the stage's share" (the rule it
+      pinned is gone; say so in the case's comment), the new pins, the
+      table's eight numbers. _Verify: `sh scripts/verify.sh` green
+      (count recorded); the two mutations named and reverted, each
+      failing its case; `git diff -U0 main -- src/styles/global.css |
+      grep '^@@'` → hunks only in `:root`'s two lines, the stage
+      section's comment and the paper rule beside the earlier tasks'
+      (listed) — none in `.image-stage`, `.image-frame`, `.image-frame
+      img`, a quiet rule or the loupe section; matte.test.mjs's quiet
+      pins and loupe.test.mjs unedited (`git diff main -- loupe.test.mjs`
+      empty); in Firefox headless via BiDi at 1512×982 and 1280×1440 on
+      land-b and a 2:3 page (named): the frame's rect against plan.md's
+      table (±1px, the real header height recorded), frame bottom → nav
+      top and nav bottom → head top (48 ± 1 each), `currentSrc`'s width,
+      and the quiet view's frame rect equal to `main`'s — each number
+      recorded here._
+
+- [ ] **T1721** — The pair blocks in the transform, and the fourth
+      mode. `review: per-task`. Pattern: T1705 — the `compare`
+      descriptor, its `structure: 'compare'` branch and its test cases
+      and fixtures in remark-pieces-blocks.test.mjs. Plan: "The pair
+      blocks in the transform, and the fourth mode", its failure lines
+      and T1721's testing bullet. `image-meta.mjs`: `COMPARE_MODES`
+      gains `'filmstrip'`; `PAIR_WIDTH`; `BLOCK_BODIES` gains `side`
+      and `slider` (`'stages'`) in the same commit as the descriptors;
+      `firstAltFor` skips by the `'stages'` kind, its comment saying
+      so. `remark-pieces-blocks.mjs`: `stageSizing` named once; the
+      `side` and `slider` descriptors after `compare`, each with a
+      comment (two stages, no attributes; `side` static, `slider` the
+      compare's slider alone); the count check reading `max`; the root's
+      width class from `PAIR_WIDTH`; `rejectBorrowedPrivate` naming the
+      block; the no-attributes line; the header comment's descriptor
+      notes. Tests per T1721's bullet in full. _Verify:
+      `sh scripts/verify.sh` green (count recorded) — re-run by the
+      orchestrator before committing; the `max` mutation named and
+      reverted; `grep -n "rejectPrivateSrc(" remark-pieces-blocks.mjs`
+      → the block loop's and the shorthand pass's calls as at T1705,
+      none on a stage path._
+
+- [ ] **T1722** — The barrier: one file per stage. Pattern: T1703's
+      scans in `scripts/check-private-files.mjs` and its temp-dir cases
+      in private-files.test.mjs. Plan: "The barrier: one file per
+      stage", its lines, T1722's testing bullet. Scan 2's two lists;
+      `compares()` keeping the pane `img`'s `srcset` and `sizes`; scan
+      4 and its line; the summary's count; the header comment's fourth
+      paragraph. Tests per the bullet. _Verify: `sh scripts/verify.sh`
+      green (count recorded) with the barrier's new summary line quoted
+      (its stage-image count on today's build); each failing case
+      exits 1 naming the page and the URL._
+
+- [ ] **T1723** — The side's static form; the fixtures; the page's
+      stage images. Pattern: T1706 (the static rules, the fog piece's
+      compare as fixture prose); the side-by-side view's rules in the
+      compare section; `.prose`'s `container-type` rule for the
+      container idiom. Plan: "The side block's static form, the
+      fixtures, the page's stage images". `global.css`: the side's
+      rules and container query, the selector lists extended.
+      `compare.ts`: `enhanceCompare` skips `.piece-side` (one line,
+      its comment). `[...id].astro`: the section's stage `<Image>`
+      without `width`. `where-the-fog-lets-go/index.md` and
+      `_land-b.md`: the fixture sentences and blocks as plan.md lists
+      them (_Fixture_ marked). compare.test.mjs (a): the two source
+      pins. _Verify: `sh scripts/verify.sh` green (count recorded), the
+      barrier's line counting the new compares (three new blocks: the
+      count before and after recorded); the built reads in
+      T1723's bullet greped and quoted (the side's and slider's root
+      classes, `_land-b.jpg`'s one `srcset` on both pages); the cap
+      mutation → scan 4's line pasted, reverted; BiDi at 1512×982: the
+      side's pane rects (equal widths, one top), captions visible, no
+      `data-js`, the same with script off (the sandboxed-iframe
+      recipe); at 480px stacked; the resource timeline on the fog piece
+      and on land-b, one request per stage file (listed)._
+
+- [ ] **T1724** — The filmstrip's state, pure. Pattern: T1707 in
+      `compare.ts` and compare.test.mjs (d). Plan: "The filmstrip's
+      state". `compare.ts`: the six `COMPARE` keys and the words
+      exactly as plan.md spells them, each commented; `stripAt`,
+      `stripSettle`, `stripEnds`; `restView` and `noteIndex` taking
+      `'filmstrip'`; the header comment's method count. Until T1726
+      the control's fourth word shows the switch's view — no pause
+      falls between. compare.test.mjs (d) per T1724's bullet, its
+      header comment's (d) paragraph extended. _Verify:
+      `sh scripts/verify.sh` green (count recorded); both mutations
+      named and reverted, each failing its case by name._
+
+- [ ] **T1725** — The slider block, enhanced. Pattern: T1708's
+      `enhance()` and T1709d's legend in `compare.ts`; compare.test.mjs
+      (c)'s exact-body cases. Plan: "The slider block, enhanced".
+      `compare.ts`: the `fixed` branch as plan.md describes, the
+      comment above `enhanceCompare` naming the slider block and the
+      side's skip. `global.css`: the fixed legend's rule. compare.test.mjs:
+      a new describe "(e) the pair blocks and the filmstrip (the
+      amendment)" with the rule's body, and (e)'s paragraph in the
+      header comment. _Verify: `sh scripts/verify.sh` green (count
+      recorded); the BiDi reads in T1725's bullet at 1512×982 and
+      1280×1440, each recorded here; a touch-type pointer drag
+      synthesised, or said line by line where it cannot be._
+
+- [ ] **T1726** — The filmstrip, enhanced. Pattern: T1708's slider in
+      `enhance()` (the pointer capture, `slide`, the settle behind
+      `!reducedMotion()`, `transitionend` on `--split`); the loupe's
+      non-passive `wheel` listener and its `deltaMode` conversion in
+      `src/lib/loupe.ts`; the handle's rules for the arrows' look.
+      Plan: "The filmstrip, enhanced". `compare.ts`: the filmstrip
+      view in `render()`, the arrows, `--i` and `--strip-at`, the
+      keys, the drag, the wheel and its idle settle, the legend's
+      paging, `data-paging` and `data-settling` behind
+      `!reducedMotion()`, the width swap per `stripWidth`; the
+      comment's list of what the script builds and writes. `global.css`:
+      `:root`'s `--compare-peek` beside the handle's tokens (their
+      comment extended), `@property --strip-at`, the filmstrip, arrow
+      and hint rules, the two motion rules, the section's header
+      comment ("five rules"). compare.test.mjs (b), (c), (e) per
+      T1726's bullet. _Verify: `sh scripts/verify.sh` green (count
+      recorded) with the motion and private-files barriers' lines;
+      motion.test.mjs and matte.test.mjs green unedited
+      (`git diff main -- motion.test.mjs` empty); `git diff -U0 main --
+      src/styles/global.css | grep '^@@'` listed; the BiDi reads in
+      T1726's bullet at both screens, each number recorded here; what
+      headless cannot drive (a real trackpad scroll, a real swipe) said
+      line by line for the pause._
+
+- [ ] **T1727** — The plugin shows a side and a slider. Pattern: T1714.
+      Plan: "Obsidian" (amendment). `obsidian-plugin/compare.ts`:
+      `STAGES_PATTERN`, its comment; `main.ts`: the import and the
+      comments. obsidian-plugin.test.mjs per T1727's bullet. _Verify:
+      `sh scripts/verify.sh` green (count recorded); in
+      `obsidian-plugin/`, `npm run build` exit 0 (or said, as T1714);
+      the vocabulary test's "nothing knows the word" walk green._
+
+- [ ] **T1728** — The documents, again. Pattern: T1715 (its
+      hand-editing rule) and AUTHORING.md's "A compare in a piece" for
+      the voice. Plan: "The documents, again". Every claim read against
+      the code and the kept values, not the first draft. _Verify:
+      `grep -n "filmstrip\|:::side\|:::slider" AUTHORING.md README.md
+      obsidian-plugin/README.md` and `grep -n "share" README.md` (hits
+      listed); no README line still describes a 3:2 rectangle;
+      `npx prettier --check AUTHORING.md README.md
+      obsidian-plugin/README.md` clean; `sh scripts/verify.sh` green._
+
+- [ ] **T1729** — The amendment's look, and the rounds. Not an
+      implementation task: the orchestrator's record of the Phase 3a
+      pause, in the person's words, with T1720's, T1725's and T1726's
+      numbers beside it. The questions, in plain language: the two
+      shares — opening at one, where only the laptop's landscape
+      moves (781 → 1171 wide); at nine tenths three of the four boxes
+      he knows would be smaller than before (plan.md's table) — and
+      whether a square is sized with the verticals or the horizontals;
+      whether the title now sits where he wants it; the side block (its
+      width, where it stacks); the slider block (its width, its fixed
+      legend's look); the filmstrip — its arrows (where, their look,
+      hidden or quiet at the ends), its keys, whether it wraps, whether
+      a sliver of each neighbour shows, whether the sideways scroll
+      should move it, its width; the slide's and the settle's
+      durations. The plugin's Live Preview of the two blocks. Each
+      round is one sub-lettered task here (`T1729a`, `b`, …) as the
+      cadence paragraph says; a round that changes a documented value
+      also updates the sentence in `AUTHORING.md` or `README.md` that
+      states it, in the same task. When he names the keeps they are
+      recorded here and Phase 4 waits for his piece as its intro says.
+      _Verify: every sub-lettered task green; each kept value agrees in
+      its one place, its test row and spec.md's Decided line (a `grep`
+      of each, listed); the documents agree (`grep` listed); the Phase
+      3a record below filled in._
+
+### Phase 3a record (the person's walkthrough)
+
+_Filled in at the pause._
+
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — the piece page with his writing and his compare as he wrote it; his photograph's image page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
 The content is his, supplied during implementation; these tasks are the
@@ -898,11 +1113,21 @@ _Filled in at the pause._
       page's layout", for the candidates this spec left (the story
       beside the photograph on wide screens, a jump line for long
       pages, the wall label's shape); anything the pauses surfaced.
+      From the 2026-09-26 amendment (Phase 3a): "The stage across
+      screen shapes" (~171–193) annotated — spec 017's one rectangle
+      turned superseded at spec 019 by the share rule (a landscape a
+      share of the width, a portrait or a square a share of the height,
+      each bounded by the other axis; the shares as kept at the Phase
+      3a pause); the processing showcase's first step gains the pair
+      blocks `side` and `slider` and the compare's filmstrip.
       `DECISIONS.md`: "## Spec 019: the image page, refined" in 018's
       shape — the decision in the photographer's words (the page over
       the mobile pass; the dictionary; Sony's own mark; the handle and
       the legend; three methods; the block; stages in the sidecar; the
-      loupe with a larger export, not tiles; the real piece at the end),
+      loupe with a larger export, not tiles; the real piece at the end;
+      and the amendment's, from the Phase 1 record and its brief: the
+      stage's share, side by side and the slider as blocks of their
+      own, the filmstrip, no duplicate downloads),
       what the plan chose and why (the family read by one function with
       the frame first; the shape spelled once; the page building the
       block's markup; the chrome script-built with an ARIA handle; the
@@ -911,8 +1136,13 @@ _Filled in at the pause._
       the loupe as an overlay in the photograph's own box; the loupe
       file as a webp transform and the barrier reading declared URLs;
       the gear table as Markdown in the content folder; tunables as
-      constants), and the keeps from each pause in his words, round by
-      round. Both hand-edited (`npx prettier --check` clean; grep for
+      constants; and the amendment's — the stage's shape read at build
+      time because the share rule is discontinuous at the square, the
+      pair blocks in the compare's one shape told apart by their
+      `piece-<name>` class, `side` without script, the filmstrip as a
+      transitioned property rather than the browser's scroll, one
+      candidate list per stage file as the barrier's fourth scan), and
+      the keeps from each pause in his words, round by round. Both hand-edited (`npx prettier --check` clean; grep for
       lines beginning with a CSS `>` or `+` before any format run).
       Then, the orchestrator's part: the pre-merge whole-spec sweep at
       the reviewer's default tier and its findings resolved; the
@@ -935,7 +1165,14 @@ _Filled in at the pause._
       the Phase 3 record; AC 12 by T1700's commit (its hash and its
       place before T1701's) and T1715's greps; AC 13 by T1716's reads
       and the Phase 4 record, the fixtures' `Fixture` strings unchanged;
-      AC 14 by the final build's GPS line); build, tests, check, and
+      AC 14 by the final build's GPS line; the amendment's six — AC 15
+      by matte.test.mjs's share and sizes-hint cases, T1720's reads and
+      the Phase 3a record; AC 16 by T1721's side cases and T1723's
+      reads; AC 17 by T1721's slider cases, T1725's reads and the
+      record; AC 18 by T1724's tables, T1726's reads and the record;
+      AC 19 by scan 4 with its tests and T1723's land-b read and
+      timeline; AC 20 by T1719's commit (its hash and its place before
+      T1720's), T1728's greps and the Phase 3a record); build, tests, check, and
       the four barriers (GPS, dev routes, motion, private files) green
       with actual output; the PR marked ready
       and merged with a merge commit; the close-out box ticked in the
