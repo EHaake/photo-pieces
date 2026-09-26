@@ -49,7 +49,7 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     (T1726), `--compare-peek`, is the same kind of token: declared once
 //     at its value and read by the filmstrip's frames rule.
 //
-// (c) The compare's motion (T1708). Three rules and nothing else, each
+// (c) The compare's motion (T1708). Five rules and nothing else, each
 //     by its string: the switch's arriving stage fading in over the
 //     leaving one, a mode change's fade, and a snap's glide — spec 018's
 //     state duration and curve and its motion-appear keyframes; no other
@@ -100,7 +100,10 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     a muted middle dot between them — T1709j's dot on the legend's
 //     row — pinned by the rule's exact body. The filmstrip's arrows
 //     (T1726): the handle's look, at the frame's sides, muted when quiet,
-//     only in the filmstrip — pinned by the rules' exact bodies.
+//     only in the filmstrip — pinned by the rules' exact bodies. Where a
+//     side stacks (T1723): its container, its two columns, and the
+//     `@container compare-side (width < 560px)` block holding one
+//     column and nothing else — by exact string and body.
 
 /** The tunables and the words, verbatim as src/lib/compare.ts carries
  *  them: to retune, move the value in src/lib/compare.ts and here. */
@@ -1037,5 +1040,24 @@ describe('(e) the pair blocks and the filmstrip (the amendment)', () => {
       { 'border-color': 'var(--color-muted)', color: 'var(--color-muted)', cursor: 'default' },
       { display: 'none' },
     ]);
+  });
+
+  it('where a side stacks: two columns in the compare-side container, one column under @container compare-side (width < 560px) and nothing else (T1723)', () => {
+    const rules = rulesIn(css);
+    expect(ruleAt(rules, '.piece-side')).toEqual({ container: 'compare-side / inline-size' });
+    expect(ruleAt(rules, '.piece-side .compare-frames')).toEqual({
+      'grid-template-columns': '1fr 1fr',
+    });
+    const AT = '@container compare-side (width < 560px)';
+    expect(
+      rules
+        .filter((rule) => rule.prelude.startsWith('@container compare-side'))
+        .map((rule) => rule.prelude),
+    ).toEqual([AT]);
+    expect(
+      rules
+        .filter((rule) => rule.within.length === 1 && rule.within[0] === AT)
+        .map((rule) => [rule.prelude, Object.fromEntries(declarationPairs(rule.body))]),
+    ).toEqual([['.piece-side .compare-frames', { 'grid-template-columns': '1fr' }]]);
   });
 });

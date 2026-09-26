@@ -590,6 +590,9 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     if (next === mode) return;
     mode = next;
     leaving = null;
+    // A change mid-glide cancels the transition, so no transitionend clears these.
+    delete root.dataset.paging;
+    delete root.dataset.settling;
     // The filmstrip opens on the switch's stage (and the switch on the filmstrip's).
     at = stage;
     writeMode(mode);
