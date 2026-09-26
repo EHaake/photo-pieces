@@ -720,15 +720,15 @@ images.
 
 - [ ] **T1713b** — Round: the mat goes while zoomed ("Maybe remove
       the matte when zooming in"). Plan: rounds paragraph (b).
-      `loupe.ts`: `LOUPE.window: 'frame'`, `data-loupe-open` on the
-      stage while open, the overlay from the frame's rect under
-      `'frame'`; `global.css`: the fifth quiet rule and the padding
+      `loupe.ts`: `LOUPE.mat: 'off'`, `data-loupe-open` on the stage
+      while open (the overlay stays placed from the image's rect);
+      `global.css`: the fifth quiet rule and the padding
       transition; barrier lists; matte (b)'s quiet list (a deliberate
       fifth); `loupe.test.mjs` (c) pins the rules; the padding
       transition reads the move token (motion barrier). _Verify: green;
-      BiDi: the frame's padding 0 and the loupe's rect equal to the
-      frame's while open, 40px and gone after close; under reduced
-      motion no transition._
+      BiDi: the frame's padding 0 while open and its rect equal to the
+      image's (the mat gone, the photograph unmoved), 40px after close;
+      the padding transition 480ms, none under reduced motion._
 
 ### Phase 2 record (the person's walkthrough)
 

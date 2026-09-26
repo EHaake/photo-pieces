@@ -697,18 +697,23 @@ where the simpler shape was taken it is said in one line.
   `hover` (`pointerType` mouse only; touch and pen keep the drag);
   a click without movement still closes; the arrows still pan and
   the next hover overrides them; under `'drag'` nothing changes.
-  (b) `LOUPE.window: 'frame'` (the other value `'photo'`, as first
-  built): while the loupe is open the stage carries `data-loupe-open`
-  (a state attribute, on the barrier's list) and the quiet frame drops
-  its mat — `html[data-quiet] .image-stage[data-loupe-open] .image-frame
+  (b) `LOUPE.mat: 'off'` (the other value `'kept'`, as first built):
+  while the loupe is open the stage carries `data-loupe-open` (a state
+  attribute, on the barrier's list) and the quiet frame drops its mat
+  — `html[data-quiet] .image-stage[data-loupe-open] .image-frame
   { padding: 0; }` (a fifth quiet rule, by name in matte (b); it reads
-  no `--mat`, so the one-matted-surface case still holds) — and the
-  overlay is placed from the frame's rect, so the loupe fills the box
-  the mat had; on close the mat returns. Removing the mat's padding
-  moves the photograph's edge by the mat's width; that jump happens
-  under the glide (a transition on the frame's padding reads
-  `--dur-move`, none under reduced motion). The plan's earlier
-  "the mat and the ground stay" is superseded by this round.
+  no `--mat`, so the one-matted-surface case still holds). The quiet
+  frame is shrink-to-fit around the photograph and the image's cap
+  reads the frame's `--mat`, so the frame collapses onto the
+  photograph and the dark ground shows where the mat was; the
+  photograph does not move or grow, and the overlay stays placed from
+  the image's rect. The mat shrinks under the glide: a transition on
+  the frame's padding reading `--dur-move` / `--ease-move` (the first
+  transition on `.image-frame`; a seventh reduced-motion rule beside
+  the sixth if the block's rule needs it). On close the attribute goes
+  and the mat returns. (Corrected 2026-09-26: the first draft of this
+  paragraph had the loupe filling the mat's box — measured impossible
+  without resizing the stage image.)
 
 - **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, `styles.css`,
   T1714). A second pattern beside `DIRECTIVE_PATTERN`, for the one
