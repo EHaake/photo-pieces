@@ -199,6 +199,15 @@ export function sideFits(width: number): boolean {
  * motion is not reduced; `data-fresh` on every mode change, until the
  * panes' fade ends). The views are T1707's pure functions above.
  *
+ * The pair blocks (spec 019 amendment): the slider block (`.piece-slider`,
+ * T1725) is this compare fixed on its slider — the mode 'slider' whatever
+ * is stored or authored, nothing read from or written to the store, no
+ * method control and no hint, the legend its two labels as text (no
+ * buttons, no side tags), the pair the first stage left and the second
+ * right, never changing; the handle, the drag, the touch, the keys and
+ * the live note the compare's, the note the second stage's. The side
+ * block (`.piece-side`, T1723) is final without script and is skipped.
+ *
  * Where it runs (moved here at spec 018, T1604c): the enhanced block is
  * one box where the static page stacks the stages, so it must land
  * before the page settles: the initial astro:page-load fires on window's
@@ -305,12 +314,18 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     return element;
   };
 
+  // The slider block (T1725): the compare's slider alone, its pair fixed.
+  const fixed = root.classList.contains('piece-slider');
+
   // The state: the method; the one pair the slider and side by side
   // show, left and right, and the side the next pick takes; the
-  // divider's position; the switch's stage.
-  let mode = openingMode(root.dataset.mode, readMode());
+  // divider's position; the switch's stage. The slider block's mode
+  // is the slider, the store neither read nor written, its pair the
+  // first stage left and the second right.
+  let mode: CompareMode = fixed ? 'slider' : openingMode(root.dataset.mode, readMode());
   let p = COMPARE.restAt;
-  let picked: CompareSlots = { ...restView('side', n), next: 'left' };
+  const rest = fixed ? restView('slider', 2) : restView('side', n);
+  let picked: CompareSlots = { left: rest.left, right: rest.right, next: 'left' };
   let stage = restView('switch', n).stage;
   /** The switch's leaving stage while the arriving one fades in over it. */
   let leaving: number | null = null;
@@ -337,7 +352,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   const control = make('div', 'compare-control');
   control.setAttribute('role', 'group');
   control.setAttribute('aria-label', COMPARE_WORDING.control);
-  const modeButtons = MODES.map((one) => {
+  const modeButtons = (fixed ? [] : MODES).map((one) => {
     const button = make('button', undefined, COMPARE_WORDING.modes[one]);
     button.type = 'button';
     button.addEventListener('click', () => choose(one));
@@ -348,19 +363,21 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   now.setAttribute('aria-live', 'polite');
 
   // The legend's row: below the frame or above it; the control in that
-  // row, or above the frame on its own.
+  // row, or above the frame on its own. The slider block has no control.
   const above: HTMLElement[] = [];
   const below: HTMLElement[] = [];
   (LEGEND_AT === 'above' ? above : below).push(legend);
-  (CONTROL_AT === 'above' || LEGEND_AT === 'above' ? above : below).push(control);
+  if (!fixed)
+    (CONTROL_AT === 'above' || LEGEND_AT === 'above' ? above : below).push(control);
   if (CONTROL_AT === 'above' && LEGEND_AT === 'above') above.reverse();
   frames.before(...above);
   frames.after(...below, now);
   // The hint follows the legend's row — the legend and, when they share
-  // it, the control — on a row of its own beneath.
-  const hint = make('p', 'compare-hint');
+  // it, the control — on a row of its own beneath. The slider block
+  // picks nothing, so it has none.
+  const hint = fixed ? null : make('p', 'compare-hint');
   const legendRow = LEGEND_AT === 'above' ? above : below;
-  legendRow[legendRow.length - 1].after(hint);
+  if (hint) legendRow[legendRow.length - 1].after(hint);
 
   if (COMPARE.cornerTags)
     stages.forEach((one, i) => one.append(make('span', 'compare-tag', words[i].label)));
@@ -381,10 +398,12 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   // Each legend button is two lines: its label, and beneath it the side
   // tag's row, always there — blank while the stage holds no side — so a
   // pick moves nothing; `data-label` lets the stylesheet reserve the
-  // label's bold width.
+  // label's bold width. The slider block's legend is its two labels as
+  // text, left · right: no buttons, no side tags.
   const slotTags = words.map(() => make('span', 'compare-slot', BLANK));
   legend.append(
     ...words.map(({ label }, i) => {
+      if (fixed) return make('li', 'compare-stop', label);
       const item = make('li', 'compare-stop');
       const button = make('button', undefined, label);
       button.type = 'button';
@@ -442,17 +461,20 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     if (showing === 'switch') frames.tabIndex = 0;
     else frames.removeAttribute('tabindex');
 
-    [...legend.children].forEach((item, i) => {
-      item.firstElementChild?.setAttribute('aria-pressed', String(shown.includes(i)));
-      // The side tag's row names the side the stage holds; blank otherwise, and in the switch.
-      const slot =
-        showing === 'switch' ? null : i === picked.left ? 'left' : i === picked.right ? 'right' : null;
-      const tag = slot === null ? BLANK : COMPARE_WORDING.slots[slot];
-      if (slotTags[i].textContent !== tag) slotTags[i].textContent = tag;
-    });
+    // The slider block's legend is text, and it has no hint: nothing here to mark.
+    if (!fixed) {
+      [...legend.children].forEach((item, i) => {
+        item.firstElementChild?.setAttribute('aria-pressed', String(shown.includes(i)));
+        // The side tag's row names the side the stage holds; blank otherwise, and in the switch.
+        const slot =
+          showing === 'switch' ? null : i === picked.left ? 'left' : i === picked.right ? 'right' : null;
+        const tag = slot === null ? BLANK : COMPARE_WORDING.slots[slot];
+        if (slotTags[i].textContent !== tag) slotTags[i].textContent = tag;
+      });
+    }
     // The hint names the side the next pick takes (hidden in the switch by the stylesheet).
     const next = `${COMPARE_WORDING.next} ${COMPARE_WORDING.slots[picked.next]}`;
-    if (hint.textContent !== next) hint.textContent = next;
+    if (hint && hint.textContent !== next) hint.textContent = next;
     modeButtons.forEach((button, i) =>
       button.setAttribute('aria-pressed', String(MODES[i] === mode)),
     );

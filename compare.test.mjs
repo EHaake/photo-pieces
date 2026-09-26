@@ -86,6 +86,11 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     And the page's own words (T1708a): WORDING.compare, the section's
 //     heading and the two labels, read from the page's source as literal
 //     strings, and the template reading them from there.
+//
+// (e) The pair blocks and the filmstrip (the amendment). The slider
+//     block's fixed legend (T1725): its two labels as text, left · right,
+//     a muted middle dot between them — T1709j's dot on the legend's
+//     row — pinned by the rule's exact body.
 
 /** The tunables and the words, verbatim as src/lib/compare.ts carries
  *  them: to retune, move the value in src/lib/compare.ts and here. */
@@ -953,5 +958,15 @@ describe('(d) the state (T1707)', () => {
     expect(restView('filmstrip', 3)).toEqual(restView('switch', 3));
     expect(noteIndex('filmstrip', { stage: 2 })).toEqual(2);
     expect(noteIndex('filmstrip', { stage: 0 })).toEqual(0);
+  });
+});
+
+describe('(e) the pair blocks and the filmstrip (the amendment)', () => {
+  it("the slider block's fixed legend sets a muted middle dot between its two labels (T1725) — \"Camera · Finished\", the legend's own gap after it", () => {
+    expect(ruleAt(rulesIn(css), '.piece-slider .compare-stop + .compare-stop::before')).toEqual({
+      content: "'·'",
+      'margin-inline-end': '1rem',
+      color: 'var(--color-muted)',
+    });
   });
 });

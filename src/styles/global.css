@@ -2478,6 +2478,15 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   font-weight: 700;
 }
 
+/* The slider block's fixed legend (spec 019 amendment, T1725): its two
+   labels as text on the legend's row, a muted middle dot between them —
+   "Camera · Finished", T1709j's dot. */
+.piece-slider .compare-stop + .compare-stop::before {
+  content: '·';
+  margin-inline-end: 1rem;
+  color: var(--color-muted);
+}
+
 /* A picked stage's side tag, "left" or "right", quieter than its label;
    the hint beneath the legend names the side the next pick takes. The
    switch picks no pair: its tag rows blank, and no hint. */
