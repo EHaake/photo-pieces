@@ -574,7 +574,13 @@ though we may need to revisit later"; the switch's keys "good"; the
 fade "fine, though maybe slightly longer, like 250ms?" — not a spec
 018 token (180 / 480 / 950); put back to him; the heading and hint
 words fine; the divider line "fine for now"; the switch's legend fine
-as is. One more round: the label and its note too close — T1709j.
+as is. One more round: the label and its note too close — T1709j. **The
+fade stays at 180ms** ("That's fine honestly. Keep it at 180ms"). "I
+think the design on this is settled." Noted for the amendment: he
+expects several compares through one piece or story — raw to
+finished first, then raw to stage 1, raw through stage 2, … raw to
+final with every stage — and asked that this load no duplicate
+images.
 
 ## Phase 2 — The loupe (reviewer after the phase; walkthrough: under `npm run dev` on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/`, enter the quiet view; the cursor over the photograph says zoom, over the mat it still says leave; click a corner and the photograph grows to full detail around that point while the mat and the dark ground stay where they are, soft at first and then sharp as the larger export fades in; drag to move around it, scroll or pinch (trackpad and phone) to zoom between the fit and full detail, + and − to zoom, the arrows to pan; Esc or a click without dragging goes back to the fit, Esc again back to the page; at the fit the arrows step to the next photograph as before; on `/images/where-the-fog-lets-go/land-a/` (a 1800×1200 placeholder with no larger export, whose own file is already past full detail at its quiet size on both his screens — the number T1712 recorded, quoted in the report; if that read found it ready, the report names the page T1712 found not ready instead) the quiet view is exactly as before and a click leaves it, while some real portrait exports on the laptop do get a loupe from their own file (T1712's numbers); the question put to him: at the fit, a click on the photograph now zooms and a click on the mat or the dark ground leaves — is that the right reading of "a click at the fit steps back out", or should a single click keep leaving and the loupe open another way; with the system's reduce-motion setting on, the zoom jumps rather than grows and the sharp export still fades in; optionally, in the browser's network panel, the larger export is requested only at the first zoom and once; as many rounds as it takes, each a sub-lettered task under T1713)
 

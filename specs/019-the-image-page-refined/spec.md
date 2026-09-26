@@ -576,3 +576,6 @@ re-implementation. The plan says where each lives.
   asked for, and the choice is among spec 018's three tokens.
 - **Round T1709j (2026-09-25)** — a muted middle dot with space on
   both sides between a stage's label and its note.
+- **Phase 1 closed (2026-09-25)** — the fade stays at 180ms; "the
+  design on this is settled." Several compares through one piece,
+  each a subset of the same stages, are expected in his writing.
