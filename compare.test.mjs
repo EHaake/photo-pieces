@@ -85,6 +85,7 @@ const EXPECTED = {
     legend: 'below',
     control: 'with-legend',
     cornerTags: false,
+    sideWidth: 'wide',
   },
   COMPARE_WORDING: {
     modes: { slider: 'Slider', side: 'Side by side', switch: 'Switch' },

@@ -27,6 +27,7 @@ export const COMPARE = {
   legend: 'below', // 'below' or 'above' the frame
   control: 'with-legend', // the method control: 'with-legend' (the legend's row) or 'above'
   cornerTags: false, // spec 006's corner tags, returned on the showing stages
+  sideWidth: 'wide', // the width class side by side swaps onto the block (compare-w-<this>), the surface's back on leaving
 } as const;
 
 /** The block's words; `modes`' keys are the three methods. */
@@ -264,6 +265,10 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   let leaving: number | null = null;
   let fits = true;
   let noted = -1;
+  // The width class the surface wrote, read once; side by side swaps it for `COMPARE.sideWidth`'s.
+  const surfaceWidth = [...root.classList].find((name) => name.startsWith(`${C.root}-w-`)) ?? '';
+  const sideWidth = `${C.root}-w-${COMPARE.sideWidth}`;
+  let worn = surfaceWidth;
 
   // The chrome.
   const line = make('span', 'compare-line');
@@ -326,7 +331,16 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
 
   const render = () => {
     const showing = view();
-    if (root.dataset.view !== showing) root.dataset.view = showing;
+    if (root.dataset.view !== showing) {
+      root.dataset.view = showing;
+      // Side by side wears `COMPARE.sideWidth`; every other view the surface's own width.
+      const width = showing === 'side' ? sideWidth : surfaceWidth;
+      if (width !== worn) {
+        if (worn) root.classList.remove(worn);
+        if (width) root.classList.add(width);
+        worn = width;
+      }
+    }
     let shown: number[];
     let note: number;
     const pair = pairOf(picked);

@@ -324,7 +324,7 @@ describe('the compare block (T1705, spec 019)', () => {
   it('three stages render as stacked figures, each image in a pane, label and note in order', async () => {
     const { code } = await render(three);
     expect(code).toMatch(
-      /^<figure class="piece-block piece-compare compare compare-w-wide" style="--ar: 0\.6667"><div class="compare-frames"><figure class="compare-stage">/,
+      /^<figure class="piece-block piece-compare compare compare-w-column" style="--ar: 0\.6667"><div class="compare-frames"><figure class="compare-stage">/,
     );
     expect(code.endsWith('</figure></div></figure>')).toBe(true);
     const stages = stagesOf(code);
@@ -341,17 +341,17 @@ describe('the compare block (T1705, spec 019)', () => {
         src: './_photo.jpg',
         alt: 'Camera',
         layout: 'constrained',
-        sizes: '(min-width: 1240px) 1160px, 96vw',
+        sizes: '(min-width: 720px) 680px, 94vw',
       }),
       expect.objectContaining({
         src: './_photo.tones.jpg',
         alt: 'Tones',
-        sizes: '(min-width: 1240px) 1160px, 96vw',
+        sizes: '(min-width: 720px) 680px, 94vw',
       }),
       expect.objectContaining({
         src: './portrait.jpg',
         alt: 'Finished',
-        sizes: '(min-width: 1240px) 1160px, 96vw',
+        sizes: '(min-width: 720px) 680px, 94vw',
       }),
     ]);
     // A device, not frames: nothing links to a page.
@@ -370,7 +370,7 @@ describe('the compare block (T1705, spec 019)', () => {
   it('data-mode is written only when the author writes a mode', async () => {
     const { code } = await render(three.replace(':::compare', ':::compare{mode="switch"}'));
     expect(code).toMatch(
-      /^<figure class="piece-block piece-compare compare compare-w-wide" style="--ar: 0\.6667" data-mode="switch">/,
+      /^<figure class="piece-block piece-compare compare compare-w-column" style="--ar: 0\.6667" data-mode="switch">/,
     );
   });
 
