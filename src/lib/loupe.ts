@@ -20,6 +20,7 @@ export const LOUPE = {
   keyStep: 1.5, // + and − multiply and divide the scale
   panStep: 0.15, // an arrow pans this share of the view
   dragSlop: 4, // px a press may move and still be a click
+  pan: 'follow', // 'follow' (zoomed, the mouse's place over the box is the place shown) or 'drag' (only a drag pans)
   zoomInKeys: ['+', '='],
   zoomOutKeys: ['-', '_'],
 } as const;
@@ -77,6 +78,7 @@ export type LoupeAction =
   | { type: 'press'; point: LoupePoint }
   | { type: 'move'; point: LoupePoint }
   | { type: 'release' }
+  | { type: 'hover'; point: LoupePoint }
   | { type: 'wheel'; point: LoupePoint; deltaY: number }
   | { type: 'pinch'; point: LoupePoint; ratio: number }
   | { type: 'key'; key: string };
@@ -90,6 +92,7 @@ export type LoupeTuning = {
   keyStep: number;
   panStep: number;
   dragSlop: number;
+  pan: 'follow' | 'drag';
   zoomInKeys: readonly string[];
   zoomOutKeys: readonly string[];
 };
@@ -139,7 +142,9 @@ export function zoomAbout(
  * a zoom-in key zooms from 1 (a key about the centre) — each `open`;
  * Escape and a click around the photograph leave the quiet view; ← and
  * → step the set. Zoomed: a press that moves past
- * `dragSlop` is a drag and pans; a click without one goes back to the
+ * `dragSlop` is a drag and pans; under `pan: 'follow'` a mouse over the
+ * box without a press pans to its place — at fraction (fx, fy) of the
+ * box, `tx = fx · w(1 − s)`, `ty = fy · h(1 − s)`; a click without a drag goes back to the
  * fit; Escape goes back to the fit; the arrows pan by `panStep` of the
  * box; the zoom keys, the wheel and the pinch zoom between 1 and full
  * detail, and reaching 1 is `close`. Escape always steps back one level.
@@ -193,6 +198,18 @@ export function loupeReduce(state: LoupeState, action: LoupeAction, ctx: LoupeCo
     case 'release':
       if (!state.press?.down) return stay;
       return { state: { ...state, press: { ...state.press, down: false } }, effect: 'none' };
+    case 'hover': {
+      if (!zoomed || tune.pan !== 'follow') return stay;
+      const share = (at: number, edge: number) =>
+        edge > 0 ? Math.min(1, Math.max(0, at / edge)) : 0;
+      const { s } = state.view;
+      const view = {
+        s,
+        tx: share(action.point.x, box.width) * box.width * (1 - s),
+        ty: share(action.point.y, box.height) * box.height * (1 - s),
+      };
+      return { state: { ...state, view }, effect: 'none' };
+    }
     case 'wheel':
       return zoomTo(state.view.s * Math.exp(-action.deltaY * tune.wheelStep), action.point);
     case 'pinch':
@@ -243,7 +260,7 @@ export type Loupe = {
  * The loupe on the image page's stage (plan, "The loupe, wired"): the
  * controller the page makes in init() when the stage carries
  * `data-loupe-src`, running `loupeReduce` on the stage's clicks,
- * presses, wheel, pinch (two pointers, or Safari's gesture events) and
+ * presses, a mouse's hover, wheel, pinch (two pointers, or Safari's gesture events) and
  * the page's keys.
  *
  * An overlay, not the stage image. On `open` it builds `div.loupe` over
@@ -431,7 +448,12 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
     }
   });
   stage.addEventListener('pointermove', (event) => {
-    if (!pointers.has(event.pointerId)) return;
+    if (!pointers.has(event.pointerId)) {
+      // A mouse with no press follows (LOUPE.pan); touch and pen only drag.
+      if (event.pointerType === 'mouse' && state.level === 'zoomed' && live())
+        run({ type: 'hover', point: pointIn(event) }, false);
+      return;
+    }
     const point = pointIn(event);
     pointers.set(event.pointerId, point);
     if (pointers.size === 1) run({ type: 'move', point }, false);

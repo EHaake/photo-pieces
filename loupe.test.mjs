@@ -59,6 +59,7 @@ const EXPECTED = {
     keyStep: 1.5,
     panStep: 0.15,
     dragSlop: 4,
+    pan: 'follow',
     zoomInKeys: ['+', '='],
     zoomOutKeys: ['-', '_'],
   },
@@ -343,6 +344,76 @@ describe('(b) the state (T1711)', () => {
         { type: 'move', point: at(600, 300) },
       ]);
       expect(step.state.view).toEqual(ZOOMED.view);
+    });
+
+    it("pan 'follow': a hover at the box's centre shows the centre, at a corner that corner", () => {
+      const s = ZOOMED.view.s;
+      const hover = (x, y) => loupeReduce(ZOOMED, { type: 'hover', point: at(x, y) }, CTX);
+      const centre = hover(500, 300);
+      expect(centre.effect).toBe('none');
+      expect(centre.state.view).toEqual({
+        s,
+        tx: (BOX.width * (1 - s)) / 2,
+        ty: (BOX.height * (1 - s)) / 2,
+      });
+      expect(hover(1000, 600).state.view).toEqual({
+        s,
+        tx: BOX.width * (1 - s),
+        ty: BOX.height * (1 - s),
+      });
+      const topLeft = hover(0, 0).state.view;
+      expect([topLeft.s, topLeft.tx + 0, topLeft.ty + 0]).toEqual([s, 0, 0]);
+      const offCentre = hover(250, 450).state.view; // a quarter across, three quarters down
+      expect(offCentre).toEqual({
+        s,
+        tx: 0.25 * BOX.width * (1 - s),
+        ty: 0.75 * BOX.height * (1 - s),
+      });
+    });
+
+    it("pan 'follow': a hover outside the box is clamped to its edge", () => {
+      const s = ZOOMED.view.s;
+      const hover = (x, y) => loupeReduce(ZOOMED, { type: 'hover', point: at(x, y) }, CTX);
+      expect(hover(1200, 900).state.view).toEqual({
+        s,
+        tx: BOX.width * (1 - s),
+        ty: BOX.height * (1 - s),
+      });
+      const before = hover(-40, -30).state.view;
+      expect([before.tx + 0, before.ty + 0]).toEqual([0, 0]);
+    });
+
+    it("pan 'follow': a hover after an arrow pan overrides it", () => {
+      const panned = loupeReduce(ZOOMED, { type: 'key', key: 'ArrowLeft' }, CTX).state;
+      const step = loupeReduce(panned, { type: 'hover', point: at(1000, 600) }, CTX);
+      expect(step.state.view.tx).toBe(BOX.width * (1 - ZOOMED.view.s));
+    });
+
+    it("a hover at the fit, or under pan 'drag', stays", () => {
+      expect(loupeReduce(LOUPE_AT_FIT, { type: 'hover', point: at(900, 500) }, CTX)).toEqual({
+        state: LOUPE_AT_FIT,
+        effect: 'none',
+      });
+      const drag = { ...CTX, tune: { pan: 'drag' } };
+      expect(loupeReduce(ZOOMED, { type: 'hover', point: at(900, 500) }, drag)).toEqual({
+        state: ZOOMED,
+        effect: 'none',
+      });
+    });
+
+    it("pan 'drag': a mouse drag still pans with the pointer", () => {
+      const drag = { ...CTX, tune: { pan: 'drag' } };
+      const move = LOUPE.dragSlop + 6;
+      const step = run(
+        ZOOMED,
+        [
+          { type: 'press', point: at(500, 300) },
+          { type: 'move', point: at(500 + move, 300) },
+          { type: 'release' },
+        ],
+        drag,
+      );
+      expect(step.state.view).toEqual({ ...ZOOMED.view, tx: ZOOMED.view.tx + move });
     });
 
     it('the zoom keys zoom about the centre between 1 and full detail; reaching 1 closes', () => {
