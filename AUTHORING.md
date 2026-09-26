@@ -422,9 +422,10 @@ written, until the tab closes. The four ways:
   and the last wraps to the first.
 - **Filmstrip** — one stage fills the frame, the others in a row
   beyond its edges: an arrow at either side, ← and → (Home and End for
-  the ends), a swipe on the phone or a sideways two-finger scroll on
-  the trackpad slides the strip to the next stage, and after a swipe
-  or a scroll it settles on the nearest. It slides, it does not fade,
+  the ends) or a swipe on the phone slides the strip to the next stage,
+  and after a swipe it settles on the nearest; a sideways two-finger
+  scroll on the trackpad pages one whole stage per gesture, its
+  momentum spent without paging again. It slides, it does not fade,
   so the frames go by in order, and it stops at either end rather than
   wrapping — the arrow with nowhere to go hides. A click on a stage in
   the legend slides there, and the note beneath is the showing stage's.

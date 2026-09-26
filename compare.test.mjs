@@ -14,6 +14,7 @@ import {
   stripAt,
   stripEnds,
   stripSettle,
+  stripWheelStep,
   switchNext,
 } from './src/lib/compare.ts';
 import { blocks, uncomment } from './src/lib/ground.ts';
@@ -84,7 +85,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     fit, and the method a block opens in.
 //     And the filmstrip's state (T1724): its six keys and its words in
 //     `EXPECTED` (the arrows at the ends, wrapping, the keys, the wheel
-//     and the width are envelope rows pinned there); the strip's
+//     and the width are envelope rows pinned there); whether a wheel
+//     event pages the strip (T1729b), as a table with its threshold read
+//     from COMPARE, so a halved threshold fails the 3px case; the strip's
 //     position after a move, clamped; the stage it settles on, the
 //     nearest (0.5 rounds up, so a floor fails it); which arrows have
 //     somewhere to go, at the first, a middle and the last stage and
@@ -128,8 +131,9 @@ const EXPECTED = {
     stripWraps: false,
     stripEnds: 'hide',
     stripKeys: { back: ['ArrowLeft'], next: ['ArrowRight'], first: ['Home'], last: ['End'] },
-    stripWheel: true,
+    stripWheel: 'page',
     stripWheelIdleMs: 150,
+    stripWheelStepPx: 4,
     stripWidth: 'surface',
   },
   COMPARE_WORDING: {
@@ -984,6 +988,38 @@ describe('(d) the state (T1707)', () => {
     ]);
     // The default is COMPARE.stripWraps.
     expect(stripEnds(3, 4)).toEqual(stripEnds(3, 4, COMPARE.stripWraps));
+  });
+
+  it("stripWheelStep: 'page' pages one stage the delta's way from stripWheelStepPx, none below it or once the gesture has paged; 'follow' and off never page (T1729b)", () => {
+    expect([
+      ['page', false, 40],
+      ['page', false, -40],
+      ['page', false, 4],
+      ['page', false, -4],
+      ['page', false, 3],
+      ['page', false, -3],
+      ['page', false, 0],
+      ['page', true, 40],
+      ['page', true, -40],
+      ['follow', false, 40],
+      ['follow', false, -40],
+      [false, false, 40],
+    ].map(([mode, gated, dx]) => [mode, gated, dx, stripWheelStep(mode, gated, dx)])).toEqual([
+      ['page', false, 40, 1],
+      ['page', false, -40, -1],
+      ['page', false, 4, 1],
+      ['page', false, -4, -1],
+      ['page', false, 3, 0],
+      ['page', false, -3, 0],
+      ['page', false, 0, 0],
+      ['page', true, 40, 0],
+      ['page', true, -40, 0],
+      ['follow', false, 40, 0],
+      ['follow', false, -40, 0],
+      [false, false, 40, 0],
+    ]);
+    // The default threshold is COMPARE.stripWheelStepPx.
+    expect(stripWheelStep('page', false, 3)).toEqual(stripWheelStep('page', false, 3, COMPARE.stripWheelStepPx));
   });
 
   it("switchNext with stripWraps steps the filmstrip: it stops at the last stage and at the first (T1724)", () => {
