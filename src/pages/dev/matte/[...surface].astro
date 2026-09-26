@@ -45,7 +45,7 @@ import { getImageRegistry } from '../../../lib/images';
 import { categoryLabel } from '../../../lib/categories';
 import { formatDate } from '../../../i18n';
 import { withBase } from '../../../lib/url';
-import { stageSizes } from '../../../lib/stage-sizes';
+import { stageShape, stageSizes } from '../../../lib/stage-sizes';
 // Aliased since spec 013, when getStaticPaths carried a mat table of the
 // same name; the prefix keeps the ground's names reading as the ground's.
 import { CANDIDATES as GROUND_CANDIDATES, TODAY as GROUND_TODAY } from '../../../lib/ground';
@@ -243,6 +243,9 @@ const SURFACE_NOTE: Record<Surface, string> = {
               <figure
                 class="image-frame"
                 style={`--ar: ${Math.round((image.image.width / image.image.height) * 1000) / 1000}`}
+                data-shape={stageShape(
+                  Math.round((image.image.width / image.image.height) * 1000) / 1000,
+                )}
               >
                 <Image
                   src={image.image}

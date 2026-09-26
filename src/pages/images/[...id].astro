@@ -41,7 +41,7 @@ import { getImageRegistry } from '../../lib/images';
 import { LOUPE, loupeImageOptions } from '../../lib/loupe';
 import { plainText, renderMarkdown } from '../../lib/markdown';
 import { ogImageOptions } from '../../lib/og';
-import { stageSizes } from '../../lib/stage-sizes';
+import { stageShape, stageSizes } from '../../lib/stage-sizes';
 import { withBase } from '../../lib/url';
 
 export async function getStaticPaths() {
@@ -268,7 +268,7 @@ const indexed =
       data-loupe-h={loupe?.attributes.height}
       data-loupe-detail={Boolean(loupe && image.detail) || undefined}
     >
-      <figure class="image-frame" style={`--ar: ${ar}`}>
+      <figure class="image-frame" style={`--ar: ${ar}`} data-shape={stageShape(ar)}>
         {
           /* Width capped at 2× the content width: enough for a retina
             1160px stage. For most sources this IS the source width; the

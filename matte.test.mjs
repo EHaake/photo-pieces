@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { galleryCell, GALLERY_STRETCH } from './src/lib/gallery-layout.ts';
 import { blocks, uncomment } from './src/lib/ground.ts';
-import { PHONE, stageSizes } from './src/lib/stage-sizes.ts';
+import { PHONE, STAGE_SHARE, stageShape, stageSizes } from './src/lib/stage-sizes.ts';
 
 // The mat rule (spec 013, T1101; a hero treatment since spec 015,
 // T1301; the quiet view's alone since spec 017, T1502): one rule,
@@ -131,8 +131,10 @@ const QUIET_STAGE_BODY =
 const FRAME_IMG_BODY =
   '\n  display: block;\n  width: auto;\n  max-width: 100%;\n  height: auto;\n  max-height: calc(var(--avail-h) - 2 * var(--mat));\n';
 
-/** The frame's sizing on paper (spec 017): one rule, gated off the quiet view. */
+/** The frame's sizing on paper (spec 017), gated off the quiet view; since
+ *  spec 019 one rule per shape, `${PAPER_FRAME}[data-shape='…']`. */
 const PAPER_FRAME = 'html:not([data-quiet]) .image-frame';
+const SHAPED = (shape) => `${PAPER_FRAME}[data-shape='${shape}']`;
 
 // ---- the evaluator (c) -------------------------------------------------
 
@@ -410,14 +412,38 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     expect(norm(frame['--mat'])).toBe('0px');
     expect(norm(frame['max-width'])).toBe('100%');
     expect(norm(frame['margin'])).toBe('0');
-    // One rectangle, turned: the L × S box, gated off the quiet view.
-    const paperRule = ruleFor(top, PAPER_FRAME);
-    expect(norm(paperRule.prelude)).toBe(PAPER_FRAME);
-    const paper = declarations(paperRule.body);
-    expect(Object.fromEntries(Object.entries(paper).map(([k, v]) => [k, norm(v)]))).toEqual({
-      '--L': 'min(var(--avail-w), var(--avail-h))',
-      '--S': 'calc(var(--L) * 2 / 3)',
-      width: 'min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)))',
+    // The stage's share (spec 019), gated off the quiet view: one rule
+    // per shape, each its width alone. Spec 017's L × S rule (and its
+    // --L/--S pin) is gone — no rule selects the bare paper frame.
+    expect([...top, ...nested].filter((block) => selects(block.prelude, PAPER_FRAME))).toEqual([]);
+    const shaped = (shape) => {
+      const rule = ruleFor(top, SHAPED(shape));
+      expect(norm(rule.prelude)).toBe(SHAPED(shape));
+      return Object.fromEntries(
+        Object.entries(declarations(rule.body)).map(([k, v]) => [k, norm(v)]),
+      );
+    };
+    expect(shaped('landscape')).toEqual({
+      width:
+        'min(calc(var(--avail-w) * var(--stage-share-landscape)), calc(var(--avail-h) * var(--ar, 1)))',
+    });
+    expect(shaped('portrait')).toEqual({
+      width:
+        'min(calc(var(--avail-h) * var(--stage-share-portrait) * var(--ar, 1)), var(--avail-w))',
+    });
+    // The two shares: declared once, on :root, at the opening 1 — and
+    // STAGE_SHARE, the sizes hint's literals, equal to them.
+    for (const token of ['--stage-share-landscape', '--stage-share-portrait']) {
+      expect([token, norm(root[token] ?? '')]).toEqual([token, '1']);
+      expect([token, css.match(new RegExp(`${token}\\s*:`, 'g'))?.length]).toEqual([token, 1]);
+      const declaring = [...top, ...nested].filter(
+        (block) => token in declarations(block.body) && !selects(block.prelude, ':root'),
+      );
+      expect(declaring.map((block) => norm(block.prelude))).toEqual([]);
+    }
+    expect(STAGE_SHARE).toEqual({
+      landscape: Number(root['--stage-share-landscape']),
+      portrait: Number(root['--stage-share-portrait']),
     });
     const paperImg = ruleFor(top, `${PAPER_FRAME} img`);
     expect(norm(paperImg.prelude)).toBe(`${PAPER_FRAME} img`);
@@ -446,6 +472,8 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     // The paper frame's `:not` preludes are not quiet rules: the list
     // below gains nothing from them.
     expect(QUIET_RULE.test(PAPER_FRAME)).toBe(false);
+    expect(QUIET_RULE.test(SHAPED('landscape'))).toBe(false);
+    expect(QUIET_RULE.test(SHAPED('portrait'))).toBe(false);
     expect(QUIET_RULE.test(`${PAPER_FRAME} img`)).toBe(false);
     const quietStage = [...top, ...nested]
       .map((block) => norm(block.prelude))
@@ -772,12 +800,13 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
   });
 
   /** The paper frame's env at a point: the stage's limits, the ratio
-   *  helpers, the L × S rule's own strings, --header-h absent (its
-   *  4.75rem fallback) and the nav's token at the viewport's width. */
+   *  helpers, the shape rule stageShape(ratio) picks, :root's shares,
+   *  --header-h absent (its 4.75rem fallback) and the nav's token at the
+   *  viewport's width. */
   const paperEnv = (one, ratio = one.ratio) => {
     const stage = declarations(ruleFor(top, '.image-stage').body);
     const frame = declarations(ruleFor(top, '.image-frame').body);
-    const paper = declarations(ruleFor(top, PAPER_FRAME).body);
+    const paper = declarations(ruleFor(top, SHAPED(stageShape(ratio))).body);
     const env = envFor(one, {
       '--ar': ratio,
       '--stage-pad': stage['--stage-pad'],
@@ -787,63 +816,83 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
       '--q': frame['--q'],
       '--mat': frame['--mat'],
       '--frame-nav-h': navAt(one.viewport),
-      '--L': paper['--L'],
-      '--S': paper['--S'],
     });
     expect('--header-h' in env).toBe(false);
     const at = { env, viewport: one.viewport };
     const width = px(paper['width'], at);
-    // The test's own box: L the smaller limit, S two-thirds of it.
-    const L = Math.min(px(stage['--avail-w'], at), px(stage['--avail-h'], at));
-    return { at, width, height: width / ratio, L, S: (2 * L) / 3 };
+    return {
+      at,
+      width,
+      height: width / ratio,
+      availW: px(stage['--avail-w'], at),
+      availH: px(stage['--avail-h'], at),
+    };
   };
 
-  it('one rectangle, turned: every frame fits the L × S box turned to suit it and touches a side', () => {
+  // Replaces spec 017's "one rectangle, turned": the L × S rule it pinned
+  // is the one spec 019 removes, so this is the same case retargeted at
+  // the rule that replaced it, not a weakened one.
+  it("the stage's share: every frame is its shape's share, bounded by the other limit, and the table holds", () => {
     const cap = declarations(ruleFor(top, '.image-frame img').body)['max-height'];
+    const shareL = Number(root['--stage-share-landscape']);
+    const shareP = Number(root['--stage-share-portrait']);
     for (const one of grid()) {
-      const { at, width, height, L, S } = paperEnv(one);
-      const [long, short] = one.ratio >= 1 ? [width, height] : [height, width];
-      expect([where('fits the box', one), long <= L + 1e-6 && short <= S + 1e-6]).toEqual([
-        where('fits the box', one),
+      const { at, width, height, availW, availH } = paperEnv(one);
+      // The rule computed here from the stage's limits and :root's shares.
+      const expected =
+        stageShape(one.ratio) === 'landscape'
+          ? Math.min(availW * shareL, availH * one.ratio)
+          : Math.min(availH * shareP, availW / one.ratio) * one.ratio;
+      expect([where('share rule', one), close(width, expected)]).toEqual([
+        where('share rule', one),
         true,
       ]);
-      expect([where('touches a side', one), close(long, L) || close(short, S)]).toEqual([
-        where('touches a side', one),
+      expect([where('fits both limits', one), width <= availW + 1e-6 && height <= availH + 1e-6]) //
+        .toEqual([where('fits both limits', one), true]);
+      const touches =
+        stageShape(one.ratio) === 'landscape'
+          ? close(width, availW * shareL) || close(height, availH)
+          : close(height, availH * shareP) || close(width, availW);
+      expect([where('touches its share or the other bound', one), touches]).toEqual([
+        where('touches its share or the other bound', one),
         true,
       ]);
-      if (one.ratio === 1)
-        expect([where('square is S × S', one), close(width, S) && close(height, S)]).toEqual([
-          where('square is S × S', one),
-          true,
-        ]);
-      if (one.ratio === 3)
-        expect([where('3:1 is L × L/3', one), close(width, L) && close(height, L / 3)]).toEqual([
-          where('3:1 is L × L/3', one),
-          true,
-        ]);
-      if (one.ratio === 0.8)
-        expect([where('4:5 is S wide', one), close(width, S)]).toEqual([
-          where('4:5 is S wide', one),
-          true,
-        ]);
       // Spec 013's cap on the image never binds on paper.
       expect([where('max-height never binds', one), px(cap, at) >= height - 1e-6]).toEqual([
         where('max-height never binds', one),
         true,
       ]);
-      // The exact pair, evaluated here rather than at the grid's 0.667:
-      // a 3:2 is L × S and a 2:3 is S × L — the reference rectangle, turned.
-      const landscape = paperEnv(one, 1.5);
-      const portrait = paperEnv(one, 1 / 1.5);
-      expect([
-        where('3:2 is L × S', one),
-        close(landscape.width, landscape.L) && close(landscape.height, landscape.S),
-      ]).toEqual([where('3:2 is L × S', one), true]);
-      expect([
-        where('2:3 is S × L', one),
-        close(portrait.width, portrait.S) && close(portrait.height, portrait.L),
-      ]).toEqual([where('2:3 is S × L', one), true]);
     }
+    // plan.md's table at the opening shares, the fallback header (76px),
+    // 3:2 and 2:3 at exactly ⅔, to ±0.1px.
+    const TABLE = [
+      [[1512, 982], 3 / 2, 1171.5, 781.0],
+      [[1512, 982], 2 / 3, 520.7, 781.0],
+      [[1280, 1440], 3 / 2, 1216.0, 810.7],
+      [[1280, 1440], 2 / 3, 826.0, 1239.0],
+    ];
+    for (const [viewport, ratio, w, h] of TABLE) {
+      const { width, height } = paperEnv({ viewport, share: 0, floor: 0, ceiling: 0, ratio });
+      const label = `${viewport.join('×')} at ${ratio.toFixed(3)}`;
+      expect([label, Math.abs(width - w) <= 0.1, Math.abs(height - h) <= 0.1]).toEqual([
+        label,
+        true,
+        true,
+      ]);
+    }
+  });
+
+  it('stageShape: wider than tall is a landscape, taller than wide a portrait, a square a portrait; both stage figures write it', () => {
+    // The square's row is the literal, not STAGE_SQUARE: a square round
+    // edits this row, as every envelope row is edited.
+    for (const [ratio, shape] of [
+      [1.5, 'landscape'],
+      [0.667, 'portrait'],
+      [1, 'portrait'],
+    ])
+      expect([ratio, stageShape(ratio)]).toEqual([ratio, shape]);
+    for (const path of ['src/pages/images/[...id].astro', 'src/pages/dev/matte/[...surface].astro'])
+      expect([path, src[path].includes('data-shape={stageShape(')]).toEqual([path, true]);
   });
 
   it('the sizes hint agrees with the rule: stageSizes(ar), at the branch the viewport selects, is the CSS width', () => {
