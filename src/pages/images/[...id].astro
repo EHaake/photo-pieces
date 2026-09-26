@@ -38,6 +38,7 @@ import {
   sectionsFor,
 } from '../../lib/image-meta.mjs';
 import { getImageRegistry } from '../../lib/images';
+import { LOUPE, loupeImageOptions } from '../../lib/loupe';
 import { plainText, renderMarkdown } from '../../lib/markdown';
 import { ogImageOptions } from '../../lib/og';
 import { stageSizes } from '../../lib/stage-sizes';
@@ -119,6 +120,12 @@ const description =
 // original file (which may carry EXIF the site doesn't publish); see
 // ogImageOptions for the passthrough case the scan caught.
 const og = await getImage(ogImageOptions(image.image));
+
+// The loupe's file (spec 019): the detail export, else the photograph's
+// own file. Named only in the stage's data attributes, which fetch
+// nothing; the script reads them when the loupe opens.
+const loupeSource = image.detail ?? (LOUPE.withoutDetail ? image.image : null);
+const loupe = loupeSource ? await getImage(loupeImageOptions(loupeSource)) : null;
 
 // The wall label: only what exists. Order is the label's reading order;
 // place and time head it (spec 006). Exposure rows are kept out of the
@@ -254,7 +261,13 @@ const indexed =
 
 <BaseLayout title={image.title} description={description} ogType="article" image={og.src}>
   <article class="image-page" data-pagefind-body={indexed || undefined}>
-    <div class="image-stage">
+    <div
+      class="image-stage"
+      data-loupe-src={loupe?.src}
+      data-loupe-w={loupe?.attributes.width}
+      data-loupe-h={loupe?.attributes.height}
+      data-loupe-detail={Boolean(loupe && image.detail) || undefined}
+    >
       <figure class="image-frame" style={`--ar: ${ar}`}>
         {
           /* Width capped at 2× the content width: enough for a retina
