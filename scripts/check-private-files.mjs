@@ -82,7 +82,8 @@ const STATE_ATTRIBUTES = [
 ];
 const STATE_CLASSES = new Set([
   'compare-line', 'compare-handle', 'compare-legend', 'compare-stop', 'compare-control',
-  'compare-now', 'compare-tag', 'loupe', 'loupe-layer', 'loupe-base', 'loupe-detail',
+  'compare-now', 'compare-tag', 'compare-slot', 'compare-hint',
+  'loupe', 'loupe-layer', 'loupe-base', 'loupe-detail',
 ]);
 
 /**

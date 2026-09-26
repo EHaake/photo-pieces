@@ -141,6 +141,16 @@ describe('the private-files barrier (T1703, spec 019)', () => {
       expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, 'index.html')}: .loupe`);
     });
 
+    it('class="compare-slot" and class="compare-hint" (the legend\'s side tag and hint, T1709d) fail', () => {
+      const dir = site({
+        'index.html': html('<ol><li><button>Tones <span class="compare-slot">left</span></button></li></ol><p class="compare-hint">next pick: right</p>'),
+      });
+      const result = run(dir);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, 'index.html')}: .compare-slot`);
+      expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, 'index.html')}: .compare-hint`);
+    });
+
     it('data-js and .loupe named only inside <script> and <style> exit 0', () => {
       const dir = site({
         'index.html': html(

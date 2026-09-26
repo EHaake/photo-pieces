@@ -2126,7 +2126,8 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
 
 /* The figure: the frame across the row, the legend and the method
    control sharing the row beneath it (or above, per COMPARE.legend and
-   COMPARE.control), the live note last. */
+   COMPARE.control), the legend's hint across the row after theirs, the
+   live note last. */
 .compare[data-js] {
   --split-pct: calc(var(--split) * 1%);
   display: grid;
@@ -2135,7 +2136,7 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   align-items: baseline;
 }
 
-.compare[data-js] > :is(.compare-frames, .compare-now) {
+.compare[data-js] > :is(.compare-frames, .compare-hint, .compare-now) {
   grid-column: 1 / -1;
 }
 
@@ -2259,9 +2260,11 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   cursor: pointer;
 }
 
-/* The legend of stops and the method control: the label's mono eyebrow,
-   the showing stages and the chosen method in the text colour. */
+/* The legend of stops, its hint and the method control: the label's mono
+   eyebrow, the showing stages (bold) and the chosen method in the text
+   colour. */
 .compare[data-js] .compare-legend,
+.compare[data-js] .compare-hint,
 .compare[data-js] .compare-control {
   display: flex;
   flex-wrap: wrap;
@@ -2292,6 +2295,22 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
 .compare[data-js] .compare-legend [aria-pressed='true'],
 .compare[data-js] .compare-control [aria-pressed='true'] {
   color: var(--color-text);
+}
+
+.compare[data-js] .compare-legend [aria-pressed='true'] {
+  font-weight: 700;
+}
+
+/* A picked stage's side tag, "left" or "right", quieter than its label;
+   the hint after the legend names the side the next pick takes. The
+   switch picks no pair: no tags there, and no hint. */
+.compare[data-js] .compare-slot {
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+.compare[data-view='switch'] .compare-hint {
+  display: none;
 }
 
 /* The live note: the showing stage's label and note, the caption's style. */

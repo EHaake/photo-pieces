@@ -6,8 +6,7 @@ import {
   COMPARE_WORDING,
   noteIndex,
   openingMode,
-  pairOf,
-  pickPair,
+  pickSlot,
   restView,
   sideFits,
   sidePair,
@@ -92,6 +91,8 @@ const EXPECTED = {
     control: 'How to compare',
     legend: 'Stages',
     handle: 'Move between the stages',
+    slots: { left: 'left', right: 'right' },
+    next: 'next pick:',
   },
 };
 
@@ -293,9 +294,12 @@ describe("(c) the compare's motion (T1708)", () => {
     expect(writes.filter((line) => !/if \(!reducedMotion\(\)\)/.test(line))).toEqual([]);
   });
 
-  it('the legend and control rule is exactly its shape (T1708a) — the legend\'s round edits it and this string', () => {
+  it('the legend, hint and control rule is exactly its shape (T1708a, T1709d) — the legend\'s round edits it and this string', () => {
     expect(
-      ruleAt(rulesIn(css), '.compare[data-js] .compare-legend, .compare[data-js] .compare-control'),
+      ruleAt(
+        rulesIn(css),
+        '.compare[data-js] .compare-legend, .compare[data-js] .compare-hint, .compare[data-js] .compare-control',
+      ),
     ).toEqual({
       display: 'flex',
       'flex-wrap': 'wrap',
@@ -358,126 +362,196 @@ describe('(d) the state (T1707)', () => {
     ]);
   });
 
-  // [pick before as [older, newer], stage clicked, pick after, the pair
-  // shown in stage order], for every pick and every click: a stage in the
-  // pair leaves it; another replaces the older and becomes the newer.
+  // [pair before as [left, right, next], stage clicked, pair after], for
+  // every pair, either side next, and every click: a stage in the pair
+  // leaves it; another takes the next side, and next flips.
   const picks = (n) => {
     const rows = [];
-    for (let older = 0; older < n; older++)
-      for (let newer = 0; newer < n; newer++)
-        if (older !== newer)
-          for (let k = 0; k < n; k++) {
-            const next = pickPair({ older, newer }, k);
-            const shown = pairOf(next);
-            rows.push([[older, newer], k, [next.older, next.newer], [shown.left, shown.right]]);
-          }
+    for (let left = 0; left < n; left++)
+      for (let right = 0; right < n; right++)
+        if (left !== right)
+          for (const next of ['left', 'right'])
+            for (let k = 0; k < n; k++) {
+              const after = pickSlot({ left, right, next }, k);
+              rows.push([[left, right, next], k, [after.left, after.right, after.next]]);
+            }
     return rows;
   };
 
-  it('pickPair on three stages: every click on every pick', () => {
+  it('pickSlot on three stages: every click on every pair, either side next', () => {
     expect(picks(3)).toEqual([
-      [[0, 1], 0, [0, 1], [0, 1]],
-      [[0, 1], 1, [0, 1], [0, 1]],
-      [[0, 1], 2, [1, 2], [1, 2]],
-      [[0, 2], 0, [0, 2], [0, 2]],
-      [[0, 2], 1, [2, 1], [1, 2]],
-      [[0, 2], 2, [0, 2], [0, 2]],
-      [[1, 0], 0, [1, 0], [0, 1]],
-      [[1, 0], 1, [1, 0], [0, 1]],
-      [[1, 0], 2, [0, 2], [0, 2]],
-      [[1, 2], 0, [2, 0], [0, 2]],
-      [[1, 2], 1, [1, 2], [1, 2]],
-      [[1, 2], 2, [1, 2], [1, 2]],
-      [[2, 0], 0, [2, 0], [0, 2]],
-      [[2, 0], 1, [0, 1], [0, 1]],
-      [[2, 0], 2, [2, 0], [0, 2]],
-      [[2, 1], 0, [1, 0], [0, 1]],
-      [[2, 1], 1, [2, 1], [1, 2]],
-      [[2, 1], 2, [2, 1], [1, 2]],
+      [[0, 1, 'left'], 0, [0, 1, 'left']],
+      [[0, 1, 'left'], 1, [0, 1, 'left']],
+      [[0, 1, 'left'], 2, [2, 1, 'right']],
+      [[0, 1, 'right'], 0, [0, 1, 'right']],
+      [[0, 1, 'right'], 1, [0, 1, 'right']],
+      [[0, 1, 'right'], 2, [0, 2, 'left']],
+      [[0, 2, 'left'], 0, [0, 2, 'left']],
+      [[0, 2, 'left'], 1, [1, 2, 'right']],
+      [[0, 2, 'left'], 2, [0, 2, 'left']],
+      [[0, 2, 'right'], 0, [0, 2, 'right']],
+      [[0, 2, 'right'], 1, [0, 1, 'left']],
+      [[0, 2, 'right'], 2, [0, 2, 'right']],
+      [[1, 0, 'left'], 0, [1, 0, 'left']],
+      [[1, 0, 'left'], 1, [1, 0, 'left']],
+      [[1, 0, 'left'], 2, [2, 0, 'right']],
+      [[1, 0, 'right'], 0, [1, 0, 'right']],
+      [[1, 0, 'right'], 1, [1, 0, 'right']],
+      [[1, 0, 'right'], 2, [1, 2, 'left']],
+      [[1, 2, 'left'], 0, [0, 2, 'right']],
+      [[1, 2, 'left'], 1, [1, 2, 'left']],
+      [[1, 2, 'left'], 2, [1, 2, 'left']],
+      [[1, 2, 'right'], 0, [1, 0, 'left']],
+      [[1, 2, 'right'], 1, [1, 2, 'right']],
+      [[1, 2, 'right'], 2, [1, 2, 'right']],
+      [[2, 0, 'left'], 0, [2, 0, 'left']],
+      [[2, 0, 'left'], 1, [1, 0, 'right']],
+      [[2, 0, 'left'], 2, [2, 0, 'left']],
+      [[2, 0, 'right'], 0, [2, 0, 'right']],
+      [[2, 0, 'right'], 1, [2, 1, 'left']],
+      [[2, 0, 'right'], 2, [2, 0, 'right']],
+      [[2, 1, 'left'], 0, [0, 1, 'right']],
+      [[2, 1, 'left'], 1, [2, 1, 'left']],
+      [[2, 1, 'left'], 2, [2, 1, 'left']],
+      [[2, 1, 'right'], 0, [2, 0, 'left']],
+      [[2, 1, 'right'], 1, [2, 1, 'right']],
+      [[2, 1, 'right'], 2, [2, 1, 'right']],
     ]);
   });
 
-  it('pickPair on four stages: every click on every pick', () => {
+  it('pickSlot on four stages: every click on every pair, either side next', () => {
     expect(picks(4)).toEqual([
-      [[0, 1], 0, [0, 1], [0, 1]],
-      [[0, 1], 1, [0, 1], [0, 1]],
-      [[0, 1], 2, [1, 2], [1, 2]],
-      [[0, 1], 3, [1, 3], [1, 3]],
-      [[0, 2], 0, [0, 2], [0, 2]],
-      [[0, 2], 1, [2, 1], [1, 2]],
-      [[0, 2], 2, [0, 2], [0, 2]],
-      [[0, 2], 3, [2, 3], [2, 3]],
-      [[0, 3], 0, [0, 3], [0, 3]],
-      [[0, 3], 1, [3, 1], [1, 3]],
-      [[0, 3], 2, [3, 2], [2, 3]],
-      [[0, 3], 3, [0, 3], [0, 3]],
-      [[1, 0], 0, [1, 0], [0, 1]],
-      [[1, 0], 1, [1, 0], [0, 1]],
-      [[1, 0], 2, [0, 2], [0, 2]],
-      [[1, 0], 3, [0, 3], [0, 3]],
-      [[1, 2], 0, [2, 0], [0, 2]],
-      [[1, 2], 1, [1, 2], [1, 2]],
-      [[1, 2], 2, [1, 2], [1, 2]],
-      [[1, 2], 3, [2, 3], [2, 3]],
-      [[1, 3], 0, [3, 0], [0, 3]],
-      [[1, 3], 1, [1, 3], [1, 3]],
-      [[1, 3], 2, [3, 2], [2, 3]],
-      [[1, 3], 3, [1, 3], [1, 3]],
-      [[2, 0], 0, [2, 0], [0, 2]],
-      [[2, 0], 1, [0, 1], [0, 1]],
-      [[2, 0], 2, [2, 0], [0, 2]],
-      [[2, 0], 3, [0, 3], [0, 3]],
-      [[2, 1], 0, [1, 0], [0, 1]],
-      [[2, 1], 1, [2, 1], [1, 2]],
-      [[2, 1], 2, [2, 1], [1, 2]],
-      [[2, 1], 3, [1, 3], [1, 3]],
-      [[2, 3], 0, [3, 0], [0, 3]],
-      [[2, 3], 1, [3, 1], [1, 3]],
-      [[2, 3], 2, [2, 3], [2, 3]],
-      [[2, 3], 3, [2, 3], [2, 3]],
-      [[3, 0], 0, [3, 0], [0, 3]],
-      [[3, 0], 1, [0, 1], [0, 1]],
-      [[3, 0], 2, [0, 2], [0, 2]],
-      [[3, 0], 3, [3, 0], [0, 3]],
-      [[3, 1], 0, [1, 0], [0, 1]],
-      [[3, 1], 1, [3, 1], [1, 3]],
-      [[3, 1], 2, [1, 2], [1, 2]],
-      [[3, 1], 3, [3, 1], [1, 3]],
-      [[3, 2], 0, [2, 0], [0, 2]],
-      [[3, 2], 1, [2, 1], [1, 2]],
-      [[3, 2], 2, [3, 2], [2, 3]],
-      [[3, 2], 3, [3, 2], [2, 3]],
+      [[0, 1, 'left'], 0, [0, 1, 'left']],
+      [[0, 1, 'left'], 1, [0, 1, 'left']],
+      [[0, 1, 'left'], 2, [2, 1, 'right']],
+      [[0, 1, 'left'], 3, [3, 1, 'right']],
+      [[0, 1, 'right'], 0, [0, 1, 'right']],
+      [[0, 1, 'right'], 1, [0, 1, 'right']],
+      [[0, 1, 'right'], 2, [0, 2, 'left']],
+      [[0, 1, 'right'], 3, [0, 3, 'left']],
+      [[0, 2, 'left'], 0, [0, 2, 'left']],
+      [[0, 2, 'left'], 1, [1, 2, 'right']],
+      [[0, 2, 'left'], 2, [0, 2, 'left']],
+      [[0, 2, 'left'], 3, [3, 2, 'right']],
+      [[0, 2, 'right'], 0, [0, 2, 'right']],
+      [[0, 2, 'right'], 1, [0, 1, 'left']],
+      [[0, 2, 'right'], 2, [0, 2, 'right']],
+      [[0, 2, 'right'], 3, [0, 3, 'left']],
+      [[0, 3, 'left'], 0, [0, 3, 'left']],
+      [[0, 3, 'left'], 1, [1, 3, 'right']],
+      [[0, 3, 'left'], 2, [2, 3, 'right']],
+      [[0, 3, 'left'], 3, [0, 3, 'left']],
+      [[0, 3, 'right'], 0, [0, 3, 'right']],
+      [[0, 3, 'right'], 1, [0, 1, 'left']],
+      [[0, 3, 'right'], 2, [0, 2, 'left']],
+      [[0, 3, 'right'], 3, [0, 3, 'right']],
+      [[1, 0, 'left'], 0, [1, 0, 'left']],
+      [[1, 0, 'left'], 1, [1, 0, 'left']],
+      [[1, 0, 'left'], 2, [2, 0, 'right']],
+      [[1, 0, 'left'], 3, [3, 0, 'right']],
+      [[1, 0, 'right'], 0, [1, 0, 'right']],
+      [[1, 0, 'right'], 1, [1, 0, 'right']],
+      [[1, 0, 'right'], 2, [1, 2, 'left']],
+      [[1, 0, 'right'], 3, [1, 3, 'left']],
+      [[1, 2, 'left'], 0, [0, 2, 'right']],
+      [[1, 2, 'left'], 1, [1, 2, 'left']],
+      [[1, 2, 'left'], 2, [1, 2, 'left']],
+      [[1, 2, 'left'], 3, [3, 2, 'right']],
+      [[1, 2, 'right'], 0, [1, 0, 'left']],
+      [[1, 2, 'right'], 1, [1, 2, 'right']],
+      [[1, 2, 'right'], 2, [1, 2, 'right']],
+      [[1, 2, 'right'], 3, [1, 3, 'left']],
+      [[1, 3, 'left'], 0, [0, 3, 'right']],
+      [[1, 3, 'left'], 1, [1, 3, 'left']],
+      [[1, 3, 'left'], 2, [2, 3, 'right']],
+      [[1, 3, 'left'], 3, [1, 3, 'left']],
+      [[1, 3, 'right'], 0, [1, 0, 'left']],
+      [[1, 3, 'right'], 1, [1, 3, 'right']],
+      [[1, 3, 'right'], 2, [1, 2, 'left']],
+      [[1, 3, 'right'], 3, [1, 3, 'right']],
+      [[2, 0, 'left'], 0, [2, 0, 'left']],
+      [[2, 0, 'left'], 1, [1, 0, 'right']],
+      [[2, 0, 'left'], 2, [2, 0, 'left']],
+      [[2, 0, 'left'], 3, [3, 0, 'right']],
+      [[2, 0, 'right'], 0, [2, 0, 'right']],
+      [[2, 0, 'right'], 1, [2, 1, 'left']],
+      [[2, 0, 'right'], 2, [2, 0, 'right']],
+      [[2, 0, 'right'], 3, [2, 3, 'left']],
+      [[2, 1, 'left'], 0, [0, 1, 'right']],
+      [[2, 1, 'left'], 1, [2, 1, 'left']],
+      [[2, 1, 'left'], 2, [2, 1, 'left']],
+      [[2, 1, 'left'], 3, [3, 1, 'right']],
+      [[2, 1, 'right'], 0, [2, 0, 'left']],
+      [[2, 1, 'right'], 1, [2, 1, 'right']],
+      [[2, 1, 'right'], 2, [2, 1, 'right']],
+      [[2, 1, 'right'], 3, [2, 3, 'left']],
+      [[2, 3, 'left'], 0, [0, 3, 'right']],
+      [[2, 3, 'left'], 1, [1, 3, 'right']],
+      [[2, 3, 'left'], 2, [2, 3, 'left']],
+      [[2, 3, 'left'], 3, [2, 3, 'left']],
+      [[2, 3, 'right'], 0, [2, 0, 'left']],
+      [[2, 3, 'right'], 1, [2, 1, 'left']],
+      [[2, 3, 'right'], 2, [2, 3, 'right']],
+      [[2, 3, 'right'], 3, [2, 3, 'right']],
+      [[3, 0, 'left'], 0, [3, 0, 'left']],
+      [[3, 0, 'left'], 1, [1, 0, 'right']],
+      [[3, 0, 'left'], 2, [2, 0, 'right']],
+      [[3, 0, 'left'], 3, [3, 0, 'left']],
+      [[3, 0, 'right'], 0, [3, 0, 'right']],
+      [[3, 0, 'right'], 1, [3, 1, 'left']],
+      [[3, 0, 'right'], 2, [3, 2, 'left']],
+      [[3, 0, 'right'], 3, [3, 0, 'right']],
+      [[3, 1, 'left'], 0, [0, 1, 'right']],
+      [[3, 1, 'left'], 1, [3, 1, 'left']],
+      [[3, 1, 'left'], 2, [2, 1, 'right']],
+      [[3, 1, 'left'], 3, [3, 1, 'left']],
+      [[3, 1, 'right'], 0, [3, 0, 'left']],
+      [[3, 1, 'right'], 1, [3, 1, 'right']],
+      [[3, 1, 'right'], 2, [3, 2, 'left']],
+      [[3, 1, 'right'], 3, [3, 1, 'right']],
+      [[3, 2, 'left'], 0, [0, 2, 'right']],
+      [[3, 2, 'left'], 1, [1, 2, 'right']],
+      [[3, 2, 'left'], 2, [3, 2, 'left']],
+      [[3, 2, 'left'], 3, [3, 2, 'left']],
+      [[3, 2, 'right'], 0, [3, 0, 'left']],
+      [[3, 2, 'right'], 1, [3, 1, 'left']],
+      [[3, 2, 'right'], 2, [3, 2, 'right']],
+      [[3, 2, 'right'], 3, [3, 2, 'right']],
     ]);
   });
 
-  it('pickPair: no click on a stage outside the pair leaves the shown pair unchanged, and no two do the same thing', () => {
+  it('pickSlot: a click outside the pair changes it, the clicked stage on the side that was next, and no two do the same thing', () => {
     for (const n of [3, 4]) {
-      const byPick = new Map();
-      for (const [before, k, , shown] of picks(n)) {
-        if (before.includes(k)) continue;
-        const was = pairOf({ older: before[0], newer: before[1] });
-        expect([before, k, shown]).not.toEqual([before, k, [was.left, was.right]]);
-        expect([before, k, shown.includes(k)]).toEqual([before, k, true]);
-        byPick.set(`${before}`, [...(byPick.get(`${before}`) ?? []), `${shown}`]);
+      const byPair = new Map();
+      for (const [before, k, after] of picks(n)) {
+        if (before.slice(0, 2).includes(k)) continue;
+        expect([before, k, after]).not.toEqual([before, k, before]);
+        const side = before[2] === 'left' ? 0 : 1;
+        expect([before, k, after[side], after[1 - side]]).toEqual([before, k, k, before[1 - side]]);
+        byPair.set(`${before}`, [...(byPair.get(`${before}`) ?? []), `${after}`]);
       }
-      for (const [before, shown] of byPick) expect([before, new Set(shown).size]).toEqual([before, shown.length]);
+      for (const [before, after] of byPair) expect([before, new Set(after).size]).toEqual([before, after.length]);
     }
   });
 
-  it('pickPair: from rest (the first stage the older pick, the last the newer) every pair of three and of four stages is within two clicks', () => {
+  it('pickSlot at rest: the first stage left, the last right, left next', () => {
+    const rest = (n) => ({ ...restView('side', n, 'ends'), next: 'left' });
+    expect([rest(3), rest(4)]).toEqual([
+      { left: 0, right: 2, next: 'left' },
+      { left: 0, right: 3, next: 'left' },
+    ]);
+  });
+
+  it('pickSlot: from rest every pair of three and of four stages is within two clicks', () => {
     for (const n of [3, 4]) {
-      const rest = restView('side', n, 'ends');
-      const start = { older: rest.left, newer: rest.right };
+      const start = { ...restView('side', n, 'ends'), next: 'left' };
       const reached = new Set();
-      const see = (pick) => {
-        const { left, right } = pairOf(pick);
-        reached.add(`${left},${right}`);
-      };
+      const see = ({ left, right }) => reached.add(`${Math.min(left, right)},${Math.max(left, right)}`);
       see(start);
       for (let a = 0; a < n; a++) {
-        const one = pickPair(start, a);
+        const one = pickSlot(start, a);
         see(one);
-        for (let b = 0; b < n; b++) see(pickPair(one, b));
+        for (let b = 0; b < n; b++) see(pickSlot(one, b));
       }
       const all = [];
       for (let l = 0; l < n; l++) for (let r = l + 1; r < n; r++) all.push(`${l},${r}`);
@@ -485,17 +559,17 @@ describe('(d) the state (T1707)', () => {
     }
   });
 
-  it('pickPair from rest on three stages: Tones replaces Camera (T | F), then Camera replaces Finished (C | T), then Finished (C | F)', () => {
-    let pick = { older: 0, newer: 2 };
+  it('pickSlot from rest on three stages: Tones goes left (T | F), then Camera right (T | C), then Finished left (F | C)', () => {
+    let pair = { left: 0, right: 2, next: 'left' };
     const seen = [];
     for (const k of [1, 0, 2]) {
-      pick = pickPair(pick, k);
-      seen.push([k, pairOf(pick)]);
+      pair = pickSlot(pair, k);
+      seen.push([k, pair]);
     }
     expect(seen).toEqual([
-      [1, { left: 1, right: 2 }],
-      [0, { left: 0, right: 1 }],
-      [2, { left: 0, right: 2 }],
+      [1, { left: 1, right: 2, next: 'right' }],
+      [0, { left: 1, right: 0, next: 'left' }],
+      [2, { left: 2, right: 0, next: 'right' }],
     ]);
   });
 

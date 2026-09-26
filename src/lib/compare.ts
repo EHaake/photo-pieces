@@ -4,7 +4,7 @@
  * block reads — no DOM — and, after them, the enhanced block itself
  * (T1708), which builds its chrome and runs its views on those rules. A
  * round is a value here and its row in compare.test.mjs's `EXPECTED`;
- * the pair the slider and side by side show is `pickPair` and its table.
+ * the pair the slider and side by side show is `pickSlot` and its table.
  */
 
 import { COMPARE_CLASSES as C } from './image-meta.mjs';
@@ -36,16 +36,20 @@ export const COMPARE_WORDING = {
   control: 'How to compare',
   legend: 'Stages',
   handle: 'Move between the stages',
+  slots: { left: 'left', right: 'right' }, // the tag on a picked legend button, naming its side
+  next: 'next pick:', // the hint after the legend, before the side the next pick takes
 } as const;
 
 /** Storage key for the reader's chosen method (per `COMPARE.remember`). */
 export const COMPARE_MODE_KEY = 'compare-mode';
 
 export type CompareMode = keyof typeof COMPARE_WORDING.modes;
-/** Two stages, the earlier on the left. */
+/** Two stages, one each side. */
 export type ComparePair = { left: number; right: number };
-/** The pair as the legend picked it: the member picked longer ago, and the newer. */
-export type ComparePick = { older: number; newer: number };
+/** A side of the pair. */
+export type CompareSlot = keyof typeof COMPARE_WORDING.slots;
+/** The pair as the legend picked it, left and right, and the side the next pick takes. */
+export type CompareSlots = ComparePair & { next: CompareSlot };
 /** The slider's pair and the divider's position, 0–100. */
 export type SliderView = ComparePair & { split: number };
 /** The switch's one showing stage. */
@@ -67,7 +71,7 @@ export function openingMode(
   return COMPARE.defaultMode;
 }
 
-/** The slider at `p` ∈ [0, 1], wiping between `pair`: the divider at `p`, the earlier stage left of it. */
+/** The slider at `p` ∈ [0, 1], wiping between `pair`: the divider at `p`, the pair's left stage left of it. */
 export function sliderView(p: number, pair: ComparePair): SliderView {
   const at = Math.min(1, Math.max(0, p));
   return { left: pair.left, right: pair.right, split: 100 * at };
@@ -75,17 +79,14 @@ export function sliderView(p: number, pair: ComparePair): SliderView {
 
 /**
  * The pair after a legend click on stage `k`: a stage already in the pair
- * leaves it as it is; another replaces the member picked longer ago, and
- * the clicked stage becomes the newer — so every pair is two clicks away.
+ * leaves it as it is; another takes the `next` side, and `next` flips —
+ * so the picks go left, then right, and every pair is two clicks away.
  */
-export function pickPair(pair: ComparePick, k: number): ComparePick {
-  if (k === pair.older || k === pair.newer) return pair;
-  return { older: pair.newer, newer: k };
-}
-
-/** A picked pair as the views show it: in stage order, the earlier on the left. */
-export function pairOf(pick: ComparePick): ComparePair {
-  return { left: Math.min(pick.older, pick.newer), right: Math.max(pick.older, pick.newer) };
+export function pickSlot(pair: CompareSlots, k: number): CompareSlots {
+  if (k === pair.left || k === pair.right) return pair;
+  return pair.next === 'left'
+    ? { left: k, right: pair.right, next: 'right' }
+    : { left: pair.left, right: k, next: 'left' };
 }
 
 /** Side by side from stage `k`: it and the next, the last with the one before. */
@@ -129,7 +130,7 @@ export function restView(
   return mode === 'slider' ? sliderView(COMPARE.restAt, pair) : pair;
 }
 
-/** The stage whose note is shown: the pair's later stage (the step being shown), or the switch's stage. */
+/** The stage whose note is shown: the pair's right stage, or the switch's stage. */
 export function noteIndex(mode: CompareMode, view: CompareView): number {
   return mode === 'switch' ? (view as SwitchView).stage : (view as ComparePair).right;
 }
@@ -147,9 +148,11 @@ export function sideFits(width: number): boolean {
  * dead in it. Everything else is built here, per `.compare` with two or
  * more stages: the method control (three buttons), the legend (one
  * button per stage, marking what shows: in the slider and side by side it
- * picks the one pair both show, by `pickPair`, the first stage the older
- * pick at rest; in the switch it goes to
- * the stage), the divider and the handle
+ * picks the one pair both show, left then right, by `pickSlot` — the
+ * picked buttons tagged with their side, a hint after the legend naming
+ * the side the next pick takes — the first stage left and the last right
+ * at rest; in the switch it goes to the stage, untagged and unhinted),
+ * the divider and the handle
  * (an ARIA slider), the live note, and the corner tags when
  * `COMPARE.cornerTags`; and the state the CSS reads — `data-js`,
  * `data-view`, `data-narrow`, each stage's `data-part`, `--split`, and the
@@ -255,11 +258,11 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   };
 
   // The state: the method; the one pair the slider and side by side
-  // show, the divider's position; the switch's stage.
+  // show, left and right, and the side the next pick takes; the
+  // divider's position; the switch's stage.
   let mode = openingMode(root.dataset.mode, readMode());
   let p = COMPARE.restAt;
-  const rest = restView('side', n);
-  let picked: ComparePick = { older: rest.left, newer: rest.right }; // the earlier stage the older pick
+  let picked: CompareSlots = { ...restView('side', n), next: 'left' };
   let stage = restView('switch', n).stage;
   /** The switch's leaving stage while the arriving one fades in over it. */
   let leaving: number | null = null;
@@ -305,6 +308,11 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   if (CONTROL_AT === 'above' && LEGEND_AT === 'above') above.reverse();
   frames.before(...above);
   frames.after(...below, now);
+  // The hint follows the legend's row — the legend and, when they share
+  // it, the control — on a row of its own beneath.
+  const hint = make('p', 'compare-hint');
+  const legendRow = LEGEND_AT === 'above' ? above : below;
+  legendRow[legendRow.length - 1].after(hint);
 
   if (COMPARE.cornerTags)
     stages.forEach((one, i) => one.append(make('span', 'compare-tag', words[i].label)));
@@ -328,6 +336,9 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
       return item;
     }),
   );
+  // Each legend button's side tag, attached while the button is picked.
+  const slotTags = words.map(() => make('span', 'compare-slot'));
+  const tagged: (CompareSlot | null)[] = words.map(() => null);
 
   const render = () => {
     const showing = view();
@@ -343,9 +354,8 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     }
     let shown: number[];
     let note: number;
-    const pair = pairOf(picked);
     if (showing === 'slider') {
-      const at = sliderView(p, pair);
+      const at = sliderView(p, picked);
       const split = String(round(at.split));
       root.style.setProperty('--split', split);
       handle.setAttribute('aria-valuenow', split);
@@ -357,10 +367,10 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
       note = noteIndex('slider', at);
     } else if (showing === 'side') {
       stages.forEach((one, i) =>
-        setPart(one, i === pair.left ? 'left' : i === pair.right ? 'right' : 'off'),
+        setPart(one, i === picked.left ? 'left' : i === picked.right ? 'right' : 'off'),
       );
-      shown = [pair.left, pair.right];
-      note = noteIndex('side', pair);
+      shown = [picked.left, picked.right];
+      note = noteIndex('side', picked);
     } else {
       stages.forEach((one, i) =>
         setPart(
@@ -375,9 +385,25 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     if (showing === 'switch') frames.tabIndex = 0;
     else frames.removeAttribute('tabindex');
 
-    [...legend.children].forEach((item, i) =>
-      item.firstElementChild?.setAttribute('aria-pressed', String(shown.includes(i))),
-    );
+    [...legend.children].forEach((item, i) => {
+      const button = item.firstElementChild;
+      button?.setAttribute('aria-pressed', String(shown.includes(i)));
+      // The picked buttons' side tags; none in the switch.
+      const slot =
+        showing === 'switch' ? null : i === picked.left ? 'left' : i === picked.right ? 'right' : null;
+      if (slot === tagged[i]) return;
+      tagged[i] = slot;
+      if (slot === null) {
+        slotTags[i].previousSibling?.remove(); // the space before it
+        slotTags[i].remove();
+      } else {
+        slotTags[i].textContent = COMPARE_WORDING.slots[slot];
+        if (slotTags[i].parentNode !== button) button?.append(' ', slotTags[i]);
+      }
+    });
+    // The hint names the side the next pick takes (hidden in the switch by the stylesheet).
+    const next = `${COMPARE_WORDING.next} ${COMPARE_WORDING.slots[picked.next]}`;
+    if (hint.textContent !== next) hint.textContent = next;
     modeButtons.forEach((button, i) =>
       button.setAttribute('aria-pressed', String(MODES[i] === mode)),
     );
@@ -414,7 +440,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   const pick = (i: number) => {
     if (view() === 'switch') go(i);
     else {
-      picked = pickPair(picked, i);
+      picked = pickSlot(picked, i);
       render();
     }
   };
