@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { blocks, uncomment } from './src/lib/ground.ts';
 import {
   LOUPE,
   LOUPE_AT_FIT,
@@ -30,6 +33,17 @@ import {
 //     zoomed (a pan, no effect), a movement under `dragSlop` then a
 //     click (a click) against one over it (a drag), `opensOn: 'dblclick'`
 //     ignoring a single click, the wheel reaching 1 (close).
+//
+// (c) The loupe's rules (T1712). The loupe's section of global.css holds
+//     exactly its seven rules, each by its string: the ready
+//     photograph's cursor and touch hand-off, the overlay, the drag's
+//     cursor, the layer's origin, the glide on spec 018's move duration
+//     and curve, the two images filling the layer, and the detail file's
+//     appearance on the appearance duration and curve — so a literal, a
+//     new token or a changed curve fails, and no other rule there
+//     animates or transitions. And the script writes `data-glide` only
+//     when motion is not reduced (the zoom is a movement); the detail's
+//     fade under reduced motion is motion.test.mjs (d)'s sixth rule.
 
 /** The tunables, verbatim as src/lib/loupe.ts carries them: to retune,
  *  move the value in src/lib/loupe.ts and here. */
@@ -389,5 +403,99 @@ describe('(b) the state (T1711)', () => {
       const step = loupeReduce(corner, { type: 'pinch', point: at(1000, 600), ratio: 0.5 }, CTX);
       expect(step.state.view).toEqual(clampPan(step.state.view, BOX));
     });
+  });
+});
+
+const here = (path) => fileURLToPath(new URL(path, import.meta.url));
+/** One line, one space, no padding inside parens. */
+const norm = (text) =>
+  text.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')').trim();
+/** Every rule in `css`, @-blocks opened, with the @-preludes it sits
+ *  under (as compare.test.mjs reads them). */
+const rulesIn = (css, within = []) =>
+  blocks(css).flatMap(({ prelude, body }) => {
+    const rule = { prelude: norm(prelude), within, body };
+    const nested = prelude.startsWith('@') ? rulesIn(body, [...within, norm(prelude)]) : [];
+    return [rule, ...nested];
+  });
+const declarationPairs = (body) =>
+  body
+    .replace(/\{[^{}]*\}/g, '')
+    .split(';')
+    .filter((part) => part.includes(':'))
+    .map((part) => [
+      part.slice(0, part.indexOf(':')).trim(),
+      norm(part.slice(part.indexOf(':') + 1)),
+    ]);
+/** The one top-level rule whose prelude is exactly `prelude`, as a map. */
+const ruleAt = (rules, prelude) => {
+  const found = rules.filter((rule) => rule.within.length === 0 && rule.prelude === prelude);
+  expect([prelude, found.length]).toEqual([prelude, 1]);
+  return Object.fromEntries(declarationPairs(found[0].body));
+};
+/** The loupe's section of global.css, from its header to the compare's. */
+const loupeSection = (raw) => {
+  const from = raw.indexOf('/* ---- The loupe (spec 019)');
+  const to = raw.indexOf('/* ---- The compare (spec 019)');
+  expect([from > -1, to > from]).toEqual([true, true]);
+  return uncomment(raw.slice(from, to));
+};
+
+describe("(c) the loupe's rules (T1712)", () => {
+  let raw;
+  let css;
+  let script;
+  beforeAll(async () => {
+    raw = await readFile(here('./src/styles/global.css'), 'utf8');
+    css = uncomment(raw);
+    script = await readFile(here('./src/lib/loupe.ts'), 'utf8');
+  });
+
+  const RULES = [
+    [
+      'html[data-quiet] .image-stage[data-loupe-ready] .image-frame img',
+      { cursor: 'zoom-in', 'touch-action': 'none' },
+    ],
+    [
+      '.loupe',
+      { position: 'absolute', overflow: 'hidden', cursor: 'zoom-out', 'touch-action': 'none' },
+    ],
+    ['.loupe[data-dragging]', { cursor: 'grabbing' }],
+    ['.loupe-layer', { 'transform-origin': '0 0' }],
+    [
+      '.loupe[data-glide] .loupe-layer',
+      { transition: 'transform var(--dur-move) var(--ease-move)' },
+    ],
+    [
+      '.loupe-base, .loupe-detail',
+      { position: 'absolute', inset: '0', width: '100%', height: '100%' },
+    ],
+    ['.loupe-detail', { animation: 'motion-appear var(--dur-appear) var(--ease-appear) both' }],
+  ];
+
+  for (const [prelude, body] of RULES)
+    it(`${prelude} is exactly ${JSON.stringify(body)} — a literal, a new token or a changed curve fails`, () => {
+      expect(ruleAt(rulesIn(css), prelude)).toEqual(body);
+    });
+
+  it("the loupe's section holds exactly the seven rules, in order — a rule added there fails", () => {
+    expect(rulesIn(loupeSection(raw)).map((rule) => rule.prelude)).toEqual(
+      RULES.map(([prelude]) => prelude),
+    );
+  });
+
+  it("no other rule in the loupe's section animates or transitions — the glide and the detail's fade are all its motion", () => {
+    const moving = rulesIn(loupeSection(raw))
+      .filter((rule) =>
+        declarationPairs(rule.body).some(([name]) => /^(animation|transition)/.test(name)),
+      )
+      .map((rule) => rule.prelude);
+    expect(moving).toEqual(['.loupe[data-glide] .loupe-layer', '.loupe-detail']);
+  });
+
+  it('the script writes data-glide only behind !reducedMotion() — the zoom is a movement', () => {
+    const writes = script.split('\n').filter((line) => /dataset\.glide\s*=/.test(line));
+    expect(writes.length).toBeGreaterThan(0);
+    expect(writes.filter((line) => !/if \(!reducedMotion\(\)/.test(line))).toEqual([]);
   });
 });

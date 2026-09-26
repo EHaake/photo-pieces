@@ -2031,6 +2031,66 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   cursor: zoom-out;
 }
 
+/* ---- The loupe (spec 019) --------------------------------------------
+   In the quiet view a loupe-ready photograph zooms to full detail about
+   the point clicked. The page's script (createLoupe, src/lib/loupe.ts)
+   marks the stage `data-loupe-ready` and, on opening, builds `.loupe`
+   over the photograph's own box, holding `.loupe-layer`, whose
+   transform it writes, with the page's file (`.loupe-base`) and, once
+   decoded, the loupe file (`.loupe-detail`) — so the mat, the frame and
+   the dark ground stay as they are and are not zoomed. Without script
+   none of this exists and the quiet view is what it was.
+   The cursor says what a click will do: zoom-in on a ready photograph,
+   zoom-out on the loupe (a click returns to the fit), grabbing while a
+   drag pans. The photograph's cursor lives here, not in the page's
+   scoped <style>, for the reason the zoom cursor above does, and it
+   must out-specify the quiet rule's zoom-out, which reaches the image
+   by inheritance only. `touch-action: none` hands the photograph's
+   touches to the script — a pinch and a drag — instead of the page's
+   scroll and zoom.
+   Motion: a discrete zoom glides on the move duration while the script
+   writes `data-glide` (never under reduced motion; a drag, the wheel and
+   a pinch follow the hand); the detail file's arrival is an appearance
+   on the appearance duration, from opacity 0 by the animation's `both`
+   fill — it is inserted only once decoded — never a pop. Under reduced
+   motion it fades as the frames do, on --rm-appear (the block at the
+   file's end). */
+html[data-quiet] .image-stage[data-loupe-ready] .image-frame img {
+  cursor: zoom-in;
+  touch-action: none;
+}
+
+.loupe {
+  position: absolute;
+  overflow: hidden;
+  cursor: zoom-out;
+  touch-action: none;
+}
+
+.loupe[data-dragging] {
+  cursor: grabbing;
+}
+
+.loupe-layer {
+  transform-origin: 0 0;
+}
+
+.loupe[data-glide] .loupe-layer {
+  transition: transform var(--dur-move) var(--ease-move);
+}
+
+.loupe-base,
+.loupe-detail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.loupe-detail {
+  animation: motion-appear var(--dur-appear) var(--ease-appear) both;
+}
+
 /* ---- The compare (spec 019) ------------------------------------------
    One block, two builders: the `:::compare` transform in a piece or a
    sidecar story, and the image page's "Raw to finished" section, both
@@ -2593,14 +2653,16 @@ html[data-slide]::view-transition-group(site-header) {
 }
 
 /* Reduced motion (spec 018's split): movements instant, fades kept.
-   Five rules. The underline's size change and the header's slide go
+   Six rules. The underline's size change and the header's slide go
    instant; the hero goes through its flag — --hero-enter at 0 zeroes
    its duration and its delays, so it lands on its end state; the
    arrival loses its rise; every colour change and fade keeps its
-   duration, and the appearance fade keeps its own unless --rm-appear
-   cuts it. Every rule here overrides its base rule at equal specificity
-   by coming later in the file, so the block closes the file, after the
-   Motion section's appearance rules — motion.test.mjs pins it after
+   duration, and the appearance fade — the frames', and the loupe's
+   detail file's following them (spec 019) — keeps its own unless
+   --rm-appear cuts it. Every rule here overrides its base rule at
+   equal specificity by coming later in the file, so the block closes
+   the file, after the Motion section's appearance rules —
+   motion.test.mjs pins it after
    every rule it overrides (T1608a: before this, `--rm-appear: 0` was
    inert, the appearance rules coming later). `0s` is the
    one literal a duration slot may carry — a zero is the absence of
@@ -2632,6 +2694,10 @@ html[data-slide]::view-transition-group(site-header) {
 
   img[data-shown='fade'],
   img[data-shown='rise'] {
+    animation-duration: calc(var(--dur-appear) * var(--rm-appear));
+  }
+
+  .loupe-detail {
     animation-duration: calc(var(--dur-appear) * var(--rm-appear));
   }
 

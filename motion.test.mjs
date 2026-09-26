@@ -60,8 +60,8 @@ import { APPEARANCE_PRESETS, APPEARANCE_TOKENS } from './src/components/dev-moti
 //
 // (d) Reduced motion keeps the fades and drops the movement. The
 //     one-millisecond blanket is gone and the block holds exactly the
-//     five rules plan.md names: a `*` prelude, a `1ms`, a
-//     `scroll-behavior`, a sixth rule or a changed one fails, and so
+//     six rules plan.md names: a `*` prelude, a `1ms`, a
+//     `scroll-behavior`, a seventh rule or a changed one fails, and so
 //     does a zero laid on a fade — an opacity transition or the
 //     appearance animation — other than the --rm-appear product. The
 //     fifth (D1604, Q1) is pinned by name: every view-transition group
@@ -180,7 +180,7 @@ const REDUCED = '@media (prefers-reduced-motion: reduce)';
  *  hero lands on its end state through its flag. */
 const REDUCED_ROOT = { '--arrive-rise': '0px', '--hero-enter': '0' };
 
-/** plan.md's "Reduced motion": the five rules, preludes and bodies. */
+/** plan.md's "Reduced motion": the six rules, preludes and bodies. */
 const REDUCED_RULES = [
   { prelude: ':root', body: REDUCED_ROOT },
   {
@@ -190,6 +190,11 @@ const REDUCED_RULES = [
   { prelude: '.site-header', body: { 'transition-duration': '0s' } },
   {
     prelude: "img[data-shown='fade'], img[data-shown='rise']",
+    body: { 'animation-duration': 'calc(var(--dur-appear) * var(--rm-appear))' },
+  },
+  // Spec 019, T1712: a deliberate sixth — the loupe's detail file fades as the frames do.
+  {
+    prelude: '.loupe-detail',
     body: { 'animation-duration': 'calc(var(--dur-appear) * var(--rm-appear))' },
   },
   // D1604, Q1: a deliberate fifth — the groups land at once.
@@ -456,7 +461,7 @@ describe('(d) reduced motion keeps the fades and drops the movement (T1600, spec
     return found[0];
   };
 
-  it('the block holds exactly the five rules — a sixth, a missing one or a changed one fails', () => {
+  it('the block holds exactly the six rules — a seventh, a missing one or a changed one fails', () => {
     expect(
       blocks(reduced().body).map((rule) => ({
         prelude: preludeOf(rule.prelude),
@@ -505,6 +510,7 @@ describe('(d) reduced motion keeps the fades and drops the movement (T1600, spec
       { prelude: 'a:not(.brand, .button, .social-links *)', bases: 1, after: [] },
       { prelude: '.site-header', bases: 1, after: [] },
       { prelude: "img[data-shown='fade'], img[data-shown='rise']", bases: 2, after: [] },
+      { prelude: '.loupe-detail', bases: 1, after: [] },
       { prelude: '::view-transition-group(*)', bases: 0, after: [] },
     ]);
   });

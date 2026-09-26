@@ -427,8 +427,9 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     // under the same attribute: the base `.image-frame img` max-height
     // above reads --avail-h and --mat, so a quiet copy of it is
     // byte-identical duplication (T1101b deleted it, on both the page
-    // and here). These three rules, the mat's between the stage's and
-    // the cursor list, and no fourth.
+    // and here). These four rules, the mat's between the stage's and
+    // the cursor list, the loupe's ready photograph after them (spec 019,
+    // T1712: a deliberate fourth), and no fifth.
     const QUIET_RULE = /html\[data-quiet\] \.image-/;
     // The paper frame's `:not` preludes are not quiet rules: the list
     // below gains nothing from them.
@@ -441,6 +442,7 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
       'html[data-quiet] .image-stage',
       'html[data-quiet] .image-frame',
       'html[data-quiet] .image-frame, html[data-quiet] .image-stage[data-quiet-ready] .image-frame',
+      'html[data-quiet] .image-stage[data-loupe-ready] .image-frame img',
     ]);
     // And the page's scoped <style> styles the frame not at all — every
     // frame rule is here, the zoom-in cursor included. A scoped copy

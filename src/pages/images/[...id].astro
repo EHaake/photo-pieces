@@ -754,9 +754,15 @@ const indexed =
   // every ClientRouter swap, so per-page setup lives in init().
   import { IMAGE_QUIET_KEY as QUIET_KEY, IMAGE_SET_KEY as SET_KEY } from '../../lib/image-set';
   import { COMPARE_CLASSES } from '../../lib/image-meta.mjs';
+  import { createLoupe, type Loupe } from '../../lib/loupe';
   import { flag, reducedMotion, withTransition } from '../../lib/motion';
 
   const root = document.documentElement;
+
+  // The loupe (spec 019): this page's controller, made in init() when the
+  // stage names a loupe file; the stage's clicks and the keys ask it
+  // first in the quiet view.
+  let loupe: Loupe | null = null;
 
   const store = {
     get: (key: string) => {
@@ -787,6 +793,7 @@ const indexed =
       img.dataset.pageSizes ??= img.sizes;
       img.sizes = quiet ? '100vw' : img.dataset.pageSizes;
     }
+    if (quiet) loupe?.refresh();
   };
   // Entering and leaving are one movement (spec 018): the three writes
   // run inside one view change, the stage frame named for its duration
@@ -794,6 +801,7 @@ const indexed =
   // the frame is never named, and the change runs at all only when
   // --rm-quiet is on (the ground fades, the frame cuts).
   const setQuiet = (quiet: boolean) => {
+    if (!quiet) loupe?.reset();
     const figure = document.querySelector<HTMLElement>('.image-frame');
     withTransition(
       () => {
@@ -808,6 +816,7 @@ const indexed =
   };
 
   const init = () => {
+    loupe = null;
     const page = document.querySelector('.image-page');
     if (!page) {
       // Quiet view lives between image pages only.
@@ -824,7 +833,10 @@ const indexed =
     if (match) for (const nav of navs) nav.hidden = nav !== match;
 
     // Quiet view: the photograph itself is the way in (photographer,
-    // visual gate T409a), the toggle a second one; any click leaves.
+    // visual gate T409a), the toggle a second one. In it the loupe hears
+    // a click first: on a loupe-ready photograph it zooms, and zoomed a
+    // click steps back to the fit; every other click — the mat, the
+    // ground, a photograph that is not loupe-ready — leaves.
     const toggle = document.querySelector<HTMLButtonElement>('[data-quiet-toggle]');
     if (toggle) {
       toggle.hidden = false;
@@ -833,17 +845,35 @@ const indexed =
     const stage = document.querySelector<HTMLElement>('.image-stage');
     if (stage) {
       stage.dataset.quietReady = '';
+      if (stage.dataset.loupeSrc) loupe = createLoupe(stage);
       stage.addEventListener('click', (event) => {
         const target = event.target as HTMLElement;
         if (target.closest('[data-quiet-toggle]')) return;
-        if (root.hasAttribute('data-quiet')) setQuiet(false);
-        else if (target.closest('.image-frame')) setQuiet(true);
+        if (root.hasAttribute('data-quiet')) {
+          if ((loupe?.click(event) ?? 'leave-quiet') === 'leave-quiet') setQuiet(false);
+        } else if (target.closest('.image-frame')) setQuiet(true);
       });
     }
     if (store.get(QUIET_KEY)) applyQuiet(true);
   };
 
   document.addEventListener('keydown', (event) => {
+    // The loupe hears a key first in the quiet view (spec 019): zoomed,
+    // Escape steps back to the fit, the arrows pan and the zoom keys zoom;
+    // at the fit a zoom key opens it. What it hands back — Escape leaving
+    // the quiet view, an arrow stepping the set — is the lines below, as
+    // it was before; so is a key the loupe does not take.
+    if (
+      loupe &&
+      root.hasAttribute('data-quiet') &&
+      !(event.altKey || event.ctrlKey || event.metaKey)
+    ) {
+      const effect = loupe.key(event);
+      if (effect === 'open' || effect === 'close' || effect === 'none') {
+        event.preventDefault();
+        return;
+      }
+    }
     if (event.key === 'Escape' && root.hasAttribute('data-quiet')) setQuiet(false);
     // Inputs keep their own arrow keys, and so does the compare: its
     // handle, its switch and its buttons take the keys they use, and an
@@ -880,5 +910,8 @@ const indexed =
   document.addEventListener('astro:after-swap', () => {
     if (store.get(QUIET_KEY) && document.querySelector('.image-page')) applyQuiet(true);
   });
+  // A resize takes the loupe back to the fit and re-reads whether the
+  // photograph is loupe-ready at its new quiet fit.
+  window.addEventListener('resize', () => loupe?.refresh());
   document.addEventListener('astro:page-load', init);
 </script>
