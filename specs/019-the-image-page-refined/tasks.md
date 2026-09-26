@@ -510,7 +510,7 @@ headers to confirm nothing was duplicated or dropped. -->
       the empty pane's stage state `off` and no image showing on that
       side._
 
-- [ ] **T1709h** — Round: any stage may be picked at any step ("Allow
+- [x] **T1709h** — Round: any stage may be picked at any step ("Allow
       the same image to be picked at any stage"): a click on the stage
       already holding the `next` side keeps it and flips `next`. Plan:
       the T1709g paragraph as amended. `pickSlot`'s one branch; the
@@ -889,6 +889,7 @@ tier if it is ever on (it is off). -->
 | T1709e Finished caption finding | implementation (`opus`, high) | ~40k | diagnosed, no site defect: the corner text is painted into the placeholder pixels by gen-placeholders (camera "4:3 · camera", tones "3:2 · tones", finished only "3:2"); no corner tags drawn (cornerTags false), captions display none, no pseudo-elements; nothing changed |
 | T1709f camera note | implementation (`opus`, high) | ~27k | done; 526 tests; land-b and the sampler read the note |
 | T1709g empty sides, tags beneath | implementation (`opus`, high) | ~98k | done; 529 tests; data-label (a script-written attribute, not a state) not on the barrier list — sweep note; with sides kept apart some arrangements take three clicks (the first stage on the left of a middle stage); narrow stacked side by side with an empty right shows one pane; the switch keeps blank tag rows |
+| T1709h any stage any step | implementation (`opus`, high) | ~43k | done; 529 tests; worst case two clicks either way round; the hidden handlex27s aria-valuetext goes stale in side by side — sweep note |
 
 _(Session-tier allowance draw noted at each pause.)_
 
