@@ -843,7 +843,7 @@ fourth block that takes stages goes to the person as a spec amendment
 (spec.md's amended "ordinary path" list, as the preamble now reads). Task ids continue from T1718; the phase order is the
 headers'.
 
-- [ ] **T1719** — The constitution, amended again, in its own commit
+- [x] **T1719** — The constitution, amended again, in its own commit
       before T1720. Pattern: T1700 and plan.md's "The constitution,
       first". Plan: "The constitution, again" — the three edits
       verbatim. `CLAUDE.md` only. Prettier on it (T1700's note: the
@@ -1271,6 +1271,7 @@ tier if it is ever on (it is off). -->
 | Amendment sign-off | top (`fable`, high, override) | ~130k | blocked: B1 the DualUp 2:3 box at share 1 computed with spec 017's L (1215.5) instead of --avail-h (1239) — two boxes grow, not one; S1 cadence paragraph stale, S2 stageShape pin must hold the literal, S3 side's static grid, S4 data-paging at an end, S5 the slider block's note a reading, S6 land-b's photograph twice put to him, S7 shares ≤ 1, S8 paperEnv retargeted |
 | Sign-off fixes (planner resumed) | implementation (`opus`, high) | ~25k | B1 fixed in the table, the walkthrough, T1729 and the Known-limitations line (spec.md's Decided parenthetical corrected by the orchestrator); S1–S8 taken |
 | Amendment re-review | top (`fable`, high, override) | ~20k | signed off; the S3 code claim (`.compare-frames` static grid, global.css 2129) verified; nothing open for the sweep. Session tier for the amendment session: the spec amendment written in-session at high effort (raised for the spec session as the policy says) |
+| T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_
 
