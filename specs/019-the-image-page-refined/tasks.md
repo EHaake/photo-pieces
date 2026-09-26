@@ -457,6 +457,41 @@ headers to confirm nothing was duplicated or dropped. -->
       built land-b and fog piece carry `compare-w-wide` (greped); the
       barrier's `sizes` read `(min-width: 1240px) 1160px, 96vw`._
 
+- [ ] **T1709c** — Round: only side by side is wide ("only wanted the
+      side by side to get larger"). Plan: rounds paragraph (c).
+      `COMPARE_WIDTH` back to column; `COMPARE.sideWidth: 'wide'` in
+      `compare.ts`, the script swapping the width class while in side
+      view; `EXPECTED` row; the transform tests' pins back to column.
+      _Verify: `sh scripts/verify.sh` green; BiDi at 1512×982: the
+      compare box 666 in slider and switch, 1160 in side, 666 again
+      after leaving side; mutation `sideWidth` → `EXPECTED` fails._
+
+- [ ] **T1709d** — Round: the pair picked in order, left then right,
+      with the picked stages marked ("it's not clear which I'm
+      selecting for which side … bold or darken the text for a selected
+      one and some additional indicator that a second click selects the
+      right image"). Plan: rounds paragraph (d). `compare.ts`:
+      `pickSlot`, the slot state, the legend's tags and hint from
+      `COMPARE_WORDING`; `global.css`: the picked button bold in
+      `--color-text`, the tag and hint in the legend's small style (the
+      (c) legend rule updated with its pinned body). Tests: `pickSlot`
+      tables for three and four stages, the wording rows. _Verify:
+      green; BiDi: from rest, clicks T then C give T | C with tags
+      left/right on T and C and the hint flipping; the wipe shows T
+      left of the divider._
+
+- [ ] **T1709e** — Finding: the Finished stage has no corner caption
+      inside the image while the others do. Diagnose in `compare.ts`
+      and the compare CSS; fix if routine. _Verify: green; BiDi: with
+      `cornerTags` as set, every showing stage's tag state listed per
+      view._
+
+- [ ] **T1709f** — Round: the camera stage's note on the page reads
+      "The RAW file straight out of camera — no edits, no adjustments".
+      `WORDING.compare.cameraNote` in the page, passed through
+      `compareStages`; the page-source pin's row. _Verify: green; the
+      built land-b page's Camera note greped._
+
 ### Phase 1 record (the person's walkthrough)
 
 **First look (2026-09-25).** The three-way slider: "I don't like the
@@ -471,8 +506,13 @@ may be more amendments to the spec coming so let's get through the
 rest first"): side by side as its own block; any number of stages
 with a final filmstrip view that pages or scrolls through them (a
 fourth method); the slider usable on its own for one pair. Rounds
-run: T1709a, T1709b. The "needs your decision" list is deferred
-until these are seen.
+run: T1709a, T1709b. **Second look:** "only wanted the side by side
+to get larger. The slider and switch is now too large"; the pair
+picking "is confusing … not clear which I'm selecting for which side";
+Finished has no corner caption "like the others do"; the camera's
+subtitle should read "The RAW file straight out of camera - no edits,
+no adjustments". Rounds: T1709c–f. The decision list is still
+deferred.
 
 ## Phase 2 — The loupe (reviewer after the phase; walkthrough: under `npm run dev` on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/`, enter the quiet view; the cursor over the photograph says zoom, over the mat it still says leave; click a corner and the photograph grows to full detail around that point while the mat and the dark ground stay where they are, soft at first and then sharp as the larger export fades in; drag to move around it, scroll or pinch (trackpad and phone) to zoom between the fit and full detail, + and − to zoom, the arrows to pan; Esc or a click without dragging goes back to the fit, Esc again back to the page; at the fit the arrows step to the next photograph as before; on `/images/where-the-fog-lets-go/land-a/` (a 1800×1200 placeholder with no larger export, whose own file is already past full detail at its quiet size on both his screens — the number T1712 recorded, quoted in the report; if that read found it ready, the report names the page T1712 found not ready instead) the quiet view is exactly as before and a click leaves it, while some real portrait exports on the laptop do get a loupe from their own file (T1712's numbers); the question put to him: at the fit, a click on the photograph now zooms and a click on the mat or the dark ground leaves — is that the right reading of "a click at the fit steps back out", or should a single click keep leaving and the loupe open another way; with the system's reduce-motion setting on, the zoom jumps rather than grows and the sharp export still fades in; optionally, in the browser's network panel, the larger export is requested only at the first zoom and once; as many rounds as it takes, each a sub-lettered task under T1713)
 

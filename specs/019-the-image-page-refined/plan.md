@@ -484,6 +484,31 @@ where the simpler shape was taken it is said in one line.
   unchanged. The legend marks the pair in both views. Known
   limitations' "three or more stages" paragraph is moot.
 
+  **Rounds T1709c–f (Phase 1 pause, second look, 2026-09-25).**
+  (c) Only side by side is wide: `COMPARE_WIDTH` returns to `column`
+  on both surfaces (the static markup and `sizes`), and a new
+  `COMPARE.sideWidth: 'wide'` names the width class the script swaps
+  onto the root while `data-view="side"` (`compare-w-column` off,
+  `compare-w-wide` on; back on leaving side). The stage's `sizes`
+  stays the surface's: each side pane is half the wide width, under
+  the column's hint. (d) The pair is picked in order: `pickPair`
+  becomes `pickSlot(pair, k)` over `{ left, right, next: 'left' |
+  'right' }` — a click on a stage in the pair does nothing; otherwise
+  the stage takes the `next` slot and `next` flips; at rest left is
+  the first stage, right the last, `next` is `'left'`. Left and right
+  are the picked order, not stage order, in both the slider (the left
+  stage shows left of the divider) and side by side. The legend marks
+  the picked buttons bold in `--color-text` with a small tag "left" /
+  "right" (`COMPARE_WORDING.slots`), the unpicked muted, and a hint
+  after the legend, "next pick: left" / "next pick: right"
+  (`COMPARE_WORDING.next`). (e) A finding: the Finished stage shows
+  no corner tag while the other stages do — diagnosed and fixed in
+  place if routine (every showing stage carries its tag when
+  `cornerTags` is on, or none does when off). (f) `WORDING.compare`
+  gains `cameraNote: 'The RAW file straight out of camera — no edits,
+  no adjustments'`, the camera stage's note on the page (the
+  photograph's own `processing:` stays the finished stage's).
+
 - **The loupe's file** (`src/lib/loupe.ts`, the image page's
   frontmatter, T1710). `LOUPE` holds the loupe's tunables:
 

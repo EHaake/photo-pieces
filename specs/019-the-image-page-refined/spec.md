@@ -552,3 +552,9 @@ re-implementation. The plan says where each lives.
 - **Round T1709b (2026-09-25)** — the compare is `wide` on both
   surfaces: "It also needs to be larger (maybe allow it beyond the
   text margins)."
+- **Rounds T1709c–f (2026-09-25)** — only side by side is wide, the
+  slider and switch stay in the column; the pair is picked in order
+  (first click left, second right), the picked stages bold and tagged
+  left / right with a hint for the next pick; every showing stage
+  carries its corner caption; the camera stage's note reads "The RAW
+  file straight out of camera — no edits, no adjustments".
