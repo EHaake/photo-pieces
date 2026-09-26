@@ -920,7 +920,7 @@ headers'.
       → the block loop's and the shorthand pass's calls as at T1705,
       none on a stage path._
 
-- [ ] **T1722** — The barrier: one file per stage. Pattern: T1703's
+- [x] **T1722** — The barrier: one file per stage. Pattern: T1703's
       scans in `scripts/check-private-files.mjs` and its temp-dir cases
       in private-files.test.mjs. Plan: "The barrier: one file per
       stage", its lines, T1722's testing bullet. Scan 2's two lists;
@@ -1284,6 +1284,7 @@ tier if it is ever on (it is off). -->
 | T1720 stage share | implementation (`opus`, high) | ~101k | done; 585 tests; both mutations fail by name; boxes match the plan's table within 0.4px (port-a's written 0.667); quiet rects equal main's; findings: DPR 2 laptop landscape asks ~2343 device px but land-b's largest candidate is 1800w (export-bound, not cap-bound); gallery-only images have no frame nav; a worktree build must clone node_modules, never symlink (a symlink re-optimised the repo's .vite deps — the person's astro dev may need a restart) |
 | T1721 pair blocks in the transform | implementation (`opus`, high) | ~70k | done; 603 tests (+18); max mutation fails both three-stage cases; the no-attributes line now also serves grid and strip (their old line ended in an empty "allowed:") |
 | T1721 per-task review | implementation (`opus`, high) | ~47k | signed off, nothing blocking; notes: "exactly two" hardcoded where `exactly ${min}` would generalise; pair tests tied to portrait.jpgx27s 0.6667 |
+| T1722 barrier scan 4 | implementation (`opus`, high) | ~47k | done; 610 tests (+7); summary today: "3 compares in one shape; 8 stage images, one candidate list per file"; a stage shown by two blocks counts twice; a src-only pane keyed by its src; only the first clashing URL reported |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_
