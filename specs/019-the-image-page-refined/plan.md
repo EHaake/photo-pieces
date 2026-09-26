@@ -1558,6 +1558,17 @@ simpler shape was taken the bullet says so.
   scoped to the filmstrip so the slider's pinned `.compare[data-settling]`
   stays byte for byte. No rule sets `opacity: 0`; no reduced-motion
   rule is added (the gates are in script, spec 018's split).
+  _As built (T1726):_ the wheel clears `data-paging` and `data-settling`
+  before it moves the strip (else the strip lags a running slide); the
+  wheel's idle settle fires only while the block is still in the
+  filmstrip and no drag is in progress; the strip keys work from anything
+  inside the frames (a focused arrow too); a `pointerdown` on an arrow
+  does not start a drag (capture would swallow the click); the arrows'
+  small literals (0.75rem, line-height 1, no padding, pointer; muted as
+  `--color-muted` border and colour with a default cursor) are pinned in
+  (e); `--strip-at` is written rounded to 1e6 as `slide()` does. The
+  frames rule's `clip-path` clips the frames' own focus ring at peek 0 —
+  put to the person at the pause.
 
 - **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, T1727).
   `COMPARE_PATTERN` becomes `STAGES_PATTERN`,

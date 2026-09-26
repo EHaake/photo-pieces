@@ -1009,7 +1009,7 @@ headers'.
       compare opens in side by side; script off: stacked (Camera 666×500
       at y 0, Finished at y 537 at 1512).
 
-- [ ] **T1726** — The filmstrip, enhanced. Pattern: T1708's slider in
+- [x] **T1726** — The filmstrip, enhanced. Pattern: T1708's slider in
       `enhance()` (the pointer capture, `slide`, the settle behind
       `!reducedMotion()`, `transitionend` on `--split`); the loupe's
       non-passive `wheel` listener and its `deltaMode` conversion in
@@ -1034,6 +1034,27 @@ headers'.
       T1726's bullet at both screens, each number recorded here; what
       headless cannot drive (a real trackpad scroll, a real swipe) said
       line by line for the pause._
+
+      _Recorded (T1726, Firefox 156 headless, land-b's section, frame
+      666.4 wide, identical at 1512×982 and 1280×1440):_ Filmstrip →
+      `data-view`, `--strip-at` 0, offsets [0, 666.4, 1332.8], back
+      arrow hidden, next 24px wide 8px in, centred; next → `data-paging`
+      with `--strip-at 0.48s cubic-bezier(0.22, 1, 0.36, 1)`, 0.927 at
+      200ms, `transitionend` clears it, lands at 1, note Tones; → to 2
+      (next hidden), Home to 0, End to 2; → at the last and Home/← at
+      the first write no `data-paging`; legend click from the last
+      slides to 0; drag −0.6w → 0.60024 held with no transition, release
+      → `data-settling` at `0.18s ease`, lands at 1; wheel deltaX 0.4w
+      → 0.4, settles to 0 after the idle (220ms) with `data-settling`;
+      deltaMode 1 × 3 lines → 0.072; vertical and diagonal wheels not
+      prevented, no move; a click on the frame does nothing; reduced
+      motion: no `data-paging`/`data-settling`, `all 0s`, the cut;
+      `--compare-peek: 2rem` → `inset(0px -32px)`, 16px outside each
+      edge hits the neighbour; script off: stacked (y 0, 540, 1025).
+      Needs eyes at the pause: a real two-finger scroll's momentum
+      against the settle, a real swipe under `pan-y`, the slide's and
+      settle's feel, the arrows' look; the frames' focus ring is clipped
+      by the strip's `clip-path` at peek 0 (inferred).
 
 - [ ] **T1727** — The plugin shows a side and a slider. Pattern: T1714.
       Plan: "Obsidian" (amendment). `obsidian-plugin/compare.ts`:
@@ -1319,6 +1340,7 @@ tier if it is ever on (it is off). -->
 | T1723 side static form, fixtures, page stage images | implementation (`opus`, high) | ~64k + ~110k (two rounds, D1723 between) | done; 612 tests (+2); stopped once on the plan's shared-files premise (D1723); one srcset per stage on both pages; the section's raw <img> also carries Astro's scoped class and cid attribute (request-identical to the story's); a stage's sizes follow the surface not the width class (the side at wide still carries column sizes — what keeps one list); prettier flags pre-existing lines in compare.test.mjs and [...id].astro — sweep note |
 | T1724 filmstrip state | implementation (`opus`, high) | ~57k | done; 618 tests (+6); both mutations fail by name; stripEnds defaults wraps to COMPARE.stripWraps as switchNext does; prettier flags compare.ts and compare.test.mjs at HEAD already — sweep note |
 | T1725 slider block enhanced | implementation (`opus`, high) | ~71k | done; 619 tests (+1); reads at both screens recorded; refit() still writes data-narrow on a narrow fixed block (every [data-narrow] rule is side-scoped, no visible effect) — note; no script-level pin on the fixed branch beyond the CSS body and the browser reads — sweep note |
+| T1726 filmstrip enhanced | implementation (`opus`, high) | ~129k | done; 625 tests (+6); reads at both screens and under reduced motion recorded; six deviations noted in plan.md's bullet (the wheel clears both states first; the idle settle only in the filmstrip with no drag; keys from anything inside the frames; pointerdown on an arrow ignored; the arrows' small literals pinned in (e); --strip-at rounded to 1e6); pause note: the frames' focus ring is clipped at peek 0 (inferred) — possibly a round |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_
