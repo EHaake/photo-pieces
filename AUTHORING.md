@@ -46,8 +46,9 @@ Why this shape:
 - **Community plugins → Photo Pieces Blocks: enabled.** The plugin
   renders leaves: a standalone block written in leaf form (`::single`,
   `::fullbleed`, `::wide`, `::tall`, `::inset`, `::diptych`,
-  `::triptych`) shows its image while you write, and one container,
-  `:::compare`, shows its stages' images with their labels beneath.
+  `::triptych`) shows its image while you write, and three containers,
+  `:::compare`, `:::side` and `:::slider`, show their stages' images
+  with their labels beneath.
   Everything else is raw text by construction — the other container
   forms (captions), and the container-only `grid`, `strip`, `aside`,
   `row`, and `held` — and the site build is the truth for those, as it
@@ -170,7 +171,8 @@ the piece's text references it. Consequences worth internalizing:
   `_land-b.tones.jpg` is one of its stages, and `_land-b.detail.jpg`
   its larger export for the loupe (spec 019). None gets a page or can
   be listed in a gallery, and a piece may place one only as a stage of
-  a `compare` in the same folder — anywhere else fails the build. See
+  a `compare`, `side` or `slider` in the same folder — anywhere else
+  fails the build. See
   "The private files" below.
 
 ### Borrowing a photograph
@@ -339,8 +341,8 @@ named for it, with a leading underscore (spec 006, widened at spec
   frame and the finished photograph, the word after the basename
   naming it for you (`tones`, `crop`, `dodge` — any word but
   `detail`). As many as the photograph took. A stage shows where you
-  put it: in a `compare` block, or on the image page when the sidecar
-  lists it.
+  put it: in a `compare`, `side` or `slider` block, or on the image
+  page when the sidecar lists it.
 - **The larger export** — `_land-b.detail.jpg`: the finished
   photograph exported bigger, for the loupe alone. One per photograph,
   found by name like the frame ("The larger export" below).
@@ -349,7 +351,8 @@ Two relations share one prefix, deliberately: `_land-b.md` is _about_
 `land-b.jpg`, and every `_land-b…` raster is _part of the making of_
 it. None of them is an image of the site — no page, never in a
 gallery — and the one place a piece may write one is as a stage of a
-`compare` in its own folder. The build fails, naming the file:
+`compare`, `side` or `slider` in its own folder. The build fails,
+naming the file:
 
 - a private file with no photograph beside it (`_land-c.tones.jpg`
   with no `land-c.jpg`), as a stray sidecar does;
@@ -357,8 +360,9 @@ gallery — and the one place a piece may write one is as a stage of a
   photograph;
 - a private file placed anywhere else — another block, the plain
   `![alt](…)` shorthand, a `cover` — or listed in a gallery;
-- a private file of another folder in a `compare`: a piece may borrow
-  another piece's finished photograph, not its making-of.
+- a private file of another folder in a `compare`, `side` or `slider`:
+  a piece may borrow another piece's finished photograph, not its
+  making-of.
 
 Strip location metadata from every one of these exports as from any
 other (the build fails on GPS in the output either way).
@@ -399,10 +403,10 @@ title on its page: a compare's image text names a stage, it does not
 describe the photograph.
 
 `mode` picks the way the compare opens: `slider` (the default),
-`side`, or `switch`. The reader can change it with the "How to
-compare" control on the row beneath, and their choice holds for every
-compare they open in that tab, outranking the `mode` written, until
-the tab closes. The three ways:
+`side`, `switch`, or `filmstrip`. The reader can change it with the
+"How to compare" control on the row beneath, and their choice holds
+for every compare they open in that tab, outranking the `mode`
+written, until the tab closes. The four ways:
 
 - **Slider** — two stages in one frame, wiping between them: drag the
   handle, or use the arrow keys. At rest it shows the first stage
@@ -416,6 +420,16 @@ the tab closes. The three ways:
 - **Switch** — one stage at a time, in the column: a click or tap on
   the photograph, Space, Enter or → moves to the next, ← steps back,
   and the last wraps to the first.
+- **Filmstrip** — one stage fills the frame, the others in a row
+  beyond its edges: an arrow at either side, ← and → (Home and End for
+  the ends), a swipe on the phone or a sideways two-finger scroll on
+  the trackpad slides the strip to the next stage, and after a swipe
+  or a scroll it settles on the nearest. It slides, it does not fade,
+  so the frames go by in order, and it stops at either end rather than
+  wrapping — the arrow with nowhere to go hides. A click on a stage in
+  the legend slides there, and the note beneath is the showing stage's.
+  Nothing plays by itself, and under reduced motion it cuts to the
+  stage instead of sliding.
 
 Without script the compare is its stages one under another, each with
 its label and note. In Obsidian's Live Preview it shows its stages'
@@ -428,6 +442,50 @@ against Finished early on, Tones against Finished further down, each
 a subset. They ask for the same files, so a reader downloads each
 stage once. The same block in a sidecar's story puts the compare in
 the writing, and the page's own "Raw to finished" section steps aside.
+
+### A pair: side and slider
+
+Where the writing wants one fixed look rather than the reader's
+choice, two more blocks take a compare's stage lines — two of them:
+
+```markdown
+:::side
+![Camera](./_land-b.jpg) Straight out of the camera, flat profile.
+![Tones](./_land-b.tones.jpg) Shadows lifted on the ridge, the fog's highlights held.
+:::
+
+:::slider
+![Camera](./_land-b.jpg) Straight out of the camera, flat profile.
+![Finished](./land-b.jpg) A touch of warmth over the whole frame.
+:::
+```
+
+- **`side`** — the two beside each other at the photograph's ratio and
+  the same size, each with its label and note beneath in the caption
+  style, running wider than the text column as the compare's side by
+  side does; where two won't fit — on a phone — they stack. Nothing to
+  choose.
+- **`slider`** — the compare's slider on one pair: the first stage
+  left, the second right, the handle at the centre, the same drag,
+  touch and arrow keys, and the two labels fixed beneath (not buttons)
+  with the second stage's note. No "How to compare" control, and the
+  reader's choice in the tab does not change it.
+
+Container form only, and **exactly two stages**, written as a
+compare's: the label and note rules above apply unchanged. **No
+attributes** — `:::side{mode="slider"}` fails as any unknown attribute
+does. The build fails, naming the piece, on one stage or three (with
+the count), and on a missing file or a private file from another
+folder, as a compare's does: a private stage comes from the block's
+own folder. In Live Preview each shows as a compare does — its stages'
+images in a row, labels beneath.
+
+Pairs and compares mix freely over the same stages — the slider's
+Camera against Finished a paragraph below a compare of all three, say.
+They ask for the same files, so however many blocks show a stage, a
+reader downloads it once. In a sidecar's story a `side` or a `slider`
+sits in the writing and the page's "Raw to finished" section still
+shows beside it; only a compare there stands in for that section.
 
 ### Stages on the image page
 
@@ -448,7 +506,7 @@ site's own note ("The RAW file straight out of camera — no edits, no
 adjustments"); then the listed stages in the order written; then the
 finished photograph, labelled Finished, whose note is the sidecar's
 `processing:` line when it has one. It is the same compare as the
-block, with the same three ways; it opens as the slider unless the
+block, with the same four ways; it opens as the slider unless the
 reader has already chosen another way in that tab.
 
 `label` is required, `note` optional. **A note is one paragraph**,

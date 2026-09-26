@@ -78,7 +78,8 @@ plain Markdown:
 Everything else in the closed block vocabulary uses directive syntax.
 A block is a leaf (`::name{...}` on its own line) or a container
 whose body carries a caption — or, for `aside`, `row`, and `held`,
-the prose beside the frame, and for `compare`, its stages:
+the prose beside the frame, and for `compare`, `side` and `slider`,
+their stages:
 
 ```md
 ::wide{src="./photo-2.jpg" alt="The playa at dusk"}
@@ -88,21 +89,23 @@ Three minutes apart. Captions take _inline markdown_.
 :::
 ```
 
-| Block       | Forms          | Attributes                                                                                         | Obsidian Live Preview |
-| ----------- | -------------- | -------------------------------------------------------------------------------------------------- | --------------------- |
-| `single`    | leaf/container | `src` `alt`                                                                                        | image (leaf)          |
-| `inset`     | leaf/container | `src` `alt`                                                                                        | image (leaf)          |
-| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                    | image (leaf)          |
-| `fullbleed` | leaf/container | `src` `alt`                                                                                        | image (leaf)          |
-| `tall`      | leaf/container | `src` `alt`                                                                                        | image (leaf)          |
-| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed` | images (leaf)         |
-| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                            | images (leaf)         |
-| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                         | raw text              |
-| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption               | raw text              |
-| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                            | raw text              |
-| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                       | raw text              |
-| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays   | raw text              |
-| `compare`   | container only | `mode=slider\|side\|switch`; body: 2+ stages, one per line: `![Label](./file.jpg)` then its note   | stages, labels below  |
+| Block       | Forms          | Attributes                                                                                                  | Obsidian Live Preview |
+| ----------- | -------------- | ----------------------------------------------------------------------------------------------------------- | --------------------- |
+| `single`    | leaf/container | `src` `alt`                                                                                                 | image (leaf)          |
+| `inset`     | leaf/container | `src` `alt`                                                                                                 | image (leaf)          |
+| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                             | image (leaf)          |
+| `fullbleed` | leaf/container | `src` `alt`                                                                                                 | image (leaf)          |
+| `tall`      | leaf/container | `src` `alt`                                                                                                 | image (leaf)          |
+| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed`          | images (leaf)         |
+| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                                     | images (leaf)         |
+| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                                  | raw text              |
+| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption                        | raw text              |
+| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                                     | raw text              |
+| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                                | raw text              |
+| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays            | raw text              |
+| `compare`   | container only | `mode=slider\|side\|switch\|filmstrip`; body: 2+ stages, one per line: `![Label](./file.jpg)` then its note | stages, labels below  |
+| `side`      | container only | none; body: exactly 2 stages, as `compare`'s; the two beside each other                                     | stages, labels below  |
+| `slider`    | container only | none; body: exactly 2 stages, as `compare`'s; one wipe, first left, second right                            | stages, labels below  |
 
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
 `single` — same rendered result. The site mats only the image page's
@@ -127,9 +130,10 @@ must exist, borrowed drafts fail. The sampler piece
 rendered.
 
 **Current status**: every block above is implemented — the spec-003
-blocks, spec 007's held block and spec 019's compare — transform, styling,
-the mat rule (the quiet view alone since spec 017), unit tests,
-and the Obsidian plugin's leaf-form rendering (and the compare's stages) —
+blocks, spec 007's held block and spec 019's compare, side and slider —
+transform, styling, the mat rule (the quiet view alone since spec 017),
+unit tests, and the Obsidian plugin's leaf-form rendering (and the
+stages of those three) —
 with images going through Astro's asset pipeline (hashed src,
 responsive srcset per treatment). Pieces render at
 `/pieces/<slug>/`, list at `/pieces/` (in the nav), and feed the
@@ -146,13 +150,15 @@ piece's folder — or in the flat `src/content/gallery-images/` root for
 images that belong to no piece — gets a page at `/images/<id>/`, where
 the id is `<piece-folder>/<basename>` or `gallery/<basename>`. The
 page shows the photograph bare and centred just below the header —
-fitted, turned for a portrait, inside a 3:2 rectangle whose long side
-is the smaller of the page's width inside its margins and the first
-screen's height below the header less the previous / next line and a
-piece's frame-to-prose spacing above and below, as large as it can be
-while touching a side (a square at the short side, a panorama at the
-long side) — with the previous / next line directly beneath at that
-spacing and above the fold; then its title, a wall label of
+sized by a share: a photograph wider than tall takes the landscape
+share of the page's width inside its margins, and one taller than
+wide, or square, the portrait share of the first screen's height below
+the header less the previous / next line and a piece's frame-to-prose
+spacing above and below; either is then bounded by the other axis, so
+the whole photograph shows (the shares are `--stage-share-landscape`
+and `--stage-share-portrait` in `src/styles/global.css`, both 1: the
+whole available extent) — with the previous / next line directly
+beneath at that spacing and above the fold; then its title, a wall label of
 exposure info
 read from the file's EXIF (camera, lens, focal length, aperture,
 shutter, ISO, capture date — since spec 019 the camera and lens by the
@@ -170,12 +176,15 @@ link, then the sidecar's free text, when the frame names one — "How
 it was made", "Raw to finished" — a compare of the photograph's
 stages: the camera's frame labelled Camera, the stages its sidecar
 lists under their own labels (Tones, say), the photograph labelled
-Finished; three ways to see it, a slider wiping between two stages
+Finished; four ways to see it, a slider wiping between two stages
 (Camera | Finished at rest, the legend of stages beneath picking the
-pair), side by side (the same pair, running wider than the column), and
-a switch (one stage at a time); the reader's choice held for the tab's
-session (spec 019, which also brings the same compare into a piece as a
-`:::compare` block) —
+pair), side by side (the same pair, running wider than the column), a
+switch (one stage at a time), and a filmstrip (one stage at a time,
+the strip sliding to the next by arrow, key, swipe or trackpad scroll,
+stopping at the last); the reader's choice held for the tab's session
+(spec 019, which also brings the same compare into a piece as a
+`:::compare` block, and two fixed pairs of stages as `:::side` and
+`:::slider`) —
 the passage of the piece the image sits in, related frames from the
 same outing, and "The print" with an enquiry link. Every page in a set
 has a neighbour line for it (the
@@ -255,10 +264,11 @@ stage of its page's compare; a stage `_<basename>.<word>.<ext>`
 (`_land-b.tones.jpg`, any word but `detail`), shown where the sidecar's
 `stages:` lists it (a `file`, a `label`, an optional one-paragraph
 `note`; the frame and the finished photograph are implied) or a
-`:::compare` places it; and the loupe's larger export
-`_<basename>.detail.<ext>`. None is an image of the site: no page,
-never in a gallery, and a piece may place one only as a stage of a
-`:::compare` in its own folder — anywhere else fails the build, as do a
+`:::compare`, `:::side` or `:::slider` places it; and the loupe's
+larger export `_<basename>.detail.<ext>`. None is an image of the
+site: no page, never in a gallery, and a piece may place one only as a
+stage of one of those three blocks in its own folder — anywhere else
+fails the build, as do a
 private file with no photograph beside it, a second frame or larger
 export for one photograph, and a sidecar listing a file that is not
 one of its photograph's stages. See `AUTHORING.md` for the exports,
