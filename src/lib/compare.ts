@@ -191,6 +191,8 @@ export function sideFits(width: number): boolean {
 export const enhanceCompare = (scope: Document) => {
   for (const root of scope.querySelectorAll<HTMLElement>(`.${C.root}`)) {
     if ('js' in root.dataset) continue;
+    // Side by side is final without script (T1723): no control, no legend, nothing to bind.
+    if (root.classList.contains('piece-side')) continue;
     const frames = root.querySelector<HTMLElement>(`:scope > .${C.frames}`);
     const stages = frames ? [...frames.querySelectorAll<HTMLElement>(`:scope > .${C.stage}`)] : [];
     if (!frames || stages.length < 2) continue;

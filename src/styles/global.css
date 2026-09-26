@@ -2216,6 +2216,27 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   margin-inline: calc((100% - var(--w)) / 2);
 }
 
+/* Side by side, the block (spec 019 amendment, T1723): final without
+   script, so it is the static form and nothing more — the two stages in
+   two columns on the static `.compare-frames` grid and gap, each pane at
+   the photograph's ratio (the side-by-side view's rules below), each
+   caption beneath its pane; one column where two won't fit. The compare
+   script skips it. 560px is 2 × COMPARE.sideMinPx, the compare's own
+   threshold at the block's opening; from here the side's is its own. */
+.piece-side {
+  container: compare-side / inline-size;
+}
+
+.piece-side .compare-frames {
+  grid-template-columns: 1fr 1fr;
+}
+
+@container compare-side (width < 560px) {
+  .piece-side .compare-frames {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* The enhanced block (T1708). The script builds the chrome — the
    divider, the handle, the legend of stops, the method control, the live
    note — and writes the state these rules read: `data-view` (slider,
@@ -2267,7 +2288,8 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   height: 100%;
 }
 
-.compare[data-js] .compare-pane img {
+.compare[data-js] .compare-pane img,
+.piece-side .compare-pane img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -2385,7 +2407,8 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   grid-area: 2 / 1;
 }
 
-.compare[data-view='side'] .compare-pane {
+.compare[data-view='side'] .compare-pane,
+.piece-side .compare-pane {
   height: auto;
   aspect-ratio: var(--ar);
 }

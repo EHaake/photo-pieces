@@ -33,9 +33,9 @@ import { setKey, type SetKind } from '../../lib/image-set';
 import {
   COMPARE_CLASSES,
   COMPARE_WIDTH,
-  compareSizes,
   compareStages,
   sectionsFor,
+  stageImageOptions,
 } from '../../lib/image-meta.mjs';
 import { getImageRegistry } from '../../lib/images';
 import { LOUPE, loupeImageOptions } from '../../lib/loupe';
@@ -183,7 +183,16 @@ const recordRows = (
 // A note is inline Markdown, as the block's is (T1708a): rendered, its
 // one paragraph's <p> unwrapped, since it sits inside the note's span.
 type CompareStage = { src: ImageMetadata; label: string; note?: string };
-const compare: CompareStage[] = shows('compare')
+// Each stage's <img> is built from getImage with the transform's own
+// request (stageImageOptions), not <Image>: under a layout the component
+// adds fit and position to the request, so its files could never be the
+// ones a story's block asks for (D1723) — as the og and loupe files are built.
+type BuiltStage = {
+  stage: Awaited<ReturnType<typeof getImage>>;
+  label: string;
+  note?: string;
+};
+const compare: BuiltStage[] = shows('compare')
   ? await Promise.all(
       compareStages(
         {
@@ -193,16 +202,16 @@ const compare: CompareStage[] = shows('compare')
           processing: image.record.processing,
         },
         WORDING.compare,
-      ).map(async (stage: CompareStage) =>
-        stage.note === undefined
-          ? stage
-          : {
-              ...stage,
-              note: (await renderMarkdown(stage.note))
+      ).map(async ({ src, label, note }: CompareStage) => ({
+        stage: await getImage({ src, alt: label, ...stageImageOptions('page') }),
+        label,
+        note:
+          note === undefined
+            ? undefined
+            : (await renderMarkdown(note))
                 .trim()
                 .replace(/^<p>((?:(?!<\/?p>)[\s\S])*)<\/p>$/, '$1'),
-            },
-      ),
+      })),
     )
   : [];
 
@@ -428,16 +437,10 @@ const indexed =
               style={`--ar: ${ar}`}
             >
               <div class={COMPARE_CLASSES.frames}>
-                {compare.map(({ src, label, note }) => (
+                {compare.map(({ stage, label, note }) => (
                   <figure class={COMPARE_CLASSES.stage}>
                     <span class={COMPARE_CLASSES.pane}>
-                      <Image
-                        src={src}
-                        alt={label}
-                        layout="constrained"
-                        width={Math.min(src.width, 1400)}
-                        sizes={compareSizes(COMPARE_WIDTH.page)}
-                      />
+                      <img src={stage.src} srcset={stage.srcSet.attribute} {...stage.attributes} />
                     </span>
                     <figcaption class={COMPARE_CLASSES.caption}>
                       <span class={COMPARE_CLASSES.label}>{label}</span>

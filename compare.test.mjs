@@ -25,12 +25,18 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //
 // (a) One shape, spelled once. The page builds every compare element
 //     through COMPARE_CLASSES — no `class="compare…"` literal to drift —
-//     and takes its width and `sizes` from COMPARE_WIDTH.page; every
+//     and takes its width from COMPARE_WIDTH.page and its stage request
+//     from stageImageOptions('page'); every
 //     COMPARE_CLASSES value and every width class has a rule in
 //     global.css, the names' one other spelling (CSS cannot import); the
 //     page's own <style> holds no compare rule, since a piece could not
 //     reach it; and no compare class is a frame host, so the stage
-//     images stay outside the appearance hooks.
+//     images stay outside the appearance hooks. The section builds its
+//     one stage <img> from getImage, never <Image> (which adds fit and
+//     position to the request), with the request the transform's
+//     stageSizing also spells, stageImageOptions — so a story's block and
+//     the section ask for the same files (T1723, D1723); enhanceCompare skips
+//     `.piece-side`, which is final without script.
 //
 // (b) The handle's tokens (T1708). `TOKENS` below is the handle's size
 //     and shape, the tuning envelope's one place for them: each declared
@@ -168,12 +174,14 @@ let page;
 let css;
 let raw;
 let script;
+let transform;
 
 beforeAll(async () => {
   page = await readFile(here(`./${PAGE}`), 'utf8');
   raw = await readFile(here('./src/styles/global.css'), 'utf8');
   css = uncomment(raw);
   script = await readFile(here('./src/lib/compare.ts'), 'utf8');
+  transform = await readFile(here('./remark-pieces-blocks.mjs'), 'utf8');
 });
 
 describe('(a) one shape, spelled once', () => {
@@ -188,7 +196,7 @@ describe('(a) one shape, spelled once', () => {
 
   it("the page's width class and sizes come from COMPARE_WIDTH.page", () => {
     expect(page).toContain('${COMPARE_CLASSES.root}-w-${COMPARE_WIDTH.page}');
-    expect(page).toContain('sizes={compareSizes(COMPARE_WIDTH.page)}');
+    expect(page).toContain("...stageImageOptions('page')");
   });
 
   it('every COMPARE_CLASSES value and every width class has a rule in global.css', () => {
@@ -215,6 +223,26 @@ describe('(a) one shape, spelled once', () => {
         (selector) => classIn(COMPARE_CLASSES.root).test(selector) || /\.compare-/.test(selector),
       ),
     ).toEqual([]);
+  });
+
+  it("the section builds its stage img from getImage with stageImageOptions('page'), never <Image> (T1723)", () => {
+    const from = page.indexOf('id="sec-compare"');
+    const to = page.indexOf('</section>', from);
+    expect([from > -1, to > from]).toEqual([true, true]);
+    const section = page.slice(from, to);
+    expect(section).not.toMatch(/<Image\b/);
+    expect(section.match(/<img\b/g) ?? []).toHaveLength(1);
+    expect(page).toContain("getImage({ src, alt: label, ...stageImageOptions('page') })");
+    expect(transform).toContain("const stageSizing = () => stageImageOptions('piece');");
+  });
+
+  it('enhanceCompare skips .piece-side, so no script touches side by side (T1723)', () => {
+    const from = script.indexOf('export const enhanceCompare');
+    const to = script.indexOf('\n};', from);
+    expect([from > -1, to > from]).toEqual([true, true]);
+    expect(script.slice(from, to)).toMatch(
+      /if \(root\.classList\.contains\('piece-side'\)\) continue;/,
+    );
   });
 
   it('no compare class is a frame host, so the stage images stay outside the appearance hooks', () => {

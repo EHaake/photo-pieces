@@ -7,7 +7,6 @@ import {
   COMPARE_CLASSES,
   COMPARE_MODES,
   COMPARE_WIDTH,
-  compareSizes,
   IMAGE_EXTENSIONS,
   ImageIdError,
   imageIdFor,
@@ -17,6 +16,7 @@ import {
   parseReference,
   privateMessage,
   privateTargetOf,
+  stageImageOptions,
 } from './src/lib/image-meta.mjs';
 
 // Turns the closed set of piece image-treatment directives (parsed by
@@ -102,7 +102,7 @@ const isLandscape = (ratio) => ratio >= 1;
 // Every stage image's sizing, whatever block holds it (compare, side,
 // slider): a stage shown by several blocks of one page resolves to one
 // URL, so it is fetched once.
-const stageSizing = () => ({ layout: 'constrained', sizes: compareSizes(COMPARE_WIDTH.piece) });
+const stageSizing = () => stageImageOptions('piece');
 
 export const BLOCKS = {
   single: {

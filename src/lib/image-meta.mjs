@@ -745,6 +745,16 @@ export function compareSizes(width) {
 }
 
 /**
+ * A stage image's request on one surface of `COMPARE_WIDTH`, spelled
+ * once for both builders (D1723): the transform's stage images and the
+ * image page's section reach `getImage` with it, and neither passes a
+ * width, so a stage shown by several blocks of one page is one file.
+ */
+export function stageImageOptions(surface) {
+  return { layout: 'constrained', sizes: compareSizes(COMPARE_WIDTH[surface]) };
+}
+
+/**
  * The image page's compare, as `{ src, label, note? }[]`: the camera's
  * frame first (labelled `words.camera`, with `words.cameraNote` when
  * given) when there is one, the declared stages in order, and the photograph last (labelled
