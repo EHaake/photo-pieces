@@ -1056,7 +1056,7 @@ headers'.
       settle's feel, the arrows' look; the frames' focus ring is clipped
       by the strip's `clip-path` at peek 0 (inferred).
 
-- [ ] **T1727** — The plugin shows a side and a slider. Pattern: T1714.
+- [x] **T1727** — The plugin shows a side and a slider. Pattern: T1714.
       Plan: "Obsidian" (amendment). `obsidian-plugin/compare.ts`:
       `STAGES_PATTERN`, its comment; `main.ts`: the import and the
       comments. obsidian-plugin.test.mjs per T1727's bullet. _Verify:
@@ -1341,6 +1341,7 @@ tier if it is ever on (it is off). -->
 | T1724 filmstrip state | implementation (`opus`, high) | ~57k | done; 618 tests (+6); both mutations fail by name; stripEnds defaults wraps to COMPARE.stripWraps as switchNext does; prettier flags compare.ts and compare.test.mjs at HEAD already — sweep note |
 | T1725 slider block enhanced | implementation (`opus`, high) | ~71k | done; 619 tests (+1); reads at both screens recorded; refit() still writes data-narrow on a narrow fixed block (every [data-narrow] rule is side-scoped, no visible effect) — note; no script-level pin on the fixed branch beyond the CSS body and the browser reads — sweep note |
 | T1726 filmstrip enhanced | implementation (`opus`, high) | ~129k | done; 625 tests (+6); reads at both screens and under reduced motion recorded; six deviations noted in plan.md's bullet (the wheel clears both states first; the idle settle only in the filmstrip with no drag; keys from anything inside the frames; pointerdown on an arrow ignored; the arrows' small literals pinned in (e); --strip-at rounded to 1e6); pause note: the frames' focus ring is clipped at peek 0 (inferred) — possibly a round |
+| T1727 plugin side and slider | implementation (`opus`, high) | ~34k | done; 628 tests (+3); plugin build exit 0; the widgetx27s data-block stays `compare` for all three |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_
