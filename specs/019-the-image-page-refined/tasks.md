@@ -610,7 +610,7 @@ images.
       its parent (`git diff --no-index` of the two `<figure>`s,
       recorded)._
 
-- [ ] **T1711** — The loupe's state, pure. Pattern: T1707's shape in
+- [x] **T1711** — The loupe's state, pure. Pattern: T1707's shape in
       `compare.ts` and `compare.test.mjs`. Plan: "The loupe's state".
       `src/lib/loupe.ts`: `fullScale`, `zoomAbout`, `clampPan`,
       `loupeReduce` exactly as plan.md describes, the effects as a
@@ -928,6 +928,7 @@ tier if it is ever on (it is off). -->
 | T1709i small handle | implementation (`opus`, high) | ~42k | done; 530 tests; 24×24, accent border, bars 8×1 at ±1.5px from centre |
 | T1709j label · note | implementation (`opus`, high) | ~44k | done; 531 tests; label-to-note gap 22.85px, the space character plus margin on the label side (asymmetric by ~4px) — note |
 | T1710 loupe file | implementation (`opus`, high) | ~75k + ~20k | done; 535 tests; land-b loupe 39,702 B (5400×3600 webp, flat fixture); dist/_astro main 781 files / 35.45 MB → after 837 / 40.25 MB (+37 files, +4.75 MB, the 62 own-file loupes 4.84 MB, none sharing a stage srcset file — fit/position enter the stage hash); the constrained layout emitted nine unnamed sizes per getImage until layout none (plan amended); og.ts has the same waste — sweep note; exifr cannot open webp (check-no-gps reads through sharp) |
+| T1711 loupe state | implementation (`opus`, high) | ~58k | done; 563 tests (+28); every fit→zoomed step (wheel, pinch, key) returns open; click decided after press/move/release by dragSlop; arrows move the view the way they point; in dblclick mode a double click while zoomed would close then reopen — T1712 or a round if the pause picks dblclick |
 
 _(Session-tier allowance draw noted at each pause.)_
 
