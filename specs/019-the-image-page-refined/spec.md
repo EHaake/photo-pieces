@@ -558,3 +558,7 @@ re-implementation. The plan says where each lives.
   left / right with a hint for the next pick; every showing stage
   carries its corner caption; the camera stage's note reads "The RAW
   file straight out of camera — no edits, no adjustments".
+- **Round T1709g (2026-09-25)** — a picked stage may be picked again
+  for the other side; the side it leaves stays empty (the bare ground)
+  until the next pick fills it; the left / right tags sit beneath their
+  buttons with space reserved, so the legend never shifts.

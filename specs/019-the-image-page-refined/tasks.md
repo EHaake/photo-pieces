@@ -492,6 +492,24 @@ headers to confirm nothing was duplicated or dropped. -->
       `compareStages`; the page-source pin's row. _Verify: green; the
       built land-b page's Camera note greped._
 
+- [ ] **T1709g** — Round: a picked stage may move to the other side,
+      leaving its old side empty until the next pick ("you can't select
+      an already selected one … maybe in this case you just have an
+      empty selection until the partner is selected. I actually like
+      that second idea better"); the left/right tags beneath their
+      buttons, space reserved ("this causes things to jump around … the
+      left and right indicators should be underneath their selections").
+      Plan: the T1709g paragraph. `compare.ts`: nullable slots in
+      `pickSlot` and the views; `global.css`: the legend button as a
+      two-line block with a reserved tag row, the (c) pin's body
+      updated; tests: the `pickSlot` tables regenerated for three and
+      four stages including empty slots. _Verify: green; BiDi at
+      1512×982: from rest (C left, F right, next left) click F → F
+      left, right empty, next right; click T → F | T; the legend
+      buttons' tops and widths unchanged across the clicks (recorded);
+      the empty pane's stage state `off` and no image showing on that
+      side._
+
 ### Phase 1 record (the person's walkthrough)
 
 **First look (2026-09-25).** The three-way slider: "I don't like the
@@ -511,8 +529,12 @@ to get larger. The slider and switch is now too large"; the pair
 picking "is confusing … not clear which I'm selecting for which side";
 Finished has no corner caption "like the others do"; the camera's
 subtitle should read "The RAW file straight out of camera - no edits,
-no adjustments". Rounds: T1709c–f. The decision list is still
-deferred.
+no adjustments". Rounds: T1709c–f. **Third look:** "it's getting close but it's still
+a little confusing": a picked stage can't be picked for the other side
+— "you just have an empty selection until the partner is selected. I
+actually like that second idea better"; the left/right tags "cause
+things to jump around … should be underneath their selections". Round:
+T1709g. The decision list is still deferred.
 
 ## Phase 2 — The loupe (reviewer after the phase; walkthrough: under `npm run dev` on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/`, enter the quiet view; the cursor over the photograph says zoom, over the mat it still says leave; click a corner and the photograph grows to full detail around that point while the mat and the dark ground stay where they are, soft at first and then sharp as the larger export fades in; drag to move around it, scroll or pinch (trackpad and phone) to zoom between the fit and full detail, + and − to zoom, the arrows to pan; Esc or a click without dragging goes back to the fit, Esc again back to the page; at the fit the arrows step to the next photograph as before; on `/images/where-the-fog-lets-go/land-a/` (a 1800×1200 placeholder with no larger export, whose own file is already past full detail at its quiet size on both his screens — the number T1712 recorded, quoted in the report; if that read found it ready, the report names the page T1712 found not ready instead) the quiet view is exactly as before and a click leaves it, while some real portrait exports on the laptop do get a loupe from their own file (T1712's numbers); the question put to him: at the fit, a click on the photograph now zooms and a click on the mat or the dark ground leaves — is that the right reading of "a click at the fit steps back out", or should a single click keep leaving and the loupe open another way; with the system's reduce-motion setting on, the zoom jumps rather than grows and the sharp export still fades in; optionally, in the browser's network panel, the larger export is requested only at the first zoom and once; as many rounds as it takes, each a sub-lettered task under T1713)
 

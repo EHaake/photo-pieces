@@ -509,6 +509,21 @@ where the simpler shape was taken it is said in one line.
   no adjustments'`, the camera stage's note on the page (the
   photograph's own `processing:` stays the finished stage's).
 
+  **Round T1709g (Phase 1 pause, third look, 2026-09-25).** A slot may
+  be empty: the state is `{ left: number | null, right: number | null,
+  next }`. `pickSlot(pair, k)`: the stage takes the `next` slot and
+  `next` flips; if the stage already held the other slot, that slot
+  becomes `null` (so a stage moves sides, and the side it left stays
+  empty until the next pick fills it); a click on the stage already in
+  the `next` slot does nothing. An empty side shows no stage: in the
+  slider the divider wipes between the one stage and the bare ground,
+  in side by side the empty pane is the ground, the live note follows
+  the right slot and is blank when that is empty. The legend's tags sit
+  beneath their buttons: each button is a two-line block with a tag
+  row always present (a blank when unpicked, `visibility: hidden` or a
+  non-breaking space) so nothing shifts; the hint line stays beneath
+  the legend. The switch is unchanged.
+
 - **The loupe's file** (`src/lib/loupe.ts`, the image page's
   frontmatter, T1710). `LOUPE` holds the loupe's tunables:
 
