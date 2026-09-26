@@ -429,7 +429,9 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     // byte-identical duplication (T1101b deleted it, on both the page
     // and here). These four rules, the mat's between the stage's and
     // the cursor list, the loupe's ready photograph after them (spec 019,
-    // T1712: a deliberate fourth), and no fifth.
+    // T1712: a deliberate fourth), the open loupe's frame without its mat
+    // (spec 019, T1713b: a deliberate fifth — padding 0, reading no
+    // --mat), and no sixth.
     const QUIET_RULE = /html\[data-quiet\] \.image-/;
     // The paper frame's `:not` preludes are not quiet rules: the list
     // below gains nothing from them.
@@ -443,6 +445,7 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
       'html[data-quiet] .image-frame',
       'html[data-quiet] .image-frame, html[data-quiet] .image-stage[data-quiet-ready] .image-frame',
       'html[data-quiet] .image-stage[data-loupe-ready] .image-frame img',
+      'html[data-quiet] .image-stage[data-loupe-open] .image-frame',
     ]);
     // And the page's scoped <style> styles the frame not at all — every
     // frame rule is here, the zoom-in cursor included. A scoped copy

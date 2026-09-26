@@ -21,6 +21,7 @@ export const LOUPE = {
   panStep: 0.15, // an arrow pans this share of the view
   dragSlop: 4, // px a press may move and still be a click
   pan: 'follow', // 'follow' (zoomed, the mouse's place over the box is the place shown) or 'drag' (only a drag pans)
+  mat: 'off', // 'off' (while the loupe is open the quiet frame drops its mat) or 'kept' (the mat stays)
   zoomInKeys: ['+', '='],
   zoomOutKeys: ['-', '_'],
 } as const;
@@ -267,9 +268,13 @@ export type Loupe = {
  * the photograph's own box, read from the image's rect, inside
  * `.image-stage` (already `position: relative`), holding
  * `div.loupe-layer` whose `translate(tx, ty) scale(s)` it writes. So
- * the mat, the frame and the dark ground are untouched and not zoomed,
- * nothing spec 018 or the mat rule pinned on the stage image moves, and
- * taking the overlay down restores the page as it was. The layer holds
+ * the frame and the dark ground are not zoomed, nothing spec 018 or the
+ * mat rule pinned on the stage image moves, and taking the overlay down
+ * restores the page as it was. Under `LOUPE.mat: 'off'` the stage
+ * carries `data-loupe-open` while zoomed, and the quiet frame drops its
+ * mat (global.css): the frame collapses onto the photograph, which
+ * neither moves nor grows, so the overlay's box is still the image's.
+ * The attribute goes on close and on reset, and the mat returns. The layer holds
  * `img.loupe-base`, the stage image's `currentSrc` — already decoded, so
  * no request and nothing to wait for — and, once decoded,
  * `img.loupe-detail`, which fades in over it (its CSS animation).
@@ -292,7 +297,9 @@ export type Loupe = {
  * move duration — `data-glide`, written only when motion is not
  * reduced, removed on `transitionend`; a drag, the wheel and a pinch
  * follow the hand without it. A close that glides takes the overlay
- * down when it lands; without the glide, at once.
+ * down when it lands; without the glide, at once. The mat's padding
+ * moves only while the overlay glides (global.css), so it shrinks and
+ * returns under the glide and jumps with the hand.
  */
 export function createLoupe(stage: HTMLElement): Loupe | null {
   const img = stage.querySelector<HTMLImageElement>('.image-frame img');
@@ -411,6 +418,8 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
     state = step.state;
     if (step.effect === 'open') build();
     if (overlay && moved) write(glide);
+    // After write(): the glide is in place before the mat's padding changes, so the padding moves with it.
+    if (LOUPE.mat === 'off') stage.toggleAttribute('data-loupe-open', state.level === 'zoomed');
     const press = state.press;
     overlay?.loupe.toggleAttribute('data-dragging', Boolean(press?.dragged && press.down));
     return step;
@@ -421,6 +430,7 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
     pointers.clear();
     spread = 0;
     gestureScale = 0;
+    stage.removeAttribute('data-loupe-open');
     takeDown();
   };
 

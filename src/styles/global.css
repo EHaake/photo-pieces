@@ -2037,9 +2037,15 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
    marks the stage `data-loupe-ready` and, on opening, builds `.loupe`
    over the photograph's own box, holding `.loupe-layer`, whose
    transform it writes, with the page's file (`.loupe-base`) and, once
-   decoded, the loupe file (`.loupe-detail`) — so the mat, the frame and
-   the dark ground stay as they are and are not zoomed. Without script
-   none of this exists and the quiet view is what it was.
+   decoded, the loupe file (`.loupe-detail`) — so the frame and the dark
+   ground are not zoomed. While the loupe is open the script marks the
+   stage `data-loupe-open` (LOUPE.mat: 'off') and the quiet frame drops
+   its mat: the frame is shrink-to-fit and the image's cap reads the
+   frame's --mat, so the frame collapses onto the photograph, which
+   neither moves nor grows, and the dark ground shows where the mat was.
+   The rule reads no --mat. On close the attribute goes and the mat
+   returns. Without script none of this exists and the quiet view is
+   what it was.
    The cursor says what a click will do: zoom-in on a ready photograph,
    zoom-out on the loupe (a click returns to the fit), grabbing while a
    drag pans. The photograph's cursor lives here, not in the page's
@@ -2054,10 +2060,22 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
    on the appearance duration, from opacity 0 by the animation's `both`
    fill — it is inserted only once decoded — never a pop. Under reduced
    motion it fades as the frames do, on --rm-appear (the block at the
-   file's end). */
+   file's end). The mat shrinks and returns under the glide: the frame's
+   padding transitions on the move duration only while the overlay
+   glides — so not on entering the quiet view, nor on a resize, and
+   never under reduced motion, where `data-glide` is never written; a
+   drag, the wheel and a pinch move it with the hand. */
 html[data-quiet] .image-stage[data-loupe-ready] .image-frame img {
   cursor: zoom-in;
   touch-action: none;
+}
+
+html[data-quiet] .image-stage[data-loupe-open] .image-frame {
+  padding: 0;
+}
+
+.image-stage:has(> .loupe[data-glide]) .image-frame {
+  transition: padding var(--dur-move) var(--ease-move);
 }
 
 .loupe {

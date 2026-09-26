@@ -60,6 +60,7 @@ const EXPECTED = {
     panStep: 0.15,
     dragSlop: 4,
     pan: 'follow',
+    mat: 'off',
     zoomInKeys: ['+', '='],
     zoomOutKeys: ['-', '_'],
   },
@@ -532,6 +533,11 @@ describe("(c) the loupe's rules (T1712)", () => {
       'html[data-quiet] .image-stage[data-loupe-ready] .image-frame img',
       { cursor: 'zoom-in', 'touch-action': 'none' },
     ],
+    ['html[data-quiet] .image-stage[data-loupe-open] .image-frame', { padding: '0' }],
+    [
+      '.image-stage:has(> .loupe[data-glide]) .image-frame',
+      { transition: 'padding var(--dur-move) var(--ease-move)' },
+    ],
     [
       '.loupe',
       { position: 'absolute', overflow: 'hidden', cursor: 'zoom-out', 'touch-action': 'none' },
@@ -554,24 +560,34 @@ describe("(c) the loupe's rules (T1712)", () => {
       expect(ruleAt(rulesIn(css), prelude)).toEqual(body);
     });
 
-  it("the loupe's section holds exactly the seven rules, in order — a rule added there fails", () => {
+  it("the loupe's section holds exactly the nine rules, in order — a rule added there fails", () => {
     expect(rulesIn(loupeSection(raw)).map((rule) => rule.prelude)).toEqual(
       RULES.map(([prelude]) => prelude),
     );
   });
 
-  it("no other rule in the loupe's section animates or transitions — the glide and the detail's fade are all its motion", () => {
+  it("no other rule in the loupe's section animates or transitions — the glide, the mat's padding under it and the detail's fade are all its motion", () => {
     const moving = rulesIn(loupeSection(raw))
       .filter((rule) =>
         declarationPairs(rule.body).some(([name]) => /^(animation|transition)/.test(name)),
       )
       .map((rule) => rule.prelude);
-    expect(moving).toEqual(['.loupe[data-glide] .loupe-layer', '.loupe-detail']);
+    expect(moving).toEqual([
+      '.image-stage:has(> .loupe[data-glide]) .image-frame',
+      '.loupe[data-glide] .loupe-layer',
+      '.loupe-detail',
+    ]);
   });
 
   it('the script writes data-glide only behind !reducedMotion() — the zoom is a movement', () => {
     const writes = script.split('\n').filter((line) => /dataset\.glide\s*=/.test(line));
     expect(writes.length).toBeGreaterThan(0);
     expect(writes.filter((line) => !/if \(!reducedMotion\(\)/.test(line))).toEqual([]);
+  });
+
+  it("the script sets data-loupe-open only behind LOUPE.mat === 'off' — under 'kept' the mat stays (T1713b)", () => {
+    const sets = script.split('\n').filter((line) => /toggleAttribute\('data-loupe-open'/.test(line));
+    expect(sets.length).toBeGreaterThan(0);
+    expect(sets.filter((line) => !/if \(LOUPE\.mat === 'off'\)/.test(line))).toEqual([]);
   });
 });

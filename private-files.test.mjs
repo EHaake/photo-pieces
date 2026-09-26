@@ -134,6 +134,13 @@ describe('the private-files barrier (T1703, spec 019)', () => {
       );
     });
 
+    it('data-loupe-open on a figure fails (T1713b)', () => {
+      const dir = site({ 'index.html': html('<figure class="image-stage" data-loupe-open><img src="/a.webp" alt=""></figure>') });
+      const result = run(dir);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(`a script-only state in the markup of ${join(dir, 'index.html')}: data-loupe-open`);
+    });
+
     it('class="loupe" fails', () => {
       const dir = site({ 'index.html': html('<div class="loupe"></div>') });
       const result = run(dir);

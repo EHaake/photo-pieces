@@ -78,7 +78,7 @@ const hasAttribute = (attributes, name) => new RegExp(`\\s${name}(?=[\\s=/>]|$)`
 /** States only the scripts write (plan.md, "The private-files barrier"). */
 const STATE_ATTRIBUTES = [
   'data-js', 'data-view', 'data-narrow', 'data-settling', 'data-fresh',
-  'data-part', 'data-loupe-ready', 'data-glide', 'data-dragging',
+  'data-part', 'data-loupe-ready', 'data-loupe-open', 'data-glide', 'data-dragging',
 ];
 const STATE_CLASSES = new Set([
   'compare-line', 'compare-handle', 'compare-legend', 'compare-stop', 'compare-control',
