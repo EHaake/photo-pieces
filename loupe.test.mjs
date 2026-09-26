@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { LOUPE, loupeImageOptions } from './src/lib/loupe.ts';
+import {
+  LOUPE,
+  LOUPE_AT_FIT,
+  clampPan,
+  fullScale,
+  loupeImageOptions,
+  loupeReduce,
+  zoomAbout,
+} from './src/lib/loupe.ts';
 
 // The loupe (spec 019).
 //
@@ -13,6 +21,15 @@ import { LOUPE, loupeImageOptions } from './src/lib/loupe.ts';
 //     through as the original. The build's side (the page's
 //     `data-loupe-*`, the detail's original pruned, its transform kept)
 //     is the barrier's scan 1, scripts/check-private-files.mjs.
+//
+// (b) The state (T1711). Full detail over the fit and the ready
+//     threshold; a zoom keeps the point under the pointer where it was;
+//     the pan clamp at each edge; and every transition of the plan's
+//     "The loupe's state" a case of its own — Escape twice from zoomed
+//     (close, then leave-quiet), ← at the fit (step-prev) against ←
+//     zoomed (a pan, no effect), a movement under `dragSlop` then a
+//     click (a click) against one over it (a drag), `opensOn: 'dblclick'`
+//     ignoring a single click, the wheel reaching 1 (close).
 
 /** The tunables, verbatim as src/lib/loupe.ts carries them: to retune,
  *  move the value in src/lib/loupe.ts and here. */
@@ -63,5 +80,314 @@ describe('(a) the file (T1710)', () => {
   it("a source past WebP's 16383px edge is scaled until its longer edge fits", () => {
     expect(loupeImageOptions(meta(20000, 10000, 'jpg')).width).toBe(16383);
     expect(loupeImageOptions(meta(10000, 20000, 'jpg')).width).toBe(8191);
+  });
+});
+
+const BOX = { width: 1000, height: 600 };
+const CTX = { box: BOX, full: 4 };
+const at = (x, y) => ({ x, y });
+/** The screen position of image point `p` (fit-box coordinates at scale 1) under `view`. */
+const onScreen = (view, p) => ({ x: view.tx + p.x * view.s, y: view.ty + p.y * view.s });
+/** Runs `actions` from `state` and returns the last step. */
+const run = (state, actions, ctx = CTX) =>
+  actions.reduce((step, action) => loupeReduce(step.state, action, ctx), {
+    state,
+    effect: 'none',
+  });
+/** Zoomed to full detail about the box's centre. */
+const ZOOMED = loupeReduce(
+  LOUPE_AT_FIT,
+  { type: 'click', point: at(500, 300), on: 'photo' },
+  CTX,
+).state;
+
+describe('(b) the state (T1711)', () => {
+  it('fullScale: 5400 over a 1400px fit at dpr 2 is 1.93, ready', () => {
+    const gain = fullScale({ natural: 5400, fit: 1400, dpr: 2 });
+    expect(gain).toBeCloseTo(1.93, 2);
+    expect(gain >= LOUPE.minGain).toBe(true);
+  });
+
+  it('fullScale: 1800 over a 1400px fit at dpr 2 is 0.64, not ready', () => {
+    const gain = fullScale({ natural: 1800, fit: 1400, dpr: 2 });
+    expect(gain).toBeCloseTo(0.64, 2);
+    expect(gain >= LOUPE.minGain).toBe(false);
+  });
+
+  it('fullScale reads pixelRatio: two image pixels per device pixel halves the gain', () => {
+    expect(fullScale({ natural: 5400, fit: 1400, dpr: 2 }, 2)).toBeCloseTo(0.96, 2);
+  });
+
+  it('zoomAbout keeps the point under the pointer where it was', () => {
+    const cases = [
+      [{ s: 1, tx: 0, ty: 0 }, at(200, 150), 3],
+      [{ s: 2, tx: -300, ty: -200 }, at(700, 450), 3.5],
+      [{ s: 3, tx: -900, ty: -500 }, at(400, 300), 2],
+    ];
+    for (const [view, point, scale] of cases) {
+      const image = { x: (point.x - view.tx) / view.s, y: (point.y - view.ty) / view.s };
+      const after = zoomAbout(view, point, scale, BOX);
+      expect(after.s).toBe(scale);
+      expect(onScreen(after, image).x).toBeCloseTo(point.x, 9);
+      expect(onScreen(after, image).y).toBeCloseTo(point.y, 9);
+    }
+  });
+
+  it('clampPan keeps the photograph covering its box at each edge', () => {
+    const s = 2; // the layer is 2000 × 1200 over a 1000 × 600 box
+    expect(clampPan({ s, tx: 50, ty: -100 }, BOX)).toEqual({ s, tx: 0, ty: -100 }); // left
+    expect(clampPan({ s, tx: -1200, ty: -100 }, BOX)).toEqual({ s, tx: -1000, ty: -100 }); // right
+    expect(clampPan({ s, tx: -400, ty: 30 }, BOX)).toEqual({ s, tx: -400, ty: 0 }); // top
+    expect(clampPan({ s, tx: -400, ty: -700 }, BOX)).toEqual({ s, tx: -400, ty: -600 }); // bottom
+    expect(clampPan({ s, tx: -400, ty: -100 }, BOX)).toEqual({ s, tx: -400, ty: -100 }); // inside
+    expect(clampPan({ s: 1, tx: -5, ty: 5 }, BOX)).toEqual({ s: 1, tx: 0, ty: 0 }); // at the fit
+  });
+
+  describe('loupeReduce at the fit', () => {
+    it('a click on the photograph (opensOn click) opens to full detail about the point', () => {
+      const point = at(200, 150);
+      const step = loupeReduce(LOUPE_AT_FIT, { type: 'click', point, on: 'photo' }, CTX);
+      expect(step.effect).toBe('open');
+      expect(step.state.level).toBe('zoomed');
+      expect(step.state.view.s).toBe(CTX.full);
+      expect(onScreen(step.state.view, point)).toEqual(point);
+    });
+
+    it("opensOn: 'dblclick' ignores a single click and opens on a double click", () => {
+      const ctx = { ...CTX, tune: { opensOn: 'dblclick' } };
+      const click = loupeReduce(
+        LOUPE_AT_FIT,
+        { type: 'click', point: at(200, 150), on: 'photo' },
+        ctx,
+      );
+      expect(click).toEqual({ state: LOUPE_AT_FIT, effect: 'none' });
+      const dbl = loupeReduce(LOUPE_AT_FIT, { type: 'dblclick', point: at(200, 150) }, ctx);
+      expect([dbl.effect, dbl.state.level, dbl.state.view.s]).toEqual(['open', 'zoomed', 4]);
+    });
+
+    it("opensOn 'click' ignores a double click (the click before it opened)", () => {
+      expect(loupeReduce(LOUPE_AT_FIT, { type: 'dblclick', point: at(1, 1) }, CTX)).toEqual({
+        state: LOUPE_AT_FIT,
+        effect: 'none',
+      });
+    });
+
+    it('a wheel zooms continuously from 1 about the pointer (open)', () => {
+      const point = at(300, 200);
+      const step = loupeReduce(LOUPE_AT_FIT, { type: 'wheel', point, deltaY: -100 }, CTX);
+      expect(step.effect).toBe('open');
+      expect(step.state.level).toBe('zoomed');
+      expect(step.state.view.s).toBeCloseTo(Math.exp(100 * LOUPE.wheelStep), 12);
+      expect(onScreen(step.state.view, point).x).toBeCloseTo(point.x, 9);
+      expect(onScreen(step.state.view, point).y).toBeCloseTo(point.y, 9);
+    });
+
+    it('a wheel outward at the fit stays at the fit', () => {
+      const step = loupeReduce(LOUPE_AT_FIT, { type: 'wheel', point: at(1, 1), deltaY: 100 }, CTX);
+      expect(step).toEqual({ state: LOUPE_AT_FIT, effect: 'none' });
+    });
+
+    it('a pinch zooms continuously from 1 about the fingers (open); pinch off, nothing', () => {
+      const point = at(300, 200);
+      const step = loupeReduce(LOUPE_AT_FIT, { type: 'pinch', point, ratio: 1.25 }, CTX);
+      expect([step.effect, step.state.level, step.state.view.s]).toEqual(['open', 'zoomed', 1.25]);
+      const off = { ...CTX, tune: { pinch: false } };
+      expect(loupeReduce(LOUPE_AT_FIT, { type: 'pinch', point, ratio: 1.25 }, off)).toEqual({
+        state: LOUPE_AT_FIT,
+        effect: 'none',
+      });
+    });
+
+    it('a zoom-in key zooms by keyStep about the centre (open); a zoom-out key does nothing', () => {
+      for (const key of LOUPE.zoomInKeys) {
+        const step = loupeReduce(LOUPE_AT_FIT, { type: 'key', key }, CTX);
+        expect([key, step.effect, step.state.view.s]).toEqual([key, 'open', LOUPE.keyStep]);
+        expect(onScreen(step.state.view, at(500, 300))).toEqual(at(500, 300));
+      }
+      for (const key of LOUPE.zoomOutKeys) {
+        expect([key, loupeReduce(LOUPE_AT_FIT, { type: 'key', key }, CTX)]).toEqual([
+          key,
+          { state: LOUPE_AT_FIT, effect: 'none' },
+        ]);
+      }
+    });
+
+    it('Escape leaves the quiet view', () => {
+      expect(loupeReduce(LOUPE_AT_FIT, { type: 'key', key: 'Escape' }, CTX)).toEqual({
+        state: LOUPE_AT_FIT,
+        effect: 'leave-quiet',
+      });
+    });
+
+    it('← steps to the previous photograph, → to the next; ↑ and ↓ do nothing', () => {
+      const effect = (key) => loupeReduce(LOUPE_AT_FIT, { type: 'key', key }, CTX).effect;
+      expect(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].map(effect)).toEqual([
+        'step-prev',
+        'step-next',
+        'none',
+        'none',
+      ]);
+    });
+
+    it('a click on the mat or the ground leaves the quiet view', () => {
+      expect(
+        loupeReduce(LOUPE_AT_FIT, { type: 'click', point: at(-20, 10), on: 'around' }, CTX),
+      ).toEqual({ state: LOUPE_AT_FIT, effect: 'leave-quiet' });
+    });
+
+    it('a press and a move at the fit pan nothing', () => {
+      const step = run(LOUPE_AT_FIT, [
+        { type: 'press', point: at(100, 100) },
+        { type: 'move', point: at(200, 200) },
+      ]);
+      expect(step).toEqual({ state: LOUPE_AT_FIT, effect: 'none' });
+    });
+  });
+
+  describe('loupeReduce zoomed', () => {
+    it('Escape twice from zoomed: back to the fit (close), then out of the quiet view (leave-quiet)', () => {
+      const first = loupeReduce(ZOOMED, { type: 'key', key: 'Escape' }, CTX);
+      expect(first).toEqual({ state: LOUPE_AT_FIT, effect: 'close' });
+      const second = loupeReduce(first.state, { type: 'key', key: 'Escape' }, CTX);
+      expect(second).toEqual({ state: LOUPE_AT_FIT, effect: 'leave-quiet' });
+    });
+
+    it('← zoomed pans by panStep of the box and steps nothing (against step-prev at the fit)', () => {
+      const step = loupeReduce(ZOOMED, { type: 'key', key: 'ArrowLeft' }, CTX);
+      expect(step.effect).toBe('none');
+      expect(step.state.level).toBe('zoomed');
+      expect(step.state.view).toEqual({
+        ...ZOOMED.view,
+        tx: ZOOMED.view.tx + LOUPE.panStep * BOX.width,
+      });
+    });
+
+    it('→ ↑ ↓ zoomed pan by panStep of the box, no effect', () => {
+      const pan = (key) => {
+        const step = loupeReduce(ZOOMED, { type: 'key', key }, CTX);
+        return [
+          key,
+          step.effect,
+          step.state.view.tx - ZOOMED.view.tx,
+          step.state.view.ty - ZOOMED.view.ty,
+        ];
+      };
+      expect(['ArrowRight', 'ArrowUp', 'ArrowDown'].map(pan)).toEqual([
+        ['ArrowRight', 'none', -LOUPE.panStep * BOX.width, 0],
+        ['ArrowUp', 'none', 0, LOUPE.panStep * BOX.height],
+        ['ArrowDown', 'none', 0, -LOUPE.panStep * BOX.height],
+      ]);
+    });
+
+    it('an arrow pan stops at the edge', () => {
+      const atLeft = { ...ZOOMED, view: { ...ZOOMED.view, tx: 0 } };
+      expect(loupeReduce(atLeft, { type: 'key', key: 'ArrowLeft' }, CTX).state.view.tx).toBe(0);
+    });
+
+    it('a drag past dragSlop pans with the pointer, and the click after it keeps the zoom', () => {
+      const move = LOUPE.dragSlop + 6;
+      const step = run(ZOOMED, [
+        { type: 'press', point: at(500, 300) },
+        { type: 'move', point: at(500 + move, 300) },
+        { type: 'release' },
+      ]);
+      expect(step.effect).toBe('none');
+      expect(step.state.view).toEqual({ ...ZOOMED.view, tx: ZOOMED.view.tx + move });
+      const click = loupeReduce(
+        step.state,
+        { type: 'click', point: at(500 + move, 300), on: 'photo' },
+        CTX,
+      );
+      expect(click.effect).toBe('none');
+      expect([click.state.level, click.state.view, click.state.press]).toEqual([
+        'zoomed',
+        step.state.view,
+        null,
+      ]);
+    });
+
+    it('a click after a movement under dragSlop is a click: back to the fit (close)', () => {
+      const move = LOUPE.dragSlop - 1;
+      const step = run(ZOOMED, [
+        { type: 'press', point: at(500, 300) },
+        { type: 'move', point: at(500 + move, 300) },
+        { type: 'release' },
+        { type: 'click', point: at(500 + move, 300), on: 'photo' },
+      ]);
+      expect(step).toEqual({ state: LOUPE_AT_FIT, effect: 'close' });
+    });
+
+    it('a move after the release pans nothing', () => {
+      const step = run(ZOOMED, [
+        { type: 'press', point: at(500, 300) },
+        { type: 'release' },
+        { type: 'move', point: at(600, 300) },
+      ]);
+      expect(step.state.view).toEqual(ZOOMED.view);
+    });
+
+    it('the zoom keys zoom about the centre between 1 and full detail; reaching 1 closes', () => {
+      const [inKey] = LOUPE.zoomInKeys;
+      const [outKey] = LOUPE.zoomOutKeys;
+      const half = loupeReduce(
+        LOUPE_AT_FIT,
+        { type: 'pinch', point: at(500, 300), ratio: 2 },
+        CTX,
+      ).state;
+      const inStep = loupeReduce(half, { type: 'key', key: inKey }, CTX);
+      expect([inStep.effect, inStep.state.view.s]).toEqual(['none', 2 * LOUPE.keyStep]);
+      expect(onScreen(inStep.state.view, at(500, 300))).toEqual(at(500, 300));
+      const capped = loupeReduce(ZOOMED, { type: 'key', key: inKey }, CTX);
+      expect([capped.effect, capped.state.view.s]).toEqual(['none', CTX.full]);
+      const outStep = loupeReduce(half, { type: 'key', key: outKey }, CTX);
+      expect([outStep.effect, outStep.state.view.s]).toEqual(['none', 2 / LOUPE.keyStep]);
+      expect(loupeReduce(outStep.state, { type: 'key', key: outKey }, CTX)).toEqual({
+        state: LOUPE_AT_FIT,
+        effect: 'close',
+      });
+    });
+
+    it('the wheel zooms between 1 and full detail about the pointer, no effect', () => {
+      const half = loupeReduce(
+        LOUPE_AT_FIT,
+        { type: 'pinch', point: at(500, 300), ratio: 2 },
+        CTX,
+      ).state;
+      const point = at(600, 350);
+      const step = loupeReduce(half, { type: 'wheel', point, deltaY: -50 }, CTX);
+      expect(step.effect).toBe('none');
+      expect(step.state.view.s).toBeCloseTo(2 * Math.exp(50 * LOUPE.wheelStep), 12);
+      const image = { x: (point.x - half.view.tx) / 2, y: (point.y - half.view.ty) / 2 };
+      expect(onScreen(step.state.view, image).x).toBeCloseTo(point.x, 9);
+      expect(onScreen(step.state.view, image).y).toBeCloseTo(point.y, 9);
+      const capped = loupeReduce(ZOOMED, { type: 'wheel', point, deltaY: -500 }, CTX);
+      expect(capped.state.view.s).toBe(CTX.full);
+    });
+
+    it('the wheel reaching 1 closes', () => {
+      const step = run(ZOOMED, [{ type: 'wheel', point: at(500, 300), deltaY: 2000 }]);
+      expect(step).toEqual({ state: LOUPE_AT_FIT, effect: 'close' });
+    });
+
+    it('the pinch zooms between 1 and full detail; pinching to 1 closes', () => {
+      const step = loupeReduce(ZOOMED, { type: 'pinch', point: at(500, 300), ratio: 0.5 }, CTX);
+      expect([step.effect, step.state.view.s]).toEqual(['none', 2]);
+      expect(
+        loupeReduce(step.state, { type: 'pinch', point: at(500, 300), ratio: 0.5 }, CTX),
+      ).toEqual({
+        state: LOUPE_AT_FIT,
+        effect: 'close',
+      });
+    });
+
+    it('a zoom out keeps the photograph covering its box', () => {
+      const corner = loupeReduce(
+        LOUPE_AT_FIT,
+        { type: 'click', point: at(0, 0), on: 'photo' },
+        CTX,
+      ).state;
+      const step = loupeReduce(corner, { type: 'pinch', point: at(1000, 600), ratio: 0.5 }, CTX);
+      expect(step.state.view).toEqual(clampPan(step.state.view, BOX));
+    });
   });
 });
