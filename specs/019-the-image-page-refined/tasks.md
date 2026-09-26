@@ -429,9 +429,50 @@ headers to confirm nothing was duplicated or dropped. -->
       `<em>Fixture stage.</em>` (greped); the fog piece's compare note
       unchanged._
 
+- [ ] **T1709a** — Round: the slider is two-way and the legend picks
+      the pair (the person, 2026-09-25: "it fundamentally needs to be
+      a 2-way comparison … I do like being able to switch between
+      different comparisons"; first pair Camera | Finished; the pair
+      buttons no longer do the same thing). Plan: "The compare,
+      enhanced", the T1709a paragraph. `src/lib/compare.ts`: `COMPARE`
+      gains `restPair: 'ends'`; `pickPair(pair, k, n)`; `sliderView(p,
+      pair)`; `restView` on the pair; `snapTo` and the segment geometry
+      removed; `enhanceCompare` holds one `pair` for the slider and
+      side by side, the legend choosing it in both, the handle wiping
+      between the two. `compare.test.mjs` (d): `EXPECTED` gains the key;
+      the `sliderView` tables replaced by pair-based cases; `pickPair`
+      cases for every click on three and four stages (no click on an
+      outside stage leaves the pair unchanged; the pair stays in
+      order). spec.md Decided: one line. _Verify: `sh scripts/verify.sh`
+      green (count); the browser reads re-taken with the driver at both
+      viewports (the pair at rest, each legend click's pair in slider
+      and side, the wipe at 25/50/75 between the pair); mutation:
+      `restPair` changed → `EXPECTED` fails by name._
+
+- [ ] **T1709b** — Round: the compare's width is `wide` on both
+      surfaces (the person: "needs to be larger (maybe allow it beyond
+      the text margins)"). `COMPARE_WIDTH` → `{ piece: 'wide', page:
+      'wide' }` in image-meta.mjs; compare.test.mjs's row; spec.md
+      Decided: one line. _Verify: `sh scripts/verify.sh` green; the
+      built land-b and fog piece carry `compare-w-wide` (greped); the
+      barrier's `sizes` read `(min-width: 1240px) 1160px, 96vw`._
+
 ### Phase 1 record (the person's walkthrough)
 
-_Filled in at the pause._
+**First look (2026-09-25).** The three-way slider: "I don't like the
+3-way slider, it just doesn't work. I think it fundamentally needs to
+be a 2-way comparison. I do like being able to switch between
+different comparisons though." Side by side: "actually is good" but
+the legend's Tones and Finished buttons "do the same thing which is a
+little confusing", and the compare "needs to be larger (maybe allow it
+beyond the text margins) … it shrinks the images down too much".
+Beyond the envelope, held for a spec amendment after Phase 3 ("there
+may be more amendments to the spec coming so let's get through the
+rest first"): side by side as its own block; any number of stages
+with a final filmstrip view that pages or scrolls through them (a
+fourth method); the slider usable on its own for one pair. Rounds
+run: T1709a, T1709b. The "needs your decision" list is deferred
+until these are seen.
 
 ## Phase 2 — The loupe (reviewer after the phase; walkthrough: under `npm run dev` on both screens with a mouse and a trackpad, and on a phone — on `/images/where-the-fog-lets-go/land-b/`, enter the quiet view; the cursor over the photograph says zoom, over the mat it still says leave; click a corner and the photograph grows to full detail around that point while the mat and the dark ground stay where they are, soft at first and then sharp as the larger export fades in; drag to move around it, scroll or pinch (trackpad and phone) to zoom between the fit and full detail, + and − to zoom, the arrows to pan; Esc or a click without dragging goes back to the fit, Esc again back to the page; at the fit the arrows step to the next photograph as before; on `/images/where-the-fog-lets-go/land-a/` (a 1800×1200 placeholder with no larger export, whose own file is already past full detail at its quiet size on both his screens — the number T1712 recorded, quoted in the report; if that read found it ready, the report names the page T1712 found not ready instead) the quiet view is exactly as before and a click leaves it, while some real portrait exports on the laptop do get a loupe from their own file (T1712's numbers); the question put to him: at the fit, a click on the photograph now zooms and a click on the mat or the dark ground leaves — is that the right reading of "a click at the fit steps back out", or should a single click keep leaving and the loupe open another way; with the system's reduce-motion setting on, the zoom jumps rather than grows and the sharp export still fades in; optionally, in the browser's network panel, the larger export is requested only at the first zoom and once; as many rounds as it takes, each a sub-lettered task under T1713)
 

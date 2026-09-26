@@ -461,6 +461,25 @@ where the simpler shape was taken it is said in one line.
   movement — spec 018's split, in script, as the travel does it); the
   two fades are kept under reduced motion.
 
+  **Round T1709a (Phase 1 pause, 2026-09-25).** The slider is two-way:
+  it wipes between one pair of stages, never three. The pair is state
+  shared by the slider and side by side — `pair: ComparePair` — and
+  at rest it is the first and last stage (Camera | Finished), set by
+  `COMPARE.restPair: 'ends'` (the one tunable of this round; the other
+  value, `'neighbours'`, is the old rest pair). The legend chooses the
+  pair in both views by one rule, `pickPair(pair, k, n)`: clicking a
+  stage already in the pair does nothing; clicking another replaces
+  the member nearest to it in stage order, the later one on a tie; the
+  pair is always kept in stage order (left = earlier). Every click on
+  a stage outside the pair changes the pair, so no two legend buttons
+  do the same thing. `sliderView(p, pair)` returns
+  `{ left: pair.left, right: pair.right, split }` — the divider at
+  `p`, the earlier stage showing left of it; the three-or-more segment
+  geometry, `snapTo`'s stops and `restAt`'s "which pair" meaning are
+  retired: `restAt` is only the divider's rest position. The switch is
+  unchanged. The legend marks the pair in both views. Known
+  limitations' "three or more stages" paragraph is moot.
+
 - **The loupe's file** (`src/lib/loupe.ts`, the image page's
   frontmatter, T1710). `LOUPE` holds the loupe's tunables:
 
@@ -686,6 +705,7 @@ implementer (Firefox 156 headless via BiDi, spec 015's recipe) with the
 numbers recorded in `tasks.md`, as spec 018 recorded its motion. The
 feel is the person's at each pause.
 
+  Round T1709b (2026-09-25): `COMPARE_WIDTH` → `{ piece: 'wide', page: 'wide' }`, the value in its one place, compare.test.mjs's row updated.
 - **The private-file family** — `image-meta.test.mjs`, **T1701**:
   `privateRole` over `_land-b` / `_land-b.tones` / `_land-b.detail` /
   `_land.b` beside `land.b` (frame, not a stage) / `_land-b.tones` with
