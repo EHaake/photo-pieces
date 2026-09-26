@@ -730,7 +730,7 @@ images.
       image's (the mat gone, the photograph unmoved), 40px after close;
       the padding transition 480ms, none under reduced motion._
 
-- [ ] **T1713c** — Round: the zoomed loupe is the full area ("there
+- [x] **T1713c** — Round: the zoomed loupe is the full area ("there
       is still a matte sized frame around the zoomed in image that
       shows the unzoomed image which makes it look broken. We need
       the zoomed in loupe view to be the full area"). Plan: the T1713c
@@ -1001,6 +1001,7 @@ tier if it is ever on (it is off). -->
 | T1712a review fixes | implementation (`opus`, high) | ~60k | done; 572 tests; dblclick action removed outright; the zoom-in cursor does not depend on opensOn (moot at click) — note; a real Safari trackpad pinch needs the walkthrough |
 | T1713a follow the mouse | implementation (`opus`, high) | ~62k | done; 577 tests (+5); a hover during the open glide snaps the view to the end (as a drag does) — may show at the walkthrough; a mouse drag still pans under follow; the personx27s own astro dev holds 4321 — previews use 4322 |
 | T1713b mat off while zoomed | implementation (`opus`, high) | ~59k + ~40k (two rounds) | done; 581 tests; stopped once: the orchestratorx27s first paragraph had the loupe filling the matx27s box, impossible without resizing the stage image — corrected to option 1; the padding transition is keyed to the overlayx27s glide, not quiet view, so entering quiet and resizing stay still; no seventh reduced-motion rule; a width-bound photograph (a panorama on a narrow screen) might grow when the mat goes — unmeasured, walkthrough |
+| T1713c full area | implementation (`opus`, high) | ~85k | done; 580 tests; the grown box is the stagex27s available area, not the matx27s box (a 3:2 photograph can match the old frame on one axis only: 1280×1440 width, 13px bands top and bottom; 1512×982 height, 20px wider each side); a photograph ready at the fit but not over the grown box opens nothing (attribute removed in the same task); the attribute lives with the overlay |
 
 _(Session-tier allowance draw noted at each pause.)_
 
