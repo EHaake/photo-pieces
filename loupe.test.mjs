@@ -31,8 +31,9 @@ import {
 //     "The loupe's state" a case of its own — Escape twice from zoomed
 //     (close, then leave-quiet), ← at the fit (step-prev) against ←
 //     zoomed (a pan, no effect), a movement under `dragSlop` then a
-//     click (a click) against one over it (a drag), `opensOn: 'dblclick'`
-//     ignoring a single click, the wheel reaching 1 (close).
+//     click (a click) against one over it (a drag), `opensOn: 'gesture'`
+//     leaving on a click on the photograph while the wheel, a pinch and
+//     + still open, the wheel reaching 1 (close).
 //
 // (c) The loupe's rules (T1712). The loupe's section of global.css holds
 //     exactly its seven rules, each by its string: the ready
@@ -167,23 +168,27 @@ describe('(b) the state (T1711)', () => {
       expect(onScreen(step.state.view, point)).toEqual(point);
     });
 
-    it("opensOn: 'dblclick' ignores a single click and opens on a double click", () => {
-      const ctx = { ...CTX, tune: { opensOn: 'dblclick' } };
+    it("opensOn: 'gesture' — a click on the photograph leaves the quiet view; the wheel, a pinch and + still open", () => {
+      const ctx = { ...CTX, tune: { opensOn: 'gesture' } };
       const click = loupeReduce(
         LOUPE_AT_FIT,
         { type: 'click', point: at(200, 150), on: 'photo' },
         ctx,
       );
-      expect(click).toEqual({ state: LOUPE_AT_FIT, effect: 'none' });
-      const dbl = loupeReduce(LOUPE_AT_FIT, { type: 'dblclick', point: at(200, 150) }, ctx);
-      expect([dbl.effect, dbl.state.level, dbl.state.view.s]).toEqual(['open', 'zoomed', 4]);
-    });
-
-    it("opensOn 'click' ignores a double click (the click before it opened)", () => {
-      expect(loupeReduce(LOUPE_AT_FIT, { type: 'dblclick', point: at(1, 1) }, CTX)).toEqual({
-        state: LOUPE_AT_FIT,
-        effect: 'none',
+      expect(click).toEqual({ state: LOUPE_AT_FIT, effect: 'leave-quiet' });
+      const opens = [
+        { type: 'wheel', point: at(200, 150), deltaY: -100 },
+        { type: 'pinch', point: at(200, 150), ratio: 1.5 },
+        { type: 'key', key: '+' },
+      ].map((action) => {
+        const step = loupeReduce(LOUPE_AT_FIT, action, ctx);
+        return [action.type, step.effect, step.state.level];
       });
+      expect(opens).toEqual([
+        ['wheel', 'open', 'zoomed'],
+        ['pinch', 'open', 'zoomed'],
+        ['key', 'open', 'zoomed'],
+      ]);
     });
 
     it('a wheel zooms continuously from 1 about the pointer (open)', () => {

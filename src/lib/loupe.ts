@@ -14,7 +14,7 @@ export const LOUPE = {
   withoutDetail: true, // a photograph with no detail export still has the loupe, to its own file's full size
   pixelRatio: 1, // image pixels per device pixel at full detail (1: one to one)
   minGain: 1.05, // no loupe when full detail is less than this over the fit
-  opensOn: 'click', // 'click', 'dblclick', or 'gesture' (only a wheel or a pinch opens it)
+  opensOn: 'click', // 'click' (a click on the photograph zooms) or 'gesture' (a click leaves; the wheel, a pinch or + opens it). The zoom-in key opens it under either
   pinch: true,
   wheelStep: 0.002, // scale × e^(−deltaY × step)
   keyStep: 1.5, // + and − multiply and divide the scale
@@ -36,9 +36,7 @@ const WEBP_MAX_EDGE = 16383;
  * for every pixel, and the format change makes the request a real
  * transform, which strips the metadata an original may carry (spec
  * 004's contract: an original never reaches the output). No quality is
- * given — the stage's <Image> gives none either — so where the full
- * size equals a stage candidate's width Astro can serve one file for
- * both.
+ * given — the stage's <Image> gives none either.
  *
  * WebP cannot hold an edge over 16383px, so a larger source is scaled
  * until its longer edge fits. And a webp source asked for at its own
@@ -76,7 +74,6 @@ export type LoupeState = { level: 'fit' | 'zoomed'; view: LoupeView; press: Loup
 /** What the controller hears: pointer, wheel, pinch and keys. `on` is where a click landed: the photograph, or the mat and the ground around it. */
 export type LoupeAction =
   | { type: 'click'; point: LoupePoint; on: 'photo' | 'around' }
-  | { type: 'dblclick'; point: LoupePoint }
   | { type: 'press'; point: LoupePoint }
   | { type: 'move'; point: LoupePoint }
   | { type: 'release' }
@@ -87,7 +84,7 @@ export type LoupeAction =
 export type LoupeEffect = 'open' | 'close' | 'leave-quiet' | 'step-prev' | 'step-next' | 'none';
 /** The tunables `loupeReduce` reads, widened so a test can pass another value. */
 export type LoupeTuning = {
-  opensOn: 'click' | 'dblclick' | 'gesture';
+  opensOn: 'click' | 'gesture';
   pinch: boolean;
   wheelStep: number;
   keyStep: number;
@@ -137,10 +134,11 @@ export function zoomAbout(
 
 /**
  * The loupe's state machine (plan, "The loupe's state"). At the fit:
- * an open by `opensOn` goes to full detail about the point; a wheel, a
- * pinch or a zoom-in key zooms from 1 (a key about the centre) — each
- * `open`; Escape and a click around the photograph leave the quiet
- * view; ← and → step the set. Zoomed: a press that moves past
+ * a click on the photograph goes to full detail about the point, or
+ * under `opensOn: 'gesture'` leaves the quiet view; a wheel, a pinch or
+ * a zoom-in key zooms from 1 (a key about the centre) — each `open`;
+ * Escape and a click around the photograph leave the quiet view; ← and
+ * → step the set. Zoomed: a press that moves past
  * `dragSlop` is a drag and pans; a click without one goes back to the
  * fit; Escape goes back to the fit; the arrows pan by `panStep` of the
  * box; the zoom keys, the wheel and the pinch zoom between 1 and full
@@ -167,10 +165,9 @@ export function loupeReduce(state: LoupeState, action: LoupeAction, ctx: LoupeCo
         if (state.press?.dragged) return { state: { ...state, press: null }, effect: 'none' };
         return { state: LOUPE_AT_FIT, effect: 'close' };
       }
-      if (action.on === 'around') return { state, effect: 'leave-quiet' };
-      return tune.opensOn === 'click' ? zoomTo(full, action.point) : stay;
-    case 'dblclick':
-      return !zoomed && tune.opensOn === 'dblclick' ? zoomTo(full, action.point) : stay;
+      if (action.on === 'around' || tune.opensOn === 'gesture')
+        return { state, effect: 'leave-quiet' };
+      return zoomTo(full, action.point);
     case 'press':
       if (!zoomed) return stay;
       return {
@@ -246,7 +243,8 @@ export type Loupe = {
  * The loupe on the image page's stage (plan, "The loupe, wired"): the
  * controller the page makes in init() when the stage carries
  * `data-loupe-src`, running `loupeReduce` on the stage's clicks,
- * presses, wheel, pinch and the page's keys.
+ * presses, wheel, pinch (two pointers, or Safari's gesture events) and
+ * the page's keys.
  *
  * An overlay, not the stage image. On `open` it builds `div.loupe` over
  * the photograph's own box, read from the image's rect, inside
@@ -273,7 +271,7 @@ export type Loupe = {
  * photograph that is not ready keeps the quiet view as it was: every
  * click is `around`, so every click leaves.
  *
- * Motion: a discrete zoom (a click, a double click, a key) glides on the
+ * Motion: a discrete zoom (a click, a key) glides on the
  * move duration — `data-glide`, written only when motion is not
  * reduced, removed on `transitionend`; a drag, the wheel and a pinch
  * follow the hand without it. A close that glides takes the overlay
@@ -293,10 +291,11 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
   let requested = false;
   const pointers = new Map<number, LoupePoint>();
   let spread = 0; // the two pointers' distance at the last pinch step
+  let gestureScale = 0; // a Safari gesture's scale at its last step; 0 when none is in hand
 
   /** The photograph's box on screen; its size is the box at the fit. */
   const photo = () => img.getBoundingClientRect();
-  const pointIn = (event: MouseEvent, at = photo()): LoupePoint => ({
+  const pointIn = (event: Pick<MouseEvent, 'clientX' | 'clientY'>, at = photo()): LoupePoint => ({
     x: event.clientX - at.left,
     y: event.clientY - at.top,
   });
@@ -404,6 +403,7 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
     state = LOUPE_AT_FIT;
     pointers.clear();
     spread = 0;
+    gestureScale = 0;
     takeDown();
   };
 
@@ -467,12 +467,44 @@ export function createLoupe(stage: HTMLElement): Loupe | null {
     { passive: false },
   );
 
-  stage.addEventListener('dblclick', (event) => {
-    if (!live()) return;
-    const at = photo();
-    const point = pointIn(event, at);
-    if (inside(point, at)) run({ type: 'dblclick', point }, true);
-  });
+  // Safari reports a trackpad pinch as gesturestart / gesturechange /
+  // gestureend, not as a ctrl+wheel: the ratio of successive `scale`
+  // values is the pinch, and over the photograph each of the three is
+  // cancelled, so the page does not zoom instead. GestureEvent is
+  // Safari's alone, so it is typed here as far as it is read.
+  type Gesture = Event & { scale: number; clientX: number; clientY: number };
+  stage.addEventListener(
+    'gesturestart',
+    (event) => {
+      if (!live()) return;
+      const at = photo();
+      if (!inside(pointIn(event as Gesture, at), at)) return;
+      event.preventDefault();
+      gestureScale = 1;
+    },
+    { passive: false },
+  );
+  stage.addEventListener(
+    'gesturechange',
+    (event) => {
+      if (gestureScale <= 0 || !live()) return;
+      event.preventDefault();
+      const gesture = event as Gesture;
+      if (!(gesture.scale > 0)) return;
+      run({ type: 'pinch', point: pointIn(gesture), ratio: gesture.scale / gestureScale }, false);
+      gestureScale = gesture.scale;
+    },
+    { passive: false },
+  );
+  stage.addEventListener(
+    'gestureend',
+    (event) => {
+      if (gestureScale <= 0) return;
+      event.preventDefault();
+      gestureScale = 0;
+    },
+    { passive: false },
+  );
 
   return {
     refresh: () => {
