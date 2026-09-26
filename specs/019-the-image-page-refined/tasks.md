@@ -807,6 +807,21 @@ T1713c. **Third look:** "Looks good, continue." Phase 2 closed.
       clean; `sh scripts/verify.sh` green (nothing under test changes
       — the run is the record)._
 
+- [ ] **T1715a** — Phase 3 review fixes. README's loupe sentence
+      ("fills the whole area the mat and photograph had") and the same
+      overstatement in `loupe.ts`'s doc comment, loupe.test.mjs (c)'s
+      and matte.test.mjs (b)'s comments → "grows into the freed space
+      with its shape kept; nothing of the unzoomed photograph shows
+      around it"; `global.css`'s "the one assignment besides the forms"
+      → "on the quiet frame"; a comment beside the fifth quiet rule
+      that its order after the ready form is load-bearing;
+      `src/content/gear.md`'s header: an unknown camera prints make and
+      model as before, a lens its string; README's tree lists
+      `obsidian-plugin.test.mjs`; any stale "The camera's frame"
+      cross-reference in AUTHORING.md. _Verify: greps for each old
+      phrase → 0; prettier clean on the three docs; `sh scripts/verify.sh`
+      green._
+
 ### Phase 3 record (the person's walkthrough)
 
 _Filled in at the pause._
@@ -1004,6 +1019,7 @@ tier if it is ever on (it is off). -->
 | T1713c full area | implementation (`opus`, high) | ~85k | done; 580 tests; the grown box is the stagex27s available area, not the matx27s box (a 3:2 photograph can match the old frame on one axis only: 1280×1440 width, 13px bands top and bottom; 1512×982 height, 20px wider each side); a photograph ready at the fit but not over the grown box opens nothing (attribute removed in the same task); the attribute lives with the overlay |
 | T1714 plugin compare | implementation (`opus`, high) | ~44k | done; 584 tests (+4); plugin build exit 0; a leaf line inside a compare span is never decorated; a compare with no images stays raw |
 | T1715 documents | implementation (`opus`, high) | ~145k | done; prettier clean; "no duplicate download" checked with a second compare in the fog piece (same URLs); gear.mdx27s own header says an unknown camera prints "as the camera wrote it" while the code falls back to make + model — sweep note |
+| Phase 3 review | implementation (`opus`, high) | ~88k | blocked once: README's loupe sentence false in the width-bound case (T1715a, with the matching comments, gear.md's header, plan's 6000px, the CSS "one assignment" comment); AC 4's text (a three-stage sweep, neighbouring pairs) is superseded by T1709a/d/g's Decided lines — noted for the close-out; sweep: readiness between the fit and the grown box (the click opens nothing — check the reducer's return), mat 'off' has no automated pin beyond the toggle line, a mouse drag under follow is undone by the next move, the plugin's and transform's parsers unbound (a shared fixture), "each stage once" unpinned, the plugin's parse tests can't tell paragraph joining |
 
 _(Session-tier allowance draw noted at each pause.)_
 

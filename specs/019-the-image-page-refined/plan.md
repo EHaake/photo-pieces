@@ -750,7 +750,7 @@ where the simpler shape was taken it is said in one line.
 - **The documents** (T1715): `AUTHORING.md` — the block (the flow's
   example, the rules: two stages, own folder for a private file,
   `mode`), the sidecar's `stages:`, the private-file family, the detail
-  export (the name, "about 6000 px on the long edge" as the starting
+  export (the name, "about 4000 px on the long edge (6000 in the first draft; 4000 kept at the Phase 2 pause)" as the starting
   recommendation, location stripped on export, the 25 MiB ceiling), the
   gear table (where, the line format, the warning); `README.md` — the
   image-page paragraph, the tree (`lib/compare.ts`, `lib/loupe.ts`,

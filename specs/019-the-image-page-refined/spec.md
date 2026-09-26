@@ -589,7 +589,11 @@ re-implementation. The plan says where each lives.
   the mouse, tracking the pointer's place on the unzoomed photograph;
   a click without movement zooms back out; touch keeps the drag. The
   mat goes while the loupe is open, the loupe filling the frame.
-- **Round T1713c (2026-09-26)** — while zoomed, the loupe is the full
-  area the mat and photograph had; nothing of the unzoomed photograph
-  shows around it.
+- **Round T1713c (2026-09-26)** — while zoomed, the mat goes and the
+  photograph grows into the freed space with its shape kept (the
+  largest box of its shape the stage allows: it matches the mat's box
+  on one axis only); nothing of the unzoomed photograph shows around
+  it. The Phase 1 rounds T1709a, d and g supersede AC 4's three-stage
+  sweep and neighbouring pairs: the slider is two-way on a picked
+  pair.
 - **Phase 2 closed (2026-09-26)** — "Looks good, continue."
