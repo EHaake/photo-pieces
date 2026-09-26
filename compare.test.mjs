@@ -6,11 +6,11 @@ import {
   COMPARE_WORDING,
   noteIndex,
   openingMode,
+  pickPair,
   restView,
   sideFits,
   sidePair,
   sliderView,
-  snapTo,
   switchNext,
 } from './src/lib/compare.ts';
 import { blocks, uncomment } from './src/lib/ground.ts';
@@ -52,14 +52,14 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     copy: every COMPARE key and value and COMPARE_WORDING, so a value
 //     retyped in compare.ts alone fails naming its key, and a key added
 //     or dropped fails the name set. The pure rules the enhanced block
-//     reads, each case named for what fails it: the slider's geometry as
-//     a table — the track is the frame's width, the stops at k / (n − 1),
-//     the segments indexed from the right so the right edge shows the
-//     first stage whole and the left edge the last, an interior stop in
-//     the segment to its right, two stages the pair (0, 1) throughout
-//     (spec 006's compare) — and the snap, the side pair, the switch's
-//     step with and without wrapping, the view at rest per method, whose
-//     note shows, the side-by-side fit, and the method a block opens in.
+//     reads, each case named for what fails it: the slider two-way
+//     (T1709a) — one pair at every p, the divider at p — and the pair a
+//     legend click picks as a table, every click on three and four
+//     stages (a stage in the pair leaves it; another replaces the nearer
+//     member, the later on a tie; the pair in stage order) — and the side
+//     pair, the switch's step with and without wrapping, the view at rest
+//     per method and per rest pair, whose note shows, the side-by-side
+//     fit, and the method a block opens in.
 //     And the page's own words (T1708a): WORDING.compare, the section's
 //     heading and the two labels, read from the page's source as literal
 //     strings, and the template reading them from there.
@@ -71,6 +71,7 @@ const EXPECTED = {
     defaultMode: 'slider',
     remember: 'visit',
     restAt: 0.5,
+    restPair: 'ends',
     snap: false,
     sliderStep: 0.02,
     sideMinPx: 280,
@@ -331,41 +332,99 @@ describe('(d) the state (T1707)', () => {
 
   // [p, pair, split]: the pair the frame shows with the handle at p;
   // the split to six places, so a third of the track reads 33.333333.
-  const view = (p, n) => {
-    const { left, right, split } = sliderView(p, n);
+  const view = (p, pair) => {
+    const { left, right, split } = sliderView(p, pair);
     return [p, [left, right], Math.round(split * 1e6) / 1e6];
   };
 
-  it('two stages show the pair (0, 1) at every p, the split following the handle (spec 006)', () => {
-    expect([0, 0.5, 1].map((p) => view(p, 2))).toEqual([
-      [0, [0, 1], 0],
-      [0.5, [0, 1], 50],
-      [1, [0, 1], 100],
+  it('the slider is two-way: the pair it is given at every p, the divider at p, clamped to the track', () => {
+    const ends = { left: 0, right: 2 };
+    expect([-0.5, 0, 0.25, 0.5, 0.75, 1, 1.5].map((p) => view(p, ends))).toEqual([
+      [-0.5, [0, 2], 0],
+      [0, [0, 2], 0],
+      [0.25, [0, 2], 25],
+      [0.5, [0, 2], 50],
+      [0.75, [0, 2], 75],
+      [1, [0, 2], 100],
+      [1.5, [0, 2], 100],
+    ]);
+    expect([0, 1 / 3, 1].map((p) => view(p, { left: 1, right: 3 }))).toEqual([
+      [0, [1, 3], 0],
+      [1 / 3, [1, 3], 33.333333],
+      [1, [1, 3], 100],
     ]);
   });
 
-  it('three stages: segments from the right, the last stage whole at 0, the first at 1, the interior stop in the segment on its right', () => {
-    expect([0, 0.25, 0.5, 0.75, 1].map((p) => view(p, 3))).toEqual([
-      [0, [1, 2], 0],
-      [0.25, [1, 2], 25],
-      [0.5, [0, 1], 50],
-      [0.75, [0, 1], 75],
-      [1, [0, 1], 100],
+  // [pair before, stage clicked, pair after], for every pair and every
+  // click: a stage in the pair leaves it; another replaces the member
+  // nearer to it in stage order, the later on a tie; left < right.
+  const picks = (n) => {
+    const rows = [];
+    for (let left = 0; left < n; left++)
+      for (let right = left + 1; right < n; right++)
+        for (let k = 0; k < n; k++) {
+          const next = pickPair({ left, right }, k, n);
+          rows.push([[left, right], k, [next.left, next.right]]);
+        }
+    return rows;
+  };
+
+  it('pickPair on three stages: every click on every pair', () => {
+    expect(picks(3)).toEqual([
+      [[0, 1], 0, [0, 1]],
+      [[0, 1], 1, [0, 1]],
+      [[0, 1], 2, [0, 2]],
+      [[0, 2], 0, [0, 2]],
+      [[0, 2], 1, [0, 1]],
+      [[0, 2], 2, [0, 2]],
+      [[1, 2], 0, [0, 2]],
+      [[1, 2], 1, [1, 2]],
+      [[1, 2], 2, [1, 2]],
     ]);
   });
 
-  it('four stages: the last whole at 0, the first at 1, each interior stop the pair to its right', () => {
-    expect([0, 1 / 3, 2 / 3, 1].map((p) => view(p, 4))).toEqual([
-      [0, [2, 3], 0],
-      [1 / 3, [1, 2], 33.333333],
-      [2 / 3, [0, 1], 66.666667],
-      [1, [0, 1], 100],
+  it('pickPair on four stages: every click on every pair', () => {
+    expect(picks(4)).toEqual([
+      [[0, 1], 0, [0, 1]],
+      [[0, 1], 1, [0, 1]],
+      [[0, 1], 2, [0, 2]],
+      [[0, 1], 3, [0, 3]],
+      [[0, 2], 0, [0, 2]],
+      [[0, 2], 1, [0, 1]],
+      [[0, 2], 2, [0, 2]],
+      [[0, 2], 3, [0, 3]],
+      [[0, 3], 0, [0, 3]],
+      [[0, 3], 1, [1, 3]],
+      [[0, 3], 2, [0, 2]],
+      [[0, 3], 3, [0, 3]],
+      [[1, 2], 0, [0, 2]],
+      [[1, 2], 1, [1, 2]],
+      [[1, 2], 2, [1, 2]],
+      [[1, 2], 3, [1, 3]],
+      [[1, 3], 0, [0, 3]],
+      [[1, 3], 1, [1, 3]],
+      [[1, 3], 2, [1, 2]],
+      [[1, 3], 3, [1, 3]],
+      [[2, 3], 0, [0, 3]],
+      [[2, 3], 1, [1, 3]],
+      [[2, 3], 2, [2, 3]],
+      [[2, 3], 3, [2, 3]],
     ]);
   });
 
-  it('snapTo settles on the nearest stop', () => {
-    expect([0, 0.2, 0.3, 0.6, 0.8, 1].map((p) => snapTo(p, 3))).toEqual([0, 0, 0.5, 0.5, 1, 1]);
-    expect([0.1, 0.4, 0.9].map((p) => snapTo(p, 2))).toEqual([0, 0, 1]);
+  it('pickPair: no click on a stage outside the pair leaves it unchanged, and no two do the same thing', () => {
+    for (const n of [3, 4]) {
+      const rows = picks(n);
+      for (const [before, k, after] of rows) {
+        if (before.includes(k)) continue;
+        expect([before, k, after]).not.toEqual([before, k, before]);
+        expect([before, k, after.includes(k)]).toEqual([before, k, true]);
+      }
+      const byPair = new Map();
+      for (const [before, k, after] of rows)
+        if (!before.includes(k)) byPair.set(`${before}`, [...(byPair.get(`${before}`) ?? []), `${after}`]);
+      for (const [before, afters] of byPair) expect([before, new Set(afters).size]).toEqual([before, afters.length]);
+    }
   });
 
   it('sidePair is stage k and the next — the last stage with the one before', () => {
@@ -388,10 +447,22 @@ describe('(d) the state (T1707)', () => {
     expect(switchNext(2, 3, -1)).toEqual(1);
   });
 
-  it('restView: the slider at restAt, side by side on the pair it shows, the switch on the first stage', () => {
-    expect(restView('slider', 3)).toEqual(sliderView(COMPARE.restAt, 3));
-    expect(restView('side', 4)).toEqual(sidePair(sliderView(COMPARE.restAt, 4).left, 4));
-    expect(restView('switch', 3)).toEqual({ stage: 0 });
+  it("restView: 'ends' — the slider and side by side on the first and last stage, the divider at restAt; the switch on the first stage", () => {
+    expect(restView('slider', 3, 'ends')).toEqual({ left: 0, right: 2, split: 100 * COMPARE.restAt });
+    expect(restView('side', 4, 'ends')).toEqual({ left: 0, right: 3 });
+    expect(restView('side', 2, 'ends')).toEqual({ left: 0, right: 1 });
+    expect(restView('switch', 3, 'ends')).toEqual({ stage: 0 });
+  });
+
+  it("restView: 'neighbours' — the pair the old three-way slider showed at restAt 0.5", () => {
+    expect(restView('side', 3, 'neighbours')).toEqual({ left: 0, right: 1 });
+    expect(restView('side', 4, 'neighbours')).toEqual({ left: 1, right: 2 });
+    expect(restView('slider', 4, 'neighbours')).toEqual({ left: 1, right: 2, split: 50 });
+  });
+
+  it('restView: the default rest pair is COMPARE.restPair', () => {
+    expect(restView('side', 4)).toEqual(restView('side', 4, COMPARE.restPair));
+    expect(restView('slider', 3)).toEqual(restView('slider', 3, COMPARE.restPair));
   });
 
   it("noteIndex: the pair's later stage in the slider and side by side, the showing stage in the switch", () => {

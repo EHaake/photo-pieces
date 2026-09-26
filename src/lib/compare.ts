@@ -4,7 +4,7 @@
  * block reads — no DOM — and, after them, the enhanced block itself
  * (T1708), which builds its chrome and runs its views on those rules. A
  * round is a value here and its row in compare.test.mjs's `EXPECTED`;
- * the slider's geometry is `sliderView` and its table.
+ * the pair the slider and side by side show is `pickPair` and its table.
  */
 
 import { COMPARE_CLASSES as C } from './image-meta.mjs';
@@ -14,8 +14,9 @@ import { reducedMotion } from './motion';
 export const COMPARE = {
   defaultMode: 'slider', // the method a block opens in when its author wrote none
   remember: 'visit', // the reader's choice: 'visit' (sessionStorage), 'always' (localStorage) or 'none'
-  restAt: 0.5, // the slider's rest position on its track, 0–1 — which pair shows at rest
-  snap: false, // on release the handle settles on the nearest stop
+  restAt: 0.5, // the slider's rest position on its track, 0–1
+  restPair: 'ends', // the pair at rest: 'ends' (the first and last stage) or 'neighbours' (the pair the old three-way slider showed at restAt)
+  snap: false, // on release the handle settles on the nearer end of the track
   sliderStep: 0.02, // an arrow key's step along the track (Page Up/Down: five steps)
   sideMinPx: 280, // the narrowest a stage may be shown side by side
   sideNarrow: 'stack', // where two won't fit: 'stack' them, or yield to 'switch'
@@ -40,7 +41,7 @@ export const COMPARE_WORDING = {
 export const COMPARE_MODE_KEY = 'compare-mode';
 
 export type CompareMode = keyof typeof COMPARE_WORDING.modes;
-/** Two neighbouring stages, the earlier on the left. */
+/** Two stages, the earlier on the left. */
 export type ComparePair = { left: number; right: number };
 /** The slider's pair and the divider's position, 0–100. */
 export type SliderView = ComparePair & { split: number };
@@ -63,17 +64,21 @@ export function openingMode(
   return COMPARE.defaultMode;
 }
 
-/** The slider at `p` ∈ [0, 1] over `n` stages: segments indexed from the right, an interior stop in the segment to its right. */
-export function sliderView(p: number, n: number): SliderView {
+/** The slider at `p` ∈ [0, 1], wiping between `pair`: the divider at `p`, the earlier stage left of it. */
+export function sliderView(p: number, pair: ComparePair): SliderView {
   const at = Math.min(1, Math.max(0, p));
-  const left = n - 2 - Math.min(Math.floor(at * (n - 1)), n - 2);
-  return { left, right: left + 1, split: 100 * at };
+  return { left: pair.left, right: pair.right, split: 100 * at };
 }
 
-/** The nearest stop to `p`, the stops at `k / (n − 1)`. */
-export function snapTo(p: number, n: number): number {
-  const at = Math.min(1, Math.max(0, p));
-  return Math.round(at * (n - 1)) / (n - 1);
+/**
+ * The pair after a legend click on stage `k` of `n`: a stage already in
+ * the pair leaves it as it is; another replaces the member nearer to it
+ * in stage order, the later on a tie; the pair is kept in stage order.
+ */
+export function pickPair(pair: ComparePair, k: number, n: number): ComparePair {
+  if (k === pair.left || k === pair.right || k < 0 || k >= n) return pair;
+  const kept = Math.abs(k - pair.left) < Math.abs(k - pair.right) ? pair.right : pair.left;
+  return { left: Math.min(kept, k), right: Math.max(kept, k) };
 }
 
 /** Side by side from stage `k`: it and the next, the last with the one before. */
@@ -94,15 +99,27 @@ export function switchNext(
   return Math.min(n - 1, Math.max(0, next));
 }
 
-/** A block's view at rest: the slider at `restAt`, side by side on the pair it shows, the switch on the first stage. */
-export function restView(mode: 'slider', n: number): SliderView;
-export function restView(mode: 'side', n: number): ComparePair;
-export function restView(mode: 'switch', n: number): SwitchView;
-export function restView(mode: CompareMode, n: number): CompareView;
-export function restView(mode: CompareMode, n: number): CompareView {
+/**
+ * A block's view at rest: the slider and side by side on the rest pair
+ * (per `COMPARE.restPair`), the slider's divider at `restAt`; the switch
+ * on the first stage. 'neighbours' is the pair the old three-way slider
+ * showed with its handle at `restAt` (segments indexed from the right).
+ */
+export function restView(mode: 'slider', n: number, rest?: string): SliderView;
+export function restView(mode: 'side', n: number, rest?: string): ComparePair;
+export function restView(mode: 'switch', n: number, rest?: string): SwitchView;
+export function restView(mode: CompareMode, n: number, rest?: string): CompareView;
+export function restView(
+  mode: CompareMode,
+  n: number,
+  rest: string = COMPARE.restPair,
+): CompareView {
   if (mode === 'switch') return { stage: 0 };
-  const slider = sliderView(COMPARE.restAt, n);
-  return mode === 'slider' ? slider : sidePair(slider.left, n);
+  const pair =
+    rest === 'ends'
+      ? { left: 0, right: n - 1 }
+      : sidePair(n - 2 - Math.min(Math.floor(COMPARE.restAt * (n - 1)), n - 2), n);
+  return mode === 'slider' ? sliderView(COMPARE.restAt, pair) : pair;
 }
 
 /** The stage whose note is shown: the pair's later stage (the step being shown), or the switch's stage. */
@@ -121,9 +138,10 @@ export function sideFits(width: number): boolean {
  * image page's "Raw to finished" — is only the stages stacked as figures,
  * each with its label and note: the page without script, with nothing
  * dead in it. Everything else is built here, per `.compare` with two or
- * more stages: the method control (three buttons), the legend (one stop
- * per stage — spans in the slider, which marks the showing pair; buttons
- * in side by side and switch, which choose), the divider and the handle
+ * more stages: the method control (three buttons), the legend (one
+ * button per stage, marking what shows: in the slider and side by side it
+ * picks the one pair both show, by `pickPair`; in the switch it goes to
+ * the stage), the divider and the handle
  * (an ARIA slider), the live note, and the corner tags when
  * `COMPARE.cornerTags`; and the state the CSS reads — `data-js`,
  * `data-view`, `data-narrow`, each stage's `data-part`, `--split`, and the
@@ -228,7 +246,8 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     return element;
   };
 
-  // The state: the method, and each method's own view.
+  // The state: the method; the one pair the slider and side by side
+  // show, the divider's position; the switch's stage.
   let mode = openingMode(root.dataset.mode, readMode());
   let p = COMPARE.restAt;
   let pair: ComparePair = restView('side', n);
@@ -237,7 +256,6 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   let leaving: number | null = null;
   let fits = true;
   let noted = -1;
-  let legendKind: 'span' | 'button' | null = null;
 
   // The chrome.
   const line = make('span', 'compare-line');
@@ -287,21 +305,16 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     if (element.dataset.part !== part) element.dataset.part = part;
   };
 
-  const buildLegend = (kind: 'span' | 'button') => {
-    legendKind = kind;
-    legend.replaceChildren(
-      ...words.map(({ label }, i) => {
-        const item = make('li', 'compare-stop');
-        const inner = make(kind, undefined, label);
-        if (inner instanceof HTMLButtonElement) {
-          inner.type = 'button';
-          inner.addEventListener('click', () => pick(i));
-        }
-        item.append(inner);
-        return item;
-      }),
-    );
-  };
+  legend.append(
+    ...words.map(({ label }, i) => {
+      const item = make('li', 'compare-stop');
+      const button = make('button', undefined, label);
+      button.type = 'button';
+      button.addEventListener('click', () => pick(i));
+      item.append(button);
+      return item;
+    }),
+  );
 
   const render = () => {
     const showing = view();
@@ -309,7 +322,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     let shown: number[];
     let note: number;
     if (showing === 'slider') {
-      const at = sliderView(p, n);
+      const at = sliderView(p, pair);
       const split = String(round(at.split));
       root.style.setProperty('--split', split);
       handle.setAttribute('aria-valuenow', split);
@@ -339,14 +352,9 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     if (showing === 'switch') frames.tabIndex = 0;
     else frames.removeAttribute('tabindex');
 
-    const kind = showing === 'slider' ? 'span' : 'button';
-    if (legendKind !== kind) buildLegend(kind);
-    [...legend.children].forEach((item, i) => {
-      const inner = item.firstElementChild as HTMLElement;
-      const on = String(shown.includes(i));
-      if (kind === 'span') inner.setAttribute('aria-current', on);
-      else inner.setAttribute('aria-pressed', on);
-    });
+    [...legend.children].forEach((item, i) =>
+      item.firstElementChild?.setAttribute('aria-pressed', String(shown.includes(i))),
+    );
     modeButtons.forEach((button, i) =>
       button.setAttribute('aria-pressed', String(MODES[i] === mode)),
     );
@@ -379,11 +387,11 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     render();
   };
 
-  /** A legend button: side by side shows the pair from it, the switch goes to it. */
+  /** A legend button: the slider and side by side take the pair it picks, the switch goes to it. */
   const pick = (i: number) => {
     if (view() === 'switch') go(i);
     else {
-      pair = sidePair(i, n);
+      pair = pickPair(pair, i, n);
       render();
     }
   };
@@ -456,7 +464,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     if (event.pointerId !== dragging) return;
     dragging = null;
     if (!COMPARE.snap) return;
-    const to = snapTo(p, n);
+    const to = Math.round(p);
     if (to === p) return;
     // The settle is a movement: instant under reduced motion.
     if (!reducedMotion()) root.dataset.settling = '';

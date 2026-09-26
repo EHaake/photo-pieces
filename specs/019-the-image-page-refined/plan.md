@@ -467,12 +467,16 @@ where the simpler shape was taken it is said in one line.
   at rest it is the first and last stage (Camera | Finished), set by
   `COMPARE.restPair: 'ends'` (the one tunable of this round; the other
   value, `'neighbours'`, is the old rest pair). The legend chooses the
-  pair in both views by one rule, `pickPair(pair, k, n)`: clicking a
-  stage already in the pair does nothing; clicking another replaces
-  the member nearest to it in stage order, the later one on a tie; the
-  pair is always kept in stage order (left = earlier). Every click on
-  a stage outside the pair changes the pair, so no two legend buttons
-  do the same thing. `sliderView(p, pair)` returns
+  pair in both views by one rule, `pickPair(pair, k)`: the pair
+  remembers which member was picked longer ago; clicking a stage
+  already in the pair does nothing; clicking another replaces the
+  member picked longer ago, and the clicked stage becomes the newer;
+  the two are shown in stage order (left = earlier). At rest the first
+  stage is the older pick. Every click on a stage outside the pair
+  changes it, no two legend buttons do the same thing, and every pair
+  is reachable from rest in at most two clicks (the implementer's
+  first rule — replace the nearest member — could never reach Tones |
+  Finished from three stages; corrected 2026-09-25). `sliderView(p, pair)` returns
   `{ left: pair.left, right: pair.right, split }` — the divider at
   `p`, the earlier stage showing left of it; the three-or-more segment
   geometry, `snapTo`'s stops and `restAt`'s "which pair" meaning are

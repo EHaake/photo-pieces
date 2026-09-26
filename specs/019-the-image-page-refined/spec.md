@@ -546,8 +546,8 @@ re-implementation. The plan says where each lives.
   pause; the fixtures stand in until then.
 - **Round T1709a (2026-09-25)** — the slider is two-way, wiping
   between one pair; the legend picks the pair in the slider and side
-  by side alike (a click on a stage outside the pair replaces its
-  nearest member, the later on a tie); at rest the pair is the first
+  by side alike (a click on a stage outside the pair replaces the
+  member picked longer ago, so every pair is reachable); at rest the pair is the first
   and last stage, Camera | Finished — "Yes, that sounds right to me."
 - **Round T1709b (2026-09-25)** — the compare is `wide` on both
   surfaces: "It also needs to be larger (maybe allow it beyond the
