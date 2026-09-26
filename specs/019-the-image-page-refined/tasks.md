@@ -898,7 +898,7 @@ headers'.
       on the first screen at both (981.80; 1439.80). The quiet frame's
       rect equals main's in all four cases. 585 tests (+1).
 
-- [ ] **T1721** — The pair blocks in the transform, and the fourth
+- [x] **T1721** — The pair blocks in the transform, and the fourth
       mode. `review: per-task`. Pattern: T1705 — the `compare`
       descriptor, its `structure: 'compare'` branch and its test cases
       and fixtures in remark-pieces-blocks.test.mjs. Plan: "The pair
@@ -1282,6 +1282,8 @@ tier if it is ever on (it is off). -->
 | Sign-off fixes (planner resumed) | implementation (`opus`, high) | ~25k | B1 fixed in the table, the walkthrough, T1729 and the Known-limitations line (spec.md's Decided parenthetical corrected by the orchestrator); S1–S8 taken |
 | Amendment re-review | top (`fable`, high, override) | ~20k | signed off; the S3 code claim (`.compare-frames` static grid, global.css 2129) verified; nothing open for the sweep. Session tier for the amendment session: the spec amendment written in-session at high effort (raised for the spec session as the policy says) |
 | T1720 stage share | implementation (`opus`, high) | ~101k | done; 585 tests; both mutations fail by name; boxes match the plan's table within 0.4px (port-a's written 0.667); quiet rects equal main's; findings: DPR 2 laptop landscape asks ~2343 device px but land-b's largest candidate is 1800w (export-bound, not cap-bound); gallery-only images have no frame nav; a worktree build must clone node_modules, never symlink (a symlink re-optimised the repo's .vite deps — the person's astro dev may need a restart) |
+| T1721 pair blocks in the transform | implementation (`opus`, high) | ~70k | done; 603 tests (+18); max mutation fails both three-stage cases; the no-attributes line now also serves grid and strip (their old line ended in an empty "allowed:") |
+| T1721 per-task review | implementation (`opus`, high) | ~47k | signed off, nothing blocking; notes: "exactly two" hardcoded where `exactly ${min}` would generalise; pair tests tied to portrait.jpgx27s 0.6667 |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_
