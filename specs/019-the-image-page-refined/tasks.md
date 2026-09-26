@@ -718,7 +718,7 @@ images.
       centre gives tx = w(1−s)/2, to the bottom-right corner w(1−s),
       to the top-left 0; a click without movement closes._
 
-- [ ] **T1713b** — Round: the mat goes while zoomed ("Maybe remove
+- [x] **T1713b** — Round: the mat goes while zoomed ("Maybe remove
       the matte when zooming in"). Plan: rounds paragraph (b).
       `loupe.ts`: `LOUPE.mat: 'off'`, `data-loupe-open` on the stage
       while open (the overlay stays placed from the image's rect);
@@ -981,6 +981,7 @@ tier if it is ever on (it is off). -->
 | Phase 2 review | implementation (`opus`, high) | ~133k | signed off, nothing blocking; fix-now as T1712a: opensOn's 'gesture' didn't leave on click as the plan claimed and 'dblclick' cannot coexist with "a click leaves"; Safari's trackpad pinch arrives as gesture events, untaken; loupe.ts's shared-file comment stale; docs: two "matte unedited" lines corrected; pause: own-file loupes at 2000px exports (portrait 1.13 on the laptop only), minGain and withoutDetail together; sweep: motion (d)'s fifth/sixth labels, the data-glide gate test's shape, no automated pin on the page wiring, pinch false leaves touch-action none, snap's inline round untested, the :root "fingertip" comment stale; the browser records were not in the bundle (check 6 unreviewed — the sweep bundle carries them) |
 | T1712a review fixes | implementation (`opus`, high) | ~60k | done; 572 tests; dblclick action removed outright; the zoom-in cursor does not depend on opensOn (moot at click) — note; a real Safari trackpad pinch needs the walkthrough |
 | T1713a follow the mouse | implementation (`opus`, high) | ~62k | done; 577 tests (+5); a hover during the open glide snaps the view to the end (as a drag does) — may show at the walkthrough; a mouse drag still pans under follow; the personx27s own astro dev holds 4321 — previews use 4322 |
+| T1713b mat off while zoomed | implementation (`opus`, high) | ~59k + ~40k (two rounds) | done; 581 tests; stopped once: the orchestratorx27s first paragraph had the loupe filling the matx27s box, impossible without resizing the stage image — corrected to option 1; the padding transition is keyed to the overlayx27s glide, not quiet view, so entering quiet and resizing stay still; no seventh reduced-motion rule; a width-bound photograph (a panorama on a narrow screen) might grow when the mat goes — unmeasured, walkthrough |
 
 _(Session-tier allowance draw noted at each pause.)_
 
