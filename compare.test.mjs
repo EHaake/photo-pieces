@@ -11,10 +11,13 @@ import {
   sideFits,
   sidePair,
   sliderView,
+  stripAt,
+  stripEnds,
+  stripSettle,
   switchNext,
 } from './src/lib/compare.ts';
 import { blocks, uncomment } from './src/lib/ground.ts';
-import { COMPARE_CLASSES, COMPARE_WIDTHS } from './src/lib/image-meta.mjs';
+import { COMPARE_CLASSES, COMPARE_MODES, COMPARE_WIDTHS } from './src/lib/image-meta.mjs';
 import { FRAME_HOSTS } from './src/lib/motion.ts';
 
 // The compare block (spec 019). Two builders make its markup — the
@@ -71,6 +74,15 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     pair, the switch's step with and without wrapping, the view at rest
 //     per method and per rest pair, whose note shows, the side-by-side
 //     fit, and the method a block opens in.
+//     And the filmstrip's state (T1724): its six keys and its words in
+//     `EXPECTED` (the arrows at the ends, wrapping, the keys, the wheel
+//     and the width are envelope rows pinned there); the strip's
+//     position after a move, clamped; the stage it settles on, the
+//     nearest (0.5 rounds up, so a floor fails it); which arrows have
+//     somewhere to go, at the first, a middle and the last stage and
+//     wrapping; its step as switchNext's second caller, with stripWraps;
+//     its view at rest and its note; and the control's words in
+//     COMPARE_MODES' order, the transform's one list of methods.
 //     And the page's own words (T1708a): WORDING.compare, the section's
 //     heading and the two labels, read from the page's source as literal
 //     strings, and the template reading them from there.
@@ -95,14 +107,21 @@ const EXPECTED = {
     control: 'with-legend',
     cornerTags: false,
     sideWidth: 'wide',
+    stripWraps: false,
+    stripEnds: 'hide',
+    stripKeys: { back: ['ArrowLeft'], next: ['ArrowRight'], first: ['Home'], last: ['End'] },
+    stripWheel: true,
+    stripWheelIdleMs: 150,
+    stripWidth: 'surface',
   },
   COMPARE_WORDING: {
-    modes: { slider: 'Slider', side: 'Side by side', switch: 'Switch' },
+    modes: { slider: 'Slider', side: 'Side by side', switch: 'Switch', filmstrip: 'Filmstrip' },
     control: 'How to compare',
     legend: 'Stages',
     handle: 'Move between the stages',
     slots: { left: 'left', right: 'right' },
     next: 'next pick:',
+    strip: { back: 'Previous stage', next: 'Next stage' },
   },
 };
 
@@ -866,5 +885,73 @@ describe('(d) the state (T1707)', () => {
 
   it("openingMode: when remembering is 'none' the stored choice is ignored", () => {
     expect(openingMode('side', 'switch', 'none')).toEqual('side');
+  });
+
+  it("the control's methods are COMPARE_MODES, in its order — the filmstrip fourth (T1724)", () => {
+    expect(Object.keys(COMPARE_WORDING.modes)).toEqual([...COMPARE_MODES]);
+  });
+
+  it('stripAt adds the move to the position, clamped to the first and the last stage (T1724)', () => {
+    expect([
+      [0, 1],
+      [1, 1],
+      [2, -1],
+      [1, 0.4],
+      [0, -1],
+      [0, -3],
+      [3, 1],
+      [2, 5],
+    ].map(([from, by]) => [from, by, stripAt(from, by, 4)])).toEqual([
+      [0, 1, 1],
+      [1, 1, 2],
+      [2, -1, 1],
+      [1, 0.4, 1.4],
+      [0, -1, 0],
+      [0, -3, 0],
+      [3, 1, 3],
+      [2, 5, 3],
+    ]);
+  });
+
+  it('stripSettle settles on the nearest stage — 0.49 on the first, 0.5 on the second — clamped to the strip (T1724)', () => {
+    expect([-0.6, 0, 0.49, 0.5, 1.2, 2.5, 3, 3.7].map((at) => [at, stripSettle(at, 4)])).toEqual([
+      [-0.6, 0],
+      [0, 0],
+      [0.49, 0],
+      [0.5, 1],
+      [1.2, 1],
+      [2.5, 3],
+      [3, 3],
+      [3.7, 3],
+    ]);
+  });
+
+  it('stripEnds: no back at the first stage, both in the middle, no next at the last — both everywhere when wrapping (T1724)', () => {
+    expect([0, 1, 3].map((stage) => [stage, stripEnds(stage, 4, false)])).toEqual([
+      [0, { back: false, next: true }],
+      [1, { back: true, next: true }],
+      [3, { back: true, next: false }],
+    ]);
+    expect([0, 1, 3].map((stage) => [stage, stripEnds(stage, 4, true)])).toEqual([
+      [0, { back: true, next: true }],
+      [1, { back: true, next: true }],
+      [3, { back: true, next: true }],
+    ]);
+    // The default is COMPARE.stripWraps.
+    expect(stripEnds(3, 4)).toEqual(stripEnds(3, 4, COMPARE.stripWraps));
+  });
+
+  it("switchNext with stripWraps steps the filmstrip: it stops at the last stage and at the first (T1724)", () => {
+    expect(switchNext(3, 4, 1, COMPARE.stripWraps)).toEqual(3);
+    expect(switchNext(0, 4, -1, COMPARE.stripWraps)).toEqual(0);
+    expect(switchNext(1, 4, 1, COMPARE.stripWraps)).toEqual(2);
+    expect(switchNext(2, 4, -1, COMPARE.stripWraps)).toEqual(1);
+  });
+
+  it('restView and noteIndex: the filmstrip opens on the first stage and its note is the showing stage, as the switch (T1724)', () => {
+    expect(restView('filmstrip', 3)).toEqual({ stage: 0 });
+    expect(restView('filmstrip', 3)).toEqual(restView('switch', 3));
+    expect(noteIndex('filmstrip', { stage: 2 })).toEqual(2);
+    expect(noteIndex('filmstrip', { stage: 0 })).toEqual(0);
   });
 });

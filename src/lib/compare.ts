@@ -28,16 +28,23 @@ export const COMPARE = {
   control: 'with-legend', // the method control: 'with-legend' (the legend's row) or 'above'
   cornerTags: false, // spec 006's corner tags, returned on the showing stages
   sideWidth: 'wide', // the width class side by side swaps onto the block (compare-w-<this>), the surface's back on leaving
+  stripWraps: false, // the filmstrip's last stage pages on to the first
+  stripEnds: 'hide', // an arrow with nowhere to go: 'hide' it, or 'quiet' (muted, aria-disabled)
+  stripKeys: { back: ['ArrowLeft'], next: ['ArrowRight'], first: ['Home'], last: ['End'] }, // the filmstrip's keys while the block has focus
+  stripWheel: true, // a horizontal wheel or trackpad scroll moves the strip
+  stripWheelIdleMs: 150, // a wheel's end: the strip settles after this long without one
+  stripWidth: 'surface', // the width class the filmstrip wears: 'surface' (the block's own, as the switch) or one of COMPARE_WIDTHS
 } as const;
 
-/** The block's words; `modes`' keys are the three methods. */
+/** The block's words; `modes`' keys are the four methods. */
 export const COMPARE_WORDING = {
-  modes: { slider: 'Slider', side: 'Side by side', switch: 'Switch' },
+  modes: { slider: 'Slider', side: 'Side by side', switch: 'Switch', filmstrip: 'Filmstrip' }, // the control's words, in its order
   control: 'How to compare',
   legend: 'Stages',
   handle: 'Move between the stages',
   slots: { left: 'left', right: 'right' }, // the tag on a picked legend button, naming its side
   next: 'next pick:', // the hint after the legend, before the side the next pick takes
+  strip: { back: 'Previous stage', next: 'Next stage' }, // the filmstrip's arrows' names
 } as const;
 
 /** Storage key for the reader's chosen method (per `COMPARE.remember`). */
@@ -54,11 +61,11 @@ export type CompareSlot = keyof typeof COMPARE_WORDING.slots;
 export type CompareSlots = CompareSides & { next: CompareSlot };
 /** The slider's sides and the divider's position, 0–100. */
 export type SliderView = CompareSides & { split: number };
-/** The switch's one showing stage. */
+/** The switch's (and the filmstrip's) one showing stage. */
 export type SwitchView = { stage: number };
 export type CompareView = SliderView | CompareSides | SwitchView;
 
-/** A string that names one of the three methods. */
+/** A string that names one of the four methods. */
 const isMode = (value: unknown): value is CompareMode =>
   typeof value === 'string' && Object.hasOwn(COMPARE_WORDING.modes, value);
 
@@ -104,7 +111,7 @@ export function sidePair(k: number, n: number): ComparePair {
   return { left, right: left + 1 };
 }
 
-/** The switch's next stage from `i` in direction `dir`, wrapping per `COMPARE.switchWraps`. */
+/** The switch's next stage from `i` in direction `dir`, wrapping per `COMPARE.switchWraps` (the filmstrip steps by it too, passing `COMPARE.stripWraps`). */
 export function switchNext(
   i: number,
   n: number,
@@ -116,22 +123,41 @@ export function switchNext(
   return Math.min(n - 1, Math.max(0, next));
 }
 
+/** The filmstrip's position after moving `by` stages from `from`, clamped to the strip, `[0, n − 1]`. */
+export function stripAt(from: number, by: number, n: number): number {
+  return Math.min(n - 1, Math.max(0, from + by));
+}
+
+/** The stage the filmstrip settles on from position `at`: the nearest, clamped to the strip. */
+export function stripSettle(at: number, n: number): number {
+  return Math.min(n - 1, Math.max(0, Math.round(at)));
+}
+
+/** Whether each of the filmstrip's arrows has somewhere to go from `stage`: nowhere past an end unless it wraps. */
+export function stripEnds(
+  stage: number,
+  n: number,
+  wraps: boolean = COMPARE.stripWraps,
+): { back: boolean; next: boolean } {
+  return { back: wraps || stage > 0, next: wraps || stage < n - 1 };
+}
+
 /**
  * A block's view at rest: the slider and side by side on the rest pair
  * (per `COMPARE.restPair`), the slider's divider at `restAt`; the switch
- * on the first stage. 'neighbours' is the pair the old three-way slider
+ * and the filmstrip on the first stage. 'neighbours' is the pair the old three-way slider
  * showed with its handle at `restAt` (segments indexed from the right).
  */
 export function restView(mode: 'slider', n: number, rest?: string): SliderView;
 export function restView(mode: 'side', n: number, rest?: string): ComparePair;
-export function restView(mode: 'switch', n: number, rest?: string): SwitchView;
+export function restView(mode: 'switch' | 'filmstrip', n: number, rest?: string): SwitchView;
 export function restView(mode: CompareMode, n: number, rest?: string): CompareView;
 export function restView(
   mode: CompareMode,
   n: number,
   rest: string = COMPARE.restPair,
 ): CompareView {
-  if (mode === 'switch') return { stage: 0 };
+  if (mode === 'switch' || mode === 'filmstrip') return { stage: 0 };
   const pair =
     rest === 'ends'
       ? { left: 0, right: n - 1 }
@@ -139,9 +165,11 @@ export function restView(
   return mode === 'slider' ? sliderView(COMPARE.restAt, pair) : pair;
 }
 
-/** The stage whose note is shown: the right side's stage (none while it is empty), or the switch's stage. */
+/** The stage whose note is shown: the right side's stage (none while it is empty), or the switch's or the filmstrip's stage. */
 export function noteIndex(mode: CompareMode, view: CompareView): number | null {
-  return mode === 'switch' ? (view as SwitchView).stage : (view as CompareSides).right;
+  return mode === 'switch' || mode === 'filmstrip'
+    ? (view as SwitchView).stage
+    : (view as CompareSides).right;
 }
 
 /** Whether a frame `width` px wide holds two stages side by side. */
@@ -155,7 +183,7 @@ export function sideFits(width: number): boolean {
  * image page's "Raw to finished" — is only the stages stacked as figures,
  * each with its label and note: the page without script, with nothing
  * dead in it. Everything else is built here, per `.compare` with two or
- * more stages: the method control (three buttons), the legend (one
+ * more stages: the method control (four buttons), the legend (one
  * button per stage, marking what shows: in the slider and side by side it
  * picks the sides both show, left then right, by `pickSlot` — a side left
  * empty by a stage that moved shows the bare ground; each button is two
@@ -338,9 +366,13 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     stages.forEach((one, i) => one.append(make('span', 'compare-tag', words[i].label)));
 
   // The method the frame shows: side by side yields to the switch where
-  // two won't fit and `sideNarrow` says so.
+  // two won't fit and `sideNarrow` says so. The filmstrip shows the
+  // switch's view until its own is built (T1724 to T1726, no pause
+  // between): its word is in the control, its state is the switch's.
   const view = (): CompareMode =>
-    mode === 'side' && !fits && SIDE_NARROW === 'switch' ? 'switch' : mode;
+    (mode === 'side' && !fits && SIDE_NARROW === 'switch') || mode === 'filmstrip'
+      ? 'switch'
+      : mode;
 
   const setPart = (element: HTMLElement, part: string) => {
     if (element.dataset.part !== part) element.dataset.part = part;
