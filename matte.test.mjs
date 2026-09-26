@@ -440,7 +440,8 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     // T1712: a deliberate fourth), the open loupe's frame without its mat
     // (spec 019, T1713b: a deliberate fifth — padding 0, reading no
     // --mat; T1713c: and --mat 0px, so the photograph grows into the
-    // mat's box), and no sixth.
+    // freed space with its shape kept, nothing of the unzoomed photograph
+    // showing around it), and no sixth.
     const QUIET_RULE = /html\[data-quiet\] \.image-/;
     // The paper frame's `:not` preludes are not quiet rules: the list
     // below gains nothing from them.

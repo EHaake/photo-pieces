@@ -274,7 +274,8 @@ export type Loupe = {
  * takes the whole frame (T1713c): an action that opens it sets
  * `data-loupe-open` on the stage first, and the quiet frame drops its
  * mat and zeroes its `--mat` (global.css), so the photograph grows into
- * the mat's box, ratio kept; the rect read then forces the layout, the
+ * the freed space with its shape kept, and nothing of the unzoomed
+ * photograph shows around it; the rect read then forces the layout, the
  * action is taken again over the grown box — its point at the same
  * place in the photograph, `fullScale` of the grown width — and the
  * overlay is built over it. While open every box is the grown one. The

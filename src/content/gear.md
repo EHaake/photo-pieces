@@ -7,8 +7,9 @@ backticks, an equals sign, then the name to print — for example
 `` - `ILCE-7RM4` = Sony α7R IV ``. A camera is listed by its model
 alone, and its line is the whole name. A sidecar's own `camera:` or
 `lens:` still wins over this table. The build warns once for each
-string the table lacks, naming a file that carries it, and the label
-prints that string as the camera wrote it until a line is added here.
+string the table lacks, naming a file that carries it, and until a
+line is added here the label prints what it did before the table: a
+camera its make and model, a lens its string as the camera wrote it.
 
 ## Cameras
 

@@ -2044,7 +2044,7 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
    --mat, so the image's caps, which read the frame's --mat, let the
    photograph grow into the space the mat had, ratio kept, and the
    loupe is built over that grown box. The rule reads no --mat; its
-   zero is the one assignment besides the forms. On close, once the
+   zero is the one assignment on the quiet frame besides the form. On close, once the
    loupe is back at the fit, the attribute goes and the mat returns
    with the photograph at its fit size. Without script none of this exists and the quiet view is
    what it was.
@@ -2069,6 +2069,7 @@ html[data-quiet] .image-stage[data-loupe-ready] .image-frame img {
   touch-action: none;
 }
 
+/* After the quiet-ready form above: equal specificity (0,4,1), so order decides; matte (b) pins it. */
 html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   padding: 0;
   --mat: 0px;

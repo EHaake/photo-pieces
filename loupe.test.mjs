@@ -534,7 +534,7 @@ describe("(c) the loupe's rules (T1712)", () => {
       'html[data-quiet] .image-stage[data-loupe-ready] .image-frame img',
       { cursor: 'zoom-in', 'touch-action': 'none' },
     ],
-    // T1713c: the open loupe takes the whole frame — the mat's token zeroed, so the image's caps let it grow into the mat's box.
+    // T1713c: the open loupe takes the whole frame — the mat's token zeroed, so the image's caps let it grow into the freed space with its shape kept; nothing of the unzoomed photograph shows around it.
     [
       'html[data-quiet] .image-stage[data-loupe-open] .image-frame',
       { padding: '0', '--mat': '0px' },

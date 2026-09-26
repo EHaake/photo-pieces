@@ -191,8 +191,9 @@ pointer's place on the unzoomed photograph; a click without moving
 zooms back out, a click around it leaves the quiet view, the wheel, a
 pinch and the `+` and `-` keys zoom between, the arrows pan, and on
 touch a drag pans.
-While the loupe is open the mat goes and the loupe fills the whole area
-the mat and photograph had. Since spec 018 the photographs move only in answer to the
+While the loupe is open the mat goes and the photograph grows into the
+freed space with its shape kept; nothing of the unzoomed photograph
+shows around it. Since spec 018 the photographs move only in answer to the
 reader or to their own loading: none pops — its box waits in the
 ground's own colour, so no box shows, until the photograph has decoded
 and fades in; below the fold it fades in with a small rise each time it
@@ -415,6 +416,7 @@ photo-pieces/
 ├── compare.test.mjs, loupe.test.mjs # the compare's and the loupe's rules, each tunable pinned by its round
 ├── gear.test.mjs                 # the gear table: its parse, its failures, the label's lookup, the warning
 ├── private-files.test.mjs        # the private-files barrier, run against fixture directories
+├── obsidian-plugin.test.mjs      # the plugin's reading of a compare body; Live Preview itself is attested by eye
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
