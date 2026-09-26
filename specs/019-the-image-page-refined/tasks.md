@@ -939,16 +939,23 @@ headers'.
       fixtures, the page's stage images". `global.css`: the side's
       rules and container query, the selector lists extended.
       `compare.ts`: `enhanceCompare` skips `.piece-side` (one line,
-      its comment). `[...id].astro`: the section's stage `<Image>`
-      without `width`. `where-the-fog-lets-go/index.md` and
+      its comment). `image-meta.mjs`: `stageImageOptions(surface)`.
+      `remark-pieces-blocks.mjs`: `stageSizing = () =>
+      stageImageOptions('piece')`. `[...id].astro`: the section's stage
+      `<img>` from `getImage({ src, alt: label, ...stageImageOptions('page')
+      })`, `<Image>` gone from the section (D1723). `where-the-fog-lets-go/index.md` and
       `_land-b.md`: the fixture sentences and blocks as plan.md lists
       them (_Fixture_ marked). compare.test.mjs (a): the two source
       pins. _Verify: `sh scripts/verify.sh` green (count recorded), the
       barrier's line counting the new compares (three new blocks: the
       count before and after recorded); the built reads in
       T1723's bullet greped and quoted (the side's and slider's root
-      classes, `_land-b.jpg`'s one `srcset` on both pages); the cap
-      mutation → scan 4's line pasted, reverted; BiDi at 1512×982: the
+      classes, `_land-b.jpg`'s one `srcset` on both pages); the
+      mutation (`width: 1400` added to the page's `getImage` call) →
+      test (a)'s failing line pasted, reverted; on the built land-b page
+      the story slider's and the section's panes for `_land-b.jpg`
+      quoted with one identical `srcset` string and the section `<img>`'s
+      attribute list equal to the story's; BiDi at 1512×982: the
       side's pane rects (equal widths, one top), captions visible, no
       `data-js`, the same with script off (the sandboxed-iframe
       recipe); at 480px stacked; the resource timeline on the fog piece
@@ -1285,6 +1292,7 @@ tier if it is ever on (it is off). -->
 | T1721 pair blocks in the transform | implementation (`opus`, high) | ~70k | done; 603 tests (+18); max mutation fails both three-stage cases; the no-attributes line now also serves grid and strip (their old line ended in an empty "allowed:") |
 | T1721 per-task review | implementation (`opus`, high) | ~47k | signed off, nothing blocking; notes: "exactly two" hardcoded where `exactly ${min}` would generalise; pair tests tied to portrait.jpgx27s 0.6667 |
 | T1722 barrier scan 4 | implementation (`opus`, high) | ~47k | done; 610 tests (+7); summary today: "3 compares in one shape; 8 stage images, one candidate list per file"; a stage shown by two blocks counts twice; a src-only pane keyed by its src; only the first clashing URL reported |
+| D1723 decision review (one URL per stage across the page's two builders) | top (`fable`, high, override) | ~111k | option B made structural: `stageImageOptions(surface)` spelled once in image-meta.mjs, the transform's `stageSizing` and the page's `getImage` both read it, `<Image>` leaves the section (it hashes fit: cover and position: center; getImage never reads image.objectFit — verified in Astro's sources); scan 4 stays URL-keyed, the one-URL fact pinned at the source by test (a) and observed on the built land-b page; the plan's "scan 4 fails otherwise" was a wrong claim; stays in T1723 |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_

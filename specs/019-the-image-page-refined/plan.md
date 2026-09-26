@@ -1441,11 +1441,31 @@ simpler shape was taken the bullet says so.
   compare's own threshold at opening; the side's is its own tunable
   from here). Each stage's caption stays shown, label · note beneath
   its pane (T1709j's dot). `enhanceCompare` skips `.piece-side` (one
-  line), so no script touches it. The page's section drops
-  `width={Math.min(src.width, 1400)}` from its stage `<Image>`: the
-  transform's Markdown images request the source's own width, and the
-  two builders must request the same transforms for a story's block and
-  the section to share files (scan 4 fails otherwise). Fixtures: the
+  line), so no script touches it. The page's section builds its stage `<img>` from `getImage`, not
+  `<Image>` (D1723): under a layout, `<Image>` writes `fit: 'cover'` and
+  `position: 'center'` into every request (`components/Image.astro`,
+  `props.fit ??= imageConfig.objectFit ?? 'cover'`), both are in
+  `DEFAULT_HASH_PROPS`, the transform's Markdown images reach `getImage`
+  with neither, and `getImage` never reads `image.objectFit` — so the
+  component and the transform cannot hash alike whatever the page passes
+  (`fit="none"` is dropped by the service; `position` cannot be unset
+  through `??=`). A stage's request is spelled once:
+  `stageImageOptions(surface)` in `image-meta.mjs` returns `{ layout:
+  'constrained', sizes: compareSizes(COMPARE_WIDTH[surface]) }`; the
+  transform's `stageSizing` is `() => stageImageOptions('piece')`, and the
+  page calls `getImage({ src, alt: label, ...stageImageOptions('page') })`
+  in the `compare` map and writes `<img src={stage.src}
+  srcset={stage.srcSet.attribute} {...stage.attributes} />` in the pane —
+  attribute for attribute what Astro's Markdown pipeline writes
+  (`vite-plugin-markdown/images.js`), as the og and loupe files are
+  already built. Neither side passes `width`, so both request the
+  source's own widths. The section's `<img>` loses
+  `data-astro-image-fit="cover"`; nothing reads it
+  (`image.responsiveStyles` is off, so Astro's `[data-astro-image-fit]`
+  rules never ship; the pane's `object-fit: contain` is the site's own).
+  Scan 4 cannot see this: keyed by URL, two builders emitting disjoint URL
+  sets for one source never collide — the one-request fact is pinned at
+  the source (test (a)) and observed on the built land-b page. Fixtures: the
   fog piece, after its compare, gains a fixture sentence, `:::side`
   (Camera, Tones) and `:::slider` (Camera, Finished); `_land-b.md`'s
   story gains, at its end, a fixture sentence and `:::slider` (Camera,
@@ -1675,8 +1695,11 @@ advice, and its pins stay unedited.
   compares (before and after recorded) and the stage images; greped from `dist/`: the fog piece's side and slider (their
   root classes, two stages each) and every `_land-b.jpg` stage image
   on the fog piece and on land-b carrying one `srcset` string
-  (quoted); mutation: the 1400 cap restored → scan 4 fails naming
-  land-b (pasted), reverted. compare.test.mjs (a): the section's stage
+  (quoted); mutation: `width: 1400` added to the page's `getImage` call → test
+  (a)'s failing line pasted, reverted (D1723: scan 4 cannot see it); the
+  story slider's and the section's panes for `_land-b.jpg` quoted with
+  one identical `srcset` string, the section `<img>`'s attribute list
+  equal to the story's. compare.test.mjs (a): the section's stage
   `<Image>` passes no `width`; `enhanceCompare` skips `.piece-side`. In
   the browser at 1512×982: the side's two panes at equal widths and one
   top, captions shown, no `data-js`, script on or off; at 480px
@@ -1769,6 +1792,22 @@ block; `content.config.ts`; `src/lib/images.ts`.
   the piece's and the page's widths apart makes land-b's story slider
   and its section two candidate lists of one stage; scan 4 then fails
   naming the page, and that round sets one hint for both.
+- **Scan 4 is blind to disjoint URL sets from one source** (D1723).
+  Keyed by URL and reading no names, it cannot tell that two hashed
+  files are one photograph, so a builder that requests a different
+  transform (a `fit`, `quality`, `width` or `position`) passes it. The
+  source pin (test (a)) holds that line for the two builders that exist.
+  Should a third builder of stage images appear, the key to add is a
+  declared identity both builders write (the stage file's basename as a
+  data attribute, required by scan 3) — not Astro's file-name shape.
+- **`<Image>` and `getImage` never share a file under a layout.**
+  `Image.astro` adds `fit: 'cover'` and `position: 'center'` to every
+  request; both are hashed; `getImage` adds neither and ignores
+  `image.objectFit` (that option changes only the component's defaults
+  and an unshipped stylesheet). Anywhere the site needs two `<img>`s of
+  one file to share transforms, both must be built from `getImage` —
+  the loupe (T1710) and the stage section (D1723) are the two cases so
+  far.
 - **The side's stacking is CSS, the compare's side by side script**:
   both open at 560px and are separate tunables from here.
 - **A settle is by position**: the nearest stage on release, no
@@ -1790,10 +1829,16 @@ block; `content.config.ts`; `src/lib/images.ts`.
   shape, told apart by `piece-side` / `piece-slider`; scan 3 and the
   plugin keep one rule, and the image page builds neither.
 - **`side` has no script at all**; its stacking is a container query.
-- **"Fetched once" is pinned as one candidate list per stage file per
-  page** (scan 4), and the page's stage images request what the
-  transform's do; the story's `side` or `slider` does not suppress the
-  section, as the spec says only a `compare` does.
+- **"Fetched once" is pinned two ways** (D1723). Scan 4 pins one
+  candidate list per stage URL per page — a stage the builders emit at
+  one URL cannot carry two lists. That the builders emit one URL at all
+  is pinned at the source: the stage request is spelled once
+  (`stageImageOptions`), both builders reach `getImage` with it, and
+  test (a) holds the page to that call. The earlier claim that scan 4
+  fails on a restored width cap was wrong — scan 4 reads no names, so
+  two builders with disjoint URL sets pass it. The story's `side` or
+  `slider` does not suppress the section, as the spec says only a
+  `compare` does.
 - **The filmstrip moves a registered property on the tokens**, not the
   browser's scroll; the switch and the filmstrip share one showing
   stage; a click on its frame does nothing; a mouse drags it as a
