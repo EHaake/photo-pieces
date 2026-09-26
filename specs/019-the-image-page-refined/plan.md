@@ -579,6 +579,18 @@ where the simpler shape was taken it is said in one line.
   original, so the pruner never touches it — the barrier's scan 1 checks
   both outcomes on every build.
 
+  T1710 finding (2026-09-25): the site-wide `image: { layout:
+  'constrained' }` makes every `getImage()` emit a responsive set, so
+  a loupe call named one file and shipped nine (+234 files, +15.7 MB
+  across the site). `loupeImageOptions` therefore returns `{ src,
+  width, format: 'webp', layout: 'none' }` — one file per loupe, the
+  URL unchanged (layout is not in the hash). `ogImageOptions` has the
+  same waste (six unnamed og candidates per page) — a sweep note, not
+  this spec's. Own-file loupes share no file with the stage (the
+  stage's fit/position enter the hash): 62 of them cost 4.84 MB; the
+  Phase 2 pause asks whether a photograph without a detail export
+  gets a loupe at all.
+
 - **The loupe's state** (`src/lib/loupe.ts`, T1711) — pure and
   unit-tested. `fullScale({ natural, fit, dpr })` is
   `natural / (fit × dpr × pixelRatio)`; a stage is loupe-ready when it
