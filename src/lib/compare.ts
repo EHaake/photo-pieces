@@ -83,13 +83,15 @@ export function sliderView(p: number, pair: CompareSides): SliderView {
  * The sides after a legend click on stage `k` (T1709g): it takes the
  * `next` side and `next` flips; if it held the other side, that side
  * empties until a later pick fills it — so a stage moves sides. A click
- * on the stage already on the `next` side does nothing. The picks go
- * left, then right, and every pair, either way round, is two clicks away.
+ * on the stage already on the `next` side keeps the sides and flips
+ * `next` all the same (T1709h): no click is a no-op, so a side can be
+ * confirmed and the other picked. The picks go left, then right, and
+ * every pair, either way round, is two clicks away.
  */
 export function pickSlot(pair: CompareSlots, k: number): CompareSlots {
   const { next } = pair;
-  if (pair[next] === k) return pair;
   const other: CompareSlot = next === 'left' ? 'right' : 'left';
+  if (pair[next] === k) return { ...pair, next: other };
   const kept = pair[other] === k ? null : pair[other];
   return next === 'left'
     ? { left: k, right: kept, next: 'right' }

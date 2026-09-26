@@ -59,9 +59,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     legend click picks as a table, every click on three and four
 //     stages from every state, a side empty or not (T1709g: the stage
 //     takes the next side and next flips; the side it left empties; a
-//     click on the stage already on the next side does nothing), and
-//     every pair within two clicks of rest, either way round within
-//     three — and the side
+//     click on the stage already on the next side keeps the sides and
+//     flips next, T1709h), and every pair, either way round, within two
+//     clicks of rest — and the side
 //     pair, the switch's step with and without wrapping, the view at rest
 //     per method and per rest pair, whose note shows, the side-by-side
 //     fit, and the method a block opens in.
@@ -393,7 +393,8 @@ describe('(d) the state (T1707)', () => {
   // side empty (null) — either side next, and every click (T1709g): the
   // stage takes the next side and next flips; if it held the other side,
   // that side empties; a click on the stage already on the next side
-  // does nothing. Both sides empty is not a state: a click fills one.
+  // keeps the sides and flips next (T1709h). Both sides empty is not a
+  // state: a click fills one.
   const picks = (n) => {
     const rows = [];
     const sides = [null, ...Array.from({ length: n }, (_, i) => i)];
@@ -413,74 +414,74 @@ describe('(d) the state (T1707)', () => {
       [[null, 0, 'left'], 0, [0, null, 'right']],
       [[null, 0, 'left'], 1, [1, 0, 'right']],
       [[null, 0, 'left'], 2, [2, 0, 'right']],
-      [[null, 0, 'right'], 0, [null, 0, 'right']],
+      [[null, 0, 'right'], 0, [null, 0, 'left']],
       [[null, 0, 'right'], 1, [null, 1, 'left']],
       [[null, 0, 'right'], 2, [null, 2, 'left']],
       [[null, 1, 'left'], 0, [0, 1, 'right']],
       [[null, 1, 'left'], 1, [1, null, 'right']],
       [[null, 1, 'left'], 2, [2, 1, 'right']],
       [[null, 1, 'right'], 0, [null, 0, 'left']],
-      [[null, 1, 'right'], 1, [null, 1, 'right']],
+      [[null, 1, 'right'], 1, [null, 1, 'left']],
       [[null, 1, 'right'], 2, [null, 2, 'left']],
       [[null, 2, 'left'], 0, [0, 2, 'right']],
       [[null, 2, 'left'], 1, [1, 2, 'right']],
       [[null, 2, 'left'], 2, [2, null, 'right']],
       [[null, 2, 'right'], 0, [null, 0, 'left']],
       [[null, 2, 'right'], 1, [null, 1, 'left']],
-      [[null, 2, 'right'], 2, [null, 2, 'right']],
-      [[0, null, 'left'], 0, [0, null, 'left']],
+      [[null, 2, 'right'], 2, [null, 2, 'left']],
+      [[0, null, 'left'], 0, [0, null, 'right']],
       [[0, null, 'left'], 1, [1, null, 'right']],
       [[0, null, 'left'], 2, [2, null, 'right']],
       [[0, null, 'right'], 0, [null, 0, 'left']],
       [[0, null, 'right'], 1, [0, 1, 'left']],
       [[0, null, 'right'], 2, [0, 2, 'left']],
-      [[0, 1, 'left'], 0, [0, 1, 'left']],
+      [[0, 1, 'left'], 0, [0, 1, 'right']],
       [[0, 1, 'left'], 1, [1, null, 'right']],
       [[0, 1, 'left'], 2, [2, 1, 'right']],
       [[0, 1, 'right'], 0, [null, 0, 'left']],
-      [[0, 1, 'right'], 1, [0, 1, 'right']],
+      [[0, 1, 'right'], 1, [0, 1, 'left']],
       [[0, 1, 'right'], 2, [0, 2, 'left']],
-      [[0, 2, 'left'], 0, [0, 2, 'left']],
+      [[0, 2, 'left'], 0, [0, 2, 'right']],
       [[0, 2, 'left'], 1, [1, 2, 'right']],
       [[0, 2, 'left'], 2, [2, null, 'right']],
       [[0, 2, 'right'], 0, [null, 0, 'left']],
       [[0, 2, 'right'], 1, [0, 1, 'left']],
-      [[0, 2, 'right'], 2, [0, 2, 'right']],
+      [[0, 2, 'right'], 2, [0, 2, 'left']],
       [[1, null, 'left'], 0, [0, null, 'right']],
-      [[1, null, 'left'], 1, [1, null, 'left']],
+      [[1, null, 'left'], 1, [1, null, 'right']],
       [[1, null, 'left'], 2, [2, null, 'right']],
       [[1, null, 'right'], 0, [1, 0, 'left']],
       [[1, null, 'right'], 1, [null, 1, 'left']],
       [[1, null, 'right'], 2, [1, 2, 'left']],
       [[1, 0, 'left'], 0, [0, null, 'right']],
-      [[1, 0, 'left'], 1, [1, 0, 'left']],
+      [[1, 0, 'left'], 1, [1, 0, 'right']],
       [[1, 0, 'left'], 2, [2, 0, 'right']],
-      [[1, 0, 'right'], 0, [1, 0, 'right']],
+      [[1, 0, 'right'], 0, [1, 0, 'left']],
       [[1, 0, 'right'], 1, [null, 1, 'left']],
       [[1, 0, 'right'], 2, [1, 2, 'left']],
       [[1, 2, 'left'], 0, [0, 2, 'right']],
-      [[1, 2, 'left'], 1, [1, 2, 'left']],
+      [[1, 2, 'left'], 1, [1, 2, 'right']],
       [[1, 2, 'left'], 2, [2, null, 'right']],
       [[1, 2, 'right'], 0, [1, 0, 'left']],
       [[1, 2, 'right'], 1, [null, 1, 'left']],
-      [[1, 2, 'right'], 2, [1, 2, 'right']],
+      [[1, 2, 'right'], 2, [1, 2, 'left']],
       [[2, null, 'left'], 0, [0, null, 'right']],
       [[2, null, 'left'], 1, [1, null, 'right']],
-      [[2, null, 'left'], 2, [2, null, 'left']],
+      [[2, null, 'left'], 2, [2, null, 'right']],
       [[2, null, 'right'], 0, [2, 0, 'left']],
       [[2, null, 'right'], 1, [2, 1, 'left']],
       [[2, null, 'right'], 2, [null, 2, 'left']],
       [[2, 0, 'left'], 0, [0, null, 'right']],
       [[2, 0, 'left'], 1, [1, 0, 'right']],
-      [[2, 0, 'left'], 2, [2, 0, 'left']],
-      [[2, 0, 'right'], 0, [2, 0, 'right']],
+      [[2, 0, 'left'], 2, [2, 0, 'right']],
+      [[2, 0, 'right'], 0, [2, 0, 'left']],
       [[2, 0, 'right'], 1, [2, 1, 'left']],
       [[2, 0, 'right'], 2, [null, 2, 'left']],
       [[2, 1, 'left'], 0, [0, 1, 'right']],
       [[2, 1, 'left'], 1, [1, null, 'right']],
-      [[2, 1, 'left'], 2, [2, 1, 'left']],
+      [[2, 1, 'left'], 2, [2, 1, 'right']],
       [[2, 1, 'right'], 0, [2, 0, 'left']],
-      [[2, 1, 'right'], 1, [2, 1, 'right']],
+      [[2, 1, 'right'], 1, [2, 1, 'left']],
       [[2, 1, 'right'], 2, [null, 2, 'left']],
     ]);
   });
@@ -491,7 +492,7 @@ describe('(d) the state (T1707)', () => {
       [[null, 0, 'left'], 1, [1, 0, 'right']],
       [[null, 0, 'left'], 2, [2, 0, 'right']],
       [[null, 0, 'left'], 3, [3, 0, 'right']],
-      [[null, 0, 'right'], 0, [null, 0, 'right']],
+      [[null, 0, 'right'], 0, [null, 0, 'left']],
       [[null, 0, 'right'], 1, [null, 1, 'left']],
       [[null, 0, 'right'], 2, [null, 2, 'left']],
       [[null, 0, 'right'], 3, [null, 3, 'left']],
@@ -500,7 +501,7 @@ describe('(d) the state (T1707)', () => {
       [[null, 1, 'left'], 2, [2, 1, 'right']],
       [[null, 1, 'left'], 3, [3, 1, 'right']],
       [[null, 1, 'right'], 0, [null, 0, 'left']],
-      [[null, 1, 'right'], 1, [null, 1, 'right']],
+      [[null, 1, 'right'], 1, [null, 1, 'left']],
       [[null, 1, 'right'], 2, [null, 2, 'left']],
       [[null, 1, 'right'], 3, [null, 3, 'left']],
       [[null, 2, 'left'], 0, [0, 2, 'right']],
@@ -509,7 +510,7 @@ describe('(d) the state (T1707)', () => {
       [[null, 2, 'left'], 3, [3, 2, 'right']],
       [[null, 2, 'right'], 0, [null, 0, 'left']],
       [[null, 2, 'right'], 1, [null, 1, 'left']],
-      [[null, 2, 'right'], 2, [null, 2, 'right']],
+      [[null, 2, 'right'], 2, [null, 2, 'left']],
       [[null, 2, 'right'], 3, [null, 3, 'left']],
       [[null, 3, 'left'], 0, [0, 3, 'right']],
       [[null, 3, 'left'], 1, [1, 3, 'right']],
@@ -518,8 +519,8 @@ describe('(d) the state (T1707)', () => {
       [[null, 3, 'right'], 0, [null, 0, 'left']],
       [[null, 3, 'right'], 1, [null, 1, 'left']],
       [[null, 3, 'right'], 2, [null, 2, 'left']],
-      [[null, 3, 'right'], 3, [null, 3, 'right']],
-      [[0, null, 'left'], 0, [0, null, 'left']],
+      [[null, 3, 'right'], 3, [null, 3, 'left']],
+      [[0, null, 'left'], 0, [0, null, 'right']],
       [[0, null, 'left'], 1, [1, null, 'right']],
       [[0, null, 'left'], 2, [2, null, 'right']],
       [[0, null, 'left'], 3, [3, null, 'right']],
@@ -527,32 +528,32 @@ describe('(d) the state (T1707)', () => {
       [[0, null, 'right'], 1, [0, 1, 'left']],
       [[0, null, 'right'], 2, [0, 2, 'left']],
       [[0, null, 'right'], 3, [0, 3, 'left']],
-      [[0, 1, 'left'], 0, [0, 1, 'left']],
+      [[0, 1, 'left'], 0, [0, 1, 'right']],
       [[0, 1, 'left'], 1, [1, null, 'right']],
       [[0, 1, 'left'], 2, [2, 1, 'right']],
       [[0, 1, 'left'], 3, [3, 1, 'right']],
       [[0, 1, 'right'], 0, [null, 0, 'left']],
-      [[0, 1, 'right'], 1, [0, 1, 'right']],
+      [[0, 1, 'right'], 1, [0, 1, 'left']],
       [[0, 1, 'right'], 2, [0, 2, 'left']],
       [[0, 1, 'right'], 3, [0, 3, 'left']],
-      [[0, 2, 'left'], 0, [0, 2, 'left']],
+      [[0, 2, 'left'], 0, [0, 2, 'right']],
       [[0, 2, 'left'], 1, [1, 2, 'right']],
       [[0, 2, 'left'], 2, [2, null, 'right']],
       [[0, 2, 'left'], 3, [3, 2, 'right']],
       [[0, 2, 'right'], 0, [null, 0, 'left']],
       [[0, 2, 'right'], 1, [0, 1, 'left']],
-      [[0, 2, 'right'], 2, [0, 2, 'right']],
+      [[0, 2, 'right'], 2, [0, 2, 'left']],
       [[0, 2, 'right'], 3, [0, 3, 'left']],
-      [[0, 3, 'left'], 0, [0, 3, 'left']],
+      [[0, 3, 'left'], 0, [0, 3, 'right']],
       [[0, 3, 'left'], 1, [1, 3, 'right']],
       [[0, 3, 'left'], 2, [2, 3, 'right']],
       [[0, 3, 'left'], 3, [3, null, 'right']],
       [[0, 3, 'right'], 0, [null, 0, 'left']],
       [[0, 3, 'right'], 1, [0, 1, 'left']],
       [[0, 3, 'right'], 2, [0, 2, 'left']],
-      [[0, 3, 'right'], 3, [0, 3, 'right']],
+      [[0, 3, 'right'], 3, [0, 3, 'left']],
       [[1, null, 'left'], 0, [0, null, 'right']],
-      [[1, null, 'left'], 1, [1, null, 'left']],
+      [[1, null, 'left'], 1, [1, null, 'right']],
       [[1, null, 'left'], 2, [2, null, 'right']],
       [[1, null, 'left'], 3, [3, null, 'right']],
       [[1, null, 'right'], 0, [1, 0, 'left']],
@@ -560,32 +561,32 @@ describe('(d) the state (T1707)', () => {
       [[1, null, 'right'], 2, [1, 2, 'left']],
       [[1, null, 'right'], 3, [1, 3, 'left']],
       [[1, 0, 'left'], 0, [0, null, 'right']],
-      [[1, 0, 'left'], 1, [1, 0, 'left']],
+      [[1, 0, 'left'], 1, [1, 0, 'right']],
       [[1, 0, 'left'], 2, [2, 0, 'right']],
       [[1, 0, 'left'], 3, [3, 0, 'right']],
-      [[1, 0, 'right'], 0, [1, 0, 'right']],
+      [[1, 0, 'right'], 0, [1, 0, 'left']],
       [[1, 0, 'right'], 1, [null, 1, 'left']],
       [[1, 0, 'right'], 2, [1, 2, 'left']],
       [[1, 0, 'right'], 3, [1, 3, 'left']],
       [[1, 2, 'left'], 0, [0, 2, 'right']],
-      [[1, 2, 'left'], 1, [1, 2, 'left']],
+      [[1, 2, 'left'], 1, [1, 2, 'right']],
       [[1, 2, 'left'], 2, [2, null, 'right']],
       [[1, 2, 'left'], 3, [3, 2, 'right']],
       [[1, 2, 'right'], 0, [1, 0, 'left']],
       [[1, 2, 'right'], 1, [null, 1, 'left']],
-      [[1, 2, 'right'], 2, [1, 2, 'right']],
+      [[1, 2, 'right'], 2, [1, 2, 'left']],
       [[1, 2, 'right'], 3, [1, 3, 'left']],
       [[1, 3, 'left'], 0, [0, 3, 'right']],
-      [[1, 3, 'left'], 1, [1, 3, 'left']],
+      [[1, 3, 'left'], 1, [1, 3, 'right']],
       [[1, 3, 'left'], 2, [2, 3, 'right']],
       [[1, 3, 'left'], 3, [3, null, 'right']],
       [[1, 3, 'right'], 0, [1, 0, 'left']],
       [[1, 3, 'right'], 1, [null, 1, 'left']],
       [[1, 3, 'right'], 2, [1, 2, 'left']],
-      [[1, 3, 'right'], 3, [1, 3, 'right']],
+      [[1, 3, 'right'], 3, [1, 3, 'left']],
       [[2, null, 'left'], 0, [0, null, 'right']],
       [[2, null, 'left'], 1, [1, null, 'right']],
-      [[2, null, 'left'], 2, [2, null, 'left']],
+      [[2, null, 'left'], 2, [2, null, 'right']],
       [[2, null, 'left'], 3, [3, null, 'right']],
       [[2, null, 'right'], 0, [2, 0, 'left']],
       [[2, null, 'right'], 1, [2, 1, 'left']],
@@ -593,32 +594,32 @@ describe('(d) the state (T1707)', () => {
       [[2, null, 'right'], 3, [2, 3, 'left']],
       [[2, 0, 'left'], 0, [0, null, 'right']],
       [[2, 0, 'left'], 1, [1, 0, 'right']],
-      [[2, 0, 'left'], 2, [2, 0, 'left']],
+      [[2, 0, 'left'], 2, [2, 0, 'right']],
       [[2, 0, 'left'], 3, [3, 0, 'right']],
-      [[2, 0, 'right'], 0, [2, 0, 'right']],
+      [[2, 0, 'right'], 0, [2, 0, 'left']],
       [[2, 0, 'right'], 1, [2, 1, 'left']],
       [[2, 0, 'right'], 2, [null, 2, 'left']],
       [[2, 0, 'right'], 3, [2, 3, 'left']],
       [[2, 1, 'left'], 0, [0, 1, 'right']],
       [[2, 1, 'left'], 1, [1, null, 'right']],
-      [[2, 1, 'left'], 2, [2, 1, 'left']],
+      [[2, 1, 'left'], 2, [2, 1, 'right']],
       [[2, 1, 'left'], 3, [3, 1, 'right']],
       [[2, 1, 'right'], 0, [2, 0, 'left']],
-      [[2, 1, 'right'], 1, [2, 1, 'right']],
+      [[2, 1, 'right'], 1, [2, 1, 'left']],
       [[2, 1, 'right'], 2, [null, 2, 'left']],
       [[2, 1, 'right'], 3, [2, 3, 'left']],
       [[2, 3, 'left'], 0, [0, 3, 'right']],
       [[2, 3, 'left'], 1, [1, 3, 'right']],
-      [[2, 3, 'left'], 2, [2, 3, 'left']],
+      [[2, 3, 'left'], 2, [2, 3, 'right']],
       [[2, 3, 'left'], 3, [3, null, 'right']],
       [[2, 3, 'right'], 0, [2, 0, 'left']],
       [[2, 3, 'right'], 1, [2, 1, 'left']],
       [[2, 3, 'right'], 2, [null, 2, 'left']],
-      [[2, 3, 'right'], 3, [2, 3, 'right']],
+      [[2, 3, 'right'], 3, [2, 3, 'left']],
       [[3, null, 'left'], 0, [0, null, 'right']],
       [[3, null, 'left'], 1, [1, null, 'right']],
       [[3, null, 'left'], 2, [2, null, 'right']],
-      [[3, null, 'left'], 3, [3, null, 'left']],
+      [[3, null, 'left'], 3, [3, null, 'right']],
       [[3, null, 'right'], 0, [3, 0, 'left']],
       [[3, null, 'right'], 1, [3, 1, 'left']],
       [[3, null, 'right'], 2, [3, 2, 'left']],
@@ -626,38 +627,40 @@ describe('(d) the state (T1707)', () => {
       [[3, 0, 'left'], 0, [0, null, 'right']],
       [[3, 0, 'left'], 1, [1, 0, 'right']],
       [[3, 0, 'left'], 2, [2, 0, 'right']],
-      [[3, 0, 'left'], 3, [3, 0, 'left']],
-      [[3, 0, 'right'], 0, [3, 0, 'right']],
+      [[3, 0, 'left'], 3, [3, 0, 'right']],
+      [[3, 0, 'right'], 0, [3, 0, 'left']],
       [[3, 0, 'right'], 1, [3, 1, 'left']],
       [[3, 0, 'right'], 2, [3, 2, 'left']],
       [[3, 0, 'right'], 3, [null, 3, 'left']],
       [[3, 1, 'left'], 0, [0, 1, 'right']],
       [[3, 1, 'left'], 1, [1, null, 'right']],
       [[3, 1, 'left'], 2, [2, 1, 'right']],
-      [[3, 1, 'left'], 3, [3, 1, 'left']],
+      [[3, 1, 'left'], 3, [3, 1, 'right']],
       [[3, 1, 'right'], 0, [3, 0, 'left']],
-      [[3, 1, 'right'], 1, [3, 1, 'right']],
+      [[3, 1, 'right'], 1, [3, 1, 'left']],
       [[3, 1, 'right'], 2, [3, 2, 'left']],
       [[3, 1, 'right'], 3, [null, 3, 'left']],
       [[3, 2, 'left'], 0, [0, 2, 'right']],
       [[3, 2, 'left'], 1, [1, 2, 'right']],
       [[3, 2, 'left'], 2, [2, null, 'right']],
-      [[3, 2, 'left'], 3, [3, 2, 'left']],
+      [[3, 2, 'left'], 3, [3, 2, 'right']],
       [[3, 2, 'right'], 0, [3, 0, 'left']],
       [[3, 2, 'right'], 1, [3, 1, 'left']],
-      [[3, 2, 'right'], 2, [3, 2, 'right']],
+      [[3, 2, 'right'], 2, [3, 2, 'left']],
       [[3, 2, 'right'], 3, [null, 3, 'left']],
     ]);
   });
 
-  it('pickSlot: a click puts the stage on the side that was next and flips next, empties the side it left, and no two clicks do the same thing', () => {
+  it('pickSlot: a click puts the stage on the side that was next and flips next, empties the side it left, on the stage already there flips next alone, and no two clicks do the same thing', () => {
     for (const n of [3, 4]) {
       const byState = new Map();
       for (const [before, k, after] of picks(n)) {
         const side = before[2] === 'left' ? 0 : 1;
+        const flipped = side === 0 ? 'right' : 'left';
+        byState.set(`${before}`, [...(byState.get(`${before}`) ?? []), `${after}`]);
         if (before[side] === k) {
-          // The stage already on the next side: nothing changes.
-          expect([before, k, after]).toEqual([before, k, before]);
+          // The stage already on the next side: the sides stay, next flips.
+          expect([before, k, after]).toEqual([before, k, [before[0], before[1], flipped]]);
           continue;
         }
         const kept = before[1 - side] === k ? null : before[1 - side];
@@ -666,9 +669,8 @@ describe('(d) the state (T1707)', () => {
           k,
           k,
           kept,
-          side === 0 ? 'right' : 'left',
+          flipped,
         ]);
-        byState.set(`${before}`, [...(byState.get(`${before}`) ?? []), `${after}`]);
       }
       for (const [before, after] of byState) expect([before, new Set(after).size]).toEqual([before, after.length]);
     }
@@ -706,25 +708,25 @@ describe('(d) the state (T1707)', () => {
     for (const n of [3, 4]) expect([n, reachable(n, 2, true)]).toEqual([n, pairs(n, true)]);
   });
 
-  it('pickSlot: from rest every pair either way round is within three clicks — and the first stage left of another than the last takes all three', () => {
+  it('pickSlot: from rest every pair either way round is within two clicks — the worst case — and only the last stage on the right with another left of it within one', () => {
     for (const n of [3, 4]) {
-      expect([n, reachable(n, 3, false)]).toEqual([n, pairs(n, false)]);
-      const late = pairs(n, false).filter((pair) => !reachable(n, 2, false).includes(pair));
-      expect([n, late]).toEqual([n, Array.from({ length: n - 2 }, (_, b) => `0,${b + 1}`)]);
+      expect([n, reachable(n, 2, false)]).toEqual([n, pairs(n, false)]);
+      expect([n, reachable(n, 1, false)]).toEqual([n, Array.from({ length: n - 1 }, (_, l) => `${l},${n - 1}`)]);
     }
   });
 
-  it('pickSlot from rest on three stages: Finished goes left and the right empties (F | –), Tones fills it (F | T), Finished again does nothing, Tones moves left (T | –), Camera right (T | C)', () => {
+  it('pickSlot from rest on three stages: Camera again keeps the sides and makes right next (C | F), Tones takes the right (C | T), Finished the left (F | T), Tones again keeps the sides and makes left next, Tones moves left (T | –), Camera right (T | C)', () => {
     let pair = { left: 0, right: 2, next: 'left' };
     const seen = [];
-    for (const k of [2, 1, 2, 1, 0]) {
+    for (const k of [0, 1, 2, 1, 1, 0]) {
       pair = pickSlot(pair, k);
       seen.push([k, pair]);
     }
     expect(seen).toEqual([
-      [2, { left: 2, right: null, next: 'right' }],
+      [0, { left: 0, right: 2, next: 'right' }],
+      [1, { left: 0, right: 1, next: 'left' }],
+      [2, { left: 2, right: 1, next: 'right' }],
       [1, { left: 2, right: 1, next: 'left' }],
-      [2, { left: 2, right: 1, next: 'left' }],
       [1, { left: 1, right: null, next: 'right' }],
       [0, { left: 1, right: 0, next: 'left' }],
     ]);
