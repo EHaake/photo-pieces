@@ -389,7 +389,7 @@ headers to confirm nothing was duplicated or dropped. -->
       frames 433, side panes stacked (both 433 wide); back up: narrow
       off, 666, still side, split 50. Nothing in the list unmeasured.
 
-- [ ] **T1709** — The first look, and the rounds. Not an
+- [x] **T1709** — The first look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 1
       pause, in the person's words, with T1704–T1708's numbers beside
       it. The questions the spec puts to him here, in plain language:
