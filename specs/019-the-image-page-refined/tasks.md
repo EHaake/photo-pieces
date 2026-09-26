@@ -429,7 +429,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `<em>Fixture stage.</em>` (greped); the fog piece's compare note
       unchanged._
 
-- [ ] **T1709a** — Round: the slider is two-way and the legend picks
+- [x] **T1709a** — Round: the slider is two-way and the legend picks
       the pair (the person, 2026-09-25: "it fundamentally needs to be
       a 2-way comparison … I do like being able to switch between
       different comparisons"; first pair Camera | Finished; the pair
@@ -809,6 +809,7 @@ tier if it is ever on (it is off). -->
 | Phase 1 review | implementation (`opus`, high) | ~142k | blocked once: the envelope table names two pins (the legend rule's strings; WORDING.compare by page source) that compare.test.mjs lacks — a plan-bullet defect, fixed as T1708a with the sidecar-note Markdown gap (the reviewer's recommendation: renderMarkdown, the live note cloning children); pause questions: the legend reads left→right while the track runs right→left; the 1px --color-bg divider on a bright photograph; sweep notes: matte (b)'s scan is section-bounded, AC 4's "page tests" are unit tables plus a browser record, unused envelope branches (cornerTags, 'above', remember 'always', sideNarrow 'switch') to prune at close-out, CLICK_SLOP_PX outside COMPARE, the switch frame's missing accessible name, aria-current on two stops, gear.mjs's duplicate cleaner and `in SECTIONS` |
 | T1708a review fixes | implementation (`opus`, high) | ~46k | done; 519 tests (+2); both mutations fail the named case; land-b reads <em>Fixture stage.</em>; a multi-paragraph sidecar note would keep its <p>s inside the span (single paragraph unwrapped by regex) — sweep note; the live note clone has no DOM test |
 | Phase 1 re-review | implementation (`opus`, high) | ~12k | signed off; to the sweep: a multi-paragraph sidecar note keeps <p>s in the span — plan and AUTHORING.md (T1715) should state one rule (fail the build, or "one paragraph"); the live note clone untested; `processing` renders as Markdown as the comparex27s last note but plain text in the How-it-was-made row |
+| T1709a two-way slider round | implementation (`opus`, high) | ~82k + ~40k (two rounds) | done; 523 tests; the orchestratorx27s first pairing rule (nearest member) could never reach Tones | Finished — the implementer caught it; corrected to "replace the older pick"; orchestrator miss again: 4ffc0e8 (`commit -a`) swept the first-rule draft — explicit paths from now on; dead `.compare-legend [aria-current]` selector left in the legend rule (pinned by (c)) — sweep note |
 
 _(Session-tier allowance draw noted at each pause.)_
 
