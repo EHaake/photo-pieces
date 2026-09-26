@@ -486,7 +486,7 @@ headers to confirm nothing was duplicated or dropped. -->
       `cornerTags` as set, every showing stage's tag state listed per
       view._
 
-- [ ] **T1709f** — Round: the camera stage's note on the page reads
+- [x] **T1709f** — Round: the camera stage's note on the page reads
       "The RAW file straight out of camera — no edits, no adjustments".
       `WORDING.compare.cameraNote` in the page, passed through
       `compareStages`; the page-source pin's row. _Verify: green; the
@@ -854,6 +854,7 @@ tier if it is ever on (it is off). -->
 | T1709c side-only wide | implementation (`opus`, high) | ~45k | done; 523 tests; 666 / 1160 / 666 / 666 on both pages; the swap keys on the view shown, so a narrow side that yielded to switch would keep the column — moot with stack; the swap has only the EXPECTED pin and the browser read |
 | T1709d ordered picking | implementation (`opus`, high) | ~93k | done; 525 tests; the hint sits after the control (the root is a 1fr auto grid, so anything among legend and control needs grid-column 1/-1); bold follows aria-pressed in the switch too; the live note follows the right slot; ordered pairs are not all reachable in two clicks (unordered are) |
 | T1709e Finished caption finding | implementation (`opus`, high) | ~40k | diagnosed, no site defect: the corner text is painted into the placeholder pixels by gen-placeholders (camera "4:3 · camera", tones "3:2 · tones", finished only "3:2"); no corner tags drawn (cornerTags false), captions display none, no pseudo-elements; nothing changed |
+| T1709f camera note | implementation (`opus`, high) | ~27k | done; 526 tests; land-b and the sampler read the note |
 
 _(Session-tier allowance draw noted at each pause.)_
 
