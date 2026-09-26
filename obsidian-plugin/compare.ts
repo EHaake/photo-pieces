@@ -1,12 +1,16 @@
-// The one container this plugin renders in Live Preview: a `:::compare`
-// block, shown as its stages' images with their labels. Kept free of the
+// The containers this plugin renders in Live Preview: the three blocks
+// that take stages — `:::compare`, `:::side` and `:::slider` — each shown
+// as its stages' images with their labels. Kept free of the
 // `obsidian` import so the site's test suite can read it
 // (obsidian-plugin.test.mjs at the repo root).
 
-/** A whole `:::compare` block, fence to fence, anchored to whole lines
- *  (use with the `gm` flags). Group 1 is the attribute braces, if any;
- *  group 2 the body. */
-export const COMPARE_PATTERN = '^:::compare(\\{[^}]*\\})?[ \\t]*\\n([\\s\\S]*?)\\n:::[ \\t]*$';
+/** A whole block of one of the three that take stages — `:::compare`,
+ *  `:::side` or `:::slider` — fence to fence, anchored to whole lines
+ *  (use with the `gm` flags). The name must be followed by `{`, spaces or
+ *  the line's end, so `:::sidebar` is not one. Group 1 is the attribute
+ *  braces, if any; group 2 the body. */
+export const STAGES_PATTERN =
+  '^:::(?:compare|side|slider)(\\{[^}]*\\})?[ \\t]*\\n([\\s\\S]*?)\\n:::[ \\t]*$';
 
 export type Stage = { src: string; label: string; note: string };
 

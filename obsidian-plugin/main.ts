@@ -2,15 +2,16 @@ import { Plugin, TFile, editorInfoField, editorLivePreviewField } from 'obsidian
 import { EditorView, Decoration, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
-import { COMPARE_PATTERN, parseCompareBody } from './compare';
+import { STAGES_PATTERN, parseCompareBody } from './compare';
 
 // Live Preview rendering for the LEAF form of the site's standalone image
 // blocks: while writing, `::single{src="./a.jpg" alt="…"}` shows the image
 // instead of raw directive text. Deliberately approximate — not styled to
 // match the site (see DECISIONS.md at the repo root).
 //
-// Mirrors the vocabulary in remark-pieces-blocks.mjs by convention. One
-// container renders: `:::compare`, shown as its stages' images with each
+// Mirrors the vocabulary in remark-pieces-blocks.mjs by convention. The
+// three blocks that take stages render — `:::compare`, `:::side` and
+// `:::slider` — each shown as a compare is, its stages' images with each
 // label beneath (its body read by compare.ts); the methods, the handle and
 // the loupe are the site's. What stays raw text on purpose: every other
 // `:::name … :::` container form (captions), grid, strip, aside, row, held —
@@ -27,7 +28,8 @@ import { COMPARE_PATTERN, parseCompareBody } from './compare';
 // wrong path shows "image not found" here too, rather than a same-named
 // file from some other folder.
 
-// `label` is set for a compare's stages only: shown beneath the image.
+// `label` is set for stages only (the three blocks that take stages):
+// shown beneath the image.
 type Image = { src: string; alt: string; label?: string };
 type Extract = (attrs: Record<string, string>) => Image[] | null;
 
@@ -194,10 +196,12 @@ function buildDecorations(state: EditorState, plugin: Plugin): DecorationSet {
   // Two passes, one per pattern; the builder needs its ranges in order.
   const found: { start: number; end: number; block: string; images: Image[] }[] = [];
 
-  // A compare's whole block, fence to fence. Its span is claimed whether
-  // or not it renders, so no line inside it is read as a leaf block.
+  // The whole block of any of the three that take stages (compare, side,
+  // slider), fence to fence, each rendered as a compare. Its span is
+  // claimed whether or not it renders, so no line inside it is read as a
+  // leaf block.
   const compares: { start: number; end: number }[] = [];
-  const compareRe = new RegExp(COMPARE_PATTERN, 'gm');
+  const compareRe = new RegExp(STAGES_PATTERN, 'gm');
   let m: RegExpExecArray | null;
   while ((m = compareRe.exec(text))) {
     const start = m.index;
