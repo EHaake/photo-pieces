@@ -399,14 +399,16 @@ export function formatCollision({ id, files }) {
  * `leftAlt|centerAlt|rightAlt`. References to other folders (any `/`
  * beyond a leading `./`) never match. Undefined when the body never
  * names the image with a non-empty alt — the image page then falls
- * back to the humanized filename. References inside a `:::compare`
- * container don't count (spec 019).
+ * back to the humanized filename. References inside a stages-bodied
+ * container — `:::compare`, `:::side`, `:::slider` — don't count
+ * (spec 019).
  */
 export function firstAltFor(body, basename) {
   for (const block of splitBlocks(body)) {
-    // A compare's image text is a stage's label ("Finished"), not the
-    // photograph's title (spec 019), so its references are skipped.
-    if (block.kind === 'container' && blockName(block.text) === 'compare') continue;
+    // A stage's image text is its label ("Finished"), not the
+    // photograph's title (spec 019), so every block whose body is
+    // stages — by its BLOCK_BODIES kind, not its name — is skipped.
+    if (block.kind === 'container' && BLOCK_BODIES[blockName(block.text)] === 'stages') continue;
     for (const ref of imageReferences(block.text)) {
       if (refersTo(ref.src, basename) && ref.alt) return ref.alt;
     }
@@ -562,6 +564,8 @@ export const BLOCK_BODIES = Object.freeze({
   row: 'prose',
   held: 'prose',
   compare: 'stages',
+  side: 'stages',
+  slider: 'stages',
 });
 
 // The body kinds whose non-image lines are a caption. A prose body is
@@ -705,7 +709,7 @@ export function sectionsFor(image) {
  * the transform, the image page and the compare script: its methods,
  * the class names its markup carries, and the widths it may take.
  */
-export const COMPARE_MODES = Object.freeze(['slider', 'side', 'switch']);
+export const COMPARE_MODES = Object.freeze(['slider', 'side', 'switch', 'filmstrip']);
 export const COMPARE_CLASSES = Object.freeze({
   root: 'compare',
   frames: 'compare-frames',
@@ -718,6 +722,12 @@ export const COMPARE_CLASSES = Object.freeze({
 export const COMPARE_WIDTHS = Object.freeze(['column', 'wide', 'stage']);
 /** Tunable: the compare's width per surface. */
 export const COMPARE_WIDTH = Object.freeze({ piece: 'column', page: 'column' });
+/**
+ * The pair blocks' width (spec 019 amendment), one value each of
+ * `COMPARE_WIDTHS`: side by side's and the slider's kept widths. A
+ * piece is their only surface, so one value per block is all there is.
+ */
+export const PAIR_WIDTH = Object.freeze({ side: 'wide', slider: 'column' });
 
 const COMPARE_SIZES = Object.freeze({
   column: '(min-width: 720px) 680px, 94vw',

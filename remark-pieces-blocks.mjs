@@ -13,6 +13,7 @@ import {
   imageIdFor,
   imageUrlFor,
   isPrivateRaster,
+  PAIR_WIDTH,
   parseReference,
   privateMessage,
   privateTargetOf,
@@ -30,7 +31,11 @@ import {
 //   forms:   'container' | 'both'
 //   body:    'caption' | 'prose' | 'images+caption' | 'stages'
 //   structure: 'unwrap' | 'split' | 'scroll' | 'compare' — how the output
-//            is built; omitted, the block is one figure of its frames
+//            is built; omitted, the block is one figure of its frames.
+//            'compare' builds compare, side and slider alike: one shape,
+//            told apart by the piece-<name> class every block carries
+//   count:   { min, max? } — the images+caption and stages bodies' count;
+//            a stages body with no max takes two or more
 //   attrs:   { required: [...], optional: [...], enums: { name: [...] },
 //              flags: [...] }  — a flag is valid only bare: {bleed}
 //   images:  (attrs, fail) => [{ src, alt }]  — validates and extracts
@@ -49,6 +54,9 @@ import {
 //            container carries --ar-sum and --n; everything else gets the
 //            raw ratio. rawAr puts the raw ratio on the wrapper too.
 //   probeAsker: what the probe's failure names (default: the block)
+//   A stages body (compare, side, slider) shares stageSizing, so a
+//   stage image carries the same sizes whatever block holds it, and
+//   takes no attributes but the compare's mode.
 //   rejectBodyImages: the body is prose only — set to the message an
 //            image in it fails with
 //   proseClass: the split structure's prose cell class
@@ -73,7 +81,7 @@ import {
 // Exceptions: alt="" (decorative; a link with no accessible name fails
 // WCAG 2.4.4), remote and root-absolute srcs (no page exists), formats
 // outside the registry (gif, svg), images an author already linked, and
-// a compare's stages (a device, not frames).
+// the stages of a compare, side or slider (a device, not frames).
 //
 // Single-colon text directives (`:word` mid-prose) are restored to the
 // literal text the author typed, attributes included: none of the
@@ -90,6 +98,11 @@ const COLLAPSE = '(min-width: 720px)';
 // the `sizes` hint: a square counts as landscape (width-starved beside
 // a column on a portrait screen the same way).
 const isLandscape = (ratio) => ratio >= 1;
+
+// Every stage image's sizing, whatever block holds it (compare, side,
+// slider): a stage shown by several blocks of one page resolves to one
+// URL, so it is fetched once.
+const stageSizing = () => ({ layout: 'constrained', sizes: compareSizes(COMPARE_WIDTH.piece) });
 
 export const BLOCKS = {
   single: {
@@ -404,7 +417,32 @@ export const BLOCKS = {
     structure: 'compare',
     count: { min: 2 },
     attrs: { required: [], optional: ['mode'], enums: { mode: COMPARE_MODES } },
-    sizing: () => ({ layout: 'constrained', sizes: compareSizes(COMPARE_WIDTH.piece) }),
+    sizing: stageSizing,
+  },
+
+  side: {
+    // Spec 019 amendment: exactly two stages, written as a compare's
+    // are, shown beside each other — static, no method, no script, and
+    // no attributes. The compare's structure whole, at PAIR_WIDTH.side.
+    forms: 'container',
+    body: 'stages',
+    structure: 'compare',
+    count: { min: 2, max: 2 },
+    attrs: { required: [], optional: [], enums: {} },
+    sizing: stageSizing,
+  },
+
+  slider: {
+    // Spec 019 amendment: exactly two stages, the compare's slider alone
+    // — first stage left of the divider, second right; no method
+    // control and no attributes. The compare's structure whole, at
+    // PAIR_WIDTH.slider.
+    forms: 'container',
+    body: 'stages',
+    structure: 'compare',
+    count: { min: 2, max: 2 },
+    attrs: { required: [], optional: [], enums: {} },
+    sizing: stageSizing,
   },
 };
 
@@ -530,9 +568,11 @@ export function remarkPiecesBlocks() {
         }
         images = bodyImages;
       } else if (block.body === 'stages') {
-        if (stages.length < block.count.min) {
+        const { min, max } = block.count;
+        if (stages.length < min || (max !== undefined && stages.length > max)) {
+          const takes = min === max ? 'exactly two' : 'two or more';
           failHere(
-            `${node.name} takes two or more stages (one per line: ![Label](./file.jpg) then its note); got ${stages.length}`,
+            `${node.name} takes ${takes} stages (one per line: ![Label](./file.jpg) then its note); got ${stages.length}`,
           );
         }
         images = stages.map(({ src, label }) => ({ src, alt: label }));
@@ -541,9 +581,10 @@ export function remarkPiecesBlocks() {
       }
       for (const image of images) {
         checkReferenceShape(file, image.src, failHere);
-        // A compare's stage may be a private file — of its own folder
-        // only; every other block refuses a private file outright.
-        if (block.body === 'stages') rejectBorrowedPrivate(image.src, failHere);
+        // A stage (compare, side, slider) may be a private file — of its
+        // own folder only; every other block refuses a private file
+        // outright.
+        if (block.body === 'stages') rejectBorrowedPrivate(image.src, node.name, failHere);
         else rejectPrivateSrc(image.src, failHere);
         checkSrcExists(file, node, image.src);
       }
@@ -632,9 +673,10 @@ export function remarkPiecesBlocks() {
               'piece-block',
               `piece-${node.name}`,
               C.root,
-              `${C.root}-w-${COMPARE_WIDTH.piece}`,
+              `${C.root}-w-${PAIR_WIDTH[node.name] ?? COMPARE_WIDTH.piece}`,
             ],
             ...(last === null ? {} : { style: `--ar: ${trimNumber(last)}` }),
+            // Only a compare takes a mode; side and slider allow none.
             ...(attrs.mode !== undefined ? { dataMode: attrs.mode } : {}),
           },
         };
@@ -836,8 +878,8 @@ function checkReferenceShape(file, src, fail) {
 // shown only on that image's page or as a stage of a compare. A piece
 // must not place it (it has no page to link to, and it isn't a
 // photograph the site presents), whatever the alt — so this runs before
-// the alt="" exemption, not inside imagePageUrl. A compare's stages run
-// rejectBorrowedPrivate instead.
+// the alt="" exemption, not inside imagePageUrl. The stages of a compare,
+// side or slider run rejectBorrowedPrivate instead.
 function rejectPrivateSrc(src, fail) {
   // The basename comes from the parser (spec 008): a borrowed
   // `../beta/_land-b.jpg` must be caught too, and stripping a leading
@@ -857,16 +899,17 @@ function rejectPrivateSrc(src, fail) {
   }
 }
 
-// Spec 019: a compare may show a private file of its own folder only. A
-// private file of another folder is another photograph's making-of; a
-// public photograph may be borrowed as any frame is (spec 008).
-function rejectBorrowedPrivate(src, fail) {
-  const { kind, basename: name, ext } = parseReference(src);
-  if (!name || kind === 'local') return;
-  if (IMAGE_EXTENSIONS.includes(ext) && isPrivateRaster(name)) {
+// Spec 019: a stages block (compare, side, slider — named in the line)
+// may show a private file of its own folder only. A private file of
+// another folder is another photograph's making-of; a public photograph
+// may be borrowed as any frame is (spec 008).
+function rejectBorrowedPrivate(src, name, fail) {
+  const { kind, basename, ext } = parseReference(src);
+  if (!basename || kind === 'local') return;
+  if (IMAGE_EXTENSIONS.includes(ext) && isPrivateRaster(basename)) {
     const folder = src.slice(0, src.lastIndexOf('/') + 1);
     fail(
-      `"${src}" is a private file of another folder — a compare may show a private file only from its own folder; a public photograph may be borrowed (${folder}${privateTargetOf(name)}${src.slice(src.lastIndexOf('.'))})`,
+      `"${src}" is a private file of another folder — a ${name} may show a private file only from its own folder; a public photograph may be borrowed (${folder}${privateTargetOf(basename)}${src.slice(src.lastIndexOf('.'))})`,
     );
   }
 }
@@ -1075,7 +1118,11 @@ function validateAttributes(block, name, attrs, fail) {
   const allowed = new Set([...block.attrs.required, ...block.attrs.optional]);
   for (const key of Object.keys(attrs)) {
     if (!allowed.has(key)) {
-      fail(`unknown attribute "${key}" on ${name} — allowed: ${[...allowed].join(', ')}`);
+      fail(
+        allowed.size === 0
+          ? `unknown attribute "${key}" on ${name} — ${name} takes no attributes`
+          : `unknown attribute "${key}" on ${name} — allowed: ${[...allowed].join(', ')}`,
+      );
     }
   }
   // remark-directive parses a bare {flag} as flag: "" — a flag with a

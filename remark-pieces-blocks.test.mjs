@@ -374,6 +374,73 @@ describe('the compare block (T1705, spec 019)', () => {
     );
   });
 
+  it('the fourth mode: a compare written mode="filmstrip" renders with data-mode="filmstrip" (T1721)', async () => {
+    const { code } = await render(three.replace(':::compare', ':::compare{mode="filmstrip"}'));
+    expect(code).toMatch(
+      /^<figure class="piece-block piece-compare compare compare-w-column" style="--ar: 0\.6667" data-mode="filmstrip">/,
+    );
+    expect(stagesOf(code)).toHaveLength(3);
+  });
+
+  // T1721 (spec 019 amendment): side and slider are the compare's shape
+  // whole, told apart by piece-<name> and their width; exactly two
+  // stages, no mode, no link.
+  describe('the pair blocks, side and slider (T1721)', () => {
+    const pair = (name) =>
+      [
+        `:::${name}`,
+        '![Camera](./_photo.jpg) Straight out of the camera, flat profile.',
+        '![Finished](./portrait.jpg) A touch of warmth.',
+        ':::',
+      ].join('\n');
+
+    it.each([
+      ['side', 'wide'],
+      ['slider', 'column'],
+    ])(
+      ':::%s with two stages renders the compare shape at compare-w-%s, labels and notes in order, no data-mode, no link',
+      async (name, width) => {
+        const { code } = await render(pair(name));
+        expect(code).toMatch(
+          new RegExp(
+            `^<figure class="piece-block piece-${name} compare compare-w-${width}" style="--ar: 0\\.6667"><div class="compare-frames"><figure class="compare-stage">`,
+          ),
+        );
+        expect(code.endsWith('</figure></div></figure>')).toBe(true);
+        expect(stagesOf(code).map(({ label, note }) => ({ label, note }))).toEqual([
+          { label: 'Camera', note: 'Straight out of the camera, flat profile.' },
+          { label: 'Finished', note: 'A touch of warmth.' },
+        ]);
+        expect((code.match(/<figure class="compare-stage">/g) ?? []).length).toBe(2);
+        expect(code).not.toContain('data-mode');
+        expect(code).not.toContain('image-link');
+        expect(code).not.toContain('<a ');
+      },
+    );
+
+    it.each(['side', 'slider'])(
+      "each :::%s stage image's sizes equal a compare's",
+      async (name) => {
+        const compare = await render(pair('compare'));
+        const compareSizes = imageMarkers(compare.code).map((m) => m.sizes);
+        expect(compareSizes).toEqual([
+          '(min-width: 720px) 680px, 94vw',
+          '(min-width: 720px) 680px, 94vw',
+        ]);
+        const { code } = await render(pair(name));
+        expect(imageMarkers(code).map((m) => m.sizes)).toEqual(compareSizes);
+      },
+    );
+
+    it.each(['side', 'slider'])('a :::%s of two own-folder private stages renders', async (name) => {
+      const { code } = await render(
+        `:::${name}\n![Camera](./_photo.jpg) Flat.\n![Tones](./_photo.tones.jpg) Lifted.\n:::`,
+      );
+      expect(imageMarkers(code).map((m) => m.src)).toEqual(['./_photo.jpg', './_photo.tones.jpg']);
+      expect(stagesOf(code).map((s) => s.label)).toEqual(['Camera', 'Tones']);
+    });
+  });
+
   it('stages separated by blank lines parse like consecutive ones', async () => {
     const spaced = await render(
       [
@@ -428,6 +495,33 @@ describe('the compare block (T1705, spec 019)', () => {
       expect(error.file).toMatch(/tests\/pieces\/alpha\/index\.md$/);
       expect(error.line).toBe(3);
     });
+
+    it.each(['side', 'slider'])(
+      'a :::%s borrowing a public photograph renders (T1721)',
+      async (name) => {
+        const { code } = await processor.render(
+          `:::${name}\n![Here](./photo.jpg) Ours.\n![There](../beta/photo.jpg) Theirs.\n:::`,
+          { fileURL: alphaURL },
+        );
+        expect(stagesOf(code).map((s) => s.label)).toEqual(['Here', 'There']);
+        expect(imageMarkers(code).map((m) => m.src)).toEqual(['./photo.jpg', '../beta/photo.jpg']);
+      },
+    );
+
+    it.each(['side', 'slider'])(
+      "a :::%s borrowing another folder's private file fails naming the block, though the file exists (T1721)",
+      async (name) => {
+        const error = await failureOf(
+          `Text.\n\n:::${name}\n![Here](./photo.jpg) Ours.\n![There](../beta/_photo.jpg) Theirs.\n:::`,
+          alphaURL,
+        );
+        expect(error.message).toContain(
+          `"../beta/_photo.jpg" is a private file of another folder — a ${name} may show a private file only from its own folder; a public photograph may be borrowed (../beta/photo.jpg)`,
+        );
+        expect(error.file).toMatch(/tests\/pieces\/alpha\/index\.md$/);
+        expect(error.line).toBe(3);
+      },
+    );
   });
 
   // Each failure names the piece and the line: the compare opens on
@@ -461,7 +555,34 @@ describe('the compare block (T1705, spec 019)', () => {
     [
       'an unknown mode',
       ':::compare{mode="carousel"}\n![Camera](./_photo.jpg) Flat.\n![Finished](./photo.jpg) Done.\n:::',
-      'invalid value "carousel" for mode on compare — allowed: slider | side | switch',
+      'invalid value "carousel" for mode on compare — allowed: slider | side | switch | filmstrip',
+    ],
+    // T1721 (spec 019 amendment): the pair blocks take exactly two
+    // stages and no attributes.
+    [
+      'a side with one stage',
+      ':::side\n![Camera](./_photo.jpg) Flat.\n:::',
+      'side takes exactly two stages (one per line: ![Label](./file.jpg) then its note); got 1',
+    ],
+    [
+      'a side with three stages',
+      ':::side\n![Camera](./_photo.jpg) Flat.\n![Tones](./_photo.tones.jpg) Lifted.\n![Finished](./photo.jpg) Done.\n:::',
+      'side takes exactly two stages (one per line: ![Label](./file.jpg) then its note); got 3',
+    ],
+    [
+      'a slider with one stage',
+      ':::slider\n![Camera](./_photo.jpg) Flat.\n:::',
+      'slider takes exactly two stages (one per line: ![Label](./file.jpg) then its note); got 1',
+    ],
+    [
+      'a slider with three stages',
+      ':::slider\n![Camera](./_photo.jpg) Flat.\n![Tones](./_photo.tones.jpg) Lifted.\n![Finished](./photo.jpg) Done.\n:::',
+      'slider takes exactly two stages (one per line: ![Label](./file.jpg) then its note); got 3',
+    ],
+    [
+      'a mode on a side',
+      ':::side{mode="slider"}\n![Camera](./_photo.jpg) Flat.\n![Finished](./photo.jpg) Done.\n:::',
+      'unknown attribute "mode" on side — side takes no attributes',
     ],
     [
       'a private file placed by another block, with the widened message',

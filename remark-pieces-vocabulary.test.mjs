@@ -933,7 +933,7 @@ describe('cross-piece references (T602, spec 008)', () => {
 
 describe('the closed vocabulary (T1501, spec 017)', () => {
   const unknown =
-    /unknown block directive "pause" — the block vocabulary is closed; known blocks: single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip, aside, row, held/;
+    /unknown block directive "pause" — the block vocabulary is closed; known blocks: single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip, aside, row, held, compare, side, slider$/;
 
   // The thrown VFileMessage, so its file and line can be pinned too.
   const failureOf = async (content) => {

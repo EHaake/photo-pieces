@@ -20,6 +20,7 @@ import {
   isPrivateRaster,
   nearest,
   neighbours,
+  PAIR_WIDTH,
   parseImagePath,
   parseReference,
   passageFor,
@@ -234,6 +235,14 @@ describe('first alt in a piece body (T302)', () => {
       ':::compare\n![Camera](./_land-b.jpg)\nStraight from the card.\n![Finished](./land-b.jpg)\nThe print.\n:::';
     expect(firstAltFor(body, 'land-b')).toBeUndefined();
   });
+
+  it("a side's stage label is not the title: skipped by its stages kind when it comes first (T1721)", () => {
+    const body = [
+      ':::side\n![Camera](./_land-b.jpg) Straight from the card.\n![Finished](./land-b.jpg) The print.\n:::',
+      ':::held{src="./land-b.jpg" alt="The ridgeline at dawn"}\nWords beside it.\n:::',
+    ].join('\n\n');
+    expect(firstAltFor(body, 'land-b')).toBe('The ridgeline at dawn');
+  });
 });
 
 describe('humanized filename (T302)', () => {
@@ -447,11 +456,13 @@ describe('the passage by body kind (T502, spec 007)', () => {
     // And the kinds stay within the ones the descriptor model documents:
     // a new kind added in step on both sides would otherwise fall
     // silently into passageFor's "no caption" default. `stages` (spec
-    // 019, the compare) is added deliberately — it contributes no
-    // caption, pinned below.
+    // 019, the compare; side and slider at T1721) is added deliberately
+    // — it contributes no caption, pinned below.
     for (const kind of Object.values(BLOCK_BODIES)) {
       expect(['caption', 'prose', 'images+caption', 'stages', 'none']).toContain(kind);
     }
+    expect(BLOCK_BODIES.side).toBe('stages');
+    expect(BLOCK_BODIES.slider).toBe('stages');
   });
 
   it("a grid's caption line is its caption, like a strip's", () => {
@@ -504,6 +515,14 @@ describe('the passage by body kind (T502, spec 007)', () => {
     ].join('\n\n');
     expect(passageFor(body, 'land-b')).toEqual({ prose: 'Before the compare.' });
     expect(passageFor(body, '_land-b')).toEqual({ prose: 'Before the compare.' });
+  });
+
+  it("a slider's stage notes give no caption (T1721)", () => {
+    const body = [
+      'Before the slider.',
+      ':::slider\n![Camera](./_land-b.jpg)\nStraight from the card.\n![Finished](./land-b.jpg)\nThe print.\n:::',
+    ].join('\n\n');
+    expect(passageFor(body, 'land-b')).toEqual({ prose: 'Before the slider.' });
   });
 });
 
@@ -1162,9 +1181,10 @@ describe('the private-file family (T1701, spec 019)', () => {
   });
 
   it("the compare's widths: every surface's width is an allowed one, and each has its sizes hint", () => {
-    for (const width of Object.values(COMPARE_WIDTH)) {
+    for (const width of [...Object.values(COMPARE_WIDTH), ...Object.values(PAIR_WIDTH)]) {
       expect(COMPARE_WIDTHS).toContain(width);
     }
+    expect(PAIR_WIDTH).toEqual({ side: 'wide', slider: 'column' });
     expect(compareSizes('column')).toBe('(min-width: 720px) 680px, 94vw');
     expect(compareSizes('wide')).toBe('(min-width: 1240px) 1160px, 96vw');
     expect(compareSizes('stage')).toBe('100vw');
