@@ -67,10 +67,12 @@ CMS or backend service for v1.
 - **Closed block vocabulary**: image treatments inside a piece's body are
   limited to a defined set of directive-backed treatments — as of spec 019:
   single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip,
-  aside, row, one durational block, held, and one interactive block,
-  compare (an ordered list of a photograph's stages — each an image, a
-  label and a note — looked at three ways), with captions via
-  the container form; the site mats only the image page's quiet view
+  aside, row, one durational block, held, and three blocks that take a
+  photograph's stages (each an image, a label and a note): compare, an
+  interactive block that looks at an ordered list of them four ways, and
+  two that hold a pair — side, the two beside each other as plain
+  figures, and slider, an interactive wipe between them — with captions
+  via the container form; the site mats only the image page's quiet view
   (spec 015, narrowed at 017: the mat is worn where the ground is dark)
   — a piece's frames and the stage on paper sit unmatted on the ground.
   The pause block (spec 007) was withdrawn at spec 017 and is not in
@@ -88,7 +90,8 @@ CMS or backend service for v1.
   one-off markup inline. There are deliberately no per-block `.astro`
   components: mapping rendered elements to components is an MDX-only
   feature, and pieces are plain `.md` by hard rule. For the same reason
-  an _interactive_ block — `compare`, and any after it — is built as
+  an _interactive_ block — `compare` and `slider`, and any after them —
+  is built as
   page-level progressive enhancement over the
   transform's HTML — `.md` content cannot mount islands, and without
   script its content stands as plain figures. The Obsidian
@@ -113,8 +116,9 @@ CMS or backend service for v1.
   stage of its processing, and `_<basename>.detail.<ext>` a larger
   export for the image page's loupe alone, fetched only when the loupe
   opens (spec 019). A private file sits beside its photograph and may
-  be placed in a body only as a stage of a `compare` block in its own
-  folder. Not the final
+  be placed in a body only as a stage of a `compare`, `side` or `slider`
+  block — the three blocks that take stages — in its own folder. Not the
+  final
   architecture: migrate to an external store once repo size or clone
   speed becomes a real, not hypothetical, problem. See `plan.md` for
   the reasoning.
