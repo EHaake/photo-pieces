@@ -620,7 +620,7 @@ images.
       `sh scripts/verify.sh` green (count recorded); mutation, reverted:
       Escape at zoomed made `leave-quiet` → the two-level case fails._
 
-- [ ] **T1712** — The loupe, wired. Pattern: the image page's
+- [x] **T1712** — The loupe, wired. Pattern: the image page's
       `setQuiet`, `init()`, stage click handler and `keydown` (the
       routing extended, not rewritten); the quiet cursor rules' comment
       in `global.css` for where a cursor rule must live and why. Plan:
@@ -929,6 +929,7 @@ tier if it is ever on (it is off). -->
 | T1709j label · note | implementation (`opus`, high) | ~44k | done; 531 tests; label-to-note gap 22.85px, the space character plus margin on the label side (asymmetric by ~4px) — note |
 | T1710 loupe file | implementation (`opus`, high) | ~75k + ~20k | done; 535 tests; land-b loupe 39,702 B (5400×3600 webp, flat fixture); dist/_astro main 781 files / 35.45 MB → after 837 / 40.25 MB (+37 files, +4.75 MB, the 62 own-file loupes 4.84 MB, none sharing a stage srcset file — fit/position enter the stage hash); the constrained layout emitted nine unnamed sizes per getImage until layout none (plan amended); og.ts has the same waste — sweep note; exifr cannot open webp (check-no-gps reads through sharp) |
 | T1711 loupe state | implementation (`opus`, high) | ~58k | done; 563 tests (+28); every fit→zoomed step (wheel, pinch, key) returns open; click decided after press/move/release by dragSlop; arrows move the view the way they point; in dblclick mode a double click while zoomed would close then reopen — T1712 or a round if the pause picks dblclick |
+| T1712 loupe wired | implementation (`opus`, high) | ~127k + ~60k (two rounds) | done; 573 tests (+10); stopped once on matte (b)'s quiet-list count vs the plan's cursor rule — resolved as a deliberate fourth by name (plan noted); the loupe section sits before the compare section (compare.test slices compare → Motion); wheel deltaMode converted; a dblclick listener so opensOn can be retuned; no real 2560px export exists — the Phase 2 report quotes 2000px numbers |
 
 _(Session-tier allowance draw noted at each pause.)_
 
