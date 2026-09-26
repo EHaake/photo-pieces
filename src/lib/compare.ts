@@ -190,14 +190,20 @@ export function sideFits(width: number): boolean {
  * lines, its label over its side tag's row, always there and blank while
  * the stage holds no side; a hint after the legend names the side the
  * next pick takes — the first stage left and the last right at rest; in
- * the switch it goes to the stage, its tag rows blank and no hint),
- * the divider and the handle
- * (an ARIA slider), the live note, and the corner tags when
+ * the switch and the filmstrip it goes to the stage, its tag rows blank
+ * and no hint), the divider and the handle
+ * (an ARIA slider), the filmstrip's two arrows (T1726), the live note,
+ * and the corner tags when
  * `COMPARE.cornerTags`; and the state the CSS reads — `data-js`,
- * `data-view`, `data-narrow`, each stage's `data-part`, `--split`, and the
- * two motion attributes (`data-settling` for a snap's glide, only when
- * motion is not reduced; `data-fresh` on every mode change, until the
- * panes' fade ends). The views are T1707's pure functions above.
+ * `data-view`, `data-narrow`, each stage's `data-part` and `--i` (its
+ * place in the filmstrip's row), `--split`, `--strip-at` (the strip's
+ * position, in stages), and the
+ * three motion attributes (`data-settling` for a snap's glide or the
+ * strip's settle after a drag or a wheel, and `data-paging` for the
+ * strip's slide to a stage, each only when motion is not reduced and
+ * only when there is somewhere to go; `data-fresh` on every mode
+ * change, until the panes' fade ends). The views are T1707's pure
+ * functions above.
  *
  * The pair blocks (spec 019 amendment): the slider block (`.piece-slider`,
  * T1725) is this compare fixed on its slider — the mode 'slider' whatever
@@ -255,6 +261,9 @@ const LEGEND_AT: string = COMPARE.legend;
 const CONTROL_AT: string = COMPARE.control;
 const SWITCH_KEYS: readonly string[] = COMPARE.switchKeys;
 const SWITCH_BACK_KEYS: readonly string[] = COMPARE.switchBackKeys;
+const STRIP_KEYS: Record<keyof typeof COMPARE.stripKeys, readonly string[]> = COMPARE.stripKeys;
+const STRIP_ENDS: string = COMPARE.stripEnds;
+const STRIP_WIDTH: string = COMPARE.stripWidth;
 const MODES = Object.keys(COMPARE_WORDING.modes) as CompareMode[];
 /** A click that travelled further than this was a drag, not a click. */
 const CLICK_SLOP_PX = 4;
@@ -327,6 +336,8 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   const rest = fixed ? restView('slider', 2) : restView('side', n);
   let picked: CompareSlots = { left: rest.left, right: rest.right, next: 'left' };
   let stage = restView('switch', n).stage;
+  // The filmstrip's position, in stages: it shows the switch's stage, and a drag or a wheel moves it between.
+  let at: number = stage;
   /** The switch's leaving stage while the arriving one fades in over it. */
   let leaving: number | null = null;
   let fits = true;
@@ -334,6 +345,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   // The width class the surface wrote, read once; side by side swaps it for `COMPARE.sideWidth`'s.
   const surfaceWidth = [...root.classList].find((name) => name.startsWith(`${C.root}-w-`)) ?? '';
   const sideWidth = `${C.root}-w-${COMPARE.sideWidth}`;
+  const stripWidth = STRIP_WIDTH === 'surface' ? surfaceWidth : `${C.root}-w-${STRIP_WIDTH}`;
   let worn = surfaceWidth;
 
   // The chrome.
@@ -346,6 +358,18 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   handle.setAttribute('aria-valuemin', '0');
   handle.setAttribute('aria-valuemax', '100');
   frames.append(line, handle);
+
+  // The filmstrip's arrows, previous and next, at the frame's sides; each stage's place in its row.
+  const arrows = (['back', 'next'] as const).map((dir) => {
+    const arrow = make('button', 'compare-arrow', dir === 'back' ? '←' : '→');
+    arrow.type = 'button';
+    arrow.dataset.dir = dir;
+    arrow.setAttribute('aria-label', COMPARE_WORDING.strip[dir]);
+    arrow.addEventListener('click', () => page(switchNext(stage, n, dir === 'back' ? -1 : 1, COMPARE.stripWraps)));
+    return arrow;
+  });
+  frames.append(...arrows);
+  stages.forEach((one, i) => one.style.setProperty('--i', String(i)));
 
   const legend = make('ol', 'compare-legend');
   legend.setAttribute('aria-label', COMPARE_WORDING.legend);
@@ -383,13 +407,9 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     stages.forEach((one, i) => one.append(make('span', 'compare-tag', words[i].label)));
 
   // The method the frame shows: side by side yields to the switch where
-  // two won't fit and `sideNarrow` says so. The filmstrip shows the
-  // switch's view until its own is built (T1724 to T1726, no pause
-  // between): its word is in the control, its state is the switch's.
+  // two won't fit and `sideNarrow` says so.
   const view = (): CompareMode =>
-    (mode === 'side' && !fits && SIDE_NARROW === 'switch') || mode === 'filmstrip'
-      ? 'switch'
-      : mode;
+    mode === 'side' && !fits && SIDE_NARROW === 'switch' ? 'switch' : mode;
 
   const setPart = (element: HTMLElement, part: string) => {
     if (element.dataset.part !== part) element.dataset.part = part;
@@ -419,8 +439,9 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     const showing = view();
     if (root.dataset.view !== showing) {
       root.dataset.view = showing;
-      // Side by side wears `COMPARE.sideWidth`; every other view the surface's own width.
-      const width = showing === 'side' ? sideWidth : surfaceWidth;
+      // Side by side wears `COMPARE.sideWidth`, the filmstrip `COMPARE.stripWidth`; every other view the surface's own width.
+      const width =
+        showing === 'side' ? sideWidth : showing === 'filmstrip' ? stripWidth : surfaceWidth;
       if (width !== worn) {
         if (worn) root.classList.remove(worn);
         if (width) root.classList.add(width);
@@ -447,6 +468,21 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
       );
       shown = onSides(picked);
       note = noteIndex('side', picked);
+    } else if (showing === 'filmstrip') {
+      // The row slid to `at`; the showing stage in the frame, every other beside it, off the frame.
+      root.style.setProperty('--strip-at', String(at));
+      stages.forEach((one, i) => setPart(one, i === stage ? 'on' : 'strip'));
+      shown = [stage];
+      note = noteIndex('filmstrip', { stage });
+      // An arrow with nowhere to go is hidden or quiet, per `COMPARE.stripEnds`.
+      const ends = stripEnds(stage, n);
+      arrows.forEach((arrow) => {
+        const open = ends[arrow.dataset.dir as 'back' | 'next'];
+        if (STRIP_ENDS === 'quiet') {
+          if (open) arrow.removeAttribute('aria-disabled');
+          else arrow.setAttribute('aria-disabled', 'true');
+        } else if (arrow.hidden === open) arrow.hidden = !open;
+      });
     } else {
       stages.forEach((one, i) =>
         setPart(
@@ -457,22 +493,23 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
       shown = [stage];
       note = noteIndex('switch', { stage });
     }
-    // The frames take focus in the switch, where a key advances them.
-    if (showing === 'switch') frames.tabIndex = 0;
+    // The frames take focus in the switch and the filmstrip, where a key moves them.
+    const single = showing === 'switch' || showing === 'filmstrip';
+    if (single) frames.tabIndex = 0;
     else frames.removeAttribute('tabindex');
 
     // The slider block's legend is text, and it has no hint: nothing here to mark.
     if (!fixed) {
       [...legend.children].forEach((item, i) => {
         item.firstElementChild?.setAttribute('aria-pressed', String(shown.includes(i)));
-        // The side tag's row names the side the stage holds; blank otherwise, and in the switch.
+        // The side tag's row names the side the stage holds; blank otherwise, and in the switch and the filmstrip.
         const slot =
-          showing === 'switch' ? null : i === picked.left ? 'left' : i === picked.right ? 'right' : null;
+          single ? null : i === picked.left ? 'left' : i === picked.right ? 'right' : null;
         const tag = slot === null ? BLANK : COMPARE_WORDING.slots[slot];
         if (slotTags[i].textContent !== tag) slotTags[i].textContent = tag;
       });
     }
-    // The hint names the side the next pick takes (hidden in the switch by the stylesheet).
+    // The hint names the side the next pick takes (hidden in the switch and the filmstrip by the stylesheet).
     const next = `${COMPARE_WORDING.next} ${COMPARE_WORDING.slots[picked.next]}`;
     if (hint && hint.textContent !== next) hint.textContent = next;
     modeButtons.forEach((button, i) =>
@@ -511,9 +548,37 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     render();
   };
 
-  /** A legend button: the slider and side by side take the pair it picks, the switch goes to it. */
+  /** The filmstrip at position `to`: the showing stage the nearest, the strip following directly. */
+  const strip = (to: number) => {
+    at = Math.round(stripAt(to, 0, n) * 1e6) / 1e6;
+    stage = stripSettle(at, n);
+    render();
+  };
+
+  /** The filmstrip paged to stage `to` (an arrow, a key, the legend): a slide on the move duration. */
+  const page = (to: number) => {
+    if (to === at) return;
+    delete root.dataset.settling;
+    // The slide is a movement: a cut under reduced motion.
+    if (!reducedMotion()) root.dataset.paging = '';
+    strip(to);
+  };
+
+  /** The filmstrip settled on the nearest stage after a drag or a wheel: a movement on the state duration. */
+  const settle = () => {
+    const to = stripSettle(at, n);
+    if (to === at) return;
+    delete root.dataset.paging;
+    // The settle is a movement: a cut under reduced motion.
+    if (!reducedMotion()) root.dataset.settling = '';
+    strip(to);
+  };
+
+  /** A legend button: the slider and side by side take the pair it picks, the switch and the filmstrip go to it. */
   const pick = (i: number) => {
-    if (view() === 'switch') go(i);
+    const showing = view();
+    if (showing === 'switch') go(i);
+    else if (showing === 'filmstrip') page(i);
     else {
       picked = pickSlot(picked, i);
       render();
@@ -525,6 +590,8 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     if (next === mode) return;
     mode = next;
     leaving = null;
+    // The filmstrip opens on the switch's stage (and the switch on the filmstrip's).
+    at = stage;
     writeMode(mode);
     render();
     delete root.dataset.fresh;
@@ -597,7 +664,12 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   frames.addEventListener('pointerup', release);
   frames.addEventListener('pointercancel', release);
   root.addEventListener('transitionend', (event) => {
-    if (event.target === root && event.propertyName === '--split') delete root.dataset.settling;
+    if (event.target !== root) return;
+    if (event.propertyName === '--split') delete root.dataset.settling;
+    if (event.propertyName === '--strip-at') {
+      delete root.dataset.paging;
+      delete root.dataset.settling;
+    }
   });
 
   // The handle's keys: ←/→ a step, Page Up/Down five, Home/End the ends.
@@ -635,6 +707,76 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     event.preventDefault();
     event.stopPropagation();
     go(switchNext(stage, n, dir));
+  });
+
+  // The filmstrip: a drag (touch or mouse) follows the hand and settles
+  // on the nearest stage on release; a vertical swipe still scrolls the
+  // page (touch-action in the stylesheet). A click on the frame does
+  // nothing; the arrows are buttons of their own.
+  let pulling: { id: number; x: number; from: number } | null = null;
+  frames.addEventListener('pointerdown', (event) => {
+    if (view() !== 'filmstrip' || event.button !== 0) return;
+    if ((event.target as Element).closest('.compare-arrow')) return;
+    delete root.dataset.paging;
+    delete root.dataset.settling;
+    pulling = { id: event.pointerId, x: event.clientX, from: at };
+    frames.setPointerCapture(event.pointerId);
+  });
+  frames.addEventListener('pointermove', (event) => {
+    if (pulling === null || event.pointerId !== pulling.id) return;
+    const width = frames.getBoundingClientRect().width;
+    if (width > 0) strip(stripAt(pulling.from, -(event.clientX - pulling.x) / width, n));
+  });
+  const letGo = (event: PointerEvent) => {
+    if (pulling === null || event.pointerId !== pulling.id) return;
+    pulling = null;
+    settle();
+  };
+  frames.addEventListener('pointerup', letGo);
+  frames.addEventListener('pointercancel', letGo);
+
+  // A horizontal wheel or trackpad scroll moves the strip, and only then
+  // keeps the page from scrolling — so the listener cannot be passive. A
+  // line or a page of delta is read in pixels. Browsers send no wheel's
+  // end: the strip settles after `stripWheelIdleMs` without one.
+  let idle: ReturnType<typeof setTimeout> | undefined;
+  frames.addEventListener(
+    'wheel',
+    (event) => {
+      if (view() !== 'filmstrip' || !COMPARE.stripWheel) return;
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      const width = frames.getBoundingClientRect().width;
+      if (width <= 0) return;
+      event.preventDefault();
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? width : 1;
+      delete root.dataset.paging;
+      delete root.dataset.settling;
+      strip(stripAt(at, (event.deltaX * unit) / width, n));
+      clearTimeout(idle);
+      idle = setTimeout(() => {
+        if (view() === 'filmstrip' && pulling === null) settle();
+      }, COMPARE.stripWheelIdleMs);
+    },
+    { passive: false },
+  );
+
+  // The filmstrip's keys, while the block has focus: a step, the first or the last stage.
+  frames.addEventListener('keydown', (event) => {
+    if (view() !== 'filmstrip') return;
+    const { key } = event;
+    const to = STRIP_KEYS.back.includes(key)
+      ? switchNext(stage, n, -1, COMPARE.stripWraps)
+      : STRIP_KEYS.next.includes(key)
+        ? switchNext(stage, n, 1, COMPARE.stripWraps)
+        : STRIP_KEYS.first.includes(key)
+          ? 0
+          : STRIP_KEYS.last.includes(key)
+            ? n - 1
+            : null;
+    if (to === null) return;
+    event.preventDefault();
+    event.stopPropagation();
+    page(to);
   });
 
   root.dataset.js = '';

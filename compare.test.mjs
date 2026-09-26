@@ -45,7 +45,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     and shape, the tuning envelope's one place for them: each declared
 //     once, in global.css's :root, at its value, and nowhere else in any
 //     stylesheet; and the handle's rule reads both, so a token left
-//     declared but unread fails too.
+//     declared but unread fails too. The filmstrip's neighbours' sliver
+//     (T1726), `--compare-peek`, is the same kind of token: declared once
+//     at its value and read by the filmstrip's frames rule.
 //
 // (c) The compare's motion (T1708). Three rules and nothing else, each
 //     by its string: the switch's arriving stage fading in over the
@@ -58,6 +60,12 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     its exact body (T1708a): the legend's shape is that rule, and the
 //     legend button's two lines (T1709g), label over its side tag's
 //     row, the label's bold width reserved.
+//     And the filmstrip's two (T1726): a page's slide on the move
+//     duration and a settle's glide on the state duration, scoped to the
+//     filmstrip so the snap's rule stands byte for byte — five rules in
+//     all; `--strip-at` registered as a number so both can run; and the
+//     script writes `data-paging` only when motion is not reduced, as it
+//     does `data-settling`.
 //
 // (d) The state (T1707). `EXPECTED` below is the tunables' one other
 //     copy: every COMPARE key and value and COMPARE_WORDING, so a value
@@ -90,7 +98,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 // (e) The pair blocks and the filmstrip (the amendment). The slider
 //     block's fixed legend (T1725): its two labels as text, left · right,
 //     a muted middle dot between them — T1709j's dot on the legend's
-//     row — pinned by the rule's exact body.
+//     row — pinned by the rule's exact body. The filmstrip's arrows
+//     (T1726): the handle's look, at the frame's sides, muted when quiet,
+//     only in the filmstrip — pinned by the rules' exact bodies.
 
 /** The tunables and the words, verbatim as src/lib/compare.ts carries
  *  them: to retune, move the value in src/lib/compare.ts and here. */
@@ -135,6 +145,7 @@ const EXPECTED = {
 const TOKENS = {
   '--compare-handle': '1.5rem',
   '--compare-handle-radius': '50%',
+  '--compare-peek': '0px',
 };
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
@@ -308,6 +319,14 @@ describe("(b) the handle's tokens (T1708)", () => {
     ]);
   });
 
+  it("the filmstrip's frames rule reads --compare-peek: each neighbour shows that far beyond the frame's edge (T1726)", () => {
+    expect(ruleAt(rulesIn(css), ".compare[data-view='filmstrip'] .compare-frames")).toEqual({
+      overflow: 'visible',
+      'clip-path': 'inset(0 calc(-1 * var(--compare-peek)))',
+      'touch-action': 'pan-y',
+    });
+  });
+
   it('the handle is a flat disc on the divider with an accent hairline, an "=" of two accent bars inside (T1709i)', () => {
     expect(ruleAt(rulesIn(css), '.compare[data-js] .compare-handle')).toEqual({
       position: 'absolute',
@@ -348,6 +367,8 @@ describe("(c) the compare's motion (T1708)", () => {
     ],
     ['.compare[data-fresh] .compare-pane', { animation: `motion-appear ${STATE} both` }],
     ['.compare[data-settling]', { transition: `--split ${STATE}` }],
+    ['.compare[data-paging]', { transition: '--strip-at var(--dur-move) var(--ease-move)' }],
+    [".compare[data-view='filmstrip'][data-settling]", { transition: `--strip-at ${STATE}` }],
   ];
 
   for (const [prelude, body] of MOTION)
@@ -355,7 +376,7 @@ describe("(c) the compare's motion (T1708)", () => {
       expect(ruleAt(rulesIn(css), prelude)).toEqual(body);
     });
 
-  it("no other rule in the compare's section animates or transitions — the three are all its motion", () => {
+  it("no other rule in the compare's section animates or transitions — the five are all its motion", () => {
     const moving = rulesIn(compareSection(raw))
       .filter((rule) =>
         declarationPairs(rule.body).some(([name]) => /^(animation|transition)/.test(name)),
@@ -376,6 +397,22 @@ describe("(c) the compare's motion (T1708)", () => {
 
   it('the script writes data-settling only behind !reducedMotion() — the settle is a movement', () => {
     const writes = script.split('\n').filter((line) => /dataset\.settling\s*=/.test(line));
+    expect(writes.length).toBeGreaterThan(0);
+    expect(writes.filter((line) => !/if \(!reducedMotion\(\)\)/.test(line))).toEqual([]);
+  });
+
+  it('--strip-at is registered as a number, inherited, at 0 — so the page and the settle can run (T1726)', () => {
+    const found = rulesIn(css).filter((rule) => rule.prelude === '@property --strip-at');
+    expect(found.length).toEqual(1);
+    expect(Object.fromEntries(declarationPairs(found[0].body))).toEqual({
+      syntax: "'<number>'",
+      inherits: 'true',
+      'initial-value': '0',
+    });
+  });
+
+  it("the script writes data-paging only behind !reducedMotion() — the strip's slide is a movement (T1726)", () => {
+    const writes = script.split('\n').filter((line) => /dataset\.paging\s*=/.test(line));
     expect(writes.length).toBeGreaterThan(0);
     expect(writes.filter((line) => !/if \(!reducedMotion\(\)\)/.test(line))).toEqual([]);
   });
@@ -968,5 +1005,37 @@ describe('(e) the pair blocks and the filmstrip (the amendment)', () => {
       'margin-inline-end': '1rem',
       color: 'var(--color-muted)',
     });
+  });
+
+  it("the filmstrip's arrows wear the handle's look at the frame's sides, muted when quiet, only in the filmstrip (T1726)", () => {
+    expect(ruleAt(rulesIn(css), '.compare[data-js] .compare-arrow')).toEqual({
+      position: 'absolute',
+      top: '50%',
+      'z-index': '3',
+      'box-sizing': 'border-box',
+      width: 'var(--compare-handle)',
+      height: 'var(--compare-handle)',
+      padding: '0',
+      border: '1px solid var(--color-accent)',
+      'border-radius': 'var(--compare-handle-radius)',
+      background: 'var(--color-bg)',
+      color: 'var(--color-accent)',
+      'font-family': 'var(--font-mono)',
+      'font-size': '0.75rem',
+      'line-height': '1',
+      transform: 'translateY(-50%)',
+      cursor: 'pointer',
+    });
+    expect([
+      ruleAt(rulesIn(css), ".compare[data-js] .compare-arrow[data-dir='back']"),
+      ruleAt(rulesIn(css), ".compare[data-js] .compare-arrow[data-dir='next']"),
+      ruleAt(rulesIn(css), ".compare[data-js] .compare-arrow[aria-disabled='true']"),
+      ruleAt(rulesIn(css), ".compare[data-js]:not([data-view='filmstrip']) .compare-arrow"),
+    ]).toEqual([
+      { left: '0.5rem' },
+      { right: '0.5rem' },
+      { 'border-color': 'var(--color-muted)', color: 'var(--color-muted)', cursor: 'default' },
+      { display: 'none' },
+    ]);
   });
 });

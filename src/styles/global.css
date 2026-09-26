@@ -172,11 +172,14 @@
   --arrows-slide: 1; /* the arrows: 1 slides the photograph off the screen and the next one on; 0 cross-fades in place */
   --rm-appear: 1; /* under reduced motion: 1 keeps the appearance fade's duration, 0 cuts it */
   --rm-quiet: 1; /* under reduced motion: 1 keeps the quiet view's ground fade, 0 cuts */
-  /* The compare's handle (spec 019): a disc a fingertip wide.
+  /* The compare's handle (spec 019): a disc a fingertip wide, and the
+     filmstrip's arrows drawn as it; and how far each of the filmstrip's
+     neighbours shows beyond the frame's edge (T1726).
      compare.test.mjs pins them — to retune, move the value here and in
      its `TOKENS`. */
   --compare-handle: 1.5rem;
   --compare-handle-radius: 50%;
+  --compare-peek: 0px; /* how far each neighbour shows beyond the frame's edge */
 }
 
 @media (max-width: 719.98px) {
@@ -2239,15 +2242,26 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 
 /* The enhanced block (T1708). The script builds the chrome — the
    divider, the handle, the legend of stops, the method control, the live
-   note — and writes the state these rules read: `data-view` (slider,
-   side, switch), `data-narrow`, each stage's `data-part`, and `--split`,
-   the divider's place along the frame, 0–100. `--split` is registered so
-   a snap can glide (`data-settling`); the divider otherwise follows the
-   hand directly. */
+   note, the filmstrip's arrows — and writes the state these rules read:
+   `data-view` (slider, side, switch, filmstrip), `data-narrow`, each
+   stage's `data-part` and `--i`, `--split`, the divider's place along
+   the frame, 0–100, and `--strip-at`, the filmstrip's position in
+   stages. `--split` is registered so a snap can glide (`data-settling`);
+   the divider otherwise follows the hand directly. `--strip-at` is
+   registered so a page can slide (`data-paging`) and a settle glide
+   (`data-settling`) — a transitioned property, not native scrolling,
+   whose smooth scroll settles on the browser's curve, not the
+   grammar's; a drag or a wheel moves it directly. */
 @property --split {
   syntax: '<number>';
   inherits: true;
   initial-value: 50;
+}
+
+@property --strip-at {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
 }
 
 /* The figure: the frame across the row, the legend and the method
@@ -2418,6 +2432,62 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   cursor: pointer;
 }
 
+/* The filmstrip (T1726): the stages in one row at the frame's size,
+   stage k at k frames from the first, the row slid by --strip-at; the
+   frame shows one stage whole and each neighbour --compare-peek beyond
+   its edge; a vertical swipe still scrolls the page. */
+.compare[data-view='filmstrip'] .compare-frames {
+  overflow: visible;
+  clip-path: inset(0 calc(-1 * var(--compare-peek)));
+  touch-action: pan-y;
+}
+
+.compare[data-view='filmstrip'] .compare-stage {
+  transform: translateX(calc((var(--i) - var(--strip-at)) * 100%));
+}
+
+/* The filmstrip's arrows: the handle's look — a flat disc of the ground
+   with an accent hairline and an accent glyph in the mono face, no
+   shadow — at the frame's sides, 0.5rem in, vertically centred; muted
+   where there is nowhere to go and COMPARE.stripEnds keeps them
+   (aria-disabled); only in the filmstrip. */
+.compare[data-js] .compare-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  box-sizing: border-box;
+  width: var(--compare-handle);
+  height: var(--compare-handle);
+  padding: 0;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--compare-handle-radius);
+  background: var(--color-bg);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.compare[data-js] .compare-arrow[data-dir='back'] {
+  left: 0.5rem;
+}
+
+.compare[data-js] .compare-arrow[data-dir='next'] {
+  right: 0.5rem;
+}
+
+.compare[data-js] .compare-arrow[aria-disabled='true'] {
+  border-color: var(--color-muted);
+  color: var(--color-muted);
+  cursor: default;
+}
+
+.compare[data-js]:not([data-view='filmstrip']) .compare-arrow {
+  display: none;
+}
+
 /* The legend of stops, its hint and the method control: the label's mono
    eyebrow, the showing stages (bold) and the chosen method in the text
    colour. */
@@ -2489,13 +2559,15 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 
 /* A picked stage's side tag, "left" or "right", quieter than its label;
    the hint beneath the legend names the side the next pick takes. The
-   switch picks no pair: its tag rows blank, and no hint. */
+   switch and the filmstrip pick no pair: their tag rows blank, and no
+   hint. */
 .compare[data-js] .compare-slot {
   color: var(--color-muted);
   font-weight: 400;
 }
 
-.compare[data-view='switch'] .compare-hint {
+.compare[data-view='switch'] .compare-hint,
+.compare[data-view='filmstrip'] .compare-hint {
   display: none;
 }
 
@@ -2522,11 +2594,15 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   left: auto;
 }
 
-/* The compare's motion: three rules and nothing else, on spec 018's
-   state duration and its appearance keyframes. The switch's arriving
+/* The compare's motion: five rules and nothing else, on spec 018's
+   durations and its appearance keyframes. The switch's arriving
    stage fades in over the one it leaves (held beneath as "under"); a
-   mode change fades the new view in from the ground; a snap glides.
-   No rule here sets opacity: 0. */
+   mode change fades the new view in from the ground; a snap glides;
+   the filmstrip's page slides on the move duration, and its settle
+   after a drag or a wheel glides on the state duration (scoped to the
+   filmstrip, so the snap's rule stands as it was). The script writes
+   the two strip attributes only when motion is not reduced. No rule
+   here sets opacity: 0. */
 .compare[data-view='switch'] .compare-stage[data-part='in'] {
   z-index: 1;
   animation: motion-appear var(--dur-state) var(--ease-state) both;
@@ -2538,6 +2614,14 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 
 .compare[data-settling] {
   transition: --split var(--dur-state) var(--ease-state);
+}
+
+.compare[data-paging] {
+  transition: --strip-at var(--dur-move) var(--ease-move);
+}
+
+.compare[data-view='filmstrip'][data-settling] {
+  transition: --strip-at var(--dur-state) var(--ease-state);
 }
 
 /* ---- Motion (spec 018) -------------------------------------------------
