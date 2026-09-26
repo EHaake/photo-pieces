@@ -449,7 +449,7 @@ headers to confirm nothing was duplicated or dropped. -->
       and side, the wipe at 25/50/75 between the pair); mutation:
       `restPair` changed → `EXPECTED` fails by name._
 
-- [ ] **T1709b** — Round: the compare's width is `wide` on both
+- [x] **T1709b** — Round: the compare's width is `wide` on both
       surfaces (the person: "needs to be larger (maybe allow it beyond
       the text margins)"). `COMPARE_WIDTH` → `{ piece: 'wide', page:
       'wide' }` in image-meta.mjs; compare.test.mjs's row; spec.md
@@ -810,6 +810,7 @@ tier if it is ever on (it is off). -->
 | T1708a review fixes | implementation (`opus`, high) | ~46k | done; 519 tests (+2); both mutations fail the named case; land-b reads <em>Fixture stage.</em>; a multi-paragraph sidecar note would keep its <p>s inside the span (single paragraph unwrapped by regex) — sweep note; the live note clone has no DOM test |
 | Phase 1 re-review | implementation (`opus`, high) | ~12k | signed off; to the sweep: a multi-paragraph sidecar note keeps <p>s in the span — plan and AUTHORING.md (T1715) should state one rule (fail the build, or "one paragraph"); the live note clone untested; `processing` renders as Markdown as the comparex27s last note but plain text in the How-it-was-made row |
 | T1709a two-way slider round | implementation (`opus`, high) | ~82k + ~40k (two rounds) | done; 523 tests; the orchestratorx27s first pairing rule (nearest member) could never reach Tones | Finished — the implementer caught it; corrected to "replace the older pick"; orchestrator miss again: 4ffc0e8 (`commit -a`) swept the first-rule draft — explicit paths from now on; dead `.compare-legend [aria-current]` selector left in the legend rule (pinned by (c)) — sweep note |
+| T1709b wide round | implementation (`opus`, high) | ~36k | done; 523 tests; compare 1160px (176px margins) on both pages at 1512×982, text column 666px; the enhanced compare is 833px tall against a 982px viewport — watch at the pause |
 
 _(Session-tier allowance draw noted at each pause.)_
 
