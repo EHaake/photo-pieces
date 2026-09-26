@@ -519,7 +519,7 @@ headers to confirm nothing was duplicated or dropped. -->
       left) click Camera → unchanged sides, next right; click Tones → C
       | T._
 
-- [ ] **T1709i** — Round: the handle "significantly smaller. Maybe a
+- [x] **T1709i** — Round: the handle "significantly smaller. Maybe a
       small circle with a '=' inside whose outline uses the site's
       accent color". Plan: the T1709i paragraph. `global.css`: the
       token to 1.5rem; the handle rule's border in `--color-accent`,
@@ -901,6 +901,7 @@ tier if it is ever on (it is off). -->
 | T1709f camera note | implementation (`opus`, high) | ~27k | done; 526 tests; land-b and the sampler read the note |
 | T1709g empty sides, tags beneath | implementation (`opus`, high) | ~98k | done; 529 tests; data-label (a script-written attribute, not a state) not on the barrier list — sweep note; with sides kept apart some arrangements take three clicks (the first stage on the left of a middle stage); narrow stacked side by side with an empty right shows one pane; the switch keeps blank tag rows |
 | T1709h any stage any step | implementation (`opus`, high) | ~43k | done; 529 tests; worst case two clicks either way round; the hidden handlex27s aria-valuetext goes stale in side by side — sweep note |
+| T1709i small handle | implementation (`opus`, high) | ~42k | done; 530 tests; 24×24, accent border, bars 8×1 at ±1.5px from centre |
 
 _(Session-tier allowance draw noted at each pause.)_
 
