@@ -515,7 +515,9 @@ where the simpler shape was taken it is said in one line.
   `next` flips; if the stage already held the other slot, that slot
   becomes `null` (so a stage moves sides, and the side it left stays
   empty until the next pick fills it); a click on the stage already in
-  the `next` slot does nothing. An empty side shows no stage: in the
+  the `next` slot keeps it there and flips `next` all the same (round
+  T1709h: no click is ever a no-op, so a side can be confirmed and the
+  other side picked without rearranging). An empty side shows no stage: in the
   slider the divider wipes between the one stage and the bare ground,
   in side by side the empty pane is the ground, the live note follows
   the right slot and is blank when that is empty. The legend's tags sit

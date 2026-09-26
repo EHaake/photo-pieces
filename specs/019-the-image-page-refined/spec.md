@@ -562,3 +562,6 @@ re-implementation. The plan says where each lives.
   for the other side; the side it leaves stays empty (the bare ground)
   until the next pick fills it; the left / right tags sit beneath their
   buttons with space reserved, so the legend never shifts.
+- **Round T1709h (2026-09-25)** — any stage may be picked at any step:
+  picking the stage already on the next side keeps it there and moves
+  the next pick to the other side.
