@@ -364,6 +364,13 @@ describe("(c) the compare's motion (T1708)", () => {
       'font-weight': '700',
     });
   });
+  it('a note after its label opens with a muted middle dot spaced on both sides (T1709j) — caption and live note alike', () => {
+    expect(ruleAt(rulesIn(css), '.compare-label + .compare-note::before')).toEqual({
+      content: "'·'",
+      'margin-inline': '0.45em',
+      color: 'var(--color-muted)',
+    });
+  });
 });
 
 describe('(d) the state (T1707)', () => {

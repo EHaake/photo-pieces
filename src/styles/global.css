@@ -2093,6 +2093,14 @@ html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   letter-spacing: 0.02em;
 }
 
+/* A muted middle dot sets the note apart from its label (T1709j), in the
+   static caption and the live note alike. */
+.compare-label + .compare-note::before {
+  content: '·';
+  margin-inline: 0.45em;
+  color: var(--color-muted);
+}
+
 .compare-w-column {
   --w: 100%;
   width: var(--w);
