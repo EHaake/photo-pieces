@@ -664,6 +664,14 @@ where the simpler shape was taken it is said in one line.
   a click on the mat or the ground leaves the quiet view — a reading of
   Goal 4 (see Resolved decisions).
 
+  T1712 note (2026-09-25): matte.test.mjs (b)'s quiet list pins exactly
+  three `html[data-quiet] .image-…` preludes; the loupe's cursor rule
+  is a planned fourth, so that list gains it by name and "no fourth"
+  becomes "no fifth" — a deliberate addition the count exists to
+  notice, as motion (d)'s sixth rule is; the rule's text stays as
+  spelled. The loupe section sits after the quiet rules and before
+  the compare section (compare.test.mjs slices compare → Motion).
+
 - **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, `styles.css`,
   T1714). A second pattern beside `DIRECTIVE_PATTERN`, for the one
   container the plugin renders: `^:::compare(\{[^}]*\})?[ \t]*\n([\s\S]*?)\n:::[ \t]*$`
