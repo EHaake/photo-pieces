@@ -533,6 +533,14 @@ where the simpler shape was taken it is said in one line.
   the diameter wide and 1px tall, centred, a few px apart) — no glyph
   font. compare.test.mjs (b) pins the token and the handle rule's body.
 
+  **Round T1709j (2026-09-25).** The label and the note are set apart:
+  wherever a `.compare-note` follows a `.compare-label` (the live note
+  and the static caption alike), a muted middle dot with space on both
+  sides stands between them — one CSS rule, `.compare-note::before`
+  scoped to the caption and the live note, `content: '·'`,
+  `margin-inline: 0.45em`, `color: var(--color-muted)` — no markup
+  change in either builder, pinned by compare.test.mjs (c) by body.
+
 - **The loupe's file** (`src/lib/loupe.ts`, the image page's
   frontmatter, T1710). `LOUPE` holds the loupe's tunables:
 

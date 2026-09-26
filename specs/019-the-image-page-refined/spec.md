@@ -567,3 +567,12 @@ re-implementation. The plan says where each lives.
   the next pick to the other side.
 - **Round T1709i (2026-09-25)** — the handle is a small 24px circle
   outlined in the accent colour with a "=" inside.
+- **Phase 1 keeps (2026-09-25)** — the gear names as the table reads;
+  the method control's words and placement; the rest pair Camera |
+  Finished; no snapping; the method remembered for the tab's session;
+  side by side stacks on the phone (to revisit); the switch's keys and
+  wrap; the heading, the hint's words; the 1px ground-white divider;
+  the switch's bold legend. The fade's duration is open: 250ms was
+  asked for, and the choice is among spec 018's three tokens.
+- **Round T1709j (2026-09-25)** — a muted middle dot with space on
+  both sides between a stage's label and its note.
