@@ -3,6 +3,7 @@ import { EditorView, Decoration, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
 import { STAGES_PATTERN, parseCompareBody } from './compare';
+import { parseAttrs, resolveRelative } from './blocks';
 
 // Live Preview rendering for the LEAF form of the site's standalone image
 // blocks: while writing, `::single{src="./a.jpg" alt="…"}` shows the image
@@ -33,35 +34,6 @@ import { STAGES_PATTERN, parseCompareBody } from './compare';
 type Image = { src: string; alt: string; label?: string };
 type Extract = (attrs: Record<string, string>) => Image[] | null;
 
-type Resolved =
-  | { kind: 'name' } // bare name: Obsidian's own linkpath lookup
-  | { kind: 'path'; path: string } // vault-relative path, resolved here
-  | { kind: 'unreachable' }; // climbs above the vault root: nothing can match
-
-/** Where a `src` points, seen from the note at `sourcePath`. A src with a
- *  folder in it is resolved the way the site build resolves it — never by
- *  name — so a wrong path is not found rather than found elsewhere. */
-export function resolveRelative(src: string, sourcePath: string): Resolved {
-  const rest = src.replace(/^\.\//, '');
-  if (!rest.includes('/')) return { kind: 'name' };
-
-  const lastSlash = sourcePath.lastIndexOf('/');
-  const folder = lastSlash === -1 ? '' : sourcePath.slice(0, lastSlash);
-
-  const out: string[] = [];
-  for (const segment of (folder ? `${folder}/${rest}` : rest).split('/')) {
-    if (segment === '' || segment === '.') continue;
-    if (segment === '..') {
-      if (out.length === 0) return { kind: 'unreachable' };
-      out.pop();
-      continue;
-    }
-    out.push(segment);
-  }
-  if (out.length === 0) return { kind: 'unreachable' };
-  return { kind: 'path', path: out.join('/') };
-}
-
 const one: Extract = (a) => (a.src ? [{ src: a.src, alt: a.alt ?? '' }] : null);
 
 const LEAF_BLOCKS: Record<string, Extract> = {
@@ -88,17 +60,6 @@ const LEAF_BLOCKS: Record<string, Extract> = {
 };
 
 const DIRECTIVE_PATTERN = `^::(${Object.keys(LEAF_BLOCKS).join('|')})\\{([^}]*)\\}[ \\t]*$`;
-
-function parseAttrs(raw: string): Record<string, string> {
-  // Quoted or unquoted values, as remark-directive accepts both.
-  const attrs: Record<string, string> = {};
-  const attrRe = /(\w+)=(?:"([^"]*)"|(\S+))/g;
-  let m: RegExpExecArray | null;
-  while ((m = attrRe.exec(raw))) {
-    attrs[m[1]] = m[2] ?? m[3];
-  }
-  return attrs;
-}
 
 class BlockWidget extends WidgetType {
   constructor(

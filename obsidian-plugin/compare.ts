@@ -12,6 +12,11 @@
 export const STAGES_PATTERN =
   '^:::(?:compare|side|slider)(\\{[^}]*\\})?[ \\t]*\\n([\\s\\S]*?)\\n:::[ \\t]*$';
 
+/** An image, `![alt](src "title")` — group 1 the alt, group 2 the src. The
+ *  one image pattern the plugin reads, here and in blocks.ts (use with the
+ *  `g` flag). */
+export const IMAGE_PATTERN = '!\\[([^\\]]*)\\]\\(\\s*([^)\\s]+)(?:\\s+"[^"]*")?\\s*\\)';
+
 export type Stage = { src: string; label: string; note: string };
 
 /** A compare's body, stage by stage, by the site transform's rule: an
@@ -20,7 +25,7 @@ export type Stage = { src: string; label: string; note: string };
  *  blank lines, read alike. Text before the first image belongs to no
  *  stage and is skipped (the site build names it and fails). */
 export function parseCompareBody(body: string): Stage[] {
-  const image = /!\[([^\]]*)\]\(\s*([^)\s]+)(?:\s+"[^"]*")?\s*\)/g;
+  const image = new RegExp(IMAGE_PATTERN, 'g');
   const stages: Stage[] = [];
   let noteFrom = -1;
   let m: RegExpExecArray | null;
