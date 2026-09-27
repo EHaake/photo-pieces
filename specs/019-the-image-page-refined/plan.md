@@ -747,6 +747,10 @@ where the simpler shape was taken it is said in one line.
   label beneath (`photo-pieces-preview-compare`), unless the cursor is
   inside it, as every leaf block does. A private stage resolves like any
   image. The methods, the handle and the loupe are the site's.
+  _Superseded by "Amendment 2 (2026-09-26): the plugin, representative"
+  below: `DIRECTIVE_PATTERN`, `BlockWidget` and the `photo-pieces-preview*`
+  classes are deleted at T1731–T1732; every block is read by the block
+  table's scanner and drawn by one figure in both views._
 
 - **The documents** (T1715): `AUTHORING.md` — the block (the flow's
   example, the rules: two stages, own folder for a private file,
@@ -1889,7 +1893,9 @@ Reading view post-processor), and one stylesheet whose every
 declaration is `!important` and whose every share is a custom
 property. No dependency; the plugin still never imports the transform
 (a test reads both). Everything above this section stands except the
-first amendment's "Obsidian" bullet, superseded as its pointer says.
+two "Obsidian" bullets (T1714's and the first amendment's), superseded
+as their pointers say, and T1728's plugin-README sentence, which
+T1734's rewrite replaces.
 
 ### Shape of the change (amendment 2)
 
@@ -2017,7 +2023,11 @@ first amendment's "Obsidian" bullet, superseded as its pointer says.
   **Every declaration except a custom property carries `!important`**
   — the strategy for "the plugin's rules win". An important author
   declaration outranks every normal one whatever its specificity, which
-  is the fix proven in his vault; a cascade layer would do the opposite
+  is the fix proven in his vault: no normal-priority rule of Obsidian's
+  can outrank it. Against another `!important` rule specificity decides
+  again (CodeMirror's base theme has one on `.cm-scroller`, none on a
+  widget's descendants), so the console check at the pause stays the
+  judge. A cascade layer would do the opposite
   (layered rules lose to Obsidian's unlayered ones), and out-specifying
   selectors we cannot see is a guess. Applying it to every declaration
   rather than a list of "layout" properties leaves the test nothing to
@@ -2026,7 +2036,10 @@ first amendment's "Obsidian" bullet, superseded as its pointer says.
   `body` (the tokens, custom properties only) and the two pane hosts
   below. The layout itself sits on elements inside the widget root
   (`.photo-pieces-frames` and its children), not on the root Obsidian's
-  `.cm-content > *` rules can reach. No at-rules.
+  `.cm-content > *` rules can reach. The root sets `white-space: normal
+  !important`: CodeMirror puts `pre-wrap` on `.cm-content` and it
+  inherits into a widget, where it would keep a caption's or a held
+  paragraph's source line breaks. No at-rules.
 
   **The pane as a container.** `wide` and `full` must reach past the
   text column to the pane, which CSS can only measure from a query
@@ -2093,10 +2106,9 @@ first amendment's "Obsidian" bullet, superseded as its pointer says.
   `sectionPieces(blocks, lineStart, lineEnd)`:
 
   ```ts
+  type Piece = { kind: 'markdown'; startLine: number; endLine: number } | { kind: 'figure'; block: ParsedBlock };
   export function sectionPieces(blocks: ParsedBlock[], lineStart: number, lineEnd: number):
-    | null // the section touches no block: leave it
-    | { pieces: ({ kind: 'markdown'; startLine: number; endLine: number } | { kind: 'figure'; block: ParsedBlock })[];
-        continues: boolean }; // the section begins inside a block that began before it
+    Piece[] | null; // null: the section touches no block — leave it
   ```
 
   Lines of the section outside every block are `markdown` runs; a block
@@ -2106,27 +2118,34 @@ first amendment's "Obsidian" bullet, superseded as its pointer says.
   pieces — a run through `MarkdownRenderer.render` on a
   `MarkdownRenderChild(el)` given to `ctx.addChild`, a figure through
   the same `toDom(figureTree(…))`; no pieces → `el` gets
-  `photo-pieces-hidden`. There is no cursor in Reading view: every block
-  always renders.
+  `photo-pieces-hidden`, and a run that yields pieces removes it, in
+  case Obsidian hands back an element it hid before. There is no cursor
+  in Reading view: every block always renders.
 
   **Keeping a multi-section block fresh.** Obsidian re-runs
   post-processors only for sections whose text changed, so editing a
   held's third paragraph re-runs that (hidden) section and not the
-  first, which drew the figure. So the plugin keeps, per
-  `ctx.sourcePath`, `blockSignature(blocks, text)` (the blocks' source
-  slices joined) as last seen; a call whose section `continues` a block
-  and whose signature differs from the stored one schedules, once per
-  tick, `leaf.view.previewMode.rerender(true)` for every Markdown leaf
-  on that file in `'preview'` mode. Every call stores the signature, so
-  the full re-render that follows sees it equal and does not loop; the
-  first render of a note stores it without comparing. An edit inside a
-  block's first section needs none (that section re-renders itself).
+  first, which drew the figure; typing a fence above an existing image
+  paragraph, or deleting a closer, changes a block around sections that
+  do not re-run at all. So the plugin keeps, per `ctx.sourcePath`,
+  `blockSignature(blocks, text)` (the blocks' source slices joined) as
+  last seen, computed on every call that has section info — a section
+  touching no block included; a call whose signature differs from the
+  stored one schedules, once per tick,
+  `leaf.view.previewMode.rerender(true)` for every Markdown leaf on that
+  file in `'preview'` mode. Every call stores the signature, so the full
+  re-render that follows sees it equal and does not loop; the first
+  render of a note stores it without comparing. The cost: any edit that
+  touches a block costs one full re-render of that note's Reading view,
+  including an edit a section would have redrawn on its own — the
+  simpler rule, taken over one that guesses which edits are safe.
 
 - **The plugin's own files** (T1732): `manifest.json` and
   `package.json` to `0.3.0`; `package.json`'s description (it still says
   "fullbleed directive") and the manifest's say "every block of the
   site's vocabulary, in Live Preview and Reading view". `minAppVersion`
-  stays: `MarkdownRenderer.render` is in the installed typings.
+  stays at 1.4.0: `MarkdownRenderer.render`, `MarkdownPreviewView.rerender`
+  and `getSectionInfo` are present in obsidian@1.4.0's typings.
 
 - **The documents** (T1734): `obsidian-plugin/README.md` rewritten for
   Goal 10 — a table of every block with what Live Preview and Reading
@@ -2203,7 +2222,13 @@ only inside Obsidian; the photographer attests them at the pause.
     from `class="piece-block piece-([a-z]+)` in order equal
     `parseBlocks(file).map((b) => b.name)` — 33 on the sampler, 8 on
     the fog piece. This is "finds every block" pinned against the
-    judge, not against a hand list.
+    judge, not against a hand list. The images too: with the
+    shorthand image lines (those starting `![` outside every claimed
+    span) removed from the rendered body, the harness's
+    `imageMarkers(code)` srcs in order (the vocabulary test's helper,
+    ~67, copied) equal `parseBlocks(file).flatMap((b) =>
+    b.images.map((i) => i.src))` — stages included, since the
+    transform emits them as image nodes too.
   - **What it read**, by a hand-written table per file: each block's
     `images` srcs (and stage labels), `caption`, `side`/`bleed`/
     `width`/`weight` where written, `method` for the three stage blocks
@@ -2220,8 +2245,13 @@ only inside Obsidian; the photographer attests them at the pause.
     `::grid{}` → none; `:::grid` with no images → none and its inner
     `::single{…}` line not a block; `:::single{…}` with a two-paragraph
     caption → both paragraphs; `::single{alt="x"}` → none;
-    `:::compare{mode="nope"}` → method `Slider`. Mutation: the fence
-    skip removed → the fence case fails, reverted.
+    `:::compare{mode="nope"}` → method `Slider`; and `Text\n::single{src="./photo.jpg" alt="x"}`
+    (a leaf directly under a paragraph line) → one block, and the same
+    string through the harness (`tests/fixtures/piece.md`) renders
+    `piece-single` — both micromark directive tokenizers interrupt a
+    paragraph, so this is the site's behaviour pinned beside the
+    plugin's, not assumed. Mutation: the fence skip removed → the fence
+    case fails, reverted.
   - **`resolveRelative`**: `./a.jpg` → name; `../beta/a.jpg` from
     `src/content/pieces/alpha/index.md` → `src/content/pieces/beta/a.jpg`;
     `../../gallery-images/a.jpg` → `src/content/gallery-images/a.jpg`;
@@ -2255,18 +2285,25 @@ only inside Obsidian; the photographer attests them at the pause.
 
 - **Reading view's sections** — **T1733**. `sectionPieces` over the
   sampler's parse: the held's first section (its opener and first
-  paragraph) → one figure, `continues: false`; its third paragraph →
-  no pieces, `continues: true`; its last (paragraph and `:::`) → none,
-  `continues: true`; a section of plain prose → `null`; a synthetic
-  paragraph line followed by a leaf on the next line → a markdown run,
-  then the figure; a section with the grid's caption → none,
-  `continues: true`. `blockSignature`: equal for two texts differing
-  outside blocks, different for one differing inside a held's third
-  paragraph. Mutation: `continues` computed from `startLine <=
-  lineStart` (off by one) → the first-section case fails, reverted.
+  paragraph) → one figure; its third paragraph → no pieces; its last
+  (paragraph and `:::`) → none; a section of plain prose → `null`; a
+  synthetic paragraph line followed by a leaf on the next line → a
+  markdown run, then the figure; a section with the grid's caption →
+  none. `blockSignature`: equal for two texts differing outside
+  blocks; different for one differing inside a held's third paragraph,
+  for one with a closer deleted, and for one with fences typed around
+  an existing image paragraph. Mutation: the `startLine >= lineStart`
+  check dropped (so a later section redraws a block begun above it) →
+  the third-paragraph case fails, reverted.
 
-- **Unchanged and green**: `parseCompareBody`'s three cases; the
-  vocabulary walk (it reads `main.ts`); the whole suite;
+- **The vocabulary walk reaches the new files** — **T1732**: the
+  "nothing … knows the word" walk in `remark-pieces-vocabulary.test.mjs`
+  (~974–979) lists `obsidian-plugin/blocks.ts` and
+  `obsidian-plugin/figure.ts` beside `main.ts` — a one-line extension
+  of the plugin's own pin, authorized at sign-off; nothing in it is
+  loosened.
+
+- **Unchanged and green**: `parseCompareBody`'s three cases; the whole suite;
   `sh scripts/verify.sh` (its `astro check` covers the plugin's `.ts`
   through the root `tsconfig.json`'s `**/*`); in `obsidian-plugin/`,
   `npm run build` exit 0 (`node_modules` is present).
@@ -2290,12 +2327,13 @@ obsidian-plugin/styles.css       rewritten: tokens, pane hosts, every layout (T1
 obsidian-plugin/main.ts          imports moved (T1730); the Live Preview field over parseBlocks, FigureWidget, resolver (T1732); the Reading view post-processor and its re-render (T1733)
 obsidian-plugin/manifest.json, package.json   0.3.0, descriptions (T1732)
 obsidian-plugin.test.mjs         T1730, T1731, T1733's cases; the STAGES_PATTERN block deleted (T1732, retargeted at T1730)
+remark-pieces-vocabulary.test.mjs   the walk's file list gains blocks.ts and figure.ts (T1732)
 obsidian-plugin/README.md, AUTHORING.md       T1734
 DECISIONS.md, ROADMAP.md         close-out (T1718, amended)
 ```
 
 Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
-`src/`, `scripts/`, every other test file; `esbuild.config.mjs`,
+`src/`, `scripts/`, every other test file (the walk's list aside); `esbuild.config.mjs`,
 `tsconfig.json` and the plugin's dependencies.
 
 ### Known limitations (amendment 2)
@@ -2313,7 +2351,13 @@ Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
 - **`full` is the scroll host's content box**, inside Obsidian's file
   margins, not the window's edge; with Readable line length off the
   column is the pane, so `wide` and `full` read alike.
-- **`tall` is a share of the window's height**, not the pane's.
+- **`tall` is a share of the window's height**, not the pane's the
+  spec names — a reading put to him at the look (T1735), so his answer
+  lands as a Decided line that settles the spec's sentence. The honest
+  fallback, if he wants the pane: `container-type: size` on the two
+  hosts and `cqb` in place of `vh` — size containment on Obsidian's
+  scroll hosts, riskier than the inline-size already taken; named, not
+  built.
 - **`match="height"` is drawn as equal widths**; stage notes are not
   shown (labels only, as today); a `side` or `slider` with the wrong
   count is drawn; text before a compare's first stage is skipped.
@@ -2324,8 +2368,8 @@ Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
   spans the cut (a list continued across it) — only in sections that
   touch a block.
 - **The freshness re-render is a full re-render** of that note's
-  Reading view, once per edit that reaches a block's later section;
-  whether Obsidian keeps the scroll position through it is his to see.
+  Reading view, once per edit that touches a block; whether Obsidian
+  keeps the scroll position through it is his to see.
 
 ### Resolved decisions (amendment 2)
 
@@ -2340,9 +2384,14 @@ Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
   float never crosses CodeMirror lines or Reading view sections.
 - **Reading view rewrites only sections that touch a block**; the
   block's first section draws it whole, later ones hide, and a stored
-  signature triggers one re-render when a later section changes.
+  signature of the note's blocks triggers one re-render whenever it
+  changes.
 - **The method words are the site's**, pinned equal; `side` and
   `slider` show their own names as written. Put to him at the look.
 - **`STAGES_PATTERN` is deleted**, its three guarantees retargeted to
   the scanner's cases before it goes.
-- **No new dependency; `minAppVersion` unchanged.**
+- **No new dependency; `minAppVersion` unchanged** (1.4.0 carries
+  every API used).
+- **The constitution needs no amendment**: its "mirrors … by
+  convention (see `DECISIONS.md` on the accepted approximation)" is
+  not contradicted by a mirror a test now pins.

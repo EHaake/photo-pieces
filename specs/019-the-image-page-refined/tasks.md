@@ -1272,8 +1272,9 @@ T1729.
       `obsidian-plugin/`, `npm run build` exit 0; the three mutations
       (a `mystery` entry; `held`'s forms `'both'`; the fence skip
       removed) each fail by name and are reverted, the failing lines
-      pasted; the cross-check's two counts (33, 8) quoted from the
-      test output._
+      pasted; the cross-check's two counts (33, 8) and its image-src
+      comparison quoted from the test output; the paragraph-then-leaf
+      case green both through the scanner and through the harness._
 
 - [ ] **T1731** — The figure and the stylesheet. Pattern: `BlockWidget.toDOM`
       in `main.ts` (the DOM it builds, the missing box's text);
@@ -1285,7 +1286,8 @@ T1729.
       `figureTree`, `toDom` (standard DOM calls only — no Obsidian
       `addClass`/`setText`, so the file stays obsidian-free).
       `styles.css` rewritten: the `body` tokens at the table's values,
-      the two pane hosts, every layout, `.photo-pieces-hidden`; every
+      the two pane hosts, every layout, `white-space: normal` on
+      `.photo-pieces-block`, `.photo-pieces-hidden`; every
       non-custom declaration `!important`; a header comment saying why
       (the Phase 3a collapse) and that the test refuses one without.
       Live Preview draws with the old classes until T1732 — no pause
@@ -1308,12 +1310,20 @@ T1729.
       `obsidian-plugin.test.mjs`: the `STAGES_PATTERN` describe block
       deleted — its three cases were retargeted to the scanner at
       T1730; the commit message names them. `manifest.json`,
-      `package.json`: 0.3.0 and the descriptions. _Verify:
+      `package.json`: 0.3.0 and the descriptions.
+      `remark-pieces-vocabulary.test.mjs`: the "nothing … knows the
+      word" walk's file list (~974–979) gains
+      `obsidian-plugin/blocks.ts` and `obsidian-plugin/figure.ts` beside
+      `main.ts` — the one edit to a site test file in this phase,
+      authorized at sign-off (plan: "The vocabulary walk reaches the new
+      files"). _Verify:
       `sh scripts/verify.sh` green (count recorded — the three deleted
       cases accounted for against T1730's additions); `npm run build`
       exit 0; `grep -n "STAGES_PATTERN\|LEAF_BLOCKS\|DIRECTIVE_PATTERN\|photo-pieces-preview" obsidian-plugin/*.ts obsidian-plugin/styles.css obsidian-plugin.test.mjs`
       → no hits; `grep -n "figureTree" obsidian-plugin/main.ts` → the
-      widget's call; the vocabulary walk green. The figures in Obsidian
+      widget's call; the vocabulary walk green with
+      `git diff -U0 -- remark-pieces-vocabulary.test.mjs` showing the
+      two added paths and nothing else. The figures in Obsidian
       are the person's at the pause._
 
 - [ ] **T1733** — Reading view draws the same figures. Pattern: T1732's
@@ -1324,13 +1334,15 @@ T1729.
       (`null` → leave), the cached parse, the section emptied and
       rebuilt from its pieces (runs through `MarkdownRenderer.render` on
       a `MarkdownRenderChild` given to `ctx.addChild`; figures through
-      `toDom(figureTree(…))`), `photo-pieces-hidden` for none; the
-      signature map by `sourcePath` and the once-per-tick
-      `previewMode.rerender(true)` for that file's leaves in
-      `'preview'` mode. `obsidian-plugin.test.mjs`: the
-      `sectionPieces` and `blockSignature` cases. _Verify:
-      `sh scripts/verify.sh` green (count recorded); `npm run build`
-      exit 0; the off-by-one mutation fails by name, reverted, line
+      `toDom(figureTree(…))`), `photo-pieces-hidden` added for none and
+      removed when a run yields pieces; the signature map by
+      `sourcePath`, computed on every call with section info, and the
+      once-per-tick `previewMode.rerender(true)` for that file's leaves
+      in `'preview'` mode whenever the signature differs.
+      `obsidian-plugin.test.mjs`: the `sectionPieces` and
+      `blockSignature` cases. _Verify: `sh scripts/verify.sh` green
+      (count recorded); `npm run build` exit 0; the dropped
+      `startLine >= lineStart` mutation fails by name, reverted, line
       pasted; `grep -n "registerMarkdownPostProcessor\|figureTree" obsidian-plugin/main.ts`
       → the post-processor and both renderers' calls._
 
@@ -1361,7 +1373,10 @@ T1729.
       — the inset (about two thirds of the text), the wide (past the
       text, up to nearly the whole pane), the fullbleed (the whole
       pane), the side frames (under half the text), the tall (at most
-      four fifths of the window's height) — and the grid's columns, the
+      four fifths of the window's height — the whole Obsidian window,
+      not the note's pane, which the spec's sentence names: ask which
+      he wants, and record the answer as a Decided line that settles
+      that sentence; the pane is the plan's named fallback) — and the grid's columns, the
       gaps, the strip's height, the caption's size and colour; the line
       naming the method under a compare, side or slider — keep it, and
       are the words right (the side and slider blocks show their own
