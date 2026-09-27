@@ -48,7 +48,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     stylesheet; and the handle's rule reads both, so a token left
 //     declared but unread fails too. The filmstrip's neighbours' sliver
 //     (T1726), `--compare-peek`, is the same kind of token: declared once
-//     at its value and read by the filmstrip's frames rule.
+//     at its value and read by the filmstrip's frames rule; so is the
+//     arrows' ring and stroke (T1729d), `--compare-arrow-color`, read by
+//     the arrow rule (pinned in (e)).
 //
 // (c) The compare's motion (T1708). Five rules and nothing else, each
 //     by its string: the switch's arriving stage fading in over the
@@ -157,6 +159,7 @@ const TOKENS = {
   '--compare-handle': '1.5rem',
   '--compare-handle-radius': '50%',
   '--compare-peek': '0px',
+  '--compare-arrow-color': 'color-mix(in oklab, var(--color-accent) 70%, var(--color-bg))',
 };
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
@@ -1069,10 +1072,10 @@ describe('(e) the pair blocks and the filmstrip (the amendment)', () => {
       width: 'var(--compare-handle)',
       height: 'var(--compare-handle)',
       padding: '0',
-      border: '1px solid var(--color-accent)',
+      border: '1px solid var(--compare-arrow-color)',
       'border-radius': 'var(--compare-handle-radius)',
       background: 'var(--color-bg)',
-      color: 'var(--color-accent)',
+      color: 'var(--compare-arrow-color)',
       'font-size': '0',
       'line-height': '1',
       transform: 'translateY(-50%)',

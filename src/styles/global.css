@@ -173,13 +173,15 @@
   --rm-appear: 1; /* under reduced motion: 1 keeps the appearance fade's duration, 0 cuts it */
   --rm-quiet: 1; /* under reduced motion: 1 keeps the quiet view's ground fade, 0 cuts */
   /* The compare's handle (spec 019): a disc a fingertip wide, and the
-     filmstrip's arrows drawn as it; and how far each of the filmstrip's
-     neighbours shows beyond the frame's edge (T1726).
+     filmstrip's arrows drawn as it; how far each of the filmstrip's
+     neighbours shows beyond the frame's edge (T1726); and the arrows'
+     ring and stroke, lighter than the accent (tuned at T1729d).
      compare.test.mjs pins them — to retune, move the value here and in
      its `TOKENS`. */
   --compare-handle: 1.5rem;
   --compare-handle-radius: 50%;
   --compare-peek: 0px; /* how far each neighbour shows beyond the frame's edge */
+  --compare-arrow-color: color-mix(in oklab, var(--color-accent) 70%, var(--color-bg));
 }
 
 @media (max-width: 719.98px) {
@@ -2447,9 +2449,11 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 }
 
 /* The filmstrip's arrows: the handle's look — a flat disc of the ground
-   with an accent hairline, no shadow — at the frame's sides, 0.5rem in,
+   with a hairline, no shadow — at the frame's sides, 0.5rem in,
    vertically centred; muted where there is nowhere to go and
    COMPARE.stripEnds keeps them (aria-disabled); only in the filmstrip.
+   T1729d: ring and chevron are --compare-arrow-color, the accent
+   lightened toward the ground; the handle keeps the accent.
    T1729a: inside, a chevron drawn as the handle draws its "=" — no glyph
    font (JetBrains Mono's subsets carry no ← or →, so the glyph was the
    system mono's). The button's ← / → stays in the markup at font-size 0
@@ -2471,10 +2475,10 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
   width: var(--compare-handle);
   height: var(--compare-handle);
   padding: 0;
-  border: 1px solid var(--color-accent);
+  border: 1px solid var(--compare-arrow-color);
   border-radius: var(--compare-handle-radius);
   background: var(--color-bg);
-  color: var(--color-accent);
+  color: var(--compare-arrow-color);
   font-size: 0;
   line-height: 1;
   transform: translateY(-50%);
