@@ -14,7 +14,11 @@ and the filmstrip as a fourth method — the paragraph "Amended after
 Phase 3" in the Summary, Goals 8 and 9, and the sections marked
 _(amended 2026-09-26)_. The amended sections were re-planned as
 plan.md's "Amendment (2026-09-26)" and tasks.md's Phase 3a
-(T1719–T1729), signed off at the top tier the same day.
+(T1719–T1729), signed off at the top tier the same day. **Amended a
+second time, 2026-09-26 (evening)**, at the Phase 3a pause: the
+authoring plugin made representative — Goal 10 and the sections marked
+_(amended 2026-09-26, plugin)_ — re-planned as plan.md's "Amendment 2
+(2026-09-26): the plugin" and tasks.md's Phase 3b, before the real piece.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
@@ -98,6 +102,24 @@ pair with no method control is what the writing wants: a `side` block
 (one wipe between two stages, nothing to choose). **A filmstrip.** A
 fourth method of the compare that pages or scrolls through every
 stage in order, for the block that carries all of them.
+
+**Amended a second time, at the Phase 3a pause (2026-09-26).** The
+photographer installed the rebuilt plugin and looked at a piece that
+uses every block. What he saw was a stack of bare images: every
+captioned container, `grid`, `strip`, `aside`, `row` and `held` raw
+text; `diptych` and `triptych` stacked because an Obsidian rule
+outranked the plugin's one layout rule; Reading view showing nothing
+at all. The plugin's scoping — "see the photo, not the raw text",
+accepted at spec 003 as an approximation — had been read far more
+narrowly than he meant it: "the concession was that 'approximation'
+would be fine for the authoring plugin. By that I meant that things
+wouldn't be exactly the same, be representative. … The goal for the
+authoring is that I can look at it in Obsidian and get a pretty good
+sense of the layout and flow." The plugin becomes that, before his
+piece rather than after it, because the writing surface is what the
+piece is written on: "a big part of that is getting all the pieces in
+place for authoring and design so we can start to tweak and refine
+things as I actually start to use them."
 
 ## Goals
 
@@ -211,6 +233,19 @@ stage in order, for the block that carries all of them.
    carries a method control or a picking legend. A private file may sit
    in either, from its own folder, exactly as in a `compare`.
 
+10. **The authoring plugin shows the piece's shape** _(amended
+    2026-09-26, plugin)_. In Obsidian, in Live Preview and in Reading
+    view alike, every block of the vocabulary renders as a
+    representative figure — the photograph at a width that reads as
+    the site's for that block, its caption beneath where the block has
+    one, beside the prose where the block puts it there — so that a
+    piece read through in Obsidian gives a good sense of its layout
+    and flow. Representative, not identical: the site's typography,
+    ground, mat, motion and every interaction stay the site's. The
+    plugin's layout rules outrank Obsidian's own, so what the plugin
+    draws is what shows. Put the cursor in a block in Live Preview and
+    it turns back into its text, as today.
+
 ## Non-goals
 
 - **The external image store.** The detail exports make the repo heavier
@@ -243,7 +278,18 @@ stage in order, for the block that carries all of them.
 - **An interactive compare in Obsidian.** The plugin shows a `compare`
   block's stages as images with their labels in Live Preview, the bar
   the plugin has always set (see the photo, not the raw text); the
-  methods, the handle and the loupe are the site's.
+  methods, the handle and the loupe are the site's. _(Amended
+  2026-09-26, plugin: the bar is raised to Goal 10 — every block a
+  representative figure, in both views; interaction, motion, the
+  site's typography and ground stay out, as does anything the plugin
+  would have to compute from the viewport the site has and Obsidian
+  does not — the exact pixel widths, the hold's scrolling, the tall
+  cap's screen share.)_
+- **A second source of truth for the vocabulary** _(amended 2026-09-26,
+  plugin)_. The plugin mirrors the transform by convention, as it
+  always has; it does not import or run the transform, and a block the
+  site rejects is not the plugin's to refuse — it shows what it can
+  parse and leaves the rest raw, and the build stays the judge.
 - **The mobile pass.** Touch works here where the spec says it does
   (the handle, the switch, the pinch); how the page reads on a phone is
   the roadmap's mobile pass, after real content exists.
@@ -288,6 +334,21 @@ stage in order, for the block that carries all of them.
   stages, the compare's slider alone — the first stage left of the
   divider, the second right, the two labels fixed as the legend, the
   pair's note beneath. No method control, no picking.
+- **The plugin's block table** _(amended 2026-09-26, plugin)_ — one
+  entry per block of the vocabulary, in the plugin, naming the block's
+  forms (leaf, container, both), the images it shows and from which
+  attributes or body lines, and its layout kind: a single figure at a
+  named width (`column`, `wide`, `full`, `tall`, `inset`), a row of two
+  or three (`diptych`, `triptych`), a grid or a horizontal strip of
+  the body's images (`grid`, `strip`), a frame beside prose on a side
+  (`aside`, `row`, `held`), or a row of stages (`compare`, `side`,
+  `slider`). The table's names are the transform's names, pinned equal
+  by a test, so a block added to the site is a line the plugin is
+  missing rather than a block it silently ignores.
+- **The two renderers** _(amended 2026-09-26, plugin)_ — the Live
+  Preview decorator (the CodeMirror field the plugin has) and a Reading
+  view post-processor, both building the same figure markup from the
+  same block table and styled by the same stylesheet.
 - **The stage's shares** _(amended 2026-09-26)_ — two numbers, the
   landscape share (of the first screen's width, for a photograph wider
   than tall) and the portrait share (of the first screen's height, for
@@ -374,6 +435,21 @@ One stage per line: the image, its label as the image's text, its note
 after it. Live Preview shows the three images with their labels; the
 site shows the compare. The same block in a sidecar's story puts the
 compare in the writing and the page's automatic section steps aside.
+
+### Reading a draft through in Obsidian _(amended 2026-09-26, plugin)_
+
+The photographer opens a piece in Live Preview. The frames sit where
+the site will put them: a `wide` past the text's edges, a `fullbleed`
+across the whole pane, a `tall` standing at most of the pane's height,
+an `inset` small, a diptych and a triptych in a row, a grid in its
+columns, a strip in one scrolling row; a captioned block shows its
+caption beneath the frame in a smaller face; an `aside` or a `row`
+puts its small frame beside the paragraph on the side named; a `held`
+puts its frame beside its paragraphs on its side, the words flowing
+past it without the site's hold. A compare, side or slider shows its
+stages in a row with the labels beneath and its method named. He
+switches to Reading view and sees the same page. He puts the cursor
+in a block in Live Preview and its text comes back for editing.
 
 ### Writing a pair _(amended 2026-09-26)_
 
@@ -481,6 +557,34 @@ output.
   is a movement on the move duration; the settle after a swipe is a
   movement on the state duration, like the slider's snap; under
   reduced motion both cut to the stage. Nothing autoplays.
+- **The plugin's figures** _(amended 2026-09-26, plugin)_. One
+  stylesheet draws every block's figure; the widths are shares of the
+  editor pane, not the site's pixels, and read as the site's order:
+  `inset` smallest, `column` the text's width, `wide` past it, `full`
+  the pane's whole width, `tall` at most a share of the pane's height
+  with the frame centred; a diptych's two and a triptych's three in a
+  row at equal widths; a grid in the site's columns; a strip one
+  horizontal row that scrolls; `aside` and `row` a small frame on the
+  named side with the prose wrapped beside it; `held` the frame on its
+  side with its paragraphs beside it (a float, not a hold). A caption
+  sits beneath its frame in the muted face, inline markdown rendered.
+  The stage blocks keep today's row of images with labels and gain
+  one line naming the method (`Slider`, `Side by side`, `Switch`,
+  `Filmstrip`, or the block's own name for `side` and `slider`). A
+  missing image keeps the dashed "not found" box. Every share is a
+  tunable in the plugin's stylesheet (the envelope).
+- **The plugin's rules win** _(amended 2026-09-26, plugin)_. Found at
+  the Phase 3a pause: Obsidian's own stylesheet outranked the plugin's
+  `display: flex`, so every row collapsed to a stack. Every layout
+  declaration the plugin relies on is written so that Obsidian's rules
+  cannot outrank it, in both views, and a test reads the stylesheet
+  and refuses a layout rule that isn't.
+- **Both views, one markup** _(amended 2026-09-26, plugin)_. Live
+  Preview replaces a block's lines with the figure while the cursor is
+  outside it, as today; Reading view renders the same figure through a
+  Markdown post-processor over the same block table, so the two never
+  disagree about what a block is. A directive typed mid-paragraph stays
+  raw in both, as the site rejects it.
 - **The pair blocks** _(amended 2026-09-26)_. `side`: the two panes at
   the photograph's ratio and the same size, the label · note of each
   beneath its pane in the caption style, no control, no legend, no
@@ -570,6 +674,14 @@ output.
   sentence on the stage's size states the share rule; the plugin's
   README notes that Live Preview shows a `side` and a `slider` as it
   shows a `compare`.
+- **The plugin's README** _(amended 2026-09-26, plugin)_ is rewritten
+  for Goal 10: its table lists every block with what each view shows,
+  nothing "raw by design" but a mid-paragraph directive; the install
+  and rebuild steps stay; a line says how to check the plugin — open
+  the sampler piece, every block a figure. `AUTHORING.md`'s "Obsidian
+  settings that matter" says the same in a sentence. `DECISIONS.md`'s
+  two plugin entries are annotated at close-out as superseded by this
+  amendment, in his words.
 
 ## The tuning envelope
 
@@ -615,7 +727,12 @@ as a routine task:
   it wraps, the neighbours' sliver, and whether a wheel scrolls it; the
   width of the filmstrip and of each pair block per surface, among the
   vocabulary's widths; the `slider` block's fixed legend's shape; where
-  a `side` stacks.
+  a `side` stacks;
+- _(amended 2026-09-26, plugin)_ every share in the plugin's
+  stylesheet — the widths of `inset`, `wide`, `full` and the side
+  frames, the `tall` height cap, the grid's columns, the gaps, the
+  caption's face — and whether the method line shows on the stage
+  blocks.
 
 **As many rounds as it takes.** A pause may run several looks; each
 round is a sub-lettered task, reviewed with the phase, and the phase's
@@ -627,6 +744,9 @@ re-dispatched on the changed section, and a sign-off:
 
 - a fourth method, or a second new block — _(amended 2026-09-26)_ now
   a fifth method, or a fourth block that takes stages;
+- _(amended 2026-09-26, plugin)_ any interaction in the plugin (a
+  working slider, a switch), motion, or matching the site's typography
+  or ground; the plugin importing the transform.
 - a change to the private-file rule beyond what Entities states, or a
   private file placed by any block but `compare`;
 - the loupe on any surface but the quiet view;
@@ -694,7 +814,7 @@ re-implementation. The plan says where each lives.
       autoplays — pinned by the existing tests
 - [ ] The Obsidian plugin shows a `compare` block's stages as images
       with their labels in Live Preview — checked by the photographer
-      at a pause
+      at a pause _(raised by the plugin amendment's criteria below)_
 - [ ] The constitution's block-vocabulary clause names `compare` and no
       longer reserves `sequence`, amended in its own commit before the
       first implementation task; `AUTHORING.md`, the README and the
@@ -748,6 +868,33 @@ _Amended 2026-09-26:_
       share; the plugin shows a `side` and a `slider` as it shows a
       `compare` in Live Preview — checked by the photographer at the
       pause
+
+_Amended 2026-09-26 (plugin):_
+
+- [ ] The plugin's block table names exactly the transform's blocks —
+      pinned by a test that compares the two lists, so a block added
+      to either side fails
+- [ ] Over the sampler piece's body, the plugin's parser finds every
+      block, leaf and container, with the images, caption and side the
+      transform would read, and leaves a mid-paragraph directive raw —
+      pinned by tests over that body and the fog piece's
+- [ ] In Live Preview every block of the sampler renders as its figure
+      — a single at its width, a diptych and a triptych in a row, a grid
+      in columns, a strip in a row, an aside, a row and a held beside
+      their prose on the named side, captions beneath, stage blocks in
+      a row with labels and the method line — and the cursor inside a
+      block returns its text; in Reading view the same figures show —
+      checked by the photographer on the laptop and the DualUp
+- [ ] Every layout declaration in the plugin's stylesheet is written so
+      Obsidian's rules cannot outrank it — pinned by a test over the
+      stylesheet; the collapse found at the Phase 3a pause (a computed
+      `display: block` on a flex row) is gone — checked in the console
+      at the pause
+- [ ] A missing image shows the dashed box in both views; a src with a
+      folder in it still resolves from the note's folder — pinned
+- [ ] The plugin's README table describes every block in both views;
+      `AUTHORING.md`'s settings section matches; the plugin builds
+      clean — pinned by greps and the build
 
 ## Decided (in this conversation, 2026-09-24)
 
@@ -918,3 +1065,26 @@ _Amended 2026-09-26:_
   outside the frame in the margin, a small gap from its edges, covering
   none of the photograph; on a phone, where there is no margin, they
   stay inside.
+- **The second amendment (2026-09-26, at the Phase 3a pause): the
+  plugin, representative.** On the plugin-check piece the photographer
+  saw everything stacked and most blocks raw: "Basically it doesn't
+  seem to be rendering the blocks as expected." Diagnosed in the
+  console: Obsidian's stylesheet outranks the plugin's `display: flex`
+  (computed `block` on the compare's row) — worked around in his vault
+  with `!important`, to be fixed on the branch. On the scoping: "the
+  concession was that 'approximation' would be fine for the authoring
+  plugin. By that I meant that things wouldn't be exactly the same, be
+  representative. Approximation doesn't mean 'almost completely
+  different and unrepresentative in most cases'. The goal for the
+  authoring is that I can look at it in Obsidian and get a pretty good
+  sense of the layout and flow." Folded into this spec before the real
+  piece, over a spec of its own: "spec 019 is now contingent on me
+  authoring a full, real piece and a big part of that is getting all
+  the pieces in place for authoring and design so we can start to
+  tweak and refine things as I actually start to use them." The
+  session's shape, to be seen: one block table mirroring the transform
+  and pinned equal to it; the same figure markup in Live Preview and
+  Reading view; widths as shares of the pane in the site's order;
+  `held` as a float beside its paragraphs, no hold; a method line on
+  the stage blocks; every share a tunable; interaction, motion and the
+  site's typography and ground left out.
