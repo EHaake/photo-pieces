@@ -6,8 +6,10 @@ import {
   DEFAULT_MODE,
   METHOD_WORDS,
   PLUGIN_BLOCKS,
+  blockSignature,
   parseBlocks,
   resolveRelative,
+  sectionPieces,
 } from './obsidian-plugin/blocks.ts';
 import { parseCompareBody } from './obsidian-plugin/compare.ts';
 import { figureTree } from './obsidian-plugin/figure.ts';
@@ -717,5 +719,94 @@ describe('the stylesheet (T1731)', () => {
     ];
     expect(named.length).toBeGreaterThan(10);
     expect(named.filter((name) => !emitted.has(name))).toEqual([]);
+  });
+});
+
+// Reading view's sections (spec 019, amendment 2, T1733): Obsidian hands
+// the post-processor one section at a time, split at blank lines, with its
+// 0-based inclusive lines in the whole note. A block is drawn by the
+// section it begins in, its later sections hidden, and a section touching
+// no block left alone; the signature decides when the note re-renders.
+
+describe("Reading view's sections (T1733)", () => {
+  const text = readPiece('vocabulary-sampler');
+  const lines = text.split('\n');
+  const blocks = parseBlocks(text);
+
+  // The section Obsidian would hand over whose first line starts `prefix`:
+  // from that line to the last before a blank one.
+  const section = (prefix) => {
+    const start = lines.findIndex((line) => line.startsWith(prefix));
+    expect(start).toBeGreaterThan(-1);
+    let end = start;
+    while (end + 1 < lines.length && lines[end + 1].trim() !== '') end++;
+    return [start, end];
+  };
+  const pieces = (prefix) => sectionPieces(blocks, ...section(prefix));
+  const held = blocks.find((b) => b.name === 'held');
+
+  it("the held's first section, its opener and first paragraph, is one figure: the whole held", () => {
+    const [start, end] = section(':::held{src="./land-b.jpg"');
+    expect(end).toBe(start + 4);
+    expect(pieces(':::held{src="./land-b.jpg"')).toEqual([{ kind: 'figure', block: held }]);
+  });
+
+  it("the held's third paragraph is no pieces: its first section drew it", () => {
+    expect(pieces('The first paragraph meets the top')).toEqual([]);
+  });
+
+  it("the held's last section, its paragraph and closer, is no pieces", () => {
+    const [, end] = section('The last line is the release.');
+    expect(end).toBe(held.endLine);
+    expect(pieces('The last line is the release.')).toEqual([]);
+  });
+
+  it('a section of plain prose touches no block: null, left as drawn', () => {
+    expect(pieces('The held image: the frame stays fixed')).toBeNull();
+  });
+
+  it("a section with the grid's caption is no pieces", () => {
+    expect(pieces('A four-image cluster with a caption')).toEqual([]);
+  });
+
+  it('a paragraph line with a leaf on the next line: a Markdown run of that line, then the figure', () => {
+    const doc = 'Text\n::single{src="./photo.jpg" alt="x"}';
+    const [single] = parseBlocks(doc);
+    expect(sectionPieces([single], 0, 1)).toEqual([
+      { kind: 'markdown', startLine: 0, endLine: 0 },
+      { kind: 'figure', block: single },
+    ]);
+  });
+
+  const signature = (note) => blockSignature(parseBlocks(note), note);
+  const edit = (from, to) => {
+    expect(text).toContain(from);
+    return text.replace(from, to);
+  };
+
+  it('the signature is equal for two texts differing outside every block', () => {
+    const edited = edit('The held image: the frame stays fixed', 'The held picture: it stays put');
+    expect(edited).not.toBe(text);
+    expect(signature(edited)).toBe(signature(text));
+  });
+
+  it("the signature differs for an edit inside the held's third paragraph", () => {
+    const edited = edit('The first paragraph meets the top', 'The opening paragraph meets the top');
+    expect(signature(edited)).not.toBe(signature(text));
+  });
+
+  it("the signature differs when a block's closer is deleted", () => {
+    const edited = edit(
+      'A four-image cluster with a caption spanning the grid.\n:::\n',
+      'A four-image cluster with a caption spanning the grid.\n',
+    );
+    expect(signature(edited)).not.toBe(signature(text));
+  });
+
+  it('the signature differs when fences are typed around an existing image paragraph', () => {
+    const image = '![A 3:2 placeholder](./land-a.jpg)';
+    const edited = edit(`\n${image}\n`, `\n:::grid\n${image}\n:::\n`);
+    expect(parseBlocks(edited).length).toBe(blocks.length + 1);
+    expect(signature(edited)).not.toBe(signature(text));
   });
 });

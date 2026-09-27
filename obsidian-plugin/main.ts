@@ -1,6 +1,8 @@
 import {
   Component,
+  MarkdownRenderChild,
   MarkdownRenderer,
+  MarkdownView,
   Plugin,
   TFile,
   editorInfoField,
@@ -10,7 +12,7 @@ import type { App } from 'obsidian';
 import { EditorView, Decoration, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
-import { parseBlocks, resolveRelative } from './blocks';
+import { blockSignature, parseBlocks, resolveRelative, sectionPieces } from './blocks';
 import type { ParsedBlock } from './blocks';
 import { figureTree, toDom } from './figure';
 
@@ -19,6 +21,16 @@ import { figureTree, toDom } from './figure';
 // while the cursor is outside them, and come back as text when it enters.
 // Both views draw a block as the same figure — the tree built in figure.ts
 // from what the scanner in blocks.ts reads — styled by styles.css.
+//
+// Reading view has no cursor: every block always renders. Obsidian hands
+// the post-processor one section at a time (split at blank lines), so a
+// block is read from the whole note and drawn by the section it begins
+// in; that section is rebuilt around it, its other lines rendered as
+// Markdown, and the block's later sections are hidden. A section that
+// touches no block is left as Obsidian drew it, and so is a section with
+// no source to read (a note embedded in another, a hover preview, an
+// export). Since Obsidian re-runs only the sections whose text changed,
+// any edit that changes a note's blocks re-renders its Reading view whole.
 //
 // Representative, not the site: frames at the site's widths, rows, grids,
 // strips, a frame beside its prose, stages with their labels and method
@@ -163,7 +175,70 @@ function directiveField(plugin: Plugin) {
 }
 
 export default class PhotoPiecesBlocksPlugin extends Plugin {
+  // The last note parsed: Reading view calls once per section, each with
+  // the whole note's text.
+  private parsed: { text: string; blocks: ParsedBlock[] } | null = null;
+  // Each note's blocks as last seen, by path, and the notes whose Reading
+  // view is due a full re-render this tick.
+  private signatures = new Map<string, string>();
+  private rerendering = new Set<string>();
+
   async onload() {
     this.registerEditorExtension(directiveField(this));
+    this.registerMarkdownPostProcessor((el, ctx) => {
+      const info = ctx.getSectionInfo(el);
+      if (!info) return; // no source to read: leave it as Obsidian drew it
+
+      const blocks = this.parse(info.text);
+      this.noteSignature(ctx.sourcePath, blockSignature(blocks, info.text));
+
+      const pieces = sectionPieces(blocks, info.lineStart, info.lineEnd);
+      if (!pieces) return;
+      el.empty();
+      if (pieces.length === 0) {
+        el.addClass('photo-pieces-hidden'); // drawn whole by its first section
+        return;
+      }
+      el.removeClass('photo-pieces-hidden');
+
+      const { app } = this;
+      const child = new MarkdownRenderChild(el);
+      ctx.addChild(child);
+      const md = (markdown: string, into: HTMLElement) => {
+        void MarkdownRenderer.render(app, markdown, into, ctx.sourcePath, child);
+      };
+      const lines = info.text.split('\n');
+      for (const piece of pieces) {
+        if (piece.kind === 'markdown') {
+          // Its own element, so a render that finishes later keeps its place.
+          md(lines.slice(piece.startLine, piece.endLine + 1).join('\n'), el.createDiv());
+        } else {
+          el.appendChild(toDom(figureTree(piece.block, resolver(app, ctx.sourcePath)), md));
+        }
+      }
+    });
+  }
+
+  private parse(text: string): ParsedBlock[] {
+    if (this.parsed?.text !== text) this.parsed = { text, blocks: parseBlocks(text) };
+    return this.parsed.blocks;
+  }
+
+  // Stored on every call, so the re-render it schedules sees it equal and
+  // does not loop; the first render of a note stores it without comparing.
+  private noteSignature(path: string, signature: string) {
+    const previous = this.signatures.get(path);
+    this.signatures.set(path, signature);
+    if (previous === undefined || previous === signature || this.rerendering.has(path)) return;
+    this.rerendering.add(path);
+    window.setTimeout(() => {
+      this.rerendering.delete(path);
+      for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
+        const view = leaf.view;
+        if (view instanceof MarkdownView && view.file?.path === path && view.getMode() === 'preview') {
+          view.previewMode.rerender(true);
+        }
+      }
+    }, 0);
   }
 }

@@ -272,3 +272,47 @@ function readImagesAndCaption(body: string): { images: Image[]; caption: string 
   }
   return { images, caption: paragraphs.slice(i).join('\n\n') };
 }
+
+/** What Reading view draws for one section: a run of the section's own
+ *  lines, as Markdown, or a block, as its figure. Lines are 0-based and
+ *  inclusive, as `getSectionInfo` gives them. */
+export type Piece =
+  | { kind: 'markdown'; startLine: number; endLine: number }
+  | { kind: 'figure'; block: ParsedBlock };
+
+/** A Reading view section's pieces, lines `lineStart`–`lineEnd` of the
+ *  note whose blocks are `blocks`; `null` when the section touches no
+ *  block, to be left as Obsidian drew it. Lines outside every block are
+ *  Markdown runs; a block that begins in the section is a figure, drawn
+ *  from its whole source whatever sections it spans; the lines of a block
+ *  that began above the section are dropped — its first section drew it.
+ *  An empty list: the section is all later lines of blocks. */
+export function sectionPieces(
+  blocks: ParsedBlock[],
+  lineStart: number,
+  lineEnd: number,
+): Piece[] | null {
+  const touching = blocks.filter((b) => b.startLine <= lineEnd && b.endLine >= lineStart);
+  if (touching.length === 0) return null;
+
+  const pieces: Piece[] = [];
+  let next = lineStart; // the first line not yet placed
+  for (const block of touching) {
+    if (block.startLine >= lineStart) {
+      if (block.startLine > next) {
+        pieces.push({ kind: 'markdown', startLine: next, endLine: block.startLine - 1 });
+      }
+      pieces.push({ kind: 'figure', block });
+    }
+    next = Math.max(next, block.endLine + 1);
+  }
+  if (next <= lineEnd) pieces.push({ kind: 'markdown', startLine: next, endLine: lineEnd });
+  return pieces;
+}
+
+/** The note's blocks as written — their source slices, joined — so that
+ *  an edit inside any block, or one that makes or unmakes a block, changes
+ *  it, and an edit outside every block does not. */
+export function blockSignature(blocks: ParsedBlock[], text: string): string {
+  return blocks.map((b) => text.slice(b.from, b.to)).join('\u0000');
+}
