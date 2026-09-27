@@ -1141,6 +1141,19 @@ headers'.
       unbroken ≥4px stream past 800ms pages again (the cap's trade).
       630 tests.
 
+- [x] **T1729d** — Round (Phase 3a pause, second look, 2026-09-26): the
+      arrows' lines still a little dark. One token, `--compare-arrow-color`
+      on `:root` beside the handle's, at `color-mix(in oklab,
+      var(--color-accent) 70%, var(--color-bg))`; the arrow rule's ring
+      and chevron read it, the handle keeps the accent, muted stays
+      `--color-muted`. `TOKENS` pins the value; (e) bodies updated.
+      _Recorded:_ live arrows compute L 0.549 against the accent's 0.36
+      at the same hue (the implementer's first oklch mix landed at hue
+      159.5 — greener — and the orchestrator switched it to oklab
+      before committing, 630 tests green); muted computes `oklch(0.5
+      0.012 250)`, now darker in L than a live arrow — moot while
+      `stripEnds` is 'hide', a look if it ever turns 'quiet'.
+
 - [ ] **T1729** — The amendment's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3a
       pause, in the person's words, with T1720's, T1725's and T1726's
@@ -1416,6 +1429,7 @@ tier if it is ever on (it is off). -->
 | T1729a arrows' look round | implementation (`opus`, high) | ~83k + ~70k (two passes) | done; 629 tests; first pass centred the fallback glyph with a Menlo-tuned nudge and found the mono face has no arrow glyphs; second pass drew the chevron in CSS; a 'lighter' ask conflicts with 'match the handle' (measured equal) — put to the person |
 | T1729b wheel pages one stage | implementation (`opus`, high) | ~64k | done; 630 tests (+1); both mutations fail by name; the gate restarts on any wheel event (vertical too) so a tail's drift cannot end it early |
 | T1729c wheel gate sticks | implementation (`opus`, high) | ~60k | done; 630 tests; cap mutation fails EXPECTED by name; old code reproduced stuck headless; if hard flicks double-page the lever is the cap or a rising-delta rule (not built) |
+| T1729d arrows lighter | implementation (`opus`, high) | ~56k | done; 630 tests; mutation fails TOKENS by name; its oklch mix shifted hue — orchestrator changed the one word to oklab and re-verified (a footprint fix, not a design call) |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_ Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.

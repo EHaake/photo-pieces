@@ -911,3 +911,6 @@ _Amended 2026-09-26:_
   filmstrip ignores empty wheel events, opens by itself after 800ms
   whatever the trackpad keeps sending, and a gesture the other way pages
   back at once.
+- **T1729d (Phase 3a pause, 2026-09-26).** The filmstrip's arrows'
+  ring and chevron are a third lighter than the accent, the same hue;
+  the handle stays the accent.
