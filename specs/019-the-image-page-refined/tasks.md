@@ -1412,6 +1412,30 @@ T1729.
       reverted; a `--photo-pieces-foo` added to body → (3) fails,
       reverted._
 
+- [x] **T1735a** — Round (Phase 3b pause, first look, 2026-09-27, on
+      the laptop): "some of them still don't [render], such as the full
+      and half-bleed … Triptych isn't keeping the correct ratios … it
+      seems to have a pretty narrow space for content and keeps
+      everything inside it." His console: the fullbleed frame 849 wide,
+      margin-left −74.5px, flex, in a 913 scroller with the sizer at
+      700 — sized right, clipped. Cause, read from Obsidian 1.8.7's own
+      app.css (in the installed asar): `.markdown-source-view.mod-cm6
+      .cm-content > [contenteditable=false] { contain: paint
+      !important }` on every CodeMirror widget, and `.cm-content > * {
+      margin: 0 !important }`. Fix: one rule on the widget root at
+      higher specificity, `contain: none` and `margin-block:
+      var(--photo-pieces-gap)`, both `!important`; pinned by a
+      stylesheet case that checks the selector outranks both. Reading
+      view has no such clip. The narrow space is Readable line length
+      (700px), the intended setting; off, every block is the pane and
+      nothing breaks out. Held not holding and equal heights drawn as
+      equal widths are as designed. The triptych: no cause found in the
+      code (equal columns at each image's own ratio, as the site); a
+      wide/fullbleed triptych was clipped by the same bug; a console
+      read is with him. Found: `full` stops at the hosts' 32px file
+      margins, not the pane's edge; the plugin weights a triptych, the
+      site only a diptych. 727 tests.
+
 - [ ] **T1735** — The plugin's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3b
       pause, in the person's words. The questions, in plain language:
@@ -1718,6 +1742,7 @@ tier if it is ever on (it is off). -->
 | Phase 3b review | implementation (`opus`, high) | ~132k | signed off, nothing blocking; fix-now T1734a: the plugin's own renders may feed the Reading-view signature and loop (guard by docId or whole-text), no pin on 'never imports the transform', the token case does not refuse an unlisted body token, AUTHORING ~433 reads Live-Preview-only; sweep: the walk gained compare.ts (plan's file-structure line names two), AC 22's mid-paragraph clause pinned synthetically not over the sampler, AC 23 names stage blocks the sampler lacks, no .catch on the widget's Promise.all, DECISIONS.md still says Reading view out of scope (T1718); pause: tall by window or pane, the method line's words, Reading view sitting still, the sampler gaining stage blocks, Readable line length off |
 | T1734a review fix-now | implementation (`opus`, high) | ~43k | done; 726 tests (+6); both mutations fail by name; the signature keyed by docId + path (the typings give docId on every context and no synchronous whole-text read); the signatures map grows one entry per document and is never pruned — sweep note; whether docId survives rerender(true) is not in the typings — the walkthrough's edit-then-Reading-view check covers it |
 | Phase 3b re-review | implementation (`opus`, high) | ~8k | signed off; the docId guard closes the loop; it now rests on Reading view keeping one docId across an edit and rerender(true) (not in the typings) — the walkthrough's edit-then-Reading-view check carries that weight, and the fallback is to skip calls whose el sits inside a plugin render target; sweep: the signatures map unbounded, the `parsed` comment says whole note |
+| T1735a bleeds clipped (diagnosis + fix) | implementation (`opus`, high) | ~90k (two passes) | done; 727 tests (+1); the cause read from Obsidian's app.css in the installed asar (a future dispatch can read the real rules); the plan's 'layout not on the root' line deviated by one declaration on the root, as the !important strategy foresaw |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 | Amendment 2 planning (2026-09-26, evening) | implementation (`opus`, high, no override) | ~220k | drafted plan.md's Amendment 2 section and Phase 3b (T1730–T1735, T1730 per-task): one block table pinned equal to the transform's descriptors, a line scanner, one figure builder for both views, a Reading-view post-processor, an `!important` stylesheet with a test; no product question |

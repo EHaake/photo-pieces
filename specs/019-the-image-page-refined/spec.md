@@ -1095,3 +1095,7 @@ _Amended 2026-09-26 (plugin):_
   the column, its fixed labels and the second stage's note; a story's
   side or slider shows beside "Raw to finished"; the filmstrip's keys,
   no wrap, no sliver, and the move and state durations stand.
+- **T1735a (Phase 3b pause, 2026-09-27).** In Live Preview a figure that
+  is wider than the text column is not clipped to it: the plugin lifts
+  Obsidian's containment on its own widget and keeps the figure's gap
+  above and below.

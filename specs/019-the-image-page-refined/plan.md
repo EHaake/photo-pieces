@@ -2338,6 +2338,13 @@ Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
 
 ### Known limitations (amendment 2)
 
+- **Obsidian clips and flattens every editor widget** (T1735a):
+  `.cm-content > [contenteditable=false] { contain: paint !important }`
+  and `.cm-content > * { margin: 0 !important }` in app.css 1.8.7. The
+  widget root's own rule outranks both by specificity; a later Obsidian
+  that raises the specificity of those rules would clip again, and the
+  fix is the same selector made longer. `full` reaches the hosts'
+  content box, 32px inside the pane's edge (`--file-margins`).
 - **The scanner's fence check is looser than CommonMark** (T1730
   review): a prose line beginning with three backticks is read as a
   fence opener, hiding blocks until the next such line, and a `:::`
