@@ -1392,7 +1392,7 @@ T1729.
       ≥ 1; `npx prettier --check obsidian-plugin/README.md AUTHORING.md README.md`
       clean; `sh scripts/verify.sh` green; `npm run build` exit 0._
 
-- [ ] **T1734a** — Phase 3b review fix-now (signed off, nothing
+- [x] **T1734a** — Phase 3b review fix-now (signed off, nothing
       blocking). (1) The plugin's own `MarkdownRenderer.render` calls
       (captions, prose, Reading view's runs) run every post-processor
       again with the note's `sourcePath`; if `getSectionInfo` there
@@ -1716,6 +1716,7 @@ tier if it is ever on (it is off). -->
 | T1733 Reading view | implementation (`opus`, high) | ~59k | done; 720 tests (+10); plugin build exit 0; the startLine mutation fails three cases; each Markdown run renders into its own div (render is async, a figure could land ahead); once-per-tick is setTimeout 0 per path; note: a hidden element whose section later returns null stays hidden until rerender(true) replaces it — watch at the look |
 | T1734 plugin documents | implementation (`opus`, high) | ~70k | done; prettier clean; 720 tests; README.md's table cells, header and three sentences corrected beyond the five named cells; findings: the sampler holds no compare/side/slider (the fog piece does; his plugin-check draft holds every block), side/slider's method line reads the lowercase block name while a compare reads the site's words — a pause question (T1735 lists it) |
 | Phase 3b review | implementation (`opus`, high) | ~132k | signed off, nothing blocking; fix-now T1734a: the plugin's own renders may feed the Reading-view signature and loop (guard by docId or whole-text), no pin on 'never imports the transform', the token case does not refuse an unlisted body token, AUTHORING ~433 reads Live-Preview-only; sweep: the walk gained compare.ts (plan's file-structure line names two), AC 22's mid-paragraph clause pinned synthetically not over the sampler, AC 23 names stage blocks the sampler lacks, no .catch on the widget's Promise.all, DECISIONS.md still says Reading view out of scope (T1718); pause: tall by window or pane, the method line's words, Reading view sitting still, the sampler gaining stage blocks, Readable line length off |
+| T1734a review fix-now | implementation (`opus`, high) | ~43k | done; 726 tests (+6); both mutations fail by name; the signature keyed by docId + path (the typings give docId on every context and no synchronous whole-text read); the signatures map grows one entry per document and is never pruned — sweep note; whether docId survives rerender(true) is not in the typings — the walkthrough's edit-then-Reading-view check covers it |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 | Amendment 2 planning (2026-09-26, evening) | implementation (`opus`, high, no override) | ~220k | drafted plan.md's Amendment 2 section and Phase 3b (T1730–T1735, T1730 per-task): one block table pinned equal to the transform's descriptors, a line scanner, one figure builder for both views, a Reading-view post-processor, an `!important` stylesheet with a test; no product question |
