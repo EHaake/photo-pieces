@@ -709,6 +709,40 @@ describe('the stylesheet (T1731)', () => {
     for (const host of PANE_HOSTS) expect(rules.some((r) => r.selectors.includes(host))).toBe(true);
   });
 
+  it("the widget root lifts Obsidian's contain: paint and restores its block margin with a selector that outranks both, so a breakout is not clipped to the column", () => {
+    // Obsidian's app.css: important rules on every uneditable widget in
+    // Live Preview, which CodeMirror makes the figure's root, and on every
+    // child of .cm-content (margin: 0).
+    const obsidian = '.markdown-source-view.mod-cm6 .cm-content > [contenteditable=false]';
+    const obsidianMargin = '.markdown-source-view.mod-cm6 .cm-content > *';
+    const classesAndAttributes = (selector) =>
+      (selector.match(/\.[\w-]+|\[[^\]]+\]/g) ?? []).length;
+    const lifting = rules.flatMap(({ selectors, declarations }) =>
+      declarations.some(([name, value]) => name === 'contain' && value === 'none !important')
+        ? selectors
+        : [],
+    );
+    expect(lifting.length).toBeGreaterThan(0);
+    for (const selector of lifting) {
+      expect(selector).toMatch(
+        /^\.markdown-source-view\.mod-cm6 \.cm-content > \.photo-pieces-block\[contenteditable=/,
+      );
+      expect(classesAndAttributes(selector)).toBeGreaterThan(classesAndAttributes(obsidian));
+      expect(classesAndAttributes(selector)).toBeGreaterThan(classesAndAttributes(obsidianMargin));
+    }
+    // The root's own block margin, at the root rule's value, on the same selector.
+    const rootMargin = rules
+      .find(({ selectors }) => selectors.includes('.photo-pieces-block'))
+      .declarations.find(([name]) => name === 'margin-block')[1];
+    const restoring = rules.flatMap(({ selectors, declarations }) =>
+      declarations.some(([name, value]) => name === 'margin-block' && value === rootMargin)
+        ? selectors.filter((selector) => lifting.includes(selector))
+        : [],
+    );
+    expect(rootMargin).toBe('var(--photo-pieces-gap) !important');
+    expect(restoring).toEqual(lifting);
+  });
+
   it('has no at-rule', () => {
     expect(pluginCss.match(/@[\w-]+/g) ?? []).toEqual([]);
   });

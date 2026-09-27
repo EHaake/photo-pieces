@@ -47,6 +47,19 @@ body {
   margin-block: var(--photo-pieces-gap) !important;
 }
 
+/* Obsidian gives every uneditable widget in Live Preview `contain: paint
+   !important` (`.markdown-source-view.mod-cm6 .cm-content >
+   [contenteditable=false]`, app.css), which clips a wide, full or bleeding
+   frame to the root's box: the text column. Against an important rule
+   specificity decides, so this names the same element one class more
+   specifically (Phase 3b pause). Obsidian's `.cm-content > * { margin: 0
+   !important }` would flatten the root's block margin the same way, so it
+   is restored here at the root's own value. */
+.markdown-source-view.mod-cm6 .cm-content > .photo-pieces-block[contenteditable='false'] {
+  contain: none !important;
+  margin-block: var(--photo-pieces-gap) !important;
+}
+
 .photo-pieces-frames img {
   display: block !important;
   width: 100% !important;
