@@ -10,8 +10,10 @@ import {
   resolveRelative,
 } from './obsidian-plugin/blocks.ts';
 import { STAGES_PATTERN, parseCompareBody } from './obsidian-plugin/compare.ts';
+import { figureTree } from './obsidian-plugin/figure.ts';
 import { BLOCKS, remarkPiecesBlocks } from './remark-pieces-blocks.mjs';
 import { COMPARE, COMPARE_WORDING } from './src/lib/compare.ts';
+import { blocks, uncomment } from './src/lib/ground.ts';
 import { COMPARE_MODES } from './src/lib/image-meta.mjs';
 
 // The plugin's reading of a :::compare body (spec 019, T1714), and of a
@@ -405,6 +407,17 @@ describe('the scanner at its edges (T1730)', () => {
     expect(block.caption).toBe('First line.\n\nSecond thought.');
   });
 
+  it("a grid's images are its leading run: an image line after the caption is caption, as the transform reads it", () => {
+    const [block] = parseBlocks(
+      ':::grid\n![One](./a.jpg)\n![Two](./b.jpg)\n\nA caption.\n\n![Three](./c.jpg)\n:::',
+    );
+    expect(block.images).toEqual([
+      { src: './a.jpg', alt: 'One' },
+      { src: './b.jpg', alt: 'Two' },
+    ]);
+    expect(block.caption).toBe('A caption.\n\n![Three](./c.jpg)');
+  });
+
   it('a leaf with its src missing is not a block', () => {
     expect(parseBlocks('::single{alt="x"}')).toEqual([]);
   });
@@ -447,5 +460,283 @@ describe('resolveRelative (T1730)', () => {
 
   it('a climb past the vault root is unreachable', () => {
     expect(resolveRelative('../../../../../a.jpg', note)).toEqual({ kind: 'unreachable' });
+  });
+});
+
+// The figure (spec 019, amendment 2, T1731): the tree both views draw,
+// read without a DOM. Every src resolves to `app://<src>` but one.
+const MISSING = './gone.jpg';
+const resolve = (src) => (src === MISSING ? null : `app://${src}`);
+const figureOf = (doc) => {
+  const found = parseBlocks(doc);
+  expect(found).toHaveLength(1);
+  return figureTree(found[0], resolve);
+};
+const img = (src, alt) => ({
+  tag: 'img',
+  classes: [],
+  attrs: { src: `app://${src}`, alt },
+  children: [],
+});
+const div = (classes, children) => ({ tag: 'div', classes, children });
+
+describe('the figure (T1731)', () => {
+  it.each([
+    [
+      'a wide pair',
+      '::diptych{left="./a.jpg" leftAlt="a" right="./b.jpg" rightAlt="b" width="wide"}',
+      ['photo-pieces-block', 'photo-pieces-pair', 'photo-pieces-w-wide'],
+    ],
+    [
+      'a fullbleed pair at full',
+      '::triptych{left="./a.jpg" leftAlt="a" center="./b.jpg" centerAlt="b" right="./c.jpg" rightAlt="c" width="fullbleed"}',
+      ['photo-pieces-block', 'photo-pieces-pair', 'photo-pieces-w-full'],
+    ],
+    [
+      'a weighted diptych, at column',
+      '::diptych{left="./a.jpg" leftAlt="a" right="./b.jpg" rightAlt="b" weight="right"}',
+      [
+        'photo-pieces-block',
+        'photo-pieces-pair',
+        'photo-pieces-w-column',
+        'photo-pieces-weight-right',
+      ],
+    ],
+    [
+      'a bleed-left wide',
+      '::wide{src="./a.jpg" alt="a" bleed="left"}',
+      [
+        'photo-pieces-block',
+        'photo-pieces-frame',
+        'photo-pieces-w-wide',
+        'photo-pieces-bleed-left',
+      ],
+    ],
+    [
+      'a fullbleed',
+      '::fullbleed{src="./a.jpg" alt="a"}',
+      ['photo-pieces-block', 'photo-pieces-frame', 'photo-pieces-w-full'],
+    ],
+    [
+      'a right aside',
+      ':::aside{src="./a.jpg" alt="a" side="right"}\nWords.\n:::',
+      [
+        'photo-pieces-block',
+        'photo-pieces-beside',
+        'photo-pieces-w-side',
+        'photo-pieces-side-right',
+      ],
+    ],
+    [
+      'a held with no side, on the left',
+      ':::held{src="./a.jpg" alt="a"}\nWords.\n:::',
+      [
+        'photo-pieces-block',
+        'photo-pieces-beside',
+        'photo-pieces-w-held',
+        'photo-pieces-side-left',
+      ],
+    ],
+    [
+      'a grid at column',
+      ':::grid\n![a](./a.jpg)\n:::',
+      ['photo-pieces-block', 'photo-pieces-grid', 'photo-pieces-w-column'],
+    ],
+    [
+      'a strip at full',
+      ':::strip\n![a](./a.jpg)\n:::',
+      ['photo-pieces-block', 'photo-pieces-strip', 'photo-pieces-w-full'],
+    ],
+    [
+      'a compare at column',
+      `:::compare\n${flow}\n:::`,
+      ['photo-pieces-block', 'photo-pieces-stages', 'photo-pieces-w-column'],
+    ],
+  ])("%s: the root's classes exactly, and its block by name", (_, doc, classes) => {
+    const root = figureOf(doc);
+    expect(root.tag).toBe('div');
+    expect(root.classes).toEqual(classes);
+    expect(root.attrs).toEqual({ 'data-block': parseBlocks(doc)[0].name });
+  });
+
+  it('a container single: its frame, then its caption as Markdown', () => {
+    const root = figureOf(':::single{src="./a.jpg" alt="An alt"}\nA _caption_.\n:::');
+    expect(root.children).toEqual([
+      div(['photo-pieces-frames'], [img('./a.jpg', 'An alt')]),
+      div(['photo-pieces-caption'], [{ markdown: 'A _caption_.' }]),
+    ]);
+  });
+
+  it("a leaf's empty caption draws no caption node", () => {
+    const root = figureOf('::single{src="./a.jpg" alt="a"}');
+    expect(root.children).toEqual([div(['photo-pieces-frames'], [img('./a.jpg', 'a')])]);
+  });
+
+  it("a pair's frames in order, then its caption", () => {
+    const root = figureOf(
+      ':::diptych{left="./a.jpg" leftAlt="l" right="./b.jpg" rightAlt="r"}\nTwo.\n:::',
+    );
+    expect(root.children).toEqual([
+      div(['photo-pieces-frames'], [img('./a.jpg', 'l'), img('./b.jpg', 'r')]),
+      div(['photo-pieces-caption'], [{ markdown: 'Two.' }]),
+    ]);
+  });
+
+  it('a beside block: its frame, then its prose as Markdown, inside the figure', () => {
+    const root = figureOf(':::row{src="./a.jpg" alt="a" side="left"}\nThe prose.\n:::');
+    expect(root.children).toEqual([
+      div(['photo-pieces-frames'], [img('./a.jpg', 'a')]),
+      div(['photo-pieces-prose'], [{ markdown: 'The prose.' }]),
+    ]);
+  });
+
+  it('an unresolved src draws the missing box with its exact text', () => {
+    const root = figureOf(`::diptych{left="./a.jpg" leftAlt="l" right="${MISSING}" rightAlt="r"}`);
+    expect(root.children[0].children).toEqual([
+      img('./a.jpg', 'l'),
+      div(['photo-pieces-missing'], [{ text: `[diptych: image not found — ${MISSING}]` }]),
+    ]);
+  });
+
+  it('a compare with no mode: stage nodes carrying their labels, then the method line Slider', () => {
+    const root = figureOf(`:::compare\n${flow}\n:::`);
+    const stage = (src, label) =>
+      div(
+        ['photo-pieces-stage'],
+        [img(src, label), div(['photo-pieces-stage-label'], [{ text: label }])],
+      );
+    expect(root.children).toEqual([
+      div(
+        ['photo-pieces-frames'],
+        [
+          stage('./_land-b.jpg', 'Camera'),
+          stage('./_land-b.tones.jpg', 'Tones'),
+          stage('./land-b.jpg', 'Finished'),
+        ],
+      ),
+      div(['photo-pieces-method'], [{ text: 'Slider' }]),
+    ]);
+  });
+
+  it("a :::side's method line is its own name, and a missing stage keeps its label", () => {
+    const two = `![Camera](${MISSING}) Note.\n![Finished](./land-b.jpg)`;
+    const root = figureOf(`:::side\n${two}\n:::`);
+    expect(root.children[0].children[0]).toEqual(
+      div(
+        ['photo-pieces-stage'],
+        [
+          div(['photo-pieces-missing'], [{ text: `[side: image not found — ${MISSING}]` }]),
+          div(['photo-pieces-stage-label'], [{ text: 'Camera' }]),
+        ],
+      ),
+    );
+    expect(root.children.slice(1)).toEqual([div(['photo-pieces-method'], [{ text: 'side' }])]);
+  });
+});
+
+// The stylesheet (T1731): every rule the plugin writes wins over
+// Obsidian's (the Phase 3a collapse), stays inside the plugin's classes,
+// and carries the tuning envelope's tokens at their values.
+const PLUGIN_TOKENS = {
+  '--photo-pieces-inset': '0.65',
+  '--photo-pieces-wide': '1.7',
+  '--photo-pieces-wide-cap': '0.96',
+  '--photo-pieces-full': '1',
+  '--photo-pieces-side': '0.45',
+  '--photo-pieces-held': '0.5',
+  '--photo-pieces-tall': '0.8',
+  '--photo-pieces-grid-columns': '2',
+  '--photo-pieces-gap': '0.5em',
+  '--photo-pieces-strip-height': '14em',
+  '--photo-pieces-stage-min': '12em',
+  '--photo-pieces-caption-size': '0.85em',
+  '--photo-pieces-caption-color': 'var(--text-muted)',
+  '--photo-pieces-method-display': 'block',
+};
+const PANE_HOSTS = ['.markdown-source-view.mod-cm6 .cm-scroller', '.markdown-preview-view'];
+
+const pluginCss = uncomment(
+  readFileSync(new URL('./obsidian-plugin/styles.css', import.meta.url), 'utf8'),
+);
+const rules = blocks(pluginCss).map(({ prelude, body }) => ({
+  prelude,
+  selectors: prelude.split(',').map((one) => one.trim().replace(/\s+/g, ' ')),
+  declarations: body
+    .split(';')
+    .filter((part) => part.includes(':'))
+    .map((part) => [
+      part.slice(0, part.indexOf(':')).trim(),
+      part
+        .slice(part.indexOf(':') + 1)
+        .trim()
+        .replace(/\s+/g, ' '),
+    ]),
+}));
+
+describe('the stylesheet (T1731)', () => {
+  it('has rules to read', () => {
+    expect(rules.length).toBeGreaterThan(10);
+  });
+
+  it('every declaration but a custom property ends in !important', () => {
+    const without = rules.flatMap(({ prelude, declarations }) =>
+      declarations
+        .filter(([name, value]) => !name.startsWith('--') && !/!important$/.test(value))
+        .map(([name]) => `${prelude.replace(/\s+/g, ' ')} { ${name} }`),
+    );
+    expect(without).toEqual([]);
+  });
+
+  it("every selector is the plugin's, but body (custom properties only) and the two pane hosts (container only)", () => {
+    const outside = rules.flatMap(({ selectors, declarations }) =>
+      selectors
+        .filter((selector) => {
+          if (selector.includes('.photo-pieces-')) return false;
+          const names = declarations.map(([name]) => name);
+          if (selector === 'body') return !names.every((name) => name.startsWith('--'));
+          if (PANE_HOSTS.includes(selector)) return names.join() !== 'container';
+          return true;
+        })
+        .map((selector) => `${selector} { ${declarations.map(([name]) => name).join('; ')} }`),
+    );
+    expect(outside).toEqual([]);
+    for (const host of PANE_HOSTS) expect(rules.some((r) => r.selectors.includes(host))).toBe(true);
+  });
+
+  it('has no at-rule', () => {
+    expect(pluginCss.match(/@[\w-]+/g) ?? []).toEqual([]);
+  });
+
+  it('PLUGIN_TOKENS: each declared once, in body, at its value', () => {
+    const declared = rules.flatMap(({ prelude, declarations }) =>
+      declarations
+        .filter(([name]) => name in PLUGIN_TOKENS)
+        .map(([name, value]) => [prelude, name, value]),
+    );
+    expect(declared).toEqual(Object.entries(PLUGIN_TOKENS).map(([n, v]) => ['body', n, v]));
+  });
+
+  it('every var(--photo-pieces-…) the stylesheet uses is declared', () => {
+    const declared = new Set(rules.flatMap(({ declarations }) => declarations.map(([n]) => n)));
+    const used = [...pluginCss.matchAll(/var\((--photo-pieces-[\w-]+)/g)].map((m) => m[1]);
+    expect(used.length).toBeGreaterThan(0);
+    expect(used.filter((name) => !declared.has(name))).toEqual([]);
+  });
+
+  it('every class it names is one the figure emits over the sampler and the fog piece, or photo-pieces-hidden', () => {
+    const emitted = new Set(['photo-pieces-hidden']);
+    const collect = (node) => {
+      if (!node.tag) return;
+      for (const name of node.classes) emitted.add(name);
+      node.children.forEach(collect);
+    };
+    for (const slug of ['vocabulary-sampler', 'where-the-fog-lets-go'])
+      for (const block of parseBlocks(readPiece(slug))) collect(figureTree(block, resolve));
+    collect(figureOf(`::single{src="${MISSING}" alt="gone"}`));
+    const named = [
+      ...new Set([...pluginCss.matchAll(/\.(photo-pieces-[\w-]+)/g)].map((m) => m[1])),
+    ];
+    expect(named.length).toBeGreaterThan(10);
+    expect(named.filter((name) => !emitted.has(name))).toEqual([]);
   });
 });

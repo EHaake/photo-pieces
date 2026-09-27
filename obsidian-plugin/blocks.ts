@@ -242,8 +242,10 @@ function readBlock(name: string, braces: string | undefined, body: string): Read
   return { attrs, images, caption, prose, method };
 }
 
-/** A grid's or a strip's body: the paragraphs (blank-line separated) made
- *  only of images are its images; the rest, joined, is its caption. */
+/** A grid's or a strip's body, as the transform partitions it: the leading
+ *  run of paragraphs (blank-line separated) made only of images are its
+ *  images; from the first paragraph that is not, everything, joined, is its
+ *  caption — an image line after the caption included. */
 function readImagesAndCaption(body: string): { images: Image[]; caption: string } {
   const paragraphs: string[] = [];
   let current: string[] = [];
@@ -258,15 +260,15 @@ function readImagesAndCaption(body: string): { images: Image[]; caption: string 
   if (current.length > 0) paragraphs.push(current.join('\n'));
 
   const images: Image[] = [];
-  const rest: string[] = [];
-  for (const paragraph of paragraphs) {
+  let i = 0;
+  for (; i < paragraphs.length; i++) {
     const found: Image[] = [];
     const image = new RegExp(IMAGE_PATTERN, 'g');
     let m: RegExpExecArray | null;
-    while ((m = image.exec(paragraph))) found.push({ src: m[2], alt: m[1] });
-    const imagesOnly = found.length > 0 && paragraph.replace(image, '').trim() === '';
-    if (imagesOnly) images.push(...found);
-    else rest.push(paragraph);
+    while ((m = image.exec(paragraphs[i]))) found.push({ src: m[2], alt: m[1] });
+    const imagesOnly = found.length > 0 && paragraphs[i].replace(image, '').trim() === '';
+    if (!imagesOnly) break;
+    images.push(...found);
   }
-  return { images, caption: rest.join('\n\n') };
+  return { images, caption: paragraphs.slice(i).join('\n\n') };
 }

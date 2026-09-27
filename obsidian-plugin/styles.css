@@ -1,48 +1,201 @@
-.photo-pieces-preview {
-  margin: 0.5em 0;
+/* The plugin's figures, in Live Preview and Reading view alike (figure.ts
+   builds them). Approximate on purpose: widths are shares of the text
+   column (%), of the editor pane (cqi) or of the window's height (vh),
+   read in the site's order, not the site's pixels (see DECISIONS.md).
+
+   Every declaration except a custom property carries !important. At the
+   Phase 3a pause Obsidian's own stylesheet outranked the plugin's
+   `display: flex`, and every row collapsed to a stack; an important author
+   declaration outranks every normal one whatever its specificity, so no
+   normal rule of Obsidian's can undo a layout here. The test
+   (obsidian-plugin.test.mjs) refuses a declaration without it, a selector
+   outside the plugin's `.photo-pieces-` classes (but for `body`'s tokens and
+   the two pane hosts), and any at-rule.
+
+   The tuning envelope: every share is one token in `body` below, pinned by
+   name and value in the test's PLUGIN_TOKENS. */
+
+body {
+  --photo-pieces-inset: 0.65;
+  --photo-pieces-wide: 1.7;
+  --photo-pieces-wide-cap: 0.96;
+  --photo-pieces-full: 1;
+  --photo-pieces-side: 0.45;
+  --photo-pieces-held: 0.5;
+  --photo-pieces-tall: 0.8;
+  --photo-pieces-grid-columns: 2;
+  --photo-pieces-gap: 0.5em;
+  --photo-pieces-strip-height: 14em;
+  --photo-pieces-stage-min: 12em;
+  --photo-pieces-caption-size: 0.85em;
+  --photo-pieces-caption-color: var(--text-muted);
+  --photo-pieces-method-display: block;
 }
 
-.photo-pieces-preview img {
-  display: block;
-  max-width: 100%;
+/* The pane as a query container, so `wide` and `full` can reach past the
+   text column: Live Preview's scroll host and Reading view's. */
+.markdown-source-view.mod-cm6 .cm-scroller,
+.markdown-preview-view {
+  container: photo-pieces-pane / inline-size !important;
 }
 
-/* diptych / triptych: thumbnails side by side */
-.photo-pieces-preview-row {
-  display: flex;
-  gap: 0.5em;
-  align-items: center;
+/* The root. CodeMirror's `pre-wrap` on .cm-content would otherwise inherit
+   into a widget and keep a caption's source line breaks. The layout sits on
+   the elements inside it, out of reach of Obsidian's `.cm-content > *`. */
+.photo-pieces-block {
+  white-space: normal !important;
+  margin-block: var(--photo-pieces-gap) !important;
 }
 
-.photo-pieces-preview-row img {
-  flex: 1 1 0;
-  min-width: 0;
+.photo-pieces-frames img {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
 }
 
-/* compare: each stage's image with its label beneath, in a row that wraps */
-.photo-pieces-preview-compare {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em;
-  align-items: flex-start;
+/* frame: a single image at its block's width */
+.photo-pieces-w-inset > .photo-pieces-frames {
+  width: calc(var(--photo-pieces-inset) * 100%) !important;
+  margin-inline: auto !important;
+}
+
+.photo-pieces-w-wide > .photo-pieces-frames {
+  --w: min(calc(var(--photo-pieces-wide) * 100%), calc(var(--photo-pieces-wide-cap) * 100cqi));
+  width: var(--w) !important;
+  max-width: none !important;
+  margin-inline: calc((100% - var(--w)) / 2) !important;
+}
+
+.photo-pieces-w-full > .photo-pieces-frames {
+  width: calc(var(--photo-pieces-full) * 100cqi) !important;
+  max-width: none !important;
+  margin-inline: calc(50% - var(--photo-pieces-full) * 50cqi) !important;
+}
+
+/* bleed: from one pane edge to the column's far side */
+.photo-pieces-w-wide.photo-pieces-bleed-left > .photo-pieces-frames {
+  width: calc(50% + 50cqi) !important;
+  margin-left: calc(50% - 50cqi) !important;
+  margin-right: 0 !important;
+}
+
+.photo-pieces-w-wide.photo-pieces-bleed-right > .photo-pieces-frames {
+  width: calc(50% + 50cqi) !important;
+  margin-left: 0 !important;
+  margin-right: calc(50% - 50cqi) !important;
+}
+
+/* tall: capped at a share of the window's height, centred */
+.photo-pieces-w-tall > .photo-pieces-frames > img {
+  width: auto !important;
+  max-height: calc(var(--photo-pieces-tall) * 100vh) !important;
+  margin-inline: auto !important;
+}
+
+/* pair: a diptych's two and a triptych's three in a row, equal widths */
+.photo-pieces-pair > .photo-pieces-frames {
+  display: flex !important;
+  gap: var(--photo-pieces-gap) !important;
+  align-items: center !important;
+}
+
+.photo-pieces-pair > .photo-pieces-frames > * {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+.photo-pieces-weight-left > .photo-pieces-frames > :first-child,
+.photo-pieces-weight-right > .photo-pieces-frames > :last-child {
+  flex-grow: 2 !important;
+}
+
+/* grid: the site's columns */
+.photo-pieces-grid > .photo-pieces-frames {
+  display: grid !important;
+  grid-template-columns: repeat(var(--photo-pieces-grid-columns), minmax(0, 1fr)) !important;
+  gap: var(--photo-pieces-gap) !important;
+}
+
+/* strip: one row that scrolls, every image at one height */
+.photo-pieces-strip > .photo-pieces-frames {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: var(--photo-pieces-gap) !important;
+  overflow-x: auto !important;
+}
+
+.photo-pieces-strip > .photo-pieces-frames > img {
+  height: var(--photo-pieces-strip-height) !important;
+  width: auto !important;
+  max-width: none !important;
+  flex: none !important;
+}
+
+/* beside (aside, row, held): the frame floated on its side, the prose
+   wrapping beside it, the float contained in the figure */
+.photo-pieces-beside {
+  display: flow-root !important;
+}
+
+.photo-pieces-w-side > .photo-pieces-frames {
+  width: calc(var(--photo-pieces-side) * 100%) !important;
+}
+
+.photo-pieces-w-held > .photo-pieces-frames {
+  width: calc(var(--photo-pieces-held) * 100%) !important;
+}
+
+.photo-pieces-side-left > .photo-pieces-frames {
+  float: left !important;
+  margin: 0 var(--photo-pieces-gap) var(--photo-pieces-gap) 0 !important;
+}
+
+.photo-pieces-side-right > .photo-pieces-frames {
+  float: right !important;
+  margin: 0 0 var(--photo-pieces-gap) var(--photo-pieces-gap) !important;
+}
+
+/* stages: each stage's image with its label beneath, in a row that wraps */
+.photo-pieces-stages > .photo-pieces-frames {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: var(--photo-pieces-gap) !important;
+  align-items: flex-start !important;
 }
 
 .photo-pieces-stage {
-  flex: 1 1 12em;
-  min-width: 0;
+  flex: 1 1 var(--photo-pieces-stage-min) !important;
+  min-width: 0 !important;
 }
 
-.photo-pieces-stage-label {
-  margin-top: 0.25em;
-  color: var(--text-muted);
-  font-size: 0.85em;
+/* the words: a stage's label, a caption, the method line */
+.photo-pieces-stage-label,
+.photo-pieces-caption,
+.photo-pieces-method {
+  margin-top: calc(var(--photo-pieces-gap) / 2) !important;
+  font-size: var(--photo-pieces-caption-size) !important;
+  color: var(--photo-pieces-caption-color) !important;
+}
+
+.photo-pieces-caption p {
+  margin: 0 !important;
+}
+
+.photo-pieces-method {
+  display: var(--photo-pieces-method-display) !important;
 }
 
 .photo-pieces-missing {
-  padding: 0.75em 1em;
-  border: 1px dashed var(--text-error);
-  color: var(--text-error);
-  font-family: var(--font-monospace);
-  font-size: 0.85em;
-  border-radius: 4px;
+  padding: 0.75em 1em !important;
+  border: 1px dashed var(--text-error) !important;
+  color: var(--text-error) !important;
+  font-family: var(--font-monospace) !important;
+  font-size: 0.85em !important;
+  border-radius: 4px !important;
+}
+
+/* Reading view: a block's later sections, drawn whole by its first */
+.photo-pieces-hidden {
+  display: none !important;
 }
