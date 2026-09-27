@@ -2442,10 +2442,16 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 /* The filmstrip (T1726): the stages in one row at the frame's size,
    stage k at k frames from the first, the row slid by --strip-at; the
    frame shows one stage whole and each neighbour --compare-peek beyond
-   its edge; a vertical swipe still scrolls the page. */
+   its edge; a vertical swipe still scrolls the page.
+   T1729f: the frame clips by overflow, not a clip-path — a clip-path cuts
+   what is painted but leaves the off-frame stages in the page's
+   scrollable width (2422px on a 1512px window at the first stage) — and
+   the peek is the clip's margin beyond the frame's box. Firefox and
+   Chromium honour overflow-clip-margin; Safari does not, so there the
+   peek reads 0 (at today's peek of 0 nothing differs). */
 .compare[data-view='filmstrip'] .compare-frames {
-  overflow: visible;
-  clip-path: inset(0 calc(-1 * var(--compare-peek)));
+  overflow: clip;
+  overflow-clip-margin: var(--compare-peek);
   touch-action: pan-y;
 }
 

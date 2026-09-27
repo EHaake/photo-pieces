@@ -49,7 +49,8 @@ import { PHONE } from './src/lib/stage-sizes.ts';
 //     stylesheet; and the handle's rule reads both, so a token left
 //     declared but unread fails too. The filmstrip's neighbours' sliver
 //     (T1726), `--compare-peek`, is the same kind of token: declared once
-//     at its value and read by the filmstrip's frames rule; so is the
+//     at its value and read by the filmstrip's frames rule, as its
+//     overflow-clip-margin (T1729f); so is the
 //     arrows' ring and stroke (T1729d), `--compare-arrow-color`, read by
 //     the arrow rule (pinned in (e)); and the gap between each arrow and
 //     the frame's edge (T1729e), `--compare-arrow-gap`, read by the two
@@ -339,10 +340,10 @@ describe("(b) the handle's tokens (T1708)", () => {
     ]);
   });
 
-  it("the filmstrip's frames rule reads --compare-peek: each neighbour shows that far beyond the frame's edge (T1726)", () => {
+  it("the filmstrip's frames rule reads --compare-peek: each neighbour shows that far beyond the frame's edge (T1726) — the frame's clip margin, so the off-frame stages add no page width (T1729f)", () => {
     expect(ruleAt(rulesIn(css), ".compare[data-view='filmstrip'] .compare-frames")).toEqual({
-      overflow: 'visible',
-      'clip-path': 'inset(0 calc(-1 * var(--compare-peek)))',
+      overflow: 'clip',
+      'overflow-clip-margin': 'var(--compare-peek)',
       'touch-action': 'pan-y',
     });
   });
