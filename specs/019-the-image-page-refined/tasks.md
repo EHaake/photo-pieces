@@ -1436,6 +1436,20 @@ T1729.
       margins, not the pane's edge; the plugin weights a triptych, the
       site only a diptych. 727 tests.
 
+- [x] **T1735b** — Round (Phase 3b pause, second look, 2026-09-27): the
+      grid's frames top-aligned (a 3:2 high beside a 4:5 with white
+      under it) where the site centres each row on the midline. One
+      declaration, `align-items: center !important`, on the grid's
+      frames rule; a stylesheet case pins it. Judged as built from his
+      screenshots: the midline triptych (equal columns, own ratios,
+      centred — the site's rule); equal heights drawn as equal widths
+      (the known limitation, offered as a round); the stage blocks'
+      labels beneath each stage and the method line under the row
+      (representative; a one-line legend offered as a round). 728
+      tests. Finding: no stylesheet case checks a layout rule's body
+      against the site's equivalent (the pair's centring is unpinned)
+      — sweep note.
+
 - [ ] **T1735** — The plugin's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3b
       pause, in the person's words. The questions, in plain language:
@@ -1743,6 +1757,7 @@ tier if it is ever on (it is off). -->
 | T1734a review fix-now | implementation (`opus`, high) | ~43k | done; 726 tests (+6); both mutations fail by name; the signature keyed by docId + path (the typings give docId on every context and no synchronous whole-text read); the signatures map grows one entry per document and is never pruned — sweep note; whether docId survives rerender(true) is not in the typings — the walkthrough's edit-then-Reading-view check covers it |
 | Phase 3b re-review | implementation (`opus`, high) | ~8k | signed off; the docId guard closes the loop; it now rests on Reading view keeping one docId across an edit and rerender(true) (not in the typings) — the walkthrough's edit-then-Reading-view check carries that weight, and the fallback is to skip calls whose el sits inside a plugin render target; sweep: the signatures map unbounded, the `parsed` comment says whole note |
 | T1735a bleeds clipped (diagnosis + fix) | implementation (`opus`, high) | ~90k (two passes) | done; 727 tests (+1); the cause read from Obsidian's app.css in the installed asar (a future dispatch can read the real rules); the plan's 'layout not on the root' line deviated by one declaration on the root, as the !important strategy foresaw |
+| T1735b grid centred | implementation (`opus`, high) | ~30k | done; 728 tests (+1); mutation fails by name; the pair's centring unpinned — sweep note |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 | Amendment 2 planning (2026-09-26, evening) | implementation (`opus`, high, no override) | ~220k | drafted plan.md's Amendment 2 section and Phase 3b (T1730–T1735, T1730 per-task): one block table pinned equal to the transform's descriptors, a line scanner, one figure builder for both views, a Reading-view post-processor, an `!important` stylesheet with a test; no product question |

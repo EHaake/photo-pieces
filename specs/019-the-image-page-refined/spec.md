@@ -1099,3 +1099,5 @@ _Amended 2026-09-26 (plugin):_
   is wider than the text column is not clipped to it: the plugin lifts
   Obsidian's containment on its own widget and keeps the figure's gap
   above and below.
+- **T1735b (Phase 3b pause, 2026-09-27).** The plugin's grid centres
+  each row's frames on the midline, as the site's does.
