@@ -114,7 +114,12 @@ class FigureWidget extends WidgetType {
     components.set(figure, component);
     // The rendered caption and prose change the figure's height after
     // layout; CodeMirror measures it again once they are in.
-    if (rendering.length > 0) Promise.all(rendering).then(() => view.requestMeasure());
+    // A render that fails leaves its caption or prose empty; say so once
+    // rather than leaving the rejection unhandled (T1734a).
+    if (rendering.length > 0)
+      Promise.all(rendering)
+        .then(() => view.requestMeasure())
+        .catch((error) => console.error('photo-pieces: a caption or prose did not render', error));
     return figure;
   }
 
@@ -178,8 +183,8 @@ export default class PhotoPiecesBlocksPlugin extends Plugin {
   // The last note parsed: Reading view calls once per section, each with
   // the whole note's text.
   private parsed: { text: string; blocks: ParsedBlock[] } | null = null;
-  // Each note's blocks as last seen, by path, and the notes whose Reading
-  // view is due a full re-render this tick.
+  // Each document's blocks as last seen, by docId and path, and the notes
+  // (by path) whose Reading view is due a full re-render this tick.
   private signatures = new Map<string, string>();
   private rerendering = new Set<string>();
 
@@ -190,7 +195,7 @@ export default class PhotoPiecesBlocksPlugin extends Plugin {
       if (!info) return; // no source to read: leave it as Obsidian drew it
 
       const blocks = this.parse(info.text);
-      this.noteSignature(ctx.sourcePath, blockSignature(blocks, info.text));
+      this.noteSignature(ctx.docId, ctx.sourcePath, blockSignature(blocks, info.text));
 
       const pieces = sectionPieces(blocks, info.lineStart, info.lineEnd);
       if (!pieces) return;
@@ -225,17 +230,34 @@ export default class PhotoPiecesBlocksPlugin extends Plugin {
   }
 
   // Stored on every call, so the re-render it schedules sees it equal and
-  // does not loop; the first render of a note stores it without comparing.
-  private noteSignature(path: string, signature: string) {
-    const previous = this.signatures.get(path);
-    this.signatures.set(path, signature);
+  // does not loop; the first render of a document stores it without
+  // comparing.
+  //
+  // Keyed by the document, not the path alone (T1734a): the plugin's own
+  // MarkdownRenderer.render calls (captions, prose, Reading view's runs)
+  // run this post-processor again with the note's sourcePath, and if their
+  // section info holds the fragment, not the note, the fragment's
+  // signature would differ from the note's and re-render it, again and
+  // again. A sub-render is another document, with its own docId, so it
+  // only ever compares against itself. The typings give docId on every
+  // context; the other guard — accept a call only when the info's text is
+  // the note's whole text — has no synchronous source for that text in
+  // them (the vault's read is async).
+  private noteSignature(docId: string, path: string, signature: string) {
+    const key = `${docId}\u0000${path}`;
+    const previous = this.signatures.get(key);
+    this.signatures.set(key, signature);
     if (previous === undefined || previous === signature || this.rerendering.has(path)) return;
     this.rerendering.add(path);
     window.setTimeout(() => {
       this.rerendering.delete(path);
       for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
         const view = leaf.view;
-        if (view instanceof MarkdownView && view.file?.path === path && view.getMode() === 'preview') {
+        if (
+          view instanceof MarkdownView &&
+          view.file?.path === path &&
+          view.getMode() === 'preview'
+        ) {
           view.previewMode.rerender(true);
         }
       }

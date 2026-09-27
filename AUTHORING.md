@@ -435,9 +435,9 @@ written, until the tab closes. The four ways:
 Without script the compare is its stages one under another, each with
 its label and note. In Obsidian, in Live Preview and Reading view, it
 shows its stages' images in a row, each with its label beneath, and
-names its method — no notes, no slider; in Live Preview put the cursor
-in the block and it turns back into its text, and a file that isn't
-there shows the dashed "not found" box.
+names its method — no notes, no slider. In Live Preview put the cursor
+in the block and it turns back into its text; in either view a file
+that isn't there shows the dashed "not found" box.
 
 A piece may write several compares over the same stages — Camera
 against Finished early on, Tones against Finished further down, each

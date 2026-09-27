@@ -1,5 +1,5 @@
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import remarkDirective from 'remark-directive';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -615,6 +615,31 @@ describe('the figure (T1731)', () => {
   });
 });
 
+// The plugin never imports the transform (T1734a): its sources import
+// only Obsidian, CodeMirror and each other, so the vocabulary it mirrors
+// is pinned by the cases above, not shared by an import.
+const pluginSources = readdirSync(new URL('./obsidian-plugin/', import.meta.url)).filter((name) =>
+  name.endsWith('.ts'),
+);
+
+describe('the plugin imports only obsidian, @codemirror/* and itself (T1734a)', () => {
+  it('has sources to read', () => {
+    expect(pluginSources).toEqual(expect.arrayContaining(['blocks.ts', 'figure.ts', 'main.ts']));
+  });
+
+  it.each(pluginSources)('%s imports nothing else', (name) => {
+    const source = readFileSync(new URL(`./obsidian-plugin/${name}`, import.meta.url), 'utf8');
+    const imported = [...source.matchAll(/(?:\bfrom|\bimport)\s*\(?\s*['"]([^'"]+)['"]/g)].map(
+      (m) => m[1],
+    );
+    expect(
+      imported.filter(
+        (spec) => spec !== 'obsidian' && !spec.startsWith('@codemirror/') && !spec.startsWith('./'),
+      ),
+    ).toEqual([]);
+  });
+});
+
 // The stylesheet (T1731): every rule the plugin writes wins over
 // Obsidian's (the Phase 3a collapse), stays inside the plugin's classes,
 // and carries the tuning envelope's tokens at their values.
@@ -695,6 +720,14 @@ describe('the stylesheet (T1731)', () => {
         .map(([name, value]) => [prelude, name, value]),
     );
     expect(declared).toEqual(Object.entries(PLUGIN_TOKENS).map(([n, v]) => ['body', n, v]));
+  });
+
+  it("body's custom properties are exactly PLUGIN_TOKENS", () => {
+    const onBody = rules
+      .filter(({ selectors }) => selectors.includes('body'))
+      .flatMap(({ declarations }) => declarations.map(([name]) => name))
+      .filter((name) => name.startsWith('--'));
+    expect(onBody).toEqual(Object.keys(PLUGIN_TOKENS));
   });
 
   it('every var(--photo-pieces-…) the stylesheet uses is declared', () => {
