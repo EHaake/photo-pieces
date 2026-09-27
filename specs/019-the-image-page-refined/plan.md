@@ -1873,7 +1873,7 @@ block; `content.config.ts`; `src/lib/images.ts`.
 
 ## Amendment 2 (2026-09-26): the plugin, representative
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-26) by the `skeptical-reviewer` at the top tier — one blocking finding fixed and re-reviewed (the T1714 Obsidian bullet claimed standing while T1731–T1732 delete what it describes), nine second-look notes taken; nothing open for the sweep from this sign-off.
 **Implements**: spec.md's sections marked _(amended 2026-09-26, plugin)_
 — Goal 10, the two Non-goals, the Entities "The plugin's block table"
 and "The two renderers", the flow "Reading a draft through in

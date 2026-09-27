@@ -18,7 +18,8 @@ plan.md's "Amendment (2026-09-26)" and tasks.md's Phase 3a
 second time, 2026-09-26 (evening)**, at the Phase 3a pause: the
 authoring plugin made representative — Goal 10 and the sections marked
 _(amended 2026-09-26, plugin)_ — re-planned as plan.md's "Amendment 2
-(2026-09-26): the plugin" and tasks.md's Phase 3b, before the real piece.
+(2026-09-26): the plugin" and tasks.md's Phase 3b (T1730–T1735),
+signed off at the top tier the same evening, before the real piece.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
