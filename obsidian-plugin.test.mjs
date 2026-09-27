@@ -743,6 +743,15 @@ describe('the stylesheet (T1731)', () => {
     expect(restoring).toEqual(lifting);
   });
 
+  it('the grid centres each row on the midline (T1735b)', () => {
+    // The site's .piece-grid sets align-items: center; a row's shorter
+    // frame sits on the taller one's midline, not at its top.
+    const grid = rules.find(({ selectors }) =>
+      selectors.includes('.photo-pieces-grid > .photo-pieces-frames'),
+    );
+    expect(grid.declarations).toContainEqual(['align-items', 'center !important']);
+  });
+
   it('has no at-rule', () => {
     expect(pluginCss.match(/@[\w-]+/g) ?? []).toEqual([]);
   });

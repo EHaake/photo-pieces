@@ -123,11 +123,13 @@ body {
   flex-grow: 2 !important;
 }
 
-/* grid: the site's columns */
+/* grid: the site's columns, each row's frames centred on its midline
+   as the site's .piece-grid does (T1735b) */
 .photo-pieces-grid > .photo-pieces-frames {
   display: grid !important;
   grid-template-columns: repeat(var(--photo-pieces-grid-columns), minmax(0, 1fr)) !important;
   gap: var(--photo-pieces-gap) !important;
+  align-items: center !important;
 }
 
 /* strip: one row that scrolls, every image at one height */
