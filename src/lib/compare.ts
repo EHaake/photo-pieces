@@ -381,6 +381,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   frames.append(line, handle);
 
   // The filmstrip's arrows, previous and next, at the frame's sides; each stage's place in its row.
+  // The figure's children, just after the frame (below), not the frame's: the filmstrip's frame clips to itself (T1729e).
   const arrows = (['back', 'next'] as const).map((dir) => {
     const arrow = make('button', 'compare-arrow', dir === 'back' ? '←' : '→');
     arrow.type = 'button';
@@ -389,7 +390,6 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     arrow.addEventListener('click', () => page(switchNext(stage, n, dir === 'back' ? -1 : 1, COMPARE.stripWraps)));
     return arrow;
   });
-  frames.append(...arrows);
   stages.forEach((one, i) => one.style.setProperty('--i', String(i)));
 
   const legend = make('ol', 'compare-legend');
@@ -416,7 +416,7 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     (CONTROL_AT === 'above' || LEGEND_AT === 'above' ? above : below).push(control);
   if (CONTROL_AT === 'above' && LEGEND_AT === 'above') above.reverse();
   frames.before(...above);
-  frames.after(...below, now);
+  frames.after(...arrows, ...below, now);
   // The hint follows the legend's row — the legend and, when they share
   // it, the control — on a row of its own beneath. The slider block
   // picks nothing, so it has none.
@@ -740,7 +740,6 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   let pulling: { id: number; x: number; from: number } | null = null;
   frames.addEventListener('pointerdown', (event) => {
     if (view() !== 'filmstrip' || event.button !== 0) return;
-    if ((event.target as Element).closest('.compare-arrow')) return;
     delete root.dataset.paging;
     delete root.dataset.settling;
     pulling = { id: event.pointerId, x: event.clientX, from: at };
@@ -821,8 +820,9 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     { passive: false },
   );
 
-  // The filmstrip's keys, while the block has focus: a step, the first or the last stage.
-  frames.addEventListener('keydown', (event) => {
+  // The filmstrip's keys, while the block or an arrow has focus: a step, the first or the last stage.
+  // The arrows sit outside the frame (T1729e), so their keys do not pass through it.
+  const stripKey = (event: KeyboardEvent) => {
     if (view() !== 'filmstrip') return;
     const { key } = event;
     const to = STRIP_KEYS.back.includes(key)
@@ -838,7 +838,9 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
     event.preventDefault();
     event.stopPropagation();
     page(to);
-  });
+  };
+  frames.addEventListener('keydown', stripKey);
+  arrows.forEach((arrow) => arrow.addEventListener('keydown', stripKey));
 
   root.dataset.js = '';
   render();

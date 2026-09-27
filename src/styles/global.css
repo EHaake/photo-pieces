@@ -175,11 +175,14 @@
   /* The compare's handle (spec 019): a disc a fingertip wide, and the
      filmstrip's arrows drawn as it; how far each of the filmstrip's
      neighbours shows beyond the frame's edge (T1726); and the arrows'
-     ring and stroke, lighter than the accent (tuned at T1729d).
+     ring and stroke, lighter than the accent (tuned at T1729d); and
+     the gap between each arrow and the frame's edge, the arrows sitting
+     outside the frame in the margin (T1729e).
      compare.test.mjs pins them — to retune, move the value here and in
      its `TOKENS`. */
   --compare-handle: 1.5rem;
   --compare-handle-radius: 50%;
+  --compare-arrow-gap: 0.5rem; /* between each of the filmstrip's arrows and the frame's edge */
   --compare-peek: 0px; /* how far each neighbour shows beyond the frame's edge */
   --compare-arrow-color: color-mix(in oklab, var(--color-accent) 70%, var(--color-bg));
 }
@@ -2269,8 +2272,10 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 /* The figure: the frame across the row, the legend and the method
    control sharing the row beneath it (or above, per COMPARE.legend and
    COMPARE.control), the legend's hint across the row after theirs, the
-   live note last. */
+   live note last. Positioned (T1729e) so the filmstrip's arrows, its
+   children, can sit on the frame's row outside the frame's clip. */
 .compare[data-js] {
+  position: relative;
   --split-pct: calc(var(--split) * 1%);
   display: grid;
   grid-template-columns: 1fr auto;
@@ -2449,8 +2454,8 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 }
 
 /* The filmstrip's arrows: the handle's look — a flat disc of the ground
-   with a hairline, no shadow — at the frame's sides, 0.5rem in,
-   vertically centred; muted where there is nowhere to go and
+   with a hairline, no shadow — at the frame's sides, vertically centred;
+   muted where there is nowhere to go and
    COMPARE.stripEnds keeps them (aria-disabled); only in the filmstrip.
    T1729d: ring and chevron are --compare-arrow-color, the accent
    lightened toward the ground; the handle keeps the accent.
@@ -2464,9 +2469,19 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
    The grid centres by place-content: the zero-height text is a second
    row, and place-items would split the height between the two. A grid
    display outranks the `hidden` attribute, so the rule after the
-   directions hands it back. */
+   directions hands it back.
+   T1729e: outside the frame, beside it in the margin, --compare-arrow-gap
+   from its edge, so no disc covers the photograph; on a phone, where the
+   column leaves no margin to hold one, inside as before, 0.5rem in — a
+   swipe does the work there. The arrows are the figure's children, not
+   the frame's: the filmstrip's frame clips to itself (and its peek), so
+   a disc inside it would be cut off at its edge, and widening that clip
+   would show the neighbours in the margin too. grid-row: 1 / 2 makes the
+   frame's row, not the whole figure, the box they centre in: both lines
+   named, since an abspos item's auto end line is the figure's edge. */
 .compare[data-js] .compare-arrow {
   position: absolute;
+  grid-row: 1 / 2;
   top: 50%;
   z-index: 3;
   display: grid;
@@ -2496,7 +2511,7 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 }
 
 .compare[data-js] .compare-arrow[data-dir='back'] {
-  left: 0.5rem;
+  left: calc(-1 * (var(--compare-handle) + var(--compare-arrow-gap)));
 }
 
 .compare[data-js] .compare-arrow[data-dir='back']::before {
@@ -2504,7 +2519,17 @@ html[data-quiet] .image-stage[data-loupe-open] .image-frame {
 }
 
 .compare[data-js] .compare-arrow[data-dir='next'] {
-  right: 0.5rem;
+  right: calc(-1 * (var(--compare-handle) + var(--compare-arrow-gap)));
+}
+
+@media (max-width: 719.98px) {
+  .compare[data-js] .compare-arrow[data-dir='back'] {
+    left: 0.5rem;
+  }
+
+  .compare[data-js] .compare-arrow[data-dir='next'] {
+    right: 0.5rem;
+  }
 }
 
 .compare[data-js] .compare-arrow[hidden] {

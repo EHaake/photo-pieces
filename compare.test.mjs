@@ -20,6 +20,7 @@ import {
 import { blocks, uncomment } from './src/lib/ground.ts';
 import { COMPARE_CLASSES, COMPARE_MODES, COMPARE_WIDTHS } from './src/lib/image-meta.mjs';
 import { FRAME_HOSTS } from './src/lib/motion.ts';
+import { PHONE } from './src/lib/stage-sizes.ts';
 
 // The compare block (spec 019). Two builders make its markup — the
 // `:::compare` transform and the image page's "Raw to finished" section
@@ -50,7 +51,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     (T1726), `--compare-peek`, is the same kind of token: declared once
 //     at its value and read by the filmstrip's frames rule; so is the
 //     arrows' ring and stroke (T1729d), `--compare-arrow-color`, read by
-//     the arrow rule (pinned in (e)).
+//     the arrow rule (pinned in (e)); and the gap between each arrow and
+//     the frame's edge (T1729e), `--compare-arrow-gap`, read by the two
+//     directions' rules (pinned in (e)).
 //
 // (c) The compare's motion (T1708). Five rules and nothing else, each
 //     by its string: the switch's arriving stage fading in over the
@@ -108,7 +111,9 @@ import { FRAME_HOSTS } from './src/lib/motion.ts';
 //     a muted middle dot between them — T1709j's dot on the legend's
 //     row — pinned by the rule's exact body. The filmstrip's arrows
 //     (T1726): the handle's look, at the frame's sides, muted when quiet,
-//     only in the filmstrip — pinned by the rules' exact bodies. Where a
+//     only in the filmstrip — pinned by the rules' exact bodies; outside
+//     the frame by --compare-arrow-gap, on the figure (positioned) in the
+//     frame's row, and inside, 0.5rem in, under the phone query (T1729e). Where a
 //     side stacks (T1723): its container, its two columns, and the
 //     `@container compare-side (width < 560px)` block holding one
 //     column and nothing else — by exact string and body.
@@ -158,6 +163,7 @@ const EXPECTED = {
 const TOKENS = {
   '--compare-handle': '1.5rem',
   '--compare-handle-radius': '50%',
+  '--compare-arrow-gap': '0.5rem',
   '--compare-peek': '0px',
   '--compare-arrow-color': 'color-mix(in oklab, var(--color-accent) 70%, var(--color-bg))',
 };
@@ -1061,9 +1067,10 @@ describe('(e) the pair blocks and the filmstrip (the amendment)', () => {
     });
   });
 
-  it("the filmstrip's arrows wear the handle's look at the frame's sides, muted when quiet, only in the filmstrip (T1726)", () => {
+  it("the filmstrip's arrows wear the handle's look at the frame's sides, muted when quiet, only in the filmstrip (T1726) — outside the frame by the gap, inside on a phone (T1729e)", () => {
     expect(ruleAt(rulesIn(css), '.compare[data-js] .compare-arrow')).toEqual({
       position: 'absolute',
+      'grid-row': '1 / 2',
       top: '50%',
       'z-index': '3',
       display: 'grid',
@@ -1105,12 +1112,31 @@ describe('(e) the pair blocks and the filmstrip (the amendment)', () => {
       ruleAt(rulesIn(css), ".compare[data-js] .compare-arrow[aria-disabled='true']"),
       ruleAt(rulesIn(css), ".compare[data-js]:not([data-view='filmstrip']) .compare-arrow"),
     ]).toEqual([
-      { left: '0.5rem' },
-      { right: '0.5rem' },
+      { left: 'calc(-1 * (var(--compare-handle) + var(--compare-arrow-gap)))' },
+      { right: 'calc(-1 * (var(--compare-handle) + var(--compare-arrow-gap)))' },
       { display: 'none' },
       { 'border-color': 'var(--color-muted)', color: 'var(--color-muted)', cursor: 'default' },
       { display: 'none' },
     ]);
+    // T1729e: the arrows are the figure's children, so the figure is their box, the frame's row the part they centre in
+    expect(ruleAt(rulesIn(css), '.compare[data-js]').position).toBe('relative');
+    expect(script).toContain('frames.after(...arrows, ...below, now);');
+    // on a phone, inside as before: the site's phone query holds the two directions and nothing else of the compare's
+    const AT = `@media ${PHONE}`;
+    expect(
+      rulesIn(css)
+        .filter((rule) => rule.within.length === 1 && rule.within[0] === AT)
+        .filter((rule) => rule.prelude.includes('.compare'))
+        .map((rule) => [rule.prelude, Object.fromEntries(declarationPairs(rule.body))]),
+    ).toEqual([
+      [".compare[data-js] .compare-arrow[data-dir='back']", { left: '0.5rem' }],
+      [".compare[data-js] .compare-arrow[data-dir='next']", { right: '0.5rem' }],
+    ]);
+  });
+
+  it('keys from a focused arrow page the strip: the filmstrip\'s key handler listens on the frame and on each arrow (T1729e)', () => {
+    expect(script).toContain("frames.addEventListener('keydown', stripKey);");
+    expect(script).toContain("arrows.forEach((arrow) => arrow.addEventListener('keydown', stripKey));");
   });
 
   it('where a side stacks: two columns in the compare-side container, one column under @container compare-side (width < 560px) and nothing else (T1723)', () => {
