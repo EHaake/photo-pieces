@@ -89,23 +89,23 @@ Three minutes apart. Captions take _inline markdown_.
 :::
 ```
 
-| Block       | Forms          | Attributes                                                                                                  | Obsidian Live Preview |
-| ----------- | -------------- | ----------------------------------------------------------------------------------------------------------- | --------------------- |
-| `single`    | leaf/container | `src` `alt`                                                                                                 | image (leaf)          |
-| `inset`     | leaf/container | `src` `alt`                                                                                                 | image (leaf)          |
-| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                             | image (leaf)          |
-| `fullbleed` | leaf/container | `src` `alt`                                                                                                 | image (leaf)          |
-| `tall`      | leaf/container | `src` `alt`                                                                                                 | image (leaf)          |
-| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed`          | images (leaf)         |
-| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                                     | images (leaf)         |
-| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                                  | raw text              |
-| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption                        | raw text              |
-| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                                     | raw text              |
-| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                                | raw text              |
-| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays            | raw text              |
-| `compare`   | container only | `mode=slider\|side\|switch\|filmstrip`; body: 2+ stages, one per line: `![Label](./file.jpg)` then its note | stages, labels below  |
-| `side`      | container only | none; body: exactly 2 stages, as `compare`'s; the two beside each other                                     | stages, labels below  |
-| `slider`    | container only | none; body: exactly 2 stages, as `compare`'s; one wipe, first left, second right                            | stages, labels below  |
+| Block       | Forms          | Attributes                                                                                                  | In Obsidian (both views) |
+| ----------- | -------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `single`    | leaf/container | `src` `alt`                                                                                                 | image                    |
+| `inset`     | leaf/container | `src` `alt`                                                                                                 | image                    |
+| `wide`      | leaf/container | `src` `alt` `bleed=left\|right`                                                                             | image                    |
+| `fullbleed` | leaf/container | `src` `alt`                                                                                                 | image                    |
+| `tall`      | leaf/container | `src` `alt`                                                                                                 | image                    |
+| `diptych`   | leaf/container | `left` `right` `leftAlt` `rightAlt`, `match=height`, `weight=left\|right`, `width=wide\|fullbleed`          | images, side by side     |
+| `triptych`  | leaf/container | `left` `center` `right` + alts, `match=height`, `width=wide\|fullbleed`                                     | images, side by side     |
+| `grid`      | container only | body: 2–6 markdown images, one per line; text after a blank line = caption                                  | images, in columns       |
+| `strip`     | container only | body: 1–8 markdown images (panorama or filmstrip); text after a blank line = caption                        | images, in one row       |
+| `aside`     | container only | `src` `alt` `side=left\|right`; body: prose that wraps around the image                                     | image beside the prose   |
+| `row`       | container only | `src` `alt` `side=left\|right`; body: prose beside the image                                                | image beside the prose   |
+| `held`      | container only | `src` `alt` `side=left\|right` `bleed` (flag); body: prose that passes beside a frame that stays            | image beside the prose   |
+| `compare`   | container only | `mode=slider\|side\|switch\|filmstrip`; body: 2+ stages, one per line: `![Label](./file.jpg)` then its note | stages, labels below     |
+| `side`      | container only | none; body: exactly 2 stages, as `compare`'s; the two beside each other                                     | stages, labels below     |
+| `slider`    | container only | none; body: exactly 2 stages, as `compare`'s; one wipe, first left, second right                            | stages, labels below     |
 
 Plain `![alt](./photo.jpg)` remains the captionless shorthand for
 `single` — same rendered result. The site mats only the image page's
@@ -132,8 +132,8 @@ rendered.
 **Current status**: every block above is implemented — the spec-003
 blocks, spec 007's held block and spec 019's compare, side and slider —
 transform, styling, the mat rule (the quiet view alone since spec 017),
-unit tests, and the Obsidian plugin's leaf-form rendering (and the
-stages of those three) —
+unit tests, and the Obsidian plugin's figure for every block, in Live
+Preview and Reading view —
 with images going through Astro's asset pipeline (hashed src,
 responsive srcset per treatment). Pieces render at
 `/pieces/<slug>/`, list at `/pieces/` (in the nav), and feed the
@@ -426,7 +426,7 @@ photo-pieces/
 ├── compare.test.mjs, loupe.test.mjs # the compare's and the loupe's rules, each tunable pinned by its round
 ├── gear.test.mjs                 # the gear table: its parse, its failures, the label's lookup, the warning
 ├── private-files.test.mjs        # the private-files barrier, run against fixture directories
-├── obsidian-plugin.test.mjs      # the plugin's reading of a compare body; Live Preview itself is attested by eye
+├── obsidian-plugin.test.mjs      # the plugin's table, scanner, figure and stylesheet; both views are attested by eye
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
 ├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
@@ -435,7 +435,7 @@ photo-pieces/
 ├── scripts/check-no-dev-routes.mjs # postbuild: no dev-only routes in dist/
 ├── scripts/check-motion.mjs      # postbuild: no literal duration or curve, hidden frame or autoplay in dist/
 ├── scripts/gen-og.mjs             # npm run og: rewrites public/og.jpg on the committed ground
-├── obsidian-plugin/              # Live Preview rendering (see its README)
+├── obsidian-plugin/              # every block as a figure, Live Preview and Reading view (see its README)
 ├── CLAUDE.md, ROADMAP.md, DECISIONS.md, AUTHORING.md
 ├── specs/                        # spec.md, plan.md, tasks.md per spec
 ├── design/brief.md

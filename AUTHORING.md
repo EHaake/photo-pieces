@@ -44,21 +44,21 @@ Why this shape:
 - **Core Templates plugin:** point it at `templates/`, and keep a
   `piece.md` template there (skeleton below).
 - **Community plugins → Photo Pieces Blocks: enabled.** The plugin
-  renders leaves: a standalone block written in leaf form (`::single`,
-  `::fullbleed`, `::wide`, `::tall`, `::inset`, `::diptych`,
-  `::triptych`) shows its image while you write, and three containers,
-  `:::compare`, `:::side` and `:::slider`, show their stages' images
-  with their labels beneath.
-  Everything else is raw text by construction — the other container
-  forms (captions), and the container-only `grid`, `strip`, `aside`,
-  `row`, and `held` — and the site build is the truth for those, as it
-  is for how a compare actually behaves. On the site, the frames you
+  draws every block of the vocabulary as a representative figure, in
+  Live Preview and in Reading view alike — each frame at a width that
+  reads as the site's for its block, its caption beneath, beside the
+  prose where the block puts it there — and in Live Preview a block
+  turns back into its text when the cursor enters it. Turn on
+  **Editor → Readable line length** so the widths read as the site's.
+  To check it, open the sampler piece (`vocabulary-sampler`): every
+  block is a figure, in both views. Representative, not identical —
+  the site's typography, ground, mat, motion and every interaction,
+  a compare's included, stay the site's, and the site build is the
+  truth for how a block actually renders. On the site, the frames you
   place animate by the site's own rules — they fade in as they load and
   as they scroll into view, and travel into their pages when clicked —
   so there is nothing to author for motion, and the plugin does not
-  change. Live Preview only — Reading
-  view is intentionally out of scope (see `DECISIONS.md`). Build/install instructions:
-  `obsidian-plugin/README.md`.
+  change. Build/install instructions: `obsidian-plugin/README.md`.
 
 ## Piece template
 
@@ -433,10 +433,11 @@ written, until the tab closes. The four ways:
   stage instead of sliding.
 
 Without script the compare is its stages one under another, each with
-its label and note. In Obsidian's Live Preview it shows its stages'
-images in a row, each with its label beneath — no notes, no slider;
-put the cursor in the block and it turns back into its text, and a
-file that isn't there shows the dashed "not found" box.
+its label and note. In Obsidian, in Live Preview and Reading view, it
+shows its stages' images in a row, each with its label beneath, and
+names its method — no notes, no slider; in Live Preview put the cursor
+in the block and it turns back into its text, and a file that isn't
+there shows the dashed "not found" box.
 
 A piece may write several compares over the same stages — Camera
 against Finished early on, Tones against Finished further down, each
@@ -478,8 +479,8 @@ attributes** — `:::side{mode="slider"}` fails as any unknown attribute
 does. The build fails, naming the piece, on one stage or three (with
 the count), and on a missing file or a private file from another
 folder, as a compare's does: a private stage comes from the block's
-own folder. In Live Preview each shows as a compare does — its stages'
-images in a row, labels beneath.
+own folder. In Obsidian each shows as a compare does — its stages'
+images in a row, labels beneath, the method line naming the block.
 
 Pairs and compares mix freely over the same stages — the slider's
 Camera against Finished a paragraph below a compare of all three, say.
