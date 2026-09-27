@@ -2338,6 +2338,12 @@ Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
 
 ### Known limitations (amendment 2)
 
+- **The scanner's fence check is looser than CommonMark** (T1730
+  review): a prose line beginning with three backticks is read as a
+  fence opener, hiding blocks until the next such line, and a `:::`
+  inside a fenced body still closes a container; both rare in a piece,
+  and the site's transform would read them the same way as far as a
+  piece can be built.
 - **The pane as a container is an assumption about Obsidian's DOM.**
   The two host selectors are Obsidian's current class names, and
   `container-type` adds layout containment to them (a containing block

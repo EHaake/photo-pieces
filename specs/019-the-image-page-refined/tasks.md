@@ -1277,7 +1277,7 @@ plugin, or the plugin importing the transform goes to the person as a
 spec amendment (spec.md's ordinary-path list). Task ids continue from
 T1729.
 
-- [ ] **T1730** — The block table and the scanner. `review: per-task`.
+- [x] **T1730** — The block table and the scanner. `review: per-task`.
       Pattern: `LEAF_BLOCKS`, `parseAttrs` and `resolveRelative` in
       `obsidian-plugin/main.ts`; `obsidian-plugin/compare.ts` (the
       obsidian-free file shape, its header comment); the vocabulary
@@ -1689,6 +1689,8 @@ tier if it is ever on (it is off). -->
 | T1729d arrows lighter | implementation (`opus`, high) | ~56k | done; 630 tests; mutation fails TOKENS by name; its oklch mix shifted hue — orchestrator changed the one word to oklab and re-verified (a footprint fix, not a design call) |
 | T1729e arrows outside | implementation (`opus`, high) | ~95k | done; 631 tests (+1); gap mutation fails TOKENS by name; found the strip's sideways page overflow (pre-existing) → T1729f |
 | T1729f strip page overflow | implementation (`opus`, high) | ~40k | done; 631 tests; baseline on the T1729e build reproduced the overflow, fixed build equal at every stage on three sizes |
+| T1730 plugin block table and scanner | implementation (`opus`, high) | ~91k | done; 689 tests (+58); plugin build exit 0; three mutations fail by name; cross-check 33 / 8 by name and order, image srcs equal; grid/strip bodies read any image-only paragraph (the transform takes the leading run) — fix-now at T1731; the plugin's tsconfig lib is ES5–ES7 (no Object.hasOwn/flatMap/.at) |
+| T1730 per-task review | implementation (`opus`, high) | ~77k | signed off, nothing blocking; notes: grid/strip leading run (fix-now at T1731), FENCE_LINE looser than CommonMark (a backtick in the info string; a `:::` inside a fenced body closes a container) — known limitation, the vocabulary walk's file list still reads main.ts only (T1732 adds blocks.ts and figure.ts; compare.ts too) |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 | Amendment 2 planning (2026-09-26, evening) | implementation (`opus`, high, no override) | ~220k | drafted plan.md's Amendment 2 section and Phase 3b (T1730–T1735, T1730 per-task): one block table pinned equal to the transform's descriptors, a line scanner, one figure builder for both views, a Reading-view post-processor, an `!important` stylesheet with a test; no product question |
