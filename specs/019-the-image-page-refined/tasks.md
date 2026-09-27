@@ -1324,7 +1324,7 @@ T1729.
       mutations (an `!important` removed; a token's value; a class
       misspelt) each fail by name, reverted, lines pasted._
 
-- [ ] **T1732** — Live Preview draws every block. Pattern: today's
+- [x] **T1732** — Live Preview draws every block. Pattern: today's
       `buildDecorations`, `directiveField` and `BlockWidget` in
       `main.ts`. Plan: "Live Preview", "The plugin's own files".
       `main.ts`: one pass over `parseBlocks`, `FigureWidget` (toDOM
@@ -1692,6 +1692,7 @@ tier if it is ever on (it is off). -->
 | T1730 plugin block table and scanner | implementation (`opus`, high) | ~91k | done; 689 tests (+58); plugin build exit 0; three mutations fail by name; cross-check 33 / 8 by name and order, image srcs equal; grid/strip bodies read any image-only paragraph (the transform takes the leading run) — fix-now at T1731; the plugin's tsconfig lib is ES5–ES7 (no Object.hasOwn/flatMap/.at) |
 | T1730 per-task review | implementation (`opus`, high) | ~77k | signed off, nothing blocking; notes: grid/strip leading run (fix-now at T1731), FENCE_LINE looser than CommonMark (a backtick in the info string; a `:::` inside a fenced body closes a container) — known limitation, the vocabulary walk's file list still reads main.ts only (T1732 adds blocks.ts and figure.ts; compare.ts too) |
 | T1731 plugin figure and stylesheet | implementation (`opus`, high) | ~83k | done; 714 tests (+25); plugin build exit 0; three mutations fail by name; the T1730 fix-now (leading run) with a case failing on the old file; deviations: beside roots carry w-side / w-held sizing the floated frames; bleed rules scoped to w-wide; a beside block always emits .photo-pieces-prose; the missing box keeps literal padding/border/radius/0.85em (not shares); the 'every class emitted' case depends on the sampler holding every variant — a note for whoever edits the sampler |
+| T1732 Live Preview | implementation (`opus`, high) | ~54k | done; 710 tests (714 − the deleted describe's 4 instances, retargeted at T1730); plugin build exit 0; the widget's Component kept in a WeakMap by element (eq-true widgets never build, so a field would leak the older one); the walk gains compare.ts too; README:66 still names LEAF_BLOCKS — T1734 |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 | Amendment 2 planning (2026-09-26, evening) | implementation (`opus`, high, no override) | ~220k | drafted plan.md's Amendment 2 section and Phase 3b (T1730–T1735, T1730 per-task): one block table pinned equal to the transform's descriptors, a line scanner, one figure builder for both views, a Reading-view post-processor, an `!important` stylesheet with a test; no product question |
