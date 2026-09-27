@@ -914,3 +914,7 @@ _Amended 2026-09-26:_
 - **T1729d (Phase 3a pause, 2026-09-26).** The filmstrip's arrows'
   ring and chevron are a third lighter than the accent, the same hue;
   the handle stays the accent.
+- **T1729e (Phase 3a pause, 2026-09-26).** The filmstrip's arrows stand
+  outside the frame in the margin, a small gap from its edges, covering
+  none of the photograph; on a phone, where there is no margin, they
+  stay inside.

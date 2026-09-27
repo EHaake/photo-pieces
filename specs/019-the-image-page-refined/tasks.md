@@ -1154,6 +1154,28 @@ headers'.
       0.012 250)`, now darker in L than a live arrow — moot while
       `stripEnds` is 'hide', a look if it ever turns 'quiet'.
 
+- [x] **T1729e** — Round (Phase 3a pause, third look, 2026-09-26): the
+      arrows covered the photograph; he wants them outside the frame.
+      `--compare-arrow-gap: 0.5rem` beside the handle tokens; the discs
+      at `calc(-1 * (var(--compare-handle) + var(--compare-arrow-gap)))`
+      outside each edge, centred on the frame's row (`grid-row: 1 / 2`
+      on a `position: relative` figure); under `(max-width: 719.98px)`
+      back inside at 0.5rem. The arrows become the figure's children
+      (the frame's `clip-path` would hide them, and widening it would
+      show the neighbours' edges), inserted after the frames so the tab
+      order holds; `stripKey` listens on the frame and each arrow.
+      `TOKENS`, (e) bodies, the phone block and the keys pinned.
+      _Recorded:_ 1512×982 discs 8px outside the frame both sides,
+      centred at its y; 1280×1440 the same; 390×844 8px inside; hidden
+      at the ends; keys from a focused arrow page. Found: the strip's
+      off-frame stages widen the page (`scrollWidth` 2422 at stage 0 on
+      1512) — pre-existing since T1726, fixed at T1729f; a focused arrow
+      that hides at an end drops focus (`stripEnds` 'hide', noted at
+      the review); `legend: 'above'` would put the frame in row 2
+      (not today's setting); a `compare-w-stage` block between 720 and
+      ~1070px could push a disc past the window edge — unmeasured.
+      631 tests.
+
 - [ ] **T1729** — The amendment's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3a
       pause, in the person's words, with T1720's, T1725's and T1726's
@@ -1430,6 +1452,7 @@ tier if it is ever on (it is off). -->
 | T1729b wheel pages one stage | implementation (`opus`, high) | ~64k | done; 630 tests (+1); both mutations fail by name; the gate restarts on any wheel event (vertical too) so a tail's drift cannot end it early |
 | T1729c wheel gate sticks | implementation (`opus`, high) | ~60k | done; 630 tests; cap mutation fails EXPECTED by name; old code reproduced stuck headless; if hard flicks double-page the lever is the cap or a rising-delta rule (not built) |
 | T1729d arrows lighter | implementation (`opus`, high) | ~56k | done; 630 tests; mutation fails TOKENS by name; its oklch mix shifted hue — orchestrator changed the one word to oklab and re-verified (a footprint fix, not a design call) |
+| T1729e arrows outside | implementation (`opus`, high) | ~95k | done; 631 tests (+1); gap mutation fails TOKENS by name; found the strip's sideways page overflow (pre-existing) → T1729f |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_ Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
