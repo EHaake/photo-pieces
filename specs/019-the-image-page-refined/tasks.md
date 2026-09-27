@@ -1124,6 +1124,23 @@ headers'.
       threshold is reasoned (settling fingers send 1–3px; a tilt wheel
       16px), not measured — his trackpad judges it.
 
+- [x] **T1729c** — Round (Phase 3a pause, second look, 2026-09-26): after
+      one gesture paged, another did nothing until the mouse moved.
+      Cause: the gate's 150ms idle restarted on every wheel event —
+      zero-delta and vertical ones too — and macOS's phase and momentum
+      stream (Firefox's wheel transaction ends on a timeout or a mouse
+      move) kept it shut; reproduced headless on the old code. Fix, one
+      place: zero-delta events ignored; `COMPARE.stripWheelGateMaxMs`
+      (new, 800) opens the gate under any stream; `stripWheelStep` takes
+      the direction spent (−1/0/1) and a gesture the other way at or
+      over the step pages back at once. `EXPECTED`, the (d) table (four
+      reversal rows). _Recorded (1512×982):_ a burst then 2s of
+      zero-delta events then a burst → 2; the same with 1px alternating
+      jitter → 2; right then left within 100ms → back to 0; a same-way
+      burst inside the gate → no second page; T1729b's checks hold; an
+      unbroken ≥4px stream past 800ms pages again (the cap's trade).
+      630 tests.
+
 - [ ] **T1729** — The amendment's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3a
       pause, in the person's words, with T1720's, T1725's and T1726's
@@ -1398,6 +1415,7 @@ tier if it is ever on (it is off). -->
 | Phase 3a re-review | implementation (`opus`, high) | ~5k | signed off; notes 3–8 of the first review to the sweep |
 | T1729a arrows' look round | implementation (`opus`, high) | ~83k + ~70k (two passes) | done; 629 tests; first pass centred the fallback glyph with a Menlo-tuned nudge and found the mono face has no arrow glyphs; second pass drew the chevron in CSS; a 'lighter' ask conflicts with 'match the handle' (measured equal) — put to the person |
 | T1729b wheel pages one stage | implementation (`opus`, high) | ~64k | done; 630 tests (+1); both mutations fail by name; the gate restarts on any wheel event (vertical too) so a tail's drift cannot end it early |
+| T1729c wheel gate sticks | implementation (`opus`, high) | ~60k | done; 630 tests; cap mutation fails EXPECTED by name; old code reproduced stuck headless; if hard flicks double-page the lever is the cap or a rising-delta rule (not built) |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_ Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.

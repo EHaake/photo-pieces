@@ -907,3 +907,7 @@ _Amended 2026-09-26:_
   duration; the rest of the gesture, momentum included, is ignored
   until it has been quiet. (The hand-following scroll stays a tunable,
   off.) A swipe by finger still follows the hand and settles nearest.
+- **T1729c (Phase 3a pause, 2026-09-26).** A gesture's gate on the
+  filmstrip ignores empty wheel events, opens by itself after 800ms
+  whatever the trackpad keeps sending, and a gesture the other way pages
+  back at once.
