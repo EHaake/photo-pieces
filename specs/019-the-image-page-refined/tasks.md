@@ -1176,6 +1176,21 @@ headers'.
       ~1070px could push a disc past the window edge — unmeasured.
       631 tests.
 
+- [x] **T1729f** — Defect found at T1729e, not a round: the filmstrip's
+      off-frame stages counted toward the page's scrollable width
+      (`clip-path` clips paint, not layout) — `scrollWidth` 2422 / 1756 /
+      1512 at stages 0 / 1 / 2 on 1512, 2306 / 1640 / 1280 on 1280,
+      1090 / 732 / 390 on the phone; no scrollbar (the body's
+      `overflow-x: clip`) but scrollable by code. The frames rule now
+      `overflow: clip; overflow-clip-margin: var(--compare-peek)`; the
+      (b) pin retargeted. _Recorded:_ scrollWidth == clientWidth at
+      every stage on all three; peek 2rem shows 32px of each neighbour
+      (hit tests) and reverts; next → paging → 1, drag −0.6w → 0.6 →
+      settles 1; the slider view byte-identical to before. Safari
+      ignores `overflow-clip-margin` (peek reads 0 there); a peek past
+      the phone's 16px padding brings the overflow back on phones —
+      both in the rule's comment. 631 tests.
+
 - [ ] **T1729** — The amendment's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3a
       pause, in the person's words, with T1720's, T1725's and T1726's
@@ -1453,6 +1468,7 @@ tier if it is ever on (it is off). -->
 | T1729c wheel gate sticks | implementation (`opus`, high) | ~60k | done; 630 tests; cap mutation fails EXPECTED by name; old code reproduced stuck headless; if hard flicks double-page the lever is the cap or a rising-delta rule (not built) |
 | T1729d arrows lighter | implementation (`opus`, high) | ~56k | done; 630 tests; mutation fails TOKENS by name; its oklch mix shifted hue — orchestrator changed the one word to oklab and re-verified (a footprint fix, not a design call) |
 | T1729e arrows outside | implementation (`opus`, high) | ~95k | done; 631 tests (+1); gap mutation fails TOKENS by name; found the strip's sideways page overflow (pre-existing) → T1729f |
+| T1729f strip page overflow | implementation (`opus`, high) | ~40k | done; 631 tests; baseline on the T1729e build reproduced the overflow, fixed build equal at every stage on three sizes |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 _(Session-tier allowance draw noted at each pause.)_ Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.

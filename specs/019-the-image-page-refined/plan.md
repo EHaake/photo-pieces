@@ -1543,7 +1543,7 @@ simpler shape was taken the bullet says so.
 
       :root { --compare-peek: 0px; }   /* how far each neighbour shows beyond the frame's edge */
       @property --strip-at { syntax: '<number>'; inherits: true; initial-value: 0; }
-      .compare[data-view='filmstrip'] .compare-frames { overflow: visible; clip-path: inset(0 calc(-1 * var(--compare-peek))); touch-action: pan-y; }
+      .compare[data-view='filmstrip'] .compare-frames { overflow: clip; overflow-clip-margin: var(--compare-peek); touch-action: pan-y; }   /* T1729f: was overflow: visible + clip-path, which left the off-frame stages in the page's width */
       .compare[data-view='filmstrip'] .compare-stage { transform: translateX(calc((var(--i) - var(--strip-at)) * 100%)); }
       .compare[data-paging] { transition: --strip-at var(--dur-move) var(--ease-move); }
       .compare[data-view='filmstrip'][data-settling] { transition: --strip-at var(--dur-state) var(--ease-state); }
