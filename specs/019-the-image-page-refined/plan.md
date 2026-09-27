@@ -1577,6 +1577,9 @@ simpler shape was taken the bullet says so.
   imports it under the new name and renders all three with the
   compare's widget and class; comments say "the three blocks that take
   stages".
+  _Superseded by "Amendment 2 (2026-09-26): the plugin, representative"
+  below: `STAGES_PATTERN` is deleted at T1732 and every block is read by
+  the block table's scanner._
 
 - **The documents, again** (T1728): `AUTHORING.md` — "A compare in a
   piece" gains `mode="filmstrip"` and what it does; a new "A pair: side
@@ -1863,3 +1866,483 @@ block; `content.config.ts`; `src/lib/images.ts`.
   three with no new markup. Showing both stages' notes is the
   alternative, put to him at the Phase 3a look.
 - **No new dependency.**
+
+## Amendment 2 (2026-09-26): the plugin, representative
+
+**Status**: Draft — pending sign-off
+**Implements**: spec.md's sections marked _(amended 2026-09-26, plugin)_
+— Goal 10, the two Non-goals, the Entities "The plugin's block table"
+and "The two renderers", the flow "Reading a draft through in
+Obsidian", the Design requirements "The plugin's figures", "The
+plugin's rules win" and "Both views, one markup", the Authoring
+requirement "The plugin's README", the envelope's plugin bullet and
+ordinary-path line, and the six criteria under "_Amended 2026-09-26
+(plugin):_" (AC 21–26 here, numbered on from AC 20).
+
+The plugin only; nothing the site builds or serves changes. Today's
+plugin reads seven leaf blocks by a line regex and the three stage
+blocks by a second one, draws one widget in Live Preview, and has one
+unguarded layout rule. It becomes: one table of every block, one
+scanner that claims each block's lines, one figure built from a parsed
+block, two renderers that call it (the existing CodeMirror field and a
+Reading view post-processor), and one stylesheet whose every
+declaration is `!important` and whose every share is a custom
+property. No dependency; the plugin still never imports the transform
+(a test reads both). Everything above this section stands except the
+first amendment's "Obsidian" bullet, superseded as its pointer says.
+
+### Shape of the change (amendment 2)
+
+- **The block table** (`obsidian-plugin/blocks.ts`, new, no `obsidian`
+  import — compare.ts's rule, so the suite reads it; T1730). One entry
+  per block, in the transform's order:
+
+  ```ts
+  export type Width = 'column' | 'wide' | 'full' | 'tall' | 'inset' | 'side' | 'held';
+  export type Layout = 'frame' | 'pair' | 'grid' | 'strip' | 'beside' | 'stages';
+  export type PluginBlock = {
+    forms: 'container' | 'both'; // = BLOCKS[name].forms
+    body: 'caption' | 'prose' | 'images+caption' | 'stages'; // = BLOCKS[name].body
+    layout: Layout;
+    width?: Width; // frame: fixed; beside: the floated frame's share
+    slots?: readonly (readonly [src: string, alt: string])[]; // attribute images, in order
+    method?: string; // side and slider: the fixed method line
+  };
+  export const PLUGIN_BLOCKS: Record<string, PluginBlock>;
+  export const METHOD_WORDS = { slider: 'Slider', side: 'Side by side', switch: 'Switch', filmstrip: 'Filmstrip' };
+  export const DEFAULT_MODE = 'slider';
+  ```
+
+  | block                                  | forms     | body           | layout  | width / slots                                                    |
+  | -------------------------------------- | --------- | -------------- | ------- | ---------------------------------------------------------------- |
+  | single, fullbleed, wide, tall, inset   | both      | caption        | frame   | column, full, wide, tall, inset; `[['src','alt']]`               |
+  | diptych, triptych                      | both      | caption        | pair    | `left/leftAlt, right/rightAlt` (+ `center/centerAlt`)            |
+  | grid, strip                            | container | images+caption | grid, strip | —                                                            |
+  | aside, row                             | container | prose          | beside  | side; `[['src','alt']]`                                          |
+  | held                                   | container | prose          | beside  | held; `[['src','alt']]`                                          |
+  | compare                                | container | stages         | stages  | method from `mode` (`METHOD_WORDS`, else `DEFAULT_MODE`)         |
+  | side, slider                           | container | stages         | stages  | `method: 'side'`, `'slider'` — the block's own name as written   |
+
+  Attributes the plugin draws, because CSS alone draws them: `wide`'s
+  `bleed`, the pairs' `width` (`wide` → wide, `fullbleed` → full) and
+  `diptych`'s `weight`, the beside blocks' `side` (`right`, else left —
+  held's default, and what an aside or row missing it shows; the build
+  judges). `match="height"` is not drawn (it needs the frames' ratios);
+  flags (`{bleed}`) and the `{#id .class}` shorthand are ignored, as
+  `parseAttrs` does today. A slot's `src` missing → the block stays raw,
+  as today; `alt` defaults to `''`.
+
+- **The scanner** (`blocks.ts`, T1730). A line scanner that claims
+  spans, not a Markdown parser: the transform's grammar for our blocks
+  is two line shapes, and a parser would be a dependency or a second
+  micromark. `parseBlocks(text: string): ParsedBlock[]` walks the lines
+  once:
+
+  ```ts
+  export type Image = { src: string; alt: string; label?: string };
+  export type ParsedBlock = {
+    name: string;
+    from: number; to: number;           // offsets: opener line's start, closer line's end
+    startLine: number; endLine: number; // 0-based, inclusive
+    attrs: Record<string, string>;
+    images: Image[];                    // slots, body images, or stages (label set)
+    caption: string;                    // Markdown, '' when none
+    prose: string;                      // Markdown, '' unless body is 'prose'
+    method: string | null;
+  };
+  ```
+
+  - A line matching `^::([a-z]+)(\{[^}]*\})?[ \t]*$` whose name is in the
+    table with `forms: 'both'` is a leaf block of one line. A
+    container-only name in leaf form (`::grid{}`) is not a block.
+  - A line matching `^:::([a-z]+)(\{[^}]*\})?[ \t]*$` whose name is in the
+    table claims the lines up to the first later `^:::[ \t]*$`; the body
+    between is not scanned for blocks (the transform refuses nesting).
+    `:::sidebar` is name `sidebar`, not in the table, not claimed. A
+    known opener with no closer is not a block — the plugin never
+    swallows the rest of a note.
+  - Lines inside a ` ``` ` or `~~~` fence outside any claimed span are
+    skipped (the site shows them as code).
+  - A directive with text before it on its line is not matched — the
+    "mid-paragraph" case; it stays raw in both views.
+  - Bodies, by the transform's rules: `caption` → the body trimmed;
+    `images+caption` → the paragraphs (blank-line separated) made only
+    of images are the images, the rest joined is the caption; `prose` →
+    the body; `stages` → `parseCompareBody` (compare.ts, unchanged,
+    labels as today). One image regex, exported from compare.ts, read
+    by both.
+  - A container that yields no image (an empty grid, a compare with no
+    stages) is not a block, but its span stays claimed, so no line
+    inside it is read as a leaf — today's compare rule, for every
+    container.
+
+  `parseAttrs` and `resolveRelative` move here from `main.ts`,
+  unchanged, so the suite can test them.
+
+- **The figure** (`obsidian-plugin/figure.ts`, new, no `obsidian`
+  import; T1731). One builder, two callers:
+  `figureTree(block: ParsedBlock, resolve: (src: string) => string | null): FigureNode`
+  returns a plain tree (`{ tag, classes, attrs?, children }`,
+  `{ text }`, `{ markdown }`), and `toDom(node, renderMarkdown)` turns
+  it into elements, handing each `{ markdown }` node to the caller's
+  Markdown renderer. The tree, not DOM, is the output so both views
+  share it and the suite tests it without a DOM library (a dependency
+  this project would otherwise need). The shape:
+
+  ```
+  div.photo-pieces-block.photo-pieces-<layout>.photo-pieces-w-<width>
+      [.photo-pieces-side-left|right][.photo-pieces-bleed-left|right][.photo-pieces-weight-left|right]
+      data-block=<name>
+    div.photo-pieces-frames
+      img (src from resolve, alt) | div.photo-pieces-missing "[<name>: image not found — <src>]"
+      — for stages: div.photo-pieces-stage > (img | missing), div.photo-pieces-stage-label <label>
+    div.photo-pieces-caption {markdown}   when the caption is not ''
+    div.photo-pieces-method <words>        stage blocks
+    div.photo-pieces-prose {markdown}      beside blocks
+  ```
+
+  Width per layout: `frame` its table width; `pair` from `width`
+  (column by default); `grid` and `stages` column; `strip` full;
+  `beside` the root at column with the frames floated at `side` or
+  `held`. The breakout sits on `.photo-pieces-frames`, never the root,
+  so a caption and the method line stay at the text's width beneath a
+  wide or full frame, as the site returns a fullbleed's caption to the
+  column. A beside block's prose is inside the figure, rendered by the
+  caller: the float is contained in one element (`display: flow-root`),
+  so CodeMirror's height map sees one block and Reading view needs no
+  float across sections. The old `photo-pieces-preview*` classes go;
+  `-stage`, `-stage-label`, `-missing` and the missing box's text stay.
+
+- **The stylesheet** (`obsidian-plugin/styles.css`, rewritten; T1731).
+  **Every declaration except a custom property carries `!important`**
+  — the strategy for "the plugin's rules win". An important author
+  declaration outranks every normal one whatever its specificity, which
+  is the fix proven in his vault; a cascade layer would do the opposite
+  (layered rules lose to Obsidian's unlayered ones), and out-specifying
+  selectors we cannot see is a guess. Applying it to every declaration
+  rather than a list of "layout" properties leaves the test nothing to
+  keep in step. Its reach is bounded by the selectors: every rule is
+  scoped to a `.photo-pieces-` class except three, pinned by the test —
+  `body` (the tokens, custom properties only) and the two pane hosts
+  below. The layout itself sits on elements inside the widget root
+  (`.photo-pieces-frames` and its children), not on the root Obsidian's
+  `.cm-content > *` rules can reach. No at-rules.
+
+  **The pane as a container.** `wide` and `full` must reach past the
+  text column to the pane, which CSS can only measure from a query
+  container: `.markdown-source-view.mod-cm6 .cm-scroller` and
+  `.markdown-preview-view` (Live Preview's and Reading view's scroll
+  hosts) get `container: photo-pieces-pane / inline-size !important`.
+  Then, as the site's `.piece-wide` and `.piece-fullbleed` do with
+  `vw`: `full` frames are `width: calc(var(--photo-pieces-full) * 100cqi);
+  margin-inline: calc(50% - var(--photo-pieces-full) * 50cqi)`; `wide`
+  sets `--w: min(calc(var(--photo-pieces-wide) * 100%),
+  calc(var(--photo-pieces-wide-cap) * 100cqi))` and
+  `margin-inline: calc((100% - var(--w)) / 2)`; `bleed-left` runs
+  from the pane's left edge to the column's right (`width: calc(50% +
+  50cqi)`, `margin-left: calc(50% - 50cqi)`), `bleed-right` mirrored.
+  `tall` caps the image at `calc(var(--photo-pieces-tall) * 100vh)`,
+  centred — the window's height, because the pane's cannot be queried
+  without size containment on Obsidian's scroller. `inset`, `side` and
+  `held` are shares of the column (`%`). `pair`: frames `display: flex`,
+  items `flex: 1 1 0; min-width: 0`, `align-items: center`, the weighted
+  one `flex-grow: 2`. `grid`: `display: grid;
+  grid-template-columns: repeat(var(--photo-pieces-grid-columns),
+  minmax(0, 1fr))`. `strip`: one row, `overflow-x: auto`, images at
+  `height: var(--photo-pieces-strip-height); width: auto; max-width:
+  none; flex: none`. `beside`: root `display: flow-root`, frames
+  `float` on its side with a gap on the prose side. `stages`: today's
+  wrapping row, `flex: 1 1 var(--photo-pieces-stage-min)`. Captions and
+  the method line: `font-size: var(--photo-pieces-caption-size); color:
+  var(--photo-pieces-caption-color)`, a caption's `p` unmargined; the
+  method line `display: var(--photo-pieces-method-display)`.
+  `.photo-pieces-hidden { display: none !important }` for Reading
+  view's continuation sections. Every value's opening number is in the
+  envelope table below.
+
+- **Live Preview** (`main.ts`, T1732). `buildDecorations` becomes one
+  pass over `parseBlocks(doc)`: each block the cursor is not inside
+  (`r.from <= to && r.to >= from`, as today) is
+  `Decoration.replace({ widget: new FigureWidget(block, sourcePath,
+  plugin), block: true })` over `[from, to]`. `FigureWidget.toDOM(view)`
+  builds `toDom(figureTree(block, resolver(app, sourcePath)), md)`,
+  where `md` is `MarkdownRenderer.render(app, markdown, el, sourcePath,
+  component)` on a `Component` the widget loads and unloads in
+  `destroy()`, then `view.requestMeasure()` once the render resolves
+  (its height changes after layout). `eq` compares the block's content
+  (name, attrs, images, caption, prose, method) and the path, so a
+  selection change does not rebuild images. `resolver(app, sourcePath)`
+  is today's lookup (`resolveRelative`, then `getFirstLinkpathDest` or
+  `getAbstractFileByPath`, then `getResourcePath`), shared with Reading
+  view. The StateField, its `docChanged || selection` rule and the
+  strict-Source-mode check stay. `LEAF_BLOCKS`, `DIRECTIVE_PATTERN`,
+  `BlockWidget` and `STAGES_PATTERN` (compare.ts) are deleted. The
+  header comment is rewritten: every block, both views, representative;
+  what stays raw (a mid-line directive, a block with a missing required
+  src, an unclosed container, an unknown name). No quoted `'pause'`
+  anywhere — the vocabulary walk reads `main.ts`.
+
+- **Reading view** (`main.ts`, and two pure helpers in `blocks.ts`;
+  T1733). `this.registerMarkdownPostProcessor((el, ctx) => …)`.
+  Obsidian hands it one rendered section at a time — a paragraph, a
+  list, a heading, split at blank lines — never the source, so a
+  block's text is recovered from `ctx.getSectionInfo(el)`: `{ text,
+  lineStart, lineEnd }`, `text` the whole note. `null` (a transclusion,
+  a hover preview, an export) → leave the section as Obsidian drew it.
+  Otherwise `parseBlocks(text)` (cached on the last text) and
+  `sectionPieces(blocks, lineStart, lineEnd)`:
+
+  ```ts
+  export function sectionPieces(blocks: ParsedBlock[], lineStart: number, lineEnd: number):
+    | null // the section touches no block: leave it
+    | { pieces: ({ kind: 'markdown'; startLine: number; endLine: number } | { kind: 'figure'; block: ParsedBlock })[];
+        continues: boolean }; // the section begins inside a block that began before it
+  ```
+
+  Lines of the section outside every block are `markdown` runs; a block
+  that begins in the section is a `figure` (drawn from its whole
+  source, whatever sections it spans); lines of a block that began
+  earlier are dropped. The section is emptied and rebuilt from the
+  pieces — a run through `MarkdownRenderer.render` on a
+  `MarkdownRenderChild(el)` given to `ctx.addChild`, a figure through
+  the same `toDom(figureTree(…))`; no pieces → `el` gets
+  `photo-pieces-hidden`. There is no cursor in Reading view: every block
+  always renders.
+
+  **Keeping a multi-section block fresh.** Obsidian re-runs
+  post-processors only for sections whose text changed, so editing a
+  held's third paragraph re-runs that (hidden) section and not the
+  first, which drew the figure. So the plugin keeps, per
+  `ctx.sourcePath`, `blockSignature(blocks, text)` (the blocks' source
+  slices joined) as last seen; a call whose section `continues` a block
+  and whose signature differs from the stored one schedules, once per
+  tick, `leaf.view.previewMode.rerender(true)` for every Markdown leaf
+  on that file in `'preview'` mode. Every call stores the signature, so
+  the full re-render that follows sees it equal and does not loop; the
+  first render of a note stores it without comparing. An edit inside a
+  block's first section needs none (that section re-renders itself).
+
+- **The plugin's own files** (T1732): `manifest.json` and
+  `package.json` to `0.3.0`; `package.json`'s description (it still says
+  "fullbleed directive") and the manifest's say "every block of the
+  site's vocabulary, in Live Preview and Reading view". `minAppVersion`
+  stays: `MarkdownRenderer.render` is in the installed typings.
+
+- **The documents** (T1734): `obsidian-plugin/README.md` rewritten for
+  Goal 10 — a table of every block with what Live Preview and Reading
+  view show (the same figure; Live Preview returns the text when the
+  cursor enters); nothing "raw by design" but a directive with text
+  before it on its line; the path paragraph kept; install and rebuild
+  kept; "How to check it": open the sampler piece, every block a
+  figure, both views; "Extending": a block added to the transform is a
+  line in `PLUGIN_BLOCKS`, which the equality test demands; the
+  stylesheet's `!important` rule and its test. `AUTHORING.md`'s
+  "Obsidian settings that matter" bullet: every block a representative
+  figure in both views, the check (the sampler), Readable line length
+  on for the widths to read as the site's; the "Live Preview only —
+  Reading view is intentionally out of scope" sentence goes. `DECISIONS.md`
+  and `ROADMAP.md` at close-out (T1718, amended).
+
+### The tuning envelope, placed (amendment 2)
+
+The envelope's plugin bullet. One place each, all in
+`obsidian-plugin/styles.css`'s `body` rule; pinned by name and value in
+obsidian-plugin.test.mjs's `PLUGIN_TOKENS` table. Widths are shares:
+of the text column (`%`), of the pane (`cqi`) or of the window's height
+(`vh`) — representative, not the site's pixels. The opening values
+mirror the site's proportions (inset 440 / 680, wide 1160 / 680 capped
+at 96vw, aside 300 / 680, row 340 / 680, grid two columns).
+
+| Envelope item                         | One place (opening value)                                                   | Pinned by                                     |
+| ------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------- |
+| `inset`'s width                       | `--photo-pieces-inset: 0.65` (of the column)                                | `PLUGIN_TOKENS`                               |
+| `wide`'s width                        | `--photo-pieces-wide: 1.7` (of the column), `--photo-pieces-wide-cap: 0.96` (of the pane) | `PLUGIN_TOKENS`                 |
+| `full`'s width                        | `--photo-pieces-full: 1` (of the pane)                                      | `PLUGIN_TOKENS`                               |
+| the side frames                       | `--photo-pieces-side: 0.45` (aside, row), `--photo-pieces-held: 0.5` (of the column) | `PLUGIN_TOKENS`                      |
+| the `tall` height cap                 | `--photo-pieces-tall: 0.8` (of the window's height)                         | `PLUGIN_TOKENS`                               |
+| the grid's columns                    | `--photo-pieces-grid-columns: 2`                                            | `PLUGIN_TOKENS`                               |
+| the gaps                              | `--photo-pieces-gap: 0.5em`                                                 | `PLUGIN_TOKENS`                               |
+| the strip's height; the stage row's wrap | `--photo-pieces-strip-height: 14em`; `--photo-pieces-stage-min: 12em`    | `PLUGIN_TOKENS`                               |
+| the caption's face                    | `--photo-pieces-caption-size: 0.85em`, `--photo-pieces-caption-color: var(--text-muted)` | `PLUGIN_TOKENS`                  |
+| whether the method line shows         | `--photo-pieces-method-display: block` (`none` hides it)                    | `PLUGIN_TOKENS`                               |
+| the method line's words               | `METHOD_WORDS` / `DEFAULT_MODE` (compare), the table's `method` (side, slider) | the equality case (the site's words); the figure cases |
+
+`--photo-pieces-tall` is 0.8 where the site's cap is 85svh: Obsidian's
+tab header and status bar take roughly the difference from the window.
+
+### Failure messages (amendment 2)
+
+None new. The plugin refuses nothing (spec: the build stays the
+judge); what it cannot draw stays raw. Its one message is today's
+missing box, unchanged: `[<block>: image not found — <src>]`.
+
+### Testing strategy (amendment 2)
+
+All in `obsidian-plugin.test.mjs`, which imports the plugin's `.ts`
+files directly (none imports `obsidian`). The renderers themselves run
+only inside Obsidian; the photographer attests them at the pause.
+
+- **The table equals the vocabulary** — **T1730**. Imports `BLOCKS`
+  from `remark-pieces-blocks.mjs` (exported today; the vocabulary test's
+  known-blocks list is its `Object.keys`): `Object.keys(PLUGIN_BLOCKS)`
+  equals `Object.keys(BLOCKS)` in order; per name, `forms` and `body`
+  equal the descriptor's; every slot's attribute names are in the
+  descriptor's `attrs.required`. `Object.keys(METHOD_WORDS)` equals
+  `COMPARE_MODES` (image-meta.mjs), `METHOD_WORDS` equals
+  `COMPARE_WORDING.modes` and `DEFAULT_MODE` equals
+  `COMPARE.defaultMode` (src/lib/compare.ts). Mutations: a `mystery`
+  entry added to `PLUGIN_BLOCKS` → fails naming it, reverted; `held`'s
+  forms set to `'both'` → the forms case fails, reverted.
+
+- **The scanner** — **T1730**. Over the real files, read whole
+  (frontmatter included — the scanner must pass over it):
+  - **Against the transform.** The sampler's and the fog piece's
+    bodies (frontmatter stripped) rendered through the vocabulary
+    test's harness (`createMarkdownProcessor` with `remarkDirective`,
+    `remarkPiecesBlocks`, `fileURL` the piece's `index.md`); the names
+    from `class="piece-block piece-([a-z]+)` in order equal
+    `parseBlocks(file).map((b) => b.name)` — 33 on the sampler, 8 on
+    the fog piece. This is "finds every block" pinned against the
+    judge, not against a hand list.
+  - **What it read**, by a hand-written table per file: each block's
+    `images` srcs (and stage labels), `caption`, `side`/`bleed`/
+    `width`/`weight` where written, `method` for the three stage blocks
+    (`Switch`, `side`, `slider`), `prose`'s first words for beside
+    blocks; the sampler's two shorthand images and the fog piece's one
+    are not blocks.
+  - **Edge cases**: `Text ::single{src="./a.jpg" alt="x"} more.` → none;
+    the same line inside a ` ``` ` fence → none; `:::sidebar … :::` →
+    none and a leaf inside it is a block; `:::side` and `:::slider` with
+    the flow's two stages claimed whole with their bodies (the three
+    `STAGES_PATTERN` cases, retargeted here before T1732 deletes the
+    pattern — the guarantees move, none is dropped); `:::compare` whose
+    stages are blank-line separated; a container with no closer → none;
+    `::grid{}` → none; `:::grid` with no images → none and its inner
+    `::single{…}` line not a block; `:::single{…}` with a two-paragraph
+    caption → both paragraphs; `::single{alt="x"}` → none;
+    `:::compare{mode="nope"}` → method `Slider`. Mutation: the fence
+    skip removed → the fence case fails, reverted.
+  - **`resolveRelative`**: `./a.jpg` → name; `../beta/a.jpg` from
+    `src/content/pieces/alpha/index.md` → `src/content/pieces/beta/a.jpg`;
+    `../../gallery-images/a.jpg` → `src/content/gallery-images/a.jpg`;
+    a climb past the root → unreachable.
+
+- **The figure** — **T1731**. `figureTree` over parsed fixtures with a
+  `resolve` that maps every src to `app://<src>` except one: per
+  layout, the root's classes exactly (a wide pair, a weighted diptych,
+  a bleed-left wide, a right aside, a held with no side → left), the
+  children in order (frames, then caption / method / prose); an
+  unresolved src → the missing node with the exact text; no caption
+  node for `''`; a compare with no mode → method `Slider`, `side` →
+  `side`; stage nodes carry their labels.
+
+- **The stylesheet** — **T1731**. Read with `blocks(uncomment(css))`
+  (src/lib/ground.ts, as compare.test.mjs does):
+  - every declaration not beginning `--` ends in `!important`, the
+    failure naming selector and property;
+  - every selector contains `.photo-pieces-` or is one of `body`
+    (declaring custom properties only) and the two pane hosts
+    (declaring `container` only);
+  - no at-rule;
+  - `PLUGIN_TOKENS`: each token declared once, in `body`, at the table's
+    value; every `var(--photo-pieces-…)` used is declared;
+  - every class the stylesheet names is one `figureTree` emits over the
+    sampler's and the fog piece's parsed blocks plus one missing image,
+    or `photo-pieces-hidden` (Reading view's).
+  Mutations: one `!important` removed → fails naming it; a token's value
+  changed → `PLUGIN_TOKENS` fails; a selector's class misspelt → the
+  class case fails; each reverted.
+
+- **Reading view's sections** — **T1733**. `sectionPieces` over the
+  sampler's parse: the held's first section (its opener and first
+  paragraph) → one figure, `continues: false`; its third paragraph →
+  no pieces, `continues: true`; its last (paragraph and `:::`) → none,
+  `continues: true`; a section of plain prose → `null`; a synthetic
+  paragraph line followed by a leaf on the next line → a markdown run,
+  then the figure; a section with the grid's caption → none,
+  `continues: true`. `blockSignature`: equal for two texts differing
+  outside blocks, different for one differing inside a held's third
+  paragraph. Mutation: `continues` computed from `startLine <=
+  lineStart` (off by one) → the first-section case fails, reverted.
+
+- **Unchanged and green**: `parseCompareBody`'s three cases; the
+  vocabulary walk (it reads `main.ts`); the whole suite;
+  `sh scripts/verify.sh` (its `astro check` covers the plugin's `.ts`
+  through the root `tsconfig.json`'s `**/*`); in `obsidian-plugin/`,
+  `npm run build` exit 0 (`node_modules` is present).
+
+- **In Obsidian, by the photographer** (the Phase 3b pause): both
+  views on the laptop and the DualUp over the sampler and the fog
+  piece; the cursor returning a block's text; the console check —
+  `getComputedStyle(document.querySelector('[data-block="diptych"]
+  .photo-pieces-frames')).display` → `flex`, the grid's → `grid`, and a
+  fullbleed's frames `getBoundingClientRect().width` against its
+  scroll host's `clientWidth`; a held's third paragraph edited in Live
+  Preview then Reading view showing the edit.
+
+### File structure (amendment 2)
+
+```
+obsidian-plugin/blocks.ts        new: PLUGIN_BLOCKS, METHOD_WORDS, DEFAULT_MODE, parseAttrs and resolveRelative (moved), parseBlocks (T1730); sectionPieces, blockSignature (T1733)
+obsidian-plugin/compare.ts       the image regex exported (T1730); STAGES_PATTERN deleted (T1732)
+obsidian-plugin/figure.ts        new: FigureNode, figureTree, toDom (T1731)
+obsidian-plugin/styles.css       rewritten: tokens, pane hosts, every layout (T1731)
+obsidian-plugin/main.ts          imports moved (T1730); the Live Preview field over parseBlocks, FigureWidget, resolver (T1732); the Reading view post-processor and its re-render (T1733)
+obsidian-plugin/manifest.json, package.json   0.3.0, descriptions (T1732)
+obsidian-plugin.test.mjs         T1730, T1731, T1733's cases; the STAGES_PATTERN block deleted (T1732, retargeted at T1730)
+obsidian-plugin/README.md, AUTHORING.md       T1734
+DECISIONS.md, ROADMAP.md         close-out (T1718, amended)
+```
+
+Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
+`src/`, `scripts/`, every other test file; `esbuild.config.mjs`,
+`tsconfig.json` and the plugin's dependencies.
+
+### Known limitations (amendment 2)
+
+- **The pane as a container is an assumption about Obsidian's DOM.**
+  The two host selectors are Obsidian's current class names, and
+  `container-type` adds layout containment to them (a containing block
+  for fixed-position descendants; CodeMirror's scroller is already a
+  positioned stacking context). If a nearer Obsidian element is itself
+  a container, `cqi` measures it instead. The pause's console check and
+  his ordinary use of the editor (hover previews, menus, scrolling)
+  judge it; the fallback, if either fails, is a `ResizeObserver` in
+  each renderer writing the pane's width to a custom property — named
+  here, not built.
+- **`full` is the scroll host's content box**, inside Obsidian's file
+  margins, not the window's edge; with Readable line length off the
+  column is the pane, so `wide` and `full` read alike.
+- **`tall` is a share of the window's height**, not the pane's.
+- **`match="height"` is drawn as equal widths**; stage notes are not
+  shown (labels only, as today); a `side` or `slider` with the wrong
+  count is drawn; text before a compare's first stage is skipped.
+- **Reading view draws nothing where `getSectionInfo` returns `null`**
+  (a note embedded in another, a hover preview, a PDF export): those
+  stay as Obsidian draws them.
+- **A section rebuilt around a block loses Markdown context** that
+  spans the cut (a list continued across it) — only in sections that
+  touch a block.
+- **The freshness re-render is a full re-render** of that note's
+  Reading view, once per edit that reaches a block's later section;
+  whether Obsidian keeps the scroll position through it is his to see.
+
+### Resolved decisions (amendment 2)
+
+- **A line scanner that claims spans**, not a Markdown parser: two line
+  shapes are the whole grammar the plugin needs, and a parser is a
+  dependency or a second micromark.
+- **One figure tree, turned into DOM by each caller** — two real
+  callers, and a tree the suite can test with no DOM library.
+- **`!important` on every declaration, scoped by selector**, over
+  specificity or layers (above); pinned by the stylesheet test.
+- **A beside block's prose is inside its figure** in both views, so the
+  float never crosses CodeMirror lines or Reading view sections.
+- **Reading view rewrites only sections that touch a block**; the
+  block's first section draws it whole, later ones hide, and a stored
+  signature triggers one re-render when a later section changes.
+- **The method words are the site's**, pinned equal; `side` and
+  `slider` show their own names as written. Put to him at the look.
+- **`STAGES_PATTERN` is deleted**, its three guarantees retargeted to
+  the scanner's cases before it goes.
+- **No new dependency; `minAppVersion` unchanged.**

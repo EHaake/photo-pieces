@@ -1,6 +1,6 @@
 # Tasks: The image page, refined
 
-**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken.
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted 2026-09-26 — pending sign-off.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1700–T1703) — the constitution amended
 first, in its own commit; the private-file family as pure rules with
@@ -1227,6 +1227,161 @@ headers'.
 
 _Filled in at the pause._
 
+## Phase 3b — The plugin, representative (reviewer after the phase; `review: per-task` on T1730; walkthrough: in Obsidian on the laptop and on the DualUp, with the rebuilt plugin (0.3.0) installed as its README says and Readable line length on — the sampler piece in Live Preview shows every block as a figure: the singles at the text's width, the insets smaller and centred, the wides past the text on both sides and the half-bleeds out to one edge of the pane, the fullbleeds across the whole pane, the talls standing at most about four fifths of the window's height, centred; every diptych and triptych in one row (the weighted ones two to one, the wide and fullbleed ones breaking out), the grid in two columns, both strips as one row that scrolls sideways across the pane; each aside, row and held a frame on its named side with its paragraphs wrapping beside it (no hold); every caption beneath its frame in a smaller, muted face with its italics; the fog piece's compare, side and slider as rows of stages with their labels and a line naming the method ("Switch", "side", "slider"); the cursor put into any block turns it back into its text; switched to Reading view, the same page; a held's third paragraph edited in Live Preview shows the edit in Reading view; a src changed to a file that isn't there shows the dashed "not found" box in both views; the console check (View → Toggle Developer Tools → Console): `getComputedStyle(document.querySelector('[data-block="diptych"] .photo-pieces-frames')).display` prints `flex` and the grid's prints `grid`, where the old rows printed `block`, and a fullbleed's frames measure the pane's width (`document.querySelector('[data-block="fullbleed"] .photo-pieces-frames').getBoundingClientRect().width` against `document.querySelector('.cm-scroller').clientWidth`, less its padding); the editor otherwise behaves as it did — hover previews, menus, scrolling; as many rounds as it takes, each a sub-lettered task under T1735)
+
+**Status**: Draft — pending sign-off. Plan: "Amendment 2 (2026-09-26):
+the plugin, representative" and its sections. The spec's second
+amendment, folded in at the Phase 3a pause and before the real piece,
+because the piece is written in Obsidian. The plugin only: nothing the
+site builds changes, and the suite's existing cases stay green. Foundational within the phase, and
+ordered first: T1730 (the block table and the scanner — what both
+renderers and the stylesheet's class test read; `review: per-task`,
+because a block misread there is misdrawn in both views and the
+equality test is what keeps it honest from here on) and T1731 (the
+one figure and the stylesheet). The renderers follow, then the
+documents, then the look. The implementer has no Obsidian: its Verify
+is the suite, the plugin's `npm run build` and greps; what the figures
+look like in both views is the person's at the pause. A round at the
+pause is one sub-lettered task under T1735, as the cadence paragraph
+says of its look tasks: a value in `styles.css`'s `body` rule and its
+row in `PLUGIN_TOKENS`, one line in spec.md's Decided section; a round
+that wants interaction, motion, the site's typography or ground in the
+plugin, or the plugin importing the transform goes to the person as a
+spec amendment (spec.md's ordinary-path list). Task ids continue from
+T1729.
+
+- [ ] **T1730** — The block table and the scanner. `review: per-task`.
+      Pattern: `LEAF_BLOCKS`, `parseAttrs` and `resolveRelative` in
+      `obsidian-plugin/main.ts`; `obsidian-plugin/compare.ts` (the
+      obsidian-free file shape, its header comment); the vocabulary
+      test's processor harness (`remark-pieces-vocabulary.test.mjs`
+      ~18–37) for the cross-check. Plan: "The block table", "The
+      scanner", and the testing bullets "The table equals the
+      vocabulary" and "The scanner". New `obsidian-plugin/blocks.ts`:
+      the types, `PLUGIN_BLOCKS` in the transform's order,
+      `METHOD_WORDS`, `DEFAULT_MODE`, `parseAttrs` and
+      `resolveRelative` moved unchanged, `parseBlocks`.
+      `compare.ts`: the image regex exported and read by
+      `parseCompareBody` and `parseBlocks` alike (`STAGES_PATTERN`
+      stays until T1732). `main.ts`: imports `parseAttrs` and
+      `resolveRelative` from `blocks.ts`, its local copies deleted;
+      nothing else. `obsidian-plugin.test.mjs`: the equality, scanner,
+      edge and `resolveRelative` cases as the plan lists them, the
+      sampler's and the fog piece's tables hand-written from the files.
+      _Verify: `sh scripts/verify.sh` green (count recorded); in
+      `obsidian-plugin/`, `npm run build` exit 0; the three mutations
+      (a `mystery` entry; `held`'s forms `'both'`; the fence skip
+      removed) each fail by name and are reverted, the failing lines
+      pasted; the cross-check's two counts (33, 8) quoted from the
+      test output._
+
+- [ ] **T1731** — The figure and the stylesheet. Pattern: `BlockWidget.toDOM`
+      in `main.ts` (the DOM it builds, the missing box's text);
+      `styles.css` as it is; compare.test.mjs's (b) `TOKENS` and its
+      use of `blocks`/`uncomment` from `src/lib/ground.ts`. Plan: "The
+      figure", "The stylesheet", "The tuning envelope, placed
+      (amendment 2)" and the testing bullets "The figure" and "The
+      stylesheet". New `obsidian-plugin/figure.ts`: `FigureNode`,
+      `figureTree`, `toDom` (standard DOM calls only — no Obsidian
+      `addClass`/`setText`, so the file stays obsidian-free).
+      `styles.css` rewritten: the `body` tokens at the table's values,
+      the two pane hosts, every layout, `.photo-pieces-hidden`; every
+      non-custom declaration `!important`; a header comment saying why
+      (the Phase 3a collapse) and that the test refuses one without.
+      Live Preview draws with the old classes until T1732 — no pause
+      falls between. `obsidian-plugin.test.mjs`: the figure and
+      stylesheet cases, `PLUGIN_TOKENS`. _Verify: `sh scripts/verify.sh`
+      green (count recorded); `npm run build` exit 0; the three
+      mutations (an `!important` removed; a token's value; a class
+      misspelt) each fail by name, reverted, lines pasted._
+
+- [ ] **T1732** — Live Preview draws every block. Pattern: today's
+      `buildDecorations`, `directiveField` and `BlockWidget` in
+      `main.ts`. Plan: "Live Preview", "The plugin's own files".
+      `main.ts`: one pass over `parseBlocks`, `FigureWidget` (toDOM
+      through `figureTree` and `toDom`, a `Component` per widget
+      unloaded in `destroy`, `MarkdownRenderer.render` for caption and
+      prose, `view.requestMeasure()` after it resolves, `eq` by
+      content and path), `resolver(app, sourcePath)`; `LEAF_BLOCKS`,
+      `DIRECTIVE_PATTERN` and `BlockWidget` deleted; the header comment
+      rewritten. `compare.ts`: `STAGES_PATTERN` and its comment deleted.
+      `obsidian-plugin.test.mjs`: the `STAGES_PATTERN` describe block
+      deleted — its three cases were retargeted to the scanner at
+      T1730; the commit message names them. `manifest.json`,
+      `package.json`: 0.3.0 and the descriptions. _Verify:
+      `sh scripts/verify.sh` green (count recorded — the three deleted
+      cases accounted for against T1730's additions); `npm run build`
+      exit 0; `grep -n "STAGES_PATTERN\|LEAF_BLOCKS\|DIRECTIVE_PATTERN\|photo-pieces-preview" obsidian-plugin/*.ts obsidian-plugin/styles.css obsidian-plugin.test.mjs`
+      → no hits; `grep -n "figureTree" obsidian-plugin/main.ts` → the
+      widget's call; the vocabulary walk green. The figures in Obsidian
+      are the person's at the pause._
+
+- [ ] **T1733** — Reading view draws the same figures. Pattern: T1732's
+      `resolver` and `toDom` call; the plan's `sectionPieces` signature.
+      Plan: "Reading view" and the testing bullet "Reading view's
+      sections". `blocks.ts`: `sectionPieces`, `blockSignature`.
+      `main.ts`: `registerMarkdownPostProcessor` — `getSectionInfo`
+      (`null` → leave), the cached parse, the section emptied and
+      rebuilt from its pieces (runs through `MarkdownRenderer.render` on
+      a `MarkdownRenderChild` given to `ctx.addChild`; figures through
+      `toDom(figureTree(…))`), `photo-pieces-hidden` for none; the
+      signature map by `sourcePath` and the once-per-tick
+      `previewMode.rerender(true)` for that file's leaves in
+      `'preview'` mode. `obsidian-plugin.test.mjs`: the
+      `sectionPieces` and `blockSignature` cases. _Verify:
+      `sh scripts/verify.sh` green (count recorded); `npm run build`
+      exit 0; the off-by-one mutation fails by name, reverted, line
+      pasted; `grep -n "registerMarkdownPostProcessor\|figureTree" obsidian-plugin/main.ts`
+      → the post-processor and both renderers' calls._
+
+- [ ] **T1734** — The documents, for the plugin. Pattern: T1728 (its
+      hand-editing rule) and the plugin README's own voice. Plan: "The
+      documents" (amendment 2). `obsidian-plugin/README.md` rewritten
+      as the plan says (every block in the table with both views; the
+      one raw case; the path paragraph, install and rebuild kept; "How
+      to check it"; "Extending" for the table, the equality test and the
+      `!important` rule). `AUTHORING.md`'s "Obsidian settings that
+      matter" plugin bullet rewritten, the Reading-view-out-of-scope
+      sentence gone; any other sentence in `AUTHORING.md` or
+      `README.md` that says containers stay raw or Reading view is not
+      handled, corrected. Every claim read against the code as built.
+      Hand-edit the prose (never script-rewrap; grep for lines beginning
+      with a CSS `>` or `+` before any format run). _Verify:
+      `grep -n "raw text\|raw by\|Reading view\|Reading View\|out of scope" obsidian-plugin/README.md AUTHORING.md README.md`
+      (hits listed — none says a block of the vocabulary stays raw or
+      Reading view is unhandled); `grep -c ":::held\|:::grid\|:::aside" obsidian-plugin/README.md`
+      ≥ 1; `npx prettier --check obsidian-plugin/README.md AUTHORING.md README.md`
+      clean; `sh scripts/verify.sh` green; `npm run build` exit 0._
+
+- [ ] **T1735** — The plugin's look, and the rounds. Not an
+      implementation task: the orchestrator's record of the Phase 3b
+      pause, in the person's words. The questions, in plain language:
+      does a piece read through in Obsidian now give a good sense of
+      its layout and flow, in both views, on both screens; the widths
+      — the inset (about two thirds of the text), the wide (past the
+      text, up to nearly the whole pane), the fullbleed (the whole
+      pane), the side frames (under half the text), the tall (at most
+      four fifths of the window's height) — and the grid's columns, the
+      gaps, the strip's height, the caption's size and colour; the line
+      naming the method under a compare, side or slider — keep it, and
+      are the words right (the side and slider blocks show their own
+      names, lowercase, so they read apart from a compare's "Slider");
+      whether Reading view refreshing after an edit is noticeable; the
+      console check's three lines, pasted as he reads them; whether
+      anything else in Obsidian changed with the plugin on. Each round
+      is one sub-lettered task here (`T1735a`, `b`, …); a round that
+      changes a value the plugin README states updates it in the same
+      task. When he names the keeps, they are recorded here and Phase 4
+      waits for his piece as its intro says. _Verify: every
+      sub-lettered task green; each kept value agrees in `styles.css`,
+      `PLUGIN_TOKENS` and spec.md's Decided line (a `grep` of each,
+      listed); the plugin README agrees; the Phase 3b record below
+      filled in._
+
+### Phase 3b record (the person's walkthrough)
+
+_Filled in at the pause._
+
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — the piece page with his writing and his compare as he wrote it; his photograph's image page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
 The content is his, supplied during implementation; these tasks are the
@@ -1306,6 +1461,18 @@ _Filled in at the pause._
       each bounded by the other axis; the shares as kept at the Phase
       3a pause); the processing showcase's first step gains the pair
       blocks `side` and `slider` and the compare's filmstrip.
+      From the second amendment (Phase 3b): "Obsidian live rendering
+      for photo blocks" (~594–603) struck as done at spec 019 (every
+      block, both views), and the "Block vocabulary expansion" entry's
+      "What remains" line (~613–615) struck with it. `DECISIONS.md`'s
+      two plugin entries — "Obsidian live-preview plugin: fullbleed
+      only, approximation accepted" (~90–110) and "Spec 003: breadth
+      over demand-driven growth; plugin approximations" (~278–298) —
+      each annotated as superseded at spec 019, in his words: "the
+      concession was that 'approximation' would be fine for the
+      authoring plugin. By that I meant that things wouldn't be exactly
+      the same, be representative. Approximation doesn't mean 'almost
+      completely different and unrepresentative in most cases'."
       `DECISIONS.md`: "## Spec 019: the image page, refined" in 018's
       shape — the decision in the photographer's words (the page over
       the mobile pass; the dictionary; Sony's own mark; the handle and
@@ -1327,7 +1494,11 @@ _Filled in at the pause._
       pair blocks in the compare's one shape told apart by their
       `piece-<name>` class, `side` without script, the filmstrip as a
       transitioned property rather than the browser's scroll, one
-      candidate list per stage file as the barrier's fourth scan), and
+      candidate list per stage file as the barrier's fourth scan; and
+      the second amendment's — the block table pinned equal to the
+      transform's, one figure for both views, `!important` on every
+      plugin declaration, the pane as a query container, Reading view
+      rebuilding only the sections a block touches), and
       the keeps from each pause in his words, round by round. Both hand-edited (`npx prettier --check` clean; grep for
       lines beginning with a CSS `>` or `+` before any format run).
       Then, the orchestrator's part: the pre-merge whole-spec sweep at
@@ -1358,14 +1529,21 @@ _Filled in at the pause._
       record; AC 18 by T1724's tables, T1726's reads and the record;
       AC 19 by scan 4 with its tests and T1723's land-b read and
       timeline; AC 20 by T1719's commit (its hash and its place before
-      T1720's), T1728's greps and the Phase 3a record); build, tests, check, and
+      T1720's), T1728's greps and the Phase 3a record; the second
+      amendment's six — AC 21 by T1730's equality cases; AC 22 by
+      T1730's cross-check and scanner cases; AC 23 by the Phase 3b
+      record; AC 24 by T1731's stylesheet cases and the record's console
+      lines; AC 25 by T1730's `resolveRelative` cases, T1731's missing
+      case and the record; AC 26 by T1734's greps and the plugin's
+      build); build, tests, check, and
       the four barriers (GPS, dev routes, motion, private files) green
       with actual output; the PR marked ready
       and merged with a merge commit; the close-out box ticked in the
       same shell command as the merge bookkeeping. _Verify: the
       implementer's `sh scripts/verify.sh` green with the documents
       edited; `grep -n "Spec 019" DECISIONS.md ROADMAP.md` → the new
-      section and the annotations; `git diff main --stat` lists no file
+      section and the annotations; `grep -in "superseded at spec 019" DECISIONS.md`
+      → the two plugin entries; `git diff main --stat` lists no file
       outside plan.md's File structure and this directory;
       `git diff main -- package.json` shows the `postbuild` line only;
       `main` green after the merge._
