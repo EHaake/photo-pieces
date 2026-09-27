@@ -34,6 +34,7 @@ export const COMPARE = {
   stripWheel: 'page', // a horizontal wheel or trackpad scroll: false (the page's own), 'follow' (the strip follows it, settling on the nearest) or 'page' (one gesture pages one stage)
   stripWheelIdleMs: 150, // a wheel gesture's end: this long without a wheel event ('follow' settles then; 'page' takes the next gesture)
   stripWheelStepPx: 4, // 'page': the least sideways delta, in pixels, in one wheel event that pages — below it, a jitter
+  stripWheelGateMaxMs: 800, // 'page': the longest a paged gesture stays spent under an unbroken stream of wheel events (T1729c) — past a normal momentum tail, whose deltas are under the step by then, and short of a second deliberate gesture a second later
   stripWidth: 'surface', // the width class the filmstrip wears: 'surface' (the block's own, as the switch) or one of COMPARE_WIDTHS
 } as const;
 
@@ -136,18 +137,20 @@ export function stripSettle(at: number, n: number): number {
 
 /**
  * Which way one wheel event pages the filmstrip: 1 on, −1 back, 0 not.
- * Only `'page'` pages, and only an event outside a gesture that already
- * paged (`gated`) whose sideways delta `deltaX`, in pixels, is at least
- * `threshold`.
+ * Only `'page'` pages, and only an event whose sideways delta `deltaX`,
+ * in pixels, is at least `threshold`, and not the way the gesture has
+ * already paged (`spent`: 1 or −1, 0 when it has not) — a delta the
+ * other way is a new decision and pages back (T1729c).
  */
 export function stripWheelStep(
   mode: false | 'follow' | 'page',
-  gated: boolean,
+  spent: -1 | 0 | 1,
   deltaX: number,
   threshold: number = COMPARE.stripWheelStepPx,
 ): -1 | 0 | 1 {
-  if (mode !== 'page' || gated || Math.abs(deltaX) < threshold) return 0;
-  return deltaX > 0 ? 1 : -1;
+  if (mode !== 'page' || Math.abs(deltaX) < threshold) return 0;
+  const dir = deltaX > 0 ? 1 : -1;
+  return dir === spent ? 0 : dir;
 }
 
 /** Whether each of the filmstrip's arrows has somewhere to go from `stage`: nowhere past an end unless it wraps. */
@@ -764,28 +767,46 @@ function enhance(root: HTMLElement, frames: HTMLElement, stages: HTMLElement[]) 
   // pages one stage its way, and the rest of it (a trackpad's momentum)
   // is ignored until it ends; at an end nothing pages. 'follow': the
   // strip follows the delta and settles on the nearest at the end.
+  // T1729c: the spent gesture could stick — any wheel event restarted its
+  // end, and macOS keeps a stream going (momentum, and zero-delta events
+  // at a phase's end or under resting fingers) — so an event with no
+  // delta on either axis is not part of any gesture, the gesture is spent
+  // at most `stripWheelGateMaxMs` from its page whatever the stream, and
+  // a delta the other way pages back (stripWheelStep).
   let idle: ReturnType<typeof setTimeout> | undefined;
-  let gated = false;
-  /** 'page': the gesture has paged, and stays spent until `stripWheelIdleMs` without a wheel event. */
-  const spend = () => {
-    gated = true;
+  let cap: ReturnType<typeof setTimeout> | undefined;
+  /** 'page': the way the gesture paged (0 when it has not), spent until `stripWheelIdleMs` without a wheel event or `stripWheelGateMaxMs` after the page. */
+  let spent: -1 | 0 | 1 = 0;
+  const open = () => {
+    spent = 0;
     clearTimeout(idle);
-    idle = setTimeout(() => (gated = false), COMPARE.stripWheelIdleMs);
+    clearTimeout(cap);
+  };
+  const quiet = () => {
+    clearTimeout(idle);
+    idle = setTimeout(open, COMPARE.stripWheelIdleMs);
+  };
+  const spend = (dir: -1 | 1) => {
+    spent = dir;
+    quiet();
+    clearTimeout(cap);
+    cap = setTimeout(open, COMPARE.stripWheelGateMaxMs);
   };
   frames.addEventListener(
     'wheel',
     (event) => {
       if (view() !== 'filmstrip' || !STRIP_WHEEL) return;
-      if (STRIP_WHEEL === 'page' && gated) spend();
+      if (event.deltaX === 0 && event.deltaY === 0) return;
+      if (STRIP_WHEEL === 'page' && spent !== 0) quiet();
       if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
       const width = frames.getBoundingClientRect().width;
       if (width <= 0) return;
       event.preventDefault();
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? width : 1;
       if (STRIP_WHEEL === 'page') {
-        const dir = stripWheelStep(STRIP_WHEEL, gated, event.deltaX * unit);
+        const dir = stripWheelStep(STRIP_WHEEL, spent, event.deltaX * unit);
         if (dir === 0) return;
-        spend();
+        spend(dir);
         page(switchNext(stage, n, dir, COMPARE.stripWraps));
         return;
       }
