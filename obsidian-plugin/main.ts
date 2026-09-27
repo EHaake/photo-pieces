@@ -1,135 +1,114 @@
-import { Plugin, TFile, editorInfoField, editorLivePreviewField } from 'obsidian';
+import {
+  Component,
+  MarkdownRenderer,
+  Plugin,
+  TFile,
+  editorInfoField,
+  editorLivePreviewField,
+} from 'obsidian';
+import type { App } from 'obsidian';
 import { EditorView, Decoration, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
-import { STAGES_PATTERN, parseCompareBody } from './compare';
-import { parseAttrs, resolveRelative } from './blocks';
+import { parseBlocks, resolveRelative } from './blocks';
+import type { ParsedBlock } from './blocks';
+import { figureTree, toDom } from './figure';
 
-// Live Preview rendering for the LEAF form of the site's standalone image
-// blocks: while writing, `::single{src="./a.jpg" alt="…"}` shows the image
-// instead of raw directive text. Deliberately approximate — not styled to
-// match the site (see DECISIONS.md at the repo root).
+// Draws every block of the site's vocabulary (remark-pieces-blocks.mjs) as
+// its figure while writing: the block's lines are replaced by the figure
+// while the cursor is outside them, and come back as text when it enters.
+// Both views draw a block as the same figure — the tree built in figure.ts
+// from what the scanner in blocks.ts reads — styled by styles.css.
 //
-// Mirrors the vocabulary in remark-pieces-blocks.mjs by convention. The
-// three blocks that take stages render — `:::compare`, `:::side` and
-// `:::slider` — each shown as a compare is, its stages' images with each
-// label beneath (its body read by compare.ts); the methods, the handle and
-// the loupe are the site's. What stays raw text on purpose: every other
-// `:::name … :::` container form (captions), grid, strip, aside, row, held —
-// multi-line bodies are otherwise out of scope for this plugin's regex
-// approach. Raw text is honest: the site build is the source of truth for
-// what those render as.
-//
-// The regex is anchored to a whole line (`m` flag): a directive typed
-// mid-paragraph does NOT render here, because the real pipeline does not
-// treat it as a block either.
+// Representative, not the site: frames at the site's widths, rows, grids,
+// strips, a frame beside its prose, stages with their labels and method
+// named; not the site's methods, handle, loupe or hold (see DECISIONS.md at
+// the repo root on the accepted approximation). The site build is the
+// judge, and what the scanner cannot read stays raw text: a directive with
+// text before it on its line (the site does not treat it as a block
+// either), a block with a required src missing, a container with no
+// closer, and a name that is not in the vocabulary.
 //
 // A `src` with a folder in it is resolved from the note's own folder,
 // exactly as the site build resolves it, with no name-based fallback: a
 // wrong path shows "image not found" here too, rather than a same-named
 // file from some other folder.
 
-// `label` is set for stages only (the three blocks that take stages):
-// shown beneath the image.
-type Image = { src: string; alt: string; label?: string };
-type Extract = (attrs: Record<string, string>) => Image[] | null;
+/** A block's image src, seen from the note at `sourcePath`, as a URL the
+ *  view can load, or `null` when it names no file. */
+function resolver(app: App, sourcePath: string): (src: string) => string | null {
+  return (src) => {
+    const resolved = resolveRelative(src, sourcePath);
+    const file =
+      resolved.kind === 'name'
+        ? app.metadataCache.getFirstLinkpathDest(src.replace(/^\.\//, ''), sourcePath)
+        : resolved.kind === 'path'
+          ? app.vault.getAbstractFileByPath(resolved.path)
+          : null;
+    return file instanceof TFile ? app.vault.getResourcePath(file) : null;
+  };
+}
 
-const one: Extract = (a) => (a.src ? [{ src: a.src, alt: a.alt ?? '' }] : null);
+// The Component that owns a figure's rendered Markdown, by the figure's
+// element: CodeMirror keeps an equal widget's DOM and destroys it through
+// the newer widget, so the element, not the widget, carries it.
+const components = new WeakMap<HTMLElement, Component>();
 
-const LEAF_BLOCKS: Record<string, Extract> = {
-  single: one,
-  fullbleed: one,
-  wide: one,
-  tall: one,
-  inset: one,
-  diptych: (a) =>
-    a.left && a.right
-      ? [
-          { src: a.left, alt: a.leftAlt ?? '' },
-          { src: a.right, alt: a.rightAlt ?? '' },
-        ]
-      : null,
-  triptych: (a) =>
-    a.left && a.center && a.right
-      ? [
-          { src: a.left, alt: a.leftAlt ?? '' },
-          { src: a.center, alt: a.centerAlt ?? '' },
-          { src: a.right, alt: a.rightAlt ?? '' },
-        ]
-      : null,
+const sameBlock = (a: ParsedBlock, b: ParsedBlock) => {
+  const keys = Object.keys(a.attrs);
+  return (
+    a.name === b.name &&
+    keys.length === Object.keys(b.attrs).length &&
+    keys.every((key) => a.attrs[key] === b.attrs[key]) &&
+    a.images.length === b.images.length &&
+    a.images.every(
+      (img, i) =>
+        img.src === b.images[i].src &&
+        img.alt === b.images[i].alt &&
+        img.label === b.images[i].label,
+    ) &&
+    a.caption === b.caption &&
+    a.prose === b.prose &&
+    a.method === b.method
+  );
 };
 
-const DIRECTIVE_PATTERN = `^::(${Object.keys(LEAF_BLOCKS).join('|')})\\{([^}]*)\\}[ \\t]*$`;
-
-class BlockWidget extends WidgetType {
+class FigureWidget extends WidgetType {
   constructor(
-    private block: string,
-    private images: Image[],
+    private block: ParsedBlock,
     private sourcePath: string,
     private plugin: Plugin,
   ) {
     super();
   }
 
-  eq(other: BlockWidget) {
-    return (
-      other.block === this.block &&
-      other.images.length === this.images.length &&
-      other.images.every(
-        (img, i) =>
-          img.src === this.images[i].src &&
-          img.alt === this.images[i].alt &&
-          img.label === this.images[i].label,
-      )
-    );
+  // By content and path, not offsets, so a selection change or an edit
+  // elsewhere in the note does not rebuild the images.
+  eq(other: FigureWidget) {
+    return other.sourcePath === this.sourcePath && sameBlock(other.block, this.block);
   }
 
-  toDOM() {
-    const wrapper = document.createElement('div');
-    wrapper.addClass('photo-pieces-preview');
-    wrapper.dataset.block = this.block;
-    if (this.block === 'compare') wrapper.addClass('photo-pieces-preview-compare');
-    else if (this.images.length > 1) wrapper.addClass('photo-pieces-preview-row');
+  toDOM(view: EditorView) {
+    const { app } = this.plugin;
+    const component = new Component();
+    component.load();
+    const rendering: Promise<void>[] = [];
+    const figure = toDom(
+      figureTree(this.block, resolver(app, this.sourcePath)),
+      (markdown, into) => {
+        rendering.push(MarkdownRenderer.render(app, markdown, into, this.sourcePath, component));
+      },
+    );
+    components.set(figure, component);
+    // The rendered caption and prose change the figure's height after
+    // layout; CodeMirror measures it again once they are in.
+    if (rendering.length > 0) Promise.all(rendering).then(() => view.requestMeasure());
+    return figure;
+  }
 
-    for (const { src, alt, label } of this.images) {
-      // A compare's stage: the image (or its "not found") with its label beneath.
-      let parent: HTMLElement = wrapper;
-      if (label !== undefined) {
-        parent = document.createElement('div');
-        parent.addClass('photo-pieces-stage');
-        wrapper.appendChild(parent);
-      }
-      const resolved = resolveRelative(src, this.sourcePath);
-      const file =
-        resolved.kind === 'name'
-          ? this.plugin.app.metadataCache.getFirstLinkpathDest(
-              src.replace(/^\.\//, ''),
-              this.sourcePath,
-            )
-          : resolved.kind === 'path'
-            ? this.plugin.app.vault.getAbstractFileByPath(resolved.path)
-            : null;
-      if (!(file instanceof TFile)) {
-        const missing = document.createElement('div');
-        missing.addClass('photo-pieces-missing');
-        missing.setText(`[${this.block}: image not found — ${src}]`);
-        parent.appendChild(missing);
-      } else {
-        const img = document.createElement('img');
-        img.src = this.plugin.app.vault.getResourcePath(file);
-        // alt is accessibility text, not a caption — captions live in the
-        // container form, which this plugin leaves as raw text.
-        img.alt = alt;
-        parent.appendChild(img);
-      }
-      if (label !== undefined) {
-        const caption = document.createElement('div');
-        caption.addClass('photo-pieces-stage-label');
-        caption.setText(label);
-        parent.appendChild(caption);
-      }
-    }
-    return wrapper;
+  destroy(dom: HTMLElement) {
+    components.get(dom)?.unload();
+    components.delete(dom);
   }
 
   ignoreEvent() {
@@ -147,59 +126,18 @@ function buildDecorations(state: EditorState, plugin: Plugin): DecorationSet {
   const info = state.field(editorInfoField, false);
   const sourcePath = info?.file?.path ?? '';
 
-  const text = state.doc.toString(); // whole doc — fine at piece scale
   const sel = state.selection.ranges;
-  // Leave raw syntax visible and editable while the cursor is on it —
-  // same convention Obsidian's own live preview uses for embeds.
-  const cursorInside = (start: number, end: number) =>
-    sel.some((r) => r.from <= end && r.to >= start);
-
-  // Two passes, one per pattern; the builder needs its ranges in order.
-  const found: { start: number; end: number; block: string; images: Image[] }[] = [];
-
-  // The whole block of any of the three that take stages (compare, side,
-  // slider), fence to fence, each rendered as a compare. Its span is
-  // claimed whether or not it renders, so no line inside it is read as a
-  // leaf block.
-  const compares: { start: number; end: number }[] = [];
-  const compareRe = new RegExp(STAGES_PATTERN, 'gm');
-  let m: RegExpExecArray | null;
-  while ((m = compareRe.exec(text))) {
-    const start = m.index;
-    const end = start + m[0].length;
-    compares.push({ start, end });
-    if (cursorInside(start, end)) continue;
-
-    const stages = parseCompareBody(m[2]);
-    if (stages.length === 0) continue; // no stages: stay raw
-    const images = stages.map(({ src, label }) => ({ src, alt: label, label }));
-    found.push({ start, end, block: 'compare', images });
-  }
-
-  const re = new RegExp(DIRECTIVE_PATTERN, 'gm');
-  while ((m = re.exec(text))) {
-    const start = m.index;
-    const end = start + m[0].length;
-
-    if (compares.some((c) => start < c.end && end > c.start)) continue;
-    if (cursorInside(start, end)) continue;
-
-    const images = LEAF_BLOCKS[m[1]](parseAttrs(m[2]));
-    if (!images) continue; // required attributes missing: stay raw
-
-    found.push({ start, end, block: m[1], images });
-  }
-
-  found.sort((a, b) => a.start - b.start);
   const builder = new RangeSetBuilder<Decoration>();
-  for (const { start, end, block, images } of found) {
+  // One pass, in order: the scanner returns the note's blocks as they
+  // stand, and the builder needs its ranges in order.
+  for (const block of parseBlocks(state.doc.toString())) {
+    // Leave raw syntax visible and editable while the cursor is on it —
+    // same convention Obsidian's own live preview uses for embeds.
+    if (sel.some((r) => r.from <= block.to && r.to >= block.from)) continue;
     builder.add(
-      start,
-      end,
-      Decoration.replace({
-        widget: new BlockWidget(block, images, sourcePath, plugin),
-        block: true,
-      }),
+      block.from,
+      block.to,
+      Decoration.replace({ widget: new FigureWidget(block, sourcePath, plugin), block: true }),
     );
   }
   return builder.finish();

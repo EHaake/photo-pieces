@@ -975,6 +975,9 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
       ...walk('src'),
       'remark-pieces-blocks.mjs',
       'obsidian-plugin/main.ts',
+      'obsidian-plugin/blocks.ts',
+      'obsidian-plugin/figure.ts',
+      'obsidian-plugin/compare.ts',
       ...rootTests,
     ];
     const hits = [];
