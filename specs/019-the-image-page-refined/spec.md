@@ -1089,3 +1089,9 @@ _Amended 2026-09-26 (plugin):_
   `held` as a float beside its paragraphs, no hold; a method line on
   the stage blocks; every share a tunable; interaction, motion and the
   site's typography and ground left out.
+- **Phase 3a keeps (2026-09-26).** Both shares stay at 1 and a square is
+  sized with the verticals; the title sits one spacing under the nav; the
+  side block runs wide and stacks under 560px; the slider block keeps
+  the column, its fixed labels and the second stage's note; a story's
+  side or slider shows beside "Raw to finished"; the filmstrip's keys,
+  no wrap, no sliver, and the move and state durations stand.

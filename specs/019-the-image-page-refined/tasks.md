@@ -1225,7 +1225,34 @@ headers'.
 
 ### Phase 3a record (the person's walkthrough)
 
-_Filled in at the pause._
+Reached 2026-09-26 after T1728a's sign-off. First look, in his words:
+"Almost everything looks good now! Only the filmstrip needs work now.
+The arrow buttons don't look right. They look a bit 'cheap'. The arrows
+aren't centered in the bubbles, and the outline color doesn't seem to
+match the rest. They seem a bit dark, might lighten them up slightly.
+Also, the trackpad controls for the filmstrip work, but they end up
+landing somewhere between images too easily. I think that a left or
+right gesture should just fully transition the image." → T1729a
+(arrows drawn in CSS, centred), T1729b (a gesture pages one stage).
+Second look: "I think the lines are still a little bit dark, but the
+arrows are centered now. The trackpad gesture is good, but there is a
+bug. If I do a gesture to move the next or previous, it works great,
+except that I can't do another (nothing happens) until I move the
+mouse slightly, and then it works again." → T1729c (the gate cannot
+stick), T1729d (the arrows a third lighter). Third look: "Can the
+arrow buttons on the filmstrip be outside the images rather than
+inside them? It's not great that they are covering parts of the image
+they are being showcased." → T1729e (outside the frame), and T1729f
+for the page-width defect found there. (A stray `npm run dev` inside
+`obsidian-plugin/` was his terminal, not the site.) **Keeps**, by
+"almost everything looks good": both shares at 1 and a square sized
+with the verticals; the title where it now sits; the side block wide
+and stacking under 560px; the slider block at the column with its
+fixed labels and the second stage's note; land-b's story slider beside
+"Raw to finished" (only a compare stands in); the filmstrip's keys, no
+wrap, no sliver, and the move and state durations. The look then
+moved to Obsidian, where the plugin's figures were found wanting —
+the second amendment (Phase 3b).
 
 ## Phase 3b — The plugin, representative (reviewer after the phase; `review: per-task` on T1730; walkthrough: in Obsidian on the laptop and on the DualUp, with the rebuilt plugin (0.3.0) installed as its README says and Readable line length on — the sampler piece in Live Preview shows every block as a figure: the singles at the text's width, the insets smaller and centred, the wides past the text on both sides and the half-bleeds out to one edge of the pane, the fullbleeds across the whole pane, the talls standing at most about four fifths of the window's height, centred; every diptych and triptych in one row (the weighted ones two to one, the wide and fullbleed ones breaking out), the grid in two columns, both strips as one row that scrolls sideways across the pane; each aside, row and held a frame on its named side with its paragraphs wrapping beside it (no hold); every caption beneath its frame in a smaller, muted face with its italics; the fog piece's compare, side and slider as rows of stages with their labels and a line naming the method ("Switch", "side", "slider"); the cursor put into any block turns it back into its text; switched to Reading view, the same page; a held's third paragraph edited in Live Preview shows the edit in Reading view; a src changed to a file that isn't there shows the dashed "not found" box in both views; the console check (View → Toggle Developer Tools → Console): `getComputedStyle(document.querySelector('[data-block="diptych"] .photo-pieces-frames')).display` prints `flex` and the grid's prints `grid`, where the old rows printed `block`, and a fullbleed's frames measure the pane's width (`document.querySelector('[data-block="fullbleed"] .photo-pieces-frames').getBoundingClientRect().width` against `document.querySelector('.cm-scroller').clientWidth`, less its padding); the editor otherwise behaves as it did — hover previews, menus, scrolling; as many rounds as it takes, each a sub-lettered task under T1735)
 
