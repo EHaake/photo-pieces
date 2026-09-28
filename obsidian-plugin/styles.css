@@ -106,7 +106,8 @@ body {
   margin-inline: auto !important;
 }
 
-/* pair: a diptych's two and a triptych's three in a row, equal widths */
+/* pair: a diptych's two and a triptych's three in a row, equal widths
+   unless matched by height (below) */
 .photo-pieces-pair > .photo-pieces-frames {
   display: flex !important;
   gap: var(--photo-pieces-gap) !important;
@@ -121,6 +122,17 @@ body {
 .photo-pieces-weight-left > .photo-pieces-frames > :first-child,
 .photo-pieces-weight-right > .photo-pieces-frames > :last-child {
   flex-grow: 2 !important;
+}
+
+/* match="height": each pane's width in proportion to its image's aspect
+   ratio, so the heights come out equal, as the site's .match-height does
+   with the transform's --ar. The plugin has no ratios when it parses, so
+   matchHeights (figure.ts) writes --photo-pieces-ar on each pane from the
+   loaded image, normalised so the smallest is 1; until then, 1 each.
+   Outranks the weight rule, as the site's flex ignores its weight. */
+.photo-pieces-pair.photo-pieces-match-height > .photo-pieces-frames > * {
+  --photo-pieces-ar: 1;
+  flex: var(--photo-pieces-ar) 1 0 !important;
 }
 
 /* grid: the site's columns, each row's frames centred on its midline

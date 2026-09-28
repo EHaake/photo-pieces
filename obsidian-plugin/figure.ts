@@ -53,6 +53,7 @@ export function figureTree(
   if (bleed) classes.push(`photo-pieces-bleed-${bleed}`);
   const weight = layout === 'pair' ? leftOrRight(attrs.weight) : null;
   if (weight) classes.push(`photo-pieces-weight-${weight}`);
+  if (layout === 'pair' && attrs.match === 'height') classes.push('photo-pieces-match-height');
 
   const picture = ({ src, alt }: Image): FigureElement => {
     const url = resolve(src);
@@ -96,4 +97,39 @@ export function toDom(
     else renderMarkdown(child.markdown, element);
   }
   return element;
+}
+
+/** Each pane's flex-grow in a match="height" pair: its image's aspect
+ *  ratio, normalised so the smallest is 1, as the site's --ar is. Widths
+ *  in proportion to the ratios give the images one height; the smallest
+ *  at 1 keeps the grows' sum at least 1, so the row's free space is all
+ *  handed out. */
+export function paneRatios(sizes: { width: number; height: number }[]): number[] {
+  const ratios = sizes.map(({ width, height }) => width / height);
+  const smallest = Math.min(...ratios);
+  return ratios.map((ratio) => ratio / smallest);
+}
+
+/** For a match="height" pair drawn by `toDom`, writes each pane's
+ *  `--photo-pieces-ar` from its image's natural size once every image has
+ *  one — at once when they are loaded already, else on each load. Until
+ *  then, and in a pair holding a missing image, the panes share the row
+ *  equally (the stylesheet's default of 1). Both views call it. */
+export function matchHeights(figure: HTMLElement): void {
+  if (!figure.classList.contains('photo-pieces-match-height')) return;
+  const frames = figure.querySelector('.photo-pieces-frames');
+  if (frames === null) return;
+  const panes = Array.from(frames.children);
+  // By tag, not instanceof: a popout window has its own HTMLImageElement.
+  if (!panes.every((pane) => pane.tagName === 'IMG')) return;
+  const images = panes as HTMLImageElement[];
+  const update = () => {
+    if (!images.every((image) => image.complete && image.naturalHeight > 0)) return;
+    const grows = paneRatios(
+      images.map((image) => ({ width: image.naturalWidth, height: image.naturalHeight })),
+    );
+    images.forEach((image, i) => image.style.setProperty('--photo-pieces-ar', String(grows[i])));
+  };
+  for (const image of images) if (!image.complete) image.addEventListener('load', update);
+  update();
 }

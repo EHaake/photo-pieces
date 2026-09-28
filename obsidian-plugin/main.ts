@@ -14,7 +14,7 @@ import type { DecorationSet } from '@codemirror/view';
 import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
 import { blockSignature, parseBlocks, resolveRelative, sectionPieces } from './blocks';
 import type { ParsedBlock } from './blocks';
-import { figureTree, toDom } from './figure';
+import { figureTree, matchHeights, toDom } from './figure';
 
 // Draws every block of the site's vocabulary (remark-pieces-blocks.mjs) as
 // its figure while writing: the block's lines are replaced by the figure
@@ -111,6 +111,7 @@ class FigureWidget extends WidgetType {
         rendering.push(MarkdownRenderer.render(app, markdown, into, this.sourcePath, component));
       },
     );
+    matchHeights(figure);
     components.set(figure, component);
     // The rendered caption and prose change the figure's height after
     // layout; CodeMirror measures it again once they are in.
@@ -218,7 +219,9 @@ export default class PhotoPiecesBlocksPlugin extends Plugin {
           // Its own element, so a render that finishes later keeps its place.
           md(lines.slice(piece.startLine, piece.endLine + 1).join('\n'), el.createDiv());
         } else {
-          el.appendChild(toDom(figureTree(piece.block, resolver(app, ctx.sourcePath)), md));
+          const figure = toDom(figureTree(piece.block, resolver(app, ctx.sourcePath)), md);
+          matchHeights(figure);
+          el.appendChild(figure);
         }
       }
     });

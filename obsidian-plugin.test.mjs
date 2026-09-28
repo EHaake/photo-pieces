@@ -12,7 +12,7 @@ import {
   sectionPieces,
 } from './obsidian-plugin/blocks.ts';
 import { parseCompareBody } from './obsidian-plugin/compare.ts';
-import { figureTree } from './obsidian-plugin/figure.ts';
+import { figureTree, paneRatios } from './obsidian-plugin/figure.ts';
 import { BLOCKS, remarkPiecesBlocks } from './remark-pieces-blocks.mjs';
 import { COMPARE, COMPARE_WORDING } from './src/lib/compare.ts';
 import { blocks, uncomment } from './src/lib/ground.ts';
@@ -484,6 +484,36 @@ describe('the figure (T1731)', () => {
       ],
     ],
     [
+      'a diptych matched by height (T1735c)',
+      '::diptych{left="./a.jpg" leftAlt="a" right="./b.jpg" rightAlt="b" match="height"}',
+      [
+        'photo-pieces-block',
+        'photo-pieces-pair',
+        'photo-pieces-w-column',
+        'photo-pieces-match-height',
+      ],
+    ],
+    [
+      'a wide triptych matched by height (T1735c)',
+      '::triptych{left="./a.jpg" leftAlt="a" center="./b.jpg" centerAlt="b" right="./c.jpg" rightAlt="c" match="height" width="wide"}',
+      [
+        'photo-pieces-block',
+        'photo-pieces-pair',
+        'photo-pieces-w-wide',
+        'photo-pieces-match-height',
+      ],
+    ],
+    [
+      'a diptych with a match other than height, unmatched (T1735c)',
+      '::diptych{left="./a.jpg" leftAlt="a" right="./b.jpg" rightAlt="b" match="width"}',
+      ['photo-pieces-block', 'photo-pieces-pair', 'photo-pieces-w-column'],
+    ],
+    [
+      'a single with match="height", unmatched: only a pair is (T1735c)',
+      '::single{src="./a.jpg" alt="a" match="height"}',
+      ['photo-pieces-block', 'photo-pieces-frame', 'photo-pieces-w-column'],
+    ],
+    [
       'a bleed-left wide',
       '::wide{src="./a.jpg" alt="a" bleed="left"}',
       [
@@ -539,6 +569,49 @@ describe('the figure (T1731)', () => {
     expect(root.classes).toEqual(classes);
     expect(root.attrs).toEqual({ 'data-block': parseBlocks(doc)[0].name });
   });
+
+  it.each([
+    [
+      '3:2, 2:3, 1:1',
+      [
+        [3, 2],
+        [2, 3],
+        [1, 1],
+      ],
+      [2.25, 1, 1.5],
+    ],
+    [
+      'a landscape and a portrait',
+      [
+        [1500, 1000],
+        [800, 1200],
+      ],
+      [2.25, 1],
+    ],
+    [
+      'two of one shape',
+      [
+        [400, 300],
+        [800, 600],
+      ],
+      [1, 1],
+    ],
+    [
+      'a square and a panorama',
+      [
+        [500, 500],
+        [3000, 1000],
+      ],
+      [1, 3],
+    ],
+  ])(
+    "paneRatios, %s: each image's aspect ratio, normalised so the smallest is 1 (T1735c)",
+    (_, sizes, grows) => {
+      const got = paneRatios(sizes.map(([width, height]) => ({ width, height })));
+      expect(got).toHaveLength(grows.length);
+      got.forEach((grow, i) => expect(grow).toBeCloseTo(grows[i], 10));
+    },
+  );
 
   it('a container single: its frame, then its caption as Markdown', () => {
     const root = figureOf(':::single{src="./a.jpg" alt="An alt"}\nA _caption_.\n:::');
@@ -750,6 +823,24 @@ describe('the stylesheet (T1731)', () => {
       selectors.includes('.photo-pieces-grid > .photo-pieces-frames'),
     );
     expect(grid.declarations).toContainEqual(['align-items', 'center !important']);
+  });
+
+  it('a pair matched by height gives each pane its flex-grow from --photo-pieces-ar, 1 by default, over the weight rule (T1735c)', () => {
+    // The site's .match-height items: flex: var(--ar, 1) 1 0. matchHeights
+    // (figure.ts) writes the property on each pane once its image loads.
+    const selector = '.photo-pieces-pair.photo-pieces-match-height > .photo-pieces-frames > *';
+    const index = rules.findIndex(({ selectors }) => selectors.includes(selector));
+    expect(index).toBeGreaterThan(-1);
+    expect(rules[index].declarations).toEqual([
+      ['--photo-pieces-ar', '1'],
+      ['flex', 'var(--photo-pieces-ar) 1 0 !important'],
+    ]);
+    // After the weight rule, at its specificity, so it wins over it.
+    const weight = rules.findIndex(({ selectors }) =>
+      selectors.includes('.photo-pieces-weight-left > .photo-pieces-frames > :first-child'),
+    );
+    expect(weight).toBeGreaterThan(-1);
+    expect(index).toBeGreaterThan(weight);
   });
 
   it('has no at-rule', () => {
