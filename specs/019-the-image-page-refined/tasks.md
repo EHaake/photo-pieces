@@ -1450,6 +1450,20 @@ T1729.
       against the site's equivalent (the pair's centring is unpinned)
       — sweep note.
 
+- [x] **T1735c** — Round (Phase 3b pause, third look, 2026-09-27):
+      "Triptychs still aren't rendering correctly. Can we fix that?" —
+      the equal-heights triptych at equal widths (the midline one is
+      the site's rule and stays). The known limitation superseded:
+      `figureTree` marks a `match="height"` pair
+      `photo-pieces-match-height`; the pane rule `flex:
+      var(--photo-pieces-ar) 1 0`, default 1, after the weight rule;
+      `matchHeights(figure)` (figure.ts, standard DOM) writes each
+      pane's ratio from the image's natural size once every pane has
+      loaded, normalised by `paneRatios` so the smallest is 1; both
+      renderers call it after `toDom`. Four root-class cases, a
+      `paneRatios` table, the rule pinned; the README row. A pair with
+      a missing or unloaded image stays at equal widths. 737 tests.
+
 - [ ] **T1735** — The plugin's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3b
       pause, in the person's words. The questions, in plain language:
@@ -1758,6 +1772,7 @@ tier if it is ever on (it is off). -->
 | Phase 3b re-review | implementation (`opus`, high) | ~8k | signed off; the docId guard closes the loop; it now rests on Reading view keeping one docId across an edit and rerender(true) (not in the typings) — the walkthrough's edit-then-Reading-view check carries that weight, and the fallback is to skip calls whose el sits inside a plugin render target; sweep: the signatures map unbounded, the `parsed` comment says whole note |
 | T1735a bleeds clipped (diagnosis + fix) | implementation (`opus`, high) | ~90k (two passes) | done; 727 tests (+1); the cause read from Obsidian's app.css in the installed asar (a future dispatch can read the real rules); the plan's 'layout not on the root' line deviated by one declaration on the root, as the !important strategy foresaw |
 | T1735b grid centred | implementation (`opus`, high) | ~30k | done; 728 tests (+1); mutation fails by name; the pair's centring unpinned — sweep note |
+| T1735c equal heights | implementation (`opus`, high) | ~53k | done; 737 tests (+9); both mutations fail by name; beyond a one-value round (a class, a rule, a DOM walk) — logged as the person's ask against Goal 10, not an envelope value |
 | T1719 constitution amendment (2026-09-26) | implementation (`opus`, high) | ~32k | done; three edits verbatim, prettier clean, 584 tests; barrier reads "3 compares in one shape" — T1723x27s before |
 
 | Amendment 2 planning (2026-09-26, evening) | implementation (`opus`, high, no override) | ~220k | drafted plan.md's Amendment 2 section and Phase 3b (T1730–T1735, T1730 per-task): one block table pinned equal to the transform's descriptors, a line scanner, one figure builder for both views, a Reading-view post-processor, an `!important` stylesheet with a test; no product question |

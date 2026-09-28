@@ -1101,3 +1101,6 @@ _Amended 2026-09-26 (plugin):_
   above and below.
 - **T1735b (Phase 3b pause, 2026-09-27).** The plugin's grid centres
   each row's frames on the midline, as the site's does.
+- **T1735c (Phase 3b pause, 2026-09-27).** In the plugin a diptych or
+  triptych matched by height ends at one height, each pane sized by its
+  photograph's shape once the images load, as on the site.

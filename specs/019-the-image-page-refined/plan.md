@@ -2371,7 +2371,7 @@ Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
   hosts and `cqb` in place of `vh` — size containment on Obsidian's
   scroll hosts, riskier than the inline-size already taken; named, not
   built.
-- **`match="height"` is drawn as equal widths**; stage notes are not
+- **`match="height"` was drawn as equal widths** until T1735c, which sizes each pane from its image's natural ratio once loaded (a pair with a missing or unloaded image stays at equal widths); stage notes are not
   shown (labels only, as today); a `side` or `slider` with the wrong
   count is drawn; text before a compare's first stage is skipped.
 - **Reading view draws nothing where `getSectionInfo` returns `null`**
