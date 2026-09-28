@@ -1933,7 +1933,7 @@ T1734's rewrite replaces.
   `bleed`, the pairs' `width` (`wide` → wide, `fullbleed` → full) and
   `diptych`'s `weight`, the beside blocks' `side` (`right`, else left —
   held's default, and what an aside or row missing it shows; the build
-  judges). `match="height"` is not drawn (it needs the frames' ratios);
+  judges). `match="height"` is drawn from the images' natural ratios once loaded (T1735c);
   flags (`{bleed}`) and the `{#id .class}` shorthand are ignored, as
   `parseAttrs` does today. A slot's `src` missing → the block stays raw,
   as today; `alt` defaults to `''`.
