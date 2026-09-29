@@ -1,0 +1,12 @@
+{
+  "vimMode": true,
+  "useMarkdownLinks": true,
+  "userIgnoreFilters": [
+    "photo-pieces/.astro/",
+    "photo-pieces/.git/",
+    "photo-pieces/dist/",
+    "photo-pieces/node_modules/",
+    "photo-pieces/obsidian-plugin/node_modules/"
+  ],
+  "promptDelete": false
+}

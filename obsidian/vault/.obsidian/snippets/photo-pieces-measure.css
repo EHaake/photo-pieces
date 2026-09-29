@@ -1,0 +1,11 @@
+/* The site's reading measure in Obsidian: the site sets its prose to
+   68ch (--prose-width in src/styles/global.css). Obsidian's "readable
+   line length" caps the note at --file-line-width (700px by default,
+   narrower than 68ch at this vault's 20px font). Measured in ch here,
+   so the line holds the same number of characters as on the site at
+   any font size. Raise or lower the number to taste. */
+body,
+body.theme-light,
+body.theme-dark {
+  --file-line-width: 68ch;
+}
