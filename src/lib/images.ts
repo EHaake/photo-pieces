@@ -24,10 +24,12 @@ import {
   imageUrlFor,
   isPrivateRaster,
   mergeOverrides,
+  nameCollisions,
   nearest,
   neighbours,
   passageFor,
   pieceFrames,
+  placeCoverProblem,
   placeNameProblem,
   placeOf,
   placeProblems,
@@ -139,10 +141,14 @@ export interface SitePlace {
 }
 
 export interface SiteImage {
-  /** `<piece-folder>/<basename>` or `gallery/<basename>`. */
+  /** `<journal-slug>/<basename>` for a journal entry's photograph, the
+   *  bare `<basename>` for one in the photographs folder (`imageIdOf`). */
   id: string;
-  /** `/photographs/<id>/`. */
+  /** `/photographs/<id>/` — `/photographs/<slug>/<basename>/` or
+   *  `/photographs/<basename>/`. */
   url: string;
+  /** The id's folder segment: the entry's slug, or `PHOTOGRAPHS_FOLDER`
+   *  (empty) in the photographs folder. */
   folder: string;
   basename: string;
   /** Astro's image metadata — pass to `<Image src>` or `getImage`. */
@@ -355,6 +361,25 @@ async function buildRegistry(): Promise<ImageRegistry> {
   const collisions = findIdCollisions(files.map((f) => f.key));
   if (collisions.length) {
     throw new Error(`[images] ${collisions.map(formatCollision).join('\n')}`);
+  }
+
+  // A photographs-folder name that is also a journal slug (spec 019):
+  // every entry, draft or not, and every journal folder holding images.
+  const journalSlugs = new Map<string, string>();
+  for (const slug of [
+    ...pieces.map((piece) => piece.id),
+    ...files.flatMap((file) => (file.pieceSlug === null ? [] : [file.pieceSlug])),
+  ]) {
+    journalSlugs.set(slug, `src/content/journal/${slug}/`);
+  }
+  const shared = nameCollisions(
+    files
+      .filter((file) => file.pieceSlug === null)
+      .map((file) => ({ name: file.basename, file: file.key.slice(1) })),
+    [...journalSlugs].map(([slug, where]) => ({ slug, where })),
+  );
+  if (shared.length) {
+    throw new Error(shared.join('\n'));
   }
 
   // Publication status by ownership. A piece folder without an
@@ -585,10 +610,14 @@ async function buildRegistry(): Promise<ImageRegistry> {
     }));
     const newest = outings.at(-1)!;
     const cover = entry.data.cover;
-    if (cover !== undefined && !group.frames.includes(cover)) {
-      coverProblems.push(
-        `[places] ${entry.filePath ?? `src/content/places/${entry.id}.md`}: cover "${cover}" is not one of this place's frames`,
-      );
+    const coverProblem = placeCoverProblem(
+      cover,
+      group.frames,
+      entry.filePath ?? `src/content/places/${entry.id}.md`,
+      known,
+    );
+    if (coverProblem) {
+      coverProblems.push(coverProblem);
       continue;
     }
     sitePlaces.push({
@@ -714,9 +743,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
           hasStory: (sidecar?.body ?? '').trim() !== '',
           record: pick(sidecar?.data, ['format', 'filters', 'support', 'processing']),
           print: pick(sidecar?.data, ['edition', 'sizes', 'paper']),
-          before: family.frame.has(file.id)
-            ? discovered[family.frame.get(file.id)!].default
-            : null,
+          before: family.frame.has(file.id) ? discovered[family.frame.get(file.id)!].default : null,
           stages: stagesById.get(file.id) ?? [],
           detail: family.detail.has(file.id)
             ? discovered[family.detail.get(file.id)!].default

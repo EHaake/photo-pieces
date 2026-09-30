@@ -1611,7 +1611,7 @@ T1735.
       The transform's comment URL moved here (T1739 still rewrites its
       id text); the nav label stays Pieces for T1742.
 
-- [ ] **T1739** — The id rule. `review: per-task`. Pattern:
+- [x] **T1739** — The id rule. `review: per-task`. Pattern:
       `parseImagePath`, `sidecarImageId`, `homeSlugOf`,
       `validateGalleries` and the place-cover loop as they are;
       image-meta.test.mjs's and galleries.test.mjs's case shapes. Plan:
@@ -1643,6 +1643,17 @@ T1735.
       `imageIdOf` or an explicit comparison); the mutation and the three one-time build edits as the
       plan lists them, each failing line pasted and each reverted. The
       orchestrator re-runs `sh scripts/verify.sh` before committing._
+      Done: orchestrator re-ran verify: 87 pages, 750 tests (+13),
+      BUILD/CHECK/TEST EXIT 0; the dist checks ok; editors-picks hrefs
+      bare (/photographs/dock-a/, /photographs/dock-b/ beside the
+      journal ids); galleries hold no gallery/; GALLERY_FOLDER in no
+      code (specs text only); the template grep → imageIdOf (image-
+      meta.mjs:53) and the related strip's startsWith (images.ts:760);
+      the truthiness grep none before and after. Mutation → 11 failures;
+      the three one-time edits failed with the plan's lines. Per-task
+      review: pass; notes carried to T1740 (referenceProblems' draft
+      line on a bare id, its split('/') copy of the slug rule) and the
+      sweep (the collision message's literal journal path).
 
 - [ ] **T1740** — A photograph's draft and date. Pattern: `imageMeta`'s
       commented fields; the registry's orphan loop; the reasons in
@@ -2198,6 +2209,8 @@ tier if it is ever on (it is off). -->
 | T1736 constitution, a third time (2026-09-29) | implementation (`opus`, high) | ~34k | done; the plan's text word for word, rewrapped so each grep phrase sits on one line; `draft: true` kept on one line as a single code span |
 | T1737 homes moved | implementation (`opus`, high) | ~93k | done; 737 tests, 87 pages; regex-escaped test paths (`tests\/pieces\/`) missed by plain greps — caught by the suite; page-head.test.mjs not in the plan's lists, handed to T1738 |
 | T1738 addresses moved | implementation (`opus`, high) | ~52k | done; 737 tests, 87 pages; regex-escaped `\/images\/` expectations again caught by the suite, not the grep |
+| T1739 id rule | implementation (`opus`, high) | ~128k | done; 750 tests (+13); oldIdHint narrowed to a bare remainder (sound per review) |
+| T1739 per-task review | implementation (`opus`, high) | ~59k | pass; notes: referenceProblems' draft branch prints null for a bare id and keeps a split('/') slug copy (→ T1740), collision message's literal path (sweep) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

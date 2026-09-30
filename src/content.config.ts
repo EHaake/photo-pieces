@@ -34,7 +34,7 @@ const journal = defineCollection({
 });
 
 // Galleries (spec 004): hand-curated, ordered lists of image ids
-// (`<piece-folder>/<basename>` or `gallery/<basename>`), one category
+// (`<journal-slug>/<basename>` or a bare `<basename>`), one category
 // each. Whether every id names a real, published image is the image
 // registry's check (src/lib/images.ts) — it reports file + line; this
 // schema covers shape only. `cover` defaults to the first image.

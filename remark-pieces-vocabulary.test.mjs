@@ -875,7 +875,7 @@ describe('cross-piece references (T602, spec 008)', () => {
   it('the shorthand borrows from the photographs folder', async () => {
     const { code } = await render('Text.\n\n![x](../../photographs/photo.jpg)\n');
     expect(code).toMatch(
-      /<p><a href="\/photographs\/gallery\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
+      /<p><a href="\/photographs\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
     );
   });
 

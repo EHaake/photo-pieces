@@ -14,10 +14,13 @@ import {
   formatCollision,
   groupByPlace,
   hasBlock,
+  homeSlugOf,
   humanizeBasename,
   imageIdFor,
+  imageIdOf,
   imageUrlFor,
   isPrivateRaster,
+  nameCollisions,
   nearest,
   neighbours,
   PAIR_WIDTH,
@@ -35,6 +38,7 @@ import {
   referencesImage,
   resolveStages,
   sectionsFor,
+  sidecarImageId,
   validateGalleries,
 } from './src/lib/image-meta.mjs';
 
@@ -52,8 +56,8 @@ describe('image ids (T302)', () => {
     expect(imageIdFor(fsPath)).toBe('where-the-fog-lets-go/land-b');
   });
 
-  it('the photographs folder maps to the `gallery/` folder segment', () => {
-    expect(imageIdFor('/src/content/photographs/harbour-01.jpg')).toBe('gallery/harbour-01');
+  it('the photographs folder gives a bare id, with no folder segment', () => {
+    expect(imageIdFor('/src/content/photographs/harbour-01.jpg')).toBe('harbour-01');
   });
 
   it("the transform's test fixture derives from its parent folder name", () => {
@@ -118,7 +122,7 @@ describe('registry classification (T302)', () => {
       root: 'photographs',
       pieceSlug: null,
       nested: false,
-      id: 'gallery/harbour-01',
+      id: 'harbour-01',
     });
   });
 
@@ -314,7 +318,7 @@ describe('private rasters (T401)', () => {
     });
     expect(classifyContentImage('/src/content/photographs/_x.webp')).toMatchObject({
       private: true,
-      folder: 'gallery',
+      folder: '',
       target: 'x',
       pieceSlug: null,
     });
@@ -623,8 +627,8 @@ describe('cross-piece references (T601, spec 008)', () => {
       ext: 'jpg',
     });
     expect(parseReference('../../photographs/dock-a.jpg')).toEqual({
-      kind: 'gallery',
-      folder: 'gallery',
+      kind: 'photographs',
+      folder: '',
       file: 'dock-a.jpg',
       basename: 'dock-a',
       ext: 'jpg',
@@ -671,7 +675,7 @@ describe('cross-piece references (T601, spec 008)', () => {
     expect(pieceFrames(body, 'a-piece', ['square', 'land-a', 'pano'])).toEqual([
       'a-piece/land-a',
       'where-the-fog-lets-go/land-b',
-      'gallery/dock-a',
+      'dock-a',
       'a-piece/pano',
       'a-piece/square',
     ]);
@@ -712,7 +716,7 @@ describe('cross-piece references (T601, spec 008)', () => {
       '![Again](../../photographs/dock-a.jpg)',
       '![Wrong](./detail/land-d.jpg)',
     ].join('\n\n');
-    expect(crossReferences(body)).toEqual(['gallery/dock-a', 'beta/port-b']);
+    expect(crossReferences(body)).toEqual(['dock-a', 'beta/port-b']);
     expect(crossReferences('Just words.')).toEqual([]);
   });
 
@@ -731,7 +735,7 @@ describe('cross-piece references (T601, spec 008)', () => {
 
   const known = new Map([
     ['where-the-fog-lets-go/land-b', 'published'],
-    ['gallery/dock-a', 'published'],
+    ['dock-a', 'published'],
     ['a-draft/land-a', 'draft'],
     ['no-piece/land-a', 'unowned'],
   ]);
@@ -756,7 +760,7 @@ describe('cross-piece references (T601, spec 008)', () => {
 
   it('a published image, in a piece folder or the photographs folder, is no problem', () => {
     expect(
-      referenceProblems('the-sampler', ['where-the-fog-lets-go/land-b', 'gallery/dock-a'], known),
+      referenceProblems('the-sampler', ['where-the-fog-lets-go/land-b', 'dock-a'], known),
     ).toEqual([]);
     expect(referenceProblems('the-sampler', [], known)).toEqual([]);
   });
@@ -874,13 +878,13 @@ describe('places (T701, spec 009)', () => {
   it('a borrowed frame is never counted under the borrower', () => {
     const grouped = groupByPlace(
       new Map([
-        ['alpha', ['alpha/land-a', 'beta/port-b', 'gallery/dock-a']],
+        ['alpha', ['alpha/land-a', 'beta/port-b', 'dock-a']],
         ['beta', ['beta/port-b']],
       ]),
       new Map([
         ['alpha/land-a', 'jetty'],
         ['beta/port-b', 'jetty'],
-        ['gallery/dock-a', 'jetty'],
+        ['dock-a', 'jetty'],
       ]),
       ['alpha', 'beta'],
     );
@@ -1030,7 +1034,9 @@ describe('the private-file family (T1701, spec 019)', () => {
     );
     expect(out.problems).toEqual([]);
     expect(out.frame).toEqual(new Map([['x/land-b', '/src/content/journal/x/_land-b.jpg']]));
-    expect(out.detail).toEqual(new Map([['x/land-b', '/src/content/journal/x/_land-b.detail.png']]));
+    expect(out.detail).toEqual(
+      new Map([['x/land-b', '/src/content/journal/x/_land-b.detail.png']]),
+    );
     expect(out.stages).toEqual(
       new Map([
         [
@@ -1188,5 +1194,102 @@ describe('the private-file family (T1701, spec 019)', () => {
     expect(compareSizes('column')).toBe('(min-width: 720px) 680px, 94vw');
     expect(compareSizes('wide')).toBe('(min-width: 1240px) 1160px, 96vw');
     expect(compareSizes('stage')).toBe('100vw');
+  });
+});
+
+// Spec 019's lexicon: a photograph in the photographs folder has a bare
+// id — no folder segment — built by `imageIdOf` alone.
+describe('the id rule (T1739, spec 019)', () => {
+  it('imageIdOf gives a bare id for the photographs folder and <folder>/<basename> otherwise', () => {
+    expect(imageIdOf('', 'bank')).toBe('bank');
+    expect(imageIdOf('fog', 'land-b')).toBe('fog/land-b');
+  });
+
+  it('parseImagePath gives a photographs-folder file a bare id and an empty folder; a journal path is unchanged', () => {
+    expect(parseImagePath('/src/content/photographs/bank.jpg')).toEqual({
+      id: 'bank',
+      folder: '',
+      basename: 'bank',
+      ext: 'jpg',
+      file: 'bank.jpg',
+    });
+    expect(parseImagePath('/src/content/journal/fog/land-b.jpg')).toEqual({
+      id: 'fog/land-b',
+      folder: 'fog',
+      basename: 'land-b',
+      ext: 'jpg',
+      file: 'land-b.jpg',
+    });
+  });
+
+  it('homeSlugOf reads the slash: null for a bare id, the entry slug otherwise', () => {
+    expect(homeSlugOf('bank')).toBe(null);
+    expect(homeSlugOf('fog/land-b')).toBe('fog');
+  });
+
+  it("sidecarImageId gives a photographs-folder sidecar's photograph its bare id", () => {
+    expect(sidecarImageId('photographs/_dock-b')).toBe('dock-b');
+  });
+
+  it('a borrowed photographs-folder src parses, borrows and frames under its bare id', () => {
+    expect(parseReference('../../photographs/x.jpg')).toEqual({
+      kind: 'photographs',
+      folder: '',
+      file: 'x.jpg',
+      basename: 'x',
+      ext: 'jpg',
+    });
+    const body = ['![Own](./land-a.jpg)', '![Borrowed](../../photographs/x.jpg)'].join('\n\n');
+    expect(crossReferences(body)).toEqual(['x']);
+    expect(pieceFrames(body, 'a-piece', ['land-a', 'pano'])).toEqual([
+      'a-piece/land-a',
+      'x',
+      'a-piece/pano',
+    ]);
+  });
+
+  it("attachPrivates keys a photographs-folder photograph's family by its bare id", () => {
+    const priv = (file) => ({
+      key: `/src/content/photographs/${file}`,
+      folder: '',
+      basename: file.slice(0, file.lastIndexOf('.')),
+      file,
+    });
+    const out = attachPrivates(
+      [priv('_bank.jpg'), priv('_bank.tones.jpg'), priv('_bank.detail.jpg')],
+      new Map([['', new Set(['bank'])]]),
+    );
+    expect(out.problems).toEqual([]);
+    expect(out.frame).toEqual(new Map([['bank', '/src/content/photographs/_bank.jpg']]));
+    expect(out.detail).toEqual(new Map([['bank', '/src/content/photographs/_bank.detail.jpg']]));
+    expect(out.stages).toEqual(
+      new Map([
+        ['bank', [{ file: '_bank.tones.jpg', key: '/src/content/photographs/_bank.tones.jpg' }]],
+      ]),
+    );
+  });
+
+  it('a journal entry named for the photographs folder is refused', () => {
+    expect(() => classifyContentImage('/src/content/journal/photographs/x.jpg')).toThrow(
+      '"/src/content/journal/photographs/x.jpg" is in a journal entry named "photographs" — that name is the photographs folder\'s; rename the entry\'s folder',
+    );
+  });
+
+  it('nameCollisions: a photograph named for a journal entry fails naming both, compared lowercased', () => {
+    const entry = [{ slug: 'bank', where: 'src/content/journal/bank/' }];
+    expect(
+      nameCollisions([{ name: 'bank', file: 'src/content/photographs/bank.jpg' }], entry),
+    ).toEqual([
+      '[images] "bank" is both a photograph (src/content/photographs/bank.jpg) and a journal entry (src/content/journal/bank/) — /photographs/bank/ would read as the page above /photographs/bank/<name>/; rename one',
+    ]);
+    expect(
+      nameCollisions([{ name: 'Bank', file: 'src/content/photographs/Bank.jpg' }], entry),
+    ).toHaveLength(1);
+    expect(
+      nameCollisions(
+        [{ name: 'bank', file: 'src/content/photographs/bank.jpg' }],
+        [{ slug: 'banks', where: 'src/content/journal/banks/' }],
+      ),
+    ).toEqual([]);
   });
 });

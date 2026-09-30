@@ -3,24 +3,30 @@
 // anything touching `astro:content` or `import.meta.glob`). The thin
 // Astro-coupled registry (`images.ts`) wraps these.
 //
-// The one identity rule, shared by the registry and the transform:
+// The one identity rule, shared by the registry and the transform
+// (`imageIdOf`, the only place it is written):
 //
-//   id = <folder>/<basename>
+//   id = <folder>/<basename>   a journal entry's photograph
+//   id = <basename>            a photograph in the flat `photographs/` folder
 //
-// where folder is the image's immediate parent folder — a piece's
-// folder name, or `gallery` for the flat `photographs/` folder — and
-// basename is the file name without its extension. Folder names must
-// already be slugs so ids match Astro's piece ids without re-running
+// where folder is the image's immediate parent folder — a journal
+// entry's folder name — and basename is the file name without its
+// extension. The photographs folder's segment is empty
+// (`PHOTOGRAPHS_FOLDER`), so its ids carry none. Folder names must
+// already be slugs so ids match Astro's entry ids without re-running
 // its slugger; that is validated here, loudly, with a rename hint.
 
 import { EMPTY_GEAR } from './gear.mjs';
 
 export const IMAGE_EXTENSIONS = Object.freeze(['jpg', 'jpeg', 'png', 'webp', 'avif', 'tiff']);
 
-/** The flat folder for photographs that belong to no journal entry, and
- *  the folder segment their ids use (`gallery/<basename>`). */
+/** The flat folder for photographs that belong to no journal entry. */
 export const PHOTOGRAPHS_ROOT = 'photographs';
-export const GALLERY_FOLDER = 'gallery';
+/** The photographs folder's id segment: none, so its ids are bare
+ *  (`<basename>`). Empty rather than a word because it can't be a slug
+ *  and it is what the id literally has — so test it by comparison, never
+ *  by truthiness. */
+export const PHOTOGRAPHS_FOLDER = '';
 /** The journal's folder: one folder per entry, `journal/<slug>/`. */
 export const JOURNAL_ROOT = 'journal';
 
@@ -40,6 +46,12 @@ const BASENAME = /^[A-Za-z0-9._-]+$/;
  * the registry attaches each to its photograph (`attachPrivates`).
  */
 const PRIVATE = /^_/;
+
+/** An image's id from its folder segment and basename — the one copy of
+ *  the identity rule at the top of this file. */
+export function imageIdOf(folder, basename) {
+  return folder === PHOTOGRAPHS_FOLDER ? basename : `${folder}/${basename}`;
+}
 
 /** The stage word that names the loupe's detail export, not a stage. */
 export const DETAIL_WORD = 'detail';
@@ -115,7 +127,7 @@ export function attachPrivates(privates, basenamesByFolder) {
   for (const { key, folder, basename, file } of privates) {
     const where = String(key).replace(/^\//, '');
     const { role, target } = privateRole(basename, basenamesByFolder.get(folder));
-    const id = `${folder}/${target}`;
+    const id = imageIdOf(folder, target);
     if (role === 'orphan') {
       problems.push(
         `${where} has no photograph: a "_" file belongs to the photograph it names, so "${target}.<ext>" should sit beside it (its camera's frame is _${target}.<ext>, a stage _${target}.<word>.<ext>, the loupe's export _${target}.${DETAIL_WORD}.<ext>)`,
@@ -225,13 +237,14 @@ export function parseImagePath(filePath) {
   if (isPrivateRaster(basename)) {
     throw new ImageIdError(privateMessage(file, basename));
   }
-  const folder = parent === PHOTOGRAPHS_ROOT ? GALLERY_FOLDER : parent;
-  if (!SLUG.test(folder)) {
+  const folder = parent === PHOTOGRAPHS_ROOT ? PHOTOGRAPHS_FOLDER : parent;
+  // The photographs folder's empty segment is no slug, and needs none.
+  if (folder !== PHOTOGRAPHS_FOLDER && !SLUG.test(folder)) {
     throw new ImageIdError(
       `image folder "${parent}" is not a slug — rename it to lowercase letters, digits, and hyphens (e.g. "${slugHint(parent)}") so image ids line up with piece ids`,
     );
   }
-  return { id: `${folder}/${basename}`, folder, basename, ext, file };
+  return { id: imageIdOf(folder, basename), folder, basename, ext, file };
 }
 
 /** The image id for a file path — see parseImagePath for accepted forms. */
@@ -250,13 +263,14 @@ export function imageUrlFor(id) {
  * The shape of an image `src` written in a piece body (spec 008) — the
  * single definition the transform, the scanner, and the registry share:
  *
- *   local   — `./<file>` or `<file>`         (the piece's own folder)
- *   piece   — `../<slug>/<file>`             (another piece's folder)
- *   gallery — `../../photographs/<file>`     (the photographs folder)
+ *   local       — `./<file>` or `<file>`         (the piece's own folder)
+ *   piece       — `../<slug>/<file>`             (another piece's folder)
+ *   photographs — `../../photographs/<file>`     (the photographs folder)
  *
  * Returns `{ kind, folder, file, basename, ext }`, where `folder` is the
- * folder segment of the image's id: the other piece's slug, `gallery`
- * for the photographs folder, and null for a local src — whose folder only the
+ * folder segment of the image's id: the other piece's slug,
+ * `PHOTOGRAPHS_FOLDER` (empty) for the photographs folder, and null for
+ * a local src — whose folder only the
  * caller knows. Any other path — a sub-folder, a deeper `../`, the
  * wrong depth to the photographs folder, a bare `..` — comes back as `invalid`
  * with the `message` the transform fails the build with.
@@ -292,8 +306,13 @@ export function parseReference(src) {
     ) {
       return referenceParts('piece', parts[1], file);
     }
-    if (parts.length === 4 && parts[0] === '..' && parts[1] === '..' && parts[2] === PHOTOGRAPHS_ROOT) {
-      return referenceParts('gallery', GALLERY_FOLDER, file);
+    if (
+      parts.length === 4 &&
+      parts[0] === '..' &&
+      parts[1] === '..' &&
+      parts[2] === PHOTOGRAPHS_ROOT
+    ) {
+      return referenceParts('photographs', PHOTOGRAPHS_FOLDER, file);
     }
   }
   return {
@@ -347,6 +366,13 @@ export function classifyContentImage(globKey) {
       `"${key}" sits directly in ${CONTENT_ROOT}${JOURNAL_ROOT}/ — a journal entry lives in its own folder (${JOURNAL_ROOT}/<slug>/index.md) so its images can have pages`,
     );
   }
+  if (root === JOURNAL_ROOT && rest[0] === PHOTOGRAPHS_ROOT) {
+    // The photographs rule reads the parent folder alone, so an entry
+    // folder of that name would mint bare ids for its images.
+    throw new ImageIdError(
+      `"${key}" is in a journal entry named "${PHOTOGRAPHS_ROOT}" — that name is the photographs folder's; rename the entry's folder`,
+    );
+  }
   const pieceSlug = root === JOURNAL_ROOT ? (rest[0] ?? null) : null;
   if (rest.length > expectedDepth) {
     return { path: key, root, pieceSlug, nested: true };
@@ -364,7 +390,7 @@ export function classifyContentImage(globKey) {
       pieceSlug,
       nested: false,
       private: true,
-      folder: root === JOURNAL_ROOT ? pieceSlug : GALLERY_FOLDER,
+      folder: root === JOURNAL_ROOT ? pieceSlug : PHOTOGRAPHS_FOLDER,
       basename,
       target: privateTargetOf(basename),
       ext,
@@ -436,7 +462,7 @@ export function referencesImage(text, basename) {
  * The frames a piece places, as image ids in the piece's own order
  * (spec 008): the order the body first references them — its own images
  * as `<folder>/<basename>`, a borrowed one as `<slug>/<basename>` or
- * `gallery/<basename>` — then the folder's unreferenced files by
+ * the bare `<basename>` — then the folder's unreferenced files by
  * name. `folder` is the piece's own folder segment and
  * `basenames` the images that live in it.
  *
@@ -459,9 +485,9 @@ export function pieceFrames(body, folder, basenames) {
   }
   const referenced = [...firstAt.keys()].sort((a, b) => firstAt.get(a) - firstAt.get(b));
   const unreferenced = [...basenames]
-    .filter((b) => !firstAt.has(`${folder}/${b}`))
+    .filter((b) => !firstAt.has(imageIdOf(folder, b)))
     .sort()
-    .map((b) => `${folder}/${b}`);
+    .map((b) => imageIdOf(folder, b));
   return [...referenced, ...unreferenced];
 }
 
@@ -474,11 +500,11 @@ export function pieceFrames(body, folder, basenames) {
 function frameIdFor(shape, folder, own) {
   if (shape.kind === 'local') {
     return IMAGE_EXTENSIONS.includes(shape.ext) && own.has(shape.basename)
-      ? `${folder}/${shape.basename}`
+      ? imageIdOf(folder, shape.basename)
       : null;
   }
-  if (shape.kind === 'piece' || shape.kind === 'gallery') {
-    return IMAGE_EXTENSIONS.includes(shape.ext) ? `${shape.folder}/${shape.basename}` : null;
+  if (shape.kind === 'piece' || shape.kind === 'photographs') {
+    return IMAGE_EXTENSIONS.includes(shape.ext) ? imageIdOf(shape.folder, shape.basename) : null;
   }
   return null;
 }
@@ -496,9 +522,9 @@ export function crossReferences(body) {
   const seen = new Set();
   for (const ref of imageReferences(body)) {
     const { kind, folder, basename, ext } = ref.shape;
-    if (kind !== 'piece' && kind !== 'gallery') continue;
+    if (kind !== 'piece' && kind !== 'photographs') continue;
     if (!IMAGE_EXTENSIONS.includes(ext)) continue;
-    const id = `${folder}/${basename}`;
+    const id = imageIdOf(folder, basename);
     if (seen.has(id)) continue;
     seen.add(id);
     ids.push(id);
@@ -908,7 +934,7 @@ function formatCamera(make, model) {
 /**
  * A sidecar collection entry id (the path verbatim, extension dropped)
  * → the image id it describes: `journal/<slug>/_land-b` → `<slug>/land-b`,
- * `photographs/_dock-b` → `gallery/dock-b`.
+ * `photographs/_dock-b` → `dock-b`.
  */
 export function sidecarImageId(entryId) {
   const m = String(entryId).match(/^(?:journal\/([^/]+)|photographs)\/_([^/]+)$/);
@@ -917,7 +943,7 @@ export function sidecarImageId(entryId) {
       `sidecar "${entryId}" is not an _<basename>.md beside an image in ${JOURNAL_ROOT}/<slug>/ or ${PHOTOGRAPHS_ROOT}/`,
     );
   }
-  return `${m[1] ?? GALLERY_FOLDER}/${m[2]}`;
+  return imageIdOf(m[1] ?? PHOTOGRAPHS_FOLDER, m[2]);
 }
 
 /**
@@ -937,6 +963,9 @@ export function validateGalleries(galleries, known) {
       const occurrence = seen.get(imageId) ?? 0;
       seen.set(imageId, occurrence + 1);
       const status = known.get(imageId);
+      // An old `gallery/<name>` id gets its own line (spec 019), before
+      // the did-you-mean, which would find the bare id but not say why.
+      const bare = status === undefined ? oldIdHint(imageId, known) : null;
       let reason;
       if (occurrence > 0) reason = `"${imageId}" is listed more than once`;
       else if (isPrivateRaster(imageId.split('/').at(-1)))
@@ -945,6 +974,7 @@ export function validateGalleries(galleries, known) {
           imageId.split('/').at(-1),
           `list "${privateTargetImageId(imageId)}" instead`,
         );
+      else if (bare !== null) reason = oldIdMessage(imageId, bare);
       else if (status === undefined)
         reason = `"${imageId}" is not an image on the site${nearestHint(imageId, known)}`;
       else if (status === 'draft')
@@ -1006,10 +1036,74 @@ export function referenceProblems(borrower, ids, known) {
 }
 
 /** An id's home piece slug — its folder by the id rule at the top of this
- *  file — or null for `gallery/...`, which belongs to no piece. */
+ *  file, the text before the first `/` — or null for a bare id, which
+ *  belongs to no piece. */
 export function homeSlugOf(id) {
-  const folder = String(id).split('/')[0];
-  return folder === GALLERY_FOLDER ? null : folder;
+  const text = String(id);
+  const slash = text.indexOf('/');
+  return slash < 0 ? null : text.slice(0, slash);
+}
+
+// The id a photographs-folder photograph had before spec 019's lexicon.
+const OLD_PHOTOGRAPHS_SEGMENT = 'gallery/';
+
+/**
+ * The bare id an old `gallery/<name>` id became (spec 019), or null:
+ * when `id` begins `gallery/`, is not itself a known id (a journal entry
+ * may be named `gallery`), and the rest is a known photographs-folder
+ * id. `known` is the registry's map (or set) of every discovered id.
+ */
+export function oldIdHint(id, known) {
+  const text = String(id);
+  if (!text.startsWith(OLD_PHOTOGRAPHS_SEGMENT) || known.has(text)) return null;
+  const rest = text.slice(OLD_PHOTOGRAPHS_SEGMENT.length);
+  return homeSlugOf(rest) === null && known.has(rest) ? rest : null;
+}
+
+function oldIdMessage(id, bare) {
+  return `"${id}" is an old id — the photograph in src/content/${PHOTOGRAPHS_ROOT}/ is "${bare}" now`;
+}
+
+/**
+ * A place's declared cover checked against its frames (spec 009): null
+ * when there is no cover or it is one of `frames`, else the message —
+ * with the old-id line when `oldIdHint` answers. `file` is the place
+ * file's path, `known` the registry's map of every discovered id.
+ */
+export function placeCoverProblem(cover, frames, file, known) {
+  if (cover === undefined || cover === null || frames.includes(cover)) return null;
+  const bare = oldIdHint(cover, known);
+  if (bare !== null) {
+    return `[places] ${file}: cover ${oldIdMessage(cover, bare)} (a place's cover must be one of its frames)`;
+  }
+  return `[places] ${file}: cover "${cover}" is not one of this place's frames`;
+}
+
+/**
+ * A photographs-folder name that is also a journal slug (spec 019):
+ * `/photographs/bank/` would read as the page above
+ * `/photographs/bank/<name>/`. `names` is `{ name, file }[]` — the
+ * photographs folder's public basenames — and `slugs` `{ slug, where }[]`
+ * — every journal entry's id and every journal folder holding images.
+ * Compared lowercased, since two addresses differing only in case read
+ * as one. One message per pair naming both, in the order of `names`.
+ */
+export function nameCollisions(names, slugs) {
+  const bySlug = new Map();
+  for (const entry of slugs) {
+    const key = String(entry.slug).toLowerCase();
+    if (!bySlug.has(key)) bySlug.set(key, []);
+    bySlug.get(key).push(entry);
+  }
+  const problems = [];
+  for (const { name, file } of names) {
+    for (const { slug, where } of bySlug.get(String(name).toLowerCase()) ?? []) {
+      problems.push(
+        `[images] "${name}" is both a photograph (${file}) and a journal entry (${where}) — ${imageUrlFor(name)} would read as the page above ${imageUrlFor(`${slug}/<name>`)}; rename one`,
+      );
+    }
+  }
+  return problems;
 }
 
 /**

@@ -73,7 +73,7 @@ import {
 // image node's hProperties into that pipeline as per-image getImage()
 // options.
 //
-// Spec 004: every image links to its page (`/photographs/<folder>/<basename>/`,
+// Spec 004: every image links to its page (`/photographs/<id>/`,
 // derived by the same rule the image registry uses, from
 // src/lib/image-meta.mjs). The mdast `link` wrapping an image carries
 // class `image-link` and the frame's `--ar` — the anchor is the layout
@@ -852,8 +852,8 @@ function checkReferenceShape(file, src, fail) {
   // lookups read local references only, so the frame would lose the alt
   // the piece wrote (its page's title falling back to the humanized
   // filename, absent a sidecar) and its passage.
-  // (A piece kind only: a gallery reference's folder is the id's
-  // `gallery` sentinel, not a path segment.)
+  // (A piece kind only: a photographs reference's folder is the id's
+  // empty segment, not a path segment.)
   if (
     shape.kind === 'piece' &&
     typeof file.path === 'string' &&
