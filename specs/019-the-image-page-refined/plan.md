@@ -2489,19 +2489,24 @@ before, and each bullet says where the simpler shape was taken.
     >
     > A **gallery** is a curated, ordered set of photographs, kept and
     > deliberately secondary. "Piece" is the structural word: it is
-    > never an address or a label on the site. The site also carries a
+    > never an address or a label on the site. Code names keep it as
+    > that structural term — `remark-pieces-blocks`, `PieceList`, the
+    > `piece-*` classes, the plugin's id — and are not site words. The
+    > site also carries a
     > simple About page and a Contact page. It's meant to be authored
     > continuously for years, with Obsidian as the writing tool and no
     > CMS or backend service for v1.
 
     (The `>` marks quotation here only; the constitution carries the
     text unquoted, the list as a list.)
-  - **The Content model clause**, five replacements:
+  - **The Content model clause**, six replacements:
     - "a single `pieces` content collection is the primary data
       source." → "the `journal` content collection
       (`src/content/journal/<slug>/index.md`) and the photographs
       folder (`src/content/photographs/`) are the primary data
       sources."
+    - the next sentence's "Beside it sits the **image registry**" →
+      "Beside them sits the **image registry**".
     - "over every accepted raster in a published piece's folder and in
       `src/content/gallery-images/`, giving each image a stable id
       (`<folder>/<basename>`), a page at `/images/<id>/`," → "over
@@ -2653,7 +2658,9 @@ before, and each bullet says where the simpler shape was taken.
 
   `GALLERY_FOLDER` is deleted; every id is built by `imageIdOf` —
   `parseImagePath` (`folder = parent === PHOTOGRAPHS_ROOT ?
-  PHOTOGRAPHS_FOLDER : parent`), `attachPrivates`, `frameIdFor`,
+  PHOTOGRAPHS_FOLDER : parent`, and its `SLUG.test(folder)` check runs
+  only on the other branch — the empty segment is no slug and would
+  fail it), `attachPrivates`, `frameIdFor`,
   `crossReferences`, `pieceFrames` — so no copy of the rule remains.
   `homeSlugOf(id)` reads the slash: the text before the first `/`, or
   null when there is none. `sidecarImageId` returns `imageIdOf(m[1] ??
@@ -2662,8 +2669,12 @@ before, and each bullet says where the simpler shape was taken.
   callers in the transform (`checkReferenceShape`'s comment) and
   `frameIdFor`/`crossReferences`. The empty string is chosen over a
   sentinel word because it cannot be a slug (`SLUG` needs one
-  character) and it is what the id literally has; no code tests a
-  folder's truthiness except through `imageIdOf` (T1739's grep).
+  character) and it is what the id literally has. Its one hazard is a
+  truthiness test on a folder, which would read the photographs
+  folder as "no folder"; T1739's grep for one (`if (folder)`, `!folder`,
+  `folder ||`, `folder ??`, with any `file.`/`info.`/`shape.` prefix)
+  finds none after the task, each hit before it listed and rewritten
+  through `imageIdOf` or an explicit comparison.
 
   The photographs rule stays parent-only, as the gallery root's was: a
   file whose parent folder is `photographs` has a bare id. So the test
@@ -2861,14 +2872,18 @@ before, and each bullet says where the simpler shape was taken.
   else written. It reuses the gallery flow as the related strip does,
   at a fixed small short side: the `.gallery-flow` rows pack by ratio
   and stretch within the cap, so a fixed `--gallery-short` gives a
-  dense, even grid of mixed ratios with no new CSS. In
+  dense, even grid of mixed ratios with no new CSS. The short side
+  clamps between the two knobs on the viewport's width, as
+  `relatedFlowStyle` does (72px at a phone's width, 88px from about
+  800px up), so both constants are real; `galleryCell`'s `sizes`
+  reads the same two. In
   `gallery-layout.ts`, beside the related strip's knobs (the one module
   that holds the walls' knobs):
 
   ```ts
-  export const INDEX_SHORT_PX = 88;        // tunable: the frame size (short side, CSS px)
-  export const INDEX_NARROW_SHORT_PX = 72; // tunable: the same below the 720px collapse
-  export const indexFlowStyle = `--gallery-short: ${INDEX_SHORT_PX}px; --gallery-stretch: ${GALLERY_STRETCH}; --gallery-width: ${GALLERY_WIDTH}; --gallery-gap: calc(var(--baseline) / 3)`;
+  export const INDEX_SHORT_PX = 88;        // tunable: the frame size — the short side's ceiling, CSS px
+  export const INDEX_NARROW_SHORT_PX = 72; // tunable: its floor, reached on a narrow screen
+  export const indexFlowStyle = `--gallery-short: clamp(${INDEX_NARROW_SHORT_PX}px, 11vw, ${INDEX_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}; --gallery-width: ${GALLERY_WIDTH}; --gallery-gap: calc(var(--baseline) / 3)`;
   export function byIndexOrder(a: { id: string; title: string }, b: { id: string; title: string }): number; // tunable: the order
   ```
 
@@ -2885,6 +2900,25 @@ before, and each bullet says where the simpler shape was taken.
   edit. The heading: `h1` "Photographs", title "Photographs".
   `setKeyFromPath('/photographs/')` is null, so a frame opened from the
   index shows its page's default set.
+
+  The index sits at exactly the prefix the layout's script reads as "a
+  photograph's page" (`IMAGES_PATH`, `/photographs/` from T1738), so
+  without a change it would be one: leaving it would run the image
+  page's `out` cross-fade, a traverse from it to a photograph a `step`,
+  and the footer link would pass the set-key click handler. One pure
+  predicate in `src/lib/image-set.ts` (where the script's other path
+  rule, `setKeyFromPath`, already lives and is tested):
+
+  ```ts
+  /** A photograph's page (`/photographs/<id>/`, base allowed) — not the index at `/photographs/` itself. */
+  export function isPhotographPath(pathname: string, base: string): boolean
+  ```
+
+  `BaseLayout`'s `isImagePage` and its click handler's
+  `startsWith(IMAGES_PATH)` both call it; `IMAGES_PATH` goes.
+  image-set.test.mjs pins it: `/photographs/` → false,
+  `/photographs/dock-a/` and `/photographs/fog/land-b/` → true,
+  `/journal/fog/` → false, and the same with a `/sub/` base.
 
   The footer link: `src/consts.ts` gains `FOOTER_LINKS` — `[{ href:
   '/contact/', label: 'Contact' }, { href: '/photographs/', label:
@@ -2931,10 +2965,13 @@ before, and each bullet says where the simpler shape was taken.
   `src/content`; `<dist>/pagefind/` excluded. Five scans:
   1. **Old addresses.** No `<dist>/pieces/`, `<dist>/images/` or
      `<dist>/og/pieces/`; in every `.html` and `.xml` file, no
-     attribute value and no element text that is a URL — root-relative
-     or absolute — whose path begins `/pieces/` or `/images/`
-     (`(?:="|>)(?:https?://[^/"<]+)?/(?:pieces|images)/`; the site's
-     base is `/`, as `url.ts` states).
+     attribute value and no element text that is a URL — root-relative,
+     or absolute on the site's own origin (`site` in `astro.config.mjs`,
+     `https://erikhaakephoto.com`, read by the script from that file's
+     `site:` line) — whose path begins `/pieces/` or `/images/`
+     (`(?:="|>)(?:<origin>)?/(?:pieces|images)/`; the site's base is
+     `/`, as `url.ts` states). An authored link to another host's
+     `/images/…` is not the site's address and passes.
   2. **The words.** Per `.html` page: the `<title>` text and the
      `<body>` markup; `<script>`, `<style>`, `<template>`, `<svg>` and
      comments removed; then the **authored regions** removed by a
@@ -2942,16 +2979,28 @@ before, and each bullet says where the simpler shape was taken.
      `figcaption` and `blockquote` elements, and any element whose
      class list holds `prose` (a journal entry's body, a place's
      writing, a photograph's story), `image-caption` or
-     `compare-note`; then every tag stripped, so attribute values,
-     class names, ids and URLs are never read; entities decoded;
-     whitespace collapsed; then every **authored string** removed —
-     harvested from `<content>/{journal,photographs,galleries,places}/**/*.md`:
-     each frontmatter value (`key: value` or `- key: value`, quotes
-     stripped) and each body alt text (`![…]`, any `…alt="…"` /
-     `…Alt="…"`) that contains the word. Only strings that contain it
-     are kept, since only those could excuse a hit. What remains must
-     not match `/\bpieces?\b/i`; each hit fails with the page and
-     thirty characters either side. "Masterpiece" does not match.
+     `compare-note`; then the values of three attributes a reader
+     meets — `aria-label`, `title` and `placeholder` — collected from
+     what remains, and every tag stripped, so every other attribute
+     value, class name, id and URL is never read; entities decoded;
+     whitespace collapsed; then every **authored string** removed from
+     both the text and the collected attribute values — harvested from
+     `<content>/{journal,photographs,galleries,places}/**/*.md`: each
+     frontmatter scalar that contains the word — a `key: value` or `-
+     key: value` line's value, quotes stripped, and a block or
+     continued scalar (`key: >`, `>-`, `|`, `|-`, or a plain value
+     continued on deeper-indented lines) read as its lines joined by
+     single spaces — and each body alt text (`![…]`, any `…alt="…"` /
+     `…Alt="…"`) that contains it; harvested strings and page text are
+     compared after the same whitespace collapse. Only strings that
+     contain the word are kept, since only those could excuse a hit.
+     What remains must not match `/\bpieces?\b/i`; each hit fails with
+     the page and thirty characters either side. "Masterpiece" does
+     not match. (Five fixture descriptions today are `>-` block
+     scalars holding the word — editors-picks, fog-frames, the
+     headlands, first light at the jetty, the vocabulary sampler — and
+     print in `p.lead` and list rows, outside every region; the block
+     reading is what excuses them.)
   3. **Drafts.** For each `<content>/photographs/_<name>.md` whose
      frontmatter holds `draft: true` (`PHOTOGRAPH_FIELDS.draft`,
      imported as check-private-files imports `COMPARE_CLASSES`): no
@@ -2973,8 +3022,9 @@ before, and each bullet says where the simpler shape was taken.
      inside the index's `.photographs-index` list name exactly that set
      of ids, each once — so every published photograph of both folders
      is on it, and nothing without a page (no draft) is. On every page,
-     the `<footer>` holds exactly one link to `/photographs/` and the
-     header's `<nav>` none. The order is not read here (the titles are
+     the `footer.site-footer` (the layout's; a `<footer>` inside
+     authored content is not it) holds exactly one link to
+     `/photographs/` and the header's `<nav>` none. The order is not read here (the titles are
      in `alt` attributes); `byIndexOrder`'s cases and T1747's read pin
      it.
 
@@ -3008,7 +3058,7 @@ The envelope's lexicon bullet. One place each:
 | Envelope item                  | One place (opening value)                                                                  | Pinned by                                                                |
 | ------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
 | the nav's three words          | `NAV_ITEMS`' labels, `src/consts.ts` (Journal, Places, Galleries)                          | lexicon.test.mjs's consts case; the barrier's words scan                 |
-| the index's frame size         | `INDEX_SHORT_PX` (88), `INDEX_NARROW_SHORT_PX` (72), `src/lib/gallery-layout.ts`           | lexicon.test.mjs, by name and value                                      |
+| the index's frame size         | `INDEX_SHORT_PX` (88, ceiling), `INDEX_NARROW_SHORT_PX` (72, floor) of `indexFlowStyle`'s clamp, `src/lib/gallery-layout.ts` | lexicon.test.mjs, by name and value                                      |
 | the index's order              | `byIndexOrder`, `src/lib/gallery-layout.ts` (title, then id)                               | lexicon.test.mjs's order cases                                           |
 | the index link's word and place | `FOOTER_LINKS`, `src/consts.ts` ("Index of photographs", after Contact)                   | lexicon.test.mjs's consts case; the barrier's scan 5                     |
 | the front door's headings      | `src/pages/index.astro`: "Read the journal"; "Journal and photographs" under "Latest"     | the words scan (no "piece"); the look                                    |
@@ -3139,8 +3189,10 @@ A field renamed is both places; the barrier imports the constant.
   `byIndexOrder` — "bank" before "Dock, late" (case ignored), "Frame 2"
   before "Frame 10" (numeric), equal titles by id; `FOOTER_LINKS` holds
   exactly one `/photographs/` link, labelled "Index of photographs", and
-  `NAV_ITEMS` none. **Mutation**: `numeric: true` dropped → the "Frame
-  10" case fails, reverted.
+  `NAV_ITEMS` none. image-set.test.mjs: `isPhotographPath` as the shape
+  lists. **Mutations**: `numeric: true` dropped → the "Frame 10" case
+  fails; the index exclusion dropped from `isPhotographPath` → the
+  `/photographs/` case fails; each reverted.
 - **The words** — **T1742** (lexicon.test.mjs): imports `NAV_ITEMS`
   and `SITE` from `src/consts.ts`; the section labels in order equal
   Journal, Places, Galleries, with their hrefs; no `\bpieces?\b` in
@@ -3148,16 +3200,21 @@ A field renamed is both places; the barrier imports the constant.
 - **The barrier** — **T1743** (lexicon.test.mjs, private-files.test's
   temp-tree shape): each scan passes on a clean tree and fails on its
   case — a `dist/images/` folder; an `href="/pieces/x/"`; a
-  `<loc>https://h/images/a/</loc>`; "Pieces" in a nav's text; "Piece"
-  in a chrome `<title>`; and passes with the word in `.prose`,
-  `figcaption`, `blockquote`, `.image-caption`, a harvested title, a
-  harvested alt, a class name, an `href`, a `<script>`, and in
-  "masterpiece"; a draft sidecar with a page, and with its URL in
+  `<loc>https://erikhaakephoto.com/images/a/</loc>`; "Pieces" in a
+  nav's text; "Piece" in a chrome `<title>`; `aria-label="All pieces"`
+  on a chrome element; and passes with an authored
+  `href="https://example.com/images/x.jpg"`, and with the word in
+  `.prose`, `figcaption`, `blockquote`, `.image-caption`, a harvested
+  title, a harvested folded description (`description: >-` over two
+  lines) printed in a `p.lead`, a harvested alt, a class name, an
+  `href`, a `<script>`, and in "masterpiece"; a draft sidecar with a page, and with its URL in
   `rss.xml`; a front-door link to an undated photograph, and to a
   draft; an index missing a photograph page's id, listing one twice,
   and listing an id with no page; a footer without the link, with two,
-  and a nav with it. **Mutations**: the authored-region list emptied →
-  the `.prose` case fails; the harvest disabled → the title case fails;
+  and a nav with it; a `<footer>` inside `.prose` does not count as the
+  site's. **Mutations**: the authored-region list emptied → the
+  `.prose` case fails; the harvest disabled → the title case fails;
+  block-scalar reading disabled → the folded-description case fails;
   each reverted.
 - **Unchanged and green**: the whole suite; the four existing barriers
   and the fifth; `astro check`; in `obsidian-plugin/`, `npm run build`.
@@ -3188,7 +3245,7 @@ src/pages/index.astro                            href (T1738); the merged list (
 src/pages/categories/[category].astro            href (T1738); items (T1741); words (T1742)
 src/pages/search.astro, src/pages/about/index.astro   words (T1742)
 src/pages/rss.xml.ts, src/lib/categories.ts, src/lib/image-set.ts, src/layouts/BaseLayout.astro, src/lib/url.ts, src/lib/og-card.mjs   addresses (T1738)
-src/layouts/BaseLayout.astro                     the footer from FOOTER_LINKS (T1747)
+src/layouts/BaseLayout.astro, src/lib/image-set.ts   the footer from FOOTER_LINKS; isPhotographPath in place of IMAGES_PATH (T1747)
 src/pages/photographs/index.astro                new: the photographs index (T1747)
 src/lib/gallery-layout.ts                        INDEX_SHORT_PX, INDEX_NARROW_SHORT_PX, indexFlowStyle, byIndexOrder (T1747)
 src/consts.ts                                    nav href (T1738); FOOTER_LINKS (T1747); nav words, SITE strings (T1742)
@@ -3199,7 +3256,7 @@ scripts/check-lexicon.mjs                        new (T1743)
 package.json, scripts/verify.sh                  postbuild; the summary grep (T1743)
 image-meta, galleries, gear, remark-pieces-vocabulary, remark-pieces-blocks, obsidian-plugin .test.mjs   paths (T1737)
 image-meta, image-set, categories, motion, matte, compare, private-files, remark-pieces-vocabulary .test.mjs   addresses (T1738)
-image-meta, galleries, remark-pieces-vocabulary .test.mjs   the id rule (T1739); image-meta, galleries (T1740); image-meta (T1746)
+image-meta, galleries, remark-pieces-vocabulary .test.mjs   the id rule (T1739); image-meta, galleries (T1740); image-meta (T1746); image-set (T1747)
 front-door.test.mjs                              new (T1741)
 lexicon.test.mjs                                 new: the index's knobs and order, the footer case (T1747); the consts case (T1742); the barrier's cases (T1743)
 AUTHORING.md, README.md, obsidian-plugin/README.md   T1744
@@ -3236,18 +3293,31 @@ the registry); `package.json`'s dependencies.
 - **It carries no category of its own.** Its eyebrow is its galleries'
   categories, as the gallery root's was; the category pages list
   galleries and journal entries only. The spec adds `draft` and
-  `published`, nothing else.
+  `published`, nothing else; whether a sidecar should carry
+  `category:` is put to him at T1745, not decided here.
 - **The feed lists journal entries only**; a dated photograph stands on
   the front door, not in `rss.xml` (the spec: "The front door only
-  learns to list a dated photograph").
+  learns to list a dated photograph"), so AC 29's "absent from the
+  feed" holds for every photograph, draft or not. Put to him at T1745.
 - **A photograph's story places its own folder's photographs only**
   (`./<file>`): `../journal/<slug>/<file>` is not a shape the site
   accepts, as it was not from the gallery root.
 - **The words scan excuses authored text by region and by harvest.** A
-  YAML block scalar (`>-`) is not harvested, and a page whose title
-  falls back to a file name holding the word ("Piece of coast" from
-  `piece-of-coast.jpg`) fails — a `title:` fixes it; the failure line
-  names the page and the text.
+  page whose title falls back to a file name holding the word ("Piece
+  of coast" from `piece-of-coast.jpg`) fails — a `title:` fixes it;
+  the failure line names the page and the text. The harvest's removal
+  is global on a page: an authored string that happened to equal a
+  chrome phrase holding the word would excuse that chrome too.
+- **The search index is not scanned.** "A draft is absent from the
+  search index" rests on pagefind indexing built pages only, and a
+  draft having none; the scan cannot read pagefind's compressed
+  fragments. The walkthrough's search for "Draft fixture" is the one
+  direct check.
+- **A journal entry named `journal`, `places` or `galleries`** would
+  make `setKeyFromPath` read `/photographs/<slug>/<name>/` as a set's
+  page (its pattern matches the path's tail) — the same kind of
+  misreading an entry named `galleries` could cause before this
+  amendment; not guarded here.
 - **Meta descriptions and the feed's channel text are not in the
   scan** (not printed on a page); the consts case and T1742's grep pin
   the chrome strings that reach them.

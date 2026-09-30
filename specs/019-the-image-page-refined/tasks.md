@@ -1531,14 +1531,16 @@ T1735.
       commit, before T1737. Pattern: T1719 (the constitution, again).
       Plan: "The constitution, a third time". `CLAUDE.md` only: "What
       this project is" replaced by the plan's text (unquoted, the three
-      forms as a list); the Content model clause's five replacements
+      forms as a list); the Content model clause's six replacements
       and the Images paragraph's two, each exactly as the plan writes
       them; nothing else in the file. Hand-edited. _Verify:
       `git diff --stat` → `CLAUDE.md` alone;
       `grep -n "gallery-images\|content/pieces\|/images/<id>\|a single \`pieces\`" CLAUDE.md`
       → no hits;
       `grep -n "src/content/journal\|src/content/photographs\|/photographs/<id>/\|published:\|never an address" CLAUDE.md`
-      → the new lines, listed; `npx prettier --check CLAUDE.md` clean;
+      → the new lines, listed;
+      `grep -n "Beside them sits\|are not site words\|as an outing of its own" CLAUDE.md`
+      → three lines; `npx prettier --check CLAUDE.md` clean;
       the commit's hash recorded here for AC 27, before T1737's._
 
 - [ ] **T1737** — The homes, moved. Large and mechanical: moves and
@@ -1588,12 +1590,14 @@ T1735.
       image-meta.test.mjs's and galleries.test.mjs's case shapes. Plan:
       "The id rule", the failure lines, and the testing bullet "The id
       rule". `image-meta.mjs`: `PHOTOGRAPHS_FOLDER`, `imageIdOf` and
-      every id built through it; `GALLERY_FOLDER` deleted; `homeSlugOf`
+      every id built through it (`parseImagePath`'s `SLUG.test(folder)`
+      on the journal branch only — the empty segment would fail it);
+      `GALLERY_FOLDER` deleted; `homeSlugOf`
       by the slash; `sidecarImageId`; the reference kind `photographs`;
       `oldIdHint`, `placeCoverProblem`, `nameCollisions`;
       `classifyContentImage`'s slug guard. `images.ts`:
       `nameCollisions` after discovery; the place-cover loop through
-      `placeCoverProblem`; the places warning's words; the doc comments.
+      `placeCoverProblem`; the doc comments.
       The transform: `checkReferenceShape`'s comment.
       `src/content/galleries/*.md`: every `gallery/<name>` → `<name>`.
       Tests: every expected `gallery/…` id and `/photographs/gallery/…`
@@ -1606,7 +1610,10 @@ T1735.
       none; `git grep -n "GALLERY_FOLDER"` → none;
       `git grep -nE '\$\{[A-Za-z.]*folder\}/' -- src remark-pieces-blocks.mjs`
       → `imageIdOf` and the related strip's journal-only `startsWith`,
-      listed; the mutation and the three one-time build edits as the
+      listed;
+      `git grep -nE '(if \(!?|!)((file|info|shape)\.)?folder\)|((file|info|shape)\.)?folder (\|\||\?\?)' -- src remark-pieces-blocks.mjs scripts`
+      → none (hits before the task listed, each rewritten through
+      `imageIdOf` or an explicit comparison); the mutation and the three one-time build edits as the
       plan lists them, each failing line pasted and each reverted. The
       orchestrator re-runs `sh scripts/verify.sh` before committing._
 
@@ -1674,7 +1681,9 @@ T1735.
       `git grep -n "not grouped under a place"` → none; the
       jetty's card on `dist/places/index.html` with its summary line
       quoted (one more outing and frame than before); the one-time
-      cover edit as the plan lists it, the card's image pasted, reverted._
+      cover edit as the plan lists it, the card's image pasted, reverted;
+      and one more: `the-jetty.md`'s cover set to `draft-fixture` → the
+      build fails with the not-one-of-its-frames line, pasted, reverted._
 
 - [ ] **T1747** — The photographs index. Placed here, before T1742, by
       its header text; its id is the next free one. Pattern:
@@ -1686,11 +1695,15 @@ T1735.
       testing bullet "The photographs index". `gallery-layout.ts`:
       `INDEX_SHORT_PX`, `INDEX_NARROW_SHORT_PX`, `indexFlowStyle`,
       `byIndexOrder`. New `src/pages/photographs/index.astro`.
-      `consts.ts`: `FOOTER_LINKS`. `BaseLayout.astro`: the footer's
-      links from it. New `lexicon.test.mjs` with the knobs, order and
-      footer cases. No stylesheet edit. _Verify: `sh scripts/verify.sh`
-      green (count; the page count one higher); the mutation fails by
-      name, reverted, line pasted;
+      `consts.ts`: `FOOTER_LINKS`. `image-set.ts`: `isPhotographPath`.
+      `BaseLayout.astro`: the footer's links from `FOOTER_LINKS`;
+      `isImagePage` and the set-key click handler through
+      `isPhotographPath`, `IMAGES_PATH` deleted. New `lexicon.test.mjs`
+      with the knobs, order and footer cases; image-set.test.mjs's
+      `isPhotographPath` cases. No stylesheet edit. _Verify:
+      `sh scripts/verify.sh` green (count; the page count one higher);
+      the two mutations fail by name, reverted, lines pasted;
+      `grep -n "IMAGES_PATH" src/layouts/BaseLayout.astro` → none;
       `grep -o 'href="/photographs/[^"]*"' dist/photographs/index.html | sort | uniq -d`
       → nothing (each once), and its count equal to
       `find dist/photographs -mindepth 2 -name index.html | wc -l`;
@@ -1719,8 +1732,9 @@ T1735.
       `grep -oE '>(Home|Journal|Places|Galleries|About|Search)<' dist/index.html`
       in order, quoted — Journal, Places, Galleries, and no
       Photographs; `grep -rliE ">[^<]*\bpieces?\b" dist --include=*.html`
-      → pages listed, each hit inside a journal entry's own prose (T1743
-      pins the rest)._
+      → pages listed, each hit inside a piece's own prose or a printed
+      authored title, description or caption, listed (T1743 pins the
+      rest)._
 
 - [ ] **T1743** — The lexicon barrier. Pattern:
       `scripts/check-private-files.mjs` (its header comment, its
@@ -1733,7 +1747,12 @@ T1735.
       lexicon.test.mjs gains the barrier's cases. _Verify:
       `sh scripts/verify.sh` green with the `[check-lexicon]` line
       quoted (pages read, regions, strings, one draft, one front-door
-      photograph, the index's count equal to T1747's); the two mutations fail by name, reverted, lines
+      photograph, the index's count equal to T1747's); the pages the
+      harvest excuses, listed — at least `/galleries/editors-picks/`,
+      `/galleries/fog-frames/`, `/places/the-headlands/`,
+      `/journal/first-light-at-the-jetty/`,
+      `/journal/vocabulary-sampler/` and every list that prints their
+      descriptions; the three mutations fail by name, reverted, lines
       pasted; one-time: `NAV_ITEMS`' "Journal" back to "Pieces" → the
       build fails, its first three lines pasted, reverted;
       `git diff -U0 -- package.json` → the `postbuild` line only._
@@ -1743,11 +1762,22 @@ T1735.
       documents" (amendment 3). `AUTHORING.md`, `README.md`,
       `obsidian-plugin/README.md` as the plan says, every claim read
       against the code as built — the ids, the addresses, the fields,
-      the messages. Hand-edit the prose (never script-rewrap; grep for
-      lines beginning with a CSS `>` or `+` before any format run).
-      _Verify:
+      the messages. `AUTHORING.md` states that a photograph in the
+      photographs folder that names a place needs a capture date — the
+      file's own, or a sidecar `date:` — and quotes the build's line
+      when it has none. The publishing flow tried under `npm run dev`
+      before its sentence is written, since the registry is built once
+      per dev-server run: the server started in the background,
+      `curl -s -o /dev/null -w "%{http_code}" localhost:4321/photographs/draft-fixture/`
+      read, the fixture's `draft: true` line removed, the same `curl`
+      read again without a restart, then after one, the line restored;
+      the three codes recorded here, and `AUTHORING.md` says what they
+      show (a restart needed, or not). Hand-edit the prose (never
+      script-rewrap; grep for lines beginning with a CSS `>` or `+`
+      before any format run). _Verify: the three `curl` codes, and
+      `git diff --stat -- src/content` empty after the restore;
       `grep -nE "gallery-images|content/pieces|/pieces/|/images/|gallery/[a-z]" AUTHORING.md README.md obsidian-plugin/README.md`
-      → none;
+      → none; `grep -niE "capture date" AUTHORING.md` ≥ 1;
       `grep -nE "src/content/photographs|published:|draft: true|\.\./\.\./photographs/|at: " AUTHORING.md README.md`
       → each at least once, listed (the photographs folder's `at:` and
       the index among them); `grep -niE "piece folder" AUTHORING.md README.md`
@@ -1757,11 +1787,23 @@ T1735.
 - [ ] **T1745** — The lexicon's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3c
       pause, in the person's words. The questions, in plain language:
-      the nav's three words; the photographs index — the footer link's
+      the nav's three words, and its order (Places now before
+      Galleries); the photographs index — the footer link's
       word ("Index of photographs") and its place beside Contact, the
       frames' size, the order by title, whether it reads as the back of
       a book; the jetty's wall with "Dock, late" on it by the day it was
-      made; the front door's list — a photograph among the journal entries as its
+      made, and the jetty's summary line counting that one photograph as
+      an outing of its own (one outing more than before) — right, or
+      should only journal entries count as outings; should a dated
+      photograph also appear in the feed (today the feed carries journal
+      entries only, so a photograph is never in it, draft or not; an
+      answer that adds it is a spec amendment); the
+      lexicon says street, portrait and event photographs are told apart
+      by their category, but a photograph in the photographs folder has
+      no category of its own — should its sidecar carry one (`category:`),
+      and where would it show (a question for him, not decided here —
+      an answer that adds the field is a spec amendment); the front
+      door's list — a photograph among the journal entries as its
       frame, its date and its title, three rows, the headings "Read the
       journal" and "Journal and photographs"; the address shapes —
       `/journal/<entry>/`, `/photographs/<entry>/<name>/` for an
