@@ -7,16 +7,33 @@ explicitly, in its own commit.
 
 ## What this project is
 
-A personal photography website, spanning landscape/nature (primary),
-street, portrait, and event work. The core experience is "pieces" —
-blog-style entries that pair writing with a small, closed set of image
-treatments; a piece can be a photo essay about a specific outing, gear
-notes, or an announcement, not exclusively image-heavy content. Galleries
-are a secondary, hand-curated view organized by category, with gallery
-images linking back to their originating piece where one exists. The site
-also carries a simple About page and a Contact page. It's meant to be
-authored continuously for years, with Obsidian as the writing tool and no
-CMS or backend service for v1.
+A personal photography website. Its centre is landscape and nature work;
+street, portrait and event photographs are the same kind of piece with
+less around them, told apart by their category, not by a form of their
+own.
+
+The site is made of **pieces**: pages that carry writing and the site's
+treatments, so the context travels with the work — as a physical gallery
+carries its own through the space, the people in it, and the writing the
+artist places around the work, and as a static, context-less virtual
+gallery does not. A piece takes one of three forms:
+
+- a **photograph** — one image: its page, its writing, its making, its
+  loupe;
+- a **journal** entry — the photographer's thoughts moving through
+  several photographs: an outing, gear notes, an announcement (the form
+  will evolve);
+- a **place** — a tour through somewhere the photographer keeps going
+  back to, the photographs and the writing along it.
+
+A **gallery** is a curated, ordered set of photographs, kept and
+deliberately secondary. "Piece" is the structural word: it is
+never an address or a label on the site. Code names keep it as that
+structural term — `remark-pieces-blocks`, `PieceList`, the `piece-*`
+classes, the plugin's id — and are not site words. The site also carries
+a simple About page and a Contact page. It's meant to be authored
+continuously for years, with Obsidian as the writing tool and no CMS or
+backend service for v1.
 
 ## Platform
 
@@ -40,30 +57,42 @@ CMS or backend service for v1.
 
 ## Architecture
 
-- **Content model**: a single `pieces` content collection is the primary
-  data source. Beside it sits the **image registry** (spec 004): a
-  build-time index, _derived_ automatically over every accepted raster
-  in a published piece's folder and in `src/content/gallery-images/`,
-  giving each image a stable id (`<folder>/<basename>`), a page at
-  `/images/<id>/`, exposure metadata read from the file's EXIF, and an
-  optional sidecar (`_<basename>.md`) whose frontmatter overrides it
-  and whose body is the photograph's story (spec 006), and from spec
-  019 whose `stages:` declare its processing. Galleries are the
-  opposite kind of thing: a separate,
-  hand-_curated_ collection of ordered image ids — never auto-generated
-  from the registry — each tagged with a category. An image belongs to
-  at most one piece, by folder; galleries reference images, not pieces,
-  and the page for an image links back to its piece where one exists.
-  **Places** (spec 009) are a third kind: a `places` collection of
+- **Content model**: the `journal` content collection
+  (`src/content/journal/<slug>/index.md`) and the photographs folder
+  (`src/content/photographs/`) are the primary data sources.
+  Beside them sits the **image registry** (spec 004): a build-time
+  index, _derived_ automatically over every accepted raster in a
+  published journal entry's folder and in `src/content/photographs/`,
+  giving each photograph a stable id (`<slug>/<basename>` in a journal
+  entry's folder, the bare `<basename>` in the photographs folder), a
+  page at `/photographs/<id>/`, exposure metadata read from the file's
+  EXIF, and an optional sidecar (`_<basename>.md`) whose frontmatter
+  overrides it and whose body is the photograph's story (spec 006), and
+  from spec 019 whose `stages:` declare its processing — and, in the
+  photographs folder only, whose `draft: true` holds the photograph
+  unpublished and whose `published:` date puts it on the front door
+  beside journal entries (a journal entry's photographs are published
+  and dated by their entry; a sidecar there that writes either field
+  fails the build). Galleries are the opposite kind of thing: a
+  separate, hand-_curated_ collection of ordered image ids — never
+  auto-generated from the registry — each tagged with a category. A
+  photograph has one home — a journal entry's folder or the photographs
+  folder; a journal entry places others by borrowing them, galleries
+  reference photographs by id, and a photograph's page links back to
+  the journal entry it lives in, if any, and to every entry that places
+  it. **Places** (spec 009) are a third kind: a `places` collection of
   files _declared_ once (a title, a description, an optional cover,
   the writing), then _grown_ by the registry — a photograph names its
-  place in its sidecar (`at: <slug>`, or `at: none`), a piece may set
-  one default for its folder with the same line, and the build refuses
-  a slug with no file, listing the places that exist. A place's page
-  shows its published frames as one wall, outings oldest first,
-  own-folder frames only, naming no piece; a place is never inferred
-  from camera metadata, and never from the sidecar's free-text
-  `place`, which stays prose for the wall label.
+  place in its sidecar (`at: <slug>`, or `at: none`), a journal entry
+  may set one default for its folder with the same line, and the build
+  refuses a slug with no file, listing the places that exist. A place's
+  page shows its published frames as one wall, outings oldest first — a
+  journal entry's own-folder frames at the place as one outing, dated
+  by the entry, and each photograph of the photographs folder that
+  names the place as an outing of its own, dated by its capture —
+  naming no journal entry; its cover is one of those frames; a place is
+  never inferred from camera metadata, and never from the sidecar's
+  free-text `place`, which stays prose for the wall label.
 - **Closed block vocabulary**: image treatments inside a piece's body are
   limited to a defined set of directive-backed treatments — as of spec 019:
   single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip,
@@ -103,13 +132,16 @@ CMS or backend service for v1.
   custom-built, but must consume the theme's design tokens rather than
   redefining their own — this keeps the custom parts visually coherent
   with the rest of the site.
-- **Images**: local and co-located with each piece for initial
-  development (`src/content/pieces/<slug>/`), plus one flat
-  `src/content/gallery-images/` root for images that belong to no piece
-  (spec 004), using Astro's built-in image handling — no external store
-  required to start. A piece's folder is public territory: every
-  accepted image in it gets a page, referenced by the body or not, and
-  images under a `draft: true` piece are unpublished with it. A raster
+- **Images**: local and co-located with each journal entry
+  (`src/content/journal/<slug>/`), plus one flat
+  `src/content/photographs/` folder for the photographs that belong to
+  no journal entry (spec 004, renamed at spec 019), each a piece of its
+  own, using Astro's built-in image handling — no external store
+  required to start. A journal entry's folder is public territory:
+  every accepted image in it gets a page, referenced by the body or
+  not, and images under a `draft: true` entry are unpublished with it;
+  a photograph in the photographs folder is unpublished by its own
+  sidecar's `draft: true`. A raster
   whose name starts with `_` is private, never an image of the site —
   no id, no page, never in a gallery: `_<basename>.<ext>` is that
   photograph's camera's frame (spec 006), `_<basename>.<word>.<ext>` a
