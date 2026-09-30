@@ -1254,6 +1254,13 @@ wrap, no sliver, and the move and state durations. The look then
 moved to Obsidian, where the plugin's figures were found wanting —
 the second amendment (Phase 3b).
 
+Keeps as of 2026-09-29, recorded at the owner's word while the look is
+held open: everything above, plus the filmstrip's arrows as T1729d–e
+left them — drawn in CSS, centred, a third lighter than the handle,
+outside the frame — and the one-stage trackpad page with its gate
+(T1729b–c). T1729 stays unchecked: the tuning questions open again on
+his real photograph at Phase 4.
+
 ## Phase 3b — The plugin, representative (reviewer after the phase; `review: per-task` on T1730; walkthrough: in Obsidian on the laptop and on the DualUp, with the rebuilt plugin (0.3.0) installed as its README says and Readable line length on — the sampler piece in Live Preview shows every block as a figure: the singles at the text's width, the insets smaller and centred, the wides past the text on both sides and the half-bleeds out to one edge of the pane, the fullbleeds across the whole pane, the talls standing at most about four fifths of the window's height, centred; every diptych and triptych in one row (the weighted ones two to one, the wide and fullbleed ones breaking out), the grid in two columns, both strips as one row that scrolls sideways across the pane; each aside, row and held a frame on its named side with its paragraphs wrapping beside it (no hold); every caption beneath its frame in a smaller, muted face with its italics; the fog piece's compare, side and slider as rows of stages with their labels and a line naming the method ("Switch", "side", "slider"); the cursor put into any block turns it back into its text; switched to Reading view, the same page; a held's third paragraph edited in Live Preview shows the edit in Reading view; a src changed to a file that isn't there shows the dashed "not found" box in both views; the console check (View → Toggle Developer Tools → Console): `getComputedStyle(document.querySelector('[data-block="diptych"] .photo-pieces-frames')).display` prints `flex` and the grid's prints `grid`, where the old rows printed `block`, and a fullbleed's frames measure the pane's width (`document.querySelector('[data-block="fullbleed"] .photo-pieces-frames').getBoundingClientRect().width` against `document.querySelector('.cm-scroller').clientWidth`, less its padding); the editor otherwise behaves as it did — hover previews, menus, scrolling; as many rounds as it takes, each a sub-lettered task under T1735)
 
 **Status**: Signed off (2026-09-26) at the top tier (B1 fixed and re-reviewed; S1–S9 taken). Plan: "Amendment 2 (2026-09-26): the plugin, representative".
@@ -1494,7 +1501,11 @@ T1729.
 
 ### Phase 3b record (the person's walkthrough)
 
-_Filled in at the pause._
+Reached 2026-09-27; three rounds (T1735a–c above, his words in each).
+Held open 2026-09-29 at the owner's word: he likes the plugin as it is
+and will tune it while writing. No keeps named beyond what the three
+rounds built; T1735 stays unchecked, and a round he asks for while
+writing is one more sub-lettered task under it.
 
 ## Phase 3c — The lexicon and the photograph's home (reviewer after the phase; `review: per-task` on T1739; walkthrough: on the laptop, the site built and previewed (`npm run build && npm run preview` — search needs the build): the nav reads Home, Journal, Places, Galleries, About, Search, and no page says "piece" or "pieces" in its own words; the footer carries a quiet "Index of photographs" beside Contact, and it opens `/photographs/`: every photograph on the site, small, in one dense grid ordered by title, a heading and nothing else written, each frame opening its page; the jetty's place page shows "Dock, late" on its wall among the jetty's other frames, placed by the day it was made; the front door lists the latest three newest first, "Dock, late" among the journal entries as its frame, its date and its title, opening `/photographs/dock-b/`; the draft fixture is nowhere — not on the front door, not in the index, not on the jetty's wall, nothing at `/photographs/draft-fixture/`, nothing when searching "Draft fixture"; the addresses: the fog entry at `/journal/where-the-fog-lets-go/`, its photographs at `/photographs/where-the-fog-lets-go/land-b/`, a photograph of the photographs folder at `/photographs/dock-a/`, and `/pieces/…` and `/images/…` gone; the journal index, a category page, the search page, a photograph page ("From the journal entry …", "In the journal", "Also in") and the About page's stand-in read in the new words; in Obsidian, the moved samples — `src/content/journal/vocabulary-sampler/index.md`, and the matte sampler, whose borrowed photographs now come from `../../photographs/` — draw every figure as before, none "not found"; and, if he wants to, the spec's publishing flow for real: a photograph and its `_<name>.md` with `draft: true` in `src/content/photographs/`, nothing at its address under `npm run dev`, then the draft line removed and `published:` written, and it stands on the front door; as many rounds as it takes, each a sub-lettered task under T1745)
 
