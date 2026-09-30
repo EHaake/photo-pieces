@@ -296,7 +296,14 @@ my first place piece instead of waiting until later."
     be a **draft** and may carry a **date of its own**, so it can be
     written in place and, when dated, stand on the front door beside
     journal entries. Nothing is deployed, so the old addresses need no
-    redirects.
+    redirects. Photographs are met by way of the pieces that show them
+    — a journal entry, a place, a gallery — so they have no place in
+    the nav; `/photographs/` is an **index**, in the sense of the one
+    at the back of a book: every published photograph, small, in one
+    continuous grid, there for whoever goes looking. And a photograph
+    in the photographs folder that names a place stands on that
+    place's page like any other frame taken there, and may be its
+    cover.
 
 ## Non-goals
 
@@ -691,7 +698,15 @@ output.
   the image page's "Also in", the feed's and the OG cards' titles use
   the lexicon's words — Journal, Photographs, Places, Galleries — in
   the wording blocks the pages already keep; "piece" and "pieces"
-  appear on no page. The front door's latest list merges journal
+  appear on no page. The nav carries three of the four — Journal,
+  Places, Galleries; Photographs is not in it. The photographs index
+  is reached by one quiet link in the footer. It is a dense grid of
+  small frames, every published photograph from both folders, in
+  order of title, each linking to its page, with no writing beyond a
+  heading: an addendum, not a feature. The frame size, the order and
+  the link's word and place are tunables. A place's page admits the
+  photographs folder's frames that name it (`at:`), among its outings
+  by their capture dates, and a place's cover may be one. The front door's latest list merges journal
   entries and dated photographs, newest first by their dates, a
   photograph shown as its frame and its title, a journal entry as
   today; its length is a tunable. A photograph without `published:`
@@ -869,8 +884,10 @@ as a routine task:
   caption's face — and whether the method line shows on the stage
   blocks;
 - _(amended 2026-09-29, lexicon)_ the words on the site (the nav's
-  four, the front door's headings, "Also in"); the front door's list
-  length; the sidecar fields' names (`draft`, `published`).
+  three, the front door's headings, "Also in"); the front door's list
+  length; the sidecar fields' names (`draft`, `published`); the
+  photographs index's frame size, its order, and its link's word and
+  place.
 
 **As many rounds as it takes.** A pause may run several looks; each
 round is a sub-lettered task, reviewed with the phase, and the phase's
@@ -1060,9 +1077,18 @@ _Amended 2026-09-29 (lexicon):_
       list in date order among journal entries, as its frame and
       title; one without it does not — pinned on the built front door
 - [ ] Every page's words are the lexicon's: the nav reads Journal,
-      Photographs, Places, Galleries; no page in `dist/` prints "piece"
+      Places, Galleries; no page in `dist/` prints "piece"
       or "pieces" outside a piece's own prose — pinned by a scan of
       `dist/`
+- [ ] `/photographs/` lists every published photograph, from both
+      folders, once each, as small frames in order of title, each
+      linking to its page; a draft is not on it; the footer links to
+      it and the nav does not — pinned on `dist/`; its look judged at
+      the pause
+- [ ] A photographs-folder photograph whose sidecar names a place
+      stands on that place's page and may be its cover; one that names
+      none, or is a draft, does not — pinned by the registry's tests
+      and a built place page
 - [ ] `AUTHORING.md` and the README describe the photographs folder,
       the journal folder, the draft and date fields and the borrowing
       path in the lexicon's words; the fixtures, the samples and the
@@ -1302,4 +1328,16 @@ _Amended 2026-09-29 (lexicon):_
   writing my first place piece instead of waiting until later." The
   session's calls, to be seen: bare basenames as the photographs
   folder's ids; `published` as the date field's name; the front door
-  merging by date; no redirects.
+  merging by date; no redirects. **The photographs index** (planning's
+  question, the same day): "I'm not actually sure I want an index page
+  for photographs, or at least not a prominent one. I do want
+  photographs to be encountered by navigating to them from other
+  journal pieces/places/galleries … How about the photographs index
+  page be a huge (eventually) continuous gallery where everything is
+  listed in a grid, but small, similar to the index at the back of a
+  book. So it's more of an addendum than a main feature." The session's
+  calls: out of the nav, a footer link, ordered by title. **Place
+  pages admit the photographs folder** — asked whether a photograph
+  piece should appear on its place's page: "yes, absolutely"; spec
+  009's own-folder rule is widened to it, and the constitution's
+  places clause with it.
