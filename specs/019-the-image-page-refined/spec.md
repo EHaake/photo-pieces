@@ -20,6 +20,11 @@ authoring plugin made representative — Goal 10 and the sections marked
 _(amended 2026-09-26, plugin)_ — re-planned as plan.md's "Amendment 2
 (2026-09-26): the plugin" and tasks.md's Phase 3b (T1730–T1735),
 signed off at the top tier the same evening, before the real piece.
+**Amended a third time, 2026-09-29**, while the plugin pause is held
+open: the site's lexicon, and the photograph as a piece — Goal 11 and
+the sections marked _(amended 2026-09-29, lexicon)_ — re-planned as
+plan.md's "Amendment 3 (2026-09-29): the lexicon, the photograph's
+home" and tasks.md's Phase 3c, before the real piece.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
@@ -121,6 +126,26 @@ piece rather than after it, because the writing surface is what the
 piece is written on: "a big part of that is getting all the pieces in
 place for authoring and design so we can start to tweak and refine
 things as I actually start to use them."
+
+**Amended a third time (2026-09-29), while writing the first real
+piece.** Choosing where to put it exposed a mismatch between the site's
+words and the photographer's model of it. The docs and this spec called
+an `index.md` folder "the piece" and a photograph's page its by-product;
+he had it the other way round, as the roadmap's "Every page a piece"
+entry already recorded: "when I'm at images/where-the-fog-lets-go/land-b/
+in the site, this is an image page that is its own piece. It's just a
+piece where the focus is a specific image rather than a place or an
+idea." And the intent behind the whole site: "A real, in person,
+physical gallery carries its own context through the experience, the
+people you see there, and the writing the artist places around the
+work. That's the intent of my pieces, being virtual tours through
+spaces that are much richer than static, bland, context-less virtual
+'galleries'." So this amendment writes the lexicon down in the
+constitution — piece, photograph, journal, place, gallery — and makes
+the photograph's home a first-class folder with the addresses, the
+draft flag and the date that a piece needs, before the real piece is
+written against them: "I'd rather get this done now while I'm writing
+my first place piece instead of waiting until later."
 
 ## Goals
 
@@ -247,6 +272,32 @@ things as I actually start to use them."
     draws is what shows. Put the cursor in a block in Live Preview and
     it turns back into its text, as today.
 
+11. **The lexicon, and the photograph as a piece** _(amended
+    2026-09-29, lexicon)_. The site is made of **pieces**: pages that
+    carry writing and the site's treatments, context travelling with
+    the work. A piece takes one of three forms — a **photograph** (one
+    image: its page, its writing, its making, its loupe), a **journal**
+    entry (his thoughts moving through several photographs: an outing,
+    gear, an announcement; the form will evolve), a **place** (a tour
+    through somewhere he keeps going back to, his photographs and his
+    writing along it) — and a **gallery** is a curated, ordered set of
+    photographs, kept and deliberately secondary. The centre of the
+    site is the landscape and nature work; street, portrait and event
+    photographs are the same kind of piece with less around them, told
+    apart by their category, not by a form of their own. "Piece" is
+    the structural word and never an address or a label. From that
+    follow the homes and the addresses: photographs that belong to no
+    journal entry live in `src/content/photographs/` (today
+    `gallery-images/`) with their sidecars and private families, at
+    `/photographs/<name>/`; a journal entry's folder is under
+    `src/content/journal/` (today `pieces/`), at `/journal/<slug>/`,
+    and its photographs at `/photographs/<slug>/<name>/`; places and
+    galleries keep theirs. A photograph in the photographs folder may
+    be a **draft** and may carry a **date of its own**, so it can be
+    written in place and, when dated, stand on the front door beside
+    journal entries. Nothing is deployed, so the old addresses need no
+    redirects.
+
 ## Non-goals
 
 - **The external image store.** The detail exports make the repo heavier
@@ -291,6 +342,15 @@ things as I actually start to use them."
   always has; it does not import or run the transform, and a block the
   site rejects is not the plugin's to refuse — it shows what it can
   parse and leaves the rest raw, and the build stays the judge.
+- **The place as a tour, the study, the front door's design**
+  _(amended 2026-09-29, lexicon)_. The lexicon names the place tour
+  and the photograph's study; building them is the roadmap's ("Every
+  page a piece, and the image's study"; the place page). The front
+  door only learns to list a dated photograph; its design stays the
+  front-door spec's. The nav's words change with the lexicon; its
+  shape does not.
+- **Redirects from the old addresses** _(amended 2026-09-29, lexicon)_
+  — nothing is deployed; the addresses simply change.
 - **The mobile pass.** Touch works here where the spec says it does
   (the handle, the switch, the pinch); how the page reads on a phone is
   the roadmap's mobile pass, after real content exists.
@@ -350,6 +410,31 @@ things as I actually start to use them."
   Preview decorator (the CodeMirror field the plugin has) and a Reading
   view post-processor, both building the same figure markup from the
   same block table and styled by the same stylesheet.
+- **The lexicon** _(amended 2026-09-29, lexicon)_ — five words in the
+  constitution: piece (the general term, never an address), photograph,
+  journal, place, gallery; and the sentence on the site's centre.
+- **The photographs folder** _(amended 2026-09-29, lexicon)_ —
+  `src/content/photographs/`, the home of every photograph that belongs
+  to no journal entry: the raster, its sidecar, its private family
+  (camera's frame, stages, detail export) beside it, exactly as in a
+  journal folder. Its ids are the bare basename (`bank`), its pages
+  `/photographs/bank/`; a journal folder's photographs keep
+  `<slug>/<name>` and sit at `/photographs/<slug>/<name>/`. Today's
+  `gallery/<name>` ids in galleries and place covers become the bare
+  name. A journal entry borrows one as `../../photographs/<file>`.
+- **The journal folder** _(amended 2026-09-29, lexicon)_ —
+  `src/content/journal/`, today `pieces/`; the collection is `journal`;
+  an entry's page `/journal/<slug>/`. Its frontmatter is unchanged.
+- **A photograph's draft and date** _(amended 2026-09-29, lexicon)_ —
+  two optional sidecar fields for a photograph in the photographs
+  folder: `draft: true` (no page, refused by a gallery or a place
+  cover that names it, absent from the feed, the OG images and the
+  search index — as a draft journal entry's photographs are) and
+  `published:` (a date; the photograph then stands on the front door's
+  latest list, newest first among journal entries, showing its frame
+  and its title). A journal folder's photographs take both from their
+  entry, as today; a sidecar there that writes either fails the build
+  naming the field.
 - **The stage's shares** _(amended 2026-09-26)_ — two numbers, the
   landscape share (of the first screen's width, for a photograph wider
   than tall) and the portrait share (of the first screen's height, for
@@ -451,6 +536,21 @@ past it without the site's hold. A compare, side or slider shows its
 stages in a row with the labels beneath and its method named. He
 switches to Reading view and sees the same page. He puts the cursor
 in a block in Live Preview and its text comes back for editing.
+
+### Publishing a photograph _(amended 2026-09-29, lexicon)_
+
+The photographer exports `bank.jpg`, its camera's frame `_bank.jpg`,
+a stage `_bank.tones.jpg` and the loupe's `_bank.detail.jpg` into
+`src/content/photographs/`, and writes `_bank.md` beside them: a
+title, a caption, `stages:`, `draft: true`, and the story with a
+`:::compare` or a `:::slider` where the writing wants one. Obsidian
+shows it as the plugin shows any piece; `npm run dev` shows nothing at
+`/photographs/bank/` while it is a draft. When it is done he removes
+the draft line and writes `published: 2026-10-04`; the page appears,
+the front door lists it first with its frame and title, and a gallery
+may now name `bank`. A journal entry written later places it as
+`../../photographs/bank.jpg`, and the photograph's page lists that
+entry under "Also in".
 
 ### Writing a pair _(amended 2026-09-26)_
 
@@ -586,6 +686,16 @@ output.
   Markdown post-processor over the same block table, so the two never
   disagree about what a block is. A directive typed mid-paragraph stays
   raw in both, as the site rejects it.
+- **The words on the site** _(amended 2026-09-29, lexicon)_. The nav,
+  the front door's headings and links, the category and search pages,
+  the image page's "Also in", the feed's and the OG cards' titles use
+  the lexicon's words — Journal, Photographs, Places, Galleries — in
+  the wording blocks the pages already keep; "piece" and "pieces"
+  appear on no page. The front door's latest list merges journal
+  entries and dated photographs, newest first by their dates, a
+  photograph shown as its frame and its title, a journal entry as
+  today; its length is a tunable. A photograph without `published:`
+  is never on the front door, however it is reached otherwise.
 - **The pair blocks** _(amended 2026-09-26)_. `side`: the two panes at
   the photograph's ratio and the same size, the label · note of each
   beneath its pane in the caption style, no control, no legend, no
@@ -683,6 +793,30 @@ output.
   settings that matter" says the same in a sentence. `DECISIONS.md`'s
   two plugin entries are annotated at close-out as superseded by this
   amendment, in his words.
+- **The constitution, a third time** _(amended 2026-09-29, lexicon)_,
+  in its own commit before the phase's first code: "What this project
+  is" gains the lexicon paragraph — the site is made of pieces; the
+  three forms and the gallery as the words above define them; the
+  centre is the landscape work; "piece" is never an address — and its
+  first sentences read in those words ("The core experience is
+  'pieces'" becomes the paragraph); the Content model clause names the
+  `journal` collection and the `photographs` folder in place of
+  `pieces` and `gallery-images`, the bare-basename id, the draft and
+  `published` fields; the Images paragraph names
+  `src/content/journal/<slug>/` and `src/content/photographs/`. The
+  exact text is the planner's to draft from these sentences and the
+  task's to write.
+- **The folders, moved** _(amended 2026-09-29, lexicon)_: `git mv` for
+  both folders and every fixture, sample and test path that names
+  them, the Obsidian samples included; the `obsidian/vault` config's
+  excluded-folder list unchanged (it names the repo, not the folders);
+  the plugin's borrowed-path resolution reads `../../photographs/`.
+- **The documents** _(amended 2026-09-29, lexicon)_: `AUTHORING.md`
+  and the README rewritten in the lexicon — the vault layout, "A piece
+  folder is public territory" as "A journal folder", the photographs
+  folder with its draft and date, the borrowing paths — and the
+  photograph's page described as the piece it is. `DECISIONS.md` at
+  close-out records the lexicon and the reasoning in his words.
 
 ## The tuning envelope
 
@@ -733,7 +867,10 @@ as a routine task:
   stylesheet — the widths of `inset`, `wide`, `full` and the side
   frames, the `tall` height cap, the grid's columns, the gaps, the
   caption's face — and whether the method line shows on the stage
-  blocks.
+  blocks;
+- _(amended 2026-09-29, lexicon)_ the words on the site (the nav's
+  four, the front door's headings, "Also in"); the front door's list
+  length; the sidecar fields' names (`draft`, `published`).
 
 **As many rounds as it takes.** A pause may run several looks; each
 round is a sub-lettered task, reviewed with the phase, and the phase's
@@ -747,7 +884,10 @@ re-dispatched on the changed section, and a sign-off:
   a fifth method, or a fourth block that takes stages;
 - _(amended 2026-09-26, plugin)_ any interaction in the plugin (a
   working slider, a switch), motion, or matching the site's typography
-  or ground; the plugin importing the transform.
+  or ground; the plugin importing the transform;
+- _(amended 2026-09-29, lexicon)_ a fourth form of piece; the place
+  tour; the study; redirects; any change to a journal entry's
+  frontmatter or to how a journal folder's photographs are published.
 - a change to the private-file rule beyond what Entities states, or a
   private file placed by any block but `compare`;
 - the loupe on any surface but the quiet view;
@@ -824,7 +964,9 @@ re-implementation. The plan says where each lives.
 - [ ] The photographer's real piece is published, its photograph
       carrying a camera's frame, at least one stage and a detail
       export, and the last pause is judged on it; the invented fixtures
-      remain marked as fixtures
+      remain marked as fixtures _(amended 2026-09-29: the piece may be
+      a photograph with its home in the photographs folder, judged on
+      its photograph page, or a journal entry judged on both pages)_
 - [ ] The build's GPS scan finds no GPS block in any image in `dist/`,
       the detail exports included — the existing barrier, re-run
 
@@ -896,6 +1038,37 @@ _Amended 2026-09-26 (plugin):_
 - [ ] The plugin's README table describes every block in both views;
       `AUTHORING.md`'s settings section matches; the plugin builds
       clean — pinned by greps and the build
+
+_Amended 2026-09-29 (lexicon):_
+
+- [ ] The constitution carries the lexicon and names the `journal`
+      collection and the `photographs` folder, amended in its own
+      commit before the phase's first code — its commit hash recorded
+- [ ] `src/content/journal/<slug>/` builds `/journal/<slug>/` and its
+      photographs `/photographs/<slug>/<name>/`;
+      `src/content/photographs/<name>.<ext>` builds
+      `/photographs/<name>/` with id `<name>`; no page under `/pieces/`
+      or `/images/` exists in `dist/`; a gallery or a place cover
+      naming `gallery/<name>` fails the build naming the file and the
+      new id — pinned on `dist/` and by the registry's tests
+- [ ] A photograph's sidecar with `draft: true` produces no page, is
+      refused by a gallery and a place cover, and is absent from the
+      feed, the OG images and the search index; removing the line
+      publishes it; the same field in a journal folder's sidecar fails
+      the build naming the field — pinned
+- [ ] A photograph with `published:` stands on the front door's latest
+      list in date order among journal entries, as its frame and
+      title; one without it does not — pinned on the built front door
+- [ ] Every page's words are the lexicon's: the nav reads Journal,
+      Photographs, Places, Galleries; no page in `dist/` prints "piece"
+      or "pieces" outside a piece's own prose — pinned by a scan of
+      `dist/`
+- [ ] `AUTHORING.md` and the README describe the photographs folder,
+      the journal folder, the draft and date fields and the borrowing
+      path in the lexicon's words; the fixtures, the samples and the
+      Obsidian plugin's path resolution follow the moved folders —
+      pinned by greps and the build; Obsidian's Live Preview of the
+      moved samples checked by the photographer at the pause
 
 ## Decided (in this conversation, 2026-09-24)
 
@@ -1104,3 +1277,29 @@ _Amended 2026-09-26 (plugin):_
 - **T1735c (Phase 3b pause, 2026-09-27).** In the plugin a diptych or
   triptych matched by height ends at one height, each pane sized by its
   photograph's shape once the images load, as on the site.
+- **The third amendment (2026-09-29): the lexicon, the photograph's
+  home.** Writing the first real piece: "Either I'm not understanding,
+  or we have this mis-spec'ed … when I'm at
+  images/where-the-fog-lets-go/land-b/ in the site, this is an image
+  page that is its own piece." On one folder per photograph: "What if
+  I want to create an image piece that is in multiple different
+  'pieces' pieces, galleries, and places pieces?" — answered by the
+  model as it stands (one home, membership through borrowing,
+  galleries and places), the naming judged wrong. On the nav: "I don't
+  think I'm going to ship a header on the site called 'pieces'. Pieces
+  are just the form of things how I'm thinking about structuring the
+  site, the content, and the links between them." On galleries: "one
+  of the main intents behind my idea was to de-emphasize traditional,
+  static, context-less galleries." The words: "I'd just not use
+  'Essay', as it comes across as too self-important. I'd use either
+  notes or journal … Mostly likely it will be my thoughts" — Journal
+  chosen (Notes already means gear notes). On the other genres: "my
+  real 'work' is my landscape/nature photography … I'm wondering if we
+  should either reframe or come up with some catch all" — no catch-all:
+  the difference is depth, not kind; the category tells them apart;
+  the site's centre is written down instead. Folded in now rather
+  than a spec of its own: "I'd rather get this done now while I'm
+  writing my first place piece instead of waiting until later." The
+  session's calls, to be seen: bare basenames as the photographs
+  folder's ids; `published` as the date field's name; the front door
+  merging by date; no redirects.
