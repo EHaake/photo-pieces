@@ -38,6 +38,40 @@ attached.
   processed work exists to test against: it could be part of the image
   detail page, its own kind of piece, or spread across both. Subsumes
   the `sequence` block's open interaction design below.
+- **Content out of the repo** — raised by the photographer after spec
+  019's plugin amendment (2026-09-29): "I want the repo to be the code
+  of the site, content should be separate." The combined layout —
+  pieces, sidecars and every raster committed under `src/content/`,
+  the vault wrapped around the clone — is the v1 convenience and **not
+  the ultimate solution**; it ends when the site goes to production,
+  not when the repo happens to get heavy. The shape, as discussed:
+  content becomes a repository of its own (`pieces/`, `gallery-images/`,
+  `galleries/`, `places/`, `gear.md`), text only, and the vault is
+  built around it — `photo-brain/content/` beside the private notes,
+  the site repo elsewhere — so writing, the sidecars, the relative
+  paths and the plugin go on unchanged; the rasters leave git for
+  object storage (Cloudflare R2 beside the Workers deployment is the
+  default candidate), the vault keeping a local mirror because
+  Obsidian and the plugin need real files beside the Markdown, synced
+  up by a tool such as rclone; the site's build fetches the content
+  repo and syncs the images down before Astro runs, so the image
+  pipeline, the EXIF read, the GPS barrier and the private-file rules
+  stay as they are, with the fixture pieces kept in the site repo as
+  test content and excluded from a production build; a push of the
+  content repo triggers the site's build through a deploy hook or a
+  small action, the site repo still deploying on its own pushes. To
+  decide in its spec: the storage provider and the sync; whether the
+  content repo is private; what `draft: true` means once content has
+  a public history; what the sampler and plugin-check pieces become;
+  and where spec 005 (going live) sits, since its deploy wiring is what
+  this changes. Git LFS was considered and passed on: it keeps one
+  repo at a per-gigabyte cost and complicates the Workers build.
+  Absorbs the external image store the constitution's images paragraph
+  defers ("migrate to an external store once repo size or clone speed
+  becomes a real, not hypothetical, problem") — spec 019's detail
+  exports, at 4000px a photograph, moved that day closer: "I plan to
+  have many images, so even without full size ones, we'll need an
+  external store." The spec after 019.
 - **Every page a piece, and the image's study** — raised by the
   photographer during spec 014 (2026-09-18), as much a statement of intent
   as a feature: every page but the front door is meant to be a piece — a
