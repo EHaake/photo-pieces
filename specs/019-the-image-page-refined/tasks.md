@@ -1496,26 +1496,26 @@ T1729.
 
 _Filled in at the pause._
 
-## Phase 3c — The lexicon and the photograph's home (reviewer after the phase; `review: per-task` on T1739; walkthrough: on the laptop, the site built and previewed (`npm run build && npm run preview` — search needs the build): the nav reads Home, Journal, Photographs (where it goes as settled before T1742), Places, Galleries, About, Search, and no page says "piece" or "pieces" in its own words; the front door lists the latest three newest first, "Dock, late" among the journal entries as its frame, its date and its title, opening `/photographs/dock-b/`; the draft fixture is nowhere — not on the front door, nothing at `/photographs/draft-fixture/`, nothing when searching "Draft fixture"; the addresses: the fog entry at `/journal/where-the-fog-lets-go/`, its photographs at `/photographs/where-the-fog-lets-go/land-b/`, a photograph of the photographs folder at `/photographs/dock-a/`, and `/pieces/…` and `/images/…` gone; the journal index, a category page, the search page, a photograph page ("From the journal entry …", "In the journal", "Also in") and the About page's stand-in read in the new words; in Obsidian, the moved samples — `src/content/journal/vocabulary-sampler/index.md`, and the matte sampler, whose borrowed photographs now come from `../../photographs/` — draw every figure as before, none "not found"; and, if he wants to, the spec's publishing flow for real: a photograph and its `_<name>.md` with `draft: true` in `src/content/photographs/`, nothing at its address under `npm run dev`, then the draft line removed and `published:` written, and it stands on the front door; as many rounds as it takes, each a sub-lettered task under T1745)
+## Phase 3c — The lexicon and the photograph's home (reviewer after the phase; `review: per-task` on T1739; walkthrough: on the laptop, the site built and previewed (`npm run build && npm run preview` — search needs the build): the nav reads Home, Journal, Places, Galleries, About, Search, and no page says "piece" or "pieces" in its own words; the footer carries a quiet "Index of photographs" beside Contact, and it opens `/photographs/`: every photograph on the site, small, in one dense grid ordered by title, a heading and nothing else written, each frame opening its page; the jetty's place page shows "Dock, late" on its wall among the jetty's other frames, placed by the day it was made; the front door lists the latest three newest first, "Dock, late" among the journal entries as its frame, its date and its title, opening `/photographs/dock-b/`; the draft fixture is nowhere — not on the front door, not in the index, not on the jetty's wall, nothing at `/photographs/draft-fixture/`, nothing when searching "Draft fixture"; the addresses: the fog entry at `/journal/where-the-fog-lets-go/`, its photographs at `/photographs/where-the-fog-lets-go/land-b/`, a photograph of the photographs folder at `/photographs/dock-a/`, and `/pieces/…` and `/images/…` gone; the journal index, a category page, the search page, a photograph page ("From the journal entry …", "In the journal", "Also in") and the About page's stand-in read in the new words; in Obsidian, the moved samples — `src/content/journal/vocabulary-sampler/index.md`, and the matte sampler, whose borrowed photographs now come from `../../photographs/` — draw every figure as before, none "not found"; and, if he wants to, the spec's publishing flow for real: a photograph and its `_<name>.md` with `draft: true` in `src/content/photographs/`, nothing at its address under `npm run dev`, then the draft line removed and `published:` written, and it stands on the front door; as many rounds as it takes, each a sub-lettered task under T1745)
 
 **Status**: Draft — pending sign-off. Plan: "Amendment 3 (2026-09-29): the
 lexicon, the photograph's home" and its sections. The spec's third
 amendment, folded in while the Phase 3b pause is held open and before
 the real piece, because the piece is written against the folders, the
-addresses and the fields it settles. **One product question is open**
-(plan: "Open — a product question for the person"): where the nav's
-Photographs goes. T1742 is not dispatched until the answer is
-transcribed into the plan and into T1742; if the answer is a new index
-page, that page is a task drafted from his answer and inserted before
-T1742; T1743 follows T1742. Foundational within the phase, and ordered
+addresses and the fields it settles. Planning's question on the nav is
+answered in the spec: three words in the nav, the photographs index
+behind a footer link, and place pages admitting the photographs folder.
+The two tasks that answer adds take the next free ids and sit in order
+before T1742: T1746 (the place walls) and T1747 (the photographs
+index), after T1741. Foundational within the phase, and ordered
 first: T1736 (the constitution, its own commit), T1737 and T1738 (the
 homes and the addresses moved — large and mechanical, each green on its
 own, so a failure points at one kind of change) and T1739 (the id rule —
 `review: per-task`, because every photograph's address, every gallery
 list, every borrowed reference and place cover reads it, and a wrong id
 re-addresses pages without failing). Then the draft and the date, the
-front door, the words, the barrier that pins them, the documents, the
-look. The implementer runs no browser here: every check is the suite,
+front door, the place walls, the photographs index, the words, the
+barrier that pins them, the documents, the look. The implementer runs no browser here: every check is the suite,
 the build's barriers and greps over `dist/`; the Obsidian samples and
 how the words read are the person's at the pause. A round at the pause
 is one sub-lettered task under T1745, as the cadence paragraph says of
@@ -1649,23 +1649,76 @@ T1735.
       `dist/categories/landscape/index.html` (or the category the
       entries carry) with the same number of rows as T1740's build._
 
-- [ ] **T1742** — The words. **Waits on the open question**: dispatched
-      once where the nav's Photographs goes is transcribed into the plan
-      and here. Pattern: the photograph page's `WORDING` block (the one
-      place a page keeps its words); `NAV_ITEMS`. Plan: "The words" and
-      the testing bullet "The words". `consts.ts`, `index.astro`,
-      `journal/index.astro`, `categories/[category].astro`,
-      `search.astro`, the photograph page's `WORDING` and its
-      description's fallback, `about/index.astro`, each at the plan's
-      opening value. New `lexicon.test.mjs` with the consts case.
+- [ ] **T1746** — The place walls admit the photographs folder. Placed
+      here, after T1741, by the order of its dependencies (it reads
+      T1740's status); its id is the next free one. Pattern:
+      `groupByPlace`, `placeSummary` and their cases in
+      image-meta.test.mjs; the registry's places block in `images.ts`.
+      Plan: "The place walls admit the photographs folder", the failure
+      line, and the testing bullet "The place walls". `image-meta.mjs`:
+      `outingOrder`, `undatedAtPlace`; `groupByPlace`'s `key` and its
+      own-folder test `(homeSlugOf(id) ?? id)`; `placeSummary` by
+      `key`. `images.ts`: the EXIF read hoisted into `rawByKey` (the
+      image loop reads the map); a photographs-folder frame's
+      `placeOfId` from its sidecar's `at:`; the "not grouped under a
+      place" note and its branch deleted; the outings ordered by
+      `outingOrder`; `SitePlace.outings` and `latest` as the plan
+      writes them. Fixtures: `at: the-jetty` in `_dock-b.md` and
+      `_draft-fixture.md`. _Verify: `sh scripts/verify.sh` green
+      (count, the new cases named; the page count unchanged); the
+      mutation fails by name, reverted, line pasted;
+      `grep -o 'href="/photographs/[^"]*"' dist/places/the-jetty/index.html`
+      → the jetty's frames in order, `/photographs/dock-b/` among them
+      where its capture date (2026-08-29) falls against the jetty
+      entry's publish date (both recorded), no `draft-fixture`;
+      `git grep -n "not grouped under a place"` → none; the
+      jetty's card on `dist/places/index.html` with its summary line
+      quoted (one more outing and frame than before); the one-time
+      cover edit as the plan lists it, the card's image pasted, reverted._
+
+- [ ] **T1747** — The photographs index. Placed here, before T1742, by
+      its header text; its id is the next free one. Pattern:
+      `src/pages/places/[slug].astro`'s wall (the `.gallery-flow`
+      cells, `galleryCell`, `loading="lazy"`, `data-pagefind-ignore`)
+      and the image page's related strip (`relatedFlowStyle`,
+      `related-flow`); `NAV_ITEMS` for the shape of `FOOTER_LINKS`.
+      Plan: "The photographs index", the envelope's rows for it, and the
+      testing bullet "The photographs index". `gallery-layout.ts`:
+      `INDEX_SHORT_PX`, `INDEX_NARROW_SHORT_PX`, `indexFlowStyle`,
+      `byIndexOrder`. New `src/pages/photographs/index.astro`.
+      `consts.ts`: `FOOTER_LINKS`. `BaseLayout.astro`: the footer's
+      links from it. New `lexicon.test.mjs` with the knobs, order and
+      footer cases. No stylesheet edit. _Verify: `sh scripts/verify.sh`
+      green (count; the page count one higher); the mutation fails by
+      name, reverted, line pasted;
+      `grep -o 'href="/photographs/[^"]*"' dist/photographs/index.html | sort | uniq -d`
+      → nothing (each once), and its count equal to
+      `find dist/photographs -mindepth 2 -name index.html | wc -l`;
+      `grep -c "draft-fixture" dist/photographs/index.html` → 0; the
+      first ten `alt` values in order, quoted (title order);
+      `grep -c 'href="/photographs/"' dist/about/index.html` → 1 (the
+      footer), and the header's nav without it (the nav's hrefs
+      quoted); the transforms the build made for the index's cells:
+      the `srcset` of one 3:2 and one 2:3 cell quoted, with their byte
+      sizes from `dist/_astro/`, for the Known limitations line._
+
+- [ ] **T1742** — The words. Pattern: the photograph page's `WORDING`
+      block (the one place a page keeps its words); `NAV_ITEMS`. Plan:
+      "The words" and the testing bullet "The words". `consts.ts`,
+      `index.astro`, `journal/index.astro`,
+      `categories/[category].astro`, `search.astro`, the photograph
+      page's `WORDING` and its description's fallback,
+      `about/index.astro`, each at the plan's opening value.
+      lexicon.test.mjs gains the consts case.
       _Verify: `sh scripts/verify.sh` green (count);
       `grep -rniE "\bpieces?\b" src/consts.ts src/pages/about src/pages/search.astro src/pages/index.astro src/pages/journal/index.astro src/pages/categories`
       → each hit listed, every one code (an import, an identifier, a
       comment, an `id`) and none a printed word;
       `grep -rnE "(title|description)=[{\"'\`][^>]*\bpieces?\b" src/pages src/components src/layouts`
       → none; the built nav,
-      `grep -oE '>(Home|Journal|Photographs|Places|Galleries|About|Search)<' dist/index.html`
-      in order, quoted; `grep -rliE ">[^<]*\bpieces?\b" dist --include=*.html`
+      `grep -oE '>(Home|Journal|Places|Galleries|About|Search)<' dist/index.html`
+      in order, quoted — Journal, Places, Galleries, and no
+      Photographs; `grep -rliE ">[^<]*\bpieces?\b" dist --include=*.html`
       → pages listed, each hit inside a journal entry's own prose (T1743
       pins the rest)._
 
@@ -1680,7 +1733,7 @@ T1735.
       lexicon.test.mjs gains the barrier's cases. _Verify:
       `sh scripts/verify.sh` green with the `[check-lexicon]` line
       quoted (pages read, regions, strings, one draft, one front-door
-      photograph); the two mutations fail by name, reverted, lines
+      photograph, the index's count equal to T1747's); the two mutations fail by name, reverted, lines
       pasted; one-time: `NAV_ITEMS`' "Journal" back to "Pieces" → the
       build fails, its first three lines pasted, reverted;
       `git diff -U0 -- package.json` → the `postbuild` line only._
@@ -1695,16 +1748,20 @@ T1735.
       _Verify:
       `grep -nE "gallery-images|content/pieces|/pieces/|/images/|gallery/[a-z]" AUTHORING.md README.md obsidian-plugin/README.md`
       → none;
-      `grep -nE "src/content/photographs|published:|draft: true|\.\./\.\./photographs/" AUTHORING.md README.md`
-      → each at least once, listed; `grep -niE "piece folder" AUTHORING.md README.md`
+      `grep -nE "src/content/photographs|published:|draft: true|\.\./\.\./photographs/|at: " AUTHORING.md README.md`
+      → each at least once, listed (the photographs folder's `at:` and
+      the index among them); `grep -niE "piece folder" AUTHORING.md README.md`
       → none; `npx prettier --check AUTHORING.md README.md obsidian-plugin/README.md`
       clean; `sh scripts/verify.sh` green._
 
 - [ ] **T1745** — The lexicon's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3c
       pause, in the person's words. The questions, in plain language:
-      the nav's four words, and Photographs where it now goes; the
-      front door's list — a photograph among the journal entries as its
+      the nav's three words; the photographs index — the footer link's
+      word ("Index of photographs") and its place beside Contact, the
+      frames' size, the order by title, whether it reads as the back of
+      a book; the jetty's wall with "Dock, late" on it by the day it was
+      made; the front door's list — a photograph among the journal entries as its
       frame, its date and its title, three rows, the headings "Read the
       journal" and "Journal and photographs"; the address shapes —
       `/journal/<entry>/`, `/photographs/<entry>/<name>/` for an
@@ -1877,11 +1934,15 @@ _Filled in at the pause._
       "carries its own context"; "I don't think I'm going to ship a
       header on the site called 'pieces'"; Journal over Essay, since
       Notes already meant gear notes; no catch-all for the other
-      genres, the centre written down instead), and what the plan chose
-      — the bare id as an empty folder segment, a shared name refused,
-      `draft` and `published` optional and the photographs folder's
-      alone, the front door's merge, the barrier's authored-text rule,
-      the internals left named), and
+      genres, the centre written down instead; the index "similar to
+      the index at the back of a book … more of an addendum than a main
+      feature"; place pages, "yes, absolutely"), and what the plan
+      chose — the bare id as an empty folder segment, a shared name
+      refused, `draft` and `published` optional and the photographs
+      folder's alone, the front door's merge, a photographs-folder
+      frame as an outing of its own on its place's wall, the index on
+      the gallery flow behind one footer link, the barrier's
+      authored-text rule, the internals left named), and
       the keeps from each pause in his words, round by round. Both hand-edited (`npx prettier --check` clean; grep for
       lines beginning with a CSS `>` or `+` before any format run).
       Then, the orchestrator's part: the pre-merge whole-spec sweep at
@@ -1918,12 +1979,14 @@ _Filled in at the pause._
       record; AC 24 by T1731's stylesheet cases and the record's console
       lines; AC 25 by T1730's `resolveRelative` cases, T1731's missing
       case and the record; AC 26 by T1734's greps and the plugin's
-      build; the third amendment's six — AC 27 by T1736's commit (its
+      build; the third amendment's eight — AC 27 by T1736's commit (its
       hash and its place before T1737's); AC 28 by T1737–T1739's cases
       and `dist/` reads and the lexicon barrier's scan 1; AC 29 by
       T1740's cases and one-time edits and scan 3; AC 30 by
       front-door.test.mjs, T1741's read and scan 4; AC 31 by the consts
-      case, scan 2 and the Phase 3c record; AC 32 by T1744's greps,
+      case, scan 2 and the Phase 3c record; AC 32 by T1747's cases and
+      reads, scan 5 and the Phase 3c record; AC 33 by T1746's cases,
+      its jetty read and the Phase 3c record; AC 34 by T1744's greps,
       T1737's `resolveRelative` cases and the Phase 3c record; AC 13 as
       amended by T1716's reads and the Phase 4 record); build, tests,
       check, and

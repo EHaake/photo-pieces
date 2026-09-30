@@ -2422,33 +2422,21 @@ date", the flow "Publishing a photograph", the Design requirement "The
 words on the site", the Authoring requirements "The constitution, a
 third time", "The folders, moved" and "The documents", the envelope's
 lexicon bullet and ordinary-path line, AC 13 as amended (T1716), and the
-six criteria under "_Amended 2026-09-29 (lexicon):_" (AC 27–32 here,
-numbered on from AC 26).
+eight criteria under "_Amended 2026-09-29 (lexicon):_" (AC 27–34 here,
+numbered on from AC 26: the constitution 27, the addresses 28, the
+draft 29, the front door 30, the words 31, the photographs index 32, the
+place pages 33, the documents 34). Planning's question on the nav is
+answered in the spec (Goal 11's last sentences, "The words on the
+site", the Decided section's last bullet): the nav carries three words,
+the photographs index is reached from the footer, and a place's page
+admits the photographs folder.
 
-**Open — a product question for the person, not settled here.** AC 31
-says "the nav reads Journal, Photographs, Places, Galleries", and the
-envelope counts "the nav's four". Journal, Places and Galleries each
-have an index page (`/journal/` after T1738, `/places/`, `/galleries/`);
-nothing in the spec gives Photographs one — its addresses are
-`/photographs/<name>/` and `/photographs/<slug>/<name>/`, and "the nav's
-words change with the lexicon; its shape does not". A nav link needs a
-target, and what that target is changes what gets built: (a) a new index
-at `/photographs/` — which photographs it lists (the photographs folder's
-only, or every published photograph), in what order (a photograph
-without `published:` has no date of its own), and how (a wall like a
-gallery's, or rows like the journal's) are all unwritten; or (b) the nav
-carries three section words for now (Journal, Places, Galleries) and
-Photographs joins it when its index is specified — an amendment to AC
-31. The plan builds neither. T1742's nav line waits on the answer; the
-orchestrator transcribes it into this paragraph and T1742 before
-dispatching T1742. If the answer is (a), the index is one more task
-before T1742, drafted from his answer — not invented here.
-
-Five changes on a built spec, in one order so the suite is green at
+Seven changes on a built spec, in one order so the suite is green at
 every commit: the homes move (`git mv`, the collection renamed), then
 the addresses, then the id rule, then the draft and date, then what
-reads them (the front door, the words), and a post-build barrier that
-makes the result a fact of every build. No dependency. No internal name
+reads them (the front door, the place walls, the photographs index, the
+words), and a post-build barrier that makes the result a fact of every
+build. No dependency. No internal name
 changes: module files (`remark-pieces-blocks.mjs`, `src/lib/pieces.ts`,
 `PieceList.astro`), the `piece-*` CSS classes, `SetKind`'s `'piece'`
 and the `data-set="piece:<slug>"` values, `WORDING`'s keys, the
@@ -2461,7 +2449,9 @@ barrier's scan 1 path (`/images/**/index.html`, now
 `/photographs/**/index.html`, T1738); File structure's
 `src/content/pieces/<his slug>/` line (T1716, amended); and Amendment
 2's `resolveRelative` case `../../gallery-images/a.jpg` (now
-`../../photographs/a.jpg`, T1737). Every other mention of `pieces/`,
+`../../photographs/a.jpg`, T1737). Spec 009's own-folder rule for a
+place's wall is widened here (T1746); it is not stated as design
+anywhere above in this plan. Every other mention of `pieces/`,
 `gallery-images/`, `/pieces/` or `/images/` above is the record of what
 was built when, and stays as written.
 
@@ -2537,8 +2527,14 @@ before, and each bullet says where the simpler shape was taken.
       places it."
     - In the Places sentences: "a piece may set one default for its
       folder" → "a journal entry may set one default for its folder";
-      "own-folder frames only, naming no piece;" → "own-folder frames
-      only, naming no journal entry;".
+      and "A place's page shows its published frames as one wall,
+      outings oldest first, own-folder frames only, naming no piece;"
+      → "A place's page shows its published frames as one wall,
+      outings oldest first — a journal entry's own-folder frames at the
+      place as one outing, dated by the entry, and each photograph of
+      the photographs folder that names the place as an outing of its
+      own, dated by its capture — naming no journal entry; its cover is
+      one of those frames;".
   - **The Images paragraph**, two replacements:
     - "local and co-located with each piece for initial development
       (`src/content/pieces/<slug>/`), plus one flat
@@ -2695,16 +2691,12 @@ before, and each bullet says where the simpler shape was taken.
     basename; the explicit line says why the id changed).
   - `placeCoverProblem(cover, frames, file, known)` → message or null
     — the place-cover check lifted out of `images.ts` so it is
-    testable, today's line unchanged unless `oldIdHint` answers. A
-    photographs-folder photograph is never a place's frame (spec 009,
-    unchanged: the wall is journal entries' own-folder frames), so the
-    old id's line says that too, rather than pointing at an id that
-    would fail next.
+    testable, today's line unchanged unless `oldIdHint` answers. (From
+    T1746 a photographs-folder photograph at the place is one of its
+    frames, so the bare id the line names can be a valid cover.)
 
   In `images.ts`: `nameCollisions` after discovery; the place-cover
-  loop calls `placeCoverProblem`; the ignored-`at:` warning says
-  "photographs in src/content/photographs/ are not grouped under a
-  place". `SiteImage`'s doc comments name the two id shapes and
+  loop calls `placeCoverProblem`. `SiteImage`'s doc comments name the two id shapes and
   `/photographs/<id>/`. Content: every `gallery/<name>` in
   `src/content/galleries/*.md` → `<name>` (five files).
 
@@ -2747,8 +2739,8 @@ before, and each bullet says where the simpler shape was taken.
   fails (`validateGalleries`' draft reason, reworded for a bare id); a
   journal entry that places it, in its body or as its cover, fails
   (`referenceProblems`' draft line, reworded for a bare id, since
-  `homeSlugOf` is null); a place's cover cannot name it (never a
-  frame); the feed lists journal entries only; its OG image and its
+  `homeSlugOf` is null); a place's cover cannot name it (a draft is on
+  no wall — `placeOfId` holds published files only, T1746); the feed lists journal entries only; its OG image and its
   search-index entry are its page's, and it has none; the front door
   reads `registry.images`. A draft with `published:` stays off the
   front door.
@@ -2805,12 +2797,108 @@ before, and each bullet says where the simpler shape was taken.
   result back to its item. A photograph without `published:` is never
   in the list, because the list is built only from those that have one.
 
+- **The place walls admit the photographs folder** (`src/lib/image-meta.mjs`,
+  `src/lib/images.ts`, fixtures, T1746). Spec 009's own-folder rule is
+  widened: a published photograph of the photographs folder whose
+  sidecar names a place (`at: <slug>`; the folder has no entry to give a
+  default) stands on that place's wall and may be its cover; one that
+  names none, says `at: none`, is a draft, or names a draft place does
+  not. The note "gallery-root photographs are not grouped under a place
+  — the line is ignored" and its branch are deleted; such a frame's
+  `placeOfId` is `placeOf(sidecar?.data.at, undefined)`, a draft place
+  resolving to null as for any frame.
+
+  **How it groups: an outing of its own, dated by its capture.** A
+  journal outing is dated by its entry's `publishDate`; a
+  photographs-folder frame has no entry, and its date is its capture
+  date — `mergeOverrides(formatExposure(raw), sidecar).date`, the wall
+  label's own date (a sidecar `date:` wins over EXIF). Merging it into
+  a same-day journal outing would compare a capture date with a publish
+  date — two clocks — and join visits that have nothing to do with each
+  other; and the wall shows no outing boundaries (no headings, no
+  dates), so a separate outing changes only the order and the summary's
+  count. One pure function orders both kinds:
+
+  ```js
+  // journal: { key: slug, date: publishDate }[]; photographs: { key: id, date: captureDate }[]
+  // → keys, oldest first; a tie puts the journal outing first, then by key
+  export function outingOrder(journal, photographs)
+  ```
+
+  `groupByPlace(framesByOuting, placeOfId, order)` keeps its shape: a
+  photograph outing's frames are `[id]`, and the own-folder test
+  becomes `(homeSlugOf(id) ?? id) !== key` — a frame's outing key is
+  its journal slug, or itself in the photographs folder — so a borrowed
+  frame is still never counted under a borrower. Its outings become `{
+  key, frames }`; `placeSummary(outings, dateByOuting)` reads
+  `outing.key` (a photograph outing counts as an outing, and its year
+  in the span). `SitePlace.outings` becomes `{ key: string; piece:
+  CollectionEntry<'journal'> | null; frames: string[] }[]` (no page
+  reads `piece`), and `latest` is `dateByOuting.get(newest.key)`, so a
+  recently made photograph can move its place up the places index; the
+  default cover is the newest outing's first frame, whichever kind.
+
+  A photographs-folder frame at a place with no capture date (no EXIF
+  date, no sidecar `date:`) fails the build rather than being put at
+  an end by a guess: `undatedAtPlace(entries)` (`{ file, slug, date
+  }[]` → messages, pure, in `image-meta.mjs`), thrown all at once. For the date to be known when the outings are
+  ordered, the registry's EXIF read moves ahead of the places: one
+  `readExposure` per published file into `rawByKey`, the image loop
+  reading the map instead of the file (the same reads, once each).
+
+  Fixtures: `_dock-b.md` gains `at: the-jetty` (its `date: 2026-08-29`
+  is its capture date); `_draft-fixture.md` gains `at: the-jetty`, so a
+  broken draft rule would put it on the wall (scan 3 refuses any link
+  to it). The jetty's declared cover stays; a photographs-folder cover
+  is pinned by the unit case and one build edit.
+
+- **The photographs index** (`src/pages/photographs/index.astro`, new;
+  `src/lib/gallery-layout.ts`; `src/consts.ts`;
+  `src/layouts/BaseLayout.astro`; T1747). `/photographs/`: every
+  published photograph of both folders — `registry.images`, which holds
+  each published id once and no draft — as small frames in one packed
+  grid, in title order, each linking to its page; an `h1` and nothing
+  else written. It reuses the gallery flow as the related strip does,
+  at a fixed small short side: the `.gallery-flow` rows pack by ratio
+  and stretch within the cap, so a fixed `--gallery-short` gives a
+  dense, even grid of mixed ratios with no new CSS. In
+  `gallery-layout.ts`, beside the related strip's knobs (the one module
+  that holds the walls' knobs):
+
+  ```ts
+  export const INDEX_SHORT_PX = 88;        // tunable: the frame size (short side, CSS px)
+  export const INDEX_NARROW_SHORT_PX = 72; // tunable: the same below the 720px collapse
+  export const indexFlowStyle = `--gallery-short: ${INDEX_SHORT_PX}px; --gallery-stretch: ${GALLERY_STRETCH}; --gallery-width: ${GALLERY_WIDTH}; --gallery-gap: calc(var(--baseline) / 3)`;
+  export function byIndexOrder(a: { id: string; title: string }, b: { id: string; title: string }): number; // tunable: the order
+  ```
+
+  `byIndexOrder`: `a.title.localeCompare(b.title, 'en', { sensitivity:
+  'base', numeric: true }) || a.id.localeCompare(b.id)`. The page:
+  `<ul class="gallery-flow gallery-wide related-flow photographs-index"
+  style={indexFlowStyle} data-pagefind-ignore>`, one `<li
+  style="--ar: …">` per photograph with an `image-link` anchor and
+  `<Image … layout="constrained" loading="lazy">` sized by
+  `galleryCell(image.image, INDEX_SHORT_PX, INDEX_NARROW_SHORT_PX)`,
+  `alt` its title. `related-flow` is reused for its one rule — below
+  the collapse a small-short-side flow keeps its cap rather than going
+  one frame per row — which is the index's case exactly; no stylesheet
+  edit. The heading: `h1` "Photographs", title "Photographs".
+  `setKeyFromPath('/photographs/')` is null, so a frame opened from the
+  index shows its page's default set.
+
+  The footer link: `src/consts.ts` gains `FOOTER_LINKS` — `[{ href:
+  '/contact/', label: 'Contact' }, { href: '/photographs/', label:
+  'Index of photographs' }]` — the link's word and its place (its
+  position among the footer's links) in one array; `BaseLayout`'s
+  `.footer-links` renders it in place of its one hard-coded Contact
+  link. `NAV_ITEMS` carries no `/photographs/` entry.
+
 - **The words** (T1742). Opening values, each in the one place the page
   already keeps its words; all the envelope's to change at the look:
   - `src/consts.ts`: `NAV_ITEMS` in the AC's order — Home, Journal
-    (`/journal/`), Photographs (**open**, above), Places, Galleries,
-    About, Search. The order moves Places before Galleries, as AC 31
-    lists them and as "deliberately secondary" reads.
+    (`/journal/`), Places, Galleries, About, Search. The order moves
+    Places before Galleries, as AC 31 lists them and as "deliberately
+    secondary" reads.
     `SITE.description` → "Photography by Erik Haake — landscape and
     nature first, with street, portrait and event work, and the writing
     that goes with it." (it prints on the front door); `rssDescription`
@@ -2840,7 +2928,7 @@ before, and each bullet says where the simpler shape was taken.
 - **The lexicon barrier** (`scripts/check-lexicon.mjs`, new;
   `postbuild` after `check-private-files`; T1743). `node
   scripts/check-lexicon.mjs [dist] [content]`, defaults `dist` and
-  `src/content`; `<dist>/pagefind/` excluded. Four scans:
+  `src/content`; `<dist>/pagefind/` excluded. Five scans:
   1. **Old addresses.** No `<dist>/pieces/`, `<dist>/images/` or
      `<dist>/og/pieces/`; in every `.html` and `.xml` file, no
      attribute value and no element text that is a URL — root-relative
@@ -2878,11 +2966,22 @@ before, and each bullet says where the simpler shape was taken.
      `/photographs/<name>/` names a sidecar
      `<content>/photographs/_<name>.md` with a `published:` line and no
      `draft: true`.
+  5. **The photographs index.** `<dist>/photographs/index.html`
+     exists; the photograph pages are every
+     `<dist>/photographs/**/index.html` but that one, each read as its
+     id (the path between `photographs/` and `/index.html`); the links
+     inside the index's `.photographs-index` list name exactly that set
+     of ids, each once — so every published photograph of both folders
+     is on it, and nothing without a page (no draft) is. On every page,
+     the `<footer>` holds exactly one link to `/photographs/` and the
+     header's `<nav>` none. The order is not read here (the titles are
+     in `alt` attributes); `byIndexOrder`'s cases and T1747's read pin
+     it.
 
   The summary line: `[check-lexicon] <n> pages read, <r> authored
   regions set aside, <s> authored strings excused; 0 old addresses;
   <d> draft photographs, none published; <f> front-door photographs,
-  each dated`. `scripts/verify.sh` adds `\[check-lexicon\]` to its
+  each dated; the index lists <p> photographs, each once`. `scripts/verify.sh` adds `\[check-lexicon\]` to its
   summary grep. The motion and private-files barriers are not edited
   here.
 
@@ -2892,8 +2991,10 @@ before, and each bullet says where the simpler shape was taken.
   "A journal folder is public territory", a section on the photographs
   folder — a photograph's home, its sidecar as its writing, the private
   family beside it, `draft: true` and `published:`, the bare id and
-  `/photographs/<name>/`, a gallery naming it by that name — the
-  borrowing paths (`../<slug>/<file>`, `../../photographs/<file>`), and
+  `/photographs/<name>/`, a gallery naming it by that name, `at:`
+  putting it on a place's wall as an outing of its own by its capture
+  date (and a place's cover able to be it), the index at
+  `/photographs/` behind the footer's link — the borrowing paths (`../<slug>/<file>`, `../../photographs/<file>`), and
   the photograph's page described as the piece it is. Every address in
   both. `obsidian-plugin/README.md`: its path paragraph's
   `../../photographs/x.jpg`, the vault-root note, and "How to check it"
@@ -2906,7 +3007,10 @@ The envelope's lexicon bullet. One place each:
 
 | Envelope item                  | One place (opening value)                                                                  | Pinned by                                                                |
 | ------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| the nav's four words           | `NAV_ITEMS`' labels, `src/consts.ts` (Journal, Photographs — open, Places, Galleries)      | lexicon.test.mjs's consts case; the barrier's words scan                 |
+| the nav's three words          | `NAV_ITEMS`' labels, `src/consts.ts` (Journal, Places, Galleries)                          | lexicon.test.mjs's consts case; the barrier's words scan                 |
+| the index's frame size         | `INDEX_SHORT_PX` (88), `INDEX_NARROW_SHORT_PX` (72), `src/lib/gallery-layout.ts`           | lexicon.test.mjs, by name and value                                      |
+| the index's order              | `byIndexOrder`, `src/lib/gallery-layout.ts` (title, then id)                               | lexicon.test.mjs's order cases                                           |
+| the index link's word and place | `FOOTER_LINKS`, `src/consts.ts` ("Index of photographs", after Contact)                   | lexicon.test.mjs's consts case; the barrier's scan 5                     |
 | the front door's headings      | `src/pages/index.astro`: "Read the journal"; "Journal and photographs" under "Latest"     | the words scan (no "piece"); the look                                    |
 | "Also in" and the page's words | the photograph page's `WORDING`: `alsoIn`, `fromPiece`, `passage.heading`                  | the words scan; the look                                                 |
 | the front door's list length   | `FRONT_DOOR.latest`, `src/lib/front-door.mjs` (3)                                          | front-door.test.mjs, by name and value                                   |
@@ -2927,9 +3031,12 @@ A field renamed is both places; the barrier imports the constant.
   "gallery/dock-a" is an old id — the photograph in
   src/content/photographs/ is "dock-a" now`.
 - A place cover naming an old id: `[places] <file>: cover
-  "gallery/dock-a" is an old id — the photograph is "dock-a" now, but a
-  place's cover is one of its own frames, and a photograph in
-  src/content/photographs/ is on no place's wall`.
+  "gallery/dock-a" is an old id — the photograph in
+  src/content/photographs/ is "dock-a" now (a place's cover must be one
+  of its frames)`.
+- A photographs-folder frame at a place with no capture date:
+  `[places] <file>: names the place "<slug>" but has no capture date,
+  which orders it on the wall — add a date: line to the sidecar`.
 - A journal-folder sidecar writing a photograph's field: `[images]
   <file>: "draft" is for a photograph in src/content/photographs/ — a
   journal entry's photographs are published and dated by their entry;
@@ -2947,7 +3054,10 @@ A field renamed is both places; the barrier imports the constant.
   photograph is at /photographs/…`; `[check-lexicon] draft photograph
   "<name>" has a page` / `is named in <file>`; `[check-lexicon] the
   front door lists "<name>", which has no published: date` (or `is a
-  draft`).
+  draft`); `[check-lexicon] the photographs index misses "<id>"` / `lists
+  "<id>" twice` / `lists "<id>", which has no page`; `[check-lexicon]
+  <page>: the footer has <n> links to /photographs/ (one expected)` /
+  `the nav links to /photographs/`.
 
 ### Testing strategy (amendment 3)
 
@@ -3008,11 +3118,33 @@ A field renamed is both places; the barrier imports the constant.
   between two entries → between them; a tie → the entry first; a list
   longer than `length` → cut. **Mutation**: the tie order swapped → the
   tie case fails, reverted.
-- **The words** — **T1742** (lexicon.test.mjs, new): imports
-  `NAV_ITEMS` and `SITE` from `src/consts.ts`; the section labels in
-  order equal the four (as the open question settles them), their
-  hrefs; no `\bpieces?\b` in any label, `SITE.description` or
-  `SITE.rssDescription`.
+- **The place walls** — **T1746** (image-meta.test.mjs): `outingOrder`
+  — a photograph dated between two entries → between them; on an
+  entry's date → after it; two photographs on one date → by id.
+  `groupByPlace` with a photograph outing `[id]` at the place → its
+  own outing, in order; a journal entry that borrows that photograph
+  does not count it (the own-folder test); a photograph whose place is
+  null → absent. `placeSummary` counts it as an outing and its year in
+  the span. `placeCoverProblem` with a photographs-folder frame among
+  the frames → null. The existing `groupByPlace` and `placeSummary`
+  cases, with `piece` renamed `key`, unchanged otherwise. **Mutation**:
+  the `?? id` dropped from the own-folder test → the photograph-outing
+  case fails, reverted. One-time build edits, reverted, lines pasted:
+  `the-jetty.md`'s cover set to `dock-b` → builds, the places index's
+  jetty card showing it. `undatedAtPlace`: an entry with a date and a
+  place → none; with a place and no date → the line naming the file
+  and the slug; with no place → none.
+- **The photographs index** — **T1747** (lexicon.test.mjs):
+  `INDEX_SHORT_PX` 88 and `INDEX_NARROW_SHORT_PX` 72 by name;
+  `byIndexOrder` — "bank" before "Dock, late" (case ignored), "Frame 2"
+  before "Frame 10" (numeric), equal titles by id; `FOOTER_LINKS` holds
+  exactly one `/photographs/` link, labelled "Index of photographs", and
+  `NAV_ITEMS` none. **Mutation**: `numeric: true` dropped → the "Frame
+  10" case fails, reverted.
+- **The words** — **T1742** (lexicon.test.mjs): imports `NAV_ITEMS`
+  and `SITE` from `src/consts.ts`; the section labels in order equal
+  Journal, Places, Galleries, with their hrefs; no `\bpieces?\b` in
+  any label, `SITE.description` or `SITE.rssDescription`.
 - **The barrier** — **T1743** (lexicon.test.mjs, private-files.test's
   temp-tree shape): each scan passes on a clean tree and fails on its
   case — a `dist/images/` folder; an `href="/pieces/x/"`; a
@@ -3022,24 +3154,28 @@ A field renamed is both places; the barrier imports the constant.
   harvested alt, a class name, an `href`, a `<script>`, and in
   "masterpiece"; a draft sidecar with a page, and with its URL in
   `rss.xml`; a front-door link to an undated photograph, and to a
-  draft. **Mutations**: the authored-region list emptied → the
-  `.prose` case fails; the harvest disabled → the title case fails;
+  draft; an index missing a photograph page's id, listing one twice,
+  and listing an id with no page; a footer without the link, with two,
+  and a nav with it. **Mutations**: the authored-region list emptied →
+  the `.prose` case fails; the harvest disabled → the title case fails;
   each reverted.
 - **Unchanged and green**: the whole suite; the four existing barriers
   and the fifth; `astro check`; in `obsidian-plugin/`, `npm run build`.
-- **At the pause, by the person**: the nav, the addresses, the front
-  door, the words on each page, and the moved samples in Obsidian.
+- **At the pause, by the person**: the nav, the footer's link and the
+  index, the jetty's wall with "Dock, late" on it, the addresses, the
+  front door, the words on each page, and the moved samples in
+  Obsidian.
 
 ### File structure (amendment 3)
 
 ```
 CLAUDE.md                                        the lexicon; the Content model and Images clauses (T1736, its own commit)
 src/content/pieces/ → src/content/journal/      git mv; the matte and vocabulary samplers' borrowed srcs (T1737)
-src/content/gallery-images/ → src/content/photographs/   git mv (T1737); _dock-b.md's published: and story line, draft-fixture.jpg and _draft-fixture.md new (T1740)
+src/content/gallery-images/ → src/content/photographs/   git mv (T1737); _dock-b.md's published: and story line, draft-fixture.jpg and _draft-fixture.md new (T1740); both sidecars' at: the-jetty (T1746)
 tests/pieces/ → tests/journal/, tests/gallery-images/ → tests/photographs/   git mv (T1737)
 src/content.config.ts                            the journal collection, imageMeta's pattern (T1737); draft, published (T1740)
-src/lib/image-meta.mjs                           PHOTOGRAPHS_ROOT, JOURNAL_ROOT, sidecarImageId's pattern, messages (T1737); a comment (T1738); PHOTOGRAPHS_FOLDER, imageIdOf, homeSlugOf, the reference kind, oldIdHint, placeCoverProblem, nameCollisions, the slug guard (T1739); PHOTOGRAPH_FIELDS, photographOnlyProblems, the draft reasons (T1740)
-src/lib/images.ts                                the glob, the collection, a message (T1737); set URLs (T1738); collisions, place covers, the places warning (T1739); the sidecar-first order, status, published (T1740)
+src/lib/image-meta.mjs                           PHOTOGRAPHS_ROOT, JOURNAL_ROOT, sidecarImageId's pattern, messages (T1737); a comment (T1738); PHOTOGRAPHS_FOLDER, imageIdOf, homeSlugOf, the reference kind, oldIdHint, placeCoverProblem, nameCollisions, the slug guard (T1739); PHOTOGRAPH_FIELDS, photographOnlyProblems, the draft reasons (T1740); outingOrder, undatedAtPlace, groupByPlace's key and own-folder test, placeSummary's key (T1746)
+src/lib/images.ts                                the glob, the collection, a message (T1737); set URLs (T1738); collisions, place covers (T1739); the sidecar-first order, status, published (T1740); the EXIF read hoisted, photographs-folder outings, the places note deleted, SitePlace.outings, latest (T1746)
 src/lib/pieces.ts                                the collection (T1737)
 src/components/PieceList.astro                   the collection (T1737); href (T1738); items, the photograph row (T1741)
 remark-pieces-blocks.mjs                         the flat-root check (T1737); a comment (T1739)
@@ -3052,7 +3188,10 @@ src/pages/index.astro                            href (T1738); the merged list (
 src/pages/categories/[category].astro            href (T1738); items (T1741); words (T1742)
 src/pages/search.astro, src/pages/about/index.astro   words (T1742)
 src/pages/rss.xml.ts, src/lib/categories.ts, src/lib/image-set.ts, src/layouts/BaseLayout.astro, src/lib/url.ts, src/lib/og-card.mjs   addresses (T1738)
-src/consts.ts                                    nav href (T1738); nav words, SITE strings (T1742)
+src/layouts/BaseLayout.astro                     the footer from FOOTER_LINKS (T1747)
+src/pages/photographs/index.astro                new: the photographs index (T1747)
+src/lib/gallery-layout.ts                        INDEX_SHORT_PX, INDEX_NARROW_SHORT_PX, indexFlowStyle, byIndexOrder (T1747)
+src/consts.ts                                    nav href (T1738); FOOTER_LINKS (T1747); nav words, SITE strings (T1742)
 scripts/check-private-files.mjs                  the photograph pages' folder (T1738)
 src/content/galleries/*.md                       bare ids (T1739)
 src/lib/front-door.mjs                           new: FRONT_DOOR, mergeLatest (T1741)
@@ -3060,9 +3199,9 @@ scripts/check-lexicon.mjs                        new (T1743)
 package.json, scripts/verify.sh                  postbuild; the summary grep (T1743)
 image-meta, galleries, gear, remark-pieces-vocabulary, remark-pieces-blocks, obsidian-plugin .test.mjs   paths (T1737)
 image-meta, image-set, categories, motion, matte, compare, private-files, remark-pieces-vocabulary .test.mjs   addresses (T1738)
-image-meta, galleries, remark-pieces-vocabulary .test.mjs   the id rule (T1739); image-meta, galleries (T1740)
+image-meta, galleries, remark-pieces-vocabulary .test.mjs   the id rule (T1739); image-meta, galleries (T1740); image-meta (T1746)
 front-door.test.mjs                              new (T1741)
-lexicon.test.mjs                                 new: the consts case (T1742); the barrier's cases (T1743)
+lexicon.test.mjs                                 new: the index's knobs and order, the footer case (T1747); the consts case (T1742); the barrier's cases (T1743)
 AUTHORING.md, README.md, obsidian-plugin/README.md   T1744
 src/content/photographs/ or src/content/journal/<his slug>/   his piece, as supplied (T1716, amended)
 ROADMAP.md, DECISIONS.md                         close-out (T1718, amended)
@@ -3073,16 +3212,27 @@ Untouched, named so the reviewer can confirm: the plugin's code
 `src/lib/motion.ts`, `compare.ts`, `loupe.ts`, `stage-sizes.ts`,
 `gear.mjs`, `exif.mjs`; `scripts/check-motion.mjs`,
 `check-no-gps.mjs`, `check-no-dev-routes.mjs`; the places pages and
-the galleries pages (they read ids and URLs through the registry);
-`package.json`'s dependencies.
+the galleries pages (they read ids, URLs, frames and covers through
+the registry); `package.json`'s dependencies.
 
 ### Known limitations (amendment 3)
 
-- **A photographs-folder photograph is on no place's wall** (spec 009's
-  own-folder rule, unchanged): an `at:` in its sidecar is checked and
-  ignored with the warning, and it cannot be a place's cover. The spec's
-  "refused by … a place cover" holds by that rule. If the place tour is
-  meant to gather photograph pieces, that is the place spec's.
+- **A place's wall orders by two clocks.** A journal outing sorts by its
+  entry's publish date, a photographs-folder photograph by its capture
+  date; an entry published months after its outing sorts later than a
+  photograph made the same day. The wall shows no dates, so this is
+  order only; the place tour's spec may date outings by capture.
+- **The photographs index is one page with no paging.** Each cell is an
+  `<li>` of about half a kilobyte of markup and an `<Image>` whose
+  `srcset` tops at `galleryCell`'s ceiling for an 88 px short side
+  (a 3:2 frame: 88 × 1.5 × 1.35 × 2 ≈ 356 px wide), so each photograph
+  adds one or two small webp transforms to the build (Astro's
+  constrained candidates at or under that width, reused across pages
+  only where the transform is identical) and a few tens of kilobytes
+  when it scrolls into view — every cell is `loading="lazy"`. At
+  hundreds of photographs the page is a few hundred kilobytes of HTML
+  and the build a few hundred more transforms; at thousands, paging or
+  a lighter cell is the change, named here, not built.
 - **It carries no category of its own.** Its eyebrow is its galleries'
   categories, as the gallery root's was; the category pages list
   galleries and journal entries only. The spec adds `draft` and
@@ -3131,12 +3281,20 @@ the galleries pages (they read ids and URLs through the registry);
   ties to the journal entry; `PieceList` takes items so one row
   treatment serves both kinds; a photograph row is its frame, its date
   and its title.
-- **One new barrier** for the addresses, the words, the drafts and the
-  front door, name-independent where it can be; authored text excused
-  by region and by harvested strings, never by class name or URL; the
-  existing barriers keep their scopes.
-- **The nav follows AC 31's order**; its Photographs target is the
-  person's (above).
+- **A photographs-folder frame at a place is an outing of its own,
+  dated by its capture**, ordered with the journal outings by one pure
+  function; not merged into a same-day outing (two clocks), and an
+  undated one refused rather than placed by guess.
+- **The photographs index reuses the gallery flow** at a fixed small
+  short side and the related strip's narrow rule by its class — no new
+  CSS; its knobs sit beside the walls' in `gallery-layout.ts`, and the
+  footer's links become one array so the link's word and place are one
+  edit.
+- **One new barrier** for the addresses, the words, the drafts, the
+  front door and the index, name-independent where it can be; authored
+  text excused by region and by harvested strings, never by class name
+  or URL; the existing barriers keep their scopes.
+- **The nav follows AC 31's order** — Journal, Places, Galleries.
 - **The About page's interim text is rewritten** — not his words, and
   AC 31 covers every page.
 - **No internal rename, no new dependency.**
