@@ -1858,7 +1858,7 @@ T1735.
       A non-literal site: line fails loudly (no test: the config path is
       not a parameter).
 
-- [ ] **T1744** — The documents. Pattern: T1728 and T1734 (their
+- [x] **T1744** — The documents. Pattern: T1728 and T1734 (their
       hand-editing rule; each document's own voice). Plan: "The
       documents" (amendment 3). `AUTHORING.md`, `README.md`,
       `obsidian-plugin/README.md` as the plan says, every claim read
@@ -1884,6 +1884,17 @@ T1735.
       the index among them); `grep -niE "piece folder" AUTHORING.md README.md`
       → none; `npx prettier --check AUTHORING.md README.md obsidian-plugin/README.md`
       clean; `sh scripts/verify.sh` green._
+      Done: the three curl codes at /photographs/draft-fixture/ under
+      npm run dev: 404 with draft: true; 200 after the line removed, no
+      restart (the front door listing it too); 200 after a restart —
+      AUTHORING.md says a sidecar edit publishes in the running server;
+      git diff --stat -- src/content empty after the restore. The stale-
+      address and piece-folder greps none; capture date 8 hits; each
+      field and path in both documents; prettier clean; 88 pages, 810
+      tests, BUILD/CHECK/TEST EXIT 0. The old-id line quoted with <name>
+      (the grep forbids gallery/[a-z]); the plugin README's vault note
+      corrected (above the repo, as AUTHORING says); README's intro in
+      the lexicon's words.
 
 - [ ] **T1745** — The lexicon's look, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3c
@@ -2280,6 +2291,7 @@ tier if it is ever on (it is off). -->
 | T1747 photographs index | implementation (`opus`, high) | ~68k | done; 784 tests (+8); findings: srcset ceiling ~712 not ~356 (plan wording), private-files barrier counts the index as an image page, Verify's href count includes the footer link |
 | T1742 the words | implementation (`opus`, high) | ~52k | done; 786 tests (+2); grep 2's two hits are the `piece` identifier |
 | T1743 lexicon barrier | implementation (`opus`, high) | ~85k | done; 810 tests (+24); the front door missing .index-feed fails (beyond the plan's 'must exist' for the index); site: failure untested |
+| T1744 documents | implementation (`opus`, high) | ~122k | done; 404/200/200 — a sidecar edit reaches the running dev server despite the registry's 'cached for the module' comment (sweep); README's test list incomplete (left) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

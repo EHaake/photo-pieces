@@ -49,15 +49,15 @@ name not in the vocabulary. The build is the judge of each.
 In Reading view, a note embedded in another note, a hover preview
 and an export are left as Obsidian draws them.
 
-A `src` that names a folder — `../other-piece/x.jpg`,
-`../../gallery-images/x.jpg` — is resolved from the note's own folder
+A `src` that names a folder — `../other-entry/x.jpg`,
+`../../photographs/x.jpg` — is resolved from the note's own folder
 the way the site build resolves it, so a wrong path shows "not found"
 rather than a same-named file from another folder. A bare `./x.jpg`
-still uses Obsidian's own lookup. Borrowing from the gallery root
+still uses Obsidian's own lookup. Borrowing from the photographs folder
 needs the vault root at or above `src/content/` (the layout in
-`AUTHORING.md` puts it at the repo root): a vault opened at `src/content/pieces/` cannot reach
-`../../gallery-images/`, and the plugin shows "not found" for a path
-the build accepts.
+`AUTHORING.md` puts it above the repo): a vault opened at
+`src/content/journal/` cannot reach `../../photographs/`, and the
+plugin shows "not found" for a path the build accepts.
 
 ## Build and install
 
@@ -84,7 +84,7 @@ provides the real CodeMirror instance at runtime, which is why
 
 ## How to check it
 
-Open the sampler piece, `src/content/pieces/vocabulary-sampler/index.md`,
+Open the sampler entry, `src/content/journal/vocabulary-sampler/index.md`,
 in Live Preview: every block in it is a figure, none raw text. Switch to
 Reading view and it is the same page. The sampler carries no compare;
 `where-the-fog-lets-go` has a compare, a side and a slider. With
@@ -94,7 +94,7 @@ site's.
 What a test can pin, `sh scripts/verify.sh` runs from
 `obsidian-plugin.test.mjs` at the repo root: the block table against
 the transform, the scanner against the transform's own reading of the
-sampler and the fog piece, the figure each block builds, the
+sampler and the fog entry, the figure each block builds, the
 stylesheet, and how Reading view's sections are rebuilt. The views
 themselves are checked by eye.
 

@@ -1,9 +1,13 @@
 # photo-pieces
 
 A personal photography site — landscape/nature, street, portrait, and
-event work — built around **pieces**: blog-style entries pairing images
-with real writing, with hand-curated galleries kept as a secondary
-view, not the main event.
+event work — built around **pieces**: pages that carry writing and the
+site's treatments, so the context travels with the work. A piece is a
+**photograph** (one image, its page, its writing, its making), a
+**journal** entry (thoughts moving through several photographs), or a
+**place** (a tour through somewhere the photographer keeps going back
+to); hand-curated **galleries** are kept as a secondary view, not the
+main event. `CLAUDE.md` defines the words.
 
 Forked from [astro-keel](https://github.com/kpab/astro-keel) by kpab
 (MIT licensed) and built out from there using spec-driven development.
@@ -41,17 +45,17 @@ npm run preview  # preview the production build
 
 Requires Node.js 22+.
 
-## Authoring a piece
+## Authoring a journal entry
 
 The actual point of this project. Write in Obsidian, with the vault
-pointed at `src/content/pieces/`; `astro dev` running alongside gives
-live preview on save. Plain Markdown only, never MDX — that's a hard
+at or above `src/content/` (`AUTHORING.md` puts it above the repo);
+`astro dev` running alongside gives live preview on save. Plain Markdown only, never MDX — that's a hard
 rule (see `CLAUDE.md`), since MDX breaks Obsidian's ability to render
 and edit the file. Vault layout, Obsidian settings, and usage
 conventions live in `AUTHORING.md`.
 
 ```
-src/content/pieces/<slug>/
+src/content/journal/<slug>/
   index.md
   photo-1.jpg
   photo-2.jpg
@@ -116,17 +120,17 @@ mattes into files). Every other frame, the image page's stage on paper
 included, sits on the ground — the gutters of a pair, a grid or a
 packed gallery row show the ground between photographs, and each cell
 is that much more picture.
-An image's `src` is `./<file>` for the piece's own photograph,
-`../<slug>/<file>` for another piece's, or
-`../../gallery-images/<file>` for one at the gallery root (spec 008) —
-the same three shapes in every block, in the shorthand, and in
-`cover`. A borrowed photograph keeps its home page, which lists every
-other published piece that places it; a published piece may not borrow
-from a draft one. Rules the build enforces loudly: alt is required on
+An image's `src` is `./<file>` for the entry's own photograph,
+`../<slug>/<file>` for another entry's, or
+`../../photographs/<file>` for one in the photographs folder (spec
+008, renamed at 019) — the same three shapes in every block, in the
+shorthand, and in `cover`. A borrowed photograph keeps its home page,
+which lists every other published entry that places it; a published
+entry may not borrow from a draft one, or a draft photograph. Rules the build enforces loudly: alt is required on
 every image (`alt=""` only for decorative), unknown blocks and
 attributes fail, the `[label]` form fails, blocks can't nest, images
-must exist, borrowed drafts fail. The sampler piece
-(`src/content/pieces/vocabulary-sampler/`) shows every treatment
+must exist, borrowed drafts fail. The sampler entry
+(`src/content/journal/vocabulary-sampler/`) shows every treatment
 rendered.
 
 **Current status**: every block above is implemented — the spec-003
@@ -135,22 +139,22 @@ transform, styling, the mat rule (the quiet view alone since spec 017),
 unit tests, and the Obsidian plugin's figure for every block, in Live
 Preview and Reading view —
 with images going through Astro's asset pipeline (hashed src,
-responsive srcset per treatment). Pieces render at
-`/pieces/<slug>/`, list at `/pieces/` (in the nav), and feed the
-homepage, RSS, and per-piece Open Graph images. Since spec 004 every
-image in a piece links to its own page (next section). Check the
+responsive srcset per treatment). Journal entries render at
+`/journal/<slug>/`, list at `/journal/` (in the nav), and feed the
+homepage, RSS, and per-entry Open Graph images. Since spec 004 every
+image in an entry links to its own page (next section). Check the
 newest `specs/*/tasks.md` for what's actually done versus still
 planned — don't assume this list is current by the time you're reading
 it.
 
-## Images, galleries, and image pages
+## Photographs, galleries, and places
 
 Every accepted raster (`jpg jpeg png webp avif tiff`) in a published
-piece's folder — or in the flat `src/content/gallery-images/` root for
-images that belong to no piece — gets a page at `/images/<id>/`, where
-the id is `<piece-folder>/<basename>` or `gallery/<basename>`. The
-page shows the photograph bare and centred just below the header —
-sized by a share: a photograph wider than tall takes the landscape
+journal entry's folder — or in the flat `src/content/photographs/`
+folder for photographs that belong to no entry — gets a page at
+`/photographs/<id>/`, where the id is `<slug>/<basename>` or the bare
+`<basename>`. The page is the photograph's piece. It shows the
+photograph bare and centred just below the header — sized by a share: a photograph wider than tall takes the landscape
 share of the page's width inside its margins, and one taller than
 wide, or square, the portrait share of the first screen's height below
 the header less the previous / next line and a piece's frame-to-prose
@@ -162,12 +166,12 @@ beneath at that spacing and above the fold; then its title, a wall label of
 exposure info
 read from the file's EXIF (camera, lens, focal length, aperture,
 shutter, ISO, capture date — since spec 019 the camera and lens by the
-names in `src/content/gear.md`, not as the camera wrote them), the piece it came from, the galleries it
-sits in, and an optional caption. Every image in a piece links there;
-so does every gallery cell. A piece is not limited to the photographs
-in its own folder: since spec 008 it may place another piece's or a
-gallery-root one by path, and that photograph's page stays its home
-folder's, naming the borrowing pieces under "Also in". Since spec 006
+names in `src/content/gear.md`, not as the camera wrote them), the journal entry it came from, the galleries it
+sits in, and an optional caption. Every image in an entry links there;
+so does every gallery cell. An entry is not limited to the photographs
+in its own folder: since spec 008 it may place another entry's or one
+from the photographs folder by path, and that photograph's page stays
+its home folder's, naming the borrowing entries under "Also in". Since spec 006
 the page grows with what the sidecar carries, each section only when
 it exists: the image's
 own story (the sidecar body, ahead of the label), place and time at
@@ -185,10 +189,10 @@ stopping at the last); the reader's choice held for the tab's session
 (spec 019, which also brings the same compare into a piece as a
 `:::compare` block, and two fixed pairs of stages as `:::side` and
 `:::slider`) —
-the passage of the piece the image sits in, related frames from the
+the passage of the journal entry the image sits in, related frames from the
 same outing, and "The print" with an enquiry link. Every page in a set
 has a neighbour line for it (the
-gallery, piece, or place they came from; arrow keys work), and every
+gallery, journal entry, or place they came from; arrow keys work), and every
 page has a quiet view — click the photograph — that dims the ground and gives
 the frame the viewport, matted on the quiet dark: the one matted surface
 on the site. Since spec 019 a click on the photograph there opens the
@@ -212,17 +216,37 @@ into its page's stage and the way back returns it, following the
 browser's history; the arrows slide the photograph off the screen and
 the next one on; the quiet view grows the photograph into its mat as the
 ground darkens; and reduced motion keeps the fades and drops the
-movement. Rules the build enforces: piece
+movement. Rules the build enforces: journal
 folders must be slugs and file names URL-safe (letters, digits, `.`,
-`-`, `_`), an image directly in `pieces/` or beside a flat
-`pieces/foo.md` fails, a file nested in a sub-folder is ignored with a
+`-`, `_`), an image directly in `journal/` or beside a flat
+`journal/foo.md` fails, a file nested in a sub-folder is ignored with a
 warning (a directive pointing into one fails), two files differing only
-by extension are a collision, and a `draft: true` piece unpublishes its
-images with it. Moving or renaming an image changes its URL — there are
-no redirects yet.
+by extension are a collision, a `draft: true` entry unpublishes its
+images with it, and an entry may be named neither `photographs` nor
+for a photograph in the photographs folder. Moving or renaming an
+image changes its URL — there are no redirects yet.
+
+**The photographs folder** — `src/content/photographs/`, flat: a
+photograph of its own, its sidecar its writing, its private files
+beside it. Two sidecar fields are this folder's alone. `draft: true`
+holds it back — no page, not on the index or a place's wall, refused
+by a gallery, a place cover and a published entry that places it —
+until the line is deleted. `published: <date>` puts it on the front
+door's latest list among the journal entries by that date, as its
+frame and title; without it the photograph has its page but stays off
+the front door, and the feed lists journal entries only. Either field
+in a journal folder's sidecar fails the build naming the field. A
+gallery names it by its bare name; an old `gallery/<name>` id fails
+the build naming the new one. `at: <slug>` in its sidecar puts it on
+that place's wall as an outing of its own, dated by its capture — the
+file's EXIF or the sidecar's `date:`, and the build fails on one with
+neither — and a place's cover may be it. `/photographs/` is the index:
+every published photograph from both folders, once each, as small
+frames in order of title, reached from the footer's "Index of
+photographs" link, not the nav. `AUTHORING.md` has the detail.
 
 **Sidecar** — optional, `_<basename>.md` beside the image (the
-underscore keeps it out of the pieces collection). Every field is
+underscore keeps it out of the journal collection). Every field is
 optional; label fields override the EXIF-derived value as written;
 the body is the image's story:
 
@@ -238,7 +262,7 @@ aperture: f/8
 shutter: 1/250 s
 iso: ISO 400
 place: The headlands above the cove # prose, never coordinates
-at: the-headlands # a declared place's slug; `none` opts out of the piece's default
+at: the-headlands # a declared place's slug; `none` opts out of the entry's default
 time: 06:40, forty minutes before sunrise
 format: Digital, full-frame # "How it was made": format, filters, support, processing
 filters: None
@@ -251,6 +275,8 @@ stages: # "Raw to finished": the steps between the camera's frame and the photog
 edition: Open edition # "The print": edition, sizes, paper
 sizes: 12 × 18, 16 × 24 inches
 paper: Hahnemühle Photo Rag Baryta
+draft: true # the photographs folder only: no page until deleted
+published: 2026-08-31 # the photographs folder only: on the front door
 ---
 The story, in the photographer's words — ordinary markdown.
 ```
@@ -295,7 +321,7 @@ cover: where-the-fog-lets-go/land-b
 images:
   - where-the-fog-lets-go/land-a
   - where-the-fog-lets-go/land-b
-  - gallery/dock-a
+  - dock-a # a photograph in src/content/photographs/: its bare name
 ---
 ```
 
@@ -305,7 +331,7 @@ whole row; nothing is cropped or reordered — `DECISIONS.md` has the
 reasoning). On a gallery page the packed rows run wider than the text
 column — out to a viewport bleed chosen at a visual gate on the
 photographer's two screens (spec 011) — while every prose element (a
-gallery's description, a piece's body) keeps its reading measure. The
+gallery's description, a journal entry's body) keeps its reading measure. The
 common short side that sets how large a frame reads is format-aware: it
 sizes off the smaller viewport dimension (`vmin`), so a tall or
 near-square display (a 16:18 LG DualUp) shows larger frames than a wide
@@ -316,34 +342,36 @@ galleries' width, gap, and format-aware density, from the same
 `gallery-layout.ts` (spec 012). `/galleries/` groups galleries by
 category and is in the nav, with the category row under its title —
 each category a link to its own page, nothing marked. `/categories/<category>/` lists a
-category's galleries then its pieces and is reached from category
+category's galleries then its journal entries and is reached from category
 labels, never from the nav; its head carries the same row with `All`
-first, back to `/pieces/`, the category you're on marked rather than
-linked, and its "Galleries" and "Pieces" headings link to the two
+first, back to `/journal/`, the category you're on marked rather than
+linked, and its "Galleries" and "Journal" headings link to the two
 indexes. The row is one component, `src/components/CategoryRow.astro`,
 fed by `categoryRow()` in `src/lib/categories.ts` and shared with
-`/pieces/`, which keeps the row it already had. A missing, duplicate,
-or draft-owned id in a gallery fails the build with the file and line.
+`/journal/`, which keeps the row it already had. A missing, duplicate,
+or draft id in a gallery fails the build with the file and line.
 
 **Place** — `src/content/places/<slug>.md` (spec 009), somewhere the
 photographer returns to: a title, an optional description, cover, and
 `draft`, and a body that is the writing about the place. The file name
 is the slug and the URL. A frame names its place in its sidecar with
-`at: <slug>`, or a piece names one default for its whole folder with
+`at: <slug>`, or a journal entry names one default for its whole folder with
 `at: <slug>` in its frontmatter — the frame's own line wins, and
 `at: none` opts a frame out of the default. `/places/<slug>/` shows the
 writing and then one wall — every published frame at the place as a
-single packed gallery, outings oldest first and each piece's frames in
-its own order, with nothing between the visits and no piece named on
-the page — so the page grows as pieces are published; `/places/` lists
-the places as cards and is in the nav after Galleries. An `at:` naming
+single packed gallery, outings oldest first, with nothing between the
+visits and no journal entry named on the page. A journal entry's
+frames there are one outing, in the entry's order, dated by its
+publish date; a photograph in the photographs folder whose sidecar
+names the place is an outing of its own, dated by its capture, and
+may be the place's cover. So the page grows as entries and
+photographs are published; `/places/` lists
+the places as cards and is in the nav between Journal and Galleries. An `at:` naming
 a place that does not exist fails the build, listing the places that
 do, as does a place `cover` that is not one of its frames once the
-place publishes; a draft or still-empty place is a
-note and builds no page. Gallery-root photographs are still kept out of
-a place — with no piece they have no publish date to take their turn by
-(`ROADMAP.md`) — so their `at:` is checked and then ignored with a
-warning.
+place publishes, and a photographs-folder photograph at a place with
+no capture date; a draft or still-empty place is a
+note and builds no page.
 
 **GPS is never published.** The EXIF reader asks for an allowlist of
 exposure tags with GPS parsing off, its output is asserted against a
@@ -367,7 +395,7 @@ footer icons — built-in set is `github`, `x`, `linkedin`, `rss`,
 
 One line in `src/styles/global.css` (`--color-accent` on `:root`) —
 plus two _derived_ copies that don't update automatically: the hex
-values in `src/pages/og/pieces/[slug].png.ts` (social-card palette;
+values in `src/pages/og/journal/[slug].png.ts` (social-card palette;
 recompute on retune, see the comment there) and the fill in
 `public/favicon.svg`. `--color-accent-hover` derives automatically via
 `color-mix()`.
@@ -377,7 +405,7 @@ recompute on retune, see the comment there) and the fill in
 CSS variables (`--font-display`, `--font-body`, `--font-mono`) in
 `src/styles/global.css`. Swap a face by installing another
 `@fontsource` package and updating the variable — **and check
-`src/pages/og/pieces/[slug].png.ts`**, which loads font files
+`src/pages/og/journal/[slug].png.ts`**, which loads font files
 directly for social preview images and won't pick up a CSS-only
 change. Easy to miss; already bit us once during the Fraunces → Spectral
 swap.
@@ -388,7 +416,7 @@ Light-only, by decision, and fully so since spec 002: no dark palette,
 no toggle, no `prefers-color-scheme` behavior. The reasoning is in
 `design/brief.md` — the photographer controls how the work is seen.
 
-The three reading pages — piece, gallery, and place — share one head,
+The three reading pages — journal entry, gallery, and place — share one head,
 marked `reading-head` and spaced by `--head-pad-reading` (above and
 below it) and `--head-gap-reading` (before the body) in
 `src/styles/global.css`. Both start at `.section`'s clamp and tighten
@@ -400,9 +428,9 @@ tighter head too — while below that the phone keeps today's air.
 Working, worth not losing track of: static full-text search at
 `/search` (Pagefind, zero backend — note it only indexes piece bodies,
 via `data-pagefind-body`, and only works against a real build, not
-`astro dev`), the RSS feed at `/rss.xml` (pieces), and sitemap/JSON-LD
-SEO basics. Per-piece Open Graph cards generate at build time from
-`src/pages/og/pieces/[slug].png.ts`; `public/og.jpg` is the site-wide
+`astro dev`), the RSS feed at `/rss.xml` (journal entries), and sitemap/JSON-LD
+SEO basics. Per-entry Open Graph cards generate at build time from
+`src/pages/og/journal/[slug].png.ts`; `public/og.jpg` is the site-wide
 fallback for other pages, regenerated by `npm run og`
 (`scripts/gen-og.mjs`) whenever `:root`'s ground moves — after
 resyncing `COLOR` in `src/lib/og-card.mjs`, the hand-kept hex copy of
@@ -421,17 +449,18 @@ photo-pieces/
 ├── remark-pieces-blocks.test.mjs # legacy contracts (npm test)
 ├── remark-pieces-vocabulary.test.mjs # spec-003 vocabulary suite
 ├── image-meta.test.mjs, exif.test.mjs, galleries.test.mjs # spec-004 suites
-├── image-set.test.mjs            # the set key: gallery, piece, place
+├── image-set.test.mjs            # the set key: gallery, journal entry, place
 ├── motion.test.mjs               # the motion grammar: the tokens pinned by name, no literal motion, nothing loops
 ├── compare.test.mjs, loupe.test.mjs # the compare's and the loupe's rules, each tunable pinned by its round
 ├── gear.test.mjs                 # the gear table: its parse, its failures, the label's lookup, the warning
 ├── private-files.test.mjs        # the private-files barrier, run against fixture directories
 ├── obsidian-plugin.test.mjs      # the plugin's table, scanner, figure and stylesheet; both views are attested by eye
 ├── tests/fixtures/               # unit-test images (EXIF-rotated, GPS-bearing)
-├── scripts/gen-placeholders.mjs  # fixture placeholder images (pieces, gallery, fixtures)
+├── scripts/gen-placeholders.mjs  # fixture placeholder images (journal, photographs, fixtures)
 ├── scripts/prune-unreferenced-originals.mjs # postbuild: drop originals nothing links
 ├── scripts/check-no-gps.mjs      # postbuild: no GPS in any built image
 ├── scripts/check-private-files.mjs # postbuild: every loupe file present and under 25 MiB, a larger export named nowhere else, every compare in one shape, no script-only state in the markup
+├── scripts/check-lexicon.mjs     # postbuild: the lexicon in what ships — no old address, no "piece" in a page's own words, no draft photograph's page or link, the front door's list and the index of photographs checked
 ├── scripts/check-no-dev-routes.mjs # postbuild: no dev-only routes in dist/
 ├── scripts/check-motion.mjs      # postbuild: no literal duration or curve, hidden frame or autoplay in dist/
 ├── scripts/gen-og.mjs             # npm run og: rewrites public/og.jpg on the committed ground
@@ -441,13 +470,14 @@ photo-pieces/
 ├── design/brief.md
 ├── src/
 │   ├── consts.ts                 # site identity
-│   ├── content.config.ts         # pieces, galleries, imageMeta, places collections
-│   ├── content/pieces/           # one folder per piece + its images (+ _sidecars, _private files: camera's frames, stages, larger exports)
-│   ├── content/gallery-images/   # images that belong to no piece
+│   ├── content.config.ts         # journal, galleries, imageMeta, places collections
+│   ├── content/journal/          # one folder per journal entry + its images (+ _sidecars, _private files: camera's frames, stages, larger exports)
+│   ├── content/photographs/      # photographs that belong to no entry (+ _sidecars, _private files)
 │   ├── content/galleries/        # one file per gallery
 │   ├── content/places/           # one file per place
 │   ├── content/gear.md           # the gear table: EXIF camera and lens strings to the label's names
-│   ├── lib/pieces.ts             # the one published-pieces query
+│   ├── lib/pieces.ts             # the one published-journal-entries query
+│   ├── lib/front-door.mjs        # the front door's latest list: journal entries and dated photographs merged
 │   ├── lib/images.ts             # the image registry (ids, EXIF, sidecars, galleries, places, sets)
 │   ├── lib/gallery-layout.ts     # packing knobs: bleed width, gap, format-aware density (galleries); density also drives the srcset/sizes math so CSS and images can't drift; the related strip's knobs live here too; the place page's wall consumes the same width, gap, and density
 │   ├── lib/image-meta.mjs        # its pure rules (shared with the transform)
@@ -464,7 +494,7 @@ photo-pieces/
 │   ├── components/               # PieceList, CoverCards (GalleryCards wraps it), CategoryRow
 │   ├── components/DevMotion.astro # dev-only motion switch: the named settings, the behaviours' on/off; renders nothing in a build
 │   ├── components/dev-motion-panel.ts, dev-motion-presets.ts # its panel (served, never bundled) and its named settings
-│   ├── pages/                    # index, pieces/, galleries/, places/, images/, categories/, about, contact, search, 404
+│   ├── pages/                    # index, journal/, photographs/ (the pages and the index), galleries/, places/, categories/, about, contact, search, 404
 │   ├── pages/dev/                # dev-only fixtures (the page-head sampler, the gallery width/gap/density sampler, the place-wall sampler, the matte sampler at dev/matte/, which also carries the site-wide ground switch); postbuild fails if any reach dist/
 │   └── styles/global.css
 ```
