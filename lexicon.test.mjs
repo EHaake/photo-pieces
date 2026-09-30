@@ -5,7 +5,8 @@ import {
   byIndexOrder,
   indexFlowStyle,
 } from './src/lib/gallery-layout.ts';
-import { FOOTER_LINKS, NAV_ITEMS } from './src/consts.ts';
+import { FOOTER_LINKS, NAV_ITEMS, SITE } from './src/consts.ts';
+import { en } from './src/i18n/en.ts';
 
 // The lexicon's tunable envelope (spec 019): each knob in its one place,
 // pinned here by name and value, so a change to one is a deliberate edit
@@ -54,5 +55,30 @@ describe('the footer and the nav (spec 019, T1747)', () => {
     expect(index).toEqual([{ href: '/photographs/', label: 'Index of photographs' }]);
     expect(FOOTER_LINKS.map((l) => l.href)).toEqual(['/contact/', '/photographs/']);
     expect(NAV_ITEMS.filter((i) => i.href === '/photographs/')).toEqual([]);
+  });
+});
+
+describe('the words (spec 019, T1742)', () => {
+  const navLabel = (item) => item.label ?? en[item.labelKey];
+
+  it('the nav reads Home, Journal, Places, Galleries, About, Search; the sections are Journal, Places, Galleries with their hrefs', () => {
+    expect(NAV_ITEMS.map(navLabel)).toEqual([
+      'Home',
+      'Journal',
+      'Places',
+      'Galleries',
+      'About',
+      'Search',
+    ]);
+    expect(NAV_ITEMS.filter((i) => i.label !== undefined)).toEqual([
+      { href: '/journal/', label: 'Journal' },
+      { href: '/places/', label: 'Places' },
+      { href: '/galleries/', label: 'Galleries' },
+    ]);
+  });
+
+  it('no "piece" or "pieces" in a nav label, SITE.description or SITE.rssDescription', () => {
+    const words = [...NAV_ITEMS.map(navLabel), SITE.description, SITE.rssDescription];
+    for (const text of words) expect(text).not.toMatch(/\bpieces?\b/i);
   });
 });

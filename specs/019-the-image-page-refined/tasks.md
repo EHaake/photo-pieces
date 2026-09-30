@@ -1794,7 +1794,7 @@ T1735.
       loupes on 64 pages; passes; to the phase review). Mutations:
       numeric order and the index exclusion each fail by name, reverted.
 
-- [ ] **T1742** — The words. Pattern: the photograph page's `WORDING`
+- [x] **T1742** — The words. Pattern: the photograph page's `WORDING`
       block (the one place a page keeps its words); `NAV_ITEMS`. Plan:
       "The words" and the testing bullet "The words". `consts.ts`,
       `index.astro`, `journal/index.astro`,
@@ -1814,6 +1814,15 @@ T1735.
       → pages listed, each hit inside a piece's own prose or a printed
       authored title, description or caption, listed (T1743 pins the
       rest)._
+      Done: 88 pages, 786 tests (+2), BUILD/CHECK/TEST EXIT 0. Built
+      nav: Home, Journal, Places, Galleries, About, Search — no
+      Photographs. Grep 1's hits all code (imports, identifiers,
+      comments, ids). Grep 2 → two lines, journal/[slug].astro's
+      title={piece.data.title} and description={piece.data.description}
+      — the identifier, printing authored text; the grep cannot tell
+      them apart. Grep 4 → 11 pages, each hit an authored description, a
+      piece's own prose, or the .piece-column class — T1743 pins the
+      rest.
 
 - [ ] **T1743** — The lexicon barrier. Pattern:
       `scripts/check-private-files.mjs` (its header comment, its
@@ -2256,6 +2265,7 @@ tier if it is ever on (it is off). -->
 | T1741 front door | implementation (`opus`, high) | ~51k | done; 765 tests (+9); mutation fails by name; row counts pinned from frontmatter |
 | T1746 place walls | implementation (`opus`, high) | ~87k | done; 776 tests (+11); one astro-check tuple type fixed in-task; a photograph naming a draft place needs no date (on no wall) |
 | T1747 photographs index | implementation (`opus`, high) | ~68k | done; 784 tests (+8); findings: srcset ceiling ~712 not ~356 (plan wording), private-files barrier counts the index as an image page, Verify's href count includes the footer link |
+| T1742 the words | implementation (`opus`, high) | ~52k | done; 786 tests (+2); grep 2's two hits are the `piece` identifier |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

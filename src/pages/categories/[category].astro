@@ -24,7 +24,7 @@ const pieces = (await getPublishedPieces()).filter((piece) =>
 const label = categoryLabel(category);
 ---
 
-<BaseLayout title={label} description={`${label} galleries and pieces.`}>
+<BaseLayout title={label} description={`${label} galleries and journal entries.`}>
   <section class="page-head section">
     <p class="eyebrow">Category</p>
     <h1>{label}</h1>
@@ -46,7 +46,7 @@ const label = categoryLabel(category);
     pieces.length > 0 && (
       <section class="section category-group" aria-labelledby="category-pieces">
         <h2 id="category-pieces" class="eyebrow">
-          <a href={withBase('/journal/')}>Pieces</a>
+          <a href={withBase('/journal/')}>Journal</a>
         </h2>
         <PieceList items={pieces.map((entry) => ({ kind: 'journal', entry }))} />
       </section>

@@ -63,7 +63,7 @@ const WORDING = {
     iso: 'ISO',
     date: 'Date',
   },
-  fromPiece: 'From the piece',
+  fromPiece: 'From the journal entry',
   alsoIn: 'Also in',
   inGallery: 'In the gallery',
   inGalleries: 'In the galleries',
@@ -75,7 +75,7 @@ const WORDING = {
     processing: 'Processing',
   },
   compare: { heading: 'Raw to finished', camera: 'Camera', cameraNote: 'The RAW file straight out of camera — no edits, no adjustments', finished: 'Finished' },
-  passage: { heading: 'In the piece', readInPlace: 'Read it in place →' },
+  passage: { heading: 'In the journal', readInPlace: 'Read it in place →' },
   related: { heading: 'Related frames' },
   print: {
     heading: 'The print',
@@ -113,7 +113,7 @@ const description =
   (captionHtml
     ? plainText(captionHtml)
     : piece
-      ? `From the piece “${piece.data.title}”.`
+      ? `From the journal entry “${piece.data.title}”.`
       : `A photograph by ${SITE.author}.`);
 
 // OG image: the optimized, metadata-stripped output — never the
