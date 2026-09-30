@@ -2414,7 +2414,7 @@ Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
 
 ## Amendment 3 (2026-09-29): the lexicon, the photograph's home
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-09-29) by the `skeptical-reviewer` at the top tier — one blocking finding fixed and re-reviewed (the words scan failed on the fixtures' folded descriptions), twelve second-look notes taken; four non-blocking lines in tasks.md's tier log.
 **Implements**: spec.md's sections marked _(amended 2026-09-29, lexicon)_
 — Goal 11, the two Non-goals, the Entities "The lexicon", "The
 photographs folder", "The journal folder" and "A photograph's draft and

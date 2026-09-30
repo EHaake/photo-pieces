@@ -24,7 +24,8 @@ signed off at the top tier the same evening, before the real piece.
 open: the site's lexicon, and the photograph as a piece — Goal 11 and
 the sections marked _(amended 2026-09-29, lexicon)_ — re-planned as
 plan.md's "Amendment 3 (2026-09-29): the lexicon, the photograph's
-home" and tasks.md's Phase 3c, before the real piece.
+home" and tasks.md's Phase 3c (T1736–T1747), signed off at the top
+tier the same day, before the real piece.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
