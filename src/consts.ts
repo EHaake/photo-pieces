@@ -72,3 +72,17 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: '/about/', labelKey: 'nav.about' },
   { href: '/search/', labelKey: 'nav.search' },
 ];
+
+export interface FooterLink {
+  href: string;
+  label: string;
+}
+
+/** The footer's links, in the order they stand — each link's word and
+ *  its place in one array. `href` is relative to the site root; `base` is
+ *  applied by the layout. The index of photographs lives here, not in
+ *  `NAV_ITEMS` (spec 019). */
+export const FOOTER_LINKS: readonly FooterLink[] = [
+  { href: '/contact/', label: 'Contact' },
+  { href: '/photographs/', label: 'Index of photographs' },
+];

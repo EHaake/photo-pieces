@@ -27,3 +27,9 @@ export function setKeyFromPath(pathname: string): string | null {
 }
 
 const KINDS = { galleries: 'gallery', journal: 'piece', places: 'place' } as const;
+
+/** A photograph's page (`/photographs/<id>/`, base allowed) — not the index at `/photographs/` itself. */
+export function isPhotographPath(pathname: string, base: string): boolean {
+  const prefix = `${base.replace(/\/$/, '')}/photographs/`;
+  return pathname.startsWith(prefix) && pathname.length > prefix.length;
+}

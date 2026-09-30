@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { setKey, setKeyFromPath } from './src/lib/image-set.ts';
+import { isPhotographPath, setKey, setKeyFromPath } from './src/lib/image-set.ts';
 
 // The set key (spec 006, extended by spec 009's places): the layout
 // writes it and the image page reads it, so the format and the paths it
@@ -28,5 +28,24 @@ describe('image sets (T701, spec 009)', () => {
     expect(setKeyFromPath('/photographs/p/x/')).toBe(null);
     expect(setKeyFromPath('/places/')).toBe(null);
     expect(setKeyFromPath('/')).toBe(null);
+  });
+});
+
+describe("a photograph's page (spec 019, T1747)", () => {
+  it('the photographs index is not a photograph\'s page', () => {
+    expect(isPhotographPath('/photographs/', '/')).toBe(false);
+    expect(isPhotographPath('/sub/photographs/', '/sub/')).toBe(false);
+  });
+
+  it('a photograph of either folder is', () => {
+    expect(isPhotographPath('/photographs/dock-a/', '/')).toBe(true);
+    expect(isPhotographPath('/photographs/fog/land-b/', '/')).toBe(true);
+    expect(isPhotographPath('/sub/photographs/dock-a/', '/sub/')).toBe(true);
+    expect(isPhotographPath('/sub/photographs/fog/land-b/', '/sub/')).toBe(true);
+  });
+
+  it('a journal page is not', () => {
+    expect(isPhotographPath('/journal/fog/', '/')).toBe(false);
+    expect(isPhotographPath('/sub/journal/fog/', '/sub/')).toBe(false);
   });
 });

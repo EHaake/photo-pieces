@@ -1752,7 +1752,7 @@ T1735.
       reverted; cover: draft-fixture → "cover \"draft-fixture\" is not
       one of this place's frames", reverted.
 
-- [ ] **T1747** — The photographs index. Placed here, before T1742, by
+- [x] **T1747** — The photographs index. Placed here, before T1742, by
       its header text; its id is the next free one. Pattern:
       `src/pages/places/[slug].astro`'s wall (the `.gallery-flow`
       cells, `galleryCell`, `loading="lazy"`, `data-pagefind-ignore`)
@@ -1781,6 +1781,18 @@ T1735.
       quoted); the transforms the build made for the index's cells:
       the `srcset` of one 3:2 and one 2:3 cell quoted, with their byte
       sizes from `dist/_astro/`, for the Known limitations line._
+      Done: 88 pages (+1), 784 tests (+8), BUILD/CHECK/TEST EXIT 0.
+      IMAGES_PATH gone; the index's hrefs each once — 64 by the literal
+      grep, which also counts the footer's own /photographs/ link; 63
+      cells in the index's list against 63 photograph pages, none
+      missing or extra; no draft-fixture. About's footer: Contact, Index
+      of photographs; the nav without /photographs/. Srcsets: land-a
+      356w/640w/712w (340, 760, 894 bytes), port-a 238w/476w (342, 908
+      bytes) — the constrained layout adds 2x candidates, so the Known
+      limitations line's ~356 px ceiling is ~712 px (to the sweep).
+      check-private-files now counts the index as an image page (63
+      loupes on 64 pages; passes; to the phase review). Mutations:
+      numeric order and the index exclusion each fail by name, reverted.
 
 - [ ] **T1742** — The words. Pattern: the photograph page's `WORDING`
       block (the one place a page keeps its words); `NAV_ITEMS`. Plan:
@@ -2243,6 +2255,7 @@ tier if it is ever on (it is off). -->
 | T1740 draft and date | implementation (`opus`, high) | ~87k | done; 756 tests (+6); T1739's two review notes taken; no deviation |
 | T1741 front door | implementation (`opus`, high) | ~51k | done; 765 tests (+9); mutation fails by name; row counts pinned from frontmatter |
 | T1746 place walls | implementation (`opus`, high) | ~87k | done; 776 tests (+11); one astro-check tuple type fixed in-task; a photograph naming a draft place needs no date (on no wall) |
+| T1747 photographs index | implementation (`opus`, high) | ~68k | done; 784 tests (+8); findings: srcset ceiling ~712 not ~356 (plan wording), private-files barrier counts the index as an image page, Verify's href count includes the footer link |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
