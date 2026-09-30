@@ -95,7 +95,7 @@ const { label, piece, galleries } = image;
 const sections = sectionsFor(image);
 const shows = (section: string) => sections.includes(section);
 
-// The eyebrow: the owning piece's categories, or for a gallery-root
+// The eyebrow: the owning piece's categories, or for a photographs-folder
 // image the categories of the galleries that hold it.
 const categories = piece
   ? piece.data.categories
@@ -376,7 +376,7 @@ const indexed =
         {
           piece && (
             <p class="image-from" data-pagefind-ignore>
-              {WORDING.fromPiece} <a href={withBase(`/pieces/${piece.id}/`)}>{piece.data.title}</a>
+              {WORDING.fromPiece} <a href={withBase(`/journal/${piece.id}/`)}>{piece.data.title}</a>
             </p>
           )
         }
@@ -386,7 +386,7 @@ const indexed =
               {WORDING.alsoIn}{' '}
               {image.appearances.map((appearance, index) => (
                 <>
-                  <a href={withBase(`/pieces/${appearance.id}/`)}>{appearance.data.title}</a>
+                  <a href={withBase(`/journal/${appearance.id}/`)}>{appearance.data.title}</a>
                   {index < image.appearances.length - 1 ? ', ' : ''}
                 </>
               ))}
@@ -469,7 +469,7 @@ const indexed =
               {passageHtml && <div set:html={passageHtml} />}
               {passageCaptionHtml && <div class="in-piece-caption" set:html={passageCaptionHtml} />}
               <p class="image-from">
-                <a href={withBase(`/pieces/${piece.id}/`)}>{WORDING.passage.readInPlace}</a>
+                <a href={withBase(`/journal/${piece.id}/`)}>{WORDING.passage.readInPlace}</a>
               </p>
             </blockquote>
           </section>

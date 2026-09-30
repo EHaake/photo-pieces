@@ -26,7 +26,7 @@ export const JOURNAL_ROOT = 'journal';
 
 const CONTENT_ROOT = '/src/content/';
 const SLUG = /^[a-z0-9-]+$/;
-// File names become URL segments verbatim (`/images/<folder>/<basename>/`):
+// File names become URL segments verbatim (`/photographs/<folder>/<basename>/`):
 // camera-style `DSC_0001` is fine, spaces and punctuation are not.
 const BASENAME = /^[A-Za-z0-9._-]+$/;
 
@@ -243,7 +243,7 @@ export function imageIdFor(filePath) {
  *  remark plugin can't call `withBase`, so this is the one place the
  *  URL shape lives. */
 export function imageUrlFor(id) {
-  return `/images/${id}/`;
+  return `/photographs/${id}/`;
 }
 
 /**

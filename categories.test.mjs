@@ -20,7 +20,7 @@ describe('the category row (T802, spec 010)', () => {
   it('with a current category All leads to the pieces index and the current item is not a link', () => {
     const row = categoryRow('street');
     expect(row).toHaveLength(5);
-    expect(row[0]).toEqual({ label: 'All', href: '/pieces/' });
+    expect(row[0]).toEqual({ label: 'All', href: '/journal/' });
     expect(row.slice(1).map((item) => item.label)).toEqual([
       'Landscape',
       'Street',

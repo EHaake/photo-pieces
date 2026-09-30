@@ -19,11 +19,11 @@ export function setKey(kind: SetKind, id: string): string {
 }
 
 /** The set a page is, from its path (`/galleries/<slug>/`,
- *  `/pieces/<slug>/`, or `/places/<slug>/`, base prefix allowed), else
+ *  `/journal/<slug>/`, or `/places/<slug>/`, base prefix allowed), else
  *  null. */
 export function setKeyFromPath(pathname: string): string | null {
-  const m = pathname.match(/\/(galleries|pieces|places)\/([^/]+)\/?$/);
+  const m = pathname.match(/\/(galleries|journal|places)\/([^/]+)\/?$/);
   return m ? setKey(KINDS[m[1] as keyof typeof KINDS], m[2]) : null;
 }
 
-const KINDS = { galleries: 'gallery', pieces: 'piece', places: 'place' } as const;
+const KINDS = { galleries: 'gallery', journal: 'piece', places: 'place' } as const;

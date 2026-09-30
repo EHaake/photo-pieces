@@ -73,7 +73,7 @@ import {
 // image node's hProperties into that pipeline as per-image getImage()
 // options.
 //
-// Spec 004: every image links to its page (`/images/<folder>/<basename>/`,
+// Spec 004: every image links to its page (`/photographs/<folder>/<basename>/`,
 // derived by the same rule the image registry uses, from
 // src/lib/image-meta.mjs). The mdast `link` wrapping an image carries
 // class `image-link` and the frame's `--ar` — the anchor is the layout

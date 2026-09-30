@@ -1,6 +1,6 @@
 ---
 // The piece list-row treatment shared by the homepage feed and the
-// /pieces/ index — one copy, so the URL shape and meta line can't drift
+// /journal/ index — one copy, so the URL shape and meta line can't drift
 // between them (extracted at 002's pre-merge review).
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
@@ -18,7 +18,7 @@ const { pieces } = Astro.props;
   pieces.length > 0 ? (
     <div class="note-list">
       {pieces.map((piece) => (
-        <a class="note-row" href={withBase(`/pieces/${piece.id}/`)}>
+        <a class="note-row" href={withBase(`/journal/${piece.id}/`)}>
           {piece.data.cover && (
             // The cover's own box, the waiting fill's host (spec 018);
             // the image's rule is unchanged.

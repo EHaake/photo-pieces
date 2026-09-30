@@ -15,7 +15,7 @@ describe('image sets (T701, spec 009)', () => {
   it('a place page is a set, beside the two kinds that already were', () => {
     expect(setKeyFromPath('/places/x/')).toBe('place:x');
     expect(setKeyFromPath('/galleries/g/')).toBe('gallery:g');
-    expect(setKeyFromPath('/pieces/p/')).toBe('piece:p');
+    expect(setKeyFromPath('/journal/p/')).toBe('piece:p');
   });
 
   it('a base prefix and a missing trailing slash do not change the key', () => {
@@ -25,7 +25,7 @@ describe('image sets (T701, spec 009)', () => {
   });
 
   it('a page that is not a set has no key', () => {
-    expect(setKeyFromPath('/images/p/x/')).toBe(null);
+    expect(setKeyFromPath('/photographs/p/x/')).toBe(null);
     expect(setKeyFromPath('/places/')).toBe(null);
     expect(setKeyFromPath('/')).toBe(null);
   });

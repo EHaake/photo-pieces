@@ -490,7 +490,7 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     // carries [data-astro-cid] on both compounds, out-specifies the
     // quiet rule above, and quiet view then shows zoom-in over the
     // photograph (measured, T1101b).
-    const page = uncomment(src['src/pages/images/[...id].astro']);
+    const page = uncomment(src['src/pages/photographs/[...id].astro']);
     const scoped = blocks(page.slice(page.indexOf('<style>'), page.indexOf('</style>')));
     const frameRules = [
       ...scoped,
@@ -537,7 +537,7 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
     // The nav claims the token, at the font size the token was measured
     // at, and puts the piece's spacing between itself and the title; the
     // head adds no top padding above the title. Each declaration by name.
-    const page = uncomment(src['src/pages/images/[...id].astro']);
+    const page = uncomment(src['src/pages/photographs/[...id].astro']);
     const scoped = blocks(page.slice(page.indexOf('<style>'), page.indexOf('</style>')));
     const nav = declarations(ruleFor(scoped, '.frame-nav').body);
     const head = declarations(ruleFor(scoped, '.image-head').body);
@@ -581,7 +581,7 @@ describe('(b) every form pinned (T1101, spec 013)', () => {
       return { all, reading, matte };
     };
 
-    const page = uncomment(src['src/pages/images/[...id].astro']);
+    const page = uncomment(src['src/pages/photographs/[...id].astro']);
     const scoped = reads(blocks(page.slice(page.indexOf('<style>'), page.indexOf('</style>'))));
     expect(scoped.all.length).toBeGreaterThan(0);
     expect(scoped.reading).toEqual([]);
@@ -891,7 +891,7 @@ describe('(c) the forms are the rule (T1101, spec 013)', () => {
       [1, 'portrait'],
     ])
       expect([ratio, stageShape(ratio)]).toEqual([ratio, shape]);
-    for (const path of ['src/pages/images/[...id].astro', 'src/pages/dev/matte/[...surface].astro'])
+    for (const path of ['src/pages/photographs/[...id].astro', 'src/pages/dev/matte/[...surface].astro'])
       expect([path, src[path].includes('data-shape={stageShape(')]).toEqual([path, true]);
   });
 

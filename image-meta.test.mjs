@@ -71,7 +71,7 @@ describe('image ids (T302)', () => {
   });
 
   it('the page URL has one definition', () => {
-    expect(imageUrlFor('a-piece/land-b')).toBe('/images/a-piece/land-b/');
+    expect(imageUrlFor('a-piece/land-b')).toBe('/photographs/a-piece/land-b/');
   });
 
   it('a folder that is not a slug fails with a rename hint', () => {

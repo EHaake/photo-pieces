@@ -360,7 +360,7 @@ describe('(a) the grammar is declared once (T1600, spec 018)', () => {
     // broken extractor would find no rules and the walk would pass on
     // anything.
     expect(styles.length).toBeGreaterThan(50);
-    expect(styles.some((rule) => rule.where.startsWith('src/pages/images/[...id].astro'))).toBe(
+    expect(styles.some((rule) => rule.where.startsWith('src/pages/photographs/[...id].astro'))).toBe(
       true,
     );
   });
@@ -694,12 +694,12 @@ describe('(e) the barrier fails on the built output (T1601, spec 018)', () => {
 
   it('a page with data-shown on an img exits 1 naming the file', () => {
     const dir = fixture('shown', {
-      'pieces/x/index.html': page('', '<img src="a.jpg" data-shown="">'),
+      'journal/x/index.html': page('', '<img src="a.jpg" data-shown="">'),
     });
     const result = run(dir);
     expect(result.status).toBe(1);
     expect(result.stderr).toContain(
-      `[check-motion] a frame hidden by default in ${join(dir, 'pieces', 'x', 'index.html')}: data-shown`,
+      `[check-motion] a frame hidden by default in ${join(dir, 'journal', 'x', 'index.html')}: data-shown`,
     );
   });
 
@@ -1079,10 +1079,10 @@ describe('(h) the way back holds what the reader saw (T1604b, spec 018)', () => 
   };
   const SET = '/_astro/a-640.webp 640w, /_astro/a-1080.webp 1080w';
   const FIXTURE = `
-    <a class="image-link" href="/images/g/a/"><img src="/_astro/a.jpg" srcset="${SET}" sizes="50vw" loading="lazy"></a>
-    <a class="image-link" href="/images/g/b/"><img src="/_astro/b.jpg" srcset="" sizes="50vw" loading="lazy"></a>
-    <a class="image-link" href="/images/g/c/"><img src="/_astro/c.jpg" srcset="" sizes="50vw" loading="lazy"></a>
-    <a class="image-link" href="/images/g/d/"><img src="/_astro/d.jpg" srcset="" sizes="50vw" loading="lazy"></a>`;
+    <a class="image-link" href="/photographs/g/a/"><img src="/_astro/a.jpg" srcset="${SET}" sizes="50vw" loading="lazy"></a>
+    <a class="image-link" href="/photographs/g/b/"><img src="/_astro/b.jpg" srcset="" sizes="50vw" loading="lazy"></a>
+    <a class="image-link" href="/photographs/g/c/"><img src="/_astro/c.jpg" srcset="" sizes="50vw" loading="lazy"></a>
+    <a class="image-link" href="/photographs/g/d/"><img src="/_astro/d.jpg" srcset="" sizes="50vw" loading="lazy"></a>`;
   const at = (pathname, width, height, ratio) => {
     vi.stubGlobal('location', { pathname });
     vi.stubGlobal('innerWidth', width);
@@ -1122,7 +1122,7 @@ describe('(h) the way back holds what the reader saw (T1604b, spec 018)', () => 
     // The same page at the same viewport: the one held frame is eager.
     expect(loading(FIXTURE, '/galleries/g/')).toEqual(['eager', 'lazy', 'lazy', 'lazy']);
     // Another pathname: untouched.
-    expect(loading(FIXTURE, '/pieces/p/')).toEqual(['lazy', 'lazy', 'lazy', 'lazy']);
+    expect(loading(FIXTURE, '/journal/p/')).toEqual(['lazy', 'lazy', 'lazy', 'lazy']);
     // Another width, height or pixel ratio: untouched.
     for (const [w, h, r] of [
       [1280, 982, 2],
@@ -1137,21 +1137,21 @@ describe('(h) the way back holds what the reader saw (T1604b, spec 018)', () => 
   // The fog piece's case: one photograph, a block frame and a full-bleed
   // frame, the same src and srcset at different sizes.
   const TWICE = (second) => `
-    <a class="image-link" href="/images/f/x/"><img src="/_astro/x.jpg" srcset="/_astro/x-750.webp 750w, /_astro/x-1668.webp 1668w" sizes="(min-width: 1240px) 670px, 94vw" loading="lazy"></a>
-    <a class="image-link" href="/images/f/x/"><img src="/_astro/x.jpg" srcset="/_astro/x-750.webp 750w, /_astro/x-1668.webp 1668w" sizes="${second}" loading="lazy"></a>`;
+    <a class="image-link" href="/photographs/f/x/"><img src="/_astro/x.jpg" srcset="/_astro/x-750.webp 750w, /_astro/x-1668.webp 1668w" sizes="(min-width: 1240px) 670px, 94vw" loading="lazy"></a>
+    <a class="image-link" href="/photographs/f/x/"><img src="/_astro/x.jpg" srcset="/_astro/x-750.webp 750w, /_astro/x-1668.webp 1668w" sizes="${second}" loading="lazy"></a>`;
 
   it('same src, different sizes: only the placement shown is held', () => {
-    at('/pieces/twice/', 1512, 982, 1);
+    at('/journal/twice/', 1512, 982, 1);
     const [block] = parse(TWICE('100vw')).images;
     shown(loaded(block));
-    expect(loading(TWICE('100vw'), '/pieces/twice/')).toEqual(['eager', 'lazy']);
+    expect(loading(TWICE('100vw'), '/journal/twice/')).toEqual(['eager', 'lazy']);
   });
 
   it('identical attributes: both held', () => {
-    at('/pieces/twice-again/', 1512, 982, 1);
+    at('/journal/twice-again/', 1512, 982, 1);
     const [block] = parse(TWICE('(min-width: 1240px) 670px, 94vw')).images;
     shown(loaded(block));
-    expect(loading(TWICE('(min-width: 1240px) 670px, 94vw'), '/pieces/twice-again/')).toEqual([
+    expect(loading(TWICE('(min-width: 1240px) 670px, 94vw'), '/journal/twice-again/')).toEqual([
       'eager',
       'eager',
     ]);
@@ -1159,10 +1159,10 @@ describe('(h) the way back holds what the reader saw (T1604b, spec 018)', () => 
 });
 
 describe("(i) the quiet view's resting rules are main's (T1605, spec 018)", () => {
-  // Pasted from `main`'s src/pages/images/[...id].astro: the quiet view
+  // Pasted from `main`'s src/pages/photographs/[...id].astro: the quiet view
   // moves as one view change now, and the states it moves between are
   // the same states, byte for byte (normalised for Prettier).
-  const PAGE = 'src/pages/images/[...id].astro';
+  const PAGE = 'src/pages/photographs/[...id].astro';
   const MAIN = [
     [
       ':global(html[data-quiet]) :global(.site-header), :global(html[data-quiet]) :global(.site-footer), :global(html[data-quiet]) .frame-nav, :global(html[data-quiet]) .image-head, :global(html[data-quiet]) .image-body, :global(html[data-quiet]) .quiet-toggle',
@@ -1204,9 +1204,9 @@ describe("(i) the quiet view's resting rules are main's (T1605, spec 018)", () =
 });
 
 describe("(j) the travel's history (T1606f, spec 018)", () => {
-  const PIECE = '/pieces/fog/';
-  const A = '/images/fog/a/';
-  const B = '/images/fog/b/';
+  const PIECE = '/journal/fog/';
+  const A = '/photographs/fog/a/';
+  const B = '/photographs/fog/b/';
   // Each row: the record on the entry, the traverse, the page left, the
   // page reached, and the kind it settles on. On back the record is the
   // entry being left (its `from` is the page reached); on forward it is

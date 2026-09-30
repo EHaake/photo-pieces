@@ -170,7 +170,7 @@ const TOKENS = {
 };
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
-const PAGE = 'src/pages/images/[...id].astro';
+const PAGE = 'src/pages/photographs/[...id].astro';
 
 /** The CSS of a component's <style> blocks (as motion.test.mjs reads them). */
 const styleBlocks = (text) =>

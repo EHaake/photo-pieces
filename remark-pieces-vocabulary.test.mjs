@@ -530,10 +530,10 @@ describe('image links (T310, spec 004)', () => {
   it('a block image is wrapped in a link to its page, derived from the piece folder', async () => {
     const { code } = await render('::single{src="./photo.jpg" alt="A photo"}');
     // T1100: every frame carries its raw ratio — 8x5 = 1.6 here.
-    expect(links(code)).toEqual([{ href: '/images/fixtures/photo/', style: '--ar: 1.6' }]);
+    expect(links(code)).toEqual([{ href: '/photographs/fixtures/photo/', style: '--ar: 1.6' }]);
     // The image inside is still the optimizer's — the marker is intact.
     expect(code).toMatch(
-      /<a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
+      /<a href="\/photographs\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
     );
   });
 
@@ -542,8 +542,8 @@ describe('image links (T310, spec 004)', () => {
       '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r"}',
     );
     expect(links(pair.code).map((l) => l.href)).toEqual([
-      '/images/fixtures/photo/',
-      '/images/fixtures/portrait/',
+      '/photographs/fixtures/photo/',
+      '/photographs/fixtures/portrait/',
     ]);
     const grid = await render(
       ':::grid\n![a](./photo.jpg)\n![b](./portrait.jpg)\n![c](./rotated.jpg)\n:::',
@@ -551,7 +551,7 @@ describe('image links (T310, spec 004)', () => {
     expect(links(grid.code)).toHaveLength(3);
     const strip = await render(':::strip\n![a](./photo.jpg)\n![b](./portrait.jpg)\n:::');
     expect(strip.code).toMatch(
-      /<div class="piece-strip-scroll" tabindex="0"><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6">/,
+      /<div class="piece-strip-scroll" tabindex="0"><a href="\/photographs\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6">/,
     );
     expect(links(strip.code)).toHaveLength(2);
   });
@@ -559,7 +559,7 @@ describe('image links (T310, spec 004)', () => {
   it('the shorthand image in prose is wrapped too', async () => {
     const { code } = await render('Text.\n\n![A photo](./photo.jpg)\n');
     expect(code).toMatch(
-      /<p><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
+      /<p><a href="\/photographs\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
     );
   });
 
@@ -660,7 +660,7 @@ describe('held: the durational block (T501, spec 007)', () => {
     // The figure's anchor to the image page carries the same raw ratio
     // (not normalized to 1 — a single frame normalized says nothing).
     expect(code).toMatch(
-      /<figure><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
+      /<figure><a href="\/photographs\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
     );
     expect(code).toMatch(
       /<div class="piece-held-prose"><p>First paragraph beside the frame\.<\/p>\n?<p>Second paragraph\.<\/p><\/div>/,
@@ -825,13 +825,13 @@ describe('cross-piece references (T602, spec 008)', () => {
     const local = await render('::single{src="./photo.jpg" alt="dawn"}');
     // T1100: both carry their raw ratio — the borrowed file is measured
     // where it lives, like the local one (both 8x5).
-    expect(links(borrowed.code)).toEqual([{ href: '/images/beta/photo/', style: '--ar: 1.6' }]);
-    expect(links(local.code)).toEqual([{ href: '/images/alpha/photo/', style: '--ar: 1.6' }]);
+    expect(links(borrowed.code)).toEqual([{ href: '/photographs/beta/photo/', style: '--ar: 1.6' }]);
+    expect(links(local.code)).toEqual([{ href: '/photographs/alpha/photo/', style: '--ar: 1.6' }]);
     expect(sizesOf(borrowed.code)[0]).toContain('680px');
     expect(sizesOf(borrowed.code)).toEqual(sizesOf(local.code));
     // The image inside is still the optimizer's, borrowed path and all.
     expect(borrowed.code).toMatch(
-      /<a href="\/images\/beta\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
+      /<a href="\/photographs\/beta\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
     );
     expect(imageMarkers(borrowed.code)[0].src).toBe('../beta/photo.jpg');
   });
@@ -844,8 +844,8 @@ describe('cross-piece references (T602, spec 008)', () => {
       '::diptych{left="./photo.jpg" right="./photo.jpg" leftAlt="l" rightAlt="r"}',
     );
     expect(links(pair.code).map((l) => l.href)).toEqual([
-      '/images/beta/photo/',
-      '/images/alpha/photo/',
+      '/photographs/beta/photo/',
+      '/photographs/alpha/photo/',
     ]);
     expect(sizesOf(pair.code)[0]).toContain('vw');
     expect(sizesOf(pair.code)).toEqual(sizesOf(localPair.code));
@@ -853,8 +853,8 @@ describe('cross-piece references (T602, spec 008)', () => {
     const grid = await render(':::grid\n![a](../beta/photo.jpg)\n![b](./photo.jpg)\n:::');
     const localGrid = await render(':::grid\n![a](./photo.jpg)\n![b](./photo.jpg)\n:::');
     expect(links(grid.code).map((l) => l.href)).toEqual([
-      '/images/beta/photo/',
-      '/images/alpha/photo/',
+      '/photographs/beta/photo/',
+      '/photographs/alpha/photo/',
     ]);
     expect(sizesOf(grid.code)[0]).toContain('340px');
     expect(sizesOf(grid.code)).toEqual(sizesOf(localGrid.code));
@@ -863,7 +863,7 @@ describe('cross-piece references (T602, spec 008)', () => {
   it('a borrowed held keeps the local --ar and sizes', async () => {
     const held = await render(':::held{src="../beta/photo.jpg" alt="ridge"}\nText.\n:::');
     const localHeld = await render(':::held{src="./photo.jpg" alt="ridge"}\nText.\n:::');
-    expect(links(held.code)).toEqual([{ href: '/images/beta/photo/', style: '--ar: 1.6' }]);
+    expect(links(held.code)).toEqual([{ href: '/photographs/beta/photo/', style: '--ar: 1.6' }]);
     expect(held.code).toContain(
       '<div class="piece-block piece-held side-left frame-landscape" style="--ar: 1.6">',
     );
@@ -875,7 +875,7 @@ describe('cross-piece references (T602, spec 008)', () => {
   it('the shorthand borrows from the photographs folder', async () => {
     const { code } = await render('Text.\n\n![x](../../photographs/photo.jpg)\n');
     expect(code).toMatch(
-      /<p><a href="\/images\/gallery\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
+      /<p><a href="\/photographs\/gallery\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
     );
   });
 
@@ -998,7 +998,7 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     // the plugin, not an empty list.
     expect(read).toBeGreaterThan(40);
     expect(files).toContain(join('src', 'styles', 'global.css'));
-    expect(files).toContain(join('src', 'pages', 'pieces', '[slug].astro'));
+    expect(files).toContain(join('src', 'pages', 'journal', '[slug].astro'));
     expect(hits).toEqual([]);
 
     // The two spellings of the one attribute, pinned together: the
@@ -1006,7 +1006,7 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     expect(readFileSync('src/styles/global.css', 'utf8')).toContain(
       'html[data-held-active] .site-header',
     );
-    expect(readFileSync('src/pages/pieces/[slug].astro', 'utf8')).toContain(
+    expect(readFileSync('src/pages/journal/[slug].astro', 'utf8')).toContain(
       "toggleAttribute('data-held-active'",
     );
   });

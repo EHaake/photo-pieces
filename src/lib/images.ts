@@ -141,7 +141,7 @@ export interface SitePlace {
 export interface SiteImage {
   /** `<piece-folder>/<basename>` or `gallery/<basename>`. */
   id: string;
-  /** `/images/<id>/`. */
+  /** `/photographs/<id>/`. */
   url: string;
   folder: string;
   basename: string;
@@ -659,7 +659,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
             kind: 'piece',
             id: piece.id,
             title: piece.data.title,
-            url: `/pieces/${piece.id}/`,
+            url: `/journal/${piece.id}/`,
             count: homeFrames.length,
             ...neighbours(homeFrames, file.id),
           });
@@ -675,7 +675,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
             kind: 'piece',
             id: other.id,
             title: other.data.title,
-            url: `/pieces/${other.id}/`,
+            url: `/journal/${other.id}/`,
             count: frames.length,
             ...neighbours(frames, file.id),
           });

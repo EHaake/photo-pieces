@@ -2,7 +2,7 @@
 // private in what ships, and the compare has one shape. Runs from
 // `postbuild`, after check-no-gps.
 //
-// First scan, the loupe: every image page (`<dir>/images/**/index.html`)
+// First scan, the loupe: every image page (`<dir>/photographs/**/index.html`)
 // names its loupe file in `data-loupe-src`. That file must exist under
 // <dir> (so the pruner cannot have taken it) and be no larger than the
 // deploy target's per-file limit. A stage that also carries
@@ -221,7 +221,7 @@ let imagePages = 0;
 let pages = 0;
 let shaped = 0;
 let stages = 0;
-const imagesDir = join(root, 'images') + sep;
+const imagesDir = join(root, 'photographs') + sep;
 
 for await (const file of files(root)) {
   const extension = extname(file);

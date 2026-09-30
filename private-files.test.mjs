@@ -15,7 +15,7 @@ const MAX_BYTES = 25 * 1024 * 1024;
 
 const DETAIL = '/_astro/land-b.detail.webp';
 const OWN = '/_astro/land-b.own.webp';
-const PAGE = 'images/where-the-fog-lets-go/land-b/index.html';
+const PAGE = 'photographs/where-the-fog-lets-go/land-b/index.html';
 const html = (body) => `<!doctype html><html><head><title>t</title></head><body>${body}</body></html>`;
 const stage = (url, detail = true) =>
   `<figure class="stage" data-loupe-src="${url}"${detail ? ' data-loupe-detail' : ''}><img src="/_astro/land-b.small.webp" alt=""></figure>`;
@@ -84,7 +84,7 @@ describe('the private-files barrier (T1703, spec 019)', () => {
     });
 
     it('a detail export in an og:image meta fails', () => {
-      const other = join('images', 'x', 'index.html');
+      const other = join('photographs', 'x', 'index.html');
       const dir = withDetail({
         [other]: html(`<meta property="og:image" content="https://example.com${DETAIL}">`),
       });
@@ -130,11 +130,11 @@ describe('the private-files barrier (T1703, spec 019)', () => {
 
   describe('scan 2: no script-only state in the markup', () => {
     it('data-js on a figure fails', () => {
-      const dir = site({ 'pieces/x/index.html': html('<figure class="stage" data-js><img src="/a.webp" alt=""></figure>') });
+      const dir = site({ 'journal/x/index.html': html('<figure class="stage" data-js><img src="/a.webp" alt=""></figure>') });
       const result = run(dir);
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(
-        `[check-private-files] a script-only state in the markup of ${join(dir, 'pieces/x/index.html')}: data-js`,
+        `[check-private-files] a script-only state in the markup of ${join(dir, 'journal/x/index.html')}: data-js`,
       );
     });
 
@@ -163,11 +163,11 @@ describe('the private-files barrier (T1703, spec 019)', () => {
     });
 
     it('data-paging (the filmstrip\'s paging state, T1722) fails', () => {
-      const dir = site({ 'pieces/x/index.html': html('<figure class="stage" data-paging><img src="/a.webp" alt=""></figure>') });
+      const dir = site({ 'journal/x/index.html': html('<figure class="stage" data-paging><img src="/a.webp" alt=""></figure>') });
       const result = run(dir);
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(
-        `[check-private-files] a script-only state in the markup of ${join(dir, 'pieces/x/index.html')}: data-paging`,
+        `[check-private-files] a script-only state in the markup of ${join(dir, 'journal/x/index.html')}: data-paging`,
       );
     });
 
@@ -202,7 +202,7 @@ describe('the private-files barrier (T1703, spec 019)', () => {
   describe('scan 3: one compare shape', () => {
     it('a compare in the shape with two stages, and one with three, exit 0', () => {
       const dir = site({
-        'pieces/x/index.html': html(compare(part('camera') + part('finished', 'a note'))),
+        'journal/x/index.html': html(compare(part('camera') + part('finished', 'a note'))),
         [PAGE]: html(compare(part('camera') + part('first', 'n') + part('finished'))),
       });
       const result = run(dir);
@@ -219,11 +219,11 @@ describe('the private-files barrier (T1703, spec 019)', () => {
     });
 
     const outOfShape = (inner, reason) => {
-      const dir = site({ 'pieces/x/index.html': html(compare(inner)) });
+      const dir = site({ 'journal/x/index.html': html(compare(inner)) });
       const result = run(dir);
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(
-        `[check-private-files] a compare out of shape in ${join(dir, 'pieces/x/index.html')}: ${reason}`,
+        `[check-private-files] a compare out of shape in ${join(dir, 'journal/x/index.html')}: ${reason}`,
       );
     };
 
@@ -280,7 +280,7 @@ describe('the private-files barrier (T1703, spec 019)', () => {
   });
 
   describe('scan 4: one candidate list per stage file per page', () => {
-    const PIECE = 'pieces/x/index.html';
+    const PIECE = 'journal/x/index.html';
     const SRCSET = '/_astro/a.400.webp 400w, /_astro/a.800.webp 800w';
     const SIZES = '(min-width: 60rem) 50vw, 100vw';
 

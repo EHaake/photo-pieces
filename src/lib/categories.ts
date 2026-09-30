@@ -21,7 +21,7 @@ export const categoryLabel = (category: Category): string =>
  * to the unfiltered pieces index.
  */
 export const categoryRow = (current?: Category): { label: string; href: string | null }[] => [
-  ...(current ? [{ label: 'All', href: '/pieces/' }] : []),
+  ...(current ? [{ label: 'All', href: '/journal/' }] : []),
   ...CATEGORIES.map((category) => ({
     label: categoryLabel(category),
     href: category === current ? null : `/categories/${category}/`,
