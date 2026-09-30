@@ -5,6 +5,7 @@ caption: >-
   this file, not from the image's EXIF — and this image's file carries
   GPS that must never appear anywhere.
 date: 2026-08-29
+at: the-jetty
 published: 2026-08-31
 camera: Fixture FX-2 (override)
 lens: Fixture 50mm f/2 (override)

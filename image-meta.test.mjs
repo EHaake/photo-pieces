@@ -24,6 +24,7 @@ import {
   nameCollisions,
   nearest,
   neighbours,
+  outingOrder,
   PAIR_WIDTH,
   parseImagePath,
   parseReference,
@@ -31,6 +32,7 @@ import {
   PHOTOGRAPH_FIELDS,
   photographOnlyProblems,
   pieceFrames,
+  placeCoverProblem,
   placeNameProblem,
   placeOf,
   placeProblems,
@@ -42,6 +44,7 @@ import {
   resolveStages,
   sectionsFor,
   sidecarImageId,
+  undatedAtPlace,
   validateGalleries,
 } from './src/lib/image-meta.mjs';
 
@@ -893,8 +896,8 @@ describe('places (T701, spec 009)', () => {
     );
     expect(grouped.get('jetty')).toEqual({
       outings: [
-        { piece: 'alpha', frames: ['alpha/land-a'] },
-        { piece: 'beta', frames: ['beta/port-b'] },
+        { key: 'alpha', frames: ['alpha/land-a'] },
+        { key: 'beta', frames: ['beta/port-b'] },
       ],
       frames: ['alpha/land-a', 'beta/port-b'],
     });
@@ -910,7 +913,7 @@ describe('places (T701, spec 009)', () => {
       ['alpha'],
     );
     expect(grouped.get('sombrio-beach')).toEqual({
-      outings: [{ piece: 'alpha', frames: ['alpha/land-b'] }],
+      outings: [{ key: 'alpha', frames: ['alpha/land-b'] }],
       frames: ['alpha/land-b'],
     });
     expect(grouped.get('jetty').frames).toEqual(['alpha/land-a']);
@@ -926,8 +929,8 @@ describe('places (T701, spec 009)', () => {
       ['beta/port-b', 'jetty'],
     ]);
     expect(groupByPlace(framesByPiece, placeOfId, ['beta', 'alpha']).get('jetty').outings).toEqual([
-      { piece: 'beta', frames: ['beta/port-b'] },
-      { piece: 'alpha', frames: ['alpha/land-a'] },
+      { key: 'beta', frames: ['beta/port-b'] },
+      { key: 'alpha', frames: ['alpha/land-a'] },
     ]);
     expect(groupByPlace(framesByPiece, placeOfId, ['beta', 'alpha']).get('jetty').frames).toEqual([
       'beta/port-b',
@@ -965,14 +968,14 @@ describe('places (T701, spec 009)', () => {
       ['alpha', new Date(Date.UTC(2019, 4, 2))],
       ['beta', new Date(Date.UTC(2026, 7, 30))],
     ]);
-    expect(placeSummary([{ piece: 'beta', frames: ['beta/port-b'] }], dates)).toBe(
+    expect(placeSummary([{ key: 'beta', frames: ['beta/port-b'] }], dates)).toBe(
       '1 outing · 1 frame · 2026',
     );
     expect(
       placeSummary(
         [
-          { piece: 'alpha', frames: ['alpha/a', 'alpha/b', 'alpha/c', 'alpha/d'] },
-          { piece: 'beta', frames: ['beta/a', 'beta/b', 'beta/c'] },
+          { key: 'alpha', frames: ['alpha/a', 'alpha/b', 'alpha/c', 'alpha/d'] },
+          { key: 'beta', frames: ['beta/a', 'beta/b', 'beta/c'] },
         ],
         dates,
       ),
@@ -1351,5 +1354,153 @@ describe('the draft and the date (T1740, spec 019)', () => {
     for (const name of Object.values(PHOTOGRAPH_FIELDS)) {
       expect(block).toMatch(new RegExp(`^\\s+${name}: z\\.`, 'm'));
     }
+  });
+});
+
+describe('the place walls (T1746, spec 019)', () => {
+  const day = (y, m, d) => new Date(Date.UTC(y, m - 1, d));
+
+  it('outingOrder: a photograph dated between two entries stands between them', () => {
+    expect(
+      outingOrder(
+        [
+          { key: 'alpha', date: day(2026, 8, 1) },
+          { key: 'beta', date: day(2026, 8, 30) },
+        ],
+        [{ key: 'dock-b', date: day(2026, 8, 29) }],
+      ),
+    ).toEqual(['alpha', 'dock-b', 'beta']);
+  });
+
+  it("outingOrder: a photograph on an entry's date comes after it", () => {
+    expect(
+      outingOrder(
+        [{ key: 'zeta', date: day(2026, 8, 30) }],
+        [{ key: 'bank', date: day(2026, 8, 30) }],
+      ),
+    ).toEqual(['zeta', 'bank']);
+  });
+
+  it('outingOrder: two photographs on one date go by id', () => {
+    expect(
+      outingOrder(
+        [],
+        [
+          { key: 'dock-b', date: day(2026, 8, 29) },
+          { key: 'bank', date: day(2026, 8, 29) },
+        ],
+      ),
+    ).toEqual(['bank', 'dock-b']);
+  });
+
+  it('groupByPlace: a photograph outing [id] at the place is its own outing, in order', () => {
+    const grouped = groupByPlace(
+      new Map([
+        ['alpha', ['alpha/land-a']],
+        ['dock-b', ['dock-b']],
+        ['beta', ['beta/port-b']],
+      ]),
+      new Map([
+        ['alpha/land-a', 'jetty'],
+        ['dock-b', 'jetty'],
+        ['beta/port-b', 'jetty'],
+      ]),
+      ['alpha', 'dock-b', 'beta'],
+    );
+    expect(grouped.get('jetty')).toEqual({
+      outings: [
+        { key: 'alpha', frames: ['alpha/land-a'] },
+        { key: 'dock-b', frames: ['dock-b'] },
+        { key: 'beta', frames: ['beta/port-b'] },
+      ],
+      frames: ['alpha/land-a', 'dock-b', 'beta/port-b'],
+    });
+  });
+
+  it('groupByPlace: a journal entry that borrows the photograph does not count it', () => {
+    const grouped = groupByPlace(
+      new Map([
+        ['dock-b', ['dock-b']],
+        ['alpha', ['alpha/land-a', 'dock-b']],
+      ]),
+      new Map([
+        ['alpha/land-a', 'jetty'],
+        ['dock-b', 'jetty'],
+      ]),
+      ['dock-b', 'alpha'],
+    );
+    expect(grouped.get('jetty').outings).toEqual([
+      { key: 'dock-b', frames: ['dock-b'] },
+      { key: 'alpha', frames: ['alpha/land-a'] },
+    ]);
+    expect(grouped.get('jetty').frames).toEqual(['dock-b', 'alpha/land-a']);
+  });
+
+  it('groupByPlace: a photograph whose place is null is absent', () => {
+    const grouped = groupByPlace(
+      new Map([
+        ['alpha', ['alpha/land-a']],
+        ['dock-b', ['dock-b']],
+      ]),
+      new Map([
+        ['alpha/land-a', 'jetty'],
+        ['dock-b', null],
+      ]),
+      ['alpha', 'dock-b'],
+    );
+    expect(grouped.get('jetty')).toEqual({
+      outings: [{ key: 'alpha', frames: ['alpha/land-a'] }],
+      frames: ['alpha/land-a'],
+    });
+  });
+
+  it('placeSummary counts a photograph outing as an outing, and its year in the span', () => {
+    const dates = new Map([
+      ['alpha', day(2024, 5, 2)],
+      ['dock-b', day(2026, 8, 29)],
+    ]);
+    expect(
+      placeSummary(
+        [
+          { key: 'alpha', frames: ['alpha/a', 'alpha/b'] },
+          { key: 'dock-b', frames: ['dock-b'] },
+        ],
+        dates,
+      ),
+    ).toBe('2 outings · 3 frames · 2024–2026');
+  });
+
+  it('placeCoverProblem: a photographs-folder frame among the frames is a cover', () => {
+    const known = new Map([
+      ['alpha/land-a', 'published'],
+      ['dock-b', 'published'],
+    ]);
+    expect(
+      placeCoverProblem('dock-b', ['alpha/land-a', 'dock-b'], 'src/content/places/jetty.md', known),
+    ).toBeNull();
+  });
+
+  it('undatedAtPlace: a date and a place → none', () => {
+    expect(
+      undatedAtPlace([
+        { file: 'src/content/photographs/_dock-b.md', slug: 'jetty', date: day(2026, 8, 29) },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('undatedAtPlace: a place and no date → the line naming the file and the slug', () => {
+    expect(
+      undatedAtPlace([
+        { file: 'src/content/photographs/_bank.md', slug: 'jetty', date: undefined },
+      ]),
+    ).toEqual([
+      '[places] src/content/photographs/_bank.md: names the place "jetty" but has no capture date, which orders it on the wall — add a date: line to the sidecar',
+    ]);
+  });
+
+  it('undatedAtPlace: no place → none', () => {
+    expect(
+      undatedAtPlace([{ file: 'src/content/photographs/_bank.md', slug: null, date: undefined }]),
+    ).toEqual([]);
   });
 });

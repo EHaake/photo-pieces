@@ -1713,7 +1713,7 @@ T1735.
       frontmatter, not a rebuild of T1740's tree. Tie mutation fails "a
       tie → the journal entry first, then the photograph", reverted.
 
-- [ ] **T1746** — The place walls admit the photographs folder. Placed
+- [x] **T1746** — The place walls admit the photographs folder. Placed
       here, after T1741, by the order of its dependencies (it reads
       T1740's status); its id is the next free one. Pattern:
       `groupByPlace`, `placeSummary` and their cases in
@@ -1741,6 +1741,16 @@ T1735.
       cover edit as the plan lists it, the card's image pasted, reverted;
       and one more: `the-jetty.md`'s cover set to `draft-fixture` → the
       build fails with the not-one-of-its-frames line, pasted, reverted._
+      Done: 87 pages, 776 tests (+11), BUILD/CHECK/TEST EXIT 0. The
+      jetty's wall: where-the-fog-lets-go/land-c (entry published
+      2026-08-28), dock-b (captured 2026-08-29), first-light-at-the-
+      jetty/jetty-dawn (2026-08-30); no draft-fixture. Summary line 2
+      outings · 2 frames · 2026 → 3 outings · 3 frames · 2026. The "not
+      grouped under a place" warning gone from code and the build log
+      (spec history keeps the phrase). Mutation (?? id dropped) → 2
+      failures, reverted. cover: dock-b → the card shows dock-b's frame,
+      reverted; cover: draft-fixture → "cover \"draft-fixture\" is not
+      one of this place's frames", reverted.
 
 - [ ] **T1747** — The photographs index. Placed here, before T1742, by
       its header text; its id is the next free one. Pattern:
@@ -2232,6 +2242,7 @@ tier if it is ever on (it is off). -->
 | T1739 per-task review | implementation (`opus`, high) | ~59k | pass; notes: referenceProblems' draft branch prints null for a bare id and keeps a split('/') slug copy (→ T1740), collision message's literal path (sweep) |
 | T1740 draft and date | implementation (`opus`, high) | ~87k | done; 756 tests (+6); T1739's two review notes taken; no deviation |
 | T1741 front door | implementation (`opus`, high) | ~51k | done; 765 tests (+9); mutation fails by name; row counts pinned from frontmatter |
+| T1746 place walls | implementation (`opus`, high) | ~87k | done; 776 tests (+11); one astro-check tuple type fixed in-task; a photograph naming a draft place needs no date (on no wall) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

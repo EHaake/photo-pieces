@@ -27,6 +27,7 @@ import {
   nameCollisions,
   nearest,
   neighbours,
+  outingOrder,
   passageFor,
   photographOnlyProblems,
   pieceFrames,
@@ -39,6 +40,7 @@ import {
   referenceProblems,
   resolveStages,
   sidecarImageId,
+  undatedAtPlace,
   validateGalleries,
 } from './image-meta.mjs';
 
@@ -118,7 +120,8 @@ export interface ImagePassage {
 
 /**
  * A place that publishes (spec 009): its writing, its outings — the
- * published pieces with at least one frame at it, oldest first, each
+ * published pieces with at least one frame at it, and since spec 019 each
+ * published photographs-folder frame that names it, oldest first, each
  * outing's frames in that piece's own order — and the card's summary.
  * Frames are ids only, so an image can point at its place without a
  * cycle. A draft place, or one with no published frame, is not here.
@@ -129,13 +132,16 @@ export interface SitePlace {
   title: string;
   /** `/places/<slug>/` (site-root; pages apply withBase). */
   url: string;
-  /** Oldest first; each outing's frames in the piece's order, own-folder only. */
-  outings: { piece: CollectionEntry<'journal'>; frames: string[] }[];
+  /** Oldest first; each outing's frames in the piece's order, own-folder
+   *  only. `key` is the journal slug, or the photographs-folder id whose
+   *  outing it is (then `piece` is null and `frames` is `[key]`). */
+  outings: { key: string; piece: CollectionEntry<'journal'> | null; frames: string[] }[];
   /** The outings' frames concatenated — the set the arrows step through. */
   frames: string[];
   /** An id among `frames`: the declared cover, else the most recent outing's first frame. */
   cover: string;
-  /** The most recent outing's publishDate — the index's order. */
+  /** The most recent outing's date — its entry's publishDate, or a
+   *  photograph's capture date — the index's order. */
   latest: Date;
   /** "N outings · M frames · 2019–2026" (placeSummary). */
   summary: string;
@@ -160,7 +166,7 @@ export interface SiteImage {
   galleries: CollectionEntry<'galleries'>[];
   sidecar: CollectionEntry<'imageMeta'> | null;
   /** The place this frame is at (spec 009) — null when it names none,
-   *  when its place is a draft, or in the photographs folder. */
+   *  or when its place is a draft. */
   place: SitePlace | null;
   /** The sidecar's `published:` for a photographs-folder photograph
    *  (spec 019) — the date it stands on the front door under; null when
@@ -580,42 +586,75 @@ async function buildRegistry(): Promise<ImageRegistry> {
     throw new Error(borrowProblems.join('\n'));
   }
 
+  // The EXIF of every published file, read once (spec 019): a
+  // photographs-folder frame's capture date orders it among a place's
+  // outings, and the image loop below reads the same map.
+  const publishedFiles = files.filter((file) => known.get(file.id) === 'published');
+  const rawByKey = new Map<string, object>(
+    await Promise.all(
+      publishedFiles.map(
+        async (file) =>
+          [file.key, await readExposure(fileURLToPath(new URL(`.${file.key}`, root)))] as const,
+      ),
+    ),
+  );
+
   // Where each published frame was made (spec 009): its sidecar's `at`,
   // else its piece's default — `placeOf` is the only copy of that
-  // precedence. A draft place resolves to no place, so the frame's label
-  // shows the free text alone and links nowhere; the note names it below.
-  // A photographs-folder frame has no piece to group under, so a place page
-  // could never show it: the line is checked for its slug and ignored.
+  // precedence; a photographs-folder frame has no piece, so only its own
+  // line (spec 019). A draft place resolves to no place, so the frame's
+  // label shows the free text alone and links nowhere; the note names it
+  // below.
   const placeOfId = new Map<string, string | null>();
-  for (const file of files) {
-    if (known.get(file.id) !== 'published') continue;
+  for (const file of publishedFiles) {
     const sidecar = sidecars.get(file.id) ?? null;
-    if (file.pieceSlug === null) {
-      if (placeOf(sidecar?.data.at, undefined) !== null) {
-        console.warn(
-          `[places] ${sidecar!.filePath ?? sidecar!.id}: photographs-folder photographs are not grouped under a place — the line is ignored`,
-        );
-      }
-      continue;
-    }
-    const slug = placeOf(sidecar?.data.at, pieceById.get(file.pieceSlug)?.data.at);
+    const pieceDefault =
+      file.pieceSlug === null ? undefined : pieceById.get(file.pieceSlug)?.data.at;
+    const slug = placeOf(sidecar?.data.at, pieceDefault);
     placeOfId.set(file.id, slug && !placeById.get(slug)?.data.draft ? slug : null);
   }
 
-  // The outings: for each published piece oldest first, its own-folder
-  // frames in the piece's order, bucketed by place. A place publishes
-  // when it has an outing and is not a draft; otherwise the build says
-  // so and builds nothing for it. The cover, checked only on a place
-  // that publishes, must be one of its frames — a place declared ahead
-  // of its first outing may name a frame not yet published.
+  // The outings: each published piece, dated by its publishDate, and each
+  // published photographs-folder frame at a place, an outing of its own
+  // dated by its capture (spec 019) — oldest first by `outingOrder`, each
+  // one's own frames bucketed by place. An undated photographs-folder
+  // frame at a place cannot be ordered, and fails the build. A place
+  // publishes when it has an outing and is not a draft; otherwise the
+  // build says so and builds nothing for it. The cover, checked only on
+  // a place that publishes, must be one of its frames — a place declared
+  // ahead of its first outing may name a frame not yet published.
   const publishedOldestFirst = pieces.filter(isPublished).sort(byOldestPublished);
-  const dateByPiece = new Map(
-    publishedOldestFirst.map((piece) => [piece.id, piece.data.publishDate]),
-  );
+  const photographOutings = publishedFiles
+    .filter((file) => file.pieceSlug === null && placeOfId.get(file.id))
+    .map((file) => {
+      const sidecar = sidecars.get(file.id) ?? null;
+      return {
+        key: file.id,
+        slug: placeOfId.get(file.id)!,
+        file: sidecar?.filePath ?? sidecar?.id ?? file.key.slice(1),
+        date: mergeOverrides(formatExposure(rawByKey.get(file.key)), sidecar?.data).date as
+          Date | undefined,
+      };
+    });
+  const undated = undatedAtPlace(photographOutings);
+  if (undated.length) {
+    throw new Error(undated.join('\n'));
+  }
+  const dateByOuting = new Map<string, Date>([
+    ...publishedOldestFirst.map((piece) => [piece.id, piece.data.publishDate] as const),
+    ...photographOutings.map((outing) => [outing.key, outing.date!] as const),
+  ]);
+  const framesByOuting = new Map<string, string[]>([
+    ...framesByPiece,
+    ...photographOutings.map((outing): [string, string[]] => [outing.key, [outing.key]]),
+  ]);
   const grouped = groupByPlace(
-    framesByPiece,
+    framesByOuting,
     placeOfId,
-    publishedOldestFirst.map((piece) => piece.id),
+    outingOrder(
+      publishedOldestFirst.map((piece) => ({ key: piece.id, date: piece.data.publishDate })),
+      photographOutings.map(({ key, date }) => ({ key, date })),
+    ),
   );
   const coverProblems: string[] = [];
   const sitePlaces: SitePlace[] = [];
@@ -631,8 +670,9 @@ async function buildRegistry(): Promise<ImageRegistry> {
       );
       continue;
     }
-    const outings = group.outings.map((outing: { piece: string; frames: string[] }) => ({
-      piece: pieceById.get(outing.piece)!,
+    const outings = group.outings.map((outing: { key: string; frames: string[] }) => ({
+      key: outing.key,
+      piece: pieceById.get(outing.key) ?? null,
       frames: outing.frames,
     }));
     const newest = outings.at(-1)!;
@@ -655,8 +695,8 @@ async function buildRegistry(): Promise<ImageRegistry> {
       outings,
       frames: group.frames,
       cover: cover ?? newest.frames[0],
-      latest: newest.piece.data.publishDate,
-      summary: placeSummary(group.outings, dateByPiece),
+      latest: dateByOuting.get(newest.key)!,
+      summary: placeSummary(group.outings, dateByOuting),
     });
   }
   if (coverProblems.length) {
@@ -695,7 +735,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
       .map(async (file, index): Promise<SiteImage> => {
         const piece = file.pieceSlug === null ? null : (pieceById.get(file.pieceSlug) ?? null);
         const sidecar = sidecars.get(file.id) ?? null;
-        const raw = await readExposure(fileURLToPath(new URL(`.${file.key}`, root)));
+        const raw = rawByKey.get(file.key)!;
         rawTags[index] = { file: file.key.slice(1), raw };
         const exposure = formatExposure(raw, gear);
         const label: ImageLabel = mergeOverrides(exposure, sidecar?.data);

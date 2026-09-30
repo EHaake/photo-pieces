@@ -1206,22 +1206,65 @@ export function placeProblems(refs, placeSlugs) {
 }
 
 /**
- * A place's outings and its frames. `framesByPiece` maps a piece slug
- * to its frames in the piece's order (borrowed ids included — that is
- * what the registry holds), `placeOfId` an image id to its resolved
- * place or null, `pieceOrder` the published piece slugs oldest first.
- * Only a piece's own-folder frames count, so a borrowed frame is never
- * counted under the borrower; an outing exists only where the piece has
- * at least one frame at the place, and a place's frames are its outings'
- * frames concatenated — the set the arrows step through. A place with no
- * frame is absent.
+ * The order of a place's outings (spec 019): a journal outing is dated by
+ * its entry's publish date, a photographs-folder frame — an outing of its
+ * own — by its capture date. `journal` is `{ key: slug, date }[]`,
+ * `photographs` `{ key: id, date }[]`; returns the keys oldest first, a
+ * tie putting the journal outing first, then by key.
  */
-export function groupByPlace(framesByPiece, placeOfId, pieceOrder) {
+export function outingOrder(journal, photographs) {
+  const outings = [
+    ...journal.map(({ key, date }) => ({ key, date, rank: 0 })),
+    ...photographs.map(({ key, date }) => ({ key, date, rank: 1 })),
+  ];
+  return outings
+    .sort(
+      (a, b) =>
+        a.date.valueOf() - b.date.valueOf() ||
+        a.rank - b.rank ||
+        String(a.key).localeCompare(String(b.key)),
+    )
+    .map((outing) => outing.key);
+}
+
+/**
+ * A photographs-folder frame at a place with no capture date (spec 019)
+ * cannot be ordered among the outings, and the build refuses it rather
+ * than guess. `entries` is `{ file, slug, date }[]` — the sidecar (or
+ * image) path, the place it stands at or null, and its capture date —
+ * and the result one message per undated frame at a place, in order.
+ */
+export function undatedAtPlace(entries) {
+  const problems = [];
+  for (const { file, slug, date } of entries) {
+    if (!slug) continue;
+    if (date instanceof Date && !Number.isNaN(date.valueOf())) continue;
+    problems.push(
+      `[places] ${file}: names the place "${slug}" but has no capture date, which orders it on the wall — add a date: line to the sidecar`,
+    );
+  }
+  return problems;
+}
+
+/**
+ * A place's outings and its frames. `framesByOuting` maps an outing key
+ * to its frames — a journal slug to the entry's frames in its order
+ * (borrowed ids included — that is what the registry holds), a
+ * photographs-folder id to `[id]` — `placeOfId` an image id to its
+ * resolved place or null, `order` the outing keys oldest first
+ * (`outingOrder`). Only an outing's own frames count — a frame's outing
+ * is its journal slug, or itself in the photographs folder — so a
+ * borrowed frame is never counted under the borrower; an outing exists
+ * only where it has at least one frame at the place, and a place's
+ * frames are its outings' frames concatenated — the set the arrows step
+ * through. A place with no frame is absent.
+ */
+export function groupByPlace(framesByOuting, placeOfId, order) {
   const places = new Map();
-  for (const piece of pieceOrder) {
+  for (const key of order) {
     const outing = new Map();
-    for (const id of framesByPiece.get(piece) ?? []) {
-      if (homeSlugOf(id) !== piece) continue;
+    for (const id of framesByOuting.get(key) ?? []) {
+      if ((homeSlugOf(id) ?? id) !== key) continue;
       const place = placeOfId.get(id);
       if (!place) continue;
       const frames = outing.get(place) ?? [];
@@ -1230,7 +1273,7 @@ export function groupByPlace(framesByPiece, placeOfId, pieceOrder) {
     }
     for (const [place, frames] of outing) {
       const entry = places.get(place) ?? { outings: [], frames: [] };
-      entry.outings.push({ piece, frames });
+      entry.outings.push({ key, frames });
       entry.frames.push(...frames);
       places.set(place, entry);
     }
@@ -1241,13 +1284,14 @@ export function groupByPlace(framesByPiece, placeOfId, pieceOrder) {
 /**
  * A place card's meta line — "2 outings · 7 frames · 2019–2026", with
  * singulars and one year when the outings share one. `outings` is what
- * `groupByPlace` returns; `dateByPiece` maps a piece slug to its
- * publish date, read as UTC like every date the site prints.
+ * `groupByPlace` returns; `dateByOuting` maps an outing key to its date
+ * (a journal entry's publish date, a photograph's capture date), read as
+ * UTC like every date the site prints.
  */
-export function placeSummary(outings, dateByPiece) {
+export function placeSummary(outings, dateByOuting) {
   const frames = outings.reduce((total, outing) => total + outing.frames.length, 0);
   const years = outings
-    .map((outing) => dateByPiece.get(outing.piece))
+    .map((outing) => dateByOuting.get(outing.key))
     .filter((date) => date instanceof Date && !Number.isNaN(date.valueOf()))
     .map((date) => date.getUTCFullYear())
     .sort((a, b) => a - b);
