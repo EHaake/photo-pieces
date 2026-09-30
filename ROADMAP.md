@@ -45,8 +45,9 @@ attached.
   the vault wrapped around the clone — is the v1 convenience and **not
   the ultimate solution**; it ends when the site goes to production,
   not when the repo happens to get heavy. The shape, as discussed:
-  content becomes a repository of its own (`pieces/`, `gallery-images/`,
-  `galleries/`, `places/`, `gear.md`), text only, and the vault is
+  content becomes a repository of its own (`journal/`, `photographs/`,
+  `galleries/`, `places/`, `gear.md` — the folders as spec 019's
+  lexicon names them), text only, and the vault is
   built around it — `photo-brain/content/` beside the private notes,
   the site repo elsewhere — so writing, the sidecars, the relative
   paths and the plugin go on unchanged; the rasters leave git for
@@ -75,6 +76,21 @@ attached.
   refinement on the design, layout, features, etc before then" — it
   runs together with going live (spec 005's deploy wiring), when the
   refinement specs judged on real pieces are done.
+- **The lexicon** — settled with the photographer on 2026-09-29 and
+  folded into spec 019 (its third amendment), to reach `main` with it:
+  the site is made of **pieces** — pages that carry writing and the
+  site's treatments, context travelling with the work, as it does in a
+  physical gallery — in three forms: a **photograph** (one image, its
+  writing and its making), a **journal** entry (his thoughts through
+  several photographs), a **place** (a tour through somewhere he keeps
+  going back to); a **gallery** is a curated set, kept and deliberately
+  secondary. "Piece" is the structural word, never an address or a nav
+  label. The centre is the landscape and nature work; street, portrait
+  and event photographs are the same kind of piece with less around
+  them. What the lexicon names and spec 019 does not build: the place
+  as a tour (today a wall of frames), the photograph's study (the next
+  entry), a photograph's category of its own, a dated photograph in the
+  feed, and the front door's design around these words.
 - **Every page a piece, and the image's study** — raised by the
   photographer during spec 014 (2026-09-18), as much a statement of intent
   as a feature: every page but the front door is meant to be a piece — a
