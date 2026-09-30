@@ -1687,7 +1687,7 @@ T1735.
       gps() undefined. referenceProblems' bare-id draft line and
       homeSlugOf (T1739's review notes) taken.
 
-- [ ] **T1741** — The front door's list. Pattern: `PieceList.astro`'s
+- [x] **T1741** — The front door's list. Pattern: `PieceList.astro`'s
       row; the frozen tunables and table-driven cases of
       `src/lib/compare.ts` and compare.test.mjs. Plan: "The front door's
       list" and its testing bullet. New `src/lib/front-door.mjs`
@@ -1703,6 +1703,15 @@ T1735.
       `draft-fixture`; `dist/journal/index.html` and
       `dist/categories/landscape/index.html` (or the category the
       entries carry) with the same number of rows as T1740's build._
+      Done: 87 pages, 765 tests (+9, front-door.test.mjs),
+      BUILD/CHECK/TEST EXIT 0. Front door rows: /journal/vocabulary-
+      sampler/ (Sep 1, 2026), /photographs/dock-b/ (Aug 31, 2026, its
+      note-cover frame, "Dock, late"), /journal/first-light-at-the-
+      jetty/ (Aug 30, 2026 — beats market-day on the tie by id); no
+      draft-fixture. Journal index 4 rows; categories landscape 3,
+      street 2, portrait 1, event 0 — checked against the entries'
+      frontmatter, not a rebuild of T1740's tree. Tie mutation fails "a
+      tie → the journal entry first, then the photograph", reverted.
 
 - [ ] **T1746** — The place walls admit the photographs folder. Placed
       here, after T1741, by the order of its dependencies (it reads
@@ -2222,6 +2231,7 @@ tier if it is ever on (it is off). -->
 | T1739 id rule | implementation (`opus`, high) | ~128k | done; 750 tests (+13); oldIdHint narrowed to a bare remainder (sound per review) |
 | T1739 per-task review | implementation (`opus`, high) | ~59k | pass; notes: referenceProblems' draft branch prints null for a bare id and keeps a split('/') slug copy (→ T1740), collision message's literal path (sweep) |
 | T1740 draft and date | implementation (`opus`, high) | ~87k | done; 756 tests (+6); T1739's two review notes taken; no deviation |
+| T1741 front door | implementation (`opus`, high) | ~51k | done; 765 tests (+9); mutation fails by name; row counts pinned from frontmatter |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

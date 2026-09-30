@@ -18,6 +18,6 @@ const pieces = await getPublishedPieces();
   </section>
 
   <section class="section index-feed" aria-label="All pieces">
-    <PieceList pieces={pieces} />
+    <PieceList items={pieces.map((entry) => ({ kind: 'journal', entry }))} />
   </section>
 </BaseLayout>

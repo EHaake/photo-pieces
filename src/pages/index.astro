@@ -7,10 +7,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import StructuredData from '../components/StructuredData.astro';
 import PieceList from '../components/PieceList.astro';
 import { getPublishedPieces } from '../lib/pieces';
+import { getImageRegistry } from '../lib/images';
+import { mergeLatest } from '../lib/front-door.mjs';
 import { withBase } from '../lib/url';
 import { SITE } from '../consts';
 
-const pieces = (await getPublishedPieces()).slice(0, 3);
+// The latest list (spec 019): journal entries and every photograph with
+// a `published:` date, merged by date — one without it is never offered.
+const entries = await getPublishedPieces();
+const registry = await getImageRegistry();
+const photographs = registry.images.filter((image) => image.published !== null);
+const entryById = new Map(entries.map((entry) => [entry.id, entry]));
+const items = mergeLatest(
+  entries.map((entry) => ({ id: entry.id, date: entry.data.publishDate })),
+  photographs.map((image) => ({ id: image.id, date: image.published as Date })),
+).map((latest) =>
+  latest.kind === 'journal'
+    ? { kind: 'journal' as const, entry: entryById.get(latest.id)! }
+    : { kind: 'photograph' as const, image: registry.byId.get(latest.id)! },
+);
 
 const site = Astro.site ?? new URL(Astro.url.origin);
 const websiteSchema = {
@@ -37,6 +52,6 @@ const websiteSchema = {
       <p class="eyebrow">Latest</p>
       <h2 id="latest-pieces">Pieces</h2>
     </div>
-    <PieceList pieces={pieces} />
+    <PieceList items={items} />
   </section>
 </BaseLayout>
