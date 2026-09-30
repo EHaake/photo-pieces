@@ -1824,7 +1824,7 @@ T1735.
       piece's own prose, or the .piece-column class — T1743 pins the
       rest.
 
-- [ ] **T1743** — The lexicon barrier. Pattern:
+- [x] **T1743** — The lexicon barrier. Pattern:
       `scripts/check-private-files.mjs` (its header comment, its
       tag-depth walk from scan 3, its `[dir]` argument, its summary
       line) and private-files.test.mjs (temp trees, `execFileSync`).
@@ -1844,6 +1844,19 @@ T1735.
       pasted; one-time: `NAV_ITEMS`' "Journal" back to "Pieces" → the
       build fails, its first three lines pasted, reverted;
       `git diff -U0 -- package.json` → the `postbuild` line only._
+      Done: 88 pages, 810 tests (+24), BUILD/CHECK/TEST EXIT 0; "[check-
+      lexicon] 88 pages read, 37 authored regions set aside, 5 authored
+      strings excused; 0 old addresses; 1 draft photographs, none
+      published; 1 front-door photographs, each dated; the index lists
+      63 photographs, each once". The harvest excuses
+      /categories/landscape/, /categories/street/, /galleries/editors-
+      picks/, /galleries/fog-frames/, /, /journal/first-light-at-the-
+      jetty/, /journal/, /journal/vocabulary-sampler/, /places/the-
+      headlands/ (five folded descriptions). Three mutations fail by
+      name (2, 3, 1), reverted; NAV_ITEMS back to Pieces → BUILD EXIT 1
+      on all 88 pages, reverted. package.json: the postbuild line only.
+      A non-literal site: line fails loudly (no test: the config path is
+      not a parameter).
 
 - [ ] **T1744** — The documents. Pattern: T1728 and T1734 (their
       hand-editing rule; each document's own voice). Plan: "The
@@ -2266,6 +2279,7 @@ tier if it is ever on (it is off). -->
 | T1746 place walls | implementation (`opus`, high) | ~87k | done; 776 tests (+11); one astro-check tuple type fixed in-task; a photograph naming a draft place needs no date (on no wall) |
 | T1747 photographs index | implementation (`opus`, high) | ~68k | done; 784 tests (+8); findings: srcset ceiling ~712 not ~356 (plan wording), private-files barrier counts the index as an image page, Verify's href count includes the footer link |
 | T1742 the words | implementation (`opus`, high) | ~52k | done; 786 tests (+2); grep 2's two hits are the `piece` identifier |
+| T1743 lexicon barrier | implementation (`opus`, high) | ~85k | done; 810 tests (+24); the front door missing .index-feed fails (beyond the plan's 'must exist' for the index); site: failure untested |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
