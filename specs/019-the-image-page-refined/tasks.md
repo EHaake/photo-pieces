@@ -1538,7 +1538,7 @@ a journal folder's photographs are published goes to the person as a
 spec amendment (spec.md's ordinary-path list). Task ids continue from
 T1735.
 
-- [ ] **T1736** — The constitution, a third time. Not code; its own
+- [x] **T1736** — The constitution, a third time. Not code; its own
       commit, before T1737. Pattern: T1719 (the constitution, again).
       Plan: "The constitution, a third time". `CLAUDE.md` only: "What
       this project is" replaced by the plan's text (unquoted, the three
@@ -1553,6 +1553,8 @@ T1735.
       `grep -n "Beside them sits\|are not site words\|as an outing of its own" CLAUDE.md`
       → three lines; `npx prettier --check CLAUDE.md` clean;
       the commit's hash recorded here for AC 27, before T1737's._
+      Done: committed alone as `80a0c21` (AC 27). The three grep phrases each
+      on one line (lines 33, 63, 92); grep 1 no hits; prettier clean.
 
 - [ ] **T1737** — The homes, moved. Large and mechanical: moves and
       path strings only, no behaviour, no id, URL or word on a page
@@ -2179,6 +2181,7 @@ tier if it is ever on (it is off). -->
 | Amendment 3 sign-off | top (`fable`, high, override) | ~200k | blocked: B1 the words scan cannot go green on five fixture descriptions written as folded scalars, and would fail his own; S1 scan 1 on external hosts, S2 the index as an "image page" to the layout script, S3 a constant that did nothing, S4 attributes unscanned, S5 search reasoned not pinned, S6 feed journal-only (to him), S7 no category on a photographs-folder photograph (to him), S8 constitution silent on code names, S9 draft as a place cover, S10 unasked pause questions, S11 the draft flow under dev untested, S12 implementer notes |
 | Sign-off fixes (planner resumed) | implementation (`opus`, high) | ~55k | B1 fixed (block and continued scalars harvested, a case and a mutation); S1–S12 all taken |
 | Amendment 3 re-review | top (`fable`, high, override) | ~25k | signed off; open, non-blocking: T1736's grep is line-based — wrap so each phrase sits on one line; the stale "gallery-root photographs are not grouped" warning lives until T1746 (the phase review confirms it gone); check-lexicon should fail loudly if `site:` stops being a literal line; still unpinned per build by design — the front door's positive case and the search index (sweep) |
+| T1736 constitution, a third time (2026-09-29) | implementation (`opus`, high) | ~34k | done; the plan's text word for word, rewrapped so each grep phrase sits on one line; `draft: true` kept on one line as a single code span |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
