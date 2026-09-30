@@ -1,6 +1,6 @@
 # Tasks: The image page, refined
 
-**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken.
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken. Phase 3c (the lexicon amendment) drafted 2026-09-29 — pending sign-off.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1700–T1703) — the constitution amended
 first, in its own commit; the private-file family as pure rules with
@@ -1496,7 +1496,237 @@ T1729.
 
 _Filled in at the pause._
 
-## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — the piece page with his writing and his compare as he wrote it; his photograph's image page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
+## Phase 3c — The lexicon and the photograph's home (reviewer after the phase; `review: per-task` on T1739; walkthrough: on the laptop, the site built and previewed (`npm run build && npm run preview` — search needs the build): the nav reads Home, Journal, Photographs (where it goes as settled before T1742), Places, Galleries, About, Search, and no page says "piece" or "pieces" in its own words; the front door lists the latest three newest first, "Dock, late" among the journal entries as its frame, its date and its title, opening `/photographs/dock-b/`; the draft fixture is nowhere — not on the front door, nothing at `/photographs/draft-fixture/`, nothing when searching "Draft fixture"; the addresses: the fog entry at `/journal/where-the-fog-lets-go/`, its photographs at `/photographs/where-the-fog-lets-go/land-b/`, a photograph of the photographs folder at `/photographs/dock-a/`, and `/pieces/…` and `/images/…` gone; the journal index, a category page, the search page, a photograph page ("From the journal entry …", "In the journal", "Also in") and the About page's stand-in read in the new words; in Obsidian, the moved samples — `src/content/journal/vocabulary-sampler/index.md`, and the matte sampler, whose borrowed photographs now come from `../../photographs/` — draw every figure as before, none "not found"; and, if he wants to, the spec's publishing flow for real: a photograph and its `_<name>.md` with `draft: true` in `src/content/photographs/`, nothing at its address under `npm run dev`, then the draft line removed and `published:` written, and it stands on the front door; as many rounds as it takes, each a sub-lettered task under T1745)
+
+**Status**: Draft — pending sign-off. Plan: "Amendment 3 (2026-09-29): the
+lexicon, the photograph's home" and its sections. The spec's third
+amendment, folded in while the Phase 3b pause is held open and before
+the real piece, because the piece is written against the folders, the
+addresses and the fields it settles. **One product question is open**
+(plan: "Open — a product question for the person"): where the nav's
+Photographs goes. T1742 is not dispatched until the answer is
+transcribed into the plan and into T1742; if the answer is a new index
+page, that page is a task drafted from his answer and inserted before
+T1742; T1743 follows T1742. Foundational within the phase, and ordered
+first: T1736 (the constitution, its own commit), T1737 and T1738 (the
+homes and the addresses moved — large and mechanical, each green on its
+own, so a failure points at one kind of change) and T1739 (the id rule —
+`review: per-task`, because every photograph's address, every gallery
+list, every borrowed reference and place cover reads it, and a wrong id
+re-addresses pages without failing). Then the draft and the date, the
+front door, the words, the barrier that pins them, the documents, the
+look. The implementer runs no browser here: every check is the suite,
+the build's barriers and greps over `dist/`; the Obsidian samples and
+how the words read are the person's at the pause. A round at the pause
+is one sub-lettered task under T1745, as the cadence paragraph says of
+its look tasks: a value in its one place (plan: "The tuning envelope,
+placed (amendment 3)") and its test row, one line in spec.md's Decided
+section; a round that wants a fourth form of piece, the place tour, the
+study, redirects, or a change to a journal entry's frontmatter or to how
+a journal folder's photographs are published goes to the person as a
+spec amendment (spec.md's ordinary-path list). Task ids continue from
+T1735.
+
+- [ ] **T1736** — The constitution, a third time. Not code; its own
+      commit, before T1737. Pattern: T1719 (the constitution, again).
+      Plan: "The constitution, a third time". `CLAUDE.md` only: "What
+      this project is" replaced by the plan's text (unquoted, the three
+      forms as a list); the Content model clause's five replacements
+      and the Images paragraph's two, each exactly as the plan writes
+      them; nothing else in the file. Hand-edited. _Verify:
+      `git diff --stat` → `CLAUDE.md` alone;
+      `grep -n "gallery-images\|content/pieces\|/images/<id>\|a single \`pieces\`" CLAUDE.md`
+      → no hits;
+      `grep -n "src/content/journal\|src/content/photographs\|/photographs/<id>/\|published:\|never an address" CLAUDE.md`
+      → the new lines, listed; `npx prettier --check CLAUDE.md` clean;
+      the commit's hash recorded here for AC 27, before T1737's._
+
+- [ ] **T1737** — The homes, moved. Large and mechanical: moves and
+      path strings only, no behaviour, no id, URL or word on a page
+      changes. Pattern: none to copy — the plan's list is the task.
+      Plan: "The homes, moved" and the testing bullet "The homes".
+      First, recorded here: `git ls-files src/content/pieces | wc -l`,
+      `git ls-files src/content/gallery-images | wc -l`,
+      `git ls-files tests/pieces tests/gallery-images | wc -l`, and the
+      test and page counts from `sh scripts/verify.sh`. Then the four
+      `git mv`s and every reader the plan lists: `content.config.ts`;
+      the collection's name wherever it is read or typed; `images.ts`'
+      glob and message; `image-meta.mjs`' `PHOTOGRAPHS_ROOT`,
+      `JOURNAL_ROOT`, `sidecarImageId`'s pattern, the messages
+      (`GALLERY_FOLDER` stays until T1739); the transform's flat-root
+      check; `gen-placeholders.mjs`; the two samplers'
+      `../../photographs/` srcs; the dev pages; every test's path
+      strings, `resolveRelative`'s cases among them. _Verify:
+      `sh scripts/verify.sh` green, the test count and the page count
+      equal to before; the three file counts equal under the new names;
+      `git diff -M --cached --stat` before the commit shows every file
+      under the four folders as a rename, the two samplers' `index.md`
+      the only ones with changed lines;
+      `git grep -nE "gallery-images|content/pieces|tests/pieces|GALLERY_ROOT|'pieces'[,)]|<'pieces'>" -- . ':!specs' ':!DECISIONS.md' ':!ROADMAP.md' ':!AUTHORING.md' ':!README.md' ':!obsidian-plugin/README.md'`
+      → only the matte sampler's surface name (`'pieces'`, a dev
+      route's segment — code), every hit listed; in `obsidian-plugin/`,
+      `npm run build` exit 0._
+
+- [ ] **T1738** — The addresses, moved. Mechanical. Pattern: T1737's
+      discipline. Plan: "The addresses, moved" and the testing bullet
+      "The addresses". The three `git mv`s under `src/pages/`; every URL
+      and page path the plan lists; the tests' expected URLs and source
+      paths. The nav's label stays "Pieces" until T1742. _Verify:
+      `sh scripts/verify.sh` green, counts equal to T1737's;
+      `ls -d dist/journal dist/photographs dist/og/journal` present,
+      `ls -d dist/pieces dist/images dist/og/pieces` → none;
+      `grep -c 'href="/photographs/where-the-fog-lets-go/' dist/journal/where-the-fog-lets-go/index.html`
+      ≥ 1;
+      `grep -rlE '(="|>)(https?://[^/"<]+)?/(pieces|images)/' dist --include=*.html --include=*.xml`
+      → none;
+      `git grep -nE "src/pages/(pieces|images)|og/pieces|(^|[^a-z_-])/(pieces|images)/" -- . ':!specs' ':!DECISIONS.md' ':!ROADMAP.md' ':!AUTHORING.md' ':!README.md' ':!obsidian-plugin/README.md'`
+      → none, or each hit listed and explained._
+
+- [ ] **T1739** — The id rule. `review: per-task`. Pattern:
+      `parseImagePath`, `sidecarImageId`, `homeSlugOf`,
+      `validateGalleries` and the place-cover loop as they are;
+      image-meta.test.mjs's and galleries.test.mjs's case shapes. Plan:
+      "The id rule", the failure lines, and the testing bullet "The id
+      rule". `image-meta.mjs`: `PHOTOGRAPHS_FOLDER`, `imageIdOf` and
+      every id built through it; `GALLERY_FOLDER` deleted; `homeSlugOf`
+      by the slash; `sidecarImageId`; the reference kind `photographs`;
+      `oldIdHint`, `placeCoverProblem`, `nameCollisions`;
+      `classifyContentImage`'s slug guard. `images.ts`:
+      `nameCollisions` after discovery; the place-cover loop through
+      `placeCoverProblem`; the places warning's words; the doc comments.
+      The transform: `checkReferenceShape`'s comment.
+      `src/content/galleries/*.md`: every `gallery/<name>` → `<name>`.
+      Tests: every expected `gallery/…` id and `/photographs/gallery/…`
+      URL in its bare form; the new cases. _Verify:
+      `sh scripts/verify.sh` green (count recorded, the new cases
+      named);
+      `test -f dist/photographs/dock-a/index.html && test -f dist/photographs/where-the-fog-lets-go/land-b/index.html && test ! -e dist/photographs/gallery && echo ok`;
+      `grep -o 'href="/photographs/[^"]*"' dist/galleries/editors-picks/index.html`
+      → bare ids, quoted; `grep -rn "gallery/" src/content/galleries` →
+      none; `git grep -n "GALLERY_FOLDER"` → none;
+      `git grep -nE '\$\{[A-Za-z.]*folder\}/' -- src remark-pieces-blocks.mjs`
+      → `imageIdOf` and the related strip's journal-only `startsWith`,
+      listed; the mutation and the three one-time build edits as the
+      plan lists them, each failing line pasted and each reverted. The
+      orchestrator re-runs `sh scripts/verify.sh` before committing._
+
+- [ ] **T1740** — A photograph's draft and date. Pattern: `imageMeta`'s
+      commented fields; the registry's orphan loop; the reasons in
+      `validateGalleries` and `referenceProblems`;
+      `gen-placeholders.mjs`' photographs list. Plan: "A photograph's
+      draft and date", the failure lines, and the testing bullet "The
+      draft and the date". `content.config.ts`: `draft`, `published`.
+      `image-meta.mjs`: `PHOTOGRAPH_FIELDS`, `photographOnlyProblems`,
+      the draft reasons for a bare id. `images.ts`: the sidecar-first
+      order, the photographs folder's status, `SiteImage.published`.
+      Fixtures: `_dock-b.md`'s `published:` (between the two newest
+      published journal entries — the three dates recorded) and its
+      story's line; `draft-fixture.jpg` generated; `_draft-fixture.md`
+      as the plan writes it. Tests as the plan lists them. _Verify:
+      `sh scripts/verify.sh` green (count; the page count unchanged —
+      the draft has no page); `test ! -e dist/photographs/draft-fixture && echo ok`;
+      `grep -rl "draft-fixture" dist --include=*.html --include=*.xml --include=*.json`
+      → none; `grep -c "Dock, late" dist/photographs/dock-b/index.html`
+      ≥ 1; the four one-time edits as the plan lists them, each failing
+      line (or the page count one higher) pasted and each reverted; the
+      new fixture's EXIF read with `exifr` and pasted (`Fixture`
+      strings, no GPS)._
+
+- [ ] **T1741** — The front door's list. Pattern: `PieceList.astro`'s
+      row; the frozen tunables and table-driven cases of
+      `src/lib/compare.ts` and compare.test.mjs. Plan: "The front door's
+      list" and its testing bullet. New `src/lib/front-door.mjs`
+      (`FRONT_DOOR`, `mergeLatest`) and `front-door.test.mjs`.
+      `PieceList.astro`: `items` and the photograph row. `index.astro`:
+      the merge. `journal/index.astro`, `categories/[category].astro`:
+      journal items. _Verify: `sh scripts/verify.sh` green (count); the
+      tie mutation fails by name, reverted, line pasted; from
+      `dist/index.html`'s `.index-feed`, the rows' hrefs and meta lines
+      in order (grep, quoted): `FRONT_DOOR.latest` rows,
+      `/photographs/dock-b/` between the two entries its date falls
+      between, with its `note-cover` image and "Dock, late", no
+      `draft-fixture`; `dist/journal/index.html` and
+      `dist/categories/landscape/index.html` (or the category the
+      entries carry) with the same number of rows as T1740's build._
+
+- [ ] **T1742** — The words. **Waits on the open question**: dispatched
+      once where the nav's Photographs goes is transcribed into the plan
+      and here. Pattern: the photograph page's `WORDING` block (the one
+      place a page keeps its words); `NAV_ITEMS`. Plan: "The words" and
+      the testing bullet "The words". `consts.ts`, `index.astro`,
+      `journal/index.astro`, `categories/[category].astro`,
+      `search.astro`, the photograph page's `WORDING` and its
+      description's fallback, `about/index.astro`, each at the plan's
+      opening value. New `lexicon.test.mjs` with the consts case.
+      _Verify: `sh scripts/verify.sh` green (count);
+      `grep -rniE "\bpieces?\b" src/consts.ts src/pages/about src/pages/search.astro src/pages/index.astro src/pages/journal/index.astro src/pages/categories`
+      → each hit listed, every one code (an import, an identifier, a
+      comment, an `id`) and none a printed word;
+      `grep -rnE "(title|description)=[{\"'\`][^>]*\bpieces?\b" src/pages src/components src/layouts`
+      → none; the built nav,
+      `grep -oE '>(Home|Journal|Photographs|Places|Galleries|About|Search)<' dist/index.html`
+      in order, quoted; `grep -rliE ">[^<]*\bpieces?\b" dist --include=*.html`
+      → pages listed, each hit inside a journal entry's own prose (T1743
+      pins the rest)._
+
+- [ ] **T1743** — The lexicon barrier. Pattern:
+      `scripts/check-private-files.mjs` (its header comment, its
+      tag-depth walk from scan 3, its `[dir]` argument, its summary
+      line) and private-files.test.mjs (temp trees, `execFileSync`).
+      Plan: "The lexicon barrier" and its testing bullet. New
+      `scripts/check-lexicon.mjs`; `package.json`'s `postbuild` gains
+      `&& node scripts/check-lexicon.mjs` after `check-private-files`;
+      `scripts/verify.sh`'s summary grep gains `\[check-lexicon\]`;
+      lexicon.test.mjs gains the barrier's cases. _Verify:
+      `sh scripts/verify.sh` green with the `[check-lexicon]` line
+      quoted (pages read, regions, strings, one draft, one front-door
+      photograph); the two mutations fail by name, reverted, lines
+      pasted; one-time: `NAV_ITEMS`' "Journal" back to "Pieces" → the
+      build fails, its first three lines pasted, reverted;
+      `git diff -U0 -- package.json` → the `postbuild` line only._
+
+- [ ] **T1744** — The documents. Pattern: T1728 and T1734 (their
+      hand-editing rule; each document's own voice). Plan: "The
+      documents" (amendment 3). `AUTHORING.md`, `README.md`,
+      `obsidian-plugin/README.md` as the plan says, every claim read
+      against the code as built — the ids, the addresses, the fields,
+      the messages. Hand-edit the prose (never script-rewrap; grep for
+      lines beginning with a CSS `>` or `+` before any format run).
+      _Verify:
+      `grep -nE "gallery-images|content/pieces|/pieces/|/images/|gallery/[a-z]" AUTHORING.md README.md obsidian-plugin/README.md`
+      → none;
+      `grep -nE "src/content/photographs|published:|draft: true|\.\./\.\./photographs/" AUTHORING.md README.md`
+      → each at least once, listed; `grep -niE "piece folder" AUTHORING.md README.md`
+      → none; `npx prettier --check AUTHORING.md README.md obsidian-plugin/README.md`
+      clean; `sh scripts/verify.sh` green._
+
+- [ ] **T1745** — The lexicon's look, and the rounds. Not an
+      implementation task: the orchestrator's record of the Phase 3c
+      pause, in the person's words. The questions, in plain language:
+      the nav's four words, and Photographs where it now goes; the
+      front door's list — a photograph among the journal entries as its
+      frame, its date and its title, three rows, the headings "Read the
+      journal" and "Journal and photographs"; the address shapes —
+      `/journal/<entry>/`, `/photographs/<entry>/<name>/` for an
+      entry's photographs, `/photographs/<name>/` for the photographs
+      folder's; the words on the photograph page ("From the journal
+      entry", "In the journal", "Also in"), the search page and the
+      About page's stand-in; the sidecar fields' names, `draft` and
+      `published`, before his piece is written against them; in
+      Obsidian, whether the moved samples draw as before. Each round is
+      one sub-lettered task here (`T1745a`, `b`, …); a round that
+      changes a word a document states updates it in the same task.
+      When he names the keeps, they are recorded here and Phase 4 waits
+      for his piece as its intro says. _Verify: every sub-lettered task
+      green; each kept value agrees in its one place, its test and
+      spec.md's Decided line (a `grep` of each, listed); the documents
+      agree; the Phase 3c record below filled in._
+
+### Phase 3c record (the person's walkthrough)
+
+_Filled in at the pause._
+
+## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — a photograph piece's page with his story (from the photographs folder, on the front door once he dates it), or a journal entry's page with his writing and his compare as he wrote it and then his photograph's page; on his photograph's page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
 The content is his, supplied during implementation; these tasks are the
 site's support for it and invent nothing. The earlier pauses are judged
@@ -1507,10 +1737,18 @@ criterion unmet — a spec amendment).
 
 - [ ] **T1716** — His piece, placed. Dispatched when the photographer
       says the files are ready and where they are. Pattern: the fog
-      piece's folder (`index.md`, the photograph, `_<basename>.md`,
-      the private family beside it). Copy the files as supplied into
-      `src/content/pieces/<his slug>/` — no edit to his prose, his
-      frontmatter or his files; a build failure over his content is
+      entry's folder (`index.md`, the photograph, `_<basename>.md`,
+      the private family beside it) for a journal entry;
+      `src/content/photographs/dock-b.jpg` and `_dock-b.md` for a
+      photograph piece. _(Amended at Phase 3c: his piece may be either
+      form.)_ Copy the files as supplied — a journal entry into
+      `src/content/journal/<his slug>/`, or a photograph piece (the
+      photograph, its `_<basename>.md` as its writing, its private
+      family beside it) into `src/content/photographs/` — no edit to
+      his prose, his frontmatter or his files; a photograph piece still
+      carrying `draft: true`, or without `published:`, is his to change
+      and is said so to the orchestrator (a draft has no page; an
+      undated photograph is not on the front door), never edited; a build failure over his content is
       returned to the orchestrator as the build's message and a plain
       sentence on what it asks of him, never fixed by rewriting his
       content. Before copying: `exifr` with `gps: true` over every
@@ -1527,10 +1765,15 @@ criterion unmet — a spec amendment).
       pixel size recorded; the GPS read's output pasted; his image page
       carries `data-loupe-detail`, his compare section's stages in his
       order (or the story's compare, and no automatic section), his
-      label's two rows (greped and quoted)._
+      label's two rows (greped and quoted); its address —
+      `/photographs/<name>/` from the photographs folder,
+      `/photographs/<slug>/<name>/` from a journal entry, whose own page
+      is `/journal/<slug>/` — and, for a dated photograph piece, its row
+      on the front door (greped and quoted)._
 
 - [ ] **T1717** — The last look, and the rounds. Not an implementation
-      task: the orchestrator's record of the Phase 4 pause on his piece,
+      task: the orchestrator's record of the Phase 4 pause on his piece
+      (its photograph's page, and its journal page if it is an entry),
       as T1709's — the gear proposals put to him first, then any of the
       envelope's questions he reopens. Rounds as `T1717a`, `b`, …; a
       round that changes a documented value also updates the sentence
@@ -1587,6 +1830,21 @@ _Filled in at the pause._
       authoring plugin. By that I meant that things wouldn't be exactly
       the same, be representative. Approximation doesn't mean 'almost
       completely different and unrepresentative in most cases'."
+      From the third amendment (Phase 3c): `ROADMAP.md`'s "Every page a
+      piece, and the image's study" (~41) annotated — the lexicon and
+      the photograph's home settled at spec 019 (a photograph a piece
+      of its own in `src/content/photographs/`, with `draft` and
+      `published`, on the front door when dated: item (3)'s date and
+      front-door half done); the processing overview, the study, the
+      pieces about seeing and the place tour remain. Every other
+      `ROADMAP.md` mention of the old names — `../../gallery-images/`
+      (~410), `src/content/gallery-images/` (~481), `/pieces/` (~490,
+      ~493, ~592) — rewritten to `../../photographs/`,
+      `src/content/photographs/` or `/journal/` where it describes the
+      site as it is or will be, and left where it records what a past
+      spec did; `README.md` was swept at T1744 and is greped again
+      here. `DECISIONS.md`'s older entries naming the old folders are
+      history and stay.
       `DECISIONS.md`: "## Spec 019: the image page, refined" in 018's
       shape — the decision in the photographer's words (the page over
       the mobile pass; the dictionary; Sony's own mark; the handle and
@@ -1612,7 +1870,18 @@ _Filled in at the pause._
       the second amendment's — the block table pinned equal to the
       transform's, one figure for both views, `!important` on every
       plugin declaration, the pane as a query container, Reading view
-      rebuilding only the sections a block touches), and
+      rebuilding only the sections a block touches; and the third's —
+      the lexicon in his words, from spec.md's Decided line ("when I'm
+      at images/where-the-fog-lets-go/land-b/ in the site, this is an
+      image page that is its own piece"; the physical gallery that
+      "carries its own context"; "I don't think I'm going to ship a
+      header on the site called 'pieces'"; Journal over Essay, since
+      Notes already meant gear notes; no catch-all for the other
+      genres, the centre written down instead), and what the plan chose
+      — the bare id as an empty folder segment, a shared name refused,
+      `draft` and `published` optional and the photographs folder's
+      alone, the front door's merge, the barrier's authored-text rule,
+      the internals left named), and
       the keeps from each pause in his words, round by round. Both hand-edited (`npx prettier --check` clean; grep for
       lines beginning with a CSS `>` or `+` before any format run).
       Then, the orchestrator's part: the pre-merge whole-spec sweep at
@@ -1649,15 +1918,26 @@ _Filled in at the pause._
       record; AC 24 by T1731's stylesheet cases and the record's console
       lines; AC 25 by T1730's `resolveRelative` cases, T1731's missing
       case and the record; AC 26 by T1734's greps and the plugin's
-      build); build, tests, check, and
-      the four barriers (GPS, dev routes, motion, private files) green
+      build; the third amendment's six — AC 27 by T1736's commit (its
+      hash and its place before T1737's); AC 28 by T1737–T1739's cases
+      and `dist/` reads and the lexicon barrier's scan 1; AC 29 by
+      T1740's cases and one-time edits and scan 3; AC 30 by
+      front-door.test.mjs, T1741's read and scan 4; AC 31 by the consts
+      case, scan 2 and the Phase 3c record; AC 32 by T1744's greps,
+      T1737's `resolveRelative` cases and the Phase 3c record; AC 13 as
+      amended by T1716's reads and the Phase 4 record); build, tests,
+      check, and
+      the five barriers (GPS, dev routes, motion, private files, and
+      from T1743 the lexicon) green
       with actual output; the PR marked ready
       and merged with a merge commit; the close-out box ticked in the
       same shell command as the merge bookkeeping. _Verify: the
       implementer's `sh scripts/verify.sh` green with the documents
       edited; `grep -n "Spec 019" DECISIONS.md ROADMAP.md` → the new
       section and the annotations; `grep -in "superseded at spec 019" DECISIONS.md`
-      → the two plugin entries; `git diff main --stat` lists no file
+      → the two plugin entries;
+      `grep -nE "gallery-images|content/pieces|/pieces/|/images/" ROADMAP.md README.md`
+      → only lines recording a past spec, listed; `git diff main --stat` lists no file
       outside plan.md's File structure and this directory;
       `git diff main -- package.json` shows the `postbuild` line only;
       `main` green after the merge._
