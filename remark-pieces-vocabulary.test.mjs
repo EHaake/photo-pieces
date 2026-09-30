@@ -635,12 +635,12 @@ describe('image links (T310, spec 004)', () => {
     ).rejects.toThrow(/is private/);
   });
 
-  it('an image beside a flat pieces/foo.md fails — the registry would never make its page', async () => {
-    const flat = new URL('./src/content/pieces/flat.md', import.meta.url);
+  it('an image beside a flat journal/foo.md fails — the registry would never make its page', async () => {
+    const flat = new URL('./src/content/journal/flat.md', import.meta.url);
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       await expect(processor.render('![x](./photo.jpg)', { fileURL: flat })).rejects.toThrow(
-        /sits directly in src\/content\/pieces\/ — a piece lives in its own folder/,
+        /sits directly in src\/content\/journal\/ — a journal entry lives in its own folder/,
       );
     } finally {
       spy.mockRestore();
@@ -793,12 +793,12 @@ describe('held: the durational block (T501, spec 007)', () => {
 });
 
 describe('cross-piece references (T602, spec 008)', () => {
-  // A second virtual piece: tests/pieces/alpha/index.md, beside the real
+  // A second virtual piece: tests/journal/alpha/index.md, beside the real
   // 8 x 5 fixtures alpha/photo.jpg, beta/photo.jpg (with beta's private
-  // frame and a .tif), and tests/gallery-images/photo.jpg. alpha's own
+  // frame and a .tif), and tests/photographs/photo.jpg. alpha's own
   // frame is the same shape as beta's, so a borrowed frame's sizing can
   // be compared against a local one's directly.
-  const alphaURL = new URL('./tests/pieces/alpha/index.md', import.meta.url);
+  const alphaURL = new URL('./tests/journal/alpha/index.md', import.meta.url);
   const render = (content) => processor.render(content, { fileURL: alphaURL });
   const renderExpectingFailure = async (content) => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -818,7 +818,7 @@ describe('cross-piece references (T602, spec 008)', () => {
 
   // The one message the parser gives every wrong shape.
   const shapeMessage = (src) =>
-    `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, another piece's as ../<slug>/<file>, and a gallery-root image as ../../gallery-images/<file>`;
+    `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, a journal entry's as ../<slug>/<file>, and a photograph from the photographs folder as ../../photographs/<file>`;
 
   it("a borrowed src in single links to the other piece's page, sized as a local one", async () => {
     const borrowed = await render('::single{src="../beta/photo.jpg" alt="dawn"}');
@@ -872,8 +872,8 @@ describe('cross-piece references (T602, spec 008)', () => {
     expect(anchorStyles(held.code)).toEqual(anchorStyles(localHeld.code));
   });
 
-  it('the shorthand borrows from the gallery root', async () => {
-    const { code } = await render('Text.\n\n![x](../../gallery-images/photo.jpg)\n');
+  it('the shorthand borrows from the photographs folder', async () => {
+    const { code } = await render('Text.\n\n![x](../../photographs/photo.jpg)\n');
     expect(code).toMatch(
       /<p><a href="\/images\/gallery\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
     );
@@ -883,7 +883,7 @@ describe('cross-piece references (T602, spec 008)', () => {
     for (const src of [
       './sub/photo.jpg',
       '../../../photo.jpg',
-      '../gallery-images/photo.jpg',
+      '../photographs/photo.jpg',
       '../beta/sub/photo.jpg',
     ]) {
       await expect(renderExpectingFailure(`::single{src="${src}" alt="x"}`)).rejects.toThrow(
@@ -905,7 +905,7 @@ describe('cross-piece references (T602, spec 008)', () => {
   });
 
   it('a borrowed non-photograph fails — it would mint the id of the raster beside it', async () => {
-    // tests/pieces/beta/photo.tif is a real TIFF on disk, so the failure
+    // tests/journal/beta/photo.tif is a real TIFF on disk, so the failure
     // is the borrowing rule, not the missing-file check.
     await expect(
       renderExpectingFailure('::single{src="../beta/photo.tif" alt="x"}'),
@@ -1033,7 +1033,7 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     });
     // The four names are pinned on purpose: a fifth collection must be
     // added here, so it cannot arrive without the option.
-    expect(globs.map((one) => one.name)).toEqual(['pieces', 'galleries', 'imageMeta', 'places']);
+    expect(globs.map((one) => one.name)).toEqual(['journal', 'galleries', 'imageMeta', 'places']);
     expect(config.match(/glob\(\{/g)).toHaveLength(4);
     expect(globs.filter((one) => !one.found || !one.deferred).map((one) => one.name)).toEqual([]);
   });

@@ -832,10 +832,10 @@ function wrapInLink(imageNode, url, extraProps = {}) {
   };
 }
 
-// An image lives in one folder — its own piece's, or the gallery root —
+// An image lives in one folder — its own piece's, or the photographs folder —
 // and that is what gives it an id and a page. A piece may place its own
 // images (`./<file>`) or borrow one from that other home (spec 008):
-// `../<slug>/<file>`, `../../gallery-images/<file>`. `parseReference` is
+// `../<slug>/<file>`, `../../photographs/<file>`. `parseReference` is
 // the single definition of those shapes; the transform adds the two
 // rules only it can check.
 function checkReferenceShape(file, src, fail) {
@@ -925,11 +925,11 @@ function imagePageUrl(file, src, fail) {
   const ext = src.slice(src.lastIndexOf('.') + 1).toLowerCase();
   if (!IMAGE_EXTENSIONS.includes(ext)) return null;
   const folder = dirname(file.path);
-  if (folder.endsWith('/src/content/pieces')) {
-    // A flat pieces/foo.md: its images sit in the pieces root, where the
+  if (folder.endsWith('/src/content/journal')) {
+    // A flat journal/foo.md: its images sit in the journal root, where the
     // registry refuses them — linking would point at a page nobody makes.
     fail(
-      `"${src}" sits directly in src/content/pieces/ — a piece lives in its own folder (pieces/<slug>/index.md) so its images can have pages`,
+      `"${src}" sits directly in src/content/journal/ — a journal entry lives in its own folder (journal/<slug>/index.md) so its images can have pages`,
     );
   }
   try {

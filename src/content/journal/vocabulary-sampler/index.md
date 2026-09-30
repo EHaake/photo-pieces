@@ -243,7 +243,7 @@ stage between the last word and the next thing.
 
 A piece may place a photograph that lives in another piece's folder, or
 at the gallery root, by writing the path Obsidian already understands —
-`../where-the-fog-lets-go/land-b.jpg`, `../../gallery-images/dock-a.jpg`.
+`../where-the-fog-lets-go/land-b.jpg`, `../../photographs/dock-a.jpg`.
 The ridgeline keeps its home: its page, its passage, and the frames
 related to it are the fog piece's, not this sampler's. That page lists
 this sampler under "Also in", and the arrows follow the reader — step
@@ -257,7 +257,7 @@ piece, the one below to no piece at all. A gallery-root image has no
 "From the piece" line to show — only its appearances — and the
 shorthand borrows it the same way the directive does:
 
-![A dock at the water's edge](../../gallery-images/dock-a.jpg)
+![A dock at the water's edge](../../photographs/dock-a.jpg)
 
 The cover of this sampler is borrowed too — the fog piece's cove frame
 — so the pieces index shows a photograph this piece does not own.

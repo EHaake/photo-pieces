@@ -41,7 +41,7 @@ import {
 
 /**
  * The image registry (spec 004): every accepted raster in a published
- * piece's folder or the gallery root, with a stable id, Astro image
+ * piece's folder or the photographs folder, with a stable id, Astro image
  * metadata for `<Image>`, the wall-label data (EXIF, overridden by a
  * sidecar), and back-references to its piece and galleries. Built once
  * per process and awaited by every page's `getStaticPaths`, so the
@@ -127,7 +127,7 @@ export interface SitePlace {
   /** `/places/<slug>/` (site-root; pages apply withBase). */
   url: string;
   /** Oldest first; each outing's frames in the piece's order, own-folder only. */
-  outings: { piece: CollectionEntry<'pieces'>; frames: string[] }[];
+  outings: { piece: CollectionEntry<'journal'>; frames: string[] }[];
   /** The outings' frames concatenated — the set the arrows step through. */
   frames: string[];
   /** An id among `frames`: the declared cover, else the most recent outing's first frame. */
@@ -147,13 +147,13 @@ export interface SiteImage {
   basename: string;
   /** Astro's image metadata — pass to `<Image src>` or `getImage`. */
   image: ImageMetadata;
-  /** The owning piece, or null for a gallery-root image. */
-  piece: CollectionEntry<'pieces'> | null;
+  /** The owning piece, or null for a photographs-folder image. */
+  piece: CollectionEntry<'journal'> | null;
   /** Galleries that include this image, newest first. */
   galleries: CollectionEntry<'galleries'>[];
   sidecar: CollectionEntry<'imageMeta'> | null;
   /** The place this frame is at (spec 009) — null when it names none,
-   *  when its place is a draft, or at the gallery root. */
+   *  when its place is a draft, or in the photographs folder. */
   place: SitePlace | null;
   /** Sidecar title → first alt in the piece body → humanized filename. */
   title: string;
@@ -186,9 +186,9 @@ export interface SiteImage {
   /** The published pieces other than the home that place this image —
    *  in their body or as their cover — newest first (spec 008). Empty
    *  when only the home shows it. */
-  appearances: CollectionEntry<'pieces'>[];
+  appearances: CollectionEntry<'journal'>[];
   /** Ids of the nearest other frames of the same outing (the piece
-   *  folder, in the piece's order) — up to six; none at the gallery root. */
+   *  folder, in the piece's order) — up to six; none in the photographs folder. */
   related: string[];
   passage: ImagePassage | null;
 }
@@ -205,7 +205,7 @@ export interface ImageRegistry {
 // Both letter cases: the site accepts camera-style `.JPG` too, and the
 // glob is case-sensitive, so the pattern has to say so.
 const discovered = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/content/{pieces,gallery-images}/**/*.{jpg,jpeg,png,webp,avif,tiff,JPG,JPEG,PNG,WEBP,AVIF,TIFF}',
+  '/src/content/{journal,photographs}/**/*.{jpg,jpeg,png,webp,avif,tiff,JPG,JPEG,PNG,WEBP,AVIF,TIFF}',
   { eager: true },
 );
 
@@ -246,7 +246,7 @@ type Classified = { path: string; root: string; pieceSlug: string | null } & (
 );
 
 async function buildRegistry(): Promise<ImageRegistry> {
-  const pieces = await getCollection('pieces');
+  const pieces = await getCollection('journal');
   const pieceById = new Map(pieces.map((piece) => [piece.id, piece]));
 
   // Places (spec 009): a place file's name is its URL segment and the
@@ -281,7 +281,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
     const info = classifyContentImage(key) as Classified;
     if (info.nested) {
       console.warn(
-        `[images] ignoring ${key}: images live directly in a piece folder or the gallery root, not in sub-folders`,
+        `[images] ignoring ${key}: images live directly in a piece folder or the photographs folder, not in sub-folders`,
       );
       continue;
     }
@@ -299,7 +299,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
   }
 
   // A piece's `cover` is a reference too, and since spec 008 it may be
-  // another piece's or the gallery root's image — so the registry needs
+  // another piece's or the photographs folder's image — so the registry needs
   // its id, not just its filename. The built `src` is hashed; the id
   // comes from the source path Astro's ImageMetadata carries, read
   // straight off the entry (the field is `@internal` and
@@ -370,7 +370,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
         if (!folderWarned.has(file.pieceSlug)) {
           folderWarned.add(file.pieceSlug);
           console.warn(
-            `[images] src/content/pieces/${file.pieceSlug}/ has images but no index.md — they stay unpublished until the piece exists`,
+            `[images] src/content/journal/${file.pieceSlug}/ has images but no index.md — they stay unpublished until the piece exists`,
           );
         }
       } else if (!isPublished(piece)) {
@@ -532,7 +532,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
   // else its piece's default — `placeOf` is the only copy of that
   // precedence. A draft place resolves to no place, so the frame's label
   // shows the free text alone and links nowhere; the note names it below.
-  // A gallery-root frame has no piece to group under, so a place page
+  // A photographs-folder frame has no piece to group under, so a place page
   // could never show it: the line is checked for its slug and ignored.
   const placeOfId = new Map<string, string | null>();
   for (const file of files) {
@@ -541,7 +541,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
     if (file.pieceSlug === null) {
       if (placeOf(sidecar?.data.at, undefined) !== null) {
         console.warn(
-          `[places] ${sidecar!.filePath ?? sidecar!.id}: gallery-root photographs are not grouped under a place — the line is ignored`,
+          `[places] ${sidecar!.filePath ?? sidecar!.id}: photographs-folder photographs are not grouped under a place — the line is ignored`,
         );
       }
       continue;
@@ -617,8 +617,8 @@ async function buildRegistry(): Promise<ImageRegistry> {
   // counts a cover too even though a cover is no frame. Both are newest
   // first — `byNewestPublished`, the very comparator getPublishedPieces
   // sorts with — because the loop that fills them is.
-  const framePieces = new Map<string, CollectionEntry<'pieces'>[]>();
-  const appearancePieces = new Map<string, CollectionEntry<'pieces'>[]>();
+  const framePieces = new Map<string, CollectionEntry<'journal'>[]>();
+  const appearancePieces = new Map<string, CollectionEntry<'journal'>[]>();
   for (const piece of pieces.filter(isPublished).sort(byNewestPublished)) {
     const frames = framesByPiece.get(piece.id) ?? [];
     for (const id of frames) push(framePieces, id, piece);

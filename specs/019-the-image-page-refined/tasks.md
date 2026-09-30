@@ -1556,7 +1556,7 @@ T1735.
       Done: committed alone as `80a0c21` (AC 27). The three grep phrases each
       on one line (lines 33, 63, 92); grep 1 no hits; prettier clean.
 
-- [ ] **T1737** — The homes, moved. Large and mechanical: moves and
+- [x] **T1737** — The homes, moved. Large and mechanical: moves and
       path strings only, no behaviour, no id, URL or word on a page
       changes. Pattern: none to copy — the plan's list is the task.
       Plan: "The homes, moved" and the testing bullet "The homes".
@@ -1581,6 +1581,14 @@ T1735.
       → only the matte sampler's surface name (`'pieces'`, a dev
       route's segment — code), every hit listed; in `obsidian-plugin/`,
       `npm run build` exit 0._
+      Done: before: 48 / 39 / 5 files, 87 pages, 737 tests; after: 48 /
+      39 / 5 under the new names, 87 pages, 737 tests, BUILD/CHECK/TEST
+      EXIT 0. 92 renames; only the two samplers' index.md changed lines
+      (R069, R098). The grep's hits beyond the matte surface name:
+      motion.test.mjs:702, page-head.test.mjs:100-101 (fake dist/pieces
+      trees) and remark-pieces-vocabulary.test.mjs:1001
+      (src/pages/pieces) — page and URL segments, T1738's. Plugin build
+      exit 0.
 
 - [ ] **T1738** — The addresses, moved. Mechanical. Pattern: T1737's
       discipline. Plan: "The addresses, moved" and the testing bullet
@@ -2182,6 +2190,7 @@ tier if it is ever on (it is off). -->
 | Sign-off fixes (planner resumed) | implementation (`opus`, high) | ~55k | B1 fixed (block and continued scalars harvested, a case and a mutation); S1–S12 all taken |
 | Amendment 3 re-review | top (`fable`, high, override) | ~25k | signed off; open, non-blocking: T1736's grep is line-based — wrap so each phrase sits on one line; the stale "gallery-root photographs are not grouped" warning lives until T1746 (the phase review confirms it gone); check-lexicon should fail loudly if `site:` stops being a literal line; still unpinned per build by design — the front door's positive case and the search index (sweep) |
 | T1736 constitution, a third time (2026-09-29) | implementation (`opus`, high) | ~34k | done; the plan's text word for word, rewrapped so each grep phrase sits on one line; `draft: true` kept on one line as a single code span |
+| T1737 homes moved | implementation (`opus`, high) | ~93k | done; 737 tests, 87 pages; regex-escaped test paths (`tests\/pieces\/`) missed by plain greps — caught by the suite; page-head.test.mjs not in the plan's lists, handed to T1738 |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

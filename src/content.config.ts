@@ -16,8 +16,8 @@ import { CATEGORIES } from './lib/categories';
 // content store for a collection meant to grow for years.
 // Pieces are plain Markdown only (no MDX) so the files stay renderable
 // and editable in Obsidian — enforced here by the loader pattern.
-const pieces = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/pieces', deferRender: true }),
+const journal = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/journal', deferRender: true }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -64,14 +64,14 @@ const galleries = defineCollection({
 // Image sidecars (spec 004): an optional `_<basename>.md` beside an
 // image — the wall label's overrides and, since spec 006, the rich
 // page's fields, with the body as the image's own story. The leading underscore keeps sidecars out of the
-// `pieces` loader by construction. The id is the path verbatim
-// (`pieces/<slug>/_land-b`, `gallery-images/_dock-b`) so the registry
+// `journal` loader by construction. The id is the path verbatim
+// (`journal/<slug>/_land-b`, `photographs/_dock-b`) so the registry
 // maps it to the image id deterministically, without Astro's slugger
 // in between. Every label field is a string that overrides the
 // EXIF-derived value as written; `date` overrides the capture date.
 const imageMeta = defineCollection({
   loader: glob({
-    pattern: '{pieces,gallery-images}/**/_*.md',
+    pattern: '{journal,photographs}/**/_*.md',
     base: './src/content',
     generateId: ({ entry }) => entry.replace(/\.md$/, ''),
     deferRender: true,
@@ -134,4 +134,4 @@ const places = defineCollection({
   }),
 });
 
-export const collections = { pieces, galleries, imageMeta, places };
+export const collections = { journal, galleries, imageMeta, places };

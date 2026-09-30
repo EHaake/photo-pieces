@@ -8,7 +8,7 @@
 //   id = <folder>/<basename>
 //
 // where folder is the image's immediate parent folder — a piece's
-// folder name, or `gallery` for the flat `gallery-images/` root — and
+// folder name, or `gallery` for the flat `photographs/` folder — and
 // basename is the file name without its extension. Folder names must
 // already be slugs so ids match Astro's piece ids without re-running
 // its slugger; that is validated here, loudly, with a rename hint.
@@ -17,10 +17,12 @@ import { EMPTY_GEAR } from './gear.mjs';
 
 export const IMAGE_EXTENSIONS = Object.freeze(['jpg', 'jpeg', 'png', 'webp', 'avif', 'tiff']);
 
-/** The flat root for images that belong to no piece, and the folder
- *  segment their ids use (`gallery/<basename>`). */
-export const GALLERY_ROOT = 'gallery-images';
+/** The flat folder for photographs that belong to no journal entry, and
+ *  the folder segment their ids use (`gallery/<basename>`). */
+export const PHOTOGRAPHS_ROOT = 'photographs';
 export const GALLERY_FOLDER = 'gallery';
+/** The journal's folder: one folder per entry, `journal/<slug>/`. */
+export const JOURNAL_ROOT = 'journal';
 
 const CONTENT_ROOT = '/src/content/';
 const SLUG = /^[a-z0-9-]+$/;
@@ -223,7 +225,7 @@ export function parseImagePath(filePath) {
   if (isPrivateRaster(basename)) {
     throw new ImageIdError(privateMessage(file, basename));
   }
-  const folder = parent === GALLERY_ROOT ? GALLERY_FOLDER : parent;
+  const folder = parent === PHOTOGRAPHS_ROOT ? GALLERY_FOLDER : parent;
   if (!SLUG.test(folder)) {
     throw new ImageIdError(
       `image folder "${parent}" is not a slug — rename it to lowercase letters, digits, and hyphens (e.g. "${slugHint(parent)}") so image ids line up with piece ids`,
@@ -250,13 +252,13 @@ export function imageUrlFor(id) {
  *
  *   local   — `./<file>` or `<file>`         (the piece's own folder)
  *   piece   — `../<slug>/<file>`             (another piece's folder)
- *   gallery — `../../gallery-images/<file>`  (the gallery root)
+ *   gallery — `../../photographs/<file>`     (the photographs folder)
  *
  * Returns `{ kind, folder, file, basename, ext }`, where `folder` is the
  * folder segment of the image's id: the other piece's slug, `gallery`
- * for the gallery root, and null for a local src — whose folder only the
+ * for the photographs folder, and null for a local src — whose folder only the
  * caller knows. Any other path — a sub-folder, a deeper `../`, the
- * wrong depth to the gallery root, a bare `..` — comes back as `invalid`
+ * wrong depth to the photographs folder, a bare `..` — comes back as `invalid`
  * with the `message` the transform fails the build with.
  *
  * Shape only: the accepted extensions, the private-frame rule
@@ -280,17 +282,17 @@ export function parseReference(src) {
   const named = file !== undefined && file !== '' && file !== '.' && file !== '..';
   if (named) {
     if (parts.length === 1) return referenceParts('local', null, file);
-    // `../gallery-images/<file>` is the gallery root written at the
+    // `../photographs/<file>` is the photographs folder written at the
     // wrong depth, not a sibling piece — the plan calls it invalid.
     if (
       parts.length === 3 &&
       parts[0] === '..' &&
-      parts[1] !== GALLERY_ROOT &&
+      parts[1] !== PHOTOGRAPHS_ROOT &&
       SLUG.test(parts[1])
     ) {
       return referenceParts('piece', parts[1], file);
     }
-    if (parts.length === 4 && parts[0] === '..' && parts[1] === '..' && parts[2] === GALLERY_ROOT) {
+    if (parts.length === 4 && parts[0] === '..' && parts[1] === '..' && parts[2] === PHOTOGRAPHS_ROOT) {
       return referenceParts('gallery', GALLERY_FOLDER, file);
     }
   }
@@ -300,7 +302,7 @@ export function parseReference(src) {
     file: null,
     basename: null,
     ext: null,
-    message: `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, another piece's as ../<slug>/<file>, and a gallery-root image as ../../${GALLERY_ROOT}/<file>`,
+    message: `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, a journal entry's as ../<slug>/<file>, and a photograph from the photographs folder as ../../${PHOTOGRAPHS_ROOT}/<file>`,
   };
 }
 
@@ -318,8 +320,8 @@ function referenceParts(kind, folder, file) {
 /**
  * Registry-side classification of a discovered file under
  * `src/content/`: which root it lives in, the owning piece's slug (or
- * null for the gallery root), and whether it is nested deeper than an
- * image's home — `pieces/<slug>/<file>` or `gallery-images/<file>`.
+ * null for the photographs folder), and whether it is nested deeper than an
+ * image's home — `journal/<slug>/<file>` or `photographs/<file>`.
  * Nested files are not images' homes: the registry warns and ignores
  * them rather than minting an id from a sub-folder name.
  */
@@ -331,21 +333,21 @@ export function classifyContentImage(globKey) {
   }
   const [root, ...rest] = key.slice(at + CONTENT_ROOT.length).split('/');
   let expectedDepth;
-  if (root === 'pieces') expectedDepth = 2;
-  else if (root === GALLERY_ROOT) expectedDepth = 1;
+  if (root === JOURNAL_ROOT) expectedDepth = 2;
+  else if (root === PHOTOGRAPHS_ROOT) expectedDepth = 1;
   else {
     throw new ImageIdError(
-      `"${key}" is under ${CONTENT_ROOT}${root}/ — images live in pieces/<slug>/ or ${GALLERY_ROOT}/`,
+      `"${key}" is under ${CONTENT_ROOT}${root}/ — images live in ${JOURNAL_ROOT}/<slug>/ or ${PHOTOGRAPHS_ROOT}/`,
     );
   }
-  if (root === 'pieces' && rest.length < expectedDepth) {
-    // An image directly in pieces/ has no piece folder to belong to; a
-    // flat `pieces/foo.md` beside it would link to a page nobody makes.
+  if (root === JOURNAL_ROOT && rest.length < expectedDepth) {
+    // An image directly in journal/ has no entry folder to belong to; a
+    // flat `journal/foo.md` beside it would link to a page nobody makes.
     throw new ImageIdError(
-      `"${key}" sits directly in ${CONTENT_ROOT}pieces/ — a piece lives in its own folder (pieces/<slug>/index.md) so its images can have pages`,
+      `"${key}" sits directly in ${CONTENT_ROOT}${JOURNAL_ROOT}/ — a journal entry lives in its own folder (${JOURNAL_ROOT}/<slug>/index.md) so its images can have pages`,
     );
   }
-  const pieceSlug = root === 'pieces' ? (rest[0] ?? null) : null;
+  const pieceSlug = root === JOURNAL_ROOT ? (rest[0] ?? null) : null;
   if (rest.length > expectedDepth) {
     return { path: key, root, pieceSlug, nested: true };
   }
@@ -362,7 +364,7 @@ export function classifyContentImage(globKey) {
       pieceSlug,
       nested: false,
       private: true,
-      folder: root === 'pieces' ? pieceSlug : GALLERY_FOLDER,
+      folder: root === JOURNAL_ROOT ? pieceSlug : GALLERY_FOLDER,
       basename,
       target: privateTargetOf(basename),
       ext,
@@ -483,7 +485,7 @@ function frameIdFor(shape, folder, own) {
 
 /**
  * The borrowed image ids a body places (spec 008) — another piece's or
- * the gallery root's — deduplicated, in document order. The registry
+ * the photographs folder's — deduplicated, in document order. The registry
  * checks these against the images it knows (see `referenceProblems`).
  * A borrowed image must be a photograph this site pages, so a src whose
  * extension is not an accepted raster mints no id here — it names no
@@ -905,14 +907,14 @@ function formatCamera(make, model) {
 
 /**
  * A sidecar collection entry id (the path verbatim, extension dropped)
- * → the image id it describes: `pieces/<slug>/_land-b` → `<slug>/land-b`,
- * `gallery-images/_dock-b` → `gallery/dock-b`.
+ * → the image id it describes: `journal/<slug>/_land-b` → `<slug>/land-b`,
+ * `photographs/_dock-b` → `gallery/dock-b`.
  */
 export function sidecarImageId(entryId) {
-  const m = String(entryId).match(/^(?:pieces\/([^/]+)|gallery-images)\/_([^/]+)$/);
+  const m = String(entryId).match(/^(?:journal\/([^/]+)|photographs)\/_([^/]+)$/);
   if (!m) {
     throw new ImageIdError(
-      `sidecar "${entryId}" is not an _<basename>.md beside an image in pieces/<slug>/ or ${GALLERY_ROOT}/`,
+      `sidecar "${entryId}" is not an _<basename>.md beside an image in ${JOURNAL_ROOT}/<slug>/ or ${PHOTOGRAPHS_ROOT}/`,
     );
   }
   return `${m[1] ?? GALLERY_FOLDER}/${m[2]}`;
@@ -996,7 +998,7 @@ export function referenceProblems(borrower, ids, known) {
       );
     } else {
       problems.push(
-        `[images] ${borrower} places ${id}, but src/content/pieces/${id.split('/')[0]}/ has no index.md — it is not a piece yet`,
+        `[images] ${borrower} places ${id}, but src/content/journal/${id.split('/')[0]}/ has no index.md — it is not a piece yet`,
       );
     }
   }

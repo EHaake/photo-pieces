@@ -87,7 +87,7 @@ describe('the block table equals the vocabulary (T1730)', () => {
   });
 });
 
-const pieces = (slug) => new URL(`./src/content/pieces/${slug}/index.md`, import.meta.url);
+const pieces = (slug) => new URL(`./src/content/journal/${slug}/index.md`, import.meta.url);
 const readPiece = (slug) => readFileSync(pieces(slug), 'utf8');
 
 // The shorthand images: lines starting `![` outside every block's span.
@@ -419,7 +419,7 @@ describe('the scanner at its edges (T1730)', () => {
 });
 
 describe('resolveRelative (T1730)', () => {
-  const note = 'src/content/pieces/alpha/index.md';
+  const note = 'src/content/journal/alpha/index.md';
 
   it('a bare or ./ name is a name, for Obsidian to look up', () => {
     expect(resolveRelative('./a.jpg', note)).toEqual({ kind: 'name' });
@@ -428,14 +428,14 @@ describe('resolveRelative (T1730)', () => {
   it("a sibling piece's path resolves from the note's folder", () => {
     expect(resolveRelative('../beta/a.jpg', note)).toEqual({
       kind: 'path',
-      path: 'src/content/pieces/beta/a.jpg',
+      path: 'src/content/journal/beta/a.jpg',
     });
   });
 
-  it('the gallery root resolves from the note', () => {
-    expect(resolveRelative('../../gallery-images/a.jpg', note)).toEqual({
+  it('the photographs folder resolves from the note', () => {
+    expect(resolveRelative('../../photographs/a.jpg', note)).toEqual({
       kind: 'path',
-      path: 'src/content/gallery-images/a.jpg',
+      path: 'src/content/photographs/a.jpg',
     });
   });
 

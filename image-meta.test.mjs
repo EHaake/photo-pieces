@@ -44,16 +44,16 @@ import {
 // drift.
 
 describe('image ids (T302)', () => {
-  const globKey = '/src/content/pieces/where-the-fog-lets-go/land-b.jpg';
-  const fsPath = '/Users/someone/photo-pieces/src/content/pieces/where-the-fog-lets-go/land-b.jpg';
+  const globKey = '/src/content/journal/where-the-fog-lets-go/land-b.jpg';
+  const fsPath = '/Users/someone/photo-pieces/src/content/journal/where-the-fog-lets-go/land-b.jpg';
 
   it('the registry (glob key) and the transform (resolved path) derive the same id', () => {
     expect(imageIdFor(globKey)).toBe('where-the-fog-lets-go/land-b');
     expect(imageIdFor(fsPath)).toBe('where-the-fog-lets-go/land-b');
   });
 
-  it('the gallery root maps to the `gallery/` folder segment', () => {
-    expect(imageIdFor('/src/content/gallery-images/harbour-01.jpg')).toBe('gallery/harbour-01');
+  it('the photographs folder maps to the `gallery/` folder segment', () => {
+    expect(imageIdFor('/src/content/photographs/harbour-01.jpg')).toBe('gallery/harbour-01');
   });
 
   it("the transform's test fixture derives from its parent folder name", () => {
@@ -61,7 +61,7 @@ describe('image ids (T302)', () => {
   });
 
   it('parses the parts the registry needs and lowercases the extension', () => {
-    expect(parseImagePath('/src/content/pieces/a-piece/Frame.JPG')).toEqual({
+    expect(parseImagePath('/src/content/journal/a-piece/Frame.JPG')).toEqual({
       id: 'a-piece/Frame',
       folder: 'a-piece',
       basename: 'Frame',
@@ -75,16 +75,16 @@ describe('image ids (T302)', () => {
   });
 
   it('a folder that is not a slug fails with a rename hint', () => {
-    expect(() => imageIdFor('/src/content/pieces/Jetty Dawn/jetty.jpg')).toThrow(
+    expect(() => imageIdFor('/src/content/journal/Jetty Dawn/jetty.jpg')).toThrow(
       /folder "Jetty Dawn" is not a slug — rename it .* \(e\.g\. "jetty-dawn"\)/,
     );
   });
 
   it('a non-image extension fails naming the accepted set', () => {
-    expect(() => imageIdFor('/src/content/pieces/a-piece/notes.txt')).toThrow(
+    expect(() => imageIdFor('/src/content/journal/a-piece/notes.txt')).toThrow(
       /"notes.txt" is not an accepted image — expected one of jpg, jpeg, png, webp, avif, tiff/,
     );
-    expect(() => imageIdFor('/src/content/pieces/a-piece/anim.gif')).toThrow(
+    expect(() => imageIdFor('/src/content/journal/a-piece/anim.gif')).toThrow(
       /not an accepted image/,
     );
   });
@@ -94,28 +94,28 @@ describe('image ids (T302)', () => {
   });
 
   it('a file name that cannot be a URL segment fails with a rename hint', () => {
-    expect(() => imageIdFor('/src/content/pieces/a-piece/Fog 01.jpg')).toThrow(
+    expect(() => imageIdFor('/src/content/journal/a-piece/Fog 01.jpg')).toThrow(
       /file name "Fog 01.jpg" can't be a URL segment .* \(e\.g\. "fog-01\.jpg"\)/,
     );
-    expect(() => imageIdFor('/src/content/pieces/a-piece/été.jpg')).toThrow(/URL segment/);
+    expect(() => imageIdFor('/src/content/journal/a-piece/été.jpg')).toThrow(/URL segment/);
     // Camera-style names are fine.
-    expect(imageIdFor('/src/content/pieces/a-piece/DSC_0001.JPG')).toBe('a-piece/DSC_0001');
+    expect(imageIdFor('/src/content/journal/a-piece/DSC_0001.JPG')).toBe('a-piece/DSC_0001');
   });
 });
 
 describe('registry classification (T302)', () => {
   it('a piece image carries its owning slug', () => {
-    expect(classifyContentImage('/src/content/pieces/a-piece/land-a.jpg')).toMatchObject({
-      root: 'pieces',
+    expect(classifyContentImage('/src/content/journal/a-piece/land-a.jpg')).toMatchObject({
+      root: 'journal',
       pieceSlug: 'a-piece',
       nested: false,
       id: 'a-piece/land-a',
     });
   });
 
-  it('a gallery-root image has no owning piece', () => {
-    expect(classifyContentImage('/src/content/gallery-images/harbour-01.jpg')).toMatchObject({
-      root: 'gallery-images',
+  it('a photographs-folder image has no owning piece', () => {
+    expect(classifyContentImage('/src/content/photographs/harbour-01.jpg')).toMatchObject({
+      root: 'photographs',
       pieceSlug: null,
       nested: false,
       id: 'gallery/harbour-01',
@@ -123,27 +123,27 @@ describe('registry classification (T302)', () => {
   });
 
   it('a file nested below an image home is flagged, not given a sub-folder id', () => {
-    expect(classifyContentImage('/src/content/pieces/a-piece/detail/img.jpg')).toEqual({
-      path: '/src/content/pieces/a-piece/detail/img.jpg',
-      root: 'pieces',
+    expect(classifyContentImage('/src/content/journal/a-piece/detail/img.jpg')).toEqual({
+      path: '/src/content/journal/a-piece/detail/img.jpg',
+      root: 'journal',
       pieceSlug: 'a-piece',
       nested: true,
     });
-    expect(classifyContentImage('/src/content/gallery-images/sets/img.jpg')).toMatchObject({
-      root: 'gallery-images',
+    expect(classifyContentImage('/src/content/photographs/sets/img.jpg')).toMatchObject({
+      root: 'photographs',
       nested: true,
     });
   });
 
-  it('an image directly in pieces/ (no piece folder) is rejected, not minted', () => {
-    expect(() => classifyContentImage('/src/content/pieces/stray.jpg')).toThrow(
-      /sits directly in \/src\/content\/pieces\/ — a piece lives in its own folder/,
+  it('an image directly in journal/ (no entry folder) is rejected, not minted', () => {
+    expect(() => classifyContentImage('/src/content/journal/stray.jpg')).toThrow(
+      /sits directly in \/src\/content\/journal\/ — a journal entry lives in its own folder/,
     );
   });
 
   it('files outside the two roots are rejected', () => {
     expect(() => classifyContentImage('/src/content/galleries/cover.jpg')).toThrow(
-      /images live in pieces\/<slug>\/ or gallery-images\//,
+      /images live in journal\/<slug>\/ or photographs\//,
     );
     expect(() => classifyContentImage('/src/assets/hero.jpg')).toThrow(/outside \/src\/content\//);
   });
@@ -152,14 +152,14 @@ describe('registry classification (T302)', () => {
 describe('id collisions (T302)', () => {
   it('two files differing only by extension are reported together', () => {
     const collisions = findIdCollisions([
-      '/src/content/pieces/a-piece/shot.jpg',
-      '/src/content/pieces/a-piece/other.jpg',
-      '/src/content/pieces/a-piece/shot.webp',
+      '/src/content/journal/a-piece/shot.jpg',
+      '/src/content/journal/a-piece/other.jpg',
+      '/src/content/journal/a-piece/shot.webp',
     ]);
     expect(collisions).toEqual([
       {
         id: 'a-piece/shot',
-        files: ['/src/content/pieces/a-piece/shot.jpg', '/src/content/pieces/a-piece/shot.webp'],
+        files: ['/src/content/journal/a-piece/shot.jpg', '/src/content/journal/a-piece/shot.webp'],
       },
     ]);
     expect(formatCollision(collisions[0])).toBe(
@@ -170,9 +170,9 @@ describe('id collisions (T302)', () => {
   it('the same basename in different folders is not a collision', () => {
     expect(
       findIdCollisions([
-        '/src/content/pieces/a-piece/land-a.jpg',
-        '/src/content/pieces/b-piece/land-a.jpg',
-        '/src/content/gallery-images/land-a.jpg',
+        '/src/content/journal/a-piece/land-a.jpg',
+        '/src/content/journal/b-piece/land-a.jpg',
+        '/src/content/photographs/land-a.jpg',
       ]),
     ).toEqual([]);
   });
@@ -295,9 +295,9 @@ describe('private rasters (T401)', () => {
   });
 
   it('is classified as private before an id would be minted, in either root and case', () => {
-    expect(classifyContentImage('/src/content/pieces/a-piece/_land-b.jpg')).toEqual({
-      path: '/src/content/pieces/a-piece/_land-b.jpg',
-      root: 'pieces',
+    expect(classifyContentImage('/src/content/journal/a-piece/_land-b.jpg')).toEqual({
+      path: '/src/content/journal/a-piece/_land-b.jpg',
+      root: 'journal',
       pieceSlug: 'a-piece',
       nested: false,
       private: true,
@@ -307,28 +307,28 @@ describe('private rasters (T401)', () => {
       ext: 'jpg',
       file: '_land-b.jpg',
     });
-    expect(classifyContentImage('/src/content/pieces/a-piece/_land-b.JPG')).toMatchObject({
+    expect(classifyContentImage('/src/content/journal/a-piece/_land-b.JPG')).toMatchObject({
       private: true,
       target: 'land-b',
       ext: 'jpg',
     });
-    expect(classifyContentImage('/src/content/gallery-images/_x.webp')).toMatchObject({
+    expect(classifyContentImage('/src/content/photographs/_x.webp')).toMatchObject({
       private: true,
       folder: 'gallery',
       target: 'x',
       pieceSlug: null,
     });
-    expect(classifyContentImage('/src/content/pieces/a-piece/land-a.jpg')).toMatchObject({
+    expect(classifyContentImage('/src/content/journal/a-piece/land-a.jpg')).toMatchObject({
       private: false,
       id: 'a-piece/land-a',
     });
   });
 
   it('parseImagePath refuses to mint an id for a private raster (the transform checks earlier, with the same sentence)', () => {
-    expect(() => imageIdFor('/src/content/pieces/a-piece/_land-b.jpg')).toThrow(
+    expect(() => imageIdFor('/src/content/journal/a-piece/_land-b.jpg')).toThrow(
       `"_land-b.jpg" is private — a file of "land-b" (its camera's frame, a stage, or the loupe's export), not an image of the site: it has no page and can't be placed in a piece or a gallery`,
     );
-    expect(() => parseImagePath('/src/content/gallery-images/_dock-b.png')).toThrow(/is private/);
+    expect(() => parseImagePath('/src/content/photographs/_dock-b.png')).toThrow(/is private/);
   });
 });
 
@@ -594,11 +594,11 @@ describe('the sections a page renders (T402)', () => {
 });
 
 // Spec 008 — cross-piece references: a src may leave the piece's folder
-// for another piece's or the gallery root, and the frame keeps its home.
+// for another piece's or the photographs folder, and the frame keeps its home.
 
 describe('cross-piece references (T601, spec 008)', () => {
   const notAccepted = (src) =>
-    `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, another piece's as ../<slug>/<file>, and a gallery-root image as ../../gallery-images/<file>`;
+    `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, a journal entry's as ../<slug>/<file>, and a photograph from the photographs folder as ../../photographs/<file>`;
 
   it('the three accepted shapes give their kind, folder, and file parts', () => {
     expect(parseReference('./land-b.jpg')).toEqual({
@@ -622,7 +622,7 @@ describe('cross-piece references (T601, spec 008)', () => {
       basename: 'land-b',
       ext: 'jpg',
     });
-    expect(parseReference('../../gallery-images/dock-a.jpg')).toEqual({
+    expect(parseReference('../../photographs/dock-a.jpg')).toEqual({
       kind: 'gallery',
       folder: 'gallery',
       file: 'dock-a.jpg',
@@ -637,7 +637,7 @@ describe('cross-piece references (T601, spec 008)', () => {
       'detail/land-a.jpg',
       '../beta/detail/land-a.jpg',
       '../../../land-a.jpg',
-      '../gallery-images/dock-a.jpg',
+      '../photographs/dock-a.jpg',
       '../../elsewhere/dock-a.jpg',
       '../../x.jpg',
       '../Beta/land-a.jpg',
@@ -664,7 +664,7 @@ describe('cross-piece references (T601, spec 008)', () => {
       'Opening prose.',
       '![First](./land-a.jpg)',
       '::single{src="../where-the-fog-lets-go/land-b.jpg" alt="Borrowed"}',
-      ':::wide{src="../../gallery-images/dock-a.jpg" alt="From the root"}\nCaption.\n:::',
+      ':::wide{src="../../photographs/dock-a.jpg" alt="From the root"}\nCaption.\n:::',
       '![Not in this folder](./ghost.jpg)',
       '![Again](./land-a.jpg)',
     ].join('\n\n');
@@ -707,9 +707,9 @@ describe('cross-piece references (T601, spec 008)', () => {
   it('the borrowed ids a body places, deduplicated, in document order', () => {
     const body = [
       '![Local](./land-a.jpg)',
-      '::single{src="../../gallery-images/dock-a.jpg" alt="g"}',
+      '::single{src="../../photographs/dock-a.jpg" alt="g"}',
       ':::diptych{left="../beta/port-b.jpg" right="./land-c.jpg"}\nCap.\n:::',
-      '![Again](../../gallery-images/dock-a.jpg)',
+      '![Again](../../photographs/dock-a.jpg)',
       '![Wrong](./detail/land-d.jpg)',
     ].join('\n\n');
     expect(crossReferences(body)).toEqual(['gallery/dock-a', 'beta/port-b']);
@@ -744,7 +744,7 @@ describe('cross-piece references (T601, spec 008)', () => {
 
   it('a folder with no index.md is not a piece yet', () => {
     expect(referenceProblems('the-sampler', ['no-piece/land-a'], known)).toEqual([
-      '[images] the-sampler places no-piece/land-a, but src/content/pieces/no-piece/ has no index.md — it is not a piece yet',
+      '[images] the-sampler places no-piece/land-a, but src/content/journal/no-piece/ has no index.md — it is not a piece yet',
     ]);
   });
 
@@ -754,7 +754,7 @@ describe('cross-piece references (T601, spec 008)', () => {
     ]);
   });
 
-  it('a published image, in a piece folder or the gallery root, is no problem', () => {
+  it('a published image, in a piece folder or the photographs folder, is no problem', () => {
     expect(
       referenceProblems('the-sampler', ['where-the-fog-lets-go/land-b', 'gallery/dock-a'], known),
     ).toEqual([]);
@@ -773,7 +773,7 @@ describe('cross-piece references (T601, spec 008)', () => {
     expect(referencesImage('![The bank](../where-the-fog-lets-go/land-b.jpg)', 'land-b')).toBe(
       false,
     );
-    expect(referencesImage('![Dock](../../gallery-images/dock-a.jpg)', 'dock-a')).toBe(false);
+    expect(referencesImage('![Dock](../../photographs/dock-a.jpg)', 'dock-a')).toBe(false);
   });
 });
 
@@ -825,19 +825,19 @@ describe('places (T701, spec 009)', () => {
   it('an unknown slug names the file and lists the declared places, sorted', () => {
     expect(
       placeProblems(
-        [{ file: 'src/content/pieces/alpha/index.md', slug: 'jety' }],
+        [{ file: 'src/content/journal/alpha/index.md', slug: 'jety' }],
         ['sombrio-beach', 'jetty', 'botanical-beach'],
       ),
     ).toEqual([
-      '[places] src/content/pieces/alpha/index.md: no place named "jety" — the places are: botanical-beach, jetty, sombrio-beach',
+      '[places] src/content/journal/alpha/index.md: no place named "jety" — the places are: botanical-beach, jetty, sombrio-beach',
     ]);
   });
 
   it('with no place declared at all, the message says how to declare one', () => {
     expect(
-      placeProblems([{ file: 'src/content/pieces/alpha/_land-a.md', slug: 'jetty' }], []),
+      placeProblems([{ file: 'src/content/journal/alpha/_land-a.md', slug: 'jetty' }], []),
     ).toEqual([
-      '[places] src/content/pieces/alpha/_land-a.md: no place named "jetty" — none is declared yet: add src/content/places/jetty.md',
+      '[places] src/content/journal/alpha/_land-a.md: no place named "jetty" — none is declared yet: add src/content/places/jetty.md',
     ]);
   });
 
@@ -845,10 +845,10 @@ describe('places (T701, spec 009)', () => {
     expect(
       placeProblems(
         [
-          { file: 'src/content/pieces/alpha/index.md', slug: 'none' },
-          { file: 'src/content/pieces/alpha/_land-a.md', slug: 'jetty' },
-          { file: 'src/content/pieces/alpha/_land-b.md', slug: 'none' },
-          { file: 'src/content/pieces/beta/index.md', slug: '' },
+          { file: 'src/content/journal/alpha/index.md', slug: 'none' },
+          { file: 'src/content/journal/alpha/_land-a.md', slug: 'jetty' },
+          { file: 'src/content/journal/alpha/_land-b.md', slug: 'none' },
+          { file: 'src/content/journal/beta/index.md', slug: '' },
         ],
         ['jetty'],
       ),
@@ -859,15 +859,15 @@ describe('places (T701, spec 009)', () => {
     expect(
       placeProblems(
         [
-          { file: 'src/content/pieces/alpha/index.md', slug: 'jety' },
-          { file: 'src/content/pieces/alpha/_land-a.md', slug: 'jetty' },
-          { file: 'src/content/pieces/beta/_port-b.md', slug: 'sombrio' },
+          { file: 'src/content/journal/alpha/index.md', slug: 'jety' },
+          { file: 'src/content/journal/alpha/_land-a.md', slug: 'jetty' },
+          { file: 'src/content/journal/beta/_port-b.md', slug: 'sombrio' },
         ],
         ['jetty', 'sombrio-beach'],
       ),
     ).toEqual([
-      '[places] src/content/pieces/alpha/index.md: no place named "jety" — the places are: jetty, sombrio-beach',
-      '[places] src/content/pieces/beta/_port-b.md: no place named "sombrio" — the places are: jetty, sombrio-beach',
+      '[places] src/content/journal/alpha/index.md: no place named "jety" — the places are: jetty, sombrio-beach',
+      '[places] src/content/journal/beta/_port-b.md: no place named "sombrio" — the places are: jetty, sombrio-beach',
     ]);
   });
 
@@ -1012,7 +1012,7 @@ describe('the private-file family (T1701, spec 019)', () => {
   });
 
   const priv = (folderName, file) => ({
-    key: `/src/content/pieces/${folderName}/${file}`,
+    key: `/src/content/journal/${folderName}/${file}`,
     folder: folderName,
     basename: file.slice(0, file.lastIndexOf('.')),
     file,
@@ -1029,15 +1029,15 @@ describe('the private-file family (T1701, spec 019)', () => {
       new Map([['x', new Set(['land-b'])]]),
     );
     expect(out.problems).toEqual([]);
-    expect(out.frame).toEqual(new Map([['x/land-b', '/src/content/pieces/x/_land-b.jpg']]));
-    expect(out.detail).toEqual(new Map([['x/land-b', '/src/content/pieces/x/_land-b.detail.png']]));
+    expect(out.frame).toEqual(new Map([['x/land-b', '/src/content/journal/x/_land-b.jpg']]));
+    expect(out.detail).toEqual(new Map([['x/land-b', '/src/content/journal/x/_land-b.detail.png']]));
     expect(out.stages).toEqual(
       new Map([
         [
           'x/land-b',
           [
-            { file: '_land-b.dodge.jpg', key: '/src/content/pieces/x/_land-b.dodge.jpg' },
-            { file: '_land-b.tones.jpg', key: '/src/content/pieces/x/_land-b.tones.jpg' },
+            { file: '_land-b.dodge.jpg', key: '/src/content/journal/x/_land-b.dodge.jpg' },
+            { file: '_land-b.tones.jpg', key: '/src/content/journal/x/_land-b.tones.jpg' },
           ],
         ],
       ]),
@@ -1056,15 +1056,15 @@ describe('the private-file family (T1701, spec 019)', () => {
       new Map([['x', new Set(['land-b'])]]),
     );
     expect(out.problems).toEqual([
-      'src/content/pieces/x/_land-b.png is a second camera\'s frame for "x/land-b" — keep one (any accepted extension)',
-      'src/content/pieces/x/_land-b.detail.png is a second detail export for "x/land-b" — keep one',
-      'src/content/pieces/x/_land-c.tones.jpg has no photograph: a "_" file belongs to the photograph it names, so "land-c.<ext>" should sit beside it (its camera\'s frame is _land-c.<ext>, a stage _land-c.<word>.<ext>, the loupe\'s export _land-c.detail.<ext>)',
+      'src/content/journal/x/_land-b.png is a second camera\'s frame for "x/land-b" — keep one (any accepted extension)',
+      'src/content/journal/x/_land-b.detail.png is a second detail export for "x/land-b" — keep one',
+      'src/content/journal/x/_land-c.tones.jpg has no photograph: a "_" file belongs to the photograph it names, so "land-c.<ext>" should sit beside it (its camera\'s frame is _land-c.<ext>, a stage _land-c.<word>.<ext>, the loupe\'s export _land-c.detail.<ext>)',
     ]);
-    expect(out.frame.get('x/land-b')).toBe('/src/content/pieces/x/_land-b.jpg');
-    expect(out.detail.get('x/land-b')).toBe('/src/content/pieces/x/_land-b.detail.jpg');
+    expect(out.frame.get('x/land-b')).toBe('/src/content/journal/x/_land-b.jpg');
+    expect(out.detail.get('x/land-b')).toBe('/src/content/journal/x/_land-b.detail.jpg');
   });
 
-  const where = 'src/content/pieces/x/_land-b.md';
+  const where = 'src/content/journal/x/_land-b.md';
   const own = [
     { file: '_land-b.dodge.jpg', key: 'k-dodge' },
     { file: '_land-b.tones.jpg', key: 'k-tones' },
@@ -1102,10 +1102,10 @@ describe('the private-file family (T1701, spec 019)', () => {
       where,
     );
     expect(out.problems).toEqual([
-      'src/content/pieces/x/_land-b.md: stages lists "_land-b.tone.jpg", which is not a stage of "land-b" — a stage is _land-b.<word>.<ext> beside the photograph',
-      'src/content/pieces/x/_land-b.md: stages lists "_land-b.jpg", the camera\'s frame — it is always the first stage; leave it out',
-      'src/content/pieces/x/_land-b.md: stages lists "_land-b.detail.jpg", the loupe\'s export — not a stage',
-      'src/content/pieces/x/_land-b.md: stages lists "_land-b.tones.jpg" twice',
+      'src/content/journal/x/_land-b.md: stages lists "_land-b.tone.jpg", which is not a stage of "land-b" — a stage is _land-b.<word>.<ext> beside the photograph',
+      'src/content/journal/x/_land-b.md: stages lists "_land-b.jpg", the camera\'s frame — it is always the first stage; leave it out',
+      'src/content/journal/x/_land-b.md: stages lists "_land-b.detail.jpg", the loupe\'s export — not a stage',
+      'src/content/journal/x/_land-b.md: stages lists "_land-b.tones.jpg" twice',
     ]);
     expect(out.stages).toEqual([{ key: 'k-tones', label: 'Tones' }]);
   });

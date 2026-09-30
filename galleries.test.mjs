@@ -7,15 +7,15 @@ import { formatGalleryProblems, sidecarImageId, validateGalleries } from './src/
 
 describe('sidecar → image id (T305)', () => {
   it('maps both roots', () => {
-    expect(sidecarImageId('pieces/where-the-fog-lets-go/_land-b')).toBe(
+    expect(sidecarImageId('journal/where-the-fog-lets-go/_land-b')).toBe(
       'where-the-fog-lets-go/land-b',
     );
-    expect(sidecarImageId('gallery-images/_dock-b')).toBe('gallery/dock-b');
+    expect(sidecarImageId('photographs/_dock-b')).toBe('gallery/dock-b');
   });
 
   it('rejects any other shape', () => {
-    expect(() => sidecarImageId('pieces/_stray')).toThrow(/is not an _<basename>\.md beside/);
-    expect(() => sidecarImageId('pieces/a-piece/deeper/_x')).toThrow(/is not an _<basename>/);
+    expect(() => sidecarImageId('journal/_stray')).toThrow(/is not an _<basename>\.md beside/);
+    expect(() => sidecarImageId('journal/a-piece/deeper/_x')).toThrow(/is not an _<basename>/);
     expect(() => sidecarImageId('galleries/_x')).toThrow(/is not an _<basename>/);
   });
 });

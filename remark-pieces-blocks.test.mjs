@@ -468,11 +468,11 @@ describe('the compare block (T1705, spec 019)', () => {
     ]);
   });
 
-  describe('the borrowing pair, from tests/pieces/alpha/', () => {
+  describe('the borrowing pair, from tests/journal/alpha/', () => {
     // Copied from remark-pieces-vocabulary.test.mjs's "cross-piece
     // references (T602, spec 008)": the render's path is a virtual
     // alpha/index.md beside beta/, which holds photo.jpg and _photo.jpg.
-    const alphaURL = new URL('./tests/pieces/alpha/index.md', import.meta.url);
+    const alphaURL = new URL('./tests/journal/alpha/index.md', import.meta.url);
 
     it('a public photograph of another folder may be a stage, resolved like any borrowed frame', async () => {
       const { code } = await processor.render(
@@ -492,7 +492,7 @@ describe('the compare block (T1705, spec 019)', () => {
       expect(error.message).toContain(
         '"../beta/_photo.jpg" is a private file of another folder — a compare may show a private file only from its own folder; a public photograph may be borrowed (../beta/photo.jpg)',
       );
-      expect(error.file).toMatch(/tests\/pieces\/alpha\/index\.md$/);
+      expect(error.file).toMatch(/tests\/journal\/alpha\/index\.md$/);
       expect(error.line).toBe(3);
     });
 
@@ -518,7 +518,7 @@ describe('the compare block (T1705, spec 019)', () => {
         expect(error.message).toContain(
           `"../beta/_photo.jpg" is a private file of another folder — a ${name} may show a private file only from its own folder; a public photograph may be borrowed (../beta/photo.jpg)`,
         );
-        expect(error.file).toMatch(/tests\/pieces\/alpha\/index\.md$/);
+        expect(error.file).toMatch(/tests\/journal\/alpha\/index\.md$/);
         expect(error.line).toBe(3);
       },
     );
