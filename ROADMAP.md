@@ -71,7 +71,10 @@ attached.
   becomes a real, not hypothetical, problem") — spec 019's detail
   exports, at 4000px a photograph, moved that day closer: "I plan to
   have many images, so even without full size ones, we'll need an
-  external store." The spec after 019.
+  external store." Not the next spec: "we'll still need to do more
+  refinement on the design, layout, features, etc before then" — it
+  runs together with going live (spec 005's deploy wiring), when the
+  refinement specs judged on real pieces are done.
 - **Every page a piece, and the image's study** — raised by the
   photographer during spec 014 (2026-09-18), as much a statement of intent
   as a feature: every page but the front door is meant to be a piece — a
