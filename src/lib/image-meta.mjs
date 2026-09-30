@@ -947,9 +947,38 @@ export function sidecarImageId(entryId) {
 }
 
 /**
+ * The sidecar fields that belong to a photograph in the photographs
+ * folder alone (spec 019): whether it is a draft, and the date it is
+ * published under. A journal entry's photographs are published and dated
+ * by their entry, so a journal-folder sidecar may write neither.
+ */
+export const PHOTOGRAPH_FIELDS = Object.freeze({ draft: 'draft', published: 'published' }); // tunable: the names
+
+/**
+ * The photograph-only fields a journal-folder sidecar writes (spec 019).
+ * `entries` is `{ file, inJournal, data }[]` — the sidecar's path, whether
+ * it sits in a journal folder, and its frontmatter. One line per written
+ * field (a written `false` counts), in the order of `entries`; empty when
+ * there are none — the caller fails the build with all of them.
+ */
+export function photographOnlyProblems(entries) {
+  const problems = [];
+  for (const { file, inJournal, data } of entries) {
+    if (!inJournal) continue;
+    for (const name of Object.values(PHOTOGRAPH_FIELDS)) {
+      if (data?.[name] === undefined) continue;
+      problems.push(
+        `[images] ${file}: "${name}" is for a photograph in src/content/${PHOTOGRAPHS_ROOT}/ — a journal entry's photographs are published and dated by their entry; remove the line`,
+      );
+    }
+  }
+  return problems;
+}
+
+/**
  * Checks every gallery's image list against the registry: each id must
- * name an image on the site, belong to a published piece (or to no
- * piece), and appear once. `galleries` is `[{ id, filePath, source,
+ * name an image on the site, belong to a published piece (or, in the
+ * photographs folder, not be a draft), and appear once. `galleries` is `[{ id, filePath, source,
  * images }]` with `source` the gallery file's text so each problem can
  * carry the line the id sits on; `known` maps every discovered image
  * id to 'published' | 'draft' | 'unowned'. Returns problems in file
@@ -978,7 +1007,10 @@ export function validateGalleries(galleries, known) {
       else if (status === undefined)
         reason = `"${imageId}" is not an image on the site${nearestHint(imageId, known)}`;
       else if (status === 'draft')
-        reason = `"${imageId}" belongs to a draft piece — publish the piece or drop the image`;
+        reason =
+          homeSlugOf(imageId) === null
+            ? `"${imageId}" is a draft (its sidecar says draft: true) — publish it or drop it from the gallery`
+            : `"${imageId}" belongs to a draft piece — publish the piece or drop the image`;
       else if (status !== 'published')
         reason = `"${imageId}" sits in a piece folder with no index.md, so it is unpublished`;
       if (reason) {
@@ -1010,7 +1042,8 @@ export function formatGalleryProblems(problems) {
  * its cover), `known` the registry's map of every discovered id to
  * 'published' | 'draft' | 'unowned'. The home piece an id names is the
  * folder segment of the id itself, by the identity rule at the top of
- * this file, so it is derived here rather than passed in. Returns one
+ * this file, so it is derived here rather than passed in; a bare id has
+ * none, and is a draft by its own sidecar (spec 019). Returns one
  * message per problem, in the order the ids came, empty when there are
  * none — the caller fails the build with all of them.
  */
@@ -1024,11 +1057,13 @@ export function referenceProblems(borrower, ids, known) {
     } else if (status === 'draft') {
       const home = homeSlugOf(id);
       problems.push(
-        `[images] ${borrower} places ${id} from ${home}, which is a draft — publish ${home} first, or place a photograph that has a page`,
+        home === null
+          ? `[images] ${borrower} places ${id}, which is a draft (its sidecar says draft: true) — publish it first, or place a photograph that has a page`
+          : `[images] ${borrower} places ${id} from ${home}, which is a draft — publish ${home} first, or place a photograph that has a page`,
       );
     } else {
       problems.push(
-        `[images] ${borrower} places ${id}, but src/content/journal/${id.split('/')[0]}/ has no index.md — it is not a piece yet`,
+        `[images] ${borrower} places ${id}, but src/content/journal/${homeSlugOf(id)}/ has no index.md — it is not a piece yet`,
       );
     }
   }

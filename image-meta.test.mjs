@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { BLOCKS } from './remark-pieces-blocks.mjs';
 import {
@@ -27,6 +28,8 @@ import {
   parseImagePath,
   parseReference,
   passageFor,
+  PHOTOGRAPH_FIELDS,
+  photographOnlyProblems,
   pieceFrames,
   placeNameProblem,
   placeOf,
@@ -1291,5 +1294,62 @@ describe('the id rule (T1739, spec 019)', () => {
         [{ slug: 'banks', where: 'src/content/journal/banks/' }],
       ),
     ).toEqual([]);
+  });
+});
+
+// Spec 019's lexicon: a photograph in the photographs folder is a draft
+// by its own sidecar and dated by its `published:`; a journal entry's
+// photographs are published and dated by their entry, so a journal-folder
+// sidecar may write neither field.
+describe('the draft and the date (T1740, spec 019)', () => {
+  const journalSidecar = 'src/content/journal/fog/_land-b.md';
+
+  it('a journal-folder sidecar writing draft: false gets one line naming draft', () => {
+    expect(
+      photographOnlyProblems([{ file: journalSidecar, inJournal: true, data: { draft: false } }]),
+    ).toEqual([
+      '[images] src/content/journal/fog/_land-b.md: "draft" is for a photograph in src/content/photographs/ — a journal entry\'s photographs are published and dated by their entry; remove the line',
+    ]);
+  });
+
+  it('a journal-folder sidecar writing both fields gets two lines, draft then published', () => {
+    const problems = photographOnlyProblems([
+      {
+        file: journalSidecar,
+        inJournal: true,
+        data: { title: 'Bank', draft: true, published: new Date('2026-10-01') },
+      },
+    ]);
+    expect(problems).toHaveLength(2);
+    expect(problems[0]).toContain(': "draft" is for a photograph');
+    expect(problems[1]).toContain(': "published" is for a photograph');
+  });
+
+  it('a photographs-folder sidecar writing both fields is no problem', () => {
+    expect(
+      photographOnlyProblems([
+        {
+          file: 'src/content/photographs/_bank.md',
+          inJournal: false,
+          data: { draft: true, published: new Date('2026-10-01') },
+        },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('referenceProblems: placing a draft photographs-folder photograph names it, not a home "from null"', () => {
+    const known = new Map([['bank', 'draft']]);
+    expect(referenceProblems('the-sampler', ['bank'], known)).toEqual([
+      '[images] the-sampler places bank, which is a draft (its sidecar says draft: true) — publish it first, or place a photograph that has a page',
+    ]);
+  });
+
+  it("each PHOTOGRAPH_FIELDS name is a key of content.config.ts's imageMeta schema", () => {
+    const config = readFileSync(new URL('./src/content.config.ts', import.meta.url), 'utf8');
+    const block = config.slice(config.indexOf('const imageMeta'), config.indexOf('const places'));
+    expect(block).toContain('z.object(');
+    for (const name of Object.values(PHOTOGRAPH_FIELDS)) {
+      expect(block).toMatch(new RegExp(`^\\s+${name}: z\\.`, 'm'));
+    }
   });
 });

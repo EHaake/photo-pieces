@@ -134,6 +134,17 @@ const GALLERY_IMAGES = [
     '2:3 · GPS',
     { ...exif('50', '2.8', '1/125', '640', '2026:08:29 19:03:10'), ...TRAFALGAR_GPS },
   ],
+  // The draft fixture (spec 019): a photograph whose sidecar says
+  // `draft: true`, so it has no page, is on no list, and is named nowhere
+  // in dist/.
+  [
+    'src/content/photographs/draft-fixture.jpg',
+    1800,
+    1200,
+    'moss',
+    '3:2 · draft',
+    exif('35', '8', '1/250', '100', '2026:09:20 17:30:00'),
+  ],
 ];
 
 // Private files (spec 006, widened at spec 019): rasters beside their

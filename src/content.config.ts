@@ -109,6 +109,15 @@ const imageMeta = defineCollection({
     edition: z.string().optional(),
     sizes: z.string().optional(),
     paper: z.string().optional(),
+    // Spec 019: a photograph in the photographs folder is published unless
+    // its sidecar says `draft: true`, and stands on the front door when it
+    // has a `published:` date (not `date`, the capture date's override).
+    // A journal entry's photographs are published and dated by their
+    // entry, so the registry refuses either line in a journal folder —
+    // optional, not defaulted, so a written `draft: false` is refused too.
+    // The names are PHOTOGRAPH_FIELDS (src/lib/image-meta.mjs).
+    draft: z.boolean().optional(), // photographs folder only
+    published: z.coerce.date().optional(), // photographs folder only
   }),
 });
 

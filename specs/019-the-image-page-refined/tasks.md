@@ -1655,7 +1655,7 @@ T1735.
       line on a bare id, its split('/') copy of the slug rule) and the
       sweep (the collision message's literal journal path).
 
-- [ ] **T1740** — A photograph's draft and date. Pattern: `imageMeta`'s
+- [x] **T1740** — A photograph's draft and date. Pattern: `imageMeta`'s
       commented fields; the registry's orphan loop; the reasons in
       `validateGalleries` and `referenceProblems`;
       `gen-placeholders.mjs`' photographs list. Plan: "A photograph's
@@ -1676,6 +1676,16 @@ T1735.
       line (or the page count one higher) pasted and each reverted; the
       new fixture's EXIF read with `exifr` and pasted (`Fixture`
       strings, no GPS)._
+      Done: 87 pages (unchanged), 756 tests (+6), BUILD/CHECK/TEST EXIT
+      0. Dates: vocabulary-sampler 2026-09-01, first-light-at-the-jetty
+      and market-day-camera-low 2026-08-30; _dock-b.md published
+      2026-08-31; the draft fixture's 2026-10-10. No draft-fixture page
+      or mention in dist; "Dock, late" twice on dock-b's page. The four
+      one-time edits: the gallery's draft line, the journal sidecar's
+      draft and published lines, and 88 pages with the draft line
+      removed — each reverted. exifr: Make Fixture, Model Fixture FX-1,
+      gps() undefined. referenceProblems' bare-id draft line and
+      homeSlugOf (T1739's review notes) taken.
 
 - [ ] **T1741** — The front door's list. Pattern: `PieceList.astro`'s
       row; the frozen tunables and table-driven cases of
@@ -2211,6 +2221,7 @@ tier if it is ever on (it is off). -->
 | T1738 addresses moved | implementation (`opus`, high) | ~52k | done; 737 tests, 87 pages; regex-escaped `\/images\/` expectations again caught by the suite, not the grep |
 | T1739 id rule | implementation (`opus`, high) | ~128k | done; 750 tests (+13); oldIdHint narrowed to a bare remainder (sound per review) |
 | T1739 per-task review | implementation (`opus`, high) | ~59k | pass; notes: referenceProblems' draft branch prints null for a bare id and keeps a split('/') slug copy (→ T1740), collision message's literal path (sweep) |
+| T1740 draft and date | implementation (`opus`, high) | ~87k | done; 756 tests (+6); T1739's two review notes taken; no deviation |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

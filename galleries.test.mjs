@@ -94,6 +94,14 @@ describe('gallery validation (T305)', () => {
     ]);
   });
 
+  it('a draft photographs-folder photograph is refused as a draft photograph, not a draft piece (T1740)', () => {
+    const withDraft = new Map([...known, ['dock-b', 'draft']]);
+    const problems = validateGalleries([gallery('drafts', 'a-piece/land-a', 'dock-b')], withDraft);
+    expect(formatGalleryProblems(problems)).toBe(
+      'src/content/galleries/drafts.md:6 — gallery "drafts": "dock-b" is a draft (its sidecar says draft: true) — publish it or drop it from the gallery',
+    );
+  });
+
   it("a camera's frame is refused for what it is, not as an unknown id (T401)", () => {
     // Private rasters are never in `known`, so the generic unknown-id
     // branch would fire without this rule — the reason names the frame's

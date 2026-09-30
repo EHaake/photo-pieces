@@ -28,6 +28,7 @@ import {
   nearest,
   neighbours,
   passageFor,
+  photographOnlyProblems,
   pieceFrames,
   placeCoverProblem,
   placeNameProblem,
@@ -161,6 +162,10 @@ export interface SiteImage {
   /** The place this frame is at (spec 009) — null when it names none,
    *  when its place is a draft, or in the photographs folder. */
   place: SitePlace | null;
+  /** The sidecar's `published:` for a photographs-folder photograph
+   *  (spec 019) — the date it stands on the front door under; null when
+   *  it has none, and always in a journal folder. */
+  published: Date | null;
   /** Sidecar title → first alt in the piece body → humanized filename. */
   title: string;
   caption?: string;
@@ -382,8 +387,46 @@ async function buildRegistry(): Promise<ImageRegistry> {
     throw new Error(shared.join('\n'));
   }
 
-  // Publication status by ownership. A piece folder without an
-  // index.md isn't a piece yet; its images stay unpublished.
+  // Sidecars, read before status (spec 019): a photographs-folder
+  // photograph's status is its sidecar's `draft:`. Each must describe an
+  // image that exists (published or not — a sidecar on a draft piece's
+  // image is fine, a typo is not).
+  const fileIds = new Set(files.map((file) => file.id));
+  const sidecars = new Map<string, CollectionEntry<'imageMeta'>>();
+  const orphans: string[] = [];
+  const sidecarEntries = await getCollection('imageMeta');
+  for (const entry of sidecarEntries) {
+    const imageId = sidecarImageId(entry.id);
+    if (!fileIds.has(imageId)) {
+      orphans.push(
+        `${entry.filePath ?? entry.id} describes "${imageId}", which is not an image on the site`,
+      );
+    } else {
+      sidecars.set(imageId, entry);
+    }
+  }
+  if (orphans.length) {
+    throw new Error(
+      `[images] orphan sidecar${orphans.length > 1 ? 's' : ''}:\n${orphans.join('\n')}`,
+    );
+  }
+
+  // A photograph's draft and date (spec 019) are the photographs folder's
+  // alone; a journal-folder sidecar writing either fails, all at once.
+  const onlyProblems = photographOnlyProblems(
+    [...sidecars].map(([imageId, entry]) => ({
+      file: entry.filePath ?? entry.id,
+      inJournal: homeSlugOf(imageId) !== null,
+      data: entry.data,
+    })),
+  );
+  if (onlyProblems.length) {
+    throw new Error(onlyProblems.join('\n'));
+  }
+
+  // Publication status: a journal folder's by its entry — a folder
+  // without an index.md isn't an entry yet, and its images stay
+  // unpublished; a photographs-folder photograph's by its sidecar.
   const known = new Map<string, Status>();
   const folderWarned = new Set<string>();
   for (const file of files) {
@@ -401,6 +444,8 @@ async function buildRegistry(): Promise<ImageRegistry> {
       } else if (!isPublished(piece)) {
         status = 'draft';
       }
+    } else if (sidecars.get(file.id)?.data.draft === true) {
+      status = 'draft';
     }
     known.set(file.id, status);
   }
@@ -428,42 +473,24 @@ async function buildRegistry(): Promise<ImageRegistry> {
     );
   }
 
-  // Sidecars: each must describe an image that exists (published or
-  // not — a sidecar on a draft piece's image is fine, a typo is not).
-  const sidecars = new Map<string, CollectionEntry<'imageMeta'>>();
-  const orphans: string[] = [];
   // Each sidecar's `stages:` (spec 019), checked against its photograph's
   // own stage files; the problems of every sidecar, thrown at once.
   const stagesById = new Map<string, SiteImage['stages']>();
   const stageProblems: string[] = [];
-  const sidecarEntries = await getCollection('imageMeta');
-  for (const entry of sidecarEntries) {
-    const imageId = sidecarImageId(entry.id);
-    if (!known.has(imageId)) {
-      orphans.push(
-        `${entry.filePath ?? entry.id} describes "${imageId}", which is not an image on the site`,
-      );
-    } else {
-      sidecars.set(imageId, entry);
-      const resolved = resolveStages(
-        entry.data.stages,
-        family.stages.get(imageId),
-        entry.filePath ?? entry.id,
-      ) as { stages: { key: string; label: string; note?: string }[]; problems: string[] };
-      stageProblems.push(...resolved.problems);
-      stagesById.set(
-        imageId,
-        resolved.stages.map(({ key, label, note }) => ({
-          image: discovered[key].default,
-          label,
-          ...(note === undefined ? {} : { note }),
-        })),
-      );
-    }
-  }
-  if (orphans.length) {
-    throw new Error(
-      `[images] orphan sidecar${orphans.length > 1 ? 's' : ''}:\n${orphans.join('\n')}`,
+  for (const [imageId, entry] of sidecars) {
+    const resolved = resolveStages(
+      entry.data.stages,
+      family.stages.get(imageId),
+      entry.filePath ?? entry.id,
+    ) as { stages: { key: string; label: string; note?: string }[]; problems: string[] };
+    stageProblems.push(...resolved.problems);
+    stagesById.set(
+      imageId,
+      resolved.stages.map(({ key, label, note }) => ({
+        image: discovered[key].default,
+        label,
+        ...(note === undefined ? {} : { note }),
+      })),
     );
   }
   if (stageProblems.length) {
@@ -738,6 +765,7 @@ async function buildRegistry(): Promise<ImageRegistry> {
           sidecar,
           place,
           title,
+          published: file.pieceSlug === null ? (sidecar?.data.published ?? null) : null,
           caption: sidecar?.data.caption,
           label,
           hasStory: (sidecar?.body ?? '').trim() !== '',
