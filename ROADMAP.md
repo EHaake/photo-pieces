@@ -190,6 +190,43 @@ attached.
   derived copies (the OG route's hexes, `public/og.jpg`, `DECISIONS.md`'s
   "Ground tone" entry) moved with it by the rule 014 landed. Spec 014 is
   closed in its own documents with the reason.
+- **The place as a tour, by its outings** — raised by the photographer at
+  spec 019's lexicon pause (2026-10-01). Today a place's page is its
+  writing and then one wall of every frame taken there, oldest visit
+  first; an "outing" exists only as the wall's order and as a count on
+  the Places list ("3 outings · 3 frames · 2026"), and since spec 019 a
+  photograph of the photographs folder that names the place counts as
+  an outing of its own. What he described, and half-expected to find:
+  outings as instances of the place — the place's page lists its
+  outings as pieces, and the reader clicks into one. To be considered
+  when the place becomes the tour the lexicon names: whether the page
+  lists outings (a journal entry, a lone photograph) as things to open,
+  how that sits with the wall, and what a lone photograph's "outing"
+  looks like there. A spec of its own, after a design conversation.
+- **The photographs index, in sections** — raised by the photographer at
+  spec 019's lexicon pause (2026-10-01). He likes the index
+  (`/photographs/`: every photograph, small, one dense grid by title)
+  as built. As the site grows it may want some categorisation so it is
+  not one huge, uninterrupted mass — by category, by place, by year, by
+  initial letter as a book's index runs. Fine for now; revisit when the
+  count makes it a mass.
+- **A hover on photographs** — raised by the photographer at spec 019's
+  lexicon pause (2026-10-01), looking at the index, as a step toward the
+  modern design he has been asking for (see "A design language of its
+  own" and "Motion, considered"): when a photograph is pointed at — in
+  the index, a gallery, a place's wall, a list's cover — a slight
+  animation and/or a styling change should mark the hover and make the
+  page feel more interactive. Pointer devices only; a phone has no hover
+  and gets nothing. To settle in a spec: which surfaces, what moves (a
+  lift, a scale, a border, a caption appearing), the durations through
+  the motion tokens, and reduced motion.
+- **The RSS feed, kept for now** — the feed at `/rss.xml` came with the
+  base theme and lists journal entries only; a dated photograph stands
+  on the front door but not in the feed. At spec 019's lexicon pause
+  (2026-10-01) the photographer was not sure a feed makes sense to keep
+  at all: keep it for now, in case a use turns up. Revisit — remove it,
+  or decide what it carries — when subscription or a newsletter is
+  considered.
 - **The pause and the hero leave the site** — decided by the
   photographer at spec 016's second look (2026-09-22), and the next
   spec: "I think we should scrap the Pause block and the stage using the
