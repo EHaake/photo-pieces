@@ -25,7 +25,12 @@ open: the site's lexicon, and the photograph as a piece — Goal 11 and
 the sections marked _(amended 2026-09-29, lexicon)_ — re-planned as
 plan.md's "Amendment 3 (2026-09-29): the lexicon, the photograph's
 home" and tasks.md's Phase 3c (T1736–T1747), signed off at the top
-tier the same day, before the real piece.
+tier the same day, before the real piece. **Amended a fourth time,
+2026-10-01**, from the Phase 3c look, with the 3a, 3b and 3c pauses
+held open: a category on a photographs-folder photograph's sidecar —
+Goal 11 and the sections marked _(amended 2026-10-01, category)_ —
+re-planned as plan.md's "Amendment 4 (2026-10-01): the photograph's
+categories" and tasks.md's Phase 3d, before the real piece.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
@@ -296,7 +301,10 @@ my first place piece instead of waiting until later."
     galleries keep theirs. A photograph in the photographs folder may
     be a **draft** and may carry a **date of its own**, so it can be
     written in place and, when dated, stand on the front door beside
-    journal entries. Nothing is deployed, so the old addresses need no
+    journal entries. _(amended 2026-10-01, category)_ It may also
+    **name its categories** in its sidecar, the word a journal entry
+    uses, so its page says what kind of work it is without a gallery
+    having to hold it. Nothing is deployed, so the old addresses need no
     redirects. Photographs are met by way of the pieces that show them
     — a journal entry, a place, a gallery — so they have no place in
     the nav; `/photographs/` is an **index**, in the sense of the one
@@ -443,6 +451,18 @@ my first place piece instead of waiting until later."
   and its title). A journal folder's photographs take both from their
   entry, as today; a sidecar there that writes either fails the build
   naming the field.
+- **A photograph's categories** _(amended 2026-10-01, category)_ — an
+  optional `categories:` line in a photographs-folder photograph's
+  sidecar: a list of one or more of the site's four categories, as a
+  journal entry's frontmatter writes it. The photograph's page shows
+  them in the eyebrow above the title, where a journal entry's
+  photographs show their entry's. Without the line the eyebrow falls
+  back to the categories of the galleries that hold the photograph, as
+  today; with it, the line is the eyebrow — the galleries' categories
+  are not merged in. Category pages are unchanged: they list galleries
+  and journal entries, not photographs. A journal folder's photographs
+  take their entry's categories, as they take its draft and date; a
+  sidecar there that writes the line fails the build naming the field.
 - **The stage's shares** _(amended 2026-09-26)_ — two numbers, the
   landscape share (of the first screen's width, for a photograph wider
   than tall) and the portrait share (of the first screen's height, for
@@ -550,11 +570,13 @@ in a block in Live Preview and its text comes back for editing.
 The photographer exports `bank.jpg`, its camera's frame `_bank.jpg`,
 a stage `_bank.tones.jpg` and the loupe's `_bank.detail.jpg` into
 `src/content/photographs/`, and writes `_bank.md` beside them: a
-title, a caption, `stages:`, `draft: true`, and the story with a
+title, a caption, `categories:` _(amended 2026-10-01, category)_,
+`stages:`, `draft: true`, and the story with a
 `:::compare` or a `:::slider` where the writing wants one. Obsidian
 shows it as the plugin shows any piece; `npm run dev` shows nothing at
 `/photographs/bank/` while it is a draft. When it is done he removes
-the draft line and writes `published: 2026-10-04`; the page appears,
+the draft line and writes `published: 2026-10-04`; the page appears
+with its categories in the eyebrow above the title,
 the front door lists it first with its frame and title, and a gallery
 may now name `bank`. A journal entry written later places it as
 `../../photographs/bank.jpg`, and the photograph's page lists that
@@ -712,6 +734,13 @@ output.
   photograph shown as its frame and its title, a journal entry as
   today; its length is a tunable. A photograph without `published:`
   is never on the front door, however it is reached otherwise.
+- **The eyebrow on a photograph's page** _(amended 2026-10-01,
+  category)_. Above the title, as today: a journal folder's photograph
+  shows its entry's categories; a photographs-folder photograph shows
+  its sidecar's `categories:` when the line is there, else the
+  categories of the galleries that hold it, else no eyebrow. Each word
+  links to its category page, as now. Nothing else on the page, and no
+  other page, changes with the line.
 - **The pair blocks** _(amended 2026-09-26)_. `side`: the two panes at
   the photograph's ratio and the same size, the label · note of each
   beneath its pane in the caption style, no control, no legend, no
@@ -833,6 +862,14 @@ output.
   folder with its draft and date, the borrowing paths — and the
   photograph's page described as the piece it is. `DECISIONS.md` at
   close-out records the lexicon and the reasoning in his words.
+- **The constitution, a fourth time** _(amended 2026-10-01,
+  category)_, in its own commit before the phase's first code: the
+  Content model clause's sentence on the sidecar's fields gains the
+  `categories:` line — in the photographs folder only, naming the
+  photograph's categories for its page's eyebrow, a journal entry's
+  photographs taking their entry's. `AUTHORING.md`'s sidecar table
+  gains the line, with the fallback to the galleries' categories in
+  one sentence.
 
 ## The tuning envelope
 
@@ -905,7 +942,10 @@ re-dispatched on the changed section, and a sign-off:
   or ground; the plugin importing the transform;
 - _(amended 2026-09-29, lexicon)_ a fourth form of piece; the place
   tour; the study; redirects; any change to a journal entry's
-  frontmatter or to how a journal folder's photographs are published.
+  frontmatter or to how a journal folder's photographs are published;
+- _(amended 2026-10-01, category)_ photographs on a category page, or
+  in the search index by category; a category on a journal folder's
+  photograph's sidecar.
 - a change to the private-file rule beyond what Entities states, or a
   private file placed by any block but `compare`;
 - the loupe on any surface but the quiet view;
@@ -1096,6 +1136,24 @@ _Amended 2026-09-29 (lexicon):_
       Obsidian plugin's path resolution follow the moved folders —
       pinned by greps and the build; Obsidian's Live Preview of the
       moved samples checked by the photographer at the pause
+
+_Amended 2026-10-01 (category):_
+
+- [ ] The constitution names the sidecar's `categories:` line, amended
+      in its own commit before the phase's first code — its commit
+      hash recorded
+- [ ] A photographs-folder photograph whose sidecar writes
+      `categories:` shows them in its page's eyebrow, each linking to
+      its category page; one without the line shows its galleries'
+      categories as before, and no eyebrow when no gallery holds it;
+      the line with a word outside the four, or empty, fails the build
+      naming the file and the field; the same line in a journal
+      folder's sidecar fails the build naming the field — pinned by the
+      registry's tests and a built page
+- [ ] Category pages list what they listed before — no photograph
+      joins them — pinned on `dist/`
+- [ ] `AUTHORING.md` describes the line and its fallback — pinned by a
+      grep
 
 ## Decided (in this conversation, 2026-09-24)
 
@@ -1342,3 +1400,22 @@ _Amended 2026-09-29 (lexicon):_
   piece should appear on its place's page: "yes, absolutely"; spec
   009's own-folder rule is widened to it, and the constitution's
   places clause with it.
+- **The fourth amendment (2026-10-01): a category on a photograph's
+  sidecar.** From the Phase 3c look, where the photographs index and
+  the publishing flow were judged on the built site. The question put
+  to him: a photograph of the photographs folder has no categories of
+  its own — its eyebrow borrows the categories of the galleries that
+  hold it, so a photograph piece written before any gallery names it
+  says nothing about what kind of work it is. The recommendation as
+  put: an optional `categories:` line in the sidecar, the word journal
+  entries use; shown in the eyebrow above the title on the
+  photograph's page, where an entry's photographs show their entry's;
+  without the line the eyebrow falls back to the galleries' categories,
+  as now; category pages unchanged. "Sure, I'll go with your
+  recommendation." The session's calls, to be seen: the line is the
+  eyebrow when present (no merge with the galleries'); a journal
+  folder's sidecar may not write it, as it may not write `draft` or
+  `published` — a journal entry's photographs wear their entry's, and
+  per-photograph overrides there stay on the ordinary path. Folded in
+  before his piece is written against the sidecar's fields, so the
+  fields are complete when he writes.
