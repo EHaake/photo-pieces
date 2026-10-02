@@ -70,10 +70,13 @@ backend service for v1.
   overrides it and whose body is the photograph's story (spec 006), and
   from spec 019 whose `stages:` declare its processing — and, in the
   photographs folder only, whose `draft: true` holds the photograph
-  unpublished and whose `published:` date puts it on the front door
-  beside journal entries (a journal entry's photographs are published
-  and dated by their entry; a sidecar there that writes either field
-  fails the build). Galleries are the opposite kind of thing: a
+  unpublished, whose `published:` date puts it on the front door beside
+  journal entries, and whose `categories:` name the photograph's
+  categories in its page's eyebrow, in place of the categories of the
+  galleries that hold it (a journal entry's photographs are published,
+  dated and categorised by their entry; a sidecar there that
+  writes any of the three fails the build).
+  Galleries are the opposite kind of thing: a
   separate, hand-_curated_ collection of ordered image ids — never
   auto-generated from the registry — each tagged with a category. A
   photograph has one home — a journal entry's folder or the photographs
