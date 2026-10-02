@@ -3295,6 +3295,9 @@ the registry); `package.json`'s dependencies.
   galleries and journal entries only. The spec adds `draft` and
   `published`, nothing else; whether a sidecar should carry
   `category:` is put to him at T1745, not decided here.
+  _Superseded by "Amendment 4 (2026-10-01): the photograph's categories"
+  below: a photographs-folder sidecar may write `categories:`, shown in
+  its page's eyebrow (T1749–T1750)._
 - **The feed lists journal entries only**; a dated photograph stands on
   the front door, not in `rss.xml` (the spec: "The front door only
   learns to list a dated photograph"), so AC 29's "absent from the
@@ -3368,3 +3371,371 @@ the registry); `package.json`'s dependencies.
 - **The About page's interim text is rewritten** — not his words, and
   AC 31 covers every page.
 - **No internal rename, no new dependency.**
+
+## Amendment 4 (2026-10-01): the photograph's categories
+
+**Status**: Draft — pending sign-off
+**Implements**: spec.md's sections marked _(amended 2026-10-01,
+category)_ — the preamble's fourth-amendment sentences, Goal 11's
+sentence on a photograph naming its categories, the Entity "A
+photograph's categories", the flow "Publishing a photograph" (its
+`categories:` and the eyebrow on publishing), the Design requirement
+"The eyebrow on a photograph's page", the Authoring requirement "The
+constitution, a fourth time", the envelope's ordinary-path line, the
+Decided section's last bullet, and the four criteria under "_Amended
+2026-10-01 (category):_" (AC 35–38 here, numbered on from AC 34: the
+constitution 35, the eyebrow and the refusals 36, the category pages
+37, the document 38).
+
+One optional sidecar line, read in two places: Astro's schema accepts
+it in either folder and refuses a bad word, and the registry refuses it
+in a journal folder, as it refuses `draft` and `published`; the
+photograph page's eyebrow reads it before the galleries' categories.
+No dependency, no new module, no change to `SiteImage`,
+`src/lib/images.ts`, the category pages, the photographs index, the
+front door, a place's wall, the feed or the search index. A sixth scan
+in the existing barrier pins the category pages; the rest is unit tests
+and one-time reads of the built pages.
+
+Everything above this section stands except one statement it makes
+false, given a one-line pointer to here: Amendment 3's Known limitation
+"It carries no category of its own". Amendment 3's envelope table says
+`PHOTOGRAPH_FIELDS` has "the two keys" in `imageMeta`; from T1749 there
+are three — that row is the record of T1740 and stays as written.
+
+The constitution has no "Scale" section; the five tests are applied as
+before, and each bullet says where the simpler shape was taken.
+
+### Shape of the change (amendment 4)
+
+- **The constitution, a fourth time** (`CLAUDE.md`, T1748, its own
+  commit before T1749, on this branch: the clause names a field only
+  this branch's schema accepts — the rule Amendment 3's constitution
+  bullet followed). One replacement in the Content model clause, exact
+  text. From:
+
+  > whose `draft: true` holds the photograph unpublished and whose
+  > `published:` date puts it on the front door beside journal entries
+  > (a journal entry's photographs are published and dated by their
+  > entry; a sidecar there that writes either field fails the build).
+
+  to:
+
+  > whose `draft: true` holds the photograph unpublished, whose
+  > `published:` date puts it on the front door beside journal entries,
+  > and whose `categories:` name the photograph's categories in its
+  > page's eyebrow, in place of the categories of the galleries that
+  > hold it (a journal entry's photographs are published, dated and
+  > categorised by their entry; a sidecar there that writes any of the
+  > three fails the build).
+
+  (Unquoted in the constitution.) Rewrapped by hand so that "whose
+  `categories:` name" and "writes any of the three fails the build"
+  each sit whole on one line — T1736's lesson: the greps are
+  line-based. Nothing else in the file.
+
+- **The line** (`src/content.config.ts`, T1749). The `imageMeta`
+  schema gains, after `published`:
+
+  ```ts
+  categories: z.array(z.enum(CATEGORIES)).min(1).optional(), // photographs folder only
+  ```
+
+  — the journal schema's line (`content.config.ts:25`) with
+  `.optional()`; `CATEGORIES` is already imported. A word outside the
+  four (a capitalised `Street` included), an empty list and a bare
+  `categories:` (YAML null) all fail at Astro's schema during content
+  sync, before the registry runs (messages below). Optional, not
+  defaulted, as `draft` and `published` are, so the journal-folder
+  refusal sees any written line. The order is kept as written; a
+  repeated word is not refused — the journal schema refuses neither,
+  and the spec's line is "as a journal entry's frontmatter writes it".
+  The comment above `draft`/`published` names the third field.
+
+- **The refusal in a journal folder** (`src/lib/image-meta.mjs`,
+  T1749). `PHOTOGRAPH_FIELDS` gains `categories`; the message's tail
+  comes from a frozen map beside it, so the two existing lines stay
+  byte-identical:
+
+  ```js
+  export const PHOTOGRAPH_FIELDS = Object.freeze({
+    draft: 'draft',
+    published: 'published',
+    categories: 'categories',
+  }); // tunable: the names
+  const FROM_THE_ENTRY = Object.freeze({
+    draft: 'are published and dated by their entry',
+    published: 'are published and dated by their entry',
+    categories: "take their entry's categories",
+  });
+  ```
+
+  `photographOnlyProblems` iterates `Object.entries(PHOTOGRAPH_FIELDS)`
+  and writes `… — a journal entry's photographs ${FROM_THE_ENTRY[key]};
+  remove the line`; lines come in the object's order (draft, published,
+  categories). The registry's call (`images.ts` lines 420–431) is
+  unchanged — it already passes every sidecar's `data` and throws all
+  the lines at once. Simpler shape taken: one more field in the
+  existing check, not a second check.
+
+- **The eyebrow** (`src/lib/categories.ts`,
+  `src/pages/photographs/[...id].astro`, T1750). A pure function
+  beside `categoryRow`, there for `categoryRow`'s reason — the rule is
+  pinned in a test rather than in a component:
+
+  ```ts
+  /**
+   * The eyebrow on a photograph's page (spec 019, amendment 4): its
+   * journal entry's categories; else its sidecar's `categories:`, whole —
+   * the galleries' are not merged in; else the categories of the
+   * galleries that hold it, first seen first; else none.
+   */
+  export const eyebrowCategories = ({
+    entry,
+    own,
+    galleries,
+  }: {
+    entry: readonly Category[] | null;
+    own: readonly Category[] | undefined;
+    galleries: readonly Category[];
+  }): Category[] =>
+    entry ? [...entry] : own && own.length > 0 ? [...own] : [...new Set(galleries)];
+  ```
+
+  The page's lines 98–102 become one call:
+
+  ```ts
+  // The eyebrow (eyebrowCategories): the entry's, the sidecar's, or the galleries'.
+  const categories = eyebrowCategories({
+    entry: piece?.data.categories ?? null,
+    own: image.sidecar?.data.categories,
+    galleries: galleries.map((gallery) => gallery.data.category),
+  });
+  ```
+
+  The markup (lines 332–348) is unchanged. In page terms: a journal
+  folder's photograph shows its entry's categories (as today); a
+  photographs-folder photograph whose sidecar writes the line shows
+  those words, in the line's order, and nothing else; without the line,
+  the categories of the galleries that hold it (as today — `galleries`
+  is the registry's newest-first list, so this is today's expression);
+  in no gallery, no eyebrow (the `<p class="eyebrow">` is not
+  rendered, as today). Each word links to `/categories/<word>/`. One
+  caller: the function earns its place as the test seam, as
+  `categoryRow` did, not by reuse. Not a `SiteImage` field — nothing
+  else reads a photograph's categories.
+
+- **The fixture** (`src/content/photographs/_dock-b.md`, T1750):
+  `categories: [street]` after `published:`. Chosen to discriminate:
+  Editor's picks (`category: landscape`) holds both `dock-b` and
+  `dock-a`, so `dock-b` reads "Street" only if the line wins whole — a
+  merge would read "Street / Landscape" or the reverse, a missed line
+  "Landscape" — while `dock-a`, with no sidecar, keeps "Landscape", and
+  `cozy-brook` (no sidecar, in no gallery, borrowed by the matte
+  sampler) keeps no eyebrow. No new fixture.
+
+- **The category pages, pinned** (`scripts/check-lexicon.mjs`, T1751).
+  `src/pages/categories/[category].astro` is not touched. A sixth scan
+  in the spec-019 barrier, which already reads the photographs' surfaces
+  (scans 3–5) and has the tag-depth walk: in the one pass over
+  `<dist>`, on every `.html` under `<dist>/categories/`, the elements
+  whose class list holds `category-group`
+  (`inside(text, hasClass('category-group'))`) hold no href matching
+  `PHOTOGRAPH_LINK` — a photograph page of either folder. If no page
+  under `<dist>/categories/` has a `category-group`, the scan fails
+  rather than passing on nothing (scan 4's guard). The summary line
+  gains `; <n> category pages, no photograph listed`; the header
+  comment gains "Sixth scan, the category pages". Simpler shape taken:
+  a deny on photograph links — the AC's words — not an allowlist of
+  what a group may link to; and a scan in the existing barrier, not a
+  new script that would copy the walk, the arguments and the summary.
+
+- **The documents** (T1752), hand-edited. `AUTHORING.md`: the sidecar
+  skeleton's note (lines 115–118, "takes two more, `draft:` and
+  `published:`") becomes three, naming `categories:`; "The photographs
+  folder"'s field block (lines 252–281): "Two sidecar fields are this
+  folder's alone" becomes three; the YAML example gains
+  `categories: [landscape] # the eyebrow above the title`; a third
+  bullet, **`categories:`** — one or more of the four, as a journal
+  entry writes them, shown above the title and linking to their
+  category pages, the line whole when present; then the fallback in one
+  sentence: "Without the line the eyebrow shows the categories of the
+  galleries that hold the photograph, and nothing when no gallery
+  does."; category pages list galleries and journal entries, not
+  photographs; and the refusal paragraph's "either line" becomes "any
+  of the three", the categories message quoted beneath the draft one.
+  `README.md` — not named by the spec; changed because it would
+  otherwise be false: "Two sidecar fields are this folder's alone"
+  (line 231) becomes three with one clause for the line, "Either field"
+  (line 237) becomes "Any of the three", and the sidecar example (lines
+  278–279) gains
+  `categories: [street] # the photographs folder only: the eyebrow, in place of its galleries'`.
+
+### The tuning envelope, placed (amendment 4)
+
+Nothing tunable is added. The spec's envelope gains only an
+ordinary-path line, and the line's name is the journal frontmatter's
+word, not an envelope item; `PHOTOGRAPH_FIELDS.categories` sits beside
+the two tunable names because the refusal and the source test read it
+there.
+
+### Failure messages (amendment 4)
+
+- A journal-folder sidecar writing the line (the registry's, with any
+  `draft`/`published` lines, all at once): `[images]
+  src/content/journal/where-the-fog-lets-go/_land-b.md: "categories" is
+  for a photograph in src/content/photographs/ — a journal entry's
+  photographs take their entry's categories; remove the line`.
+- A word outside the four — **Astro's schema error fires, not the
+  registry's**, during content sync. Expected text, read from Astro
+  7.2.2's `InvalidContentEntryDataError` and Zod 4.4.3's English locale
+  in `node_modules` — not yet run, so T1749 pastes the real lines and
+  the orchestrator corrects this quotation if they differ:
+
+  ```
+  **imageMeta → photographs/_dock-b** data does not match collection schema.
+
+    **categories.0**: Invalid option: expected one of "landscape"|"street"|"portrait"|"event"
+  ```
+
+  with the error's location the sidecar's path (the terminal may print
+  the `**` as bold). It names the file — the entry id is the path, by
+  `imageMeta`'s `generateId`, and the location — and the field,
+  `categories.0` being the index of the bad word.
+- An empty list, `categories: []`: the same header, then
+  `**categories**: Too small: expected array to have >=1 items`.
+- A bare `categories:` (YAML null): the same header and an invalid-type
+  line in Astro's own wording (its error map's "Expected type …,
+  received …", possibly with the path printed twice); read at T1749
+  and recorded.
+- The barrier: `[check-lexicon] <file>: a category page lists a
+  photograph (<href>) — category pages list galleries and journal
+  entries`; `[check-lexicon] no .category-group on any page under
+  <dist>/categories/ — the category pages' lists are where scan 6
+  reads`.
+
+### Testing strategy (amendment 4)
+
+- **The constitution** — **T1748**: greps only.
+- **The line and the refusal** — **T1749** (image-meta.test.mjs):
+  `photographOnlyProblems` — a journal sidecar with
+  `categories: ['landscape']` → exactly the categories line above; with
+  all three fields → three lines, draft, published, categories; a
+  photographs-folder sidecar with all three → none. The existing draft
+  and both-fields cases unchanged and green (their messages
+  byte-identical). The existing "each PHOTOGRAPH_FIELDS name is a key"
+  case now covers `categories` without an edit. New, a source read like
+  it: the `imageMeta` block holds
+  `categories: z.array(z.enum(CATEGORIES)).min(1).optional()` — a
+  dropped `.min(1)` or a loosened `z.string()` fails it by name. (The
+  schema cannot run under Vitest: `content.config.ts` imports
+  `astro:content`.) **Mutation**: `categories` removed from
+  `PHOTOGRAPH_FIELDS` → the journal-categories case fails; reverted.
+  One-time build edits, each reverted, the failing lines pasted:
+  `categories: [nature]` in `_dock-b.md`; `categories: []`; a bare
+  `categories:`; `categories: [landscape]` in
+  `journal/where-the-fog-lets-go/_land-b.md`.
+- **The eyebrow** — **T1750** (categories.test.mjs):
+  `eyebrowCategories` — the entry's list wins over a line and
+  galleries; a line `['street']` with galleries `['landscape']` →
+  `['street']`; a line's order kept (`['street', 'landscape']`); no
+  line → the galleries' deduplicated, first seen first
+  (`['landscape', 'street', 'landscape']` → `['landscape', 'street']`);
+  an empty `own` → the galleries' (the schema refuses it; the function
+  does not rely on that); nothing → `[]`. **Mutation**: the line merged
+  with the galleries' (`[...new Set([...own, ...galleries])]`) → the
+  `['street']` case fails; reverted. On `dist/`, one-time reads of the
+  eyebrow's links (the header from `class="page-head section
+  image-head` to its `</h1>`): `dock-b` → `/categories/street/` alone;
+  `dock-a` → `/categories/landscape/`; `cozy-brook` → none;
+  `where-the-fog-lets-go/land-b` → its entry's `categories:` in order.
+  "Nothing else, and no other page, changes with the line": `dist/`
+  built with T1750's code and without the fixture line, then with it,
+  `diff -rq` excluding `pagefind/` → `photographs/dock-b/index.html`
+  alone (the page's indexed text changes with the eyebrow, so pagefind's
+  fragments do too).
+- **The category pages** — **T1751** (lexicon.test.mjs): the clean
+  tree gains `categories/landscape/index.html` with two
+  `category-group` sections (a gallery card's link to `/galleries/fog/`,
+  a journal row's to `/journal/fog/`), so every expectation quoting the
+  clean tree's summary line follows it (6 pages read, the new clause) —
+  the expectation following an added page, not a loosened check; no
+  other expectation changes. Cases: a group holding a link to
+  `/photographs/dock-b/` fails, naming the file; one to
+  `/photographs/fog/land-a/` too; the category page deleted → the guard
+  line; a link to `/photographs/dock-b/` on a category page outside its
+  groups passes. **Mutation**: the scan's href check skipped → the
+  `dock-b` case fails; reverted. One-time real build: a photograph item
+  added to the category page's `PieceList` items → BUILD EXIT 1 with
+  the scan 6 line, reverted. AC 37's "what they listed before": the
+  four category pages' link hrefs hashed before T1749's first edit and
+  after T1751 — equal.
+- **The documents** — **T1752**: greps.
+- **Unchanged and green**: the whole suite; the five barriers;
+  `astro check`.
+- **At the pause, by the person**: the three photographs-folder pages
+  and a journal photograph's, the category pages, `AUTHORING.md`'s
+  lines.
+
+### File structure (amendment 4)
+
+```
+CLAUDE.md                                  the Content model clause's sidecar sentence (T1748, its own commit)
+src/content.config.ts                      imageMeta's categories line, the comment (T1749)
+src/lib/image-meta.mjs                     PHOTOGRAPH_FIELDS.categories, FROM_THE_ENTRY, photographOnlyProblems' tail (T1749)
+image-meta.test.mjs                        the refusal cases, the schema line's source case (T1749)
+src/lib/categories.ts                      eyebrowCategories (T1750)
+categories.test.mjs                        its cases (T1750)
+src/pages/photographs/[...id].astro        the eyebrow's computation, its comment (T1750)
+src/content/photographs/_dock-b.md         categories: [street] (T1750)
+scripts/check-lexicon.mjs                  scan 6, the header comment, the summary (T1751)
+lexicon.test.mjs                           the clean tree's category page, scan 6's cases (T1751)
+AUTHORING.md, README.md                    T1752
+```
+
+Untouched, named so the reviewer can confirm: `src/lib/images.ts`;
+`src/pages/categories/[category].astro`; `src/components/*`; the
+photographs index, the front door, the place and gallery pages, the
+feed; `scripts/verify.sh` (its summary grep already prints
+`[check-lexicon]`); `package.json`.
+
+### Known limitations (amendment 4)
+
+- **A photograph's categories reach its own page only.** The category
+  pages, the photographs index, the galleries and search's filters do
+  not read the line (the spec's ordinary path). The eyebrow's words are
+  part of the page's indexed text, as the galleries' categories were.
+- **The bad-line failures are the build's.** Under `npm run dev`
+  Astro's glob loader catches a reload's error and logs `Failed to
+  reload <file>: …` (`onChange` in
+  `astro/dist/content/loaders/glob.js`), so the server keeps the last
+  good data; `npm run build` refuses the line. Read from Astro's
+  source, not tested here.
+- **A repeated word is not refused** (`[street, street]` prints twice),
+  as in a journal entry's frontmatter.
+- **The eyebrow's wiring is checked once, not per build.** The rule is
+  pinned on every run by categories.test.mjs; that the page calls it,
+  by T1750's reads of `dist/`. A per-build scan would need a second
+  YAML reader in the barrier for one line of page code.
+
+### Resolved decisions (amendment 4)
+
+- **The line is whole when present** — the spec's call; the function
+  returns it, never merged.
+- **The schema refuses a bad word, not the registry** — the journal
+  schema's own line plus `.optional()`, so the two cannot disagree, and
+  Astro's message names the file and the field.
+- **One more photograph-only field, not a second check**; its own tail
+  in the message, the other two lines unchanged.
+- **The rule sits beside `categoryRow` and is tested there**; not a
+  `SiteImage` field.
+- **`dock-b` carries the line, as `street`**, so a merge or a missed
+  line reads differently from what passes.
+- **AC 37 by a sixth scan in `check-lexicon.mjs`** — a deny on
+  photograph links inside the category pages' groups, guarded against
+  reading nothing — plus a one-time before-and-after hash.
+- **`README.md` follows `AUTHORING.md`**: it states the folder's fields
+  and would otherwise be false.
+- **No `review: per-task`**: one schema line, one more name in an
+  existing check, one call on the page; nothing re-addresses or
+  unpublishes a page if wrong. **No new dependency.**

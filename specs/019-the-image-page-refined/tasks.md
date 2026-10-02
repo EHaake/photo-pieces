@@ -1981,6 +1981,148 @@ Settled the same day: "Actually, just go with 'From the journal entry
 journal entry", "In the journal", "Also in"); no round, no exception to
 the lexicon.
 
+## Phase 3d — The photograph's categories (reviewer after the phase; no task is `review: per-task` — the largest change is one schema line and one more name in an existing check, the page's change is one call, and a mistake in any of them re-addresses or unpublishes nothing, so one review of the whole diff serves; walkthrough: on the laptop, the site built and previewed (`npm run build && npm run preview`): "Dock, late" at `/photographs/dock-b/` now reads Street above its title — the new line in its sidecar — and not Landscape, though Editor's picks, a landscape gallery, holds it; the photograph at `/photographs/dock-a/`, in the same gallery with no line, still reads Landscape; the brook at `/photographs/cozy-brook/`, in no gallery, has nothing above its title; a journal entry's photograph, `/photographs/where-the-fog-lets-go/land-b/`, shows its entry's categories as before; each word above a title opens its category page, and the four category pages list the same galleries and journal entries as before, no photograph among them; `AUTHORING.md`'s "The photographs folder" describes the `categories:` line and what shows without it; and, if he wants to, the line in a sidecar of his own — `categories: [landscape]` on a photograph in `src/content/photographs/`, and its page reads Landscape; as many rounds as it takes, each a sub-lettered task under T1753)
+
+**Status**: Draft — pending sign-off. Plan: "Amendment 4 (2026-10-01):
+the photograph's categories" and its sections.
+The spec's fourth amendment, from the Phase 3c look, folded in while
+the 3a, 3b and 3c pauses are held open — T1729, T1735 and T1745 stay
+unchecked and are not touched by this phase — and before his piece is
+written against the sidecar's fields. Foundational within the phase,
+and ordered first: T1748 (the constitution, its own commit) and T1749
+(the line in the schema and its refusal in a journal folder — the
+eyebrow reads the schema's type). Then the eyebrow, the barrier that
+pins the category pages, the documents, the look. The implementer runs
+no browser: every check is the suite, the build's barriers and reads of
+`dist/`; how the eyebrow reads is the person's at the pause. The
+envelope adds nothing tunable for this amendment (plan: "The tuning
+envelope, placed (amendment 4)"), so a round at this pause is a
+fixture's or a document's words; a round that wants the line merged
+with the galleries', photographs on a category page or in search by
+category, or the line in a journal folder goes to the person as a spec
+amendment (spec.md's ordinary-path list). Task ids continue from T1747.
+
+- [ ] **T1748** — The constitution, a fourth time. Not code; its own
+      commit, before T1749. Pattern: T1736 (the constitution, a third
+      time). Plan: "Shape of the change (amendment 4)", its first
+      bullet. `CLAUDE.md` only: the Content model clause's one
+      replacement, exactly as the plan writes it, unquoted, rewrapped
+      by hand so that "whose `categories:` name" and "writes any of the
+      three fails the build" each sit whole on one line; nothing else
+      in the file. _Verify: `git diff --stat` → `CLAUDE.md` alone;
+      `grep -n "either field" CLAUDE.md` → no hits;
+      `grep -c "categories:" CLAUDE.md` → 1;
+      `grep -n "whose .categories:. name" CLAUDE.md` → one line;
+      `grep -n "writes any of the three fails the build" CLAUDE.md` →
+      one line; `npx prettier --check CLAUDE.md` clean; the commit's hash
+      recorded here for AC 35, before T1749's._
+
+- [ ] **T1749** — The line, and its refusal in a journal folder.
+      Pattern: `imageMeta`'s `draft`/`published` lines and the journal
+      schema's `categories` line (`src/content.config.ts:25`); T1740's
+      `PHOTOGRAPH_FIELDS` and `photographOnlyProblems` and their cases
+      in image-meta.test.mjs (the source-read case for the new source
+      case). Plan: "The line", "The refusal in a journal folder",
+      "Failure messages (amendment 4)", and the testing bullet "The
+      line and the refusal". Before any edit, the baseline for T1751:
+      `npm run build`, then
+      `for c in landscape street portrait event; do grep -oE '<a [^>]*>' dist/categories/$c/index.html | grep -oE 'href="[^"]*"'; done > "$TMPDIR/category-links-before.txt"`,
+      and `wc -l < "$TMPDIR/category-links-before.txt"` and
+      `shasum < "$TMPDIR/category-links-before.txt"` — the count and the
+      hash recorded here. Then
+      `content.config.ts`: the line and the comment.
+      `image-meta.mjs`: `PHOTOGRAPH_FIELDS.categories`,
+      `FROM_THE_ENTRY`, the loop over `Object.entries`.
+      image-meta.test.mjs: the cases as the plan lists them. _Verify:
+      `sh scripts/verify.sh` green (test count; the page count
+      unchanged); the mutation fails by name, reverted; the four
+      one-time build edits as the plan lists them, each failing
+      build's error lines pasted verbatim (BUILD EXIT 1) and each
+      reverted — if Astro's text differs from the plan's quotation,
+      say so in the report so the orchestrator corrects the plan;
+      `git diff --stat -- src/content` empty after the reverts._
+
+- [ ] **T1750** — The eyebrow. Pattern: `categoryRow` in
+      `src/lib/categories.ts` and its cases in categories.test.mjs.
+      Plan: "The eyebrow", "The fixture", and the testing bullet "The
+      eyebrow". `categories.ts`: `eyebrowCategories` as the plan writes
+      it; `src/pages/photographs/[...id].astro`: lines 98–102 become
+      the call, the markup unchanged; categories.test.mjs: the cases.
+      In this order: the code and the tests; `npm run build`;
+      `cp -R dist "$TMPDIR/dist-before-line"`; then
+      `_dock-b.md` gains `categories: [street]` after `published:`.
+      _Verify: `sh scripts/verify.sh` green (test count; page count
+      unchanged); the mutation fails by name, reverted; the eyebrow's
+      links read with
+      `node -e 'const t=require("fs").readFileSync(process.argv[1],"utf8");const a=t.indexOf("class=\"page-head section image-head");if(a<0)throw new Error("no image-head");const h=t.slice(a,t.indexOf("</h1>",a));console.log([...h.matchAll(/href="([^"]*)"/g)].map(m=>m[1]).join(" ")||"(none)")' dist/photographs/<id>/index.html`
+      — `dock-b` → `/categories/street/`; `dock-a` →
+      `/categories/landscape/`; `cozy-brook` → `(none)`;
+      `where-the-fog-lets-go/land-b` → one `/categories/<word>/` per
+      word of its entry's `categories:`, in order (that line quoted);
+      `diff -rq -x pagefind "$TMPDIR/dist-before-line" dist` →
+      `photographs/dock-b/index.html` alone (any other file listed is
+      reported with the first lines of its diff)._
+
+- [ ] **T1751** — The category pages, pinned. Pattern:
+      `scripts/check-lexicon.mjs`'s scan 4 (its guard against reading
+      nothing) and scan 5 (`inside`, `hasClass`, `hrefs`,
+      `PHOTOGRAPH_LINK`); lexicon.test.mjs's barrier cases (`clean`,
+      `tree`, `passes`, `fails`). Plan: "The category pages, pinned",
+      the barrier's failure lines, and the testing bullet "The
+      category pages". `check-lexicon.mjs`: scan 6, the header
+      comment, the summary clause. lexicon.test.mjs: the clean tree's
+      category page, the summary expectations that follow it (each
+      listed in the report), scan 6's cases. _Verify:
+      `sh scripts/verify.sh` green with the `[check-lexicon]` line
+      quoted (four category pages); the mutation fails by name,
+      reverted; one-time: a photograph item (the front door's item
+      shape, `src/pages/index.astro`) added to the category page's
+      `PieceList` items → BUILD EXIT 1 with the scan 6 line pasted,
+      reverted, `git diff --stat -- src/pages src/components` empty;
+      T1749's baseline loop re-run after a clean build into
+      `"$TMPDIR/category-links-after.txt"` → the same count and hash as
+      recorded there, and `diff` of the two files empty (AC 37)._
+
+- [ ] **T1752** — The documents. Pattern: T1744 (its hand-editing rule;
+      each document's own voice). Plan: "The documents" (amendment 4).
+      `AUTHORING.md` and `README.md` as the plan says, every claim read
+      against the code as built — the journal-folder message quoted from
+      `photographOnlyProblems`' line, the schema's words from T1749's
+      pasted lines. Hand-edit the prose (never script-rewrap; grep for
+      lines beginning with a `>` or `+` before any format run).
+      _Verify: `grep -n "categories:" AUTHORING.md README.md` → the
+      journal frontmatter's lines and the new ones, listed (the
+      photographs folder's example and bullet in `AUTHORING.md`, the
+      sidecar example in `README.md`);
+      `grep -niE "galleries that hold" AUTHORING.md` ≥ 1;
+      `grep -cF "take their entry's categories; remove the line" AUTHORING.md`
+      → 1;
+      `grep -niE "two sidecar fields|takes two more|either line|either field" AUTHORING.md README.md`
+      → none; `npx prettier --check AUTHORING.md README.md` clean;
+      `sh scripts/verify.sh` green._
+
+- [ ] **T1753** — The photograph's categories, looked at, and the
+      rounds. Not an implementation task: the orchestrator's record of
+      the Phase 3d pause, in the person's words, as T1745's. The
+      questions, in plain language: "Dock, late" reading Street above
+      its title from its own line while its gallery is a landscape one —
+      is the line rightly the whole eyebrow; the photograph beside it in
+      that gallery still reading Landscape, and the brook in no gallery
+      reading nothing; the category pages unchanged; whether
+      `AUTHORING.md`'s lines say it as he would look for it. Each round
+      is one sub-lettered task here (`T1753a`, `b`, …): a fixture's or
+      a document's words, a round that changes a word a document states
+      updating it in the same task; a round that wants what this
+      phase's intro sends to the ordinary path goes to him as a spec
+      amendment. When he names the keeps, they are recorded here.
+      _Verify: every sub-lettered task green; the documents agree with
+      what was kept (a `grep` of each, listed); the Phase 3d record
+      below filled in._
+
+### Phase 3d record (the person's walkthrough)
+
+_Filled in at the pause._
+
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — a photograph piece's page with his story (from the photographs folder, on the front door once he dates it), or a journal entry's page with his writing and his compare as he wrote it and then his photograph's page; on his photograph's page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
 The content is his, supplied during implementation; these tasks are the
