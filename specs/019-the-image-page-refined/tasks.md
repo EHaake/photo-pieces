@@ -1976,6 +1976,11 @@ conflict: the lexicon (spec.md Goal 11, the constitution) says "piece"
 is never a label on the site, and the lexicon barrier fails the build
 on the word in a page's own words.
 
+Settled the same day: "Actually, just go with 'From the journal entry
+[title]'" — the photograph page's words kept as built ("From the
+journal entry", "In the journal", "Also in"); no round, no exception to
+the lexicon.
+
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — a photograph piece's page with his story (from the photographs folder, on the front door once he dates it), or a journal entry's page with his writing and his compare as he wrote it and then his photograph's page; on his photograph's page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
 The content is his, supplied during implementation; these tasks are the
