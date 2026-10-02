@@ -1964,6 +1964,18 @@ word, the address shapes, the photograph page's words, and whether the
 moved samples draw in Obsidian. T1745 stays unchecked until the
 amendment lands and he has looked at those.
 
+Second answers, 2026-10-01: the sidecar fields — "draft and published
+are good" (kept). The moved samples left to the orchestrator ("I'll let
+you decide this"): every image path in the two samplers' `index.md`
+resolves to a file from its new folder (vocabulary-sampler 11 paths,
+matte-sampler 10, none missing — a shell check, not a look in
+Obsidian); taken as enough, and he will see them drawn when he writes.
+The photograph page's words: he asked for "In the journal piece" —
+which of the three phrases it replaces is put back to him, with the
+conflict: the lexicon (spec.md Goal 11, the constitution) says "piece"
+is never a label on the site, and the lexicon barrier fails the build
+on the word in a page's own words.
+
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — a photograph piece's page with his story (from the photographs folder, on the front door once he dates it), or a journal entry's page with his writing and his compare as he wrote it and then his photograph's page; on his photograph's page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
 The content is his, supplied during implementation; these tasks are the
