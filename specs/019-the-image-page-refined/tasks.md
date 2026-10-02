@@ -1935,7 +1935,34 @@ T1735.
 
 ### Phase 3c record (the person's walkthrough)
 
-_Filled in at the pause._
+Reached 2026-09-29; his look 2026-10-01, on the built site. No rounds.
+**Keeps**: the nav's order — "Current nav order is good" (Journal,
+Places, Galleries). The feed stays journal-only: "I'm not sure an RSS
+feed makes sense to keep at all, but keep it for now, maybe we'll find
+a use for it later" — no dated photograph in it, no amendment. A lone
+photograph of the photographs folder counts as an outing of its own,
+as built ("I'll go with what you'd suggest for how it works right
+now"), with the place as a tour by its outings noted on the roadmap.
+The photographs index as built: "I like it a lot" — categorising it
+later, and a hover on photographs (pointer devices only), are roadmap
+notes, not rounds. `ROADMAP.md` on `main` (61e7bdf) carries the four
+notes: the place as a tour by its outings, the index in sections, a
+hover on photographs, the feed kept for now.
+
+**One answer is a spec amendment, not a round**: a category on a
+photograph's sidecar — "Sure, I'll go with your recommendation." The
+recommendation as put to him: an optional `categories:` line in a
+photographs-folder photograph's sidecar, the word journal entries use;
+shown in the eyebrow above the title on the photograph's page, where an
+entry's photographs show their entry's; without the line the eyebrow
+falls back to the categories of the galleries that hold it, as now;
+category pages unchanged (galleries and journal entries). It goes to a
+spec session as spec 019's fourth amendment, before his piece is
+written against the sidecar's fields. Not asked or not answered yet:
+the sidecar field names `draft` and `published`, the footer link's
+word, the address shapes, the photograph page's words, and whether the
+moved samples draw in Obsidian. T1745 stays unchecked until the
+amendment lands and he has looked at those.
 
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — a photograph piece's page with his story (from the photographs folder, on the front door once he dates it), or a journal entry's page with his writing and his compare as he wrote it and then his photograph's page; on his photograph's page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
