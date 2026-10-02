@@ -228,16 +228,19 @@ image changes its URL — there are no redirects yet.
 
 **The photographs folder** — `src/content/photographs/`, flat: a
 photograph of its own, its sidecar its writing, its private files
-beside it. Two sidecar fields are this folder's alone. `draft: true`
+beside it. Three sidecar fields are this folder's alone. `draft: true`
 holds it back — no page, not on the index or a place's wall, refused
 by a gallery, a place cover and a published entry that places it —
 until the line is deleted. `published: <date>` puts it on the front
 door's latest list among the journal entries by that date, as its
 frame and title; without it the photograph has its page but stays off
-the front door, and the feed lists journal entries only. Either field
-in a journal folder's sidecar fails the build naming the field. A
-gallery names it by its bare name; an old `gallery/<name>` id fails
-the build naming the new one. `at: <slug>` in its sidecar puts it on
+the front door, and the feed lists journal entries only.
+`categories: [<category>]`, one or more of the four, shows above its
+title in place of its galleries' categories, which show there without
+it; category pages still list galleries and journal entries only. Any
+of the three in a journal folder's sidecar fails the build naming the
+field. A gallery names it by its bare name; an old `gallery/<name>` id
+fails the build naming the new one. `at: <slug>` in its sidecar puts it on
 that place's wall as an outing of its own, dated by its capture — the
 file's EXIF or the sidecar's `date:`, and the build fails on one with
 neither — and a place's cover may be it. `/photographs/` is the index:
@@ -277,6 +280,7 @@ sizes: 12 × 18, 16 × 24 inches
 paper: Hahnemühle Photo Rag Baryta
 draft: true # the photographs folder only: no page until deleted
 published: 2026-08-31 # the photographs folder only: on the front door
+categories: [street] # the photographs folder only: the eyebrow, in place of its galleries'
 ---
 The story, in the photographer's words — ordinary markdown.
 ```

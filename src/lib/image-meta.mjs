@@ -948,11 +948,22 @@ export function sidecarImageId(entryId) {
 
 /**
  * The sidecar fields that belong to a photograph in the photographs
- * folder alone (spec 019): whether it is a draft, and the date it is
- * published under. A journal entry's photographs are published and dated
- * by their entry, so a journal-folder sidecar may write neither.
+ * folder alone (spec 019): whether it is a draft, the date it is
+ * published under, and its categories. A journal entry's photographs are
+ * published and dated by their entry and take their entry's categories,
+ * so a journal-folder sidecar may write none of them. The message's tail
+ * for each comes from FROM_THE_ENTRY.
  */
-export const PHOTOGRAPH_FIELDS = Object.freeze({ draft: 'draft', published: 'published' }); // tunable: the names
+export const PHOTOGRAPH_FIELDS = Object.freeze({
+  draft: 'draft',
+  published: 'published',
+  categories: 'categories',
+}); // tunable: the names draft and published (categories is the journal's word, not a tunable)
+const FROM_THE_ENTRY = Object.freeze({
+  draft: 'are published and dated by their entry',
+  published: 'are published and dated by their entry',
+  categories: "take their entry's categories",
+});
 
 /**
  * The photograph-only fields a journal-folder sidecar writes (spec 019).
@@ -965,10 +976,10 @@ export function photographOnlyProblems(entries) {
   const problems = [];
   for (const { file, inJournal, data } of entries) {
     if (!inJournal) continue;
-    for (const name of Object.values(PHOTOGRAPH_FIELDS)) {
+    for (const [key, name] of Object.entries(PHOTOGRAPH_FIELDS)) {
       if (data?.[name] === undefined) continue;
       problems.push(
-        `[images] ${file}: "${name}" is for a photograph in src/content/${PHOTOGRAPHS_ROOT}/ — a journal entry's photographs are published and dated by their entry; remove the line`,
+        `[images] ${file}: "${name}" is for a photograph in src/content/${PHOTOGRAPHS_ROOT}/ — a journal entry's photographs ${FROM_THE_ENTRY[key]}; remove the line`,
       );
     }
   }

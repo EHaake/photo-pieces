@@ -114,8 +114,8 @@ The story, if there is one.
 
 saved as `_<basename>.md` beside an image (every field optional — see
 "Metadata: EXIF, then a sidecar" below; a photograph in the photographs
-folder takes two more, `draft:` and `published:` — "The photographs
-folder" below), and
+folder takes three more, `draft:`, `published:` and `categories:` —
+"The photographs folder" below), and
 
 ```markdown
 ---
@@ -249,13 +249,14 @@ naming the file and the new id:
 "gallery/<name>" is an old id — the photograph in src/content/photographs/ is "<name>" now
 ```
 
-Two sidecar fields are this folder's alone:
+Three sidecar fields are this folder's alone:
 
 ```yaml
 ---
 title: Dock, late
 draft: true # no page yet
 published: 2026-08-31 # on the front door, by this date
+categories: [landscape] # the eyebrow above the title
 at: the-jetty # on the place's wall, by its capture date
 ---
 ```
@@ -271,13 +272,23 @@ at: the-jetty # on the place's wall, by its capture date
   all the same, with its page, but stays off the front door. It is not
   `date:`, which is the capture date the label shows. The feed carries
   journal entries only.
+- **`categories:`** names one or more of the four, as a journal entry
+  writes them (`landscape`, `street`, `portrait`, `event`), and shows
+  them in the eyebrow above the photograph's title, each linking to
+  its category page. When the line is there it is the whole eyebrow —
+  the galleries' categories are not added to it. Without the line the
+  eyebrow shows the categories of the galleries that hold the
+  photograph, and nothing when no gallery does. Category pages list
+  galleries and journal entries, not photographs, so the line puts the
+  photograph on none of them.
 
-A journal entry's photographs are published and dated by their entry,
-so either line in a journal folder's sidecar fails the build, naming
-the file:
+A journal entry's photographs are published, dated and categorised by
+their entry, so any of the three lines in a journal folder's sidecar
+fails the build, naming the file and the field:
 
 ```
 [images] <file>: "draft" is for a photograph in src/content/photographs/ — a journal entry's photographs are published and dated by their entry; remove the line
+[images] <file>: "categories" is for a photograph in src/content/photographs/ — a journal entry's photographs take their entry's categories; remove the line
 ```
 
 **`at:` puts it on a place's wall** as an outing of its own, ordered

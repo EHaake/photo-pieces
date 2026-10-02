@@ -108,6 +108,11 @@ describe('the lexicon barrier (spec 019, T1743)', () => {
   const page = (body, { title = 'Erik Haake', header = HEADER, footer = FOOTER } = {}) =>
     `<!doctype html><html><head><title>${title}</title></head><body>${header}<main>${body}</main>${footer}</body></html>`;
   const FEED = (links) => `<section class="section index-feed" aria-labelledby="latest-pieces"><ul>${links}</ul></section>`;
+  /** A category page's main: its galleries' group, then its journal entries'. */
+  const CATEGORY = (galleries, journal) =>
+    '<section class="page-head section"><p class="eyebrow">Category</p><h1>Landscape</h1></section>' +
+    `<section class="section category-group" aria-labelledby="category-galleries">${galleries}</section>` +
+    `<section class="section category-group" aria-labelledby="category-pieces">${journal}</section>`;
   const INDEX = (ids) =>
     `<ul class="gallery-flow photographs-index">${ids.map((id) => `<li><a href="/photographs/${id}/"><img src="/_astro/x.webp" alt="x"></a></li>`).join('')}</ul>`;
 
@@ -119,6 +124,9 @@ describe('the lexicon barrier (spec 019, T1743)', () => {
       'photographs/dock-b/index.html': page('<h1>Dock, late</h1>'),
       'photographs/fog/land-a/index.html': page('<h1>Land</h1>'),
       'journal/fog/index.html': page('<h1>Fog</h1>'),
+      'categories/landscape/index.html': page(
+        CATEGORY('<ul class="gallery-cards"><li><a href="/galleries/fog/">Fog</a></li></ul>', '<ul><li><a href="/journal/fog/">Fog</a></li></ul>'),
+      ),
       'rss.xml': '<rss><channel><item><link>https://erikhaakephoto.com/journal/fog/</link></item></channel></rss>',
       'sitemap-0.xml': '<urlset><url><loc>https://erikhaakephoto.com/photographs/dock-b/</loc></url></urlset>',
     },
@@ -182,7 +190,7 @@ describe('the lexicon barrier (spec 019, T1743)', () => {
 
   it('the clean tree passes, with the summary line', () => {
     expect(passes().stdout).toContain(
-      '[check-lexicon] 5 pages read, 0 authored regions set aside, 0 authored strings excused; 0 old addresses; 1 draft photographs, none published; 1 front-door photographs, each dated; the index lists 2 photographs, each once',
+      '[check-lexicon] 6 pages read, 0 authored regions set aside, 0 authored strings excused; 0 old addresses; 1 draft photographs, none published; 1 front-door photographs, each dated; the index lists 2 photographs, each once; 1 category pages, no photograph listed',
     );
   });
 
@@ -347,6 +355,46 @@ describe('the lexicon barrier (spec 019, T1743)', () => {
 
     it("a <footer> inside .prose does not count as the site's", () => {
       passes(withPage('<div class="prose"><footer class="site-footer"><a href="/photographs/">All of them</a></footer></div>'));
+    });
+  });
+
+  describe('scan 6: the category pages (T1751)', () => {
+    const category = '<dist>/categories/landscape/index.html';
+    const GALLERIES = '<ul class="gallery-cards"><li><a href="/galleries/fog/">Fog</a></li></ul>';
+    const JOURNAL = '<ul><li><a href="/journal/fog/">Fog</a></li></ul>';
+    const withCategory = (body) => ({ dist: { 'categories/landscape/index.html': page(body) } });
+
+    it('a group holding a link to /photographs/dock-b/ fails, naming the file', () => {
+      fails(
+        withCategory(CATEGORY(GALLERIES, JOURNAL.replace('</ul>', '<li><a href="/photographs/dock-b/">Dock, late</a></li></ul>'))),
+        `[check-lexicon] ${category}: a category page lists a photograph (/photographs/dock-b/) — category pages list galleries and journal entries`,
+      );
+    });
+
+    it("a group holding a link to a journal folder's /photographs/fog/land-a/ fails", () => {
+      fails(
+        withCategory(CATEGORY(GALLERIES.replace('</ul>', '<li><a href="/photographs/fog/land-a/">Land</a></li></ul>'), JOURNAL)),
+        `[check-lexicon] ${category}: a category page lists a photograph (/photographs/fog/land-a/)`,
+      );
+    });
+
+    it('a link to /photographs/dock-b/ in a section of another class fails: the whole body is read', () => {
+      fails(
+        withCategory(CATEGORY(GALLERIES, JOURNAL) + '<section class="section category-photographs"><a href="/photographs/dock-b/">Dock, late</a></section>'),
+        `[check-lexicon] ${category}: a category page lists a photograph (/photographs/dock-b/)`,
+      );
+    });
+
+    it("the footer's bare /photographs/ passes", () => {
+      const result = passes();
+      expect(result.stdout).toContain('1 category pages, no photograph listed');
+    });
+
+    it('no category page fails: the guard against reading nothing', () => {
+      fails(
+        { dist: { 'categories/landscape/index.html': null } },
+        '[check-lexicon] no page under <dist>/categories/ — the category pages are where scan 6 reads',
+      );
     });
   });
 });

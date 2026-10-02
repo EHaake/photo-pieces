@@ -27,3 +27,19 @@ export const categoryRow = (current?: Category): { label: string; href: string |
     href: category === current ? null : `/categories/${category}/`,
   })),
 ];
+
+/**
+ * The eyebrow on a photograph's page (spec 019, amendment 4): its
+ * journal entry's categories; else its sidecar's `categories:`, whole —
+ * the galleries' are not merged in; else the categories of the
+ * galleries that hold it, first seen first; else none.
+ */
+export const eyebrowCategories = ({
+  entry,
+  own,
+  galleries,
+}: {
+  entry: readonly Category[] | null;
+  own: readonly Category[] | undefined;
+  galleries: readonly Category[];
+}): Category[] => (entry ? [...entry] : own && own.length > 0 ? [...own] : [...new Set(galleries)]);

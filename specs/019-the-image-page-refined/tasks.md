@@ -2001,7 +2001,7 @@ with the galleries', photographs on a category page or in search by
 category, or the line in a journal folder goes to the person as a spec
 amendment (spec.md's ordinary-path list). Task ids continue from T1747.
 
-- [ ] **T1748** — The constitution, a fourth time. Not code; its own
+- [x] **T1748** — The constitution, a fourth time. Not code; its own
       commit, before T1749. Pattern: T1736 (the constitution, a third
       time). Plan: "Shape of the change (amendment 4)", its first
       bullet. `CLAUDE.md` only: the Content model clause's one
@@ -2015,8 +2015,9 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       `grep -n "writes any of the three fails the build" CLAUDE.md` →
       one line; `npx prettier --check CLAUDE.md` clean; the commit's hash
       recorded here for AC 35, before T1749's._
+      Done: committed alone as `ab772a5` (AC 35), before T1749's. `git diff --stat` → `CLAUDE.md` alone (a stray, pre-existing `obsidian-plugin/package-lock.json` change left unstaged); "either field" no hits; `categories:` count 1; the two phrases whole on lines 74 and 78; prettier clean. The wrap leaves "Galleries are the opposite kind of thing: a" on a short line of its own.
 
-- [ ] **T1749** — The line, and its refusal in a journal folder.
+- [x] **T1749** — The line, and its refusal in a journal folder.
       Pattern: `imageMeta`'s `draft`/`published` lines and the journal
       schema's `categories` line (`src/content.config.ts:25`); T1740's
       `PHOTOGRAPH_FIELDS` and `photographOnlyProblems` and their cases
@@ -2042,8 +2043,9 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       reverted — if Astro's text differs from the plan's quotation,
       say so in the report so the orchestrator corrects the plan;
       `git diff --stat -- src/content` empty after the reverts._
+      Done: verify green — 88 pages, 814 tests (+4). Baseline for T1751: 83 links, shasum `5ae9f308e8e577ccb00ad508ab05f5b3d78c06d8`. Mutation (`categories` out of `PHOTOGRAPH_FIELDS`) failed the two journal-categories cases by name, reverted. One-time builds, each BUILD EXIT 1 and reverted (`git diff --stat -- src/content` empty after): `[nature]` → `[InvalidContentEntryDataError] imageMeta → photographs/_dock-b data does not match collection schema.` then `categories.0: Invalid option: expected one of "landscape"|"street"|"portrait"|"event"`, location `src/content/photographs/_dock-b.md:0:0` (matches the plan); `[]` → the same header, `categories: Too small: expected array to have >=1 items` (matches); bare `categories:` → the same header, ``categories**: **categories: Expected type `"array"`, received `"object"` `` (recorded in the plan); `_land-b.md` → `[images] src/content/journal/where-the-fog-lets-go/_land-b.md: "categories" is for a photograph in src/content/photographs/ — a journal entry's photographs take their entry's categories; remove the line` (byte-identical). The JSDoc above `PHOTOGRAPH_FIELDS` reworded (it said a journal sidecar may write "neither").
 
-- [ ] **T1750** — The eyebrow. Pattern: `categoryRow` in
+- [x] **T1750** — The eyebrow. Pattern: `categoryRow` in
       `src/lib/categories.ts` and its cases in categories.test.mjs.
       Plan: "The eyebrow", "The fixture", and the testing bullet "The
       eyebrow". `categories.ts`: `eyebrowCategories` as the plan writes
@@ -2063,8 +2065,9 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       `diff -rq -x pagefind "$TMPDIR/dist-before-line" dist` →
       `photographs/dock-b/index.html` alone (any other file listed is
       reported with the first lines of its diff)._
+      Done: verify green — 88 pages, 820 tests (+6). Mutation (the line merged with the galleries') failed "a sidecar line wins whole" by name, reverted. Eyebrow reads on `dist/`: `dock-b` → `/categories/street/`; `dock-a` → `/categories/landscape/`; `cozy-brook` → `(none)`; `where-the-fog-lets-go/land-b` → `/categories/landscape/` (its entry's `categories: [landscape]`, index.md:4). `diff -rq -x pagefind` → `photographs/dock-b/index.html` alone. Finding: `prettier --check` warned on `[...id].astro` before this edit; left as found.
 
-- [ ] **T1751** — The category pages, pinned. Pattern:
+- [x] **T1751** — The category pages, pinned. Pattern:
       `scripts/check-lexicon.mjs`'s scan 4 (its guard against reading
       nothing) and scan 5 (`inside`, `hasClass`, `hrefs`,
       `PHOTOGRAPH_LINK`); lexicon.test.mjs's barrier cases (`clean`,
@@ -2085,8 +2088,9 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       T1749's baseline loop re-run after a clean build into
       `"$TMPDIR/category-links-after.txt"` → the same count and hash as
       recorded there, and `diff` of the two files empty (AC 37)._
+      Done: verify green — 88 pages, 825 tests (+5); `[check-lexicon] 88 pages read, 37 authored regions set aside, 5 authored strings excused; 0 old addresses; 1 draft photographs, none published; 1 front-door photographs, each dated; the index lists 63 photographs, each once; 4 category pages, no photograph listed`. Mutation (href check skipped) failed three scan-6 cases by name, `dock-b` among them, reverted. One-time: a photograph item in the category page's `PieceList` → BUILD EXIT 1, `[check-lexicon] dist/categories/landscape/index.html: a category page lists a photograph (/photographs/dock-b/) — category pages list galleries and journal entries` and the same for portrait and street (event renders no list: no journal entry), reverted; `src/pages/categories/` clean. Summary expectations changed: one — the clean tree's "5 pages read" → "6 pages read … ; 1 category pages, no photograph listed". After-capture: 83 links, the same shasum, `diff` empty (AC 37).
 
-- [ ] **T1752** — The documents. Pattern: T1744 (its hand-editing rule;
+- [x] **T1752** — The documents. Pattern: T1744 (its hand-editing rule;
       each document's own voice). Plan: "The documents" (amendment 4).
       `AUTHORING.md` and `README.md` as the plan says, every claim read
       against the code as built — the journal-folder message quoted from
@@ -2103,6 +2107,7 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       `grep -niE "two sidecar fields|takes two more|either line|either field" AUTHORING.md README.md`
       → none; `npx prettier --check AUTHORING.md README.md` clean;
       `sh scripts/verify.sh` green._
+      Done: greps: `categories:` → README 68 (journal), 238 (the clause naming the line), 283 (the sidecar example); AUTHORING 74 (journal), 117 (the skeleton's note), 259 (the example), 275 (the bullet); "galleries that hold" 1 (AUTHORING:280); the quoted message 1; no stale phrase; prettier clean; verify green, 825 tests (AC 38). Wording: the refusal paragraph says "naming the file and the field"; "the line whole when present" rendered as "When the line is there it is the whole eyebrow — the galleries' categories are not added to it". Reviewer's second looks left for the pause: AUTHORING.md's bullet does not say a bad word or an empty line fails the build; one long README line (~657).
 
 - [ ] **T1753** — The photograph's categories, looked at, and the
       rounds. Not an implementation task: the orchestrator's record of
@@ -2485,6 +2490,12 @@ tier if it is ever on (it is off). -->
 | Amendment 4 planning (2026-10-01) | implementation (`opus`, high, no override) | ~205k | drafted plan.md's Amendment 4 and Phase 3d (T1748–T1753, none per-task); no product question; six deviations named (README changed too, no sidecar table in AUTHORING.md, the stale envelope row, AC 36's built page read once, lexicon.test's summary line following an added page, no per-task review) |
 | Amendment 4 sign-off | top (`fable`, high, override) | ~63k | signed off, nothing blocking; S1 scan 6 scoped to `.category-group` leaves a hole, S2 AC 36's eyebrow read is one-time, S3 the "each name is a key" case is vacuous for `categories`, S4 the stale "two keys" row and the `tunable` comment, S5 the README change authorised |
 | Amendment 4 sign-off notes (planner resumed) | implementation (`opus`, high) | ~15k | S1–S4 taken (`PHOTOGRAPH_LINK` cannot match the bare index link, so scan 6 reads the whole page; no test reads the real `dist/`, so the eyebrow read stays one-time — the sweep re-reads dock-b's page), S5 nothing to do |
+| T1748 constitution, a fourth time | implementation (`opus`, high) | ~27k | done; committed alone `ab772a5` (AC 35) |
+| T1749 the line and its refusal | implementation (`opus`, high) | ~43k | done; 814 tests (+4); Astro's three schema messages pasted — two match the plan, the bare-line one recorded (path doubled, `**` literal, null as "object") |
+| T1750 the eyebrow | implementation (`opus`, high) | ~35k | done; 820 tests (+6); dock-b street / dock-a landscape / cozy-brook none / land-b landscape read once on `dist/` — the sweep re-reads `dist/photographs/dock-b/` (plan's Known limitation) |
+| T1751 category pages pinned | implementation (`opus`, high) | ~53k | done; 825 tests (+5); 4 category pages; 83 links, hash equal before and after (AC 37); one-time edit fails three of four pages (event renders no list) |
+| T1752 documents | implementation (`opus`, high) | ~55k | done; greps as asked plus README:238; AUTHORING.md does not say a bad line fails the build (optional; pause) |
+| Phase 3d review | implementation (`opus`, high) | ~59k | signed off, nothing blocking; six second looks: the bundle summarised the EXIT lines (Done notes carry the real lines), AC 35/T1749 records (here), the plan's code span (fixed), AUTHORING.md's bad-line sentence (pause), a long README line (cosmetic), the eyebrow read once (sweep) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

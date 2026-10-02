@@ -7,6 +7,7 @@ caption: >-
 date: 2026-08-29
 at: the-jetty
 published: 2026-08-31
+categories: [street]
 camera: Fixture FX-2 (override)
 lens: Fixture 50mm f/2 (override)
 focalLength: 50 mm

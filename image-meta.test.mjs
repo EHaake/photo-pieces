@@ -1347,6 +1347,48 @@ describe('the draft and the date (T1740, spec 019)', () => {
     ]);
   });
 
+  it('a journal-folder sidecar writing categories gets one line naming categories', () => {
+    expect(
+      photographOnlyProblems([
+        { file: journalSidecar, inJournal: true, data: { categories: ['landscape'] } },
+      ]),
+    ).toEqual([
+      '[images] src/content/journal/fog/_land-b.md: "categories" is for a photograph in src/content/photographs/ — a journal entry\'s photographs take their entry\'s categories; remove the line',
+    ]);
+  });
+
+  it('a journal-folder sidecar writing all three fields gets three lines, draft, published, categories', () => {
+    const problems = photographOnlyProblems([
+      {
+        file: journalSidecar,
+        inJournal: true,
+        data: { categories: ['street'], published: new Date('2026-10-01'), draft: false },
+      },
+    ]);
+    expect(problems).toHaveLength(3);
+    expect(problems[0]).toContain(': "draft" is for a photograph');
+    expect(problems[1]).toContain(': "published" is for a photograph');
+    expect(problems[2]).toContain(': "categories" is for a photograph');
+  });
+
+  it('a photographs-folder sidecar writing all three fields is no problem', () => {
+    expect(
+      photographOnlyProblems([
+        {
+          file: 'src/content/photographs/_bank.md',
+          inJournal: false,
+          data: { draft: true, published: new Date('2026-10-01'), categories: ['event'] },
+        },
+      ]),
+    ).toEqual([]);
+  });
+
+  it("content.config.ts's imageMeta schema holds the categories line, optional, at least one of the four", () => {
+    const config = readFileSync(new URL('./src/content.config.ts', import.meta.url), 'utf8');
+    const block = config.slice(config.indexOf('const imageMeta'), config.indexOf('const places'));
+    expect(block).toContain('categories: z.array(z.enum(CATEGORIES)).min(1).optional()');
+  });
+
   it("each PHOTOGRAPH_FIELDS name is a key of content.config.ts's imageMeta schema", () => {
     const config = readFileSync(new URL('./src/content.config.ts', import.meta.url), 'utf8');
     const block = config.slice(config.indexOf('const imageMeta'), config.indexOf('const places'));

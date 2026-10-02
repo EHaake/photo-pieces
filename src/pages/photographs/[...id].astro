@@ -22,7 +22,7 @@ import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { CONTACT_EMAIL, SITE } from '../../consts';
 import { formatDate } from '../../i18n';
-import { categoryLabel } from '../../lib/categories';
+import { categoryLabel, eyebrowCategories } from '../../lib/categories';
 import {
   RELATED_NARROW_SHORT_PX,
   RELATED_SHORT_PX,
@@ -95,11 +95,12 @@ const { label, piece, galleries } = image;
 const sections = sectionsFor(image);
 const shows = (section: string) => sections.includes(section);
 
-// The eyebrow: the owning piece's categories, or for a photographs-folder
-// image the categories of the galleries that hold it.
-const categories = piece
-  ? piece.data.categories
-  : [...new Set(galleries.map((gallery) => gallery.data.category))];
+// The eyebrow (eyebrowCategories): the entry's, the sidecar's, or the galleries'.
+const categories = eyebrowCategories({
+  entry: piece?.data.categories ?? null,
+  own: image.sidecar?.data.categories,
+  galleries: galleries.map((gallery) => gallery.data.category),
+});
 
 // The story: the sidecar body through the site's own pipeline, so it is
 // a piece body in miniature (blocks included).

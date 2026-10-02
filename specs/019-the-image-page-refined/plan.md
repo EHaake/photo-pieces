@@ -3609,10 +3609,12 @@ there.
   `categories.0` being the index of the bad word.
 - An empty list, `categories: []`: the same header, then
   `**categories**: Too small: expected array to have >=1 items`.
-- A bare `categories:` (YAML null): the same header and an invalid-type
-  line in Astro's own wording (its error map's "Expected type …,
-  received …", possibly with the path printed twice); read at T1749
-  and recorded.
+- A bare `categories:` (YAML null): the same header, then — read at
+  T1749 (Astro 7.2.2) —
+  ``categories**: **categories: Expected type `"array"`, received `"object"` ``:
+  the path printed twice, the bold markers unbalanced so a literal `**`
+  shows, and null reported as `"object"`. The file is still named by
+  the error's header and location.
 - The barrier: `[check-lexicon] <file>: a category page lists a
   photograph (<href>) — category pages list galleries and journal
   entries`; `[check-lexicon] no page under <dist>/categories/ — the

@@ -42,6 +42,13 @@
 // `footer.site-footer` (outside the authored regions) holds exactly one
 // link to `/photographs/`, and the site header's `<nav>` none.
 //
+// Sixth scan, the category pages: every `.html` under `<dist>/categories/`
+// holds, in its whole body (scripts, styles and comments removed; not only
+// its `.category-group` sections), no link to a photograph page of either
+// folder. The footer's bare `/photographs/` is the index, not a photograph,
+// and passes. No page under `<dist>/categories/` fails rather than passing
+// on nothing.
+//
 // `<dist>/pagefind/` is excluded: pagefind's index is a third party's.
 //
 //   node scripts/check-lexicon.mjs [dist] [content]   # defaults: dist, src/content
@@ -269,11 +276,13 @@ const INDEX_LINK = new RegExp(`^(?:${ORIGIN})?/photographs/$`);
 
 const photographsDir = join(root, 'photographs');
 const indexFile = join(photographsDir, 'index.html');
+const categoriesDir = join(root, 'categories');
 const pageIds = new Set();
 let pages = 0;
 let regions = 0;
 let frontDoor = 0;
 let listed = 0;
+let categoryPages = 0;
 
 for await (const file of files(root)) {
   const extension = extname(file);
@@ -341,6 +350,21 @@ for await (const file of files(root)) {
     .flatMap(hrefs)
     .filter((href) => INDEX_LINK.test(href)).length;
   if (navLinks > 0) problems.push(`[check-lexicon] ${file}: the nav links to /photographs/`);
+
+  // scan 6: the category pages
+  if (file.startsWith(categoriesDir + sep)) {
+    categoryPages += 1;
+    for (const href of hrefs(body)) {
+      if (PHOTOGRAPH_LINK.test(href)) {
+        problems.push(`[check-lexicon] ${file}: a category page lists a photograph (${href}) — category pages list galleries and journal entries`);
+      }
+    }
+  }
+}
+
+// scan 6: the guard against reading nothing
+if (categoryPages === 0) {
+  problems.push(`[check-lexicon] no page under ${categoriesDir}${sep} — the category pages are where scan 6 reads`);
 }
 
 // scan 3: a draft has no page
@@ -389,5 +413,5 @@ if (problems.length > 0) {
   process.exit(1);
 }
 console.log(
-  `[check-lexicon] ${pages} pages read, ${regions} authored regions set aside, ${excused.size} authored strings excused; 0 old addresses; ${drafts.length} draft photographs, none published; ${frontDoor} front-door photographs, each dated; the index lists ${listed} photographs, each once`,
+  `[check-lexicon] ${pages} pages read, ${regions} authored regions set aside, ${excused.size} authored strings excused; 0 old addresses; ${drafts.length} draft photographs, none published; ${frontDoor} front-door photographs, each dated; the index lists ${listed} photographs, each once; ${categoryPages} category pages, no photograph listed`,
 );
