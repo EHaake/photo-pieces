@@ -3064,7 +3064,7 @@ The envelope's lexicon bullet. One place each:
 | the front door's headings      | `src/pages/index.astro`: "Read the journal"; "Journal and photographs" under "Latest"     | the words scan (no "piece"); the look                                    |
 | "Also in" and the page's words | the photograph page's `WORDING`: `alsoIn`, `fromPiece`, `passage.heading`                  | the words scan; the look                                                 |
 | the front door's list length   | `FRONT_DOOR.latest`, `src/lib/front-door.mjs` (3)                                          | front-door.test.mjs, by name and value                                   |
-| the sidecar fields' names      | `PHOTOGRAPH_FIELDS`, `src/lib/image-meta.mjs`, and the two keys in `content.config.ts`'s `imageMeta` | image-meta.test.mjs: each value is an `imageMeta` key in the source |
+| the sidecar fields' names      | `PHOTOGRAPH_FIELDS`, `src/lib/image-meta.mjs`, and the two keys in `content.config.ts`'s `imageMeta` (three from T1749) | image-meta.test.mjs: each value is an `imageMeta` key in the source |
 
 A field renamed is both places; the barrier imports the constant.
 
@@ -3374,7 +3374,7 @@ the registry); `package.json`'s dependencies.
 
 ## Amendment 4 (2026-10-01): the photograph's categories
 
-**Status**: Draft — pending sign-off
+**Status**: Signed off (2026-10-01) by the `skeptical-reviewer` at the top tier — no blocking findings; five second-look notes taken (scan 6 over the whole category page, the one-time eyebrow read as a known limitation the tier log carries to the sweep, the vacuous-case wording, the envelope row and the `PHOTOGRAPH_FIELDS` comment, the README change accepted).
 **Implements**: spec.md's sections marked _(amended 2026-10-01,
 category)_ — the preamble's fourth-amendment sentences, Goal 11's
 sentence on a photograph naming its categories, the Entity "A
@@ -3399,9 +3399,9 @@ and one-time reads of the built pages.
 
 Everything above this section stands except one statement it makes
 false, given a one-line pointer to here: Amendment 3's Known limitation
-"It carries no category of its own". Amendment 3's envelope table says
-`PHOTOGRAPH_FIELDS` has "the two keys" in `imageMeta`; from T1749 there
-are three — that row is the record of T1740 and stays as written.
+"It carries no category of its own". Amendment 3's envelope table row
+for the sidecar fields' names says "the two keys"; it carries a
+parenthetical "(three from T1749)" — the one other line touched above.
 
 The constitution has no "Scale" section; the five tests are applied as
 before, and each bullet says where the simpler shape was taken.
@@ -3462,7 +3462,7 @@ before, and each bullet says where the simpler shape was taken.
     draft: 'draft',
     published: 'published',
     categories: 'categories',
-  }); // tunable: the names
+  }); // tunable: the names draft and published (categories is the journal's word, not a tunable)
   const FROM_THE_ENTRY = Object.freeze({
     draft: 'are published and dated by their entry',
     published: 'are published and dated by their entry',
@@ -3537,18 +3537,23 @@ before, and each bullet says where the simpler shape was taken.
 - **The category pages, pinned** (`scripts/check-lexicon.mjs`, T1751).
   `src/pages/categories/[category].astro` is not touched. A sixth scan
   in the spec-019 barrier, which already reads the photographs' surfaces
-  (scans 3–5) and has the tag-depth walk: in the one pass over
-  `<dist>`, on every `.html` under `<dist>/categories/`, the elements
-  whose class list holds `category-group`
-  (`inside(text, hasClass('category-group'))`) hold no href matching
-  `PHOTOGRAPH_LINK` — a photograph page of either folder. If no page
-  under `<dist>/categories/` has a `category-group`, the scan fails
-  rather than passing on nothing (scan 4's guard). The summary line
-  gains `; <n> category pages, no photograph listed`; the header
-  comment gains "Sixth scan, the category pages". Simpler shape taken:
-  a deny on photograph links — the AC's words — not an allowlist of
-  what a group may link to; and a scan in the existing barrier, not a
-  new script that would copy the walk, the arguments and the summary.
+  (scans 3–5) and has the helpers: in the one pass over `<dist>`, on
+  every `.html` under `<dist>/categories/`, the whole page body (the
+  loop's `body`, scripts, styles and comments already removed) holds no
+  href matching `PHOTOGRAPH_LINK` — a photograph page of either folder.
+  Whole body, not the `.category-group` sections: a future section
+  under another class would otherwise pass. This is safe because
+  `PHOTOGRAPH_LINK` (`^(?:<origin>)?/photographs/(.+)/$`) needs at least
+  one character and a slash after `/photographs/`, so it does not match
+  the footer's bare `/photographs/` index link — the one link to that
+  folder in a category page's chrome (the header's nav has none, by
+  scan 5). If there is no `.html` under `<dist>/categories/` at all,
+  the scan fails rather than passing on nothing (scan 4's guard). The
+  summary line gains `; <n> category pages, no photograph listed`; the
+  header comment gains "Sixth scan, the category pages". Simpler shape
+  taken: a deny on photograph links — the AC's words — not an
+  allowlist; and a scan in the existing barrier, not a new script that
+  would copy the walk, the arguments and the summary.
 
 - **The documents** (T1752), hand-edited. `AUTHORING.md`: the sidecar
   skeleton's note (lines 115–118, "takes two more, `draft:` and
@@ -3610,9 +3615,8 @@ there.
   and recorded.
 - The barrier: `[check-lexicon] <file>: a category page lists a
   photograph (<href>) — category pages list galleries and journal
-  entries`; `[check-lexicon] no .category-group on any page under
-  <dist>/categories/ — the category pages' lists are where scan 6
-  reads`.
+  entries`; `[check-lexicon] no page under <dist>/categories/ — the
+  category pages are where scan 6 reads`.
 
 ### Testing strategy (amendment 4)
 
@@ -3624,10 +3628,14 @@ there.
   photographs-folder sidecar with all three → none. The existing draft
   and both-fields cases unchanged and green (their messages
   byte-identical). The existing "each PHOTOGRAPH_FIELDS name is a key"
-  case now covers `categories` without an edit. New, a source read like
-  it: the `imageMeta` block holds
+  case runs over `categories` too, but is not counted as evidence for
+  it: a `categories:` key elsewhere in the config (the journal schema
+  has one) is too near a vacuous pass to rest on. The evidence is a new
+  exact-string source case: the `imageMeta` block (from
+  `const imageMeta` to `const places`) holds
   `categories: z.array(z.enum(CATEGORIES)).min(1).optional()` — a
-  dropped `.min(1)` or a loosened `z.string()` fails it by name. (The
+  missing line, a dropped `.min(1)` or a loosened `z.string()` fails it
+  by name. (The
   schema cannot run under Vitest: `content.config.ts` imports
   `astro:content`.) **Mutation**: `categories` removed from
   `PHOTOGRAPH_FIELDS` → the journal-categories case fails; reverted.
@@ -3662,9 +3670,11 @@ there.
   the expectation following an added page, not a loosened check; no
   other expectation changes. Cases: a group holding a link to
   `/photographs/dock-b/` fails, naming the file; one to
-  `/photographs/fog/land-a/` too; the category page deleted → the guard
-  line; a link to `/photographs/dock-b/` on a category page outside its
-  groups passes. **Mutation**: the scan's href check skipped → the
+  `/photographs/fog/land-a/` too; a link to `/photographs/dock-b/` in a
+  section of another class on the category page fails too (the whole
+  body is read); the footer's bare `/photographs/` passes (it is in
+  the clean tree's every page); the category page deleted → the guard
+  line. **Mutation**: the scan's href check skipped → the
   `dock-b` case fails; reverted. One-time real build: a photograph item
   added to the category page's `PieceList` items → BUILD EXIT 1 with
   the scan 6 line, reverted. AC 37's "what they listed before": the
@@ -3715,8 +3725,13 @@ feed; `scripts/verify.sh` (its summary grep already prints
   as in a journal entry's frontmatter.
 - **The eyebrow's wiring is checked once, not per build.** The rule is
   pinned on every run by categories.test.mjs; that the page calls it,
-  by T1750's reads of `dist/`. A per-build scan would need a second
-  YAML reader in the barrier for one line of page code.
+  by T1750's reads of `dist/`. No test in the suite reads the real
+  `dist/` (lexicon.test.mjs, private-files.test.mjs and
+  gps-barrier.test.mjs run their barriers on temporary trees), so there
+  is no existing case to add it to, and a per-build scan would need a
+  second YAML reader in the barrier for one line of page code. The tier
+  log records that AC 36's built page was read once, so the pre-merge
+  sweep knows to re-read it.
 
 ### Resolved decisions (amendment 4)
 
@@ -3732,8 +3747,9 @@ feed; `scripts/verify.sh` (its summary grep already prints
 - **`dock-b` carries the line, as `street`**, so a merge or a missed
   line reads differently from what passes.
 - **AC 37 by a sixth scan in `check-lexicon.mjs`** — a deny on
-  photograph links inside the category pages' groups, guarded against
-  reading nothing — plus a one-time before-and-after hash.
+  photograph links across each category page's whole body (the bare
+  index link does not match `PHOTOGRAPH_LINK`), guarded against reading
+  nothing — plus a one-time before-and-after hash.
 - **`README.md` follows `AUTHORING.md`**: it states the folder's fields
   and would otherwise be false.
 - **No `review: per-task`**: one schema line, one more name in an

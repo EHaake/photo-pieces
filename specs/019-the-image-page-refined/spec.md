@@ -30,7 +30,8 @@ tier the same day, before the real piece. **Amended a fourth time,
 held open: a category on a photographs-folder photograph's sidecar —
 Goal 11 and the sections marked _(amended 2026-10-01, category)_ —
 re-planned as plan.md's "Amendment 4 (2026-10-01): the photograph's
-categories" and tasks.md's Phase 3d, before the real piece.
+categories" and tasks.md's Phase 3d (T1748–T1753), signed off at the top tier
+the same day, before the real piece.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and

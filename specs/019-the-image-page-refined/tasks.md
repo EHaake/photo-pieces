@@ -1,6 +1,6 @@
 # Tasks: The image page, refined
 
-**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken. Phase 3c (the lexicon amendment) drafted and signed off 2026-09-29 at the top tier — one blocking finding (B1) fixed and re-reviewed, twelve second looks taken.
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken. Phase 3c (the lexicon amendment) drafted and signed off 2026-09-29 at the top tier — one blocking finding (B1) fixed and re-reviewed, twelve second looks taken. Phase 3d (the category amendment) drafted and signed off 2026-10-01 at the top tier — nothing blocking, five second looks taken.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1700–T1703) — the constitution amended
 first, in its own commit; the private-file family as pure rules with
@@ -1983,8 +1983,7 @@ the lexicon.
 
 ## Phase 3d — The photograph's categories (reviewer after the phase; no task is `review: per-task` — the largest change is one schema line and one more name in an existing check, the page's change is one call, and a mistake in any of them re-addresses or unpublishes nothing, so one review of the whole diff serves; walkthrough: on the laptop, the site built and previewed (`npm run build && npm run preview`): "Dock, late" at `/photographs/dock-b/` now reads Street above its title — the new line in its sidecar — and not Landscape, though Editor's picks, a landscape gallery, holds it; the photograph at `/photographs/dock-a/`, in the same gallery with no line, still reads Landscape; the brook at `/photographs/cozy-brook/`, in no gallery, has nothing above its title; a journal entry's photograph, `/photographs/where-the-fog-lets-go/land-b/`, shows its entry's categories as before; each word above a title opens its category page, and the four category pages list the same galleries and journal entries as before, no photograph among them; `AUTHORING.md`'s "The photographs folder" describes the `categories:` line and what shows without it; and, if he wants to, the line in a sidecar of his own — `categories: [landscape]` on a photograph in `src/content/photographs/`, and its page reads Landscape; as many rounds as it takes, each a sub-lettered task under T1753)
 
-**Status**: Draft — pending sign-off. Plan: "Amendment 4 (2026-10-01):
-the photograph's categories" and its sections.
+**Status**: Signed off (2026-10-01) at the top tier (nothing blocking; S1–S5 taken). Plan: "Amendment 4 (2026-10-01): the photograph's categories" and its sections.
 The spec's fourth amendment, from the Phase 3c look, folded in while
 the 3a, 3b and 3c pauses are held open — T1729, T1735 and T1745 stay
 unchecked and are not touched by this phase — and before his piece is
@@ -2031,8 +2030,10 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       `shasum < "$TMPDIR/category-links-before.txt"` — the count and the
       hash recorded here. Then
       `content.config.ts`: the line and the comment.
-      `image-meta.mjs`: `PHOTOGRAPH_FIELDS.categories`,
-      `FROM_THE_ENTRY`, the loop over `Object.entries`.
+      `image-meta.mjs`: `PHOTOGRAPH_FIELDS.categories`, its
+      `// tunable` comment qualified as the plan writes it (draft and
+      published only; `categories` is not a tunable), `FROM_THE_ENTRY`,
+      the loop over `Object.entries`.
       image-meta.test.mjs: the cases as the plan lists them. _Verify:
       `sh scripts/verify.sh` green (test count; the page count
       unchanged); the mutation fails by name, reverted; the four
@@ -2069,8 +2070,10 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       `PHOTOGRAPH_LINK`); lexicon.test.mjs's barrier cases (`clean`,
       `tree`, `passes`, `fails`). Plan: "The category pages, pinned",
       the barrier's failure lines, and the testing bullet "The
-      category pages". `check-lexicon.mjs`: scan 6, the header
-      comment, the summary clause. lexicon.test.mjs: the clean tree's
+      category pages". `check-lexicon.mjs`: scan 6 over each category
+      page's whole body (not its `.category-group` sections), its guard
+      failing when there is no `.html` under `<dist>/categories/`, the
+      header comment, the summary clause. lexicon.test.mjs: the clean tree's
       category page, the summary expectations that follow it (each
       listed in the report), scan 6's cases. _Verify:
       `sh scripts/verify.sh` green with the `[check-lexicon]` line
@@ -2479,10 +2482,14 @@ tier if it is ever on (it is off). -->
 | T1743 lexicon barrier | implementation (`opus`, high) | ~85k | done; 810 tests (+24); the front door missing .index-feed fails (beyond the plan's 'must exist' for the index); site: failure untested |
 | T1744 documents | implementation (`opus`, high) | ~122k | done; 404/200/200 — a sidecar edit reaches the running dev server despite the registry's 'cached for the module' comment (sweep); README's test list incomplete (left) |
 | Phase 3c review | implementation (`opus`, high) | ~221k | pass, nothing blocking; the stale not-grouped warning gone from code and both documents (ROADMAP.md:445–451 still stale — close-out); the private-files count off by one on the index (harmless; plan leaves that barrier untouched) |
+| Amendment 4 planning (2026-10-01) | implementation (`opus`, high, no override) | ~205k | drafted plan.md's Amendment 4 and Phase 3d (T1748–T1753, none per-task); no product question; six deviations named (README changed too, no sidecar table in AUTHORING.md, the stale envelope row, AC 36's built page read once, lexicon.test's summary line following an added page, no per-task review) |
+| Amendment 4 sign-off | top (`fable`, high, override) | ~63k | signed off, nothing blocking; S1 scan 6 scoped to `.category-group` leaves a hole, S2 AC 36's eyebrow read is one-time, S3 the "each name is a key" case is vacuous for `categories`, S4 the stale "two keys" row and the `tunable` comment, S5 the README change authorised |
+| Amendment 4 sign-off notes (planner resumed) | implementation (`opus`, high) | ~15k | S1–S4 taken (`PHOTOGRAPH_LINK` cannot match the bare index link, so scan 6 reads the whole page; no test reads the real `dist/`, so the eyebrow read stays one-time — the sweep re-reads dock-b's page), S5 nothing to do |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
 
+- (Phase 3d, from sign-off) AC 36's built-page eyebrow is read once at T1750, not per build (no test reads the real `dist/`) — the sweep re-reads `dist/photographs/dock-b/` for `/categories/street/` alone.
 - (Phase 3c) `ROADMAP.md:445–451` still says photographs-folder photographs cannot join a place — the close-out bundle names it. `check-private-files` counts the photographs index as an image page (63 loupes on 64 pages) and its header claims every image page names a loupe, which nothing enforces — exclude the index, and enforce or soften. The collision message and `referenceProblems` write `src/content/journal/` literally — build from `JOURNAL_ROOT`. plan.md's Known limitations "~356 px" srcset ceiling is ~712 px (two or three transforms per photograph). AUTHORING.md's writing-loop paragraph: a sidecar edit reached the running dev server though the paragraph (and the registry's comment) says it is built once per run — find what rebuilds it and make one claim. The samplers' prose still says "gallery root" (vocabulary-sampler:245, matte-sampler:14). check-lexicon's scan 1 cannot see a URL in JSON-LD; its `isDraft` reads lowercase `true` only. AC 29's draft-as-cover is pinned indirectly (the draft fixture's `at: the-jetty` and scan 3).
 - Spec.md AC 6 was narrowed by one word ("a _private_ stage borrowed from another folder") to match its own Authoring rule; carried to the person in the spec-conformance summary for his approval, not passed silently.
 - Scan 3's "class-bearing descendants … and nothing else" should be defined as the `COMPARE_CLASSES` nesting, tolerant of any class Astro's Markdown image pipeline or `pieceWrap` adds, or T1706 fails on markup the plan didn't anticipate (implementer's footprint at T1703/T1706).
