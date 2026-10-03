@@ -6,10 +6,18 @@ import { CATEGORIES, categoryRow, eyebrowCategories } from './src/lib/categories
 // is pinned here rather than in the component.
 
 describe('the category row (T802, spec 010)', () => {
-  it('without a current category the row is the four categories, each a link, and no All', () => {
+  it('without a current category All leads, marked, and the four categories follow as links (T1753a)', () => {
     const row = categoryRow();
-    expect(row.map((item) => item.label)).toEqual(['Landscape', 'Street', 'Portrait', 'Event']);
-    expect(row.map((item) => item.href)).toEqual([
+    expect(row).toHaveLength(5);
+    expect(row[0]).toEqual({ label: 'All', href: null });
+    expect(row.map((item) => item.label)).toEqual([
+      'All',
+      'Landscape',
+      'Street',
+      'Portrait',
+      'Event',
+    ]);
+    expect(row.slice(1).map((item) => item.href)).toEqual([
       '/categories/landscape/',
       '/categories/street/',
       '/categories/portrait/',
@@ -37,9 +45,17 @@ describe('the category row (T802, spec 010)', () => {
     ]);
   });
 
+  it('the row has the same shape with and without a current category, so nothing shifts (T1753a)', () => {
+    const labels = (row) => row.map((item) => item.label);
+    expect(labels(categoryRow())).toEqual(labels(categoryRow('street')));
+    for (const category of CATEGORIES) {
+      expect(labels(categoryRow(category))).toEqual(labels(categoryRow()));
+    }
+  });
+
   it("the row's order is CATEGORIES' own, not a hard-coded list", () => {
     const row = categoryRow();
-    expect(row.map((item) => item.href)).toEqual(
+    expect(row.slice(1).map((item) => item.href)).toEqual(
       CATEGORIES.map((category) => `/categories/${category}/`),
     );
   });

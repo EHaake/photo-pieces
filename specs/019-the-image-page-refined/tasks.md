@@ -2127,6 +2127,31 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       what was kept (a `grep` of each, listed); the Phase 3d record
       below filled in._
 
+- [x] **T1753a** — Round: "All" always in the category row ("On the
+      categories page, All should always be visible. Right now if you
+      click on any of the options, the options move to the right and All
+      appears. If you then click on all it disappears. It comes across as
+      a UI glitch and feels strange." — 2026-10-02). Reverses spec 010's
+      Goal 1 line "All appears only when a category is selected"; the
+      product owner's call, recorded in spec.md's Decided section. Shape
+      taken: `categoryRow` always leads with All — marked (`href: null`)
+      when no category is current, since the journal and galleries
+      indexes are both unfiltered, and the link to `/journal/` on a
+      category page; the four categories after it as now; the row's
+      shape identical on every page so nothing shifts. Pattern: T1709a
+      (a round: one rule, its tests, one Decided line). `categories.ts`:
+      `categoryRow` and its doc comment; `CategoryRow.astro`'s comment;
+      categories.test.mjs: the T802 cases amended (no case may still
+      assert "no All"); spec.md: one Decided line under the fourth
+      amendment's. _Verify: `sh scripts/verify.sh` green; the row read
+      on `dist/journal/index.html`, `dist/galleries/index.html` and
+      `dist/categories/street/index.html` (the `nav.category-row`
+      markup quoted): five items on each, All first — a `<span
+      aria-current="page">` on the two indexes, `<a href="/journal/">`
+      on the category page; the mutation (All dropped when no current)
+      fails by name, reverted._
+      Done: verify green, 826 tests (+1 net: the no-All case replaced, a same-shape case added). Rows read on `dist/`: journal and galleries indexes `<span aria-current="page">All</span>` then the four links; the street page `<a href="/journal/">All</a>` then Landscape, Street marked, Portrait, Event. Mutation (the old conditional All) failed three cases by name, reverted. Note for his look: All on the two indexes wears the current mark (underlined) as a current category does.
+
 ### Phase 3d record (the person's walkthrough)
 
 _Filled in at the pause._
@@ -2496,6 +2521,7 @@ tier if it is ever on (it is off). -->
 | T1751 category pages pinned | implementation (`opus`, high) | ~53k | done; 825 tests (+5); 4 category pages; 83 links, hash equal before and after (AC 37); one-time edit fails three of four pages (event renders no list) |
 | T1752 documents | implementation (`opus`, high) | ~55k | done; greps as asked plus README:238; AUTHORING.md does not say a bad line fails the build (optional; pause) |
 | Phase 3d review | implementation (`opus`, high) | ~59k | signed off, nothing blocking; six second looks: the bundle summarised the EXIT lines (Done notes carry the real lines), AC 35/T1749 records (here), the plan's code span (fixed), AUTHORING.md's bad-line sentence (pause), a long README line (cosmetic), the eyebrow read once (sweep) |
+| T1753a All always in the row | implementation (`opus`, high) | ~31k | done; 826 tests; reverses spec 010 Goal 1 at his call, Decided line in spec.md; All marked on both indexes (to be seen) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

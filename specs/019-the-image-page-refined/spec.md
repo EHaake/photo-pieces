@@ -1420,3 +1420,13 @@ _Amended 2026-10-01 (category):_
   per-photograph overrides there stay on the ordinary path. Folded in
   before his piece is written against the sidecar's fields, so the
   fields are complete when he writes.
+- **"All" always in the category row (2026-10-02).** From the Phase 3d
+  look: "On the categories page, All should always be visible. Right
+  now if you click on any of the options, the options move to the right
+  and All appears. If you then click on all it disappears. It comes
+  across as a UI glitch and feels strange." The call: the category row
+  always leads with All — marked on the journal and galleries indexes,
+  where nothing is filtered, and a link back to the journal index on a
+  category page — so the row is one shape everywhere and nothing moves.
+  This reverses spec 010's "All appears only when a category is
+  selected", and its galleries index row "without All".

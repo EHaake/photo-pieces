@@ -16,12 +16,16 @@ export const categoryLabel = (category: Category): string =>
  * The category link row shared by the pieces index, the galleries index,
  * and a category page (spec 010). Pure: `href` is a site-root path the
  * caller runs through `withBase`, and `href: null` marks the item the
- * reader is already on. Without a current category the row is the four
- * categories in `CATEGORIES` order; with one, "All" leads, pointing back
- * to the unfiltered pieces index.
+ * reader is already on. "All" always leads, so the row's shape is the
+ * same on every page and nothing shifts when a category is picked
+ * (spec 019, T1753a, reversing spec 010's "All only when a category is
+ * selected"): marked when no category is current — the journal and
+ * galleries indexes are both unfiltered — and otherwise pointing back to
+ * the unfiltered journal index. The four categories follow in
+ * `CATEGORIES` order.
  */
 export const categoryRow = (current?: Category): { label: string; href: string | null }[] => [
-  ...(current ? [{ label: 'All', href: '/journal/' }] : []),
+  { label: 'All', href: current ? '/journal/' : null },
   ...CATEGORIES.map((category) => ({
     label: categoryLabel(category),
     href: category === current ? null : `/categories/${category}/`,
