@@ -18,7 +18,10 @@ exhibit is the loose analogy — context, exploration, a turned corner
 the visitor walks toward out of their own curiosity — played in the
 web's terms, the arbitrary link, never as a literal virtual museum. Not
 a blog and not a static gallery: **every piece leads into the next,
-always inviting the visitor deeper**, each building on the last. The
+always inviting the visitor deeper** — by options the visitor chooses
+among, featured prominently, never one prescribed route, and held
+loosely: the direct connections where they exist, less intuitive ones
+beside them, above all where no obvious next piece does. The
 structure should be one another photographer could use for their own
 installation (an aspiration, not a v1 requirement).
 

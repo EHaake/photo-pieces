@@ -76,10 +76,43 @@ front ("I'm not worried about its current state").
   really exists. A connection he writes himself and one the site finds
   from shared fields can sit side by side; which leads, and how many
   options a page offers before choice becomes noise, are for the spec.
+  **Held loosely** (his addendum, the same day): the journal is to be
+  "more of individual thought pieces" on many topics, so exploration
+  "doesn't need to be in the sense of going to strictly directly
+  related content" — direct
+  connections where they exist, "but also maybe less intuitive options,
+  especially if there isn't a direct, obvious next piece", always
+  present and featured prominently. What that means in practice is the
+  next entry's to explore before this one is specified.
   Judged once there are enough real pieces to connect — a handful at
   least — so it follows his first pieces rather than preceding them.
   Touches the front door (the thesis a visitor enters by), the place as
   a tour, and the processing showcase, each one way of going deeper.
+- **Exploration, explored** — a design exploration before "Every
+  piece leads onward" is specified, raised by the photographer on
+  2026-10-02: "while I want to maintain the guiding principle of the
+  exploration, I don't want it to be too strict … when there are more
+  direct connections we provide those but also maybe less intuitive
+  options, especially if there isn't a direct, obvious next piece." Not
+  a build; a study, like the design brief that preceded spec 015, ending
+  in a direction he chooses. Questions to work through with him: what
+  kinds of connection there are between a photograph, a thought piece
+  and a place — direct (the same place, outing or subject), lateral (a
+  shared technique, mood, season, light, palette, idea), and chosen
+  (one he names by hand); what a less intuitive option is and where it
+  comes from — his own pairing, a shared quality, a deliberate
+  contrast, or chance — and how the page says why it is there without
+  over-explaining; how many options a page offers, and in what form,
+  before choice becomes noise; how the options are featured
+  prominently without turning the end of a piece into a feed; what the
+  site does with a piece that has no direct connection at all; and
+  what he would write or tag, if anything, to feed it — the cost on his
+  side kept low, since the content is the larger work. Looks at how
+  galleries, museums, print magazines and the better personal sites
+  handle the turn from one work to the next, and at what the related
+  section already does well. Wants a body of real pieces on several
+  topics to test against; until then, the question is held open, not
+  answered with fixtures.
 - **A structure others could use** — from `VISION.md`: "I also hope
   [it] can be generalized such that others can use its structure to
   create their own personal virtual installation." An aspiration, not a
