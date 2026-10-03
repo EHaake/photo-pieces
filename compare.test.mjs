@@ -282,7 +282,7 @@ describe('(a) one shape, spelled once', () => {
   });
 
   it("the section builds its stage img from getImage with stageImageOptions('page'), never <Image> (T1723)", () => {
-    const from = page.indexOf('id="sec-compare"');
+    const from = page.indexOf('<section class="sec sec-compare"');
     const to = page.indexOf('</section>', from);
     expect([from > -1, to > from]).toEqual([true, true]);
     const section = page.slice(from, to);
@@ -500,8 +500,20 @@ describe('(d) the state (T1707)', () => {
     expect(found).toEqual([
       "  compare: { heading: 'Raw to finished', camera: 'Camera', cameraNote: 'The RAW file straight out of camera — no edits, no adjustments', finished: 'Finished' },",
     ]);
-    expect(page).toContain('{WORDING.compare.heading}');
+    expect(page).toContain('aria-label={WORDING.compare.heading}');
     expect(page).toContain('WORDING.compare,');
+  });
+
+  it('the compare section shows no heading and is named by aria-label, as the story is (T1753b)', () => {
+    const from = page.indexOf('<section class="sec sec-compare"');
+    const to = page.indexOf('</section>', from);
+    expect([from > -1, to > from]).toEqual([true, true]);
+    const section = page.slice(from, to);
+    expect(section).not.toMatch(/<h2\b/);
+    expect(section).not.toContain('aria-labelledby');
+    expect(section.slice(0, section.indexOf('>') + 1)).toBe(
+      '<section class="sec sec-compare" aria-label={WORDING.compare.heading}>',
+    );
   });
 
   // [p, pair, split]: the pair the frame shows with the handle at p;

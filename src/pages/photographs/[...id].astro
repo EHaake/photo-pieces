@@ -429,10 +429,7 @@ const indexed =
 
       {
         shows('compare') && (
-          <section class="sec sec-compare" aria-labelledby="sec-compare">
-            <h2 class="sec-title" id="sec-compare">
-              {WORDING.compare.heading}
-            </h2>
+          <section class="sec sec-compare" aria-label={WORDING.compare.heading}>
             <figure
               class={`${COMPARE_CLASSES.root} ${COMPARE_CLASSES.root}-w-${COMPARE_WIDTH.page}`}
               style={`--ar: ${ar}`}

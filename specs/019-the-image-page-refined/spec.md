@@ -1430,3 +1430,14 @@ _Amended 2026-10-01 (category):_
   category page — so the row is one shape everywhere and nothing moves.
   This reverses spec 010's "All appears only when a category is
   selected", and its galleries index row "without All".
+- **No heading over the image page's compare (2026-10-02).** From the
+  Phase 3d look: in side by side the box widens and "Raw to finished"
+  stays at the text column's edge, which "looks off in terms of
+  formatting". Asked whether the heading should follow the box, the
+  images go to their outer edges, or side by side go back to a column:
+  "I think it might be better to remove the heading altogether. I agree
+  that having the heading jump isn't good, but I also don't want to pin
+  them to the edges." The call: the section shows no heading; "Raw to
+  finished" stays its name for screen readers, as "The story" names the
+  story's section, so the documents still call it the "Raw to finished"
+  section. The frames' placement and the width rule are unchanged.

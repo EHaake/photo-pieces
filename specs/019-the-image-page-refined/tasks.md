@@ -2152,6 +2152,36 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       fails by name, reverted._
       Done: verify green, 826 tests (+1 net: the no-All case replaced, a same-shape case added). Rows read on `dist/`: journal and galleries indexes `<span aria-current="page">All</span>` then the four links; the street page `<a href="/journal/">All</a>` then Landscape, Street marked, Portrait, Event. Mutation (the old conditional All) failed three cases by name, reverted. Note for his look: All on the two indexes wears the current mark (underlined) as a current category does.
 
+- [x] **T1753b** — Round: no visible heading over the photograph page's
+      compare section (2026-10-02). The finding: in side by side the box
+      widens and "Raw to finished" stays at the text column's edge
+      ("looks off in terms of formatting"); diagnosed — no bug (tier
+      log). Options put to him: the heading follows the box, the images
+      pushed to their outer edges, side by side back to column. His
+      answer: "I think it might be better to remove the heading
+      altogether. I agree that having the heading jump isn't good, but I
+      also don't want to pin them to the edges." Shape taken: the
+      section's `<h2 class="sec-title" id="sec-compare">` removed; the
+      section named by `aria-label={WORDING.compare.heading}` instead of
+      `aria-labelledby`, as the story's section is (`sec-story`), so the
+      words stay its accessible name and the documents' "the 'Raw to
+      finished' section" stays true; `WORDING.compare.heading` kept; the
+      frames' placement, the width rule and the other views unchanged.
+      Pattern: T1709a (a round: the change, its tests, one Decided line)
+      and the page's `sec-story` section. Files: `[...id].astro`;
+      compare.test.mjs (its `id="sec-compare"` anchor and the
+      `{WORDING.compare.heading}` source case moved to what the section
+      now carries — a test pins that no `<h2>` sits in the section and
+      that the label is there); spec.md: one Decided line; any line in
+      `AUTHORING.md` or `README.md` that says the section shows a heading
+      corrected in the same task (a mention of the section by its name
+      stays). _Verify: `sh scripts/verify.sh` green; on
+      `dist/photographs/where-the-fog-lets-go/land-b/index.html` the
+      compare section's opening tag quoted (`aria-label="Raw to
+      finished"`) and no `<h2` between it and its `<figure`; the
+      mutation (the `<h2>` put back) fails by name, reverted._
+      Done: verify green, 827 tests (+1). On land-b's built page: `<section class="sec sec-compare" aria-label="Raw to finished" data-astro-cid-l3n7jj3i>`, no `<h2` before its `<figure`. Mutation (the `<h2>` put back) failed "the compare section shows no heading and is named by aria-label, as the story is (T1753b)" by name, reverted. `AUTHORING.md` and `README.md` unchanged: every mention names the section, none claims a visible heading.
+
 ### Phase 3d record (the person's walkthrough)
 
 _Filled in at the pause._
@@ -2523,6 +2553,7 @@ tier if it is ever on (it is off). -->
 | Phase 3d review | implementation (`opus`, high) | ~59k | signed off, nothing blocking; six second looks: the bundle summarised the EXIT lines (Done notes carry the real lines), AC 35/T1749 records (here), the plan's code span (fixed), AUTHORING.md's bad-line sentence (pause), a long README line (cosmetic), the eyebrow read once (sweep) |
 | T1753a All always in the row | implementation (`opus`, high) | ~31k | done; 826 tests; reverses spec 010 Goal 1 at his call, Decided line in spec.md; All marked on both indexes (to be seen) |
 | Finding: side-by-side heading (diagnosis, 2026-10-02) | implementation (`opus`, high) | ~36k | no bug: the heading sits in the text column while side by side widens the box; the camera stage (4:3) is letterboxed inside a 3:2 pane, so its visible edge is inset a second time. Options (heading follows the box; images pushed to their outer edges; side back to column) put to him. Session on `claude-opus-5-5` from this turn (switched outside the session; recorded, not inferred as the fallback) |
+| T1753b no compare heading | implementation (`opus`, high) | ~32k | done; 827 tests; the section named by aria-label as the story's is; Decided line in spec.md |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
