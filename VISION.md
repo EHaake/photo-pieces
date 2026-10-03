@@ -85,10 +85,14 @@ rests on.
   — the raw frame, the stages, the choices — is how the site lets a viewer
   into "how I think and view the world", not an appendix for
   photographers.
-- **Every piece leads onward.** A page ends in an invitation that builds
-  on what was just read — the next piece chosen for why it follows, not a
-  generated list or a dead end ("Pieces should lead into the next, always
-  inviting the viewer to go deeper").
+- **Every piece leads onward, by options, not a route.** A page ends in
+  several ways to go deeper, each building on what was just read, and
+  the visitor picks — never a dead end, and never one prescribed path
+  ("Pieces should lead into the next, always inviting the viewer to go
+  deeper"; and, on 2026-10-02: "I don't want the route for the viewer
+  to be prescribed directly. I want to encourage exploration, which
+  means providing options."). The related pieces section is the kind
+  of thing this means, to be expanded and refined.
 - **Curiosity moves the visitor.** Discovery over exhaustive menus: the
   turned corner, the thing glimpsed that the reader chooses to go toward
   ("an expression of their own curiosity"). Indexes and filters exist but

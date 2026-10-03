@@ -52,26 +52,34 @@ front ("I'm not worried about its current state").
   inviting the viewer to go deeper", each "building on the last in some
   way". Raised by the photographer on 2026-10-02 with the vision, as a
   long refinement grown alongside the content rather than designed up
-  front. Today a page ends in mechanical links — the neighbour arrows
-  through a gallery or an entry, an outing's related frames, "Also in",
-  the photographs index — useful, but none of them says why this should
-  follow that. The candidates, in rough order, each its own spec when
-  the pieces exist to judge it on: (1) **links between pieces in the
-  writing** — the prerequisite; see "Internal piece-to-piece link
-  rewriting" below, needed the day he writes the first one; (2) **an
-  authored way onward** — a piece names what follows it and in a line
-  why, and its page ends there, the mechanical links becoming the
-  fallback for a piece that names nothing; (3) **the glimpse** — what a
-  link shows before it is followed (a frame, a line), so the reader
-  walks toward something seen, the museum's turned corner in the web's
-  terms; (4) **threads** — the paths those links make across the site
-  (a place's outings, a technique's progression, a season), surfaced
-  only where a thread really exists. Never a "you may also like" grid:
-  the onward link is chosen, not generated. Judged once there are
-  enough real pieces to link between — a handful at least — so it
-  follows his first pieces rather than preceding them. Touches the front
-  door (the thesis a visitor enters by), the place as a tour, and the
-  processing showcase, each of which is one way of going deeper.
+  front. **Options, not a route**: "I don't want the route for the
+  viewer to be prescribed directly. I want to encourage exploration,
+  which means providing options." A page ends in several ways to go
+  deeper and the visitor chooses; no piece dictates the one that comes
+  next. **The related section is the seed**: "I actually liked the
+  related pieces section and maybe want to expand and/or refine that
+  feature in the future." Today a page ends in the neighbour arrows
+  through a gallery or an entry, the outing's related frames, "Also
+  in", and the photographs index. The candidates, each its own spec
+  when the pieces exist to judge it on: (1) **links between pieces in
+  the writing** — the prerequisite; see "Internal piece-to-piece link
+  rewriting" below, needed the day he writes the first one; (2) **the
+  related section, widened** — beyond the outing's frames to other
+  pieces that share something real with this one (a place, a subject,
+  a technique, a season, a stage of processing), each option saying
+  in a word what it shares, so the choice is the visitor's and
+  informed; (3) **the glimpse** — what an option shows before it is
+  followed (a frame, a line), so the reader walks toward something
+  seen, the museum's turned corner in the web's terms; (4)
+  **threads** — the paths those connections make across the site (a
+  place's outings, a technique's progression), surfaced only where one
+  really exists. A connection he writes himself and one the site finds
+  from shared fields can sit side by side; which leads, and how many
+  options a page offers before choice becomes noise, are for the spec.
+  Judged once there are enough real pieces to connect — a handful at
+  least — so it follows his first pieces rather than preceding them.
+  Touches the front door (the thesis a visitor enters by), the place as
+  a tour, and the processing showcase, each one way of going deeper.
 - **A structure others could use** — from `VISION.md`: "I also hope
   [it] can be generalized such that others can use its structure to
   create their own personal virtual installation." An aspiration, not a
