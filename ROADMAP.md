@@ -4,6 +4,15 @@ Deliberately unordered and unscheduled — this is a backlog to revisit
 once there's a working v1 site to actually use, not a plan with dates
 attached.
 
+Every entry answers to `VISION.md` and the constitution's "Why this
+site exists": does it draw the visitor deeper, or is it what a blog or
+a gallery would do by default? From 2026-10-02 the photographer's
+stated rhythm: once something reasonable is off the ground, he writes
+for the site and builds the content base while the design goes on
+being refined in parallel — refinement specs judged on real pieces,
+not fixtures, and the vision reached over a long refinement, not up
+front ("I'm not worried about its current state").
+
 - **Shop / print sales** — let visitors purchase prints of showcased
   images. Deferred out of `specs/001-site-foundation` because it's a
   substantial feature in its own right (payments, fulfillment,
@@ -38,6 +47,43 @@ attached.
   processed work exists to test against: it could be part of the image
   detail page, its own kind of piece, or spread across both. Subsumes
   the `sequence` block's open interaction design below.
+- **Every piece leads onward** — the heart of `VISION.md`, and the
+  part least realised: "Pieces should lead into the next, always
+  inviting the viewer to go deeper", each "building on the last in some
+  way". Raised by the photographer on 2026-10-02 with the vision, as a
+  long refinement grown alongside the content rather than designed up
+  front. Today a page ends in mechanical links — the neighbour arrows
+  through a gallery or an entry, an outing's related frames, "Also in",
+  the photographs index — useful, but none of them says why this should
+  follow that. The candidates, in rough order, each its own spec when
+  the pieces exist to judge it on: (1) **links between pieces in the
+  writing** — the prerequisite; see "Internal piece-to-piece link
+  rewriting" below, needed the day he writes the first one; (2) **an
+  authored way onward** — a piece names what follows it and in a line
+  why, and its page ends there, the mechanical links becoming the
+  fallback for a piece that names nothing; (3) **the glimpse** — what a
+  link shows before it is followed (a frame, a line), so the reader
+  walks toward something seen, the museum's turned corner in the web's
+  terms; (4) **threads** — the paths those links make across the site
+  (a place's outings, a technique's progression, a season), surfaced
+  only where a thread really exists. Never a "you may also like" grid:
+  the onward link is chosen, not generated. Judged once there are
+  enough real pieces to link between — a handful at least — so it
+  follows his first pieces rather than preceding them. Touches the front
+  door (the thesis a visitor enters by), the place as a tour, and the
+  processing showcase, each of which is one way of going deeper.
+- **A structure others could use** — from `VISION.md`: "I also hope
+  [it] can be generalized such that others can use its structure to
+  create their own personal virtual installation." An aspiration, not a
+  product and not a v1 requirement. What it asks now is restraint in
+  the ordinary course: his content separate from the code ("Content
+  out of the repo" is the first and largest step), and his particulars
+  — the site's name and words, the categories, the gear table, the
+  About page — in content or one settings file rather than spread
+  through components, whenever a spec is touching them anyway. Making
+  it actually usable by someone else (setup, documentation, a starter
+  vault, a theme boundary others can restyle) waits until his own
+  installation has settled.
 - **Content out of the repo** — raised by the photographer after spec
   019's plugin amendment (2026-09-29): "I want the repo to be the code
   of the site, content should be separate." The combined layout —
@@ -696,8 +742,11 @@ attached.
   authored as vault-relative markdown links (which is what Obsidian's
   `[[` autocomplete inserts, and what feeds its graph/backlinks) need a
   small build-time remark transform to become published route URLs
-  (`/pieces/<slug>/`). Same pipeline as the block directives. Needed
-  the day the first cross-piece link gets written, not before.
+  (`/journal/<slug>/`, `/photographs/<id>/`, `/places/<slug>/` since
+  spec 019's lexicon). Same pipeline as the block directives. Needed
+  the day the first cross-piece link gets written, not before — and,
+  since 2026-10-02, the first step of "Every piece leads onward": with
+  his first pieces being written, likely soon.
 - **Obsidian live rendering for photo blocks** — built, in a
   deliberately minimal form: a custom plugin in `obsidian-plugin/`
   rendered `fullbleed` directives as images in Live Preview, the mode
