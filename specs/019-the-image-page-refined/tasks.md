@@ -2182,6 +2182,28 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       mutation (the `<h2>` put back) fails by name, reverted._
       Done: verify green, 827 tests (+1). On land-b's built page: `<section class="sec sec-compare" aria-label="Raw to finished" data-astro-cid-l3n7jj3i>`, no `<h2` before its `<figure`. Mutation (the `<h2>` put back) failed "the compare section shows no heading and is named by aria-label, as the story is (T1753b)" by name, reverted. `AUTHORING.md` and `README.md` unchanged: every mention names the section, none claims a visible heading.
 
+- [x] **T1753c** — Round: a little more air around the compare section
+      (2026-10-02): "I'd maybe give a slight amount more space between
+      what's above and below it. Just a small amount. I'm imagining
+      having some prose above and below introducing the section and
+      describing what was done." On the photograph page only: the
+      `.sec-compare` section's space before it and after it raised by a
+      small, named step in `--baseline` units (today `.sec + .sec` gives
+      `calc(var(--baseline) * 1.5)` before each section; the compare's
+      own before and after each gain about half a baseline — one value,
+      named once, used for both sides), so the section without its
+      heading stands apart a touch more from the wall label above and
+      the section below. The other sections, the compare block inside a
+      story or a journal entry, the width rule and the views unchanged.
+      Pattern: the page's own `.sec + .sec` rule (consume `--baseline`,
+      no literal length; the theme boundary). Files: `[...id].astro`'s
+      `<style>` (and the test that pins the page's styles, if one reads
+      them); spec.md: one Decided line. _Verify: `sh scripts/verify.sh`
+      green; the new rule quoted from the built CSS in `dist/`; the
+      compare block's own vertical margins inside a story or journal
+      entry quoted from `global.css` for the record (unchanged)._
+      Done: verify green, 827 tests. Built CSS: `.sec-compare{--compare-air:calc(var(--baseline) * .5);padding-bottom:var(--compare-air)}` and `.sec+.sec-compare{padding-top:calc(var(--baseline) * 1.5 + var(--compare-air))}` — padding, not margin, since a margin above would collapse into the wall label's last child's `margin-bottom: var(--baseline)`. The in-body compare unchanged: `.piece-block { margin-block: var(--block-margin) }`, `--block-margin: calc(var(--baseline) * 2)`. Side effect, checked by the orchestrator: the page's scoped `<style>` crossed Astro's inline limit and now ships as one shared `_astro/*.css` (5 files, was 4) instead of an inline block on each photograph page, so `[check-motion]` reads 21 stylesheets, was 83 — the same rules, scanned in the file (the stashed build reads 83; `compare-air` found in `dist/_astro/_..BVHNyvm7.css`). For the sweep.
+
 ### Phase 3d record (the person's walkthrough)
 
 _Filled in at the pause._
@@ -2554,6 +2576,7 @@ tier if it is ever on (it is off). -->
 | T1753a All always in the row | implementation (`opus`, high) | ~31k | done; 826 tests; reverses spec 010 Goal 1 at his call, Decided line in spec.md; All marked on both indexes (to be seen) |
 | Finding: side-by-side heading (diagnosis, 2026-10-02) | implementation (`opus`, high) | ~36k | no bug: the heading sits in the text column while side by side widens the box; the camera stage (4:3) is letterboxed inside a 3:2 pane, so its visible edge is inset a second time. Options (heading follows the box; images pushed to their outer edges; side back to column) put to him. Session on `claude-opus-5-5` from this turn (switched outside the session; recorded, not inferred as the fallback) |
 | T1753b no compare heading | implementation (`opus`, high) | ~32k | done; 827 tests; the section named by aria-label as the story's is; Decided line in spec.md |
+| T1753c air around the compare | implementation (`opus`, high) | ~34k | done; half a baseline each side as padding; the page's styles now external (check-motion 83 → 21 stylesheets, same coverage — for the sweep) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

@@ -549,6 +549,20 @@ const indexed =
     padding-top: calc(var(--baseline) * 1.5);
   }
 
+  /* The "Raw to finished" section shows no heading (T1753b), so it
+     stands a touch further from the wall label above and the section
+     below (T1753c): one step of air, named once, added to both sides.
+     Padding, not margin — a margin above would collapse into the wall
+     label's own. */
+  .sec-compare {
+    --compare-air: calc(var(--baseline) * 0.5);
+    padding-bottom: var(--compare-air);
+  }
+
+  .sec + .sec-compare {
+    padding-top: calc(var(--baseline) * 1.5 + var(--compare-air));
+  }
+
   .sec-title {
     max-width: none;
     margin-bottom: calc(var(--baseline) * 0.6);

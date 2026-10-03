@@ -1441,3 +1441,12 @@ _Amended 2026-10-01 (category):_
   finished" stays its name for screen readers, as "The story" names the
   story's section, so the documents still call it the "Raw to finished"
   section. The frames' placement and the width rule are unchanged.
+- **A little more air around the image page's compare (2026-10-02).**
+  From the same look, with its heading gone the section sat close to
+  what surrounds it. "I'd maybe give a slight amount more space between
+  what's above and below it. Just a small amount. I'm imagining having
+  some prose above and below introducing the section and describing
+  what was done." The call: on the photograph page only, the section's
+  space before it and after it each grow by half a baseline, one value
+  for both sides. The other sections, the compare block inside a story
+  or a journal entry, the width rule and the views are unchanged.
