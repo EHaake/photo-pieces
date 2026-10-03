@@ -5,6 +5,31 @@ into every Claude Code session automatically. Specs and plans must not
 contradict it; if a spec needs to, the constitution gets amended first,
 explicitly, in its own commit.
 
+## Why this site exists
+
+A **virtual installation** for the photographer's work — his statement,
+in his words, is `VISION.md`, and it is the reason behind every section
+below. A photograph alone never carried what it was like to be there;
+his photographs are "a carefully and tastefully curated exaggeration of
+the reality", and the site extends that: it invites the visitor into
+his world and how he sees it, and rewards the one who came from an
+image seen elsewhere with a depth no other medium gives. A museum
+exhibit is the loose analogy — context, exploration, a turned corner
+the visitor walks toward out of their own curiosity — played in the
+web's terms, the arbitrary link, never as a literal virtual museum. Not
+a blog and not a static gallery: **every piece leads into the next,
+always inviting the visitor deeper**, each building on the last. The
+structure should be one another photographer could use for their own
+installation (an aspiration, not a v1 requirement).
+
+**The test for every decision** — a spec's goals, a design call, a
+feature, a default: does it draw the visitor deeper into the work and
+the way of seeing behind it, or is it what a blog or a gallery would do
+by default? A spec's `spec.md` says, in its Goals, how it serves this;
+a choice that a blog or gallery convention would make is taken only
+when it also passes the test. `VISION.md`'s "What it asks of the site"
+lists what this means so far.
+
 ## What this project is
 
 A personal photography website, spanning landscape/nature (primary),
