@@ -2109,7 +2109,7 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       `sh scripts/verify.sh` green._
       Done: greps: `categories:` → README 68 (journal), 238 (the clause naming the line), 283 (the sidecar example); AUTHORING 74 (journal), 117 (the skeleton's note), 259 (the example), 275 (the bullet); "galleries that hold" 1 (AUTHORING:280); the quoted message 1; no stale phrase; prettier clean; verify green, 825 tests (AC 38). Wording: the refusal paragraph says "naming the file and the field"; "the line whole when present" rendered as "When the line is there it is the whole eyebrow — the galleries' categories are not added to it". Reviewer's second looks left for the pause: AUTHORING.md's bullet does not say a bad word or an empty line fails the build; one long README line (~657).
 
-- [ ] **T1753** — The photograph's categories, looked at, and the
+- [x] **T1753** — The photograph's categories, looked at, and the
       rounds. Not an implementation task: the orchestrator's record of
       the Phase 3d pause, in the person's words, as T1745's. The
       questions, in plain language: "Dock, late" reading Street above
@@ -2126,6 +2126,7 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
       _Verify: every sub-lettered task green; the documents agree with
       what was kept (a `grep` of each, listed); the Phase 3d record
       below filled in._
+      Done: three rounds (T1753a–c), all green; his keeps recorded in the Phase 3d record below. The documents agree: no document states the category row's All rule; every "Raw to finished" mention names the section, none a visible heading; the `categories:` lines as T1752 left them (AUTHORING 74, 117, 259, 275; README 68, 238, 283).
 
 - [x] **T1753a** — Round: "All" always in the category row ("On the
       categories page, All should always be visible. Right now if you
@@ -2206,7 +2207,31 @@ amendment (spec.md's ordinary-path list). Task ids continue from T1747.
 
 ### Phase 3d record (the person's walkthrough)
 
-_Filled in at the pause._
+Reached 2026-10-01; his look 2026-10-02, on the built site on the
+laptop ("Ok overall great"). The eyebrow kept as built — the sidecar's
+line the whole eyebrow, the galleries' as the fallback, nothing in no
+gallery; the category pages unchanged. Three rounds:
+
+- **T1753a** — "All" always leads the category row: "On the categories
+  page, All should always be visible … It comes across as a UI glitch
+  and feels strange." Kept: "Looks good now." Reverses spec 010's Goal 1
+  line; recorded in spec.md's Decided section.
+- **T1753b** — a finding, not a fault: in side by side the compare
+  widens and its heading stayed at the column's edge. Of the options
+  put to him: "I think it might be better to remove the heading
+  altogether. I agree that having the heading jump isn't good, but I
+  also don't want to pin them to the edges." The section keeps the words
+  as its accessible name.
+- **T1753c** — "a slight amount more space between what's above and
+  below it. Just a small amount. I'm imagining having some prose above
+  and below introducing the section and describing what was done."
+  Half a baseline each side. Told that prose around a compare is the
+  story's own compare, which replaces the section.
+
+**Keeps**: "Looks good for now." Not raised by him: the reviewer's
+optional sentence in `AUTHORING.md` that a bad `categories:` word or an
+empty line fails the build (left as is). The Phase 3a, 3b and 3c looks
+(T1729, T1735, T1745) stay open; Phase 4 waits for his piece.
 
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — a photograph piece's page with his story (from the photographs folder, on the front door once he dates it), or a journal entry's page with his writing and his compare as he wrote it and then his photograph's page; on his photograph's page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
