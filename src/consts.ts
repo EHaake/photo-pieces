@@ -15,11 +15,11 @@ export const SITE = {
    *  Interim factual wording until Erik supplies his own (spec 005,
    *  task T114). */
   description:
-    'Photography by Erik Haake — landscape and nature, street, portrait, and event work, presented as written pieces.',
+    'Photography by Erik Haake — landscape and nature first, with street, portrait and event work, and the writing that goes with it.',
   /** Description of the RSS feed at /rss.xml.
    *  Interim factual wording until Erik supplies his own (spec 005,
    *  task T114). */
-  rssDescription: 'Pieces from Erik Haake Photography.',
+  rssDescription: 'The journal of Erik Haake Photography.',
   /** Default social share image, relative to the site root (see public/). */
   ogImage: '/og.jpg',
   /** Post author, emitted in JSON-LD BlogPosting structured data.
@@ -66,9 +66,23 @@ export type NavItem =
  *  `label` instead — one of the two is required. */
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: '/', labelKey: 'nav.home' },
-  { href: '/pieces/', label: 'Pieces' },
-  { href: '/galleries/', label: 'Galleries' },
+  { href: '/journal/', label: 'Journal' },
   { href: '/places/', label: 'Places' },
+  { href: '/galleries/', label: 'Galleries' },
   { href: '/about/', labelKey: 'nav.about' },
   { href: '/search/', labelKey: 'nav.search' },
+];
+
+export interface FooterLink {
+  href: string;
+  label: string;
+}
+
+/** The footer's links, in the order they stand — each link's word and
+ *  its place in one array. `href` is relative to the site root; `base` is
+ *  applied by the layout. The index of photographs lives here, not in
+ *  `NAV_ITEMS` (spec 019). */
+export const FOOTER_LINKS: readonly FooterLink[] = [
+  { href: '/contact/', label: 'Contact' },
+  { href: '/photographs/', label: 'Index of photographs' },
 ];

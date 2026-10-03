@@ -45,7 +45,7 @@ import { getImageRegistry } from '../../../lib/images';
 import { categoryLabel } from '../../../lib/categories';
 import { formatDate } from '../../../i18n';
 import { withBase } from '../../../lib/url';
-import { stageSizes } from '../../../lib/stage-sizes';
+import { stageShape, stageSizes } from '../../../lib/stage-sizes';
 // Aliased since spec 013, when getStaticPaths carried a mat table of the
 // same name; the prefix keeps the ground's names reading as the ground's.
 import { CANDIDATES as GROUND_CANDIDATES, TODAY as GROUND_TODAY } from '../../../lib/ground';
@@ -79,11 +79,11 @@ const { surface, surfaces, grounds } = Astro.props;
 const registry = await getImageRegistry();
 
 // The sampler's set is the REAL photographs, not the whole mixed root (the
-// spec-011 lesson): src/content/gallery-images/ holds both the real exports
+// spec-011 lesson): src/content/photographs/ holds both the real exports
 // and the synthetic placeholder fixtures, and the gate exists to judge mats
 // on photographs. The fixtures carry a camera name beginning 'Fixture';
 // the real exports carry real camera models. If too few real exports exist
-// yet, fall back to the whole gallery root so the sampler still has frames.
+// yet, fall back to the whole photographs folder so the sampler still has frames.
 const REAL = (img: (typeof registry.images)[number]) =>
   img.piece === null && !!img.label?.camera && !/^Fixture/i.test(img.label.camera);
 let set = registry.images.filter(REAL);
@@ -92,8 +92,8 @@ if (set.length < 6) set = registry.images.filter((img) => img.piece === null);
 // ---- the `pieces` surface: the draft fixture piece, in the piece page's
 // markup. It is `draft: true`, so it ships no page, no appearance and no
 // OG image; here it is read straight from the collection.
-const piece = await getEntry('pieces', 'matte-sampler');
-if (!piece) throw new Error('[matte sampler] src/content/pieces/matte-sampler/index.md is missing');
+const piece = await getEntry('journal', 'matte-sampler');
+if (!piece) throw new Error('[matte sampler] src/content/journal/matte-sampler/index.md is missing');
 const { Content } = await render(piece);
 
 // ---- the `galleries` surface: the gallery page's packed flow and the
@@ -109,7 +109,7 @@ const relatedCells = set.map((image) => ({
 // 3:2 reference rectangle turned (spec 017), as the image page renders
 // them. A landscape, a portrait and a near-square come from the real
 // exports; no real export is a panorama
-// (the widest is 3:2), so that one falls back to the gallery root's
+// (the widest is 3:2), so that one falls back to the photographs folder's
 // placeholder set — the frame's geometry is what the stage is judged on.
 const ratioOf = (img: (typeof registry.images)[number]) => img.image.width / img.image.height;
 const widest = (pool: typeof registry.images) =>
@@ -243,6 +243,9 @@ const SURFACE_NOTE: Record<Surface, string> = {
               <figure
                 class="image-frame"
                 style={`--ar: ${Math.round((image.image.width / image.image.height) * 1000) / 1000}`}
+                data-shape={stageShape(
+                  Math.round((image.image.width / image.image.height) * 1000) / 1000,
+                )}
               >
                 <Image
                   src={image.image}

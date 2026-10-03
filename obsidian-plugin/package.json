@@ -1,7 +1,7 @@
 {
   "name": "photo-pieces-blocks",
-  "version": "0.2.0",
-  "description": "Live-preview image rendering for the fullbleed directive used in photo-pieces.",
+  "version": "0.3.0",
+  "description": "Draws every block of the photo-pieces vocabulary as its figure, in Live Preview and Reading view.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs watch",

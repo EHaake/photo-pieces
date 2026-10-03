@@ -8,13 +8,13 @@ description: >-
   placeholder images labelled with their ratio and order.
 date: 2026-07-12
 images:
-  - gallery/wide-3x2-01
-  - gallery/wide-3x2-02
-  - gallery/wide-3x2-03
-  - gallery/wide-3x2-04
-  - gallery/wide-3x2-05
-  - gallery/wide-3x2-06
-  - gallery/wide-3x2-07
-  - gallery/wide-3x2-08
-  - gallery/wide-3x2-09
+  - wide-3x2-01
+  - wide-3x2-02
+  - wide-3x2-03
+  - wide-3x2-04
+  - wide-3x2-05
+  - wide-3x2-06
+  - wide-3x2-07
+  - wide-3x2-08
+  - wide-3x2-09
 ---

@@ -9,8 +9,8 @@ description: >-
 images:
   - where-the-fog-lets-go/land-a
   - market-day-camera-low/land-c
-  - gallery/dock-a
+  - dock-a
   - market-day-camera-low/port-45
-  - gallery/dock-b
+  - dock-b
   - where-the-fog-lets-go/pano
 ---

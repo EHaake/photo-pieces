@@ -16,8 +16,8 @@ import { CATEGORIES } from './lib/categories';
 // content store for a collection meant to grow for years.
 // Pieces are plain Markdown only (no MDX) so the files stay renderable
 // and editable in Obsidian — enforced here by the loader pattern.
-const pieces = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/pieces', deferRender: true }),
+const journal = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/journal', deferRender: true }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -34,7 +34,7 @@ const pieces = defineCollection({
 });
 
 // Galleries (spec 004): hand-curated, ordered lists of image ids
-// (`<piece-folder>/<basename>` or `gallery/<basename>`), one category
+// (`<journal-slug>/<basename>` or a bare `<basename>`), one category
 // each. Whether every id names a real, published image is the image
 // registry's check (src/lib/images.ts) — it reports file + line; this
 // schema covers shape only. `cover` defaults to the first image.
@@ -64,14 +64,14 @@ const galleries = defineCollection({
 // Image sidecars (spec 004): an optional `_<basename>.md` beside an
 // image — the wall label's overrides and, since spec 006, the rich
 // page's fields, with the body as the image's own story. The leading underscore keeps sidecars out of the
-// `pieces` loader by construction. The id is the path verbatim
-// (`pieces/<slug>/_land-b`, `gallery-images/_dock-b`) so the registry
+// `journal` loader by construction. The id is the path verbatim
+// (`journal/<slug>/_land-b`, `photographs/_dock-b`) so the registry
 // maps it to the image id deterministically, without Astro's slugger
 // in between. Every label field is a string that overrides the
 // EXIF-derived value as written; `date` overrides the capture date.
 const imageMeta = defineCollection({
   loader: glob({
-    pattern: '{pieces,gallery-images}/**/_*.md',
+    pattern: '{journal,photographs}/**/_*.md',
     base: './src/content',
     generateId: ({ entry }) => entry.replace(/\.md$/, ''),
     deferRender: true,
@@ -98,9 +98,29 @@ const imageMeta = defineCollection({
     filters: z.string().optional(),
     support: z.string().optional(),
     processing: z.string().optional(),
+    // Spec 019: the steps between the camera's frame and the finished
+    // photograph, in order, each a private file beside it
+    // (`_<basename>.<word>.<ext>`) with a label and an optional note. The
+    // frame and the photograph are implied, never listed; the registry
+    // checks every `file` against the photograph's own stage files.
+    stages: z
+      .array(z.object({ file: z.string(), label: z.string().min(1), note: z.string().optional() }))
+      .optional(),
     edition: z.string().optional(),
     sizes: z.string().optional(),
     paper: z.string().optional(),
+    // Spec 019: a photograph in the photographs folder is published unless
+    // its sidecar says `draft: true`, stands on the front door when it
+    // has a `published:` date (not `date`, the capture date's override),
+    // and may name its `categories:` as a journal entry's frontmatter
+    // writes them (amendment 4). A journal entry's photographs are
+    // published, dated and categorised by their entry, so the registry
+    // refuses any of the three lines in a journal folder — optional, not
+    // defaulted, so a written `draft: false` is refused too.
+    // The names are PHOTOGRAPH_FIELDS (src/lib/image-meta.mjs).
+    draft: z.boolean().optional(), // photographs folder only
+    published: z.coerce.date().optional(), // photographs folder only
+    categories: z.array(z.enum(CATEGORIES)).min(1).optional(), // photographs folder only
   }),
 });
 
@@ -126,4 +146,4 @@ const places = defineCollection({
   }),
 });
 
-export const collections = { pieces, galleries, imageMeta, places };
+export const collections = { journal, galleries, imageMeta, places };

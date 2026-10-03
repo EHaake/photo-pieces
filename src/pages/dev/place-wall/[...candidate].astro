@@ -70,13 +70,13 @@ if (!place) throw new Error(`[place-wall sampler] no places in the registry`);
 const { Content } = await render(place.entry);
 
 // The wall's set is the REAL photographs, not the whole mixed root
-// (the spec-011 lesson): src/content/gallery-images/ holds both the real
+// (the spec-011 lesson): src/content/photographs/ holds both the real
 // exports and the synthetic placeholder fixtures, and the gate exists to
 // judge real photographs. The fixtures carry a camera name beginning
 // 'Fixture' in their wall label ('Fixture FX-1', and one sidecar
 // override, 'Fixture FX-2 (override)'), the real exports real camera
 // models. If too few real exports exist yet, fall back to the whole
-// gallery root so the sampler still has a wall to hang.
+// photographs folder so the sampler still has a wall to hang.
 const REAL = (img: (typeof registry.images)[number]) =>
   img.piece === null && !!img.label?.camera && !/^Fixture/i.test(img.label.camera);
 let set = registry.images.filter(REAL);

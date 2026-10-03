@@ -12,8 +12,8 @@ The vault is a **parent** of the repo, not the content folder itself:
 ~/photo-brain/                  <- Obsidian vault root
 ├── photo-pieces/               <- this repo, a normal git clone
 │   └── src/content/
-│       ├── pieces/             <- published pieces live here
-│       ├── gallery-images/     <- images that belong to no piece
+│       ├── journal/            <- one folder per journal entry
+│       ├── photographs/        <- photographs of their own, one flat folder
 │       ├── galleries/          <- one file per gallery
 │       └── places/             <- one file per place (spec 009)
 ├── notes/                      <- private second-brain material
@@ -28,8 +28,8 @@ Why this shape:
   location scouting, gear research, journal fragments. They can never
   be committed by accident because git never sees them. No `.gitignore`
   discipline required.
-- **One vault means one graph.** A scouting note can link to the piece
-  that came out of that trip; the graph grows across private and
+- **One vault means one graph.** A scouting note can link to the journal
+  entry that came out of that trip; the graph grows across private and
   published material together.
 
 ## Obsidian settings that matter
@@ -42,24 +42,28 @@ Why this shape:
   `dist` so search, the graph, and link suggestions don't drown in
   repo machinery.
 - **Core Templates plugin:** point it at `templates/`, and keep a
-  `piece.md` template there (skeleton below).
+  `journal.md` template there (skeleton below).
 - **Community plugins → Photo Pieces Blocks: enabled.** The plugin
-  renders leaves: a standalone block written in leaf form (`::single`,
-  `::fullbleed`, `::wide`, `::tall`, `::inset`, `::diptych`,
-  `::triptych`) shows its image while you write. Everything
-  else is raw text by construction — container forms (captions), and
-  the container-only `grid`, `strip`, `aside`, `row`, and `held` — and
-  the site build is the truth for those. On the site, the frames you
+  draws every block of the vocabulary as a representative figure, in
+  Live Preview and in Reading view alike — each frame at a width that
+  reads as the site's for its block, its caption beneath, beside the
+  prose where the block puts it there — and in Live Preview a block
+  turns back into its text when the cursor enters it. Turn on
+  **Editor → Readable line length** so the widths read as the site's.
+  To check it, open the sampler entry (`journal/vocabulary-sampler`): every
+  block is a figure, in both views. Representative, not identical —
+  the site's typography, ground, mat, motion and every interaction,
+  a compare's included, stay the site's, and the site build is the
+  truth for how a block actually renders. On the site, the frames you
   place animate by the site's own rules — they fade in as they load and
   as they scroll into view, and travel into their pages when clicked —
   so there is nothing to author for motion, and the plugin does not
-  change. Live Preview only — Reading
-  view is intentionally out of scope (see `DECISIONS.md`). Build/install instructions:
-  `obsidian-plugin/README.md`.
+  change. Build/install instructions: `obsidian-plugin/README.md`.
 
-## Piece template
+## Journal entry template
 
-Contents for `templates/piece.md` — frontmatter is simultaneously the
+Contents for `templates/journal.md`, saved as
+`src/content/journal/<slug>/index.md` — frontmatter is simultaneously the
 Astro schema (build-validated) and Obsidian's Properties panel, so
 there is no separate metadata system to maintain:
 
@@ -77,7 +81,7 @@ draft: true
 
 `categories` values: `landscape`, `street`, `portrait`, `event`.
 `at`: the slug of a declared place — the default for every frame in
-the folder that names none — see "Places" below.
+the entry's folder that names none — see "Places" below.
 
 Three more skeletons worth keeping in `templates/` (spec 004 — the
 field reference is in `README.md`):
@@ -109,7 +113,9 @@ The story, if there is one.
 ```
 
 saved as `_<basename>.md` beside an image (every field optional — see
-"Metadata: EXIF, then a sidecar" below), and
+"Metadata: EXIF, then a sidecar" below; a photograph in the photographs
+folder takes three more, `draft:`, `published:` and `categories:` —
+"The photographs folder" below), and
 
 ```markdown
 ---
@@ -137,50 +143,62 @@ Why you keep going back.
 
 saved in `src/content/places/` (spec 009 — "Places" below).
 
-## A piece folder is public territory
+## A journal folder is public territory
 
-Since spec 004 every accepted image in a published piece's folder has
-its own page at `/images/<piece-folder>/<basename>/` — whether or not
-the piece's text references it. Consequences worth internalizing:
+Since spec 004 every accepted image in a published journal entry's
+folder has its own page at `/photographs/<slug>/<basename>/` — whether
+or not the entry's text references it. Consequences worth
+internalizing:
 
 - **Don't park alternates in the folder.** An unreferenced frame is
   still published with a page. Keep contact-sheet material in `notes/`
   or the archive; move a frame into the folder when it's chosen.
-- **No sub-folders.** A piece's own images live directly in its
+- **No sub-folders.** An entry's own images live directly in its
   folder; a `detail/` folder is ignored with a build warning, and a
-  directive pointing into one fails the build. A piece may also
-  _place_ another piece's photograph, or one from the gallery root, by
-  path — see "Borrowing a photograph" below.
-- **File names are URLs.** `land-b.jpg` becomes `/images/<slug>/land-b/`.
-  Renaming or moving an image — or renaming the folder — changes its
-  URL (no redirects yet — nothing is live), so name frames before
-  publishing, not after. Since spec 008 a rename also breaks every
-  reference to that photograph from another piece; the build fails
-  naming each missing file until they are updated.
+  directive pointing into one fails the build. An entry may also
+  _place_ another entry's photograph, or one from the photographs
+  folder, by path — see "Borrowing a photograph" below.
+- **File names are URLs.** `land-b.jpg` becomes
+  `/photographs/<slug>/land-b/`. Renaming or moving an image — or
+  renaming the folder — changes its URL (no redirects yet — nothing is
+  live), so name frames before publishing, not after. Since spec 008 a
+  rename also breaks every reference to that photograph from another
+  entry; the build fails naming each missing file until they are
+  updated.
 - **`draft: true` hides the images too.** A gallery that lists one of
-  them fails the build until the piece is published, and so does a
-  published piece that places one — the message names both pieces. A
-  draft piece may place anything.
+  them fails the build until the entry is published, and so does a
+  published entry that places one — the message names both entries. A
+  draft entry may place anything.
 - **The folder name must be a slug** (`lowercase-with-hyphens`), as
-  they all are already — the build says so, with the fix, if not.
+  they all are already — the build says so, with the fix, if not. Two
+  names are taken: an entry named `photographs` is refused, since that
+  is the photographs folder's name, and an entry may not share its name
+  with a photograph in the photographs folder (`journal/bank/` and
+  `photographs/bank.jpg`) — `/photographs/bank/` would read as the page
+  above the entry's photographs — so the build names both and asks you
+  to rename one.
 - **An underscore makes a file private.** `_land-b.jpg` beside
-  `land-b.jpg` is that photograph's camera's frame (spec 006): it gets
-  no page, can't be listed in a gallery, and a piece that places it
-  fails the build. See "The camera's frame" below.
+  `land-b.jpg` is that photograph's camera's frame (spec 006);
+  `_land-b.tones.jpg` is one of its stages, and `_land-b.detail.jpg`
+  its larger export for the loupe (spec 019). None gets a page or can
+  be listed in a gallery, and a piece may place one only as a stage of
+  a `compare`, `side` or `slider` in the same folder — anywhere else
+  fails the build. See
+  "The private files" below.
 
 ### Borrowing a photograph
 
-A piece writes its own images as `./<file>`. Since spec 008 two more
-shapes reach out of the folder:
+A journal entry writes its own images as `./<file>`. Since spec 008
+two more shapes reach out of the folder:
 
 ```md
 ::single{src="../where-the-fog-lets-go/land-b.jpg" alt="The ridgeline emerging from fog"}
 
-![A dock at the water's edge](../../gallery-images/dock-a.jpg)
+![A dock at the water's edge](../../photographs/dock-a.jpg)
 ```
 
-`../<other-piece-slug>/<file>` is another piece's photograph;
-`../../gallery-images/<file>` is one from the gallery root. Both work
+`../<other-entry-slug>/<file>` is another entry's photograph;
+`../../photographs/<file>` is one from the photographs folder. Both work
 everywhere an image is written — every block, the `diptych` and
 `triptych` slots, `grid` and `strip` bodies, `held`, the
 plain `![alt](…)` shorthand, and the `cover` field in frontmatter.
@@ -188,24 +206,109 @@ Obsidian previews them as it previews any image, because the path is
 real.
 
 The photograph keeps its home. Its id, its page's URL, "From the
-piece", the quoted passage, the related frames, the categories, and
-the title stay the home folder's — nothing moves and nothing is
-duplicated. The alt written in the borrowing piece is used for that
-image element and nowhere else.
+journal entry", the quoted passage, the related frames, the
+categories, and the title stay the home folder's — nothing moves and
+nothing is duplicated. The alt written in the borrowing entry is used
+for that image element and nowhere else.
 
 The photograph's page says where else it appears: below "From the
-piece" — or in its place, for a gallery-root photograph — an "Also
-in" line links every other published piece that places it, newest
-first.
-The arrows follow the reader: arriving from a borrowing piece they
-step through that piece's frames with the borrowed one in its place;
-arriving from the home piece or a gallery, as before. A piece that
+journal entry" — or in its place, for a photograph of the photographs
+folder — an "Also in" line links every other published entry that
+places it, newest first.
+The arrows follow the reader: arriving from a borrowing entry they
+step through that entry's frames with the borrowed one in its place;
+arriving from the home entry or a gallery, as before. An entry that
 borrows a photograph only as its `cover` is named under "Also in" but
 gets no arrows for it — a cover has no place in the reading order.
 
 The sampler's "Borrowed" section
-(`src/content/pieces/vocabulary-sampler/`) is the standing example,
+(`src/content/journal/vocabulary-sampler/`) is the standing example,
 its borrowed cover included.
+
+## The photographs folder
+
+A photograph that belongs to no journal entry lives in
+`src/content/photographs/`, one flat folder: `dock-b.jpg`, with its
+sidecar `_dock-b.md` beside it and its private files — the camera's
+frame, the stages, the larger export — beside that ("The private
+files" below). It is a piece of its own, and its page is the piece:
+the sidecar is its writing — its title, its caption, its story as the
+body — and everything the page shows of it grows from that file, as
+for any photograph ("Metadata: EXIF, then a sidecar" below). Its story
+places its own folder's photographs only, as `./<file>`.
+
+Its id is its bare name — `dock-b`, no folder — and its page is at
+`/photographs/dock-b/`. A gallery lists it by that name
+(`- dock-b`), a place's `cover` names it the same way, and a journal
+entry places it as `../../photographs/dock-b.jpg` ("Borrowing a
+photograph" above). The id was `gallery/<name>` before spec 019; a
+gallery or a place cover still naming the old id fails the build,
+naming the file and the new id:
+
+```
+"gallery/<name>" is an old id — the photograph in src/content/photographs/ is "<name>" now
+```
+
+Three sidecar fields are this folder's alone:
+
+```yaml
+---
+title: Dock, late
+draft: true # no page yet
+published: 2026-08-31 # on the front door, by this date
+categories: [landscape] # the eyebrow above the title
+at: the-jetty # on the place's wall, by its capture date
+---
+```
+
+- **`draft: true`** holds the photograph back: no page, not on the
+  index of photographs, not on a place's wall. A gallery that lists it
+  fails the build, naming the file and line, with the reason
+  `"dock-b" is a draft (its sidecar says draft: true)`, and so does a
+  published journal entry that places it. Delete the line to publish it.
+- **`published:`** is the date it went up, and it puts the photograph
+  on the front door's latest list among the journal entries, newest
+  first, as its frame and its title. Without the line it is published
+  all the same, with its page, but stays off the front door. It is not
+  `date:`, which is the capture date the label shows. The feed carries
+  journal entries only.
+- **`categories:`** names one or more of the four, as a journal entry
+  writes them (`landscape`, `street`, `portrait`, `event`), and shows
+  them in the eyebrow above the photograph's title, each linking to
+  its category page. When the line is there it is the whole eyebrow —
+  the galleries' categories are not added to it. Without the line the
+  eyebrow shows the categories of the galleries that hold the
+  photograph, and nothing when no gallery does. Category pages list
+  galleries and journal entries, not photographs, so the line puts the
+  photograph on none of them.
+
+A journal entry's photographs are published, dated and categorised by
+their entry, so any of the three lines in a journal folder's sidecar
+fails the build, naming the file and the field:
+
+```
+[images] <file>: "draft" is for a photograph in src/content/photographs/ — a journal entry's photographs are published and dated by their entry; remove the line
+[images] <file>: "categories" is for a photograph in src/content/photographs/ — a journal entry's photographs take their entry's categories; remove the line
+```
+
+**`at:` puts it on a place's wall** as an outing of its own, ordered
+among the place's outings by its capture date — the file's own, or the
+sidecar's `date:` where the file has none or has it wrong — while a
+journal entry's frames there are one outing, ordered by the entry's
+publish date. No default reaches it (a journal entry's `at:` covers its
+own folder only), so it is at a place only when its own line says so,
+and it may then be the place's cover. **A photograph at a place needs
+a capture date**: one with neither fails the build, rather than being
+put on the wall by guess:
+
+```
+[places] <file>: names the place "the-jetty" but has no capture date, which orders it on the wall — add a date: line to the sidecar
+```
+
+**The index of photographs** is at `/photographs/`: every published
+photograph from both folders, once each, as small frames in order of
+title, each linking to its page. It is reached from the footer's
+"Index of photographs" link, not from the nav; a draft is not on it.
 
 ## Metadata: EXIF, then a sidecar
 
@@ -224,10 +327,42 @@ beside the image, whose `title`, `caption` (one paragraph, inline
 markdown), `date`, and label fields (`camera`, `lens`, `focalLength`,
 `aperture`, `shutter`, `iso`) override what EXIF said, field by field,
 as written. Obsidian treats a sidecar as an ordinary note; the leading
-underscore is what keeps it out of the pieces collection. A misspelled
+underscore is what keeps it out of the journal collection. A misspelled
 field is silently ignored (Obsidian adds properties of its own, so the
 schema can't be strict); a field of the wrong type fails the build
 naming it.
+
+### Gear names
+
+The label prints the camera and the lens by name rather than as the
+camera wrote them: `ILCE-7RM4` in the file reads "Sony α7R IV" on the
+page. The names live in one hand-edited file, `src/content/gear.md` —
+it opens in the vault as a note, and nothing regenerates it — one line
+per string, under `## Cameras` or `## Lenses`:
+
+```markdown
+## Cameras
+
+- `ILCE-7RM4` = Sony α7R IV
+
+## Lenses
+
+- `FE 16-35mm F2.8 GM II` = Sony FE 16-35mm f/2.8 GM II
+```
+
+A dash, the string exactly as the file's EXIF carries it in backticks,
+an equals sign, then the name to print. A camera is keyed by its model
+alone, and its line is the whole name. The file's title and a
+paragraph may sit above the first list; inside a list, only entries,
+blank lines and one-line `<!-- … -->` comments. **A malformed table
+fails the build** — a line in any other shape, or a string listed
+twice in one list — naming the file and the line. **A string the
+table lacks only warns**: the build prints one `[gear]` line for each,
+naming the first file that carries it, and the label prints what it
+printed before the table existed until a line is added. A sidecar's
+own `camera:` or `lens:` still wins over the table. The table is read
+where the image registry is built, so restart `npm run dev` to see an
+edit, as for a new image ("The writing loop" below).
 
 ### The rich page's fields and the story
 
@@ -247,7 +382,7 @@ aperture: f/8
 shutter: 1/250 s
 iso: ISO 400
 place: The headlands above the cove # prose, never coordinates
-at: the-headlands # the declared place's slug — the wall label links to it; `none` opts out of the piece's default
+at: the-headlands # the declared place's slug — the wall label links to it; `none` opts out of the entry's default
 time: 06:40 — forty minutes before sunrise, late November
 format: Digital, full-frame # "How it was made", with the three below
 filters: None
@@ -269,39 +404,238 @@ label shows, `at` is the slug of a declared place, which the label
 links to — see "Places" below.
 
 **A story is prose — no holds.** The image page renders the story
-through the same pipeline, but not through the piece page's script,
+through the same pipeline, but not through the journal page's script,
 so a `held` frame written in a sidecar never keeps the header away;
-the bled shapes assume the piece page's column besides. Write it in a
-piece, where it works.
+the bled shapes assume the journal page's column besides. Write it in
+a journal entry, where it works.
 
-The page also quotes **the passage** of the piece the image sits in:
+The page also quotes **the passage** of the journal entry the image
+sits in, under "In the journal":
 the nearest paragraph before the block that first places it, plus that
 block's caption where it has one. Only caption-bodied blocks
 contribute the caption — the container forms of `single`, `wide`,
 `tall`, `fullbleed`, `inset`, `diptych`, `triptych`, and the caption
 line of a `grid` or `strip`. The body of a `held`, `row`, or `aside`
-is the piece's own prose, not a caption, so it never appears on the
+is the entry's own prose, not a caption, so it never appears on the
 image page. If you want words quoted there, write them as the block's
 caption, not beside the frame.
 
 The page's headings and row names ("How it was made", "Ask about a
 print"…) live in one block at the top of
-`src/pages/images/[...id].astro` — retune them there.
+`src/pages/photographs/[...id].astro` — retune them there.
 
-### The camera's frame
+## The private files
 
-To show the raw-to-finished compare, export the camera's frame — the
-unprocessed file, at web size like everything else — and drop it
-beside the photograph under the same name with a leading underscore:
-`_land-b.jpg` beside `land-b.jpg` (any accepted extension; the two
-need not match). Nothing to declare: the site finds it. One frame per
-photograph. The frame is private — no page, never in a gallery, never
-placed in a piece; a frame with no photograph beside it fails the
-build naming the file, as a stray sidecar does. Two relations share
-one prefix, deliberately: `_land-b.md` is _about_ `land-b.jpg`, and
-`_land-b.jpg` is _the raw of_ `land-b.jpg`. Strip location metadata
-from the frame's export as from any other (the build fails on GPS in
-the output either way).
+A photograph can carry three kinds of private file: rasters beside it,
+named for it, with a leading underscore (spec 006, widened at spec
+019). Any accepted extension, and it need not match the photograph's.
+
+- **The camera's frame** — `_land-b.jpg` beside `land-b.jpg`: the
+  unprocessed file, at web size like everything else. One per
+  photograph. Nothing to declare: the site finds it, and it is the
+  first stage of the compare on the photograph's page.
+- **A stage** — `_land-b.tones.jpg`: one step between the camera's
+  frame and the finished photograph, the word after the basename
+  naming it for you (`tones`, `crop`, `dodge` — any word but
+  `detail`). As many as the photograph took. A stage shows where you
+  put it: in a `compare`, `side` or `slider` block, or on the image
+  page when the sidecar lists it.
+- **The larger export** — `_land-b.detail.jpg`: the finished
+  photograph exported bigger, for the loupe alone. One per photograph,
+  found by name like the frame ("The larger export" below).
+
+Two relations share one prefix, deliberately: `_land-b.md` is _about_
+`land-b.jpg`, and every `_land-b…` raster is _part of the making of_
+it. None of them is an image of the site — no page, never in a
+gallery — and the one place a piece may write one is as a stage of a
+`compare`, `side` or `slider` in its own folder. The build fails,
+naming the file:
+
+- a private file with no photograph beside it (`_land-c.tones.jpg`
+  with no `land-c.jpg`), as a stray sidecar does;
+- a second camera's frame, or a second larger export, for one
+  photograph;
+- a private file placed anywhere else — another block, the plain
+  `![alt](…)` shorthand, a `cover` — or listed in a gallery;
+- a private file of another folder in a `compare`, `side` or `slider`:
+  a journal entry may borrow another folder's finished photograph, not
+  its making-of.
+
+Strip location metadata from every one of these exports as from any
+other (the build fails on GPS in the output either way).
+
+### A compare in a piece
+
+A `compare` shows one photograph's stages one against another — the
+camera's frame, the steps between, the finished photograph:
+
+```markdown
+:::compare{mode="slider"}
+![Camera](./_land-b.jpg) Straight out of the camera, flat profile.
+![Tones](./_land-b.tones.jpg) Shadows lifted on the ridge, the fog's highlights held.
+![Finished](./land-b.jpg) A touch of warmth over the whole frame.
+:::
+```
+
+Container form only, one stage per line. **A stage is an image whose
+text is its label, the text to the next image its note** — a label of
+a word or two, which is also the image's alt text, and a note of a
+sentence or a short paragraph, inline markdown allowed. A later
+paragraph without an image joins the previous note, so a blank line
+between stages changes nothing, and text written after the last stage
+becomes the finished stage's note: the block has no caption of its
+own. The build fails on
+
+- fewer than two stages;
+- a stage without its label — `![](./_land-b.jpg)`;
+- anything in the body but stages: text before the first image, a
+  list, a heading, another block;
+- a missing file, or a private file from another folder. A private
+  file comes from the block's own folder (`./_land-b.jpg`); a public
+  photograph may be borrowed by path, as anywhere ("Borrowing a
+  photograph" above).
+
+A stage links nowhere, and its label never becomes the photograph's
+title on its page: a compare's image text names a stage, it does not
+describe the photograph.
+
+`mode` picks the way the compare opens: `slider` (the default),
+`side`, `switch`, or `filmstrip`. The reader can change it with the
+"How to compare" control on the row beneath, and their choice holds
+for every compare they open in that tab, outranking the `mode`
+written, until the tab closes. The four ways:
+
+- **Slider** — two stages in one frame, wiping between them: drag the
+  handle, or use the arrow keys. At rest it shows the first stage
+  against the last — Camera | Finished above — with the handle in the
+  middle. The legend of stage names beneath picks the pair: the first
+  click sets the left side, the next the right, and any stage can be
+  picked at any step, so every pair is two clicks away.
+- **Side by side** — the same pair next to each other, picked in the
+  legend the same way, and the one way that runs wider than the text
+  column. Where two won't fit — on a phone — they stack.
+- **Switch** — one stage at a time, in the column: a click or tap on
+  the photograph, Space, Enter or → moves to the next, ← steps back,
+  and the last wraps to the first.
+- **Filmstrip** — one stage fills the frame, the others in a row
+  beyond its edges: an arrow at either side, ← and → (Home and End for
+  the ends) or a swipe on the phone slides the strip to the next stage,
+  and after a swipe it settles on the nearest; a sideways two-finger
+  scroll on the trackpad pages one whole stage per gesture, its
+  momentum spent without paging again. It slides, it does not fade,
+  so the frames go by in order, and it stops at either end rather than
+  wrapping — the arrow with nowhere to go hides. A click on a stage in
+  the legend slides there, and the note beneath is the showing stage's.
+  Nothing plays by itself, and under reduced motion it cuts to the
+  stage instead of sliding.
+
+Without script the compare is its stages one under another, each with
+its label and note. In Obsidian, in Live Preview and Reading view, it
+shows its stages' images in a row, each with its label beneath, and
+names its method — no notes, no slider. In Live Preview put the cursor
+in the block and it turns back into its text; in either view a file
+that isn't there shows the dashed "not found" box.
+
+A piece may write several compares over the same stages — Camera
+against Finished early on, Tones against Finished further down, each
+a subset. They ask for the same files, so a reader downloads each
+stage once. The same block in a sidecar's story puts the compare in
+the writing, and the page's own "Raw to finished" section steps aside.
+
+### A pair: side and slider
+
+Where the writing wants one fixed look rather than the reader's
+choice, two more blocks take a compare's stage lines — two of them:
+
+```markdown
+:::side
+![Camera](./_land-b.jpg) Straight out of the camera, flat profile.
+![Tones](./_land-b.tones.jpg) Shadows lifted on the ridge, the fog's highlights held.
+:::
+
+:::slider
+![Camera](./_land-b.jpg) Straight out of the camera, flat profile.
+![Finished](./land-b.jpg) A touch of warmth over the whole frame.
+:::
+```
+
+- **`side`** — the two beside each other at the photograph's ratio and
+  the same size, each with its label and note beneath in the caption
+  style, running wider than the text column as the compare's side by
+  side does; where two won't fit — on a phone — they stack. Nothing to
+  choose.
+- **`slider`** — the compare's slider on one pair: the first stage
+  left, the second right, the handle at the centre, the same drag,
+  touch and arrow keys, and the two labels fixed beneath (not buttons)
+  with the second stage's note. No "How to compare" control, and the
+  reader's choice in the tab does not change it.
+
+Container form only, and **exactly two stages**, written as a
+compare's: the label and note rules above apply unchanged. **No
+attributes** — `:::side{mode="slider"}` fails as any unknown attribute
+does. The build fails, naming the piece, on one stage or three (with
+the count), and on a missing file or a private file from another
+folder, as a compare's does: a private stage comes from the block's
+own folder. In Obsidian each shows as a compare does — its stages'
+images in a row, labels beneath, the method line naming the block.
+
+Pairs and compares mix freely over the same stages — the slider's
+Camera against Finished a paragraph below a compare of all three, say.
+They ask for the same files, so however many blocks show a stage, a
+reader downloads it once. In a sidecar's story a `side` or a `slider`
+sits in the writing and the page's "Raw to finished" section still
+shows beside it; only a compare there stands in for that section.
+
+### Stages on the image page
+
+Without writing a block, a photograph's page shows its compare in a
+"Raw to finished" section whenever it has a camera's frame or its
+sidecar lists a stage. List the stages in the sidecar:
+
+```yaml
+stages:
+  - file: _land-b.tones.jpg
+    label: Tones
+    note: Shadows lifted on the ridge, the fog's highlights held.
+```
+
+and drop `_land-b.tones.jpg` beside the photograph. The section shows
+the camera's frame first when there is one, labelled Camera, with the
+site's own note ("The RAW file straight out of camera — no edits, no
+adjustments"); then the listed stages in the order written; then the
+finished photograph, labelled Finished, whose note is the sidecar's
+`processing:` line when it has one. It is the same compare as the
+block, with the same four ways; it opens as the slider unless the
+reader has already chosen another way in that tab.
+
+`label` is required, `note` optional. **A note is one paragraph**,
+inline markdown allowed. The frame and the finished photograph are
+implied — never list them. A listed `file` that is not a stage of this
+photograph — a typo, another photograph's stage, the camera's frame,
+the larger export — fails the build naming the sidecar, and so does a
+file listed twice. A stage file the sidecar doesn't list stays off the
+page; a `compare` in a piece can still show it.
+
+### The larger export
+
+In the quiet view, a click on the photograph opens the loupe: it zooms
+to full detail, one pixel of the file to one pixel of the screen, and
+follows the mouse. By default it reads the photograph's own file, and
+only where that file has detail to add at the screen's size. For more,
+export the finished photograph larger as `_land-b.detail.jpg` beside
+`land-b.jpg`. Nothing to declare: the loupe finds it, and nothing else
+uses it — the build checks that no page, feed or gallery names it.
+
+- **Size** — 4000px on the long edge is the recommendation, limited
+  by the camera's resolution: a sensor with fewer pixels than that
+  gives what it has. The size is your call per photograph.
+- **Location** — strip it on export, as for every file ("Metadata:
+  EXIF, then a sidecar" above); the build's GPS check covers the
+  loupe's file like every image it ships.
+- **The ceiling** — the site makes the loupe's file from the export at
+  its full size, and the host takes no file over 25 MiB (Cloudflare
+  Workers static assets' per-file limit): the build fails naming the
+  file if one comes out larger. A 4000px export is far below it.
 
 ## The block that takes time
 
@@ -335,8 +669,8 @@ outlast the frame. A frame taller than its prose does not hold at all —
 the row is only as tall as the frame, so there is nothing to stick
 through — it sits in the flow with the words beside it. On a laptop
 screen a landscape frame takes about five paragraphs to outlast, a
-full-height vertical about eight — the sampler piece
-(`src/content/pieces/vocabulary-sampler/`) is the calibration. Count the
+full-height vertical about eight — the sampler entry
+(`src/content/journal/vocabulary-sampler/`) is the calibration. Count the
 paragraphs before deciding a photograph deserves a hold.
 
 **No hold where no column fits.** The frame is sized from its own ratio
@@ -362,15 +696,16 @@ same.
 A gallery is one file in `src/content/galleries/`: a title, one
 category, an optional description and date, an ordered list of image
 ids, and an optional cover (defaults to the first image). Ids are
-`<piece-folder>/<basename>` for a piece's image and
-`gallery/<basename>` for one in `src/content/gallery-images/`. The
+`<slug>/<basename>` for a journal entry's photograph and the bare
+`<basename>` for one in `src/content/photographs/`. The
 order is the order on the page; the layout packs rows so every image
 in a row renders at the same short side, and it never reorders to fill
 a row — so a lone frame before a panorama sits centered in a short row
-by design. The build refuses a missing, duplicate, or draft-owned id
-and names the file and line. Images that belong to no piece go in
-`gallery-images/`, flat, and have no draft flag: to unpublish one,
-delete it.
+by design. The build refuses a missing, duplicate, or draft id — a
+draft entry's photograph, or a photographs-folder one whose sidecar
+says `draft: true` — and names the file and line. Photographs that
+belong to no journal entry go in `photographs/`, flat ("The
+photographs folder" above).
 
 ## Places
 
@@ -384,22 +719,24 @@ refused, because that is the word for no place. The writing is prose:
 no photograph lives beside a place file, and the place's photographs
 are the frames below it.
 
-A frame says where it was made in its sidecar, `at: <slug>`. A piece
-shot entirely in one place says it once instead, `at: <slug>` in its
-frontmatter, and every frame in its folder that names no place of its
-own is taken to be there; a frame's own line always wins, and
-`at: none` keeps a frame out of its piece's default. A piece that sets
+A frame says where it was made in its sidecar, `at: <slug>`. A journal
+entry shot entirely in one place says it once instead, `at: <slug>` in
+its frontmatter, and every frame in its folder that names no place of
+its own is taken to be there; a frame's own line always wins, and
+`at: none` keeps a frame out of its entry's default. An entry that sets
 no default imposes none: its frames are wherever their own lines
-say, and a frame that says nothing is at no place (`at: none` on a
-piece means the same as leaving the line out — Obsidian will offer
-the value there, since the property is shared). `at` is a
-slug wherever it is written — on a piece and on a sidecar alike —
+say, and a frame that says nothing is at no place (`at: none` on an
+entry means the same as leaving the line out — Obsidian will offer
+the value there, since the property is shared). A photograph in the
+photographs folder has only its own line ("The photographs folder"
+above). `at` is a
+slug wherever it is written — on an entry and on a sidecar alike —
 while the sidecar's `place` stays prose for the wall label; they are
 two properties, so Obsidian's autocomplete offers each its own values
 and keeps them apart.
 
 ```
-# the piece: src/content/pieces/where-the-fog-lets-go/index.md
+# the journal entry: src/content/journal/where-the-fog-lets-go/index.md
 at: the-headlands # the default for every frame in the folder
 
 # a frame that was elsewhere: _pano.md
@@ -407,36 +744,40 @@ at: none # shot on the drive home
 place: The road home, from the car window # the label shows the text alone
 
 # a frame at another place: _land-c.md
-at: the-jetty # its own line wins over the piece's default
+at: the-jetty # its own line wins over the entry's default
+
+# a photograph of the photographs folder: src/content/photographs/_dock-b.md
+at: the-jetty # an outing of its own, by its capture date
 ```
 
 `/places/<slug>/` shows the title, the description, a summary line
-("N outings · M frames · 2019–2026", the years being the outings'
-publish years), your writing, and then one wall — every published
-frame at the place as a single packed gallery, at the galleries'
-width, gap, and density. The order is the outings oldest first, each
-piece's frames in the piece's own order, with no heading, date, or
-divider between one visit and the next. The page names no piece
-anywhere; a frame's own page says which piece it came from and links
-there. That is the whole act of adding photographs: publish a
-piece whose frames name the place, and the page grows. A borrowed
-photograph stays with its home piece, never counted twice.
+("N outings · M frames · 2019–2026", the years being the outings' —
+an entry's publish year, a photograph's capture year), your writing,
+and then one wall — every published frame at the place as a single
+packed gallery, at the galleries' width, gap, and density. The order
+is the outings oldest first — a journal entry's frames, in the entry's
+own order, are one outing, dated by the entry; a photographs-folder
+photograph is one on its own, dated by its capture — with no heading,
+date, or divider between one visit and the next. The page names no
+journal entry anywhere; a frame's own page says which entry it came
+from, where it came from one, and links there. That is the whole act of adding photographs:
+publish an entry whose frames name the place, or a photograph whose
+sidecar does, and the page grows. A borrowed photograph stays with its
+home, never counted twice.
 `/places/` lists the places as cards, most recent outing first, and
-Places is in the nav after Galleries. On a photograph's page the
+Places is in the nav between Journal and Galleries. On a photograph's page the
 label's place is the place's title as a link,
 with the sidecar's free text after it where there is any, and arrows
 from a place step through that place's frames.
 
-The build refuses an `at:` naming a place that does not exist — on a
-piece or a sidecar, draft or not — and lists the places that do; it
+The build refuses an `at:` naming a place that does not exist — on an
+entry or a sidecar, draft or not — and lists the places that do; it
 refuses a `cover` that is not one of the place's frames, once the
 place publishes. A draft place and a place with no published frame
 yet get a note, not a failure: no page, no card, and their frames
 show no place, so a place can be declared ahead of its first outing.
-A gallery-root photograph still cannot join a place: belonging to no
-piece, it has no publish date to take its turn by in the wall's order
-(`ROADMAP.md`). Its `at:` is checked for the slug and then ignored
-with a warning naming the file.
+A photograph of the photographs folder at a place with no capture date
+fails the build ("The photographs folder" above).
 
 ## Hard-won syntax rules
 
@@ -475,9 +816,9 @@ Learned by breaking them — each of these fails quietly if violated:
   `bleed="left"` or `bleed="right"` — and a bare `{bleed}` there fails
   as an invalid value, since it has no side to inherit.
 - **Images must live in the vault**, written as one of three paths:
-  the piece's own image as `./<file>`, another piece's as
-  `../<slug>/<file>`, a gallery-root one as
-  `../../gallery-images/<file>` ("Borrowing a photograph" above). Any
+  the entry's own image as `./<file>`, another entry's as
+  `../<slug>/<file>`, one from the photographs folder as
+  `../../photographs/<file>` ("Borrowing a photograph" above). Any
   other relative shape — a sub-folder, a further level up, a home-dir
   path (`~/Downloads/...`), which resolves nowhere in Obsidian's
   preview either — fails the build with a message naming those three;
@@ -501,10 +842,10 @@ Type `[[`, pick the note, and a standard markdown link gets inserted.
 Those links feed backlinks and the graph the same as wiki-links would —
 no Obsidian feature is lost by the wikilinks-off setting.
 
-One known seam: a link from one piece to another resolves inside the
-vault but is not yet rewritten to its published URL
-(`/pieces/<slug>/`) at build time. That transform is logged in
-`ROADMAP.md` and becomes necessary the day the first cross-piece link
+One known seam: a link from one journal entry to another resolves
+inside the vault but is not yet rewritten to its published URL
+(`/journal/<slug>/`) at build time. That transform is logged in
+`ROADMAP.md` and becomes necessary the day the first cross-entry link
 is written. Fine to write such links now; they just aren't live on the
 site yet.
 
@@ -519,9 +860,13 @@ executes, a push updates only the private repo; nothing deploys
 anywhere.
 
 One limit of the loop: the image registry is built once per dev-server
-run. Text edits hot-reload; **adding, removing, or renaming images,
-sidecars, or galleries needs `npm run dev` restarted** before their
-pages, links, and validation catch up. (For the record, `astro build`
+run. Text edits hot-reload, and so does an edit inside a sidecar:
+deleting a photograph's `draft: true` publishes it in the running
+server, no restart needed (tried at spec 019: its page answered 404
+before the edit, 200 after it, and 200 again after a restart).
+**Adding, removing, or renaming images, sidecars, or galleries needs
+`npm run dev` restarted** before their pages, links, and validation
+catch up. (For the record, `astro build`
 caches rendered pieces by content digest in
 `node_modules/.astro/data-store.json`; a change to the remark
 transform itself doesn't show in a local build until that file is
@@ -538,16 +883,19 @@ needs.
 
 ## Image exports, not masters
 
-Commit web-sized exports to the piece folder — roughly 2560px on the
+Commit web-sized exports to the entry's folder or the photographs
+folder — roughly 2560px on the
 long edge, 1–3MB. Never RAW files or full-resolution masters: git
 history keeps every byte forever, and the build only needs enough
 pixels for its largest responsive variant. Masters live in the photo
 archive, not the repo. (Decision and numbers: `DECISIONS.md`, "Images
-stay committed to git".) And **never bake a matte into the file**:
+stay committed to git".) The one larger file is the loupe's export,
+at most one per photograph, about 4000px — "The larger export" above.
+And **never bake a matte into the file**:
 the site mats the frames it mats itself, and since spec 017 that is
 the image page's quiet view alone. Every other frame — in a piece, in
 a gallery, or on the image page's stage on paper — sits on the ground
-unmatted. So a baked mat would be the only mat in a piece, white
+unmatted. So a baked mat would be the only mat in an entry, white
 around one photograph in a reading flow where nothing else has any;
 in the quiet view it would render double-matted, the site measuring
 its own share — 6% of the

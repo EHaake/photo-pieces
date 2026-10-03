@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatGalleryProblems, sidecarImageId, validateGalleries } from './src/lib/image-meta.mjs';
+import {
+  formatGalleryProblems,
+  placeCoverProblem,
+  sidecarImageId,
+  validateGalleries,
+} from './src/lib/image-meta.mjs';
 
 // Spec 004's gallery rules — the pure half of the registry
 // (src/lib/images.ts), which feeds these the collection data and fails
@@ -7,15 +12,15 @@ import { formatGalleryProblems, sidecarImageId, validateGalleries } from './src/
 
 describe('sidecar → image id (T305)', () => {
   it('maps both roots', () => {
-    expect(sidecarImageId('pieces/where-the-fog-lets-go/_land-b')).toBe(
+    expect(sidecarImageId('journal/where-the-fog-lets-go/_land-b')).toBe(
       'where-the-fog-lets-go/land-b',
     );
-    expect(sidecarImageId('gallery-images/_dock-b')).toBe('gallery/dock-b');
+    expect(sidecarImageId('photographs/_dock-b')).toBe('dock-b');
   });
 
   it('rejects any other shape', () => {
-    expect(() => sidecarImageId('pieces/_stray')).toThrow(/is not an _<basename>\.md beside/);
-    expect(() => sidecarImageId('pieces/a-piece/deeper/_x')).toThrow(/is not an _<basename>/);
+    expect(() => sidecarImageId('journal/_stray')).toThrow(/is not an _<basename>\.md beside/);
+    expect(() => sidecarImageId('journal/a-piece/deeper/_x')).toThrow(/is not an _<basename>/);
     expect(() => sidecarImageId('galleries/_x')).toThrow(/is not an _<basename>/);
   });
 });
@@ -24,7 +29,7 @@ describe('gallery validation (T305)', () => {
   const known = new Map([
     ['a-piece/land-a', 'published'],
     ['a-piece/land-b', 'published'],
-    ['gallery/dock-a', 'published'],
+    ['dock-a', 'published'],
     ['drafted/land-a', 'draft'],
     ['half-done/frame', 'unowned'],
   ]);
@@ -46,9 +51,7 @@ describe('gallery validation (T305)', () => {
   });
 
   it('a clean gallery has no problems', () => {
-    expect(validateGalleries([gallery('ok', 'a-piece/land-a', 'gallery/dock-a')], known)).toEqual(
-      [],
-    );
+    expect(validateGalleries([gallery('ok', 'a-piece/land-a', 'dock-a')], known)).toEqual([]);
   });
 
   it('a missing id is reported with file and line, and a nearby id as a hint', () => {
@@ -72,7 +75,7 @@ describe('gallery validation (T305)', () => {
 
   it('a duplicate is reported on its second occurrence', () => {
     const problems = validateGalleries(
-      [gallery('dup', 'a-piece/land-a', 'gallery/dock-a', 'a-piece/land-a')],
+      [gallery('dup', 'a-piece/land-a', 'dock-a', 'a-piece/land-a')],
       known,
     );
     expect(problems).toMatchObject([
@@ -91,6 +94,14 @@ describe('gallery validation (T305)', () => {
     ]);
   });
 
+  it('a draft photographs-folder photograph is refused as a draft photograph, not a draft piece (T1740)', () => {
+    const withDraft = new Map([...known, ['dock-b', 'draft']]);
+    const problems = validateGalleries([gallery('drafts', 'a-piece/land-a', 'dock-b')], withDraft);
+    expect(formatGalleryProblems(problems)).toBe(
+      'src/content/galleries/drafts.md:6 — gallery "drafts": "dock-b" is a draft (its sidecar says draft: true) — publish it or drop it from the gallery',
+    );
+  });
+
   it("a camera's frame is refused for what it is, not as an unknown id (T401)", () => {
     // Private rasters are never in `known`, so the generic unknown-id
     // branch would fire without this rule — the reason names the frame's
@@ -99,7 +110,7 @@ describe('gallery validation (T305)', () => {
     expect(problems.map((p) => [p.line, p.reason])).toEqual([
       [
         5,
-        '"a-piece/_land-b" is a camera\'s frame, not an image of the site — list "a-piece/land-b" instead',
+        '"a-piece/_land-b" is private — a file of "land-b" (its camera\'s frame, a stage, or the loupe\'s export), not an image of the site: list "a-piece/land-b" instead',
       ],
     ]);
   });
@@ -126,11 +137,49 @@ describe('gallery validation (T305)', () => {
     );
   });
 
+  it('an old gallery/ id names the bare id it became (T1739)', () => {
+    const problems = validateGalleries([gallery('old', 'a-piece/land-a', 'gallery/dock-a')], known);
+    expect(formatGalleryProblems(problems)).toBe(
+      'src/content/galleries/old.md:6 — gallery "old": "gallery/dock-a" is an old id — the photograph in src/content/photographs/ is "dock-a" now',
+    );
+  });
+
+  it('a journal entry named gallery keeps its ids: gallery/dock-a known is no problem (T1739)', () => {
+    const withEntry = new Map([...known, ['gallery/dock-a', 'published']]);
+    expect(validateGalleries([gallery('entry', 'gallery/dock-a')], withEntry)).toEqual([]);
+  });
+
   it('reports every problem across galleries in file order', () => {
     const problems = validateGalleries(
       [gallery('one', 'nope/a', 'a-piece/land-a'), gallery('two', 'drafted/land-a')],
       known,
     );
     expect(problems.map((p) => `${p.galleryId}:${p.line}`)).toEqual(['one:5', 'two:5']);
+  });
+});
+
+describe("a place's cover (T1739)", () => {
+  const known = new Map([
+    ['dock-a', 'published'],
+    ['alpha/land-a', 'published'],
+    ['beta/port-b', 'published'],
+  ]);
+  const file = 'src/content/places/the-jetty.md';
+
+  it('a cover among the frames, or no cover, is no problem', () => {
+    expect(placeCoverProblem('alpha/land-a', ['alpha/land-a'], file, known)).toBe(null);
+    expect(placeCoverProblem(undefined, ['alpha/land-a'], file, known)).toBe(null);
+  });
+
+  it("a stranger is not one of the place's frames", () => {
+    expect(placeCoverProblem('beta/port-b', ['alpha/land-a'], file, known)).toBe(
+      '[places] src/content/places/the-jetty.md: cover "beta/port-b" is not one of this place\'s frames',
+    );
+  });
+
+  it('an old gallery/ id names the bare id it became', () => {
+    expect(placeCoverProblem('gallery/dock-a', ['alpha/land-a'], file, known)).toBe(
+      '[places] src/content/places/the-jetty.md: cover "gallery/dock-a" is an old id — the photograph in src/content/photographs/ is "dock-a" now (a place\'s cover must be one of its frames)',
+    );
   });
 });

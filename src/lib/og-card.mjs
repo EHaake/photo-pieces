@@ -1,7 +1,7 @@
 // The Open Graph card, shared by the per-piece route and the generator
 // that writes the static `public/og.jpg` (spec 014, T1201). One tree and
 // one palette in one module: the route
-// (`src/pages/og/pieces/[slug].png.ts`) and `scripts/gen-og.mjs` render
+// (`src/pages/og/journal/[slug].png.ts`) and `scripts/gen-og.mjs` render
 // the same card, so the site-wide fallback image and the per-piece
 // images cannot drift apart — and `ground.test.mjs` has one `COLOR` to
 // pin against `:root`.
