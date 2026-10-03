@@ -70,6 +70,26 @@ build something deeper, that I also hope can be generalized such that
 others can use its structure to create their own personal virtual
 installation.
 
+## Addendum: exploration, held loosely (2026-10-02)
+
+Later the same day, in his words, corrected for typos only:
+
+> I don't want the route for the viewer to be prescribed directly. I
+> want to encourage exploration, which means providing options. I
+> actually liked the related pieces section and maybe want to expand
+> and/or refine that feature in the future.
+
+> I intend to make a good amount of content, many pieces referencing
+> different topics. In fact, the journal section I intend to be more of
+> individual thought pieces. For that reason, while I want to maintain
+> the guiding principle of the exploration, I don't want it to be too
+> strict. The exploration aspect doesn't need to be in the sense of
+> going to strictly directly related content. I do always want to have
+> options for the next place to go and feature that prominently, but
+> want it to be flexible such that when there are more direct
+> connections we provide those but also maybe less intuitive options,
+> especially if there isn't a direct, obvious next piece.
+
 ## What it asks of the site
 
 Read from the statement above; each line names the part of it that it
@@ -85,14 +105,17 @@ rests on.
   — the raw frame, the stages, the choices — is how the site lets a viewer
   into "how I think and view the world", not an appendix for
   photographers.
-- **Every piece leads onward, by options, not a route.** A page ends in
-  several ways to go deeper, each building on what was just read, and
-  the visitor picks — never a dead end, and never one prescribed path
+- **Every piece offers ways onward — options, prominent, held loosely.**
+  A page always ends in several places to go next, featured prominently,
+  and the visitor picks; never a dead end and never one prescribed path
   ("Pieces should lead into the next, always inviting the viewer to go
-  deeper"; and, on 2026-10-02: "I don't want the route for the viewer
-  to be prescribed directly. I want to encourage exploration, which
-  means providing options."). The related pieces section is the kind
-  of thing this means, to be expanded and refined.
+  deeper"; "I want to encourage exploration, which means providing
+  options"). The options need not be strictly related: where there are
+  direct connections they are offered, and beside them less intuitive
+  ones — above all where no obvious next piece exists, which with many
+  thought pieces on different topics will be often ("I don't want it to
+  be too strict"). The related pieces section is the seed, to be
+  expanded and refined.
 - **Curiosity moves the visitor.** Discovery over exhaustive menus: the
   turned corner, the thing glimpsed that the reader chooses to go toward
   ("an expression of their own curiosity"). Indexes and filters exist but
