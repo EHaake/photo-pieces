@@ -76,6 +76,23 @@ attached.
   refinement on the design, layout, features, etc before then" — it
   runs together with going live (spec 005's deploy wiring), when the
   refinement specs judged on real pieces are done.
+  Raised again 2026-10-02, at spec 019's Phase 3d look, asked how one
+  photograph is reused across entries without copies (it is borrowed by
+  relative path; nothing is duplicated): "we'll need to migrate to an
+  image store soon so we should plan for that." The urgency moved up —
+  a candidate for the spec after 019 rather than the tail of the
+  refinement specs; whether it runs before or with going live is that
+  spec session's first question. Authoring as planned does not change:
+  a photograph is still written as a relative path to a real file in
+  the vault's local mirror (`./land-b.jpg`, `../<entry>/<file>`,
+  `../../photographs/<file>`), the plugin and Obsidian's previews read
+  that file, and only where the bytes are kept changes — synced up from
+  the mirror, synced down before the build. Also to decide there: the
+  mirror on more than one machine (the laptop and the desktop each
+  syncing — which wins, and how a deletion travels), whether the
+  private family (`_<name>.*`, the detail exports) lives in the same
+  bucket or a private one, and what stops a raster from being committed
+  to the content repo by accident.
 - **The lexicon** — settled with the photographer on 2026-09-29 and
   folded into spec 019 (its third amendment), to reach `main` with it:
   the site is made of **pieces** — pages that carry writing and the
