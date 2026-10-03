@@ -38,6 +38,76 @@ attached.
   processed work exists to test against: it could be part of the image
   detail page, its own kind of piece, or spread across both. Subsumes
   the `sequence` block's open interaction design below.
+- **Content out of the repo** — raised by the photographer after spec
+  019's plugin amendment (2026-09-29): "I want the repo to be the code
+  of the site, content should be separate." The combined layout —
+  pieces, sidecars and every raster committed under `src/content/`,
+  the vault wrapped around the clone — is the v1 convenience and **not
+  the ultimate solution**; it ends when the site goes to production,
+  not when the repo happens to get heavy. The shape, as discussed:
+  content becomes a repository of its own (`journal/`, `photographs/`,
+  `galleries/`, `places/`, `gear.md` — the folders as spec 019's
+  lexicon names them), text only, and the vault is
+  built around it — `photo-brain/content/` beside the private notes,
+  the site repo elsewhere — so writing, the sidecars, the relative
+  paths and the plugin go on unchanged; the rasters leave git for
+  object storage (Cloudflare R2 beside the Workers deployment is the
+  default candidate), the vault keeping a local mirror because
+  Obsidian and the plugin need real files beside the Markdown, synced
+  up by a tool such as rclone; the site's build fetches the content
+  repo and syncs the images down before Astro runs, so the image
+  pipeline, the EXIF read, the GPS barrier and the private-file rules
+  stay as they are, with the fixture pieces kept in the site repo as
+  test content and excluded from a production build; a push of the
+  content repo triggers the site's build through a deploy hook or a
+  small action, the site repo still deploying on its own pushes. To
+  decide in its spec: the storage provider and the sync; whether the
+  content repo is private; what `draft: true` means once content has
+  a public history; what the sampler and plugin-check pieces become;
+  and where spec 005 (going live) sits, since its deploy wiring is what
+  this changes. Git LFS was considered and passed on: it keeps one
+  repo at a per-gigabyte cost and complicates the Workers build.
+  Absorbs the external image store the constitution's images paragraph
+  defers ("migrate to an external store once repo size or clone speed
+  becomes a real, not hypothetical, problem") — spec 019's detail
+  exports, at 4000px a photograph, moved that day closer: "I plan to
+  have many images, so even without full size ones, we'll need an
+  external store." Not the next spec: "we'll still need to do more
+  refinement on the design, layout, features, etc before then" — it
+  runs together with going live (spec 005's deploy wiring), when the
+  refinement specs judged on real pieces are done.
+  Raised again 2026-10-02, at spec 019's Phase 3d look, asked how one
+  photograph is reused across entries without copies (it is borrowed by
+  relative path; nothing is duplicated): "we'll need to migrate to an
+  image store soon so we should plan for that." The urgency moved up —
+  a candidate for the spec after 019 rather than the tail of the
+  refinement specs; whether it runs before or with going live is that
+  spec session's first question. Authoring as planned does not change:
+  a photograph is still written as a relative path to a real file in
+  the vault's local mirror (`./land-b.jpg`, `../<entry>/<file>`,
+  `../../photographs/<file>`), the plugin and Obsidian's previews read
+  that file, and only where the bytes are kept changes — synced up from
+  the mirror, synced down before the build. Also to decide there: the
+  mirror on more than one machine (the laptop and the desktop each
+  syncing — which wins, and how a deletion travels), whether the
+  private family (`_<name>.*`, the detail exports) lives in the same
+  bucket or a private one, and what stops a raster from being committed
+  to the content repo by accident.
+- **The lexicon** — settled with the photographer on 2026-09-29 and
+  folded into spec 019 (its third amendment), to reach `main` with it:
+  the site is made of **pieces** — pages that carry writing and the
+  site's treatments, context travelling with the work, as it does in a
+  physical gallery — in three forms: a **photograph** (one image, its
+  writing and its making), a **journal** entry (his thoughts through
+  several photographs), a **place** (a tour through somewhere he keeps
+  going back to); a **gallery** is a curated set, kept and deliberately
+  secondary. "Piece" is the structural word, never an address or a nav
+  label. The centre is the landscape and nature work; street, portrait
+  and event photographs are the same kind of piece with less around
+  them. What the lexicon names and spec 019 does not build: the place
+  as a tour (today a wall of frames), the photograph's study (the next
+  entry), a photograph's category of its own, a dated photograph in the
+  feed, and the front door's design around these words.
 - **Every page a piece, and the image's study** — raised by the
   photographer during spec 014 (2026-09-18), as much a statement of intent
   as a feature: every page but the front door is meant to be a piece — a
@@ -137,6 +207,43 @@ attached.
   derived copies (the OG route's hexes, `public/og.jpg`, `DECISIONS.md`'s
   "Ground tone" entry) moved with it by the rule 014 landed. Spec 014 is
   closed in its own documents with the reason.
+- **The place as a tour, by its outings** — raised by the photographer at
+  spec 019's lexicon pause (2026-10-01). Today a place's page is its
+  writing and then one wall of every frame taken there, oldest visit
+  first; an "outing" exists only as the wall's order and as a count on
+  the Places list ("3 outings · 3 frames · 2026"), and since spec 019 a
+  photograph of the photographs folder that names the place counts as
+  an outing of its own. What he described, and half-expected to find:
+  outings as instances of the place — the place's page lists its
+  outings as pieces, and the reader clicks into one. To be considered
+  when the place becomes the tour the lexicon names: whether the page
+  lists outings (a journal entry, a lone photograph) as things to open,
+  how that sits with the wall, and what a lone photograph's "outing"
+  looks like there. A spec of its own, after a design conversation.
+- **The photographs index, in sections** — raised by the photographer at
+  spec 019's lexicon pause (2026-10-01). He likes the index
+  (`/photographs/`: every photograph, small, one dense grid by title)
+  as built. As the site grows it may want some categorisation so it is
+  not one huge, uninterrupted mass — by category, by place, by year, by
+  initial letter as a book's index runs. Fine for now; revisit when the
+  count makes it a mass.
+- **A hover on photographs** — raised by the photographer at spec 019's
+  lexicon pause (2026-10-01), looking at the index, as a step toward the
+  modern design he has been asking for (see "A design language of its
+  own" and "Motion, considered"): when a photograph is pointed at — in
+  the index, a gallery, a place's wall, a list's cover — a slight
+  animation and/or a styling change should mark the hover and make the
+  page feel more interactive. Pointer devices only; a phone has no hover
+  and gets nothing. To settle in a spec: which surfaces, what moves (a
+  lift, a scale, a border, a caption appearing), the durations through
+  the motion tokens, and reduced motion.
+- **The RSS feed, kept for now** — the feed at `/rss.xml` came with the
+  base theme and lists journal entries only; a dated photograph stands
+  on the front door but not in the feed. At spec 019's lexicon pause
+  (2026-10-01) the photographer was not sure a feed makes sense to keep
+  at all: keep it for now, in case a use turns up. Revisit — remove it,
+  or decide what it carries — when subscription or a newsletter is
+  considered.
 - **The pause and the hero leave the site** — decided by the
   photographer at spec 016's second look (2026-09-22), and the next
   spec: "I think we should scrap the Pause block and the stage using the

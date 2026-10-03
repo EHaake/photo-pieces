@@ -1,0 +1,9 @@
+{
+  "enabledCssSnippets": [
+    "photo-pieces-measure",
+    "photo-pieces-site"
+  ],
+  "theme": "moonstone",
+  "cssTheme": "Maple",
+  "baseFontSize": 20
+}
