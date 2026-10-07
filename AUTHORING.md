@@ -85,17 +85,24 @@ puts them in the vault and leaves alone any you have changed there
 (build-validated) and Obsidian's Properties panel, so there is no
 separate metadata system to maintain.
 
-**Fill every line a template gives you, or delete it.** A field left
-empty fails the build — `title:` with nothing after it is not a
-missing title — and so does `categories: []`. Before it builds:
+**A line left blank is a line not written.** A field with nothing
+after it (`place:`), an empty `""`, or an empty list (`categories: []`,
+as Obsidian's Properties panel writes one) is read as if the line were
+not there — in a journal entry, a sidecar, a gallery or a place, and in
+each step under `stages:`. So fill what you need and leave the rest:
+a sidecar's blank `date:` leaves the file's own capture date, a blank
+`draft:` is not a draft. A field the build needs still fails when it is
+blank, as it does when it is missing, naming the file and the field.
+Before it builds:
 
 - a journal entry needs its `title`, its `categories` and its
   `description`;
-- a photograph's sidecar needs its `title`, and in the photographs
-  folder its `categories`, or neither line;
 - a gallery needs its `title`, its `category` and at least one image
   under `images`;
 - a place needs its `title`.
+
+A photograph's sidecar needs nothing filled: each of its fields is
+optional, in either folder.
 
 A date is today's where that is the default: a journal entry's
 `publishDate`, a photograph's `published`, a gallery's `date`. The
@@ -104,18 +111,17 @@ start as `draft: true`.
 
 `categories` values: `landscape`, `street`, `portrait`, `event`.
 
-For the same reason the optional fields are not in the templates — an
-empty line for one would fail the build. Write them as you need them: a
-journal entry's `cover` and `at` (the slug of a declared place — the
-default for every frame in the entry's folder that names none — see
-"Places" below); a sidecar's label overrides and rich-page fields
-("Metadata: EXIF, then a sidecar" below, and the field reference in
-`README.md`); a gallery's `description` and `cover`; a place's
-`description` and `cover`.
+For the same reason the templates carry every field their schema has,
+the optional ones blank, in the schema's order: a journal entry's
+`cover` and `at` (the slug of a declared place — the default for every
+frame in the entry's folder that names none — see "Places" below); a
+sidecar's label overrides and rich-page fields ("Metadata: EXIF, then a
+sidecar" below, and the field reference in `README.md`); a gallery's
+`description` and `cover`; a place's `description` and `cover`.
 
-The two sidecar templates carry a `stages:` example as comment lines.
-Take the `# ` off each line to use it ("Stages on the image page"
-below); left as it is, it does nothing.
+The two sidecar templates carry a blank `stages:` line. Write the steps
+under it ("Stages on the image page" below); left blank, it does
+nothing.
 
 ## A journal folder is public territory
 
@@ -252,9 +258,11 @@ at: the-jetty # on the place's wall, by its capture date
   its category page. When the line is there it is the whole eyebrow —
   the galleries' categories are not added to it. Without the line the
   eyebrow shows the categories of the galleries that hold the
-  photograph, and nothing when no gallery does. Category pages list
-  galleries and journal entries, not photographs, so the line puts the
-  photograph on none of them.
+  photograph, and nothing when no gallery does. A blank line —
+  `categories:` or `categories: []` — is no line; a word outside the
+  four fails the build, naming the file and the field. Category pages
+  list galleries and journal entries, not photographs, so the line puts
+  the photograph on none of them.
 
 A journal entry's photographs are published, dated and categorised by
 their entry, so any of the three lines in a journal folder's sidecar

@@ -33,12 +33,12 @@ What is here, under `vault/` (mirroring the vault root):
   (`photograph.md`, its sidecar), a photograph in a journal entry's
   folder (`journal-photograph.md`, its sidecar, without the three
   fields that are the photographs folder's alone), a gallery
-  (`gallery.md`) and a place (`place.md`). Each holds only fields its
-  collection's schema accepts, in the schema's order
-  (`src/content.config.ts`; `obsidian-templates.test.mjs` holds every
-  key to it), and only lines that build once filled: an empty line
-  fails the schema, so the optional fields are left out and written as
-  needed. The two sidecars carry a `stages:` example as comment lines.
+  (`gallery.md`) and a place (`place.md`). Each holds every field its
+  collection's schema has, in the schema's order
+  (`src/content.config.ts`; `obsidian-templates.test.mjs` holds each
+  template to it), the optional ones blank: a blank field is read as
+  not set, so a line left empty builds. The two sidecars carry a blank
+  `stages:` line.
   `AUTHORING.md`, "Templates", says what each needs before it builds.
 
 The workspace layout (`workspace.json`) is left out: it is window state,

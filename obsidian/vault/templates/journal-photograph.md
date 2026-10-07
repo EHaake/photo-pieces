@@ -1,7 +1,22 @@
 ---
 title:
-# stages:
-#   - file: _<basename>.tones.jpg
-#     label: Tones
-#     note: What this step changed.
+caption:
+date:
+camera:
+lens:
+focalLength:
+aperture:
+shutter:
+iso:
+place:
+time:
+at:
+format:
+filters:
+support:
+processing:
+stages:
+edition:
+sizes:
+paper:
 ---

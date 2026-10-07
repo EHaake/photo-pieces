@@ -1450,3 +1450,22 @@ _Amended 2026-10-01 (category):_
   space before it and after it each grow by half a baseline, one value
   for both sides. The other sections, the compare block inside a story
   or a journal entry, the width rule and the views are unchanged.
+- **A blank field means not set (2026-10-06).** From the templates,
+  which had to leave out every optional field because an empty line
+  failed the build — as a property added and left blank in Obsidian's
+  panel did, and a blank `date:` became 1970. Asked whether a blank
+  line should be read as not set: "Yes, make a blank field mean not
+  set." The call: in any frontmatter the site reads — a journal entry,
+  a photograph's sidecar, a gallery, a place — a field written with
+  nothing after it, an empty string or an empty list is read as if the
+  line were not there, and the same inside each item of `stages:`. A
+  required field left blank still fails, as a missing one does, naming
+  the file and the field. This reverses AC 36's "or empty" for a
+  sidecar's `categories:`: an empty line there is unset, and the
+  eyebrow falls back to the galleries'; a word outside the four still
+  fails. The templates carry every field their schema has, the optional
+  ones blank.
+  Two consequences, stated to him: a `draft:` line left empty is not
+  a draft, so the piece publishes; and an empty `draft:`, `published:`
+  or `categories:` in a journal folder's sidecar is no longer refused,
+  being no line at all — a filled one still is.

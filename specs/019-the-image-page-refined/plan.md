@@ -3614,7 +3614,11 @@ there.
   ``categories**: **categories: Expected type `"array"`, received `"object"` ``:
   the path printed twice, the bold markers unbalanced so a literal `**`
   shows, and null reported as `"object"`. The file is still named by
-  the error's header and location.
+  the error's header and location. _Superseded at T1735e
+  (2026-10-06): a blank line, an empty string and an empty list are
+  read as no line, so a bare `categories:` and `categories: []` are
+  unset and the eyebrow falls back; a word outside the four still
+  fails as above._
 - The barrier: `[check-lexicon] <file>: a category page lists a
   photograph (<href>) — category pages list galleries and journal
   entries`; `[check-lexicon] no page under <dist>/categories/ — the

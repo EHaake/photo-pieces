@@ -1537,6 +1537,48 @@ T1729.
       keeps the edit and says so (never run against `~/photo-brain`)._
       Done: verify green, 835 tests (+8, `obsidian-templates.test.mjs`). Five templates (`journal`, `photograph`, `journal-photograph`, `gallery`, `place`), `templates.json`, the install step (second run: "Templates changed in the vault, left as they are (not overwritten): place.md"), both documents repointed. Mutation (`mood: calm` in place.md) failed "each frontmatter key of place.md is a key of content.config.ts's schema for it", reverted. One-time builds, filled then removed (`src/content` clean): journal needs title, categories, description; photograph title, categories; journal-photograph title; gallery title, category, one image id; place title. **Thinner than the task line pictured**: no empty optional line passes the schema (YAML's empty value reaches zod as null and `.optional()` refuses it — an all-empty sidecar failed on 20 fields; an empty `date:` coerces to 1970), so every optional field is left out, and the `stages:` example is YAML comments, which Obsidian's property rewrite may drop. Put to him: fuller templates need the schema to read a blank line as not set. Finding: a property added and left blank in Obsidian's panel fails the build today.
 
+- [x] **T1735e** — Round (2026-10-06, his answer to T1735d's question):
+      "Yes, make a blank field mean not set." `review: per-task` (it
+      changes what every collection's schema accepts). The rule, in
+      page terms: in any frontmatter the site reads — a journal entry,
+      a photograph's sidecar, a gallery, a place — a field written with
+      nothing after it (`place:`), an empty string, or an empty list
+      (`categories: []`, what Obsidian's Properties panel writes for an
+      empty list property) is read as if the line were not there; the
+      same inside each item of `stages:` (a blank `note:`). A required
+      field left blank therefore still fails, as a missing field does,
+      naming the file and the field; an optional one is simply unset —
+      so a blank `date:` no longer becomes 1970, and a blank `draft:`
+      is not a draft. One mechanism, named once and applied to every
+      collection's schema in `src/content.config.ts` (a preprocess step
+      before validation; if Astro refuses a preprocessed schema for a
+      collection, stop and return the options — do not switch to
+      per-field `.nullish()` on your own). Reverses AC 36's "or empty"
+      for a sidecar's `categories:` (an empty line is now unset; a word
+      outside the four still fails) — one Decided line in spec.md says
+      so in his words. Then the templates, filled out: every optional
+      field the schema has, present and blank, in the schema's order,
+      the commented `stages:` example replaced by a blank `stages:`
+      line (comments do not survive Obsidian's property rewrite);
+      `obsidian-templates.test.mjs` following; `AUTHORING.md`'s
+      Templates section, its `categories:` bullet and any line saying a
+      blank fails, corrected by hand; `obsidian/README.md` if it says
+      so. Pattern: `content.config.ts`'s existing schemas; T1735d's
+      test; T1744's hand-editing rule. _Verify: `sh scripts/verify.sh`
+      green; a unit test of the blank-stripping function itself (null,
+      '', whitespace, [], a nested stage's blank note, and that 0,
+      false and a non-empty value are kept) with a mutation that fails
+      by name; one-time builds, each reverted and `git status --short
+      src/content` empty: every template copied in with only its
+      required fields filled builds (the required fields per template
+      listed); `_dock-b.md` with a blank `place:`, a blank `date:` and
+      `categories: []` builds, its page's eyebrow falling back to its
+      gallery's Landscape and its label's date the file's own (quoted);
+      a journal entry with a blank `title:` fails naming the file and
+      the field (lines pasted); `categories: [nature]` in `_dock-b.md`
+      still fails (lines pasted)._
+      Done: orchestrator's own `sh scripts/verify.sh` green — 88 pages, 846 tests (+11), BUILD/CHECK/TEST EXIT 0. Mechanism: `withoutBlankFields` in `src/lib/blank-fields.ts`, wrapped once as `blankIsUnset` around all four collection schemas (Astro accepts the preprocessed schema). Mutation (`trim()` dropped) failed "a string of whitespace alone is not set", reverted. One-time builds, each reverted: the five templates with only required fields filled build (journal: title, categories, description; photograph and journal-photograph: none; gallery: title, category, one image id; place: title); `_dock-b.md` with blank `date:`, `place:` and `categories: []` builds, eyebrow Landscape, label date August 29, 2026; a blank journal `title:` → BUILD EXIT 1, `title: Required`, location the file; `categories: [nature]` still fails. Reviewed per-task: signed off, nothing blocking. Carried: a blank `draft:` publishes (said to him; Decided line); no standing test that each schema is wrapped (sweep); a blank photograph-only line in a journal sidecar is no longer refused (a filled one is); a blank list item (`-`) is kept and fails as `images.0` (message unconfirmed); AC 36's text still says "or empty" (close-out reads it with the Decided line).
+
 ### Phase 3b record (the person's walkthrough)
 
 Reached 2026-09-27; three rounds (T1735a–c above, his words in each).
@@ -2641,6 +2683,8 @@ tier if it is ever on (it is off). -->
 | T1753b no compare heading | implementation (`opus`, high) | ~32k | done; 827 tests; the section named by aria-label as the story's is; Decided line in spec.md |
 | T1753c air around the compare | implementation (`opus`, high) | ~34k | done; half a baseline each side as padding; the page's styles now external (check-motion 83 → 21 stylesheets, same coverage — for the sweep) |
 | T1735d Obsidian templates (2026-10-06) | implementation (`opus`, high) | ~87k | done; 835 tests; templates thin because a blank optional line fails the schema — whether blank means not-set is put to him; README's structure listing names neither `obsidian/` nor the new test (close-out) |
+| T1735e blank means not set | implementation (`opus`, high) | ~80k | done; 846 tests; one preprocess step on all four schemas; templates carry every field |
+| T1735e per-task review | implementation (`opus`, high) | ~50k | signed off, nothing blocking; six second looks — a blank `draft:` publishes (told to him), no standing test of the wiring (sweep), blank photograph-only lines in a journal sidecar pass, blank list items kept, AC 36's text, small wording |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
