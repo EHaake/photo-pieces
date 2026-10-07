@@ -1499,6 +1499,44 @@ T1729.
       listed); the plugin README agrees; the Phase 3b record below
       filled in._
 
+- [x] **T1735d** — Round (the authoring look held open, 2026-10-06,
+      before his first piece): "Can we add templates to obsidian for the
+      different types of pieces? Can we add that to the project?" The
+      skeletons `AUTHORING.md` describes ("Journal entry template")
+      become files the vault's core Templates plugin inserts, kept in
+      the repo beside the vault's other settings and restored by the
+      same script. Files: `obsidian/vault/templates/` — one template per
+      thing he writes: a journal entry (`index.md`'s frontmatter), a
+      photograph of the photographs folder (its sidecar, with `draft`,
+      `published`, `categories`), a journal entry's photograph (its
+      sidecar, without those three), a gallery, a place; each holding
+      only fields the schema accepts, in the schema's order, the
+      optional rich-page fields present but empty where an empty line
+      is accepted and left out where it is not, a `stages:` example the
+      author can delete, and Obsidian's own `{{date:YYYY-MM-DD}}` where
+      a date is today's by default; `obsidian/vault/.obsidian/templates.json`
+      naming the folder; `obsidian/install.sh` copying the folder
+      without overwriting a template he has changed in the vault (copy
+      only where the vault has no file of that name, and say which were
+      skipped); `obsidian/README.md` and `AUTHORING.md`'s template
+      section and its "Core Templates plugin" line pointing at the files
+      instead of carrying a second copy that can drift; a test that
+      every template's frontmatter keys are keys of the collection
+      schema it is for (the source-read pattern of image-meta.test.mjs's
+      `PHOTOGRAPH_FIELDS` case), so a renamed field fails by name.
+      Pattern: `obsidian/` as c746cff left it; T1744 for the documents'
+      hand-editing rule. _Verify: `sh scripts/verify.sh` green; one-time:
+      each template copied into `src/content/` as a real file with only
+      the fields a build needs filled (a slug, a title, and for the
+      sidecars the photograph beside it) builds, the list of fields that
+      had to be filled reported per template, each copy removed and
+      `git status --short src/content` empty; the mutation (a template
+      given a key the schema lacks) fails by name, reverted;
+      `sh obsidian/install.sh "$TMPDIR/vault-check"` run twice against a
+      scratch vault — the second run after editing one template there —
+      keeps the edit and says so (never run against `~/photo-brain`)._
+      Done: verify green, 835 tests (+8, `obsidian-templates.test.mjs`). Five templates (`journal`, `photograph`, `journal-photograph`, `gallery`, `place`), `templates.json`, the install step (second run: "Templates changed in the vault, left as they are (not overwritten): place.md"), both documents repointed. Mutation (`mood: calm` in place.md) failed "each frontmatter key of place.md is a key of content.config.ts's schema for it", reverted. One-time builds, filled then removed (`src/content` clean): journal needs title, categories, description; photograph title, categories; journal-photograph title; gallery title, category, one image id; place title. **Thinner than the task line pictured**: no empty optional line passes the schema (YAML's empty value reaches zod as null and `.optional()` refuses it — an all-empty sidecar failed on 20 fields; an empty `date:` coerces to 1970), so every optional field is left out, and the `stages:` example is YAML comments, which Obsidian's property rewrite may drop. Put to him: fuller templates need the schema to read a blank line as not set. Finding: a property added and left blank in Obsidian's panel fails the build today.
+
 ### Phase 3b record (the person's walkthrough)
 
 Reached 2026-09-27; three rounds (T1735a–c above, his words in each).
@@ -2602,6 +2640,7 @@ tier if it is ever on (it is off). -->
 | Finding: side-by-side heading (diagnosis, 2026-10-02) | implementation (`opus`, high) | ~36k | no bug: the heading sits in the text column while side by side widens the box; the camera stage (4:3) is letterboxed inside a 3:2 pane, so its visible edge is inset a second time. Options (heading follows the box; images pushed to their outer edges; side back to column) put to him. Session on `claude-opus-5-5` from this turn (switched outside the session; recorded, not inferred as the fallback) |
 | T1753b no compare heading | implementation (`opus`, high) | ~32k | done; 827 tests; the section named by aria-label as the story's is; Decided line in spec.md |
 | T1753c air around the compare | implementation (`opus`, high) | ~34k | done; half a baseline each side as padding; the page's styles now external (check-motion 83 → 21 stylesheets, same coverage — for the sweep) |
+| T1735d Obsidian templates (2026-10-06) | implementation (`opus`, high) | ~87k | done; 835 tests; templates thin because a blank optional line fails the schema — whether blank means not-set is put to him; README's structure listing names neither `obsidian/` nor the new test (close-out) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

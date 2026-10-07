@@ -41,8 +41,9 @@ Why this shape:
 - **Files & links → Excluded files:** add `.git`, `node_modules`, and
   `dist` so search, the graph, and link suggestions don't drown in
   repo machinery.
-- **Core Templates plugin:** point it at `templates/`, and keep a
-  `journal.md` template there (skeleton below).
+- **Core Templates plugin:** on, and pointed at `templates/`. The
+  restore script sets both and puts the site's templates in that folder
+  ("Templates" below).
 - **Community plugins → Photo Pieces Blocks: enabled.** The plugin
   draws every block of the vocabulary as a representative figure, in
   Live Preview and in Reading view alike — each frame at a width that
@@ -60,88 +61,61 @@ Why this shape:
   so there is nothing to author for motion, and the plugin does not
   change. Build/install instructions: `obsidian-plugin/README.md`.
 
-## Journal entry template
+## Templates
 
-Contents for `templates/journal.md`, saved as
-`src/content/journal/<slug>/index.md` — frontmatter is simultaneously the
-Astro schema (build-validated) and Obsidian's Properties panel, so
-there is no separate metadata system to maintain:
+One template for each thing you write, in the vault's `templates/`
+folder. **Templates: Insert template**, from the command palette, puts
+one into the open note:
 
-```markdown
----
-title:
-publishDate:
-categories: []
-description:
-cover:
-at:
-draft: true
----
-```
+- `journal.md` — a journal entry, saved as
+  `src/content/journal/<slug>/index.md`;
+- `photograph.md` — a photograph of the photographs folder: its
+  sidecar, saved as `src/content/photographs/_<basename>.md`;
+- `journal-photograph.md` — a photograph in a journal entry's folder:
+  its sidecar, saved as `_<basename>.md` beside it, without the three
+  fields that are the photographs folder's alone;
+- `gallery.md` — a gallery, saved in `src/content/galleries/`;
+- `place.md` — a place, saved in `src/content/places/` ("Places"
+  below).
+
+The files are the repo's, in `obsidian/vault/templates/` — read them
+there; this document keeps no copy of them. `sh obsidian/install.sh`
+puts them in the vault and leaves alone any you have changed there
+(`obsidian/README.md`). Frontmatter is simultaneously the Astro schema
+(build-validated) and Obsidian's Properties panel, so there is no
+separate metadata system to maintain.
+
+**Fill every line a template gives you, or delete it.** A field left
+empty fails the build — `title:` with nothing after it is not a
+missing title — and so does `categories: []`. Before it builds:
+
+- a journal entry needs its `title`, its `categories` and its
+  `description`;
+- a photograph's sidecar needs its `title`, and in the photographs
+  folder its `categories`, or neither line;
+- a gallery needs its `title`, its `category` and at least one image
+  under `images`;
+- a place needs its `title`.
+
+A date is today's where that is the default: a journal entry's
+`publishDate`, a photograph's `published`, a gallery's `date`. The
+journal entry, the photograph of the photographs folder and the place
+start as `draft: true`.
 
 `categories` values: `landscape`, `street`, `portrait`, `event`.
-`at`: the slug of a declared place — the default for every frame in
-the entry's folder that names none — see "Places" below.
 
-Three more skeletons worth keeping in `templates/` (spec 004 — the
-field reference is in `README.md`):
+For the same reason the optional fields are not in the templates — an
+empty line for one would fail the build. Write them as you need them: a
+journal entry's `cover` and `at` (the slug of a declared place — the
+default for every frame in the entry's folder that names none — see
+"Places" below); a sidecar's label overrides and rich-page fields
+("Metadata: EXIF, then a sidecar" below, and the field reference in
+`README.md`); a gallery's `description` and `cover`; a place's
+`description` and `cover`.
 
-```markdown
----
-title:
-caption:
-date:
-camera:
-lens:
-focalLength:
-aperture:
-shutter:
-iso:
-place:
-at:
-time:
-format:
-filters:
-support:
-processing:
-edition:
-sizes:
-paper:
----
-
-The story, if there is one.
-```
-
-saved as `_<basename>.md` beside an image (every field optional — see
-"Metadata: EXIF, then a sidecar" below; a photograph in the photographs
-folder takes three more, `draft:`, `published:` and `categories:` —
-"The photographs folder" below), and
-
-```markdown
----
-title:
-category:
-description:
-date:
-images:
-  -
----
-```
-
-saved in `src/content/galleries/`, and
-
-```markdown
----
-title:
-description:
-cover:
-draft: true
----
-
-Why you keep going back.
-```
-
-saved in `src/content/places/` (spec 009 — "Places" below).
+The two sidecar templates carry a `stages:` example as comment lines.
+Take the `# ` off each line to use it ("Stages on the image page"
+below); left as it is, it does nothing.
 
 ## A journal folder is public territory
 
