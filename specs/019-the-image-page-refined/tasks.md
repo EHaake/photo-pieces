@@ -1587,6 +1587,22 @@ and will tune it while writing. No keeps named beyond what the three
 rounds built; T1735 stays unchecked, and a round he asks for while
 writing is one more sub-lettered task under it.
 
+2026-10-06, as he sat down to write his first piece: two rounds —
+T1735d (templates for each kind of piece) and T1735e ("Yes, make a
+blank field mean not set"). Asked the same day and **not a round — a
+spec amendment, the fifth**: "I think most photographs should belong to
+a place automatically. Can we have it so that if I create a photograph
+piece before the place piece exists, it makes it automatically?" Of
+three options put to him (the site makes the page; the plugin makes the
+file; keep the rule): "Go with option 1, go with the recommendation" —
+the site makes a plain place page from the name until he writes the
+place's file, each build lists the places made so, a name one or two
+letters off an existing place is refused as a probable typo, and an
+auto-made place is listed straight away. It reverses the constitution's
+Places clause, so it goes to a spec session; the brief is
+`amendment-5-brief.md` in this directory. His piece does not wait on
+it.
+
 ## Phase 3c — The lexicon and the photograph's home (reviewer after the phase; `review: per-task` on T1739; walkthrough: on the laptop, the site built and previewed (`npm run build && npm run preview` — search needs the build): the nav reads Home, Journal, Places, Galleries, About, Search, and no page says "piece" or "pieces" in its own words; the footer carries a quiet "Index of photographs" beside Contact, and it opens `/photographs/`: every photograph on the site, small, in one dense grid ordered by title, a heading and nothing else written, each frame opening its page; the jetty's place page shows "Dock, late" on its wall among the jetty's other frames, placed by the day it was made; the front door lists the latest three newest first, "Dock, late" among the journal entries as its frame, its date and its title, opening `/photographs/dock-b/`; the draft fixture is nowhere — not on the front door, not in the index, not on the jetty's wall, nothing at `/photographs/draft-fixture/`, nothing when searching "Draft fixture"; the addresses: the fog entry at `/journal/where-the-fog-lets-go/`, its photographs at `/photographs/where-the-fog-lets-go/land-b/`, a photograph of the photographs folder at `/photographs/dock-a/`, and `/pieces/…` and `/images/…` gone; the journal index, a category page, the search page, a photograph page ("From the journal entry …", "In the journal", "Also in") and the About page's stand-in read in the new words; in Obsidian, the moved samples — `src/content/journal/vocabulary-sampler/index.md`, and the matte sampler, whose borrowed photographs now come from `../../photographs/` — draw every figure as before, none "not found"; and, if he wants to, the spec's publishing flow for real: a photograph and its `_<name>.md` with `draft: true` in `src/content/photographs/`, nothing at its address under `npm run dev`, then the draft line removed and `published:` written, and it stands on the front door; as many rounds as it takes, each a sub-lettered task under T1745)
 
 **Status**: Signed off (2026-09-29) at the top tier (B1 fixed and re-reviewed; S1–S12 taken). Plan: "Amendment 3 (2026-09-29): the lexicon, the photograph's home" and its sections.
