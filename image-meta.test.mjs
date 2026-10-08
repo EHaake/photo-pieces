@@ -21,8 +21,10 @@ import {
   imageIdOf,
   imageUrlFor,
   isPrivateRaster,
+  lettersOff,
   nameCollisions,
   nearest,
+  nearMissProblems,
   neighbours,
   outingOrder,
   PAIR_WIDTH,
@@ -32,11 +34,17 @@ import {
   PHOTOGRAPH_FIELDS,
   photographOnlyProblems,
   pieceFrames,
+  PLACE_NEAR_MISS,
+  PLACE_NEAR_MISS_SHORT,
+  PLACE_SHORT_NAME,
+  PLACE_TITLE_SMALL_WORDS,
+  placeAtProblems,
   placeCoverProblem,
   placeNameProblem,
   placeOf,
   placeProblems,
   placeSummary,
+  placeTitle,
   privateRole,
   privateTargetOf,
   referenceProblems,
@@ -1544,5 +1552,261 @@ describe('the place walls (T1746, spec 019)', () => {
     expect(
       undatedAtPlace([{ file: 'src/content/photographs/_bank.md', slug: null, date: undefined }]),
     ).toEqual([]);
+  });
+});
+
+describe("a place's name (T1755, spec 019)", () => {
+  const place = (slug) => ({ slug, file: `src/content/places/${slug}.md` });
+  const sidecar = (name, slug) => ({ file: `src/content/photographs/_${name}.md`, slug });
+
+  it("PLACE_TITLE_SMALL_WORDS is the spec's eleven small words", () => {
+    expect(PLACE_TITLE_SMALL_WORDS).toEqual([
+      'a',
+      'an',
+      'and',
+      'at',
+      'by',
+      'for',
+      'in',
+      'of',
+      'on',
+      'the',
+      'to',
+    ]);
+  });
+
+  it('PLACE_NEAR_MISS is 2 letters', () => {
+    expect(PLACE_NEAR_MISS).toBe(2);
+  });
+
+  it('PLACE_NEAR_MISS_SHORT is 1 letter', () => {
+    expect(PLACE_NEAR_MISS_SHORT).toBe(1);
+  });
+
+  it('PLACE_SHORT_NAME is 6 characters', () => {
+    expect(PLACE_SHORT_NAME).toBe(6);
+  });
+
+  it("placeTitle: the spec's three — Falls Creek Falls, Top of the World, The Jetty", () => {
+    expect(placeTitle('falls-creek-falls')).toBe('Falls Creek Falls');
+    expect(placeTitle('top-of-the-world')).toBe('Top of the World');
+    expect(placeTitle('the-jetty')).toBe('The Jetty');
+  });
+
+  it('placeTitle: a small word first takes its capital', () => {
+    expect(placeTitle('of-mice')).toBe('Of Mice');
+  });
+
+  it('placeTitle: digits pass through', () => {
+    expect(placeTitle('highway-101')).toBe('Highway 101');
+  });
+
+  it('placeTitle: a doubled hyphen makes no empty word', () => {
+    expect(placeTitle('a--b')).toBe('A B');
+    expect(placeTitle('falls--creek')).toBe('Falls Creek');
+  });
+
+  it("placeAtProblems: a title written as a name → the exact line with the slug to write, on an entry's file and on a sidecar's", () => {
+    expect(
+      placeAtProblems([{ file: 'src/content/photographs/_falls.md', slug: 'Falls Creek Falls' }]),
+    ).toEqual([
+      '[places] src/content/photographs/_falls.md: at: "Falls Creek Falls" is not a place\'s name — lowercase letters, digits and hyphens only, or none for no place: write at: falls-creek-falls',
+    ]);
+    expect(
+      placeAtProblems([{ file: 'src/content/journal/alpha/index.md', slug: 'Falls Creek Falls' }]),
+    ).toEqual([
+      '[places] src/content/journal/alpha/index.md: at: "Falls Creek Falls" is not a place\'s name — lowercase letters, digits and hyphens only, or none for no place: write at: falls-creek-falls',
+    ]);
+  });
+
+  it('placeAtProblems: `None` is not the word `none`, and the line suggests it', () => {
+    expect(placeAtProblems([sidecar('falls', 'None')])).toEqual([
+      '[places] src/content/photographs/_falls.md: at: "None" is not a place\'s name — lowercase letters, digits and hyphens only, or none for no place: write at: none',
+    ]);
+  });
+
+  it('placeAtProblems: an underscore is not a hyphen — `falls_creek` suggests `falls-creek`', () => {
+    expect(placeAtProblems([sidecar('falls', 'falls_creek')])).toEqual([
+      '[places] src/content/photographs/_falls.md: at: "falls_creek" is not a place\'s name — lowercase letters, digits and hyphens only, or none for no place: write at: falls-creek',
+    ]);
+  });
+
+  it('placeAtProblems: `--` holds no letter or digit — refused, with nothing to suggest', () => {
+    expect(placeAtProblems([sidecar('falls', '--')])).toEqual([
+      '[places] src/content/photographs/_falls.md: at: "--" is not a place\'s name — lowercase letters, digits and hyphens only, or none for no place',
+    ]);
+  });
+
+  it('placeAtProblems: a slug, `none` and a blank → none', () => {
+    expect(
+      placeAtProblems([
+        { file: 'src/content/journal/alpha/index.md', slug: 'falls-creek-falls' },
+        sidecar('a', 'highway-101'),
+        sidecar('b', 'none'),
+        { file: 'src/content/journal/beta/index.md', slug: '' },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('placeAtProblems: two bad lines → two messages, in the order the refs came', () => {
+    expect(
+      placeAtProblems([
+        sidecar('b', 'The Jetty'),
+        sidecar('ok', 'the-jetty'),
+        { file: 'src/content/journal/alpha/index.md', slug: 'Falls Creek Falls' },
+      ]),
+    ).toEqual([
+      '[places] src/content/photographs/_b.md: at: "The Jetty" is not a place\'s name — lowercase letters, digits and hyphens only, or none for no place: write at: the-jetty',
+      '[places] src/content/journal/alpha/index.md: at: "Falls Creek Falls" is not a place\'s name — lowercase letters, digits and hyphens only, or none for no place: write at: falls-creek-falls',
+    ]);
+  });
+
+  it('lettersOff: the same name is 0 off', () => {
+    expect(lettersOff('jetty', 'jetty')).toBe(0);
+  });
+
+  it('lettersOff: a substitution is 1, a hyphen or a digit counted as a letter', () => {
+    expect(lettersOff('jetty', 'jatty')).toBe(1);
+    expect(lettersOff('trail-1', 'trail-2')).toBe(1);
+    expect(lettersOff('the-jetty', 'the_jetty')).toBe(1);
+  });
+
+  it('lettersOff: an insertion is 1', () => {
+    expect(lettersOff('jety', 'jetty')).toBe(1);
+  });
+
+  it('lettersOff: a deletion is 1', () => {
+    expect(lettersOff('jetty', 'jety')).toBe(1);
+  });
+
+  it('lettersOff: a swap of two adjacent letters is 1, not 2', () => {
+    expect(lettersOff('jetty', 'jtety')).toBe(1);
+  });
+
+  it('lettersOff: two edits are 2', () => {
+    expect(lettersOff('falls-creek-falls', 'falls-creek-polls')).toBe(2);
+  });
+
+  it('lettersOff: three edits are 3', () => {
+    expect(lettersOff('falls-creek-falls', 'falls-creek-pools')).toBe(3);
+  });
+
+  it('nearMissProblems: one letter off a declared place → the exact line, both spellings, both files, both ways past', () => {
+    expect(nearMissProblems([sidecar('b', 'the-jety')], [place('the-jetty')])).toEqual([
+      '[places] "the-jety" (src/content/photographs/_b.md) is 1 letter off the place "the-jetty" (src/content/places/the-jetty.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/the-jety.md',
+    ]);
+  });
+
+  it("nearMissProblems: one letter off a place passed as a draft's file → refused the same", () => {
+    expect(
+      nearMissProblems([sidecar('b', 'the-jety')], [{ ...place('the-jetty'), draft: true }]),
+    ).toEqual([
+      '[places] "the-jety" (src/content/photographs/_b.md) is 1 letter off the place "the-jetty" (src/content/places/the-jetty.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/the-jety.md',
+    ]);
+  });
+
+  it('nearMissProblems: two letters off a long name → refused', () => {
+    expect(
+      nearMissProblems([sidecar('b', 'falls-creek-polls')], [place('falls-creek-falls')]),
+    ).toEqual([
+      '[places] "falls-creek-polls" (src/content/photographs/_b.md) is 2 letters off the place "falls-creek-falls" (src/content/places/falls-creek-falls.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/falls-creek-polls.md',
+    ]);
+  });
+
+  it('nearMissProblems: three letters off a long name → none', () => {
+    expect(
+      nearMissProblems([sidecar('b', 'falls-creek-pools')], [place('falls-creek-falls')]),
+    ).toEqual([]);
+  });
+
+  it('nearMissProblems: two names with no file, one letter apart → one line naming both files and both files to add, the names sorted', () => {
+    expect(
+      nearMissProblems([sidecar('b', 'falls-creek-fals'), sidecar('a', 'falls-creek-falls')], []),
+    ).toEqual([
+      '[places] "falls-creek-falls" (src/content/photographs/_a.md) is 1 letter off "falls-creek-fals" (src/content/photographs/_b.md), and neither has a place file — one is a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/falls-creek-falls.md and src/content/places/falls-creek-fals.md',
+    ]);
+  });
+
+  it('nearMissProblems: a short pair two letters off → none', () => {
+    expect(nearMissProblems([sidecar('b', 'dome')], [place('cove')])).toEqual([]);
+  });
+
+  it('nearMissProblems: a short pair one letter off → refused', () => {
+    expect(nearMissProblems([sidecar('b', 'cave')], [place('cove')])).toEqual([
+      '[places] "cave" (src/content/photographs/_b.md) is 1 letter off the place "cove" (src/content/places/cove.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/cave.md',
+    ]);
+  });
+
+  it('nearMissProblems: the longer name has six characters, two letters off → none (six is short)', () => {
+    expect(nearMissProblems([sidecar('b', 'harper')], [place('harbor')])).toEqual([]);
+  });
+
+  it('nearMissProblems: the longer name has seven characters, two letters off → refused (seven is not short)', () => {
+    expect(nearMissProblems([sidecar('b', 'the-bog')], [place('the-bay')])).toEqual([
+      '[places] "the-bog" (src/content/photographs/_b.md) is 2 letters off the place "the-bay" (src/content/places/the-bay.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/the-bog.md',
+    ]);
+  });
+
+  it('nearMissProblems: the longer name of the pair decides whether it is short, whichever of the two is the typo', () => {
+    expect(nearMissProblems([sidecar('b', 'harbours')], [place('harbor')])).toEqual([
+      '[places] "harbours" (src/content/photographs/_b.md) is 2 letters off the place "harbor" (src/content/places/harbor.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/harbours.md',
+    ]);
+    expect(nearMissProblems([sidecar('b', 'harbor')], [place('harbours')])).toEqual([
+      '[places] "harbor" (src/content/photographs/_b.md) is 2 letters off the place "harbours" (src/content/places/harbours.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/harbor.md',
+    ]);
+  });
+
+  it('nearMissProblems: two declared places one letter apart, both named → none', () => {
+    expect(
+      nearMissProblems(
+        [sidecar('a', 'the-jetty'), sidecar('b', 'the-jety')],
+        [place('the-jetty'), place('the-jety')],
+      ),
+    ).toEqual([]);
+  });
+
+  it('nearMissProblems: a name far from every place → none — it makes a place, where the withdrawn rule refused it', () => {
+    expect(
+      nearMissProblems(
+        [{ file: 'src/content/journal/alpha/index.md', slug: 'top-of-the-world' }],
+        [place('sombrio-beach'), place('jetty'), place('botanical-beach')],
+      ),
+    ).toEqual([]);
+  });
+
+  it('nearMissProblems: a name written by three files names the first and "and 2 more"', () => {
+    expect(
+      nearMissProblems(
+        [sidecar('a', 'the-jety'), sidecar('b', 'the-jety'), sidecar('c', 'the-jety')],
+        [place('the-jetty')],
+      ),
+    ).toEqual([
+      '[places] "the-jety" (src/content/photographs/_a.md and 2 more) is 1 letter off the place "the-jetty" (src/content/places/the-jetty.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/the-jety.md',
+    ]);
+  });
+
+  it('nearMissProblems: `none` and blanks are never measured', () => {
+    expect(
+      nearMissProblems(
+        [
+          sidecar('a', 'none'),
+          { file: 'src/content/journal/alpha/index.md', slug: '' },
+          sidecar('b', 'none'),
+        ],
+        [place('nine'), place('a')],
+      ),
+    ).toEqual([]);
+  });
+
+  it('nearMissProblems: every near miss comes back at once, the pairs sorted by name', () => {
+    expect(
+      nearMissProblems(
+        [sidecar('b', 'the-jety'), sidecar('a', 'sombrio-beech')],
+        [place('the-jetty'), place('sombrio-beach')],
+      ),
+    ).toEqual([
+      '[places] "sombrio-beech" (src/content/photographs/_a.md) is 1 letter off the place "sombrio-beach" (src/content/places/sombrio-beach.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/sombrio-beech.md',
+      '[places] "the-jety" (src/content/photographs/_b.md) is 1 letter off the place "the-jetty" (src/content/places/the-jetty.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/the-jety.md',
+    ]);
   });
 });

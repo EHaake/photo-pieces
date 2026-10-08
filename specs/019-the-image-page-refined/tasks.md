@@ -2374,7 +2374,7 @@ list). Task ids continue from T1753.
       recorded here for AC 39, before T1755's._
       Done: committed alone as `519a8dc` (AC 39), before T1755's. `git diff --stat` → `CLAUDE.md` alone (the stray `obsidian-plugin/package-lock.json` change left unstaged); the three old phrases no hits; the three new phrases and "never inferred from camera metadata" count 1 each, each whole on one line; prettier clean; verify.sh green (88 pages, 846 tests). The wrap leaves "and the photographs that name none. A place's" on a short line so the sentence after stays out of the diff.
 
-- [ ] **T1755** — A place's name: the title rule, the shape, the
+- [x] **T1755** — A place's name: the title rule, the shape, the
       guard. `review: per-task`. Pure rules, not yet called: the site
       builds as before. Pattern: `placeOf`, `placeNameProblem` and
       `undatedAtPlace` in `src/lib/image-meta.mjs` (a pure rule, its
@@ -2398,6 +2398,7 @@ list). Task ids continue from T1753.
       image-meta.test.mjs alone; the three failure lines as the tests
       expect them pasted, for the orchestrator to set beside the
       plan's (AC 40's title rule by name; AC 43's rule)._
+      Done: `placeTitle`, `placeAtProblems`, `lettersOff`, `nearMissProblems` and the four tunables beside `placeOf`, called by nothing yet; 846 → 882 tests (36 new, none removed), verify.sh re-run by the orchestrator green (88 pages). The five mutations each failed by name and were reverted; a sixth at review (the letter-or-digit rule dropped) fails the `--` case by name. The three failure lines are the plan's, character for character (reviewer). Two cases beyond the plan's list, kept: the longer name of a pair decides whether it is short (`harbor`/`harbours`), and every near miss comes back at once, sorted. Readings: pairs sorted by code unit; "and N more" counts refs, one per file. Per-task review: signed off, nothing blocking.
 
 - [ ] **T1756** — The registry makes places. `review: per-task`.
       Pattern: the registry's own place loop (`src/lib/images.ts`
@@ -2995,6 +2996,8 @@ tier if it is ever on (it is off). -->
 | Amendment 5 sign-off notes (planner resumed) | implementation (`opus`, high) | ~14k | S1–S10 taken, none declined; the dev sampler keeps `the-headlands` by name; AC 40–42's built pages are read once (no test reads the real `dist/`) — the sweep re-reads `dist/places/top-of-the-world/` |
 | Phase 3e implementation session (2026-10-07) | session on `claude-opus-5-5`, medium (opened on Opus, not the session tier's Fable; asked, the person said stay on Opus) | — | orchestration from T1754 |
 | T1754 constitution, a fifth time | implementation (`opus`, high) | ~33k | done; committed alone `519a8dc` (AC 39) |
+| T1755 a place's name | implementation (`opus`, high) | ~76k | done; 882 tests; two cases beyond the plan's list kept; finding carried to T1756 — the guard measures badly shaped values, so the registry must throw on the shape check first |
+| T1755 per-task review | implementation (`opus`, high) | ~51k | signed off, nothing blocking; seven second looks — the `--` case's mutation run (fails by name), `slugSuggestion`'s accent-stripping untested and the sort's second key unpinned (sweep), shape-first and one ref per file and drafts passed as declared (T1756's bundle) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

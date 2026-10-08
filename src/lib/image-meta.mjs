@@ -1193,6 +1193,180 @@ export function placeNameProblem(name, file) {
 }
 
 /**
+ * A place's name (spec 019, amendment 5). A place is made by being
+ * named: an `at:` whose slug has no place file makes the place, its
+ * title read from the slug. The title rule, the shape of a name where
+ * it is written, and the guard against a misspelt one.
+ */
+
+export const PLACE_TITLE_SMALL_WORDS = Object.freeze([
+  'a',
+  'an',
+  'and',
+  'at',
+  'by',
+  'for',
+  'in',
+  'of',
+  'on',
+  'the',
+  'to',
+]); // tunable: lower case after the first word of a made place's title
+export const PLACE_NEAR_MISS = 2; // tunable: letters off that read as a typo
+export const PLACE_NEAR_MISS_SHORT = 1; // tunable: the same, for a short name
+export const PLACE_SHORT_NAME = 6; // tunable: a name this long or shorter is short
+
+/**
+ * The title rule: a made place's title, read from its slug. The words
+ * between hyphens, empty ones dropped (`a--b` is a legal file name),
+ * each given a capital except a small word after the first, joined by
+ * spaces. Digits pass through.
+ */
+export function placeTitle(slug) {
+  return String(slug ?? '')
+    .split('-')
+    .filter((word) => word !== '')
+    .map((word, index) =>
+      index > 0 && PLACE_TITLE_SMALL_WORDS.includes(word)
+        ? word
+        : word[0].toUpperCase() + word.slice(1),
+    )
+    .join(' ');
+}
+
+/**
+ * The slug a value that is not one should have been: NFKD, combining
+ * marks removed, lower case, every run outside `a-z0-9` one hyphen,
+ * hyphens trimmed from the ends. Empty when nothing is left.
+ */
+function slugSuggestion(value) {
+  return String(value)
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/**
+ * The shape of a place's name, checked where it is written. `refs` is
+ * `{ file, slug }[]` — every `at:` on any journal entry or sidecar,
+ * draft or not, already trimmed. A value passes when it is blank,
+ * `none`, or a slug holding at least one letter or digit — one step
+ * tighter than a place file's name, since `--` would make a place with
+ * an empty title. Returns one message per value that is not a name, in
+ * the order of `refs`, each showing the slug it should be when there is
+ * one to show; empty when there are none, so the caller fails the build
+ * with all of them at once.
+ */
+export function placeAtProblems(refs) {
+  const problems = [];
+  for (const { file, slug } of refs) {
+    if (!slug || slug === PLACE_NONE) continue;
+    if (SLUG.test(slug) && /[a-z0-9]/.test(slug)) continue;
+    const suggestion = slugSuggestion(slug);
+    problems.push(
+      `[places] ${file}: at: "${slug}" is not a place's name — lowercase letters, digits and hyphens only, or ${PLACE_NONE} for no place${suggestion ? `: write at: ${suggestion}` : ''}`,
+    );
+  }
+  return problems;
+}
+
+/**
+ * How many letters off two names are: the fewest single-character
+ * insertions, deletions and substitutions that turn `a` into `b`, a
+ * swap of two adjacent characters counted as one (optimal string
+ * alignment) — the swap is the commonest slip of the hand, and counted
+ * as two it would slip past the short-name allowance. Hyphens and
+ * digits count as letters.
+ */
+export function lettersOff(a, b) {
+  const from = String(a);
+  const to = String(b);
+  let before = [];
+  let above = Array.from({ length: to.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= from.length; i += 1) {
+    const row = [i];
+    for (let j = 1; j <= to.length; j += 1) {
+      const same = from[i - 1] === to[j - 1];
+      let off = Math.min(above[j] + 1, row[j - 1] + 1, above[j - 1] + (same ? 0 : 1));
+      if (i > 1 && j > 1 && from[i - 1] === to[j - 2] && from[i - 2] === to[j - 1]) {
+        off = Math.min(off, before[j - 2] + 1);
+      }
+      row.push(off);
+    }
+    before = above;
+    above = row;
+  }
+  return above[to.length];
+}
+
+const byCodeUnit = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+
+/**
+ * The guard: a name with no place file that is one or two letters off
+ * another place's name is a probable typo, and the build refuses it
+ * rather than make a second place in silence. `refs` is `{ file, slug
+ * }[]` — every `at:`, a draft's included, already trimmed — and
+ * `declared` `{ slug, file }[]`, every place file, drafts included.
+ * The names with no file are the distinct slugs of `refs` that are not
+ * blank, not `none` and not declared; each is measured against every
+ * declared slug and against every other name with no file, once per
+ * pair. A pair is refused within `PLACE_NEAR_MISS` letters —
+ * `PLACE_NEAR_MISS_SHORT` when the longer of the two names has
+ * `PLACE_SHORT_NAME` characters or fewer. Two declared slugs are never
+ * measured against each other. Returns one message per pair, pairs
+ * sorted by name, empty when there are none.
+ */
+export function nearMissProblems(refs, declared) {
+  const placeFiles = new Map(declared.map(({ slug, file }) => [slug, file]));
+  const writers = new Map();
+  for (const { file, slug } of refs) {
+    if (!slug || slug === PLACE_NONE || placeFiles.has(slug)) continue;
+    if (!writers.has(slug)) writers.set(slug, []);
+    writers.get(slug).push(file);
+  }
+  const written = (name) => {
+    const [first, ...rest] = writers.get(name);
+    return `"${name}" (${rest.length > 0 ? `${first} and ${rest.length} more` : first})`;
+  };
+  const near = (a, b) => {
+    const off = lettersOff(a, b);
+    const allowance =
+      Math.max(a.length, b.length) <= PLACE_SHORT_NAME ? PLACE_NEAR_MISS_SHORT : PLACE_NEAR_MISS;
+    return off <= allowance ? `${off} letter${off === 1 ? '' : 's'} off` : null;
+  };
+  const toAdd = (name) => `src/content/places/${name}.md`;
+  const ways = 'Correct the spelling; or, if they really are two places, add';
+
+  const names = [...writers.keys()].sort(byCodeUnit);
+  const pairs = [];
+  for (const [index, name] of names.entries()) {
+    for (const [place, file] of placeFiles) {
+      const off = near(name, place);
+      if (off === null) continue;
+      pairs.push({
+        first: name,
+        second: place,
+        message: `[places] ${written(name)} is ${off} the place "${place}" (${file}) — a probable typo. ${ways} ${toAdd(name)}`,
+      });
+    }
+    for (const other of names.slice(index + 1)) {
+      const off = near(name, other);
+      if (off === null) continue;
+      pairs.push({
+        first: name,
+        second: other,
+        message: `[places] ${written(name)} is ${off} ${written(other)}, and neither has a place file — one is a probable typo. ${ways} ${toAdd(name)} and ${toAdd(other)}`,
+      });
+    }
+  }
+  return pairs
+    .sort((a, b) => byCodeUnit(a.first, b.first) || byCodeUnit(a.second, b.second))
+    .map((pair) => pair.message);
+}
+
+/**
  * The slug rule: every `at:` other than `none`, on a piece or a sidecar,
  * draft or not, must name a declared place. `refs` is `[{ file, slug }]`
  * — every `at:` the registry found, already trimmed — and `placeSlugs`
