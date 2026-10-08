@@ -293,7 +293,7 @@ const FOG = [
 
 describe('what the scanner reads, by hand (T1730)', () => {
   it.each([
-    ['vocabulary-sampler', SAMPLER, [20, 259]],
+    ['vocabulary-sampler', SAMPLER, [21, 260]],
     ['where-the-fog-lets-go', FOG, [17]],
   ])(
     '%s: every block with its images, caption, attributes, method and prose; the shorthand images are not blocks',
