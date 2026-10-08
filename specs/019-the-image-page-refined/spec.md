@@ -32,6 +32,12 @@ Goal 11 and the sections marked _(amended 2026-10-01, category)_ —
 re-planned as plan.md's "Amendment 4 (2026-10-01): the photograph's
 categories" and tasks.md's Phase 3d (T1748–T1753), signed off at the top tier
 the same day, before the real piece.
+**Amended a fifth time, 2026-10-06**, as he sat down to write the real
+piece, with the 3a, 3b and 3c pauses held open: a place made by naming
+it — Goal 12 and the sections marked _(amended 2026-10-06, place)_ —
+to be re-planned as plan.md's "Amendment 5 (2026-10-06): a place made
+by naming it" and tasks.md's Phase 3e (task ids on from T1753), before
+the real piece.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
@@ -153,6 +159,23 @@ the photograph's home a first-class folder with the addresses, the
 draft flag and the date that a piece needs, before the real piece is
 written against them: "I'd rather get this done now while I'm writing
 my first place piece instead of waiting until later."
+
+**Amended a fifth time (2026-10-06), as he was about to write the
+first piece** — a photograph called "Falls Creek Falls", at a place of
+the same name. Spec 009 made a place something declared before it is
+named: a file first, then photographs that name it, and a build that
+refuses a name with no file. Writing a photograph, that is backwards.
+The photograph is the work in hand, and the place's writing may be
+years off: "I think most photographs should belong to a place
+automatically. Can we have it so that if I create a photograph piece
+before the place piece exists, it makes it automatically?" So a place
+is now made by being named. The site builds its page — a title read
+from the name, the photographs on its wall — until he writes the
+place's own file, which then takes over. What the refusal protected
+against, a misspelt name quietly becoming a second place, is kept by
+other means: the build refuses a new name a letter or two off an
+existing one, and says each time which places it made itself and
+which photographs name no place at all.
 
 ## Goals
 
@@ -315,6 +338,29 @@ my first place piece instead of waiting until later."
     place's page like any other frame taken there, and may be its
     cover.
 
+12. **A place made by naming it** _(amended 2026-10-06, place)_. A
+    published photograph that names a place the site has no file for
+    is enough to make the place: its page stands at `/places/<slug>/`
+    with a title read from the name and the photographs that name it
+    as its wall, it is on the places index straight away, and the
+    photograph's label links to it. The place's own file, whenever he
+    writes it, takes over at the same address with his title, his
+    description, his cover and his writing. The build says which
+    places it made this way and which photographs name no place at
+    all, and refuses a new name one or two letters off an existing
+    place as a probable typo. Nothing is inferred: a place comes from
+    a name he wrote, never from camera metadata.
+    **How it serves the purpose** (`VISION.md`, and the constitution's
+    test). A place is one of the ways onward from a photograph —
+    "Pieces should lead into the next, always inviting the viewer to
+    go deeper" — and a photograph whose place had no file led nowhere
+    until he stopped writing to declare one. The larger work is his
+    writing; the site should not ask for a file before a photograph
+    can lead somewhere. What it must not become is what a gallery does
+    by default, a tag page: the page the site makes is a place's wall
+    waiting for its writing, in the form every place page has, and it
+    says nothing he did not tell it.
+
 ## Non-goals
 
 - **The external image store.** The detail exports make the repo heavier
@@ -464,6 +510,37 @@ my first place piece instead of waiting until later."
   and journal entries, not photographs. A journal folder's photographs
   take their entry's categories, as they take its draft and date; a
   sidecar there that writes the line fails the build naming the field.
+- **A made place** _(amended 2026-10-06, place)_ — a place with no
+  file in `src/content/places/`, made because a published photograph
+  names it: by its sidecar's `at: <slug>`, in either folder, or by its
+  journal entry's `at:` default. It is a place wherever a declared one
+  is — its page, its card on the places index, the place line on its
+  photographs' labels, the arrows that follow a reader from its wall —
+  with three differences: its title is read from the slug (the title
+  rule, next), it has no description and no writing, and its cover is
+  the first frame of its most recent outing, the rule a declared place
+  without a `cover` already follows. Its frames and their order are
+  the registry's, as for any place. Writing
+  `src/content/places/<slug>.md` makes it a declared place and the
+  file's fields take over; no photograph's line changes. A place
+  cannot be made and held back at once: a place file with
+  `draft: true` is still how he holds a place back — no page, and its
+  frames show no place, as today — and a name whose photographs are
+  all unpublished makes nothing.
+- **The title rule** _(amended 2026-10-06, place)_ — a made place's
+  title, from its slug: the hyphens become spaces and each word takes
+  a capital, except the small words (a, an, and, at, by, for, in, of,
+  on, the, to) after the first. `falls-creek-falls` reads "Falls Creek
+  Falls", `top-of-the-world` "Top of the World", `the-jetty` "The
+  Jetty". Where that is wrong for a place — his own file calls the
+  jetty "The jetty" — the place's file is the correction. The list of
+  small words is a tunable.
+- **A place's name** _(amended 2026-10-06, place)_ — what `at:` may
+  hold: the word `none`, or a slug — lowercase letters, digits and
+  hyphens, the shape a place file's name already has. With the file no
+  longer required, the shape is checked where the name is written:
+  `at: Falls Creek Falls` fails the build naming the file and the
+  value, and shows the slug it should be.
 - **The stage's shares** _(amended 2026-09-26)_ — two numbers, the
   landscape share (of the first screen's width, for a photograph wider
   than tall) and the portrait share (of the first screen's height, for
@@ -582,6 +659,22 @@ the front door lists it first with its frame and title, and a gallery
 may now name `bank`. A journal entry written later places it as
 `../../photographs/bank.jpg`, and the photograph's page lists that
 entry under "Also in".
+
+### Naming a new place _(amended 2026-10-06, place)_
+
+He writes `_falls-creek-falls.md` beside his photograph in the
+photographs folder and adds `at: falls-creek-falls`. No file of that
+name is in `src/content/places/`. The build passes and says what it
+did: the place `falls-creek-falls` made, one photograph on it,
+`src/content/places/falls-creek-falls.md` the file that would take it
+over. `/places/falls-creek-falls/` shows "Falls Creek Falls" and his
+photograph; the places index carries its card; the photograph's label
+names Falls Creek Falls, a link. A month later a second photograph
+says `at: falls-creek-fals`; the build stops, names both sidecars and
+both spellings, and he fixes the letter. A year later he has something
+to say about the place: he makes the file from the `place` template —
+a title, a description, a cover, his writing — and the same address
+now carries them. The build's note no longer lists it.
 
 ### Writing a pair _(amended 2026-09-26)_
 
@@ -742,6 +835,18 @@ output.
   categories of the galleries that hold it, else no eyebrow. Each word
   links to its category page, as now. Nothing else on the page, and no
   other page, changes with the line.
+- **A made place's page and card** _(amended 2026-10-06, place)_. The
+  page is a place page with nothing where the description and the
+  writing stand: the title, then the wall, in the layout, widths and
+  order of any place's wall, and no line of the site's own in their
+  stead — no "writing to come", no count, no note that the page was
+  made. Its card on the places index is any place's card — the cover,
+  the title, the line of counts and years, nothing where a declared
+  place's description would stand — in the index's usual order,
+  unmarked. The photograph's label links to it by its title, as to a
+  declared place. A visitor cannot tell a made place from a declared
+  one that says little; only the build's note can. The place wall
+  itself, and a declared place's page and card, are unchanged.
 - **The pair blocks** _(amended 2026-09-26)_. `side`: the two panes at
   the photograph's ratio and the same size, the label · note of each
   beneath its pane in the caption style, no control, no legend, no
@@ -871,6 +976,54 @@ output.
   photographs taking their entry's. `AUTHORING.md`'s sidecar table
   gains the line, with the fallback to the galleries' categories in
   one sentence.
+- **The constitution, a fifth time** _(amended 2026-10-06, place)_,
+  in its own commit before the phase's first code: the Content model
+  clause's sentences on places. A place is _made_ by being named and
+  _grown_ by the registry; its file, when there is one, _declares_ its
+  title, description, cover and writing and takes the made page over;
+  the build refuses a name that is not a slug, or that is a near miss
+  of another place's, and lists the places it made — in place of
+  "_declared_ once … then _grown_ by the registry" and "the build
+  refuses a slug with no file, listing the places that exist". That a
+  place is never inferred from camera metadata, nor from the sidecar's
+  free-text `place`, stands as written. The exact text is the
+  planner's to draft from these sentences and the task's to write.
+- **The near-miss guard** _(amended 2026-10-06, place)_. A name with
+  no file that is one or two letters off another place's name — a
+  declared place's, a draft place's, or another made place's — fails
+  the build as a probable typo. The message names both files and both
+  spellings and gives the two ways past it: correct the spelling, or,
+  if they really are two places, write the place's file for each that
+  has none. A declared place's name is never refused, so two real
+  places that close are two files. Two names with no file that are
+  near each other fail together; the build does not guess which is the
+  typo. For a short name two letters is most of the word, so the
+  allowance there is one; where short begins is the plan's to set, and
+  both numbers are tunables.
+- **What the build says** _(amended 2026-10-06, place)_. Two notes, in
+  the summary `sh scripts/verify.sh` prints, neither ever failing the
+  build. First, one line for each place the build made, with how many
+  photographs stand on it and the file that would take it over.
+  Second, the published photographs that name no place: a
+  photographs-folder photograph with no `at:` line, and a journal
+  entry's photographs that name none where the entry sets no default —
+  an entry's read as one line with a count, however many there are. A
+  photograph whose line reads `at: none`, and the photographs of an
+  entry whose own line reads `at: none`, are left off: that is him
+  saying no place on purpose. (An entry's `at: none` so gains one
+  meaning that leaving the line out lacks — it quiets this note, and
+  changes nothing else.) The notes spec 009 prints — a draft place, a
+  declared place no photograph names — stand.
+- **The documents and the template** _(amended 2026-10-06, place)_:
+  `AUTHORING.md`'s "Places" and the photographs folder's `at:`
+  paragraph, and the README where it states the rule, say that naming
+  a place makes it, how its title is read, that the place's file takes
+  over, what the guard refuses and the way past it, and what the two
+  notes list. The `place` template is unchanged and is described as
+  what he reaches for when he has something to say about a place, no
+  longer a step before a photograph can name it. The Obsidian plugin
+  does not change: its autocomplete for `at:` already offers the names
+  written elsewhere in the vault.
 
 ## The tuning envelope
 
@@ -927,6 +1080,9 @@ as a routine task:
   length; the sidecar fields' names (`draft`, `published`); the
   photographs index's frame size, its order, and its link's word and
   place.
+- _(amended 2026-10-06, place)_ the title rule's small words; the
+  near-miss guard's two allowances and where a short name begins; the
+  wording and the grouping of the build's two notes.
 
 **As many rounds as it takes.** A pause may run several looks; each
 round is a sub-lettered task, reviewed with the phase, and the phase's
@@ -947,6 +1103,12 @@ re-dispatched on the changed section, and a sign-off:
 - _(amended 2026-10-01, category)_ photographs on a category page, or
   in the search index by category; a category on a journal folder's
   photograph's sidecar.
+- _(amended 2026-10-06, place)_ a place inferred from anything but a
+  name he wrote; a made place held back as a draft; any line of the
+  site's own on a made place's page or card, or a mark telling made
+  places from declared ones; a title written where the place is named
+  (`at: Falls Creek Falls`); the plugin creating place files; any
+  change to the place wall or to a declared place's page.
 - a change to the private-file rule beyond what Entities states, or a
   private file placed by any block but `compare`;
 - the loupe on any surface but the quiet view;
@@ -1155,6 +1317,57 @@ _Amended 2026-10-01 (category):_
       joins them — pinned on `dist/`
 - [ ] `AUTHORING.md` describes the line and its fallback — pinned by a
       grep
+
+_Amended 2026-10-06 (place):_
+
+- [ ] The constitution's places sentences say a place is made by being
+      named, declared by its file and grown by the registry, and name
+      the near-miss refusal and the build's list — amended in its own
+      commit before the phase's first code — its commit hash recorded
+- [ ] A published photograph that names a slug with no place file — by
+      its sidecar's `at:`, in either folder, or by its journal entry's
+      default — builds `/places/<slug>/`: the title by the title rule,
+      the published photographs that name it as the wall in the
+      place's order, the first frame of the most recent outing as the
+      cover, no description, no writing and no line of the site's own;
+      the title rule gives "Falls Creek Falls", "Top of the World" and
+      "The Jetty" for `falls-creek-falls`, `top-of-the-world` and
+      `the-jetty` — pinned by the registry's tests, a test of the rule
+      by name, and a built page
+- [ ] The made place is on `/places/` as a card with its cover, its
+      title and its line of counts, in the index's order, unmarked;
+      its photographs' labels link to it by its title, and the arrows
+      from its wall step through its photographs — pinned on `dist/`;
+      its look judged at the pause
+- [ ] Writing `src/content/places/<slug>.md` takes the place over at
+      the same address — the file's title, description, cover and
+      writing — and the build's note stops listing it; the same file
+      with `draft: true` builds no page and its photographs show no
+      place, as before; a name whose photographs are all unpublished
+      builds no page, no card and no note — pinned by the registry's
+      tests and a built page
+- [ ] A name with no file one or two letters off another place's name
+      — declared, draft or made — fails the build naming both files
+      and both spellings and the two ways past it; a short name is
+      refused at one letter only; two declared places that close build
+      as before; an `at:` value that is not a slug or `none` fails the
+      build naming the file and the value — pinned by the registry's
+      tests, each case able to fail for the reason its name gives
+- [ ] The build prints one line for each place it made, with its count
+      of photographs and the file that would take it over, and the
+      published photographs that name no place — a journal entry's as
+      one line with a count — leaving off those whose own line, or
+      whose entry's line, reads `at: none`; neither note fails the
+      build, and both show in what `sh scripts/verify.sh` prints —
+      pinned by tests of the notes and the command's output, recorded
+- [ ] A declared place's page, its card, its cover and the places
+      index's order are what they were, and the lexicon's scans pass
+      over the made place's pages — pinned on `dist/` and by the
+      existing place tests, unchanged and green
+- [ ] `AUTHORING.md` and the README describe naming a place, the title
+      rule, the place's file taking over, the guard and the way past
+      it, the two notes and the `place` template's role — pinned by
+      greps
 
 ## Decided (in this conversation, 2026-09-24)
 
@@ -1469,3 +1682,39 @@ _Amended 2026-10-01 (category):_
   a draft, so the piece publishes; and an empty `draft:`, `published:`
   or `categories:` in a journal folder's sidecar is no longer refused,
   being no line at all — a filled one still is.
+- **The fifth amendment (2026-10-06): a place made by naming it.**
+  Asked as he was about to write his first piece, a photograph called
+  "Falls Creek Falls" at a place of the same name: "I think most
+  photographs should belong to a place automatically. Can we have it
+  so that if I create a photograph piece before the place piece
+  exists, it makes it automatically?" Three options were put to him —
+  the site makes the place's page itself; the Obsidian plugin creates
+  the place's file; the rule stays — with the first recommended, two
+  guards against typos beside it, and a made place on the places index
+  straight away: "Go with option 1, go with the recommendation." In
+  the spec session three questions were put, each with a
+  recommendation. Whether naming is enough, or the build should also
+  say which photographs name no place: recommended, a quiet list that
+  never fails the build, `at: none` left off it. The title until he
+  writes the file: recommended, a capital on each word but the small
+  ones after the first, his file correcting any it gets wrong. What
+  the made page and its card say besides the title: recommended,
+  nothing — "a line such as 'writing to come' would be the site saying
+  something you didn't." His answer to the three: "Go with your
+  recommendations." The session's calls, to be seen: a journal entry's
+  `at:` default makes a place as a sidecar's line does; a made place's
+  cover is the first frame of its most recent outing; the card keeps
+  the line of counts every place's card carries (the recommendation
+  said "the cover and the title" — the counts are the photographs',
+  not the site's words); a made place is unmarked on the site and
+  named only in the build's note; it cannot be a draft, and a place
+  file with `draft: true` stays the way to hold a place back; the
+  guard tests names with no file against every other place's name and
+  never refuses a declared one, so two real places a letter apart are
+  two files; a short name is allowed one letter, not two; `at:` must
+  be a slug, checked where it is written; an entry's `at: none` quiets
+  the no-place note for its photographs; the plugin does not change.
+  Nothing is inferred from the camera, and GPS is never read — the
+  constitution's rule, untouched. Folded in before his piece: he makes
+  `falls-creek-falls` from the `place` template in the meantime, and
+  that file simply stays the place's own once this lands.
