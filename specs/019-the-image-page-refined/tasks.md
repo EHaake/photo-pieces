@@ -2354,7 +2354,7 @@ creating place files, or a change to the wall or to a declared place's
 page goes to the person as a spec amendment (spec.md's ordinary-path
 list). Task ids continue from T1753.
 
-- [ ] **T1754** — The constitution, a fifth time. Not code; its own
+- [x] **T1754** — The constitution, a fifth time. Not code; its own
       commit, before T1755. Pattern: T1748 (the constitution, a fourth
       time). Plan: "Shape of the change (amendment 5)", its first
       bullet. `CLAUDE.md` only: the Content model clause's one
@@ -2372,6 +2372,7 @@ list). Task ids continue from T1753.
       `grep -c "never inferred from camera metadata" CLAUDE.md` → 1, as
       before; `npx prettier --check CLAUDE.md` clean; the commit's hash
       recorded here for AC 39, before T1755's._
+      Done: committed alone as `519a8dc` (AC 39), before T1755's. `git diff --stat` → `CLAUDE.md` alone (the stray `obsidian-plugin/package-lock.json` change left unstaged); the three old phrases no hits; the three new phrases and "never inferred from camera metadata" count 1 each, each whole on one line; prettier clean; verify.sh green (88 pages, 846 tests). The wrap leaves "and the photographs that name none. A place's" on a short line so the sentence after stays out of the diff.
 
 - [ ] **T1755** — A place's name: the title rule, the shape, the
       guard. `review: per-task`. Pure rules, not yet called: the site
@@ -2992,6 +2993,8 @@ tier if it is ever on (it is off). -->
 | Amendment 5 planning (2026-10-07) | implementation (`opus`, high, no override) | ~197k | drafted plan.md's Amendment 5 and Phase 3e (T1754–T1760; T1755 and T1756 per-task); no product question; twelve readings named — the made page's line of counts (spec.md corrected to say it stays; first question of the look), the guard reads drafts too, `placeProblems`' four cases go with the refusal, verify.sh prints place notes uncapped, swap counts as one letter, short = six or fewer |
 | Amendment 5 sign-off | top (`fable`, high, override) | ~80k | signed off, nothing blocking; S1 a typo of `none` makes a place (the look), S2 AC 45's wording (spec.md corrected), S3 the entry default unpinned end to end, S4 two forms the absence case missed, S5 a stale quotation, S6 counts asserted, S7 the cover sketch, S8 grouping is not one value, S9 the dev sampler's place, S10 hyphens and digits count |
 | Amendment 5 sign-off notes (planner resumed) | implementation (`opus`, high) | ~14k | S1–S10 taken, none declined; the dev sampler keeps `the-headlands` by name; AC 40–42's built pages are read once (no test reads the real `dist/`) — the sweep re-reads `dist/places/top-of-the-world/` |
+| Phase 3e implementation session (2026-10-07) | session on `claude-opus-5-5`, medium (opened on Opus, not the session tier's Fable; asked, the person said stay on Opus) | — | orchestration from T1754 |
+| T1754 constitution, a fifth time | implementation (`opus`, high) | ~33k | done; committed alone `519a8dc` (AC 39) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
