@@ -111,12 +111,17 @@ backend service for v1.
   folder; a journal entry places others by borrowing them, galleries
   reference photographs by id, and a photograph's page links back to
   the journal entry it lives in, if any, and to every entry that places
-  it. **Places** (spec 009) are a third kind: a `places` collection of
-  files _declared_ once (a title, a description, an optional cover,
-  the writing), then _grown_ by the registry — a photograph names its
-  place in its sidecar (`at: <slug>`, or `at: none`), a journal entry
-  may set one default for its folder with the same line, and the build
-  refuses a slug with no file, listing the places that exist. A place's
+  it. **Places** (spec 009) are a third kind. A place is _made_ by being
+  named and _grown_ by the registry: a photograph names its place in its
+  sidecar (`at: <slug>`, or `at: none`), a journal entry may set one
+  default for its folder with the same line, and a published photograph
+  naming a slug is enough for the place's page, its title read from the
+  slug (spec 019). Its file in the `places` collection, when there is
+  one, _declares_ its title, description, cover and writing and takes
+  the made page over at the same address, and a file with `draft: true`
+  holds the place back. The build refuses a name that is not a slug, or
+  that is a near miss of another place's, and lists the places it made
+  and the photographs that name none. A place's
   page shows its published frames as one wall, outings oldest first — a
   journal entry's own-folder frames at the place as one outing, dated
   by the entry, and each photograph of the photographs folder that
