@@ -2400,7 +2400,7 @@ list). Task ids continue from T1753.
       plan's (AC 40's title rule by name; AC 43's rule)._
       Done: `placeTitle`, `placeAtProblems`, `lettersOff`, `nearMissProblems` and the four tunables beside `placeOf`, called by nothing yet; 846 → 882 tests (36 new, none removed), verify.sh re-run by the orchestrator green (88 pages). The five mutations each failed by name and were reverted; a sixth at review (the letter-or-digit rule dropped) fails the `--` case by name. The three failure lines are the plan's, character for character (reviewer). Two cases beyond the plan's list, kept: the longer name of a pair decides whether it is short (`harbor`/`harbours`), and every near miss comes back at once, sorted. Readings: pairs sorted by code unit; "and N more" counts refs, one per file. Per-task review: signed off, nothing blocking.
 
-- [ ] **T1756** — The registry makes places. `review: per-task`.
+- [x] **T1756** — The registry makes places. `review: per-task`.
       Pattern: the registry's own place loop (`src/lib/images.ts`
       lines 659–701) and its slug-rule block (lines 506–524);
       `groupByPlace`'s cases in image-meta.test.mjs; place-page.test.mjs's
@@ -2451,6 +2451,7 @@ list). Task ids continue from T1753.
       the count given); `git diff --stat -- src/content` empty after the
       reverts (AC 40, AC 42 and AC 43 by the registry's tests; AC 45's
       "what they were")._
+      Done: `placeRoll` decides every place (declared, draft, empty, made); `placeProblems` gone with its caller; `SitePlace.entry` nullable, the place page's three reads guarded. verify.sh re-run by the orchestrator green — 88 pages (unchanged), 885 tests (882 − 4 + 6 `placeRoll` + 1 absence); `grep placeProblems` no hits; `diff -rq` of `dist/` against the baseline (`$TMPDIR/dist-before-a5`) empty, no cid or `_astro/` name moved. Mutations: 'made' dropped → two `placeRoll` cases fail by name; "Writing to come" → the absence case fails by name; an unguarded `place.entry.data.description` → `astro check` fails, ts(18047) (the plan's "needs verification" settled: it does catch it). One-time builds, reverted: `at: the-pier` → EXIT 0, `<h1>` "The Pier"; `at: the-jety` → EXIT 1 with the guard's line as the plan writes it; the market entry's default `at: market-square` → EXIT 0, "Market Square", a wall of 8 links to that entry's photographs; `git diff --stat -- src/content` empty. Removed cases and what succeeds each (AC 45): "an unknown slug names the file and lists the declared places" → `nearMissProblems`' one-letter-off case and `placeRoll`'s 'made' case; "with no place declared at all …" → `placeRoll`'s 'made' case; "a known slug and `none` are no problem" → `placeAtProblems`' and `nearMissProblems`' none/blank cases; "every problem comes back at once" → the two all-at-once cases. Reading: "no `? :` on it" is a ternary directly on the entry, so the plan's own `place.entry && hasWriting ? … : null` stands. Per-task review: signed off, nothing blocking.
 
 - [ ] **T1757** — What the build says. Pattern: the two notes the
       registry prints today (`console.warn`, `[places] note: …`,
@@ -2998,6 +2999,8 @@ tier if it is ever on (it is off). -->
 | T1754 constitution, a fifth time | implementation (`opus`, high) | ~33k | done; committed alone `519a8dc` (AC 39) |
 | T1755 a place's name | implementation (`opus`, high) | ~76k | done; 882 tests; two cases beyond the plan's list kept; finding carried to T1756 — the guard measures badly shaped values, so the registry must throw on the shape check first |
 | T1755 per-task review | implementation (`opus`, high) | ~51k | signed off, nothing blocking; seven second looks — the `--` case's mutation run (fails by name), `slugSuggestion`'s accent-stripping untested and the sort's second key unpinned (sweep), shape-first and one ref per file and drafts passed as declared (T1756's bundle) |
+| T1756 the registry makes places | implementation (`opus`, high) | ~101k | done; 885 tests, 88 pages, dist unchanged; `astro check` does catch an unguarded entry; drafts reach the guard but nothing pins it |
+| T1756 per-task review | implementation (`opus`, high) | ~56k | signed off, nothing blocking; seven second looks — the absence case is bypassed through the template's own locals (`!Content`, `!description`, `Content ? :`), so Known limitations overclaims (phase review); smaller regex misses; the registry's draft branch and `placeOfId` holding published files only are pinned by T1758's builds (c) and (d) alone; the two spec-009 note strings unpinned (T1757's bundle) |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

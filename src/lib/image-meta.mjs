@@ -1367,30 +1367,6 @@ export function nearMissProblems(refs, declared) {
 }
 
 /**
- * The slug rule: every `at:` other than `none`, on a piece or a sidecar,
- * draft or not, must name a declared place. `refs` is `[{ file, slug }]`
- * — every `at:` the registry found, already trimmed — and `placeSlugs`
- * an iterable of the declared place ids, drafts included. Returns one
- * message per problem in the order of `refs`, empty when there are none,
- * so the caller fails the build with all of them at once.
- */
-export function placeProblems(refs, placeSlugs) {
-  const declared = [...placeSlugs];
-  const known = new Set(declared);
-  const listed = [...declared].sort().join(', ');
-  const problems = [];
-  for (const { file, slug } of refs) {
-    if (!slug || slug === PLACE_NONE || known.has(slug)) continue;
-    problems.push(
-      declared.length > 0
-        ? `[places] ${file}: no place named "${slug}" — the places are: ${listed}`
-        : `[places] ${file}: no place named "${slug}" — none is declared yet: add src/content/places/${slug}.md`,
-    );
-  }
-  return problems;
-}
-
-/**
  * The order of a place's outings (spec 019): a journal outing is dated by
  * its entry's publish date, a photographs-folder frame — an outing of its
  * own — by its capture date. `journal` is `{ key: slug, date }[]`,
@@ -1464,6 +1440,27 @@ export function groupByPlace(framesByOuting, placeOfId, order) {
     }
   }
   return places;
+}
+
+/**
+ * The roll of places (spec 019, amendment 5). `declared` is
+ * `{ slug, draft }[]`, the place files in their order; `grouped` is
+ * `groupByPlace`'s map. Every declared place, in order — 'draft',
+ * 'declared' (it has frames) or 'empty' — then every grouped name
+ * with no file, sorted: 'made'. Returns `{ slug, status }[]`.
+ */
+export function placeRoll(declared, grouped) {
+  const files = new Set(declared.map(({ slug }) => slug));
+  return [
+    ...declared.map(({ slug, draft }) => ({
+      slug,
+      status: draft ? 'draft' : grouped.has(slug) ? 'declared' : 'empty',
+    })),
+    ...[...grouped.keys()]
+      .filter((slug) => !files.has(slug))
+      .sort(byCodeUnit)
+      .map((slug) => ({ slug, status: 'made' })),
+  ];
 }
 
 /**

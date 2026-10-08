@@ -64,10 +64,18 @@ const registry = await getImageRegistry();
 // The head and the writing come from the fixture place with the longer
 // writing; its summary line is that place's real one (its own outing and
 // frame counts, not the sampler set's) and is labelled as such below.
+// The sampler judges the writing above the wall, so it needs that place
+// and its file — by name, never whichever place sorts first (since spec
+// 019's amendment 5 that could be a made place, which has no file).
 const PLACE_SLUG = 'the-headlands';
-const place = registry.places.find((p) => p.slug === PLACE_SLUG) ?? registry.places[0];
-if (!place) throw new Error(`[place-wall sampler] no places in the registry`);
-const { Content } = await render(place.entry);
+const place = registry.places.find((p) => p.slug === PLACE_SLUG);
+const entry = place?.entry;
+if (!place || !entry) {
+  throw new Error(
+    `[place-wall sampler] needs the place "${PLACE_SLUG}" with its file (src/content/places/${PLACE_SLUG}.md) and a published frame`,
+  );
+}
+const { Content } = await render(entry);
 
 // The wall's set is the REAL photographs, not the whole mixed root
 // (the spec-011 lesson): src/content/photographs/ holds both the real
@@ -111,7 +119,7 @@ const label = (c: Candidate) =>
           <header class="page-head section reading-head">
             <p class="eyebrow">Place</p>
             <h1>{place.title}</h1>
-            {place.entry.data.description && <p class="lead">{place.entry.data.description}</p>}
+            {entry.data.description && <p class="lead">{entry.data.description}</p>}
             <div class="entry-meta">{place.summary} (the fixture place's own counts)</div>
           </header>
 

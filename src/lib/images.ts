@@ -26,16 +26,19 @@ import {
   mergeOverrides,
   nameCollisions,
   nearest,
+  nearMissProblems,
   neighbours,
   outingOrder,
   passageFor,
   photographOnlyProblems,
   pieceFrames,
+  placeAtProblems,
   placeCoverProblem,
   placeNameProblem,
   placeOf,
-  placeProblems,
+  placeRoll,
   placeSummary,
+  placeTitle,
   privateMessage,
   referenceProblems,
   resolveStages,
@@ -125,10 +128,19 @@ export interface ImagePassage {
  * outing's frames in that piece's own order — and the card's summary.
  * Frames are ids only, so an image can point at its place without a
  * cycle. A draft place, or one with no published frame, is not here.
+ *
+ * Since spec 019's amendment 5 a place is made by being named: a name
+ * with no place file is here too, through the same loop. Nothing marks
+ * it — no `made` flag and no flattened description — so the card, the
+ * label and the set are handed nothing that could tell a made place
+ * from a declared one; the one reader of a description is the place
+ * page, which has the entry.
  */
 export interface SitePlace {
   slug: string;
-  entry: CollectionEntry<'places'>;
+  /** The place's file; null for a made place, which has none. */
+  entry: CollectionEntry<'places'> | null;
+  /** The file's title, else the slug read by the title rule (`placeTitle`). */
   title: string;
   /** `/places/<slug>/` (site-root; pages apply withBase). */
   url: string;
@@ -503,24 +515,37 @@ async function buildRegistry(): Promise<ImageRegistry> {
     throw new Error(`[images] stages:\n${stageProblems.join('\n')}`);
   }
 
-  // The slug rule (spec 009): every `at:` other than `none`, on any
-  // piece — draft or not, a typo in a draft is still a typo — and on
-  // any sidecar, must name a declared place, draft or not. All at once.
-  const slugProblems = placeProblems(
-    [
-      ...pieces.map((piece) => ({
-        file: piece.filePath ?? piece.id,
-        slug: (piece.data.at ?? '').trim(),
-      })),
-      ...sidecarEntries.map((entry) => ({
-        file: entry.filePath ?? entry.id,
-        slug: (entry.data.at ?? '').trim(),
-      })),
-    ],
-    placeById.keys(),
+  // A place's name (spec 009; spec 019, amendment 5): every `at:` other
+  // than `none`, on any piece — draft or not, a typo in a draft is still
+  // a typo — and on any sidecar, one ref per file. It need not name a
+  // place file: a name with no file makes the place. It must be a name —
+  // the shape, thrown first, since a value that is not a name is not
+  // measured — and, with no file, not a near miss of another place's
+  // name, measured against every place file, draft or not. Each all at
+  // once.
+  const refs = [
+    ...pieces.map((piece) => ({
+      file: piece.filePath ?? piece.id,
+      slug: (piece.data.at ?? '').trim(),
+    })),
+    ...sidecarEntries.map((entry) => ({
+      file: entry.filePath ?? entry.id,
+      slug: (entry.data.at ?? '').trim(),
+    })),
+  ];
+  const shapeProblems = placeAtProblems(refs);
+  if (shapeProblems.length) {
+    throw new Error(shapeProblems.join('\n'));
+  }
+  const nearMisses = nearMissProblems(
+    refs,
+    placeEntries.map((entry) => ({
+      slug: entry.id,
+      file: entry.filePath ?? `src/content/places/${entry.id}.md`,
+    })),
   );
-  if (slugProblems.length) {
-    throw new Error(slugProblems.join('\n'));
+  if (nearMisses.length) {
+    throw new Error(nearMisses.join('\n'));
   }
 
   // Galleries: validated with file + line against everything known.
@@ -619,10 +644,14 @@ async function buildRegistry(): Promise<ImageRegistry> {
   // dated by its capture (spec 019) — oldest first by `outingOrder`, each
   // one's own frames bucketed by place. An undated photographs-folder
   // frame at a place cannot be ordered, and fails the build. A place
-  // publishes when it has an outing and is not a draft; otherwise the
-  // build says so and builds nothing for it. The cover, checked only on
-  // a place that publishes, must be one of its frames — a place declared
-  // ahead of its first outing may name a frame not yet published.
+  // publishes when it has an outing and is not a draft — declared by its
+  // file, or made by a name with no file (`placeRoll`; spec 019,
+  // amendment 5); a draft, or a file with no outing, the build names and
+  // builds nothing for. The cover, checked only on a place that
+  // publishes, must be one of its frames — a place declared ahead of its
+  // first outing may name a frame not yet published; a made place
+  // declares none and takes the most recent outing's first frame, as a
+  // declared place without a `cover` does.
   const publishedOldestFirst = pieces.filter(isPublished).sort(byOldestPublished);
   const photographOutings = publishedFiles
     .filter((file) => file.pieceSlug === null && placeOfId.get(file.id))
@@ -658,40 +687,48 @@ async function buildRegistry(): Promise<ImageRegistry> {
   );
   const coverProblems: string[] = [];
   const sitePlaces: SitePlace[] = [];
-  for (const entry of placeEntries) {
-    if (entry.data.draft) {
-      console.warn(`[places] note: ${entry.id} is a draft — no page, and its frames show no place`);
+  const roll = placeRoll(
+    placeEntries.map((entry) => ({ slug: entry.id, draft: entry.data.draft })),
+    grouped,
+  ) as { slug: string; status: 'draft' | 'declared' | 'empty' | 'made' }[];
+  for (const { slug, status } of roll) {
+    if (status === 'draft') {
+      console.warn(`[places] note: ${slug} is a draft — no page, and its frames show no place`);
       continue;
     }
-    const group = grouped.get(entry.id);
-    if (!group) {
+    if (status === 'empty') {
       console.warn(
-        `[places] note: ${entry.id} has no published frame yet — no page until a photograph names it`,
+        `[places] note: ${slug} has no published frame yet — no page until a photograph names it`,
       );
       continue;
     }
+    // 'declared' or 'made': the one body. A made place has no entry.
+    const entry = placeById.get(slug) ?? null;
+    const group = grouped.get(slug);
     const outings = group.outings.map((outing: { key: string; frames: string[] }) => ({
       key: outing.key,
       piece: pieceById.get(outing.key) ?? null,
       frames: outing.frames,
     }));
     const newest = outings.at(-1)!;
-    const cover = entry.data.cover;
-    const coverProblem = placeCoverProblem(
-      cover,
-      group.frames,
-      entry.filePath ?? `src/content/places/${entry.id}.md`,
-      known,
-    );
-    if (coverProblem) {
-      coverProblems.push(coverProblem);
-      continue;
+    const cover = entry?.data.cover;
+    if (entry) {
+      const coverProblem = placeCoverProblem(
+        cover,
+        group.frames,
+        entry.filePath ?? `src/content/places/${entry.id}.md`,
+        known,
+      );
+      if (coverProblem) {
+        coverProblems.push(coverProblem);
+        continue;
+      }
     }
     sitePlaces.push({
-      slug: entry.id,
+      slug,
       entry,
-      title: entry.data.title,
-      url: `/places/${entry.id}/`,
+      title: entry?.data.title ?? placeTitle(slug),
+      url: `/places/${slug}/`,
       outings,
       frames: group.frames,
       cover: cover ?? newest.frames[0],

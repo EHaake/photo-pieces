@@ -132,6 +132,22 @@ describe('the place page renders one wall from place.frames (T1002, spec 012)', 
   });
 });
 
+describe('the place page prints nothing for a place with no file (T1756, spec 019 amendment 5)', () => {
+  // A made place has no entry. The template may guard the entry's
+  // presence (`place.entry?.`, `place.entry &&`); it never tests its
+  // absence or supplies a stand-in for it, so no line of the site's own
+  // can stand where a description or the writing would have.
+  it('guards the entry and never tests its absence: no `!place.entry`, no comparison with null or undefined, no `? :` on it, no `place.entry ||`, no `place.entry ??`', () => {
+    expect(code).toMatch(/place\.entry\?\./);
+    expect(code).not.toMatch(/!\s*place\.entry\b/);
+    expect(code).not.toMatch(/place\.entry\s*[!=]==?\s*(null|undefined)\b/);
+    expect(code).not.toMatch(/\b(null|undefined)\s*[!=]==?\s*place\.entry\b(?!\s*\??\.)/);
+    expect(code).not.toMatch(/place\.entry\s*\?(?![.?])/);
+    expect(code).not.toMatch(/place\.entry\s*\|\|/);
+    expect(code).not.toMatch(/place\.entry\s*\?\?/);
+  });
+});
+
 describe('the writing-to-wall gap in global.css (T1002, spec 012 gate)', () => {
   it("the gate's value: :root declares --place-wall-gap at one .section padding", () => {
     const roots = top.filter((block) => selects(block.prelude, ':root'));

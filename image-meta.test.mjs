@@ -42,7 +42,7 @@ import {
   placeCoverProblem,
   placeNameProblem,
   placeOf,
-  placeProblems,
+  placeRoll,
   placeSummary,
   placeTitle,
   privateRole,
@@ -840,55 +840,6 @@ describe('places (T701, spec 009)', () => {
     );
   });
 
-  it('an unknown slug names the file and lists the declared places, sorted', () => {
-    expect(
-      placeProblems(
-        [{ file: 'src/content/journal/alpha/index.md', slug: 'jety' }],
-        ['sombrio-beach', 'jetty', 'botanical-beach'],
-      ),
-    ).toEqual([
-      '[places] src/content/journal/alpha/index.md: no place named "jety" — the places are: botanical-beach, jetty, sombrio-beach',
-    ]);
-  });
-
-  it('with no place declared at all, the message says how to declare one', () => {
-    expect(
-      placeProblems([{ file: 'src/content/journal/alpha/_land-a.md', slug: 'jetty' }], []),
-    ).toEqual([
-      '[places] src/content/journal/alpha/_land-a.md: no place named "jetty" — none is declared yet: add src/content/places/jetty.md',
-    ]);
-  });
-
-  it('a known slug and `none` are no problem, on a piece or on a sidecar', () => {
-    expect(
-      placeProblems(
-        [
-          { file: 'src/content/journal/alpha/index.md', slug: 'none' },
-          { file: 'src/content/journal/alpha/_land-a.md', slug: 'jetty' },
-          { file: 'src/content/journal/alpha/_land-b.md', slug: 'none' },
-          { file: 'src/content/journal/beta/index.md', slug: '' },
-        ],
-        ['jetty'],
-      ),
-    ).toEqual([]);
-  });
-
-  it('every problem comes back at once, in the order the refs came', () => {
-    expect(
-      placeProblems(
-        [
-          { file: 'src/content/journal/alpha/index.md', slug: 'jety' },
-          { file: 'src/content/journal/alpha/_land-a.md', slug: 'jetty' },
-          { file: 'src/content/journal/beta/_port-b.md', slug: 'sombrio' },
-        ],
-        ['jetty', 'sombrio-beach'],
-      ),
-    ).toEqual([
-      '[places] src/content/journal/alpha/index.md: no place named "jety" — the places are: jetty, sombrio-beach',
-      '[places] src/content/journal/beta/_port-b.md: no place named "sombrio" — the places are: jetty, sombrio-beach',
-    ]);
-  });
-
   it('a borrowed frame is never counted under the borrower', () => {
     const grouped = groupByPlace(
       new Map([
@@ -969,6 +920,75 @@ describe('places (T701, spec 009)', () => {
     );
     expect(grouped.has('jetty')).toBe(false);
     expect([...grouped.keys()]).toEqual([]);
+  });
+
+  /** `groupByPlace`'s map for these names: one outing of one frame each. */
+  const groupedAt = (...slugs) =>
+    new Map(
+      slugs.map((slug) => [
+        slug,
+        { outings: [{ key: 'alpha', frames: [`alpha/${slug}`] }], frames: [`alpha/${slug}`] },
+      ]),
+    );
+
+  it("placeRoll: a grouped name with no file is 'made'", () => {
+    expect(placeRoll([], groupedAt('top-of-the-world'))).toEqual([
+      { slug: 'top-of-the-world', status: 'made' },
+    ]);
+    expect(
+      placeRoll([{ slug: 'the-jetty', draft: false }], groupedAt('the-jetty', 'top-of-the-world')),
+    ).toContainEqual({ slug: 'top-of-the-world', status: 'made' });
+  });
+
+  it("placeRoll: the same name with a file is 'declared' and nothing is 'made' — the file takes over", () => {
+    expect(
+      placeRoll([{ slug: 'top-of-the-world', draft: false }], groupedAt('top-of-the-world')),
+    ).toEqual([{ slug: 'top-of-the-world', status: 'declared' }]);
+  });
+
+  it("placeRoll: with a draft file it is 'draft', even when handed a group", () => {
+    expect(
+      placeRoll([{ slug: 'top-of-the-world', draft: true }], groupedAt('top-of-the-world')),
+    ).toEqual([{ slug: 'top-of-the-world', status: 'draft' }]);
+  });
+
+  it("placeRoll: a file with no group is 'empty'", () => {
+    expect(placeRoll([{ slug: 'top-of-the-world', draft: false }], new Map())).toEqual([
+      { slug: 'top-of-the-world', status: 'empty' },
+    ]);
+  });
+
+  it('placeRoll: a name with no file and no group is absent — all its photographs unpublished', () => {
+    // `placeOfId` is filled from published files only, so the frame that
+    // names top-of-the-world is not in it and no group forms.
+    const grouped = groupByPlace(
+      new Map([['alpha', ['alpha/land-a', 'alpha/land-b']]]),
+      new Map([['alpha/land-a', 'the-jetty']]),
+      ['alpha'],
+    );
+    expect(placeRoll([{ slug: 'the-jetty', draft: false }], grouped)).toEqual([
+      { slug: 'the-jetty', status: 'declared' },
+    ]);
+    expect(placeRoll([], new Map())).toEqual([]);
+  });
+
+  it('placeRoll: declared places first, in file order, then the made ones, sorted', () => {
+    expect(
+      placeRoll(
+        [
+          { slug: 'the-jetty', draft: false },
+          { slug: 'botanical-beach', draft: true },
+          { slug: 'the-headlands', draft: false },
+        ],
+        groupedAt('top-of-the-world', 'the-jetty', 'falls-creek-falls'),
+      ),
+    ).toEqual([
+      { slug: 'the-jetty', status: 'declared' },
+      { slug: 'botanical-beach', status: 'draft' },
+      { slug: 'the-headlands', status: 'empty' },
+      { slug: 'falls-creek-falls', status: 'made' },
+      { slug: 'top-of-the-world', status: 'made' },
+    ]);
   });
 
   it("the card line counts outings and frames, and names the place's years", () => {
