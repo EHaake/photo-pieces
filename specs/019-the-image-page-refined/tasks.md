@@ -2329,6 +2329,270 @@ optional sentence in `AUTHORING.md` that a bad `categories:` word or an
 empty line fails the build (left as is). The Phase 3a, 3b and 3c looks
 (T1729, T1735, T1745) stay open; Phase 4 waits for his piece.
 
+## Phase 3e — A place made by naming it (reviewer after the phase; T1755 and T1756 are `review: per-task` — the guard is all that stands between a misspelt name and a second place made in silence, and the registry change deletes the old refusal and decides every place's page, so a mistake there unpublishes a declared place, publishes one held back, or puts photographs on the wrong wall; walkthrough: on the laptop, the site built and previewed (`npm run build && npm run preview`): `/places/` shows a third card, "Top of the World", between The jetty and The headlands — its cover, its title and its line of counts, nothing marking it as different — though no file for it exists in `src/content/places/`; `/places/top-of-the-world/` shows that title, the line of counts and a wall of two photographs, with no description, no writing and nothing in their place; the photograph at `/photographs/wide-3x2-02/` names Top of the World on its label, a link to that page, and arriving from the place's wall the arrows step between its two photographs; The jetty's and The headlands' pages and cards are as they were; `sh scripts/verify.sh` now prints, under the build, one line for the place the build made — how many photographs are on it and the file that would take it over — and the photographs that name no place, the photographs folder's by name and each journal entry's as one line with a count; `AUTHORING.md`'s "Places" says all of this; and, if he wants to, on his own photograph: `at: falls-creek-falls` in its sidecar with no place file makes the page, his file made from the `place` template takes it over, a name one letter off stops the build naming both files, and `at: Falls Creek Falls` stops it showing the slug to write; as many rounds as it takes, each a sub-lettered task under T1760)
+
+**Status**: Draft (2026-10-07) — pending sign-off. Plan: "Amendment 5 (2026-10-06): a place made by naming it" and its sections.
+The spec's fifth amendment, asked as he sat down to write his piece,
+folded in while the 3a, 3b and 3c pauses are held open — T1729, T1735
+and T1745 stay unchecked and are not touched by this phase — and before
+Phase 4. Foundational within the phase, and ordered first: T1754 (the
+constitution, its own commit), T1755 (a place's name — the title rule,
+the shape, the guard, as pure rules) and T1756 (the registry making
+places, and the one template that reads a place's file). Then what the
+build says, the fixtures with the reads of the built pages, the
+documents, the look. The implementer runs no browser: every check is
+the suite, the build's barriers, reads of `dist/` and the command's
+printed lines; how the made place reads is the person's at the pause.
+The envelope for a round here (plan: "The tuning envelope, placed
+(amendment 5)"): the title rule's small words, the guard's two
+allowances and where a short name begins, the wording and the grouping
+of the two notes. A round that wants a place inferred from anything but
+a written name, a made place held back as a draft, any line of the
+site's own on a made place's page or card or a mark telling it from a
+declared one, a title written where the place is named, the plugin
+creating place files, or a change to the wall or to a declared place's
+page goes to the person as a spec amendment (spec.md's ordinary-path
+list). Task ids continue from T1753.
+
+- [ ] **T1754** — The constitution, a fifth time. Not code; its own
+      commit, before T1755. Pattern: T1748 (the constitution, a fourth
+      time). Plan: "Shape of the change (amendment 5)", its first
+      bullet. `CLAUDE.md` only: the Content model clause's one
+      replacement, exactly as the plan writes it, unquoted, rewrapped
+      by hand so that `is _made_ by being`, `_declares_ its title` and
+      `near miss of another place's` each sit whole on one line; the
+      sentence that follows ("A place's page shows …") and the rest of
+      the file untouched. _Verify: `git diff --stat` → `CLAUDE.md`
+      alone (the stray, pre-existing `obsidian-plugin/package-lock.json`
+      change left unstaged);
+      `grep -nE "_declared_ once|refuses a slug with no file|listing the places that exist" CLAUDE.md`
+      → no hits; `grep -c "is _made_ by being" CLAUDE.md` → 1;
+      `grep -c "_declares_ its title" CLAUDE.md` → 1;
+      `grep -c "near miss of another place's" CLAUDE.md` → 1;
+      `grep -c "never inferred from camera metadata" CLAUDE.md` → 1, as
+      before; `npx prettier --check CLAUDE.md` clean; the commit's hash
+      recorded here for AC 39, before T1755's._
+
+- [ ] **T1755** — A place's name: the title rule, the shape, the
+      guard. `review: per-task`. Pure rules, not yet called: the site
+      builds as before. Pattern: `placeOf`, `placeNameProblem` and
+      `undatedAtPlace` in `src/lib/image-meta.mjs` (a pure rule, its
+      problems returned all at once, the message's shape) and the
+      "places (T701, spec 009)" cases in image-meta.test.mjs. Plan: "A
+      place's name", "The tuning envelope, placed (amendment 5)",
+      "Failure messages and notes (amendment 5)" (the three failure
+      lines), and the testing bullet "A place's name".
+      `image-meta.mjs`, beside `placeOf`: `PLACE_TITLE_SMALL_WORDS`,
+      `PLACE_NEAR_MISS`, `PLACE_NEAR_MISS_SHORT`, `PLACE_SHORT_NAME`,
+      each with its `// tunable` comment; `placeTitle`;
+      `placeAtProblems` (and `slugSuggestion`, not exported);
+      `lettersOff`; `nearMissProblems`. `placeProblems` is left in
+      place — T1756 removes it with its caller. image-meta.test.mjs: a
+      new `describe`, the cases as the plan lists them, each named for
+      the reason it can fail. _Verify: `sh scripts/verify.sh tests`
+      green (the test count, up by the new cases; none removed); the
+      five mutations of the plan's testing bullet, each failing by name
+      (the failing test's name pasted) and reverted;
+      `git diff --stat` → `src/lib/image-meta.mjs` and
+      image-meta.test.mjs alone; the three failure lines as the tests
+      expect them pasted, for the orchestrator to set beside the
+      plan's (AC 40's title rule by name; AC 43's rule)._
+
+- [ ] **T1756** — The registry makes places. `review: per-task`.
+      Pattern: the registry's own place loop (`src/lib/images.ts`
+      lines 659–701) and its slug-rule block (lines 506–524);
+      `groupByPlace`'s cases in image-meta.test.mjs; place-page.test.mjs's
+      source cases (`uncommentSource`, `code`). Plan: "Which places
+      publish", "The registry", "The place page and the dev sampler",
+      "Every other consumer, untouched", and the testing bullet "Which
+      places publish, and the registry". Before any edit, the baseline:
+      `npm run build && cp -R dist "$TMPDIR/dist-before-a5"`. Then
+      `image-meta.mjs`: `placeRoll`; `placeProblems` removed.
+      `images.ts`: the imports; `SitePlace.entry` nullable and its
+      comments; the two checks in the slug-rule block, shape first; the
+      loop over `placeRoll`, the two existing notes byte-identical.
+      `content.config.ts`: the three comments, no schema line.
+      `src/pages/places/[slug].astro`: the three guarded lines and the
+      markup's two conditions, nothing else.
+      `src/pages/dev/place-wall/[...candidate].astro`: the fallback
+      removed, the entry required. image-meta.test.mjs: `placeRoll`'s
+      cases; the four `placeProblems` cases removed with the function,
+      each named in the report. place-page.test.mjs: the absence case.
+      This task prints no new note (T1757). _Verify:
+      `sh scripts/verify.sh` green (the page count unchanged; the test
+      count, with the four removed and the new ones added, both
+      numbers given); `grep -rn "placeProblems" src scripts *.test.mjs`
+      → no hits; the three mutations of the plan's testing bullet —
+      'made' dropped from the roll, the "Writing to come" line in the
+      template, an unguarded `place.entry.data.description` — the first
+      two failing by name and the third failing `astro check` (its
+      error line pasted; if `astro check` passes it, say so — the plan
+      marks it as needing verification), each reverted;
+      `diff -rq -x pagefind "$TMPDIR/dist-before-a5" dist` → empty (a
+      file listed is reported with the first lines of its diff, and a
+      difference that is only a `data-astro-cid-*` value or an
+      `_astro/` file's name is said to be that); one-time builds, each
+      reverted: `_dock-b.md` to `at: the-pier` → BUILD EXIT 0,
+      `dist/places/the-pier/index.html` exists and
+      `grep -o '<h1[^>]*>[^<]*</h1>'` on it reads "The Pier"; to
+      `at: the-jety` → BUILD EXIT 1 with the guard's line pasted
+      verbatim; `git diff --stat -- src/content` empty after the
+      reverts (AC 40, AC 42 and AC 43 by the registry's tests; AC 45's
+      "what they were")._
+
+- [ ] **T1757** — What the build says. Pattern: the two notes the
+      registry prints today (`console.warn`, `[places] note: …`,
+      `images.ts` lines 662–671) and `undatedAtPlace` (lines returned,
+      the caller prints); image-meta.test.mjs's source-read case for
+      `content.config.ts` (lines 1385–1399) for the verify.sh case.
+      Plan: "What the build says", "Failure messages and notes
+      (amendment 5)" (the three note lines), and the testing bullet
+      "What the build says". `image-meta.mjs`: `PLACE_NOTE`,
+      `madePlaceNote`, `noPlaceNotes`. `images.ts`: the made note where
+      the roll's 'made' place is built; `noPlaceNotes` over the
+      published files, after the place loop. `scripts/verify.sh`: the
+      capped list leaves out `\[places\] note:`; one line after it
+      prints every such line from `build.log`, with a comment saying
+      what the group is. image-meta.test.mjs: the cases, the verify.sh
+      source case. _Verify: `sh scripts/verify.sh` green, and its
+      printed build section pasted whole — BUILD EXIT 0, the note group
+      showing the two spec-009 notes if they print today, the
+      photographs folder's line (its count: the folder's published
+      photographs less `dock-b`) and one line each for
+      `market-day-camera-low` and `vocabulary-sampler` (8 photographs
+      each), none for `first-light-at-the-jetty` (its one photograph
+      names the jetty) nor `where-the-fog-lets-go` (its entry sets a
+      default, and `_pano.md` says `none`), and no made line yet; any
+      note printed twice is reported, not fixed
+      here; the two mutations fail by name, reverted;
+      `diff -rq -x pagefind "$TMPDIR/dist-before-a5" dist` → as T1756
+      left it (the notes change no page) (AC 44)._
+
+- [ ] **T1758** — The fixtures and the built pages. Pattern: T1750
+      (the order of builds, the reads of `dist/` with one command
+      each, every one-time edit reverted); `_dock-b.md` for a
+      photographs-folder sidecar. Plan: "The fixtures", "Failure
+      messages and notes (amendment 5)", and the testing bullet "The
+      fixtures and the built pages". In this order.
+      (1) `npm run build && cp -R dist "$TMPDIR/dist-before-fixtures"`.
+      (2) `vocabulary-sampler/index.md` gains `at: none`; build;
+      `diff -rq -x pagefind "$TMPDIR/dist-before-fixtures" dist` →
+      empty, and the note group has lost the sampler's line and no
+      other. (3) The two sidecars, `_wide-3x2-01.md` and
+      `_wide-3x2-02.md`, as the plan writes them — a `date:` and an
+      `at:` each, no title. _Verify: `sh scripts/verify.sh` green —
+      one page more than T1757's count, "Indexed" one more, the
+      `[check-lexicon]` line quoted, and the note group pasted: the
+      made line for `top-of-the-world` with 2 photographs and its
+      file, the photographs folder's count down by two. On `dist/`:
+      `grep -o '<h1[^>]*>[^<]*</h1>' dist/places/top-of-the-world/index.html`
+      → "Top of the World"; `grep -c 'class="lead' ` and
+      `grep -c 'place-writing'` on that page → 0 and 0, and on
+      `dist/places/the-headlands/index.html` → at least 1 each (the
+      greps can see what they deny); the wall's links, in order,
+      `/photographs/wide-3x2-01/` then `/photographs/wide-3x2-02/`;
+      the page's `og:image` tag quoted, a `wide-3x2-02` file;
+      `grep -o 'href="/places/[^"/]*/"' dist/places/index.html` → the
+      jetty, top-of-the-world, the headlands, in that order; the made
+      place's card and the jetty's card quoted side by side — the same
+      elements and classes, the cover a `wide-3x2-02` file, the meta
+      line "2 outings · 2 frames · 2026";
+      `grep -o '<a href="/places/top-of-the-world/"[^>]*>[^<]*</a>' dist/photographs/wide-3x2-02/index.html`
+      → the label's link, reading "Top of the World"; the place set on
+      `dist/photographs/wide-3x2-01/index.html` — its `data-set` block
+      quoted beside the jetty's on `dist/photographs/dock-b/index.html`,
+      its next link `/photographs/wide-3x2-02/` and no previous;
+      `cmp` of `dist/places/the-jetty/index.html` and
+      `dist/places/the-headlands/index.html` with their copies in
+      `"$TMPDIR/dist-before-fixtures"` → identical. Then the one-time
+      builds, each with its lines pasted and each reverted before the
+      next: (a) `cp dist/places/top-of-the-world/index.html "$TMPDIR/made.html"`,
+      then `src/content/places/top-of-the-world.md` holding
+      `title: Top of the World` alone → BUILD EXIT 0,
+      `cmp "$TMPDIR/made.html" dist/places/top-of-the-world/index.html`
+      identical, and no made line in the notes; (b) that file with
+      `title: The top of the world`, a description, `cover: wide-3x2-01`
+      and one line of writing → the page's `<h1>`, its `.lead` and its
+      `.place-writing` quoted, the card's cover a `wide-3x2-01` file,
+      the label's link reading the file's title; (c) the same file
+      with `draft: true` → no `dist/places/top-of-the-world/`, no
+      `/places/top-of-the-world/` anywhere under `dist/` (`grep -rl`,
+      `pagefind/` aside), the draft note printed and no made line;
+      then, the draft file still there, `_wide-3x2-02.md` to
+      `at: top-of-the-wold` → BUILD EXIT 1 naming the draft place's
+      file; (d) no place file, and `_draft-fixture.md` — a draft
+      photograph — to `at: nowhere-yet` (not the two new sidecars:
+      galleries list those photographs, and a gallery refuses a draft)
+      → BUILD EXIT 0, no `dist/places/nowhere-yet/`, no card for it on
+      `dist/places/index.html`, no made line naming it;
+      (e) `_wide-3x2-02.md` to `at: top-of-the-wold` → BUILD
+      EXIT 1 with the two-names line, both sidecars and both files to
+      add in it; (f) `_wide-3x2-02.md` to `at: Top of the World` →
+      BUILD EXIT 1 with the shape line and `top-of-the-world` in it.
+      After the last revert: `git status --short -- src/content` → the
+      two new sidecars and the sampler's line, nothing else, and
+      `sh scripts/verify.sh` green once more. Any line that differs
+      from the plan's quotation is reported so the orchestrator
+      corrects the plan (AC 40 and AC 41 on the built pages; AC 42;
+      AC 43's refusals in a real build; AC 44's made line; AC 45)._
+
+- [ ] **T1759** — The documents. Pattern: T1752 (its hand-editing
+      rule; each document's own voice). Plan: "The documents"
+      (amendment 5). `AUTHORING.md` and `README.md` as the plan says,
+      every claim read against the code as built — the guard's and the
+      shape's lines quoted from T1758's pasted builds, the notes from
+      its note group, the small words from `PLACE_TITLE_SMALL_WORDS`.
+      Hand-edit the prose (never script-rewrap; grep for lines
+      beginning with a `>` or `+` before any format run); the small
+      words sit whole on one line. The `place` template and the plugin
+      are not touched. _Verify:
+      `grep -nE "declared once|does not exist|means the same as leaving the line out|none is declared yet|the places are:" AUTHORING.md README.md`
+      → none; `grep -n "declared place" AUTHORING.md README.md` → each
+      remaining line listed, each true of a place with a file only;
+      `grep -cF "a, an, and, at, by, for, in, of, on, the, to" AUTHORING.md`
+      → 1; `grep -c "Top of the World" AUTHORING.md` and
+      `grep -c "Falls Creek Falls" AUTHORING.md` → at least 1 each;
+      `grep -c "probable typo" AUTHORING.md` and the same on
+      `README.md` → at least 1 each;
+      `grep -cF "would take it over" AUTHORING.md` and
+      `grep -cE "names? no place" AUTHORING.md` → at least 1 each;
+      `grep -n "place.md" AUTHORING.md` → the Templates line, saying
+      it is for when he has something to say about a place;
+      `grep -n "at: none" AUTHORING.md` → the lines listed, the
+      entry's one saying it quiets the note;
+      `git diff --stat -- obsidian obsidian-plugin` → nothing but the
+      stray `package-lock.json`; `npx prettier --check AUTHORING.md README.md`
+      clean; `sh scripts/verify.sh` green (AC 46)._
+
+- [ ] **T1760** — The made place, looked at, and the rounds. Not an
+      implementation task: the orchestrator's record of the Phase 3e
+      pause, in the person's words, as T1753's. The questions, in plain
+      language: the made place's page carrying the line of counts under
+      its title, as every place's page does — the spec's "no count" was
+      read as no count standing in for the description, so that a made
+      page is exactly a declared one that says little; is that right,
+      or should a made page be the title and the wall alone; "Top of
+      the World" as the title read from the name, and whether the small
+      words are the right ones; the card among the other places,
+      unmarked; the label's link and the arrows; the two notes as the
+      command prints them — their words, and the photographs folder's
+      as one line of names; a name one letter off being refused, and
+      whether one letter for a name of six characters or fewer and two
+      above is where he wants it; whether `AUTHORING.md`'s "Places"
+      says it as he would look for it. Each round is one sub-lettered
+      task here (`T1760a`, `b`, …): one value and the expectation
+      beside it, or a fixture's or a document's words, a round that
+      changes a word a document states updating it in the same task; a
+      round that wants what this phase's intro sends to the ordinary
+      path goes to him as a spec amendment. When he names the keeps,
+      they are recorded here. _Verify: every sub-lettered task green;
+      the documents agree with what was kept (a `grep` of each,
+      listed); the Phase 3e record below filled in._
+
+### Phase 3e record (the person's walkthrough)
+
+_Filled in at the pause._
+
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — a photograph piece's page with his story (from the photographs folder, on the front door once he dates it), or a journal entry's page with his writing and his compare as he wrote it and then his photograph's page; on his photograph's page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
 The content is his, supplied during implementation; these tasks are the

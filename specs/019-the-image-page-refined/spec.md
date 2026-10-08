@@ -837,10 +837,11 @@ output.
   other page, changes with the line.
 - **A made place's page and card** _(amended 2026-10-06, place)_. The
   page is a place page with nothing where the description and the
-  writing stand: the title, then the wall, in the layout, widths and
-  order of any place's wall, and no line of the site's own in their
-  stead — no "writing to come", no count, no note that the page was
-  made. Its card on the places index is any place's card — the cover,
+  writing stand: the title, the line of counts and years every place
+  page carries under its title, then the wall, in the layout, widths
+  and order of any place's wall, and no line of the site's own in the
+  stead of the description or the writing — no "writing to come", no
+  note that the page was made. Its card on the places index is any place's card — the cover,
   the title, the line of counts and years, nothing where a declared
   place's description would stand — in the index's usual order,
   unmarked. The photograph's label links to it by its title, as to a
@@ -1329,7 +1330,9 @@ _Amended 2026-10-06 (place):_
       default — builds `/places/<slug>/`: the title by the title rule,
       the published photographs that name it as the wall in the
       place's order, the first frame of the most recent outing as the
-      cover, no description, no writing and no line of the site's own;
+      cover, no description, no writing and no line of the site's own
+      in their stead (the line of counts under the title stays, as on
+      any place's page);
       the title rule gives "Falls Creek Falls", "Top of the World" and
       "The Jetty" for `falls-creek-falls`, `top-of-the-world` and
       `the-jetty` — pinned by the registry's tests, a test of the rule
@@ -1706,7 +1709,10 @@ _Amended 2026-10-06 (place):_
   cover is the first frame of its most recent outing; the card keeps
   the line of counts every place's card carries (the recommendation
   said "the cover and the title" — the counts are the photographs',
-  not the site's words); a made place is unmarked on the site and
+  not the site's words), and so does the made page under its title,
+  as every place's page does — put to him as the first question of the
+  look, since his answer was "nothing" besides the title; a made place
+  is unmarked on the site and
   named only in the build's note; it cannot be a draft, and a place
   file with `draft: true` stays the way to hold a place back; the
   guard tests names with no file against every other place's name and
