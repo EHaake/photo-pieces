@@ -175,7 +175,7 @@ its home folder's, naming the borrowing entries under "Also in". Since spec 006
 the page grows with what the sidecar carries, each section only when
 it exists: the image's
 own story (the sidecar body, ahead of the label), place and time at
-the label's head — the place being the declared place's title as a
+the label's head — the place being the place's title as a
 link, then the sidecar's free text, when the frame names one — "How
 it was made", "Raw to finished" — a compare of the photograph's
 stages: the camera's frame labelled Camera, the stages its sidecar
@@ -243,7 +243,8 @@ field. A gallery names it by its bare name; an old `gallery/<name>` id
 fails the build naming the new one. `at: <slug>` in its sidecar puts it on
 that place's wall as an outing of its own, dated by its capture — the
 file's EXIF or the sidecar's `date:`, and the build fails on one with
-neither — and a place's cover may be it. `/photographs/` is the index:
+neither — and a place's cover may be it; the place needs no file, the
+name makes it (**Place** below). `/photographs/` is the index:
 every published photograph from both folders, once each, as small
 frames in order of title, reached from the footer's "Index of
 photographs" link, not the nav. `AUTHORING.md` has the detail.
@@ -265,7 +266,7 @@ aperture: f/8
 shutter: 1/250 s
 iso: ISO 400
 place: The headlands above the cove # prose, never coordinates
-at: the-headlands # a declared place's slug; `none` opts out of the entry's default
+at: the-headlands # a place's name; `none` opts out of the entry's default
 time: 06:40, forty minutes before sunrise
 format: Digital, full-frame # "How it was made": format, filters, support, processing
 filters: None
@@ -355,13 +356,19 @@ fed by `categoryRow()` in `src/lib/categories.ts` and shared with
 `/journal/`, which keeps the row it already had. A missing, duplicate,
 or draft id in a gallery fails the build with the file and line.
 
-**Place** — `src/content/places/<slug>.md` (spec 009), somewhere the
-photographer returns to: a title, an optional description, cover, and
-`draft`, and a body that is the writing about the place. The file name
-is the slug and the URL. A frame names its place in its sidecar with
+**Place** — somewhere the photographer returns to (spec 009), made by
+naming it (spec 019). A frame names its place in its sidecar with
 `at: <slug>`, or a journal entry names one default for its whole folder with
 `at: <slug>` in its frontmatter — the frame's own line wins, and
-`at: none` opts a frame out of the default. `/places/<slug>/` shows the
+`at: none` opts a frame out of the default. A name with no file makes
+the place, once a published photograph carries it: the title is read
+from the slug (`top-of-the-world` is "Top of the World"), the cover is
+the first frame of the most recent outing, and the page is the title,
+its line of counts and the wall. `src/content/places/<slug>.md` takes
+the place over at the same address: a title, an optional description,
+cover, and `draft`, and a body that is the writing about the place;
+`draft: true` there holds the place back, photographs or no. The file
+name is the slug and the URL. `/places/<slug>/` shows the
 writing and then one wall — every published frame at the place as a
 single packed gallery, outings oldest first, with nothing between the
 visits and no journal entry named on the page. A journal entry's
@@ -370,12 +377,16 @@ publish date; a photograph in the photographs folder whose sidecar
 names the place is an outing of its own, dated by its capture, and
 may be the place's cover. So the page grows as entries and
 photographs are published; `/places/` lists
-the places as cards and is in the nav between Journal and Galleries. An `at:` naming
-a place that does not exist fails the build, listing the places that
-do, as does a place `cover` that is not one of its frames once the
-place publishes, and a photographs-folder photograph at a place with
-no capture date; a draft or still-empty place is a
-note and builds no page.
+the places as cards and is in the nav between Journal and Galleries. An `at:` that is
+not a slug or `none` fails the build, naming the file and the value, as
+does a name with no file one or two letters off another place's name
+(one, for a short name) — a probable typo, passed by correcting the
+spelling or by writing the place's file — a place `cover` that is not
+one of its frames once the place publishes, and a photographs-folder
+photograph at a place with no capture date; a draft or still-empty
+place file is a note and builds no page, and the build notes each
+place it made and the published photographs that name no place.
+`AUTHORING.md` has the detail.
 
 **GPS is never published.** The EXIF reader asks for an allowlist of
 exposure tags with GPS parsing off, its output is asserted against a

@@ -75,8 +75,9 @@ one into the open note:
   its sidecar, saved as `_<basename>.md` beside it, without the three
   fields that are the photographs folder's alone;
 - `gallery.md` — a gallery, saved in `src/content/galleries/`;
-- `place.md` — a place, saved in `src/content/places/` ("Places"
-  below).
+- `place.md` — for when you have something to say about a place: its
+  file, saved as `src/content/places/<slug>.md`. Naming a place is
+  what makes it, so no place needs one ("Places" below).
 
 The files are the repo's, in `obsidian/vault/templates/` — read them
 there; this document keeps no copy of them. `sh obsidian/install.sh`
@@ -113,7 +114,7 @@ start as `draft: true`.
 
 For the same reason the templates carry every field their schema has,
 the optional ones blank, in the schema's order: a journal entry's
-`cover` and `at` (the slug of a declared place — the default for every
+`cover` and `at` (a place's name — the default for every
 frame in the entry's folder that names none — see "Places" below); a
 sidecar's label overrides and rich-page fields ("Metadata: EXIF, then a
 sidecar" below, and the field reference in `README.md`); a gallery's
@@ -277,11 +278,14 @@ fails the build, naming the file and the field:
 among the place's outings by its capture date — the file's own, or the
 sidecar's `date:` where the file has none or has it wrong — while a
 journal entry's frames there are one outing, ordered by the entry's
-publish date. No default reaches it (a journal entry's `at:` covers its
-own folder only), so it is at a place only when its own line says so,
-and it may then be the place's cover. **A photograph at a place needs
-a capture date**: one with neither fails the build, rather than being
-put on the wall by guess:
+publish date. The place need not have a file: the name is enough to
+make it ("Places" below). No default reaches the photograph (a journal
+entry's `at:` covers its own folder only), so it is at a place only
+when its own line says so, and it may then be the place's cover. A
+photograph with no `at:` line is listed in the build's note of the
+photographs that name no place, until the line names a place or says
+`at: none`. **A photograph at a place needs a capture date**: one with
+neither fails the build, rather than being put on the wall by guess:
 
 ```
 [places] <file>: names the place "the-jetty" but has no capture date, which orders it on the wall — add a date: line to the sidecar
@@ -364,7 +368,7 @@ aperture: f/8
 shutter: 1/250 s
 iso: ISO 400
 place: The headlands above the cove # prose, never coordinates
-at: the-headlands # the declared place's slug — the wall label links to it; `none` opts out of the entry's default
+at: the-headlands # a place's name — the wall label links to it; `none` opts out of the entry's default
 time: 06:40 — forty minutes before sunrise, late November
 format: Digital, full-frame # "How it was made", with the three below
 filters: None
@@ -382,8 +386,8 @@ plain prose is the expectation.
 ```
 
 `place` and `at` are two properties, not one: `place` is the prose the
-label shows, `at` is the slug of a declared place, which the label
-links to — see "Places" below.
+label shows, `at` is a place's name, which the label links to by the
+place's title — see "Places" below.
 
 **A story is prose — no holds.** The image page renders the story
 through the same pipeline, but not through the journal page's script,
@@ -691,15 +695,40 @@ photographs folder" above).
 
 ## Places
 
-A place is somewhere you keep going back to: declared once, then grown
-by the photographs that name it. One file in `src/content/places/`
-— a title, an optional description, an optional cover (the id of one
-of the place's own frames), an optional `draft`, and a body that is
-your writing about the place. The file name is the slug and the URL,
-so it is lowercase letters, digits, and hyphens only; `none` is
-refused, because that is the word for no place. The writing is prose:
-no photograph lives beside a place file, and the place's photographs
-are the frames below it.
+A place is somewhere you keep going back to, and it is made by naming
+it. Write `at: falls-creek-falls` in a photograph's sidecar and, once
+that photograph is published, the place is on the site: its page at
+`/places/falls-creek-falls/`, its card on `/places/`, and the
+photograph's label linking there. No file has to be written first.
+From then on the place grows by the photographs that name it.
+
+**Its title is read from its name**: the words between the hyphens,
+each given a capital — except a small word after the first, which
+stays lower case. The small words are
+a, an, and, at, by, for, in, of, on, the, to.
+So `falls-creek-falls` is "Falls Creek Falls", `top-of-the-world` is
+"Top of the World", and `the-jetty` is "The Jetty". The rule knows no
+abbreviations and no apostrophes (`mt-hood` is "Mt Hood"); a title it
+gets wrong is put right in the place's file.
+
+**The place's file takes it over.** When you have something to say
+about a place, write `src/content/places/<slug>.md` under the same
+name — the `place` template is that file: a title, an optional
+description, an optional cover (the id of one of the place's own
+frames), an optional `draft`, and a body that is your writing about
+the place. The page stays at the same address and the photographs that
+name the place stay its wall; the file gives it its title, its
+description, its cover and your writing. A file that holds a title and
+nothing else changes the title and nothing else. Without a `cover`, as
+without a file, the cover is the first frame of the most recent
+outing. `draft: true` in the file holds the place back, photographs or
+no: no page, no card, and the photographs that name it show no place.
+The template starts with that line, so writing the file takes a place
+already on the site off it until the line is deleted. The file name is
+the slug and the URL, so it is lowercase letters, digits, and hyphens
+only; `none` is refused, because that is the word for no place. The
+writing is prose: no photograph lives beside a place file, and the
+place's photographs are the frames below it.
 
 A frame says where it was made in its sidecar, `at: <slug>`. A journal
 entry shot entirely in one place says it once instead, `at: <slug>` in
@@ -707,15 +736,26 @@ its frontmatter, and every frame in its folder that names no place of
 its own is taken to be there; a frame's own line always wins, and
 `at: none` keeps a frame out of its entry's default. An entry that sets
 no default imposes none: its frames are wherever their own lines
-say, and a frame that says nothing is at no place (`at: none` on an
-entry means the same as leaving the line out — Obsidian will offer
-the value there, since the property is shared). A photograph in the
+say, and a frame that says nothing is at no place. On an entry,
+`at: none` sets no default either, and it quiets the note about the
+folder's photographs that name no place (below) — Obsidian will offer
+the value there, since the property is shared. A photograph in the
 photographs folder has only its own line ("The photographs folder"
-above). `at` is a
-slug wherever it is written — on an entry and on a sidecar alike —
-while the sidecar's `place` stays prose for the wall label; they are
-two properties, so Obsidian's autocomplete offers each its own values
-and keeps them apart.
+above).
+
+`at` holds a place's name wherever it is written — on an entry and on
+a sidecar alike: lowercase letters, digits and hyphens, with at least
+one letter or digit among them, or the word `none`. Anything else
+fails the build, naming the file and the value, with the name to write
+where there is one to offer:
+
+```
+[places] src/content/photographs/_wide-3x2-02.md: at: "Top of the World" is not a place's name — lowercase letters, digits and hyphens only, or none for no place: write at: top-of-the-world
+```
+
+The sidecar's `place` stays prose for the wall label; `at` and `place`
+are two properties, so Obsidian's autocomplete offers each its own
+values and keeps them apart.
 
 ```
 # the journal entry: src/content/journal/where-the-fog-lets-go/index.md
@@ -730,6 +770,9 @@ at: the-jetty # its own line wins over the entry's default
 
 # a photograph of the photographs folder: src/content/photographs/_dock-b.md
 at: the-jetty # an outing of its own, by its capture date
+
+# a place with no file, made by its name: src/content/photographs/_wide-3x2-01.md
+at: top-of-the-world # "Top of the World", at /places/top-of-the-world/
 ```
 
 `/places/<slug>/` shows the title, the description, a summary line
@@ -740,26 +783,80 @@ packed gallery, at the galleries' width, gap, and density. The order
 is the outings oldest first — a journal entry's frames, in the entry's
 own order, are one outing, dated by the entry; a photographs-folder
 photograph is one on its own, dated by its capture — with no heading,
-date, or divider between one visit and the next. The page names no
+date, or divider between one visit and the next. A place with no file
+shows its title, the summary line and the wall: no description, no
+writing, and nothing standing in for them. The page names no
 journal entry anywhere; a frame's own page says which entry it came
 from, where it came from one, and links there. That is the whole act of adding photographs:
 publish an entry whose frames name the place, or a photograph whose
 sidecar does, and the page grows. A borrowed photograph stays with its
 home, never counted twice.
-`/places/` lists the places as cards, most recent outing first, and
+`/places/` lists the places as cards, most recent outing first — one
+made by its name among the rest, nothing marking it — and
 Places is in the nav between Journal and Galleries. On a photograph's page the
 label's place is the place's title as a link,
 with the sidecar's free text after it where there is any, and arrows
 from a place step through that place's frames.
 
-The build refuses an `at:` naming a place that does not exist — on an
-entry or a sidecar, draft or not — and lists the places that do; it
-refuses a `cover` that is not one of the place's frames, once the
-place publishes. A draft place and a place with no published frame
-yet get a note, not a failure: no page, no card, and their frames
-show no place, so a place can be declared ahead of its first outing.
-A photograph of the photographs folder at a place with no capture date
-fails the build ("The photographs folder" above).
+**A misspelt name would make a second place**, with nothing on the
+site to show it, so the build refuses a name with no file that is one
+or two letters off another place's name:
+
+```
+[places] "top-of-the-wold" (src/content/photographs/_wide-3x2-02.md) is 1 letter off the place "top-of-the-world" (src/content/places/top-of-the-world.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/top-of-the-wold.md
+```
+
+Where neither name has a file the build does not guess which is wrong,
+and names both:
+
+```
+[places] "top-of-the-wold" (src/content/photographs/_wide-3x2-02.md) is 1 letter off "top-of-the-world" (src/content/photographs/_wide-3x2-01.md), and neither has a place file — one is a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/top-of-the-wold.md and src/content/places/top-of-the-world.md
+```
+
+There are two ways past it, and the message gives both: correct the
+spelling, or, if they really are two places, write the file it names —
+both files, where neither place has one. A short name is refused at
+one letter only: a pair whose longer name has six characters or fewer.
+Two neighbouring letters swapped count as one. The guard counts every
+character, hyphens and digits included, so two real places that close
+— `north-beach` and `south-beach`, `trail-1` and `trail-2` — are
+refused until each has its file. It reads every `at:`, a draft's
+included, and measures a name against every place file, a draft one
+too; two places that each have a file are never measured against each
+other.
+
+**The build says which places it made**, one line each, with the count
+of published photographs that name the place and the file that would
+take it over:
+
+```
+[places] note: made top-of-the-world ("Top of the World") — 2 photographs; src/content/places/top-of-the-world.md would take it over
+```
+
+It also lists the published photographs that name no place — the
+photographs folder's as one line with every name (cut short here), a
+journal entry's as one line with a count:
+
+```
+[places] note: 35 photographs in src/content/photographs/ name no place — cozy-brook, dock-a, … (at: <slug> in a sidecar names one; at: none says none on purpose)
+[places] note: 8 photographs in src/content/journal/market-day-camera-low/ name no place (at: <slug> in its index.md names one for the folder; at: none says none on purpose)
+```
+
+A photograph is left off when its own `at:` line, or its entry's, is
+written — `none` included, which is how to say no place on purpose.
+Neither note fails the build. Both are in what the build prints, and
+`sh scripts/verify.sh` prints the place notes as a group of their own.
+
+Besides those two refusals — an `at:` that is not a name, and a name
+that is a probable typo, on an entry or a sidecar, draft or not — the
+build refuses a `cover` that is not one of the place's frames, once
+the place publishes. A draft place file and one with no published
+frame yet get a note, not a failure: no page, no card, and their
+frames show no place, so a place's file can be written ahead of its
+first outing. A name with no file whose photographs are all
+unpublished is nothing yet: no page, no card, no note. A photograph of
+the photographs folder at a place with no capture date fails the build
+("The photographs folder" above).
 
 ## Hard-won syntax rules
 
