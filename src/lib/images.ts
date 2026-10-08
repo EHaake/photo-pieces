@@ -19,6 +19,7 @@ import {
   groupByPlace,
   hasBlock,
   homeSlugOf,
+  madePlaceNote,
   humanizeBasename,
   ImageIdError,
   imageUrlFor,
@@ -28,6 +29,7 @@ import {
   nearest,
   nearMissProblems,
   neighbours,
+  noPlaceNotes,
   outingOrder,
   passageFor,
   photographOnlyProblems,
@@ -735,7 +737,21 @@ async function buildRegistry(): Promise<ImageRegistry> {
       latest: dateByOuting.get(newest.key)!,
       summary: placeSummary(group.outings, dateByOuting),
     });
+    if (status === 'made') {
+      console.warn(madePlaceNote(slug, placeTitle(slug), group.frames.length));
+    }
   }
+  // The published photographs that name no place — a note, as the made
+  // place's is, never a failure (spec 019, amendment 5): each line as
+  // written, so an entry's `at: none` leaves its folder off.
+  const unplaced = noPlaceNotes(
+    publishedFiles.map((file) => ({
+      id: file.id,
+      at: sidecars.get(file.id)?.data.at,
+      entryAt: file.pieceSlug === null ? undefined : pieceById.get(file.pieceSlug)?.data.at,
+    })),
+  );
+  for (const note of unplaced) console.warn(note);
   if (coverProblems.length) {
     throw new Error(coverProblems.join('\n'));
   }

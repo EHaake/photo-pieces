@@ -22,7 +22,9 @@ if [ "$only" != tests ]; then
   echo "## build (full log: $LOGDIR/build.log)"
   # Anything the registry, the transform, or Astro flagged, capped.
   grep -nE "error|Error|ERROR|warn|WARN|\[images\]|\[places\]|\[gear\]|failed|Failed" "$LOGDIR/build.log" \
-    | grep -vE "no GPS|0 errors|0 warnings" | head -n 30
+    | grep -vE "no GPS|0 errors|0 warnings|\[places\] note:" | head -n 30
+  # The place notes, every one, outside the cap: a place the build made, a draft or empty place, the photographs that name no place.
+  grep -E "\[places\] note:" "$LOGDIR/build.log"
   grep -E "page\(s\) built|Indexed [0-9]+ pages|\[prune-originals\]|\[check-no-gps\]|\[check-private-files\]|\[check-lexicon\]|\[check-no-dev-routes\]|\[check-motion\]|BUILD EXIT" "$LOGDIR/build.log"
   if ! grep -q "BUILD EXIT 0" "$LOGDIR/build.log"; then
     echo "--- last 40 lines"; tail -n 40 "$LOGDIR/build.log"

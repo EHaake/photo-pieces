@@ -22,10 +22,12 @@ import {
   imageUrlFor,
   isPrivateRaster,
   lettersOff,
+  madePlaceNote,
   nameCollisions,
   nearest,
   nearMissProblems,
   neighbours,
+  noPlaceNotes,
   outingOrder,
   PAIR_WIDTH,
   parseImagePath,
@@ -36,6 +38,7 @@ import {
   pieceFrames,
   PLACE_NEAR_MISS,
   PLACE_NEAR_MISS_SHORT,
+  PLACE_NOTE,
   PLACE_SHORT_NAME,
   PLACE_TITLE_SMALL_WORDS,
   placeAtProblems,
@@ -1828,5 +1831,143 @@ describe("a place's name (T1755, spec 019)", () => {
       '[places] "sombrio-beech" (src/content/photographs/_a.md) is 1 letter off the place "sombrio-beach" (src/content/places/sombrio-beach.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/sombrio-beech.md',
       '[places] "the-jety" (src/content/photographs/_b.md) is 1 letter off the place "the-jetty" (src/content/places/the-jetty.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/the-jety.md',
     ]);
+  });
+});
+
+describe('what the build says (T1757, spec 019)', () => {
+  const HOW_IN_FOLDER = '(at: <slug> in a sidecar names one; at: none says none on purpose)';
+  const HOW_IN_ENTRY =
+    '(at: <slug> in its index.md names one for the folder; at: none says none on purpose)';
+
+  it('PLACE_NOTE is "[places] note:"', () => {
+    expect(PLACE_NOTE).toBe('[places] note:');
+  });
+
+  it('madePlaceNote: the exact line — the slug, the title, the count, the file that would take it over', () => {
+    expect(madePlaceNote('top-of-the-world', 'Top of the World', 2)).toBe(
+      '[places] note: made top-of-the-world ("Top of the World") — 2 photographs; src/content/places/top-of-the-world.md would take it over',
+    );
+  });
+
+  it('madePlaceNote: one photograph is "1 photograph"', () => {
+    expect(madePlaceNote('falls-creek-falls', 'Falls Creek Falls', 1)).toBe(
+      '[places] note: made falls-creek-falls ("Falls Creek Falls") — 1 photograph; src/content/places/falls-creek-falls.md would take it over',
+    );
+  });
+
+  it('noPlaceNotes: a photographs-folder photograph with no line is listed; one with `at: none` is not, one naming a place is not', () => {
+    expect(
+      noPlaceNotes([
+        { id: 'cozy-brook', at: undefined, entryAt: undefined },
+        { id: 'dock-a', at: 'none', entryAt: undefined },
+        { id: 'dock-b', at: 'the-jetty', entryAt: undefined },
+      ]),
+    ).toEqual([
+      '[places] note: 1 photograph in src/content/photographs/ names no place — cozy-brook (at: <slug> in a sidecar names one; at: none says none on purpose)',
+    ]);
+  });
+
+  it("noPlaceNotes: the photographs folder's are one line — the count, then the ids, sorted", () => {
+    expect(
+      noPlaceNotes([
+        { id: 'water-and-ice', at: undefined, entryAt: undefined },
+        { id: 'cozy-brook', at: '  ', entryAt: undefined },
+        { id: 'dock-a', at: undefined, entryAt: undefined },
+      ]),
+    ).toEqual([
+      `[places] note: 3 photographs in src/content/photographs/ name no place — cozy-brook, dock-a, water-and-ice ${HOW_IN_FOLDER}`,
+    ]);
+  });
+
+  it('noPlaceNotes: a journal entry with no line and three frames with none → one line with 3', () => {
+    expect(
+      noPlaceNotes([
+        { id: 'alpha/land-a', at: undefined, entryAt: undefined },
+        { id: 'alpha/land-b', at: undefined, entryAt: undefined },
+        { id: 'alpha/pano', at: undefined, entryAt: undefined },
+      ]),
+    ).toEqual([
+      '[places] note: 3 photographs in src/content/journal/alpha/ name no place (at: <slug> in its index.md names one for the folder; at: none says none on purpose)',
+    ]);
+  });
+
+  it('noPlaceNotes: a frame there with its own `at:` or `at: none` is not counted', () => {
+    expect(
+      noPlaceNotes([
+        { id: 'alpha/land-a', at: undefined, entryAt: undefined },
+        { id: 'alpha/land-b', at: 'the-jetty', entryAt: undefined },
+        { id: 'alpha/pano', at: 'none', entryAt: undefined },
+      ]),
+    ).toEqual([
+      '[places] note: 1 photograph in src/content/journal/alpha/ names no place (at: <slug> in its index.md names one for the folder; at: none says none on purpose)',
+    ]);
+  });
+
+  it('noPlaceNotes: an entry whose line reads `none` gives no line', () => {
+    expect(
+      noPlaceNotes([
+        { id: 'alpha/land-a', at: undefined, entryAt: 'none' },
+        { id: 'alpha/land-b', at: undefined, entryAt: 'none' },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('noPlaceNotes: an entry with a default gives no line', () => {
+    expect(
+      noPlaceNotes([
+        { id: 'alpha/land-a', at: undefined, entryAt: 'the-headlands' },
+        { id: 'alpha/pano', at: 'none', entryAt: 'the-headlands' },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('noPlaceNotes: the folder first, then the entries sorted by slug', () => {
+    expect(
+      noPlaceNotes([
+        { id: 'vocabulary-sampler/land-a', at: undefined, entryAt: undefined },
+        { id: 'market-day/land-a', at: undefined, entryAt: undefined },
+        { id: 'market-day/land-b', at: undefined, entryAt: undefined },
+        { id: 'cozy-brook', at: undefined, entryAt: undefined },
+      ]),
+    ).toEqual([
+      `[places] note: 1 photograph in src/content/photographs/ names no place — cozy-brook ${HOW_IN_FOLDER}`,
+      `[places] note: 2 photographs in src/content/journal/market-day/ name no place ${HOW_IN_ENTRY}`,
+      `[places] note: 1 photograph in src/content/journal/vocabulary-sampler/ names no place ${HOW_IN_ENTRY}`,
+    ]);
+  });
+
+  it('noPlaceNotes: nothing to say → []', () => {
+    expect(noPlaceNotes([])).toEqual([]);
+    expect(
+      noPlaceNotes([
+        { id: 'dock-b', at: 'the-jetty', entryAt: undefined },
+        { id: 'alpha/land-a', at: undefined, entryAt: 'the-headlands' },
+      ]),
+    ).toEqual([]);
+  });
+
+  it("scripts/verify.sh prints every PLACE_NOTE line of build.log with no head on it, and the capped list's grep -vE leaves the same text out", () => {
+    const script = readFileSync(new URL('./scripts/verify.sh', import.meta.url), 'utf8');
+    const text = PLACE_NOTE.replace(/[[\]]/g, '\\$&'); // as a grep -E pattern
+    const lines = script.split('\n').filter((line) => !line.trim().startsWith('#'));
+    const notes = lines.filter(
+      (line) => line.includes('grep') && line.includes(text) && line.includes('build.log'),
+    );
+    expect(notes).toHaveLength(1);
+    expect(notes[0]).not.toContain('head');
+    const capped = lines.filter((line) => line.includes('grep -vE'));
+    expect(capped).toHaveLength(1);
+    expect(capped[0]).toContain('head -n 30');
+    expect(capped[0]).toContain(text);
+  });
+
+  it("images.ts holds the two spec-009 notes as written — the draft place's and the empty place's", () => {
+    const registry = readFileSync(new URL('./src/lib/images.ts', import.meta.url), 'utf8');
+    expect(registry).toContain(
+      '`[places] note: ${slug} is a draft — no page, and its frames show no place`',
+    );
+    expect(registry).toContain(
+      '`[places] note: ${slug} has no published frame yet — no page until a photograph names it`',
+    );
   });
 });

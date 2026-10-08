@@ -1464,6 +1464,67 @@ export function placeRoll(declared, grouped) {
 }
 
 /**
+ * What the build says about places (spec 019, amendment 5). Every note
+ * opens with `PLACE_NOTE`, which is what `scripts/verify.sh` greps the
+ * build log for to print the notes as a group of their own. None fails
+ * the build: the registry prints them with `console.warn`.
+ */
+
+export const PLACE_NOTE = '[places] note:'; // tunable: with the notes' wording and grouping below
+
+const photographsCount = (count) => `${count} ${count === 1 ? 'photograph' : 'photographs'}`;
+
+/**
+ * The made place's line: its slug, the title read from it, how many
+ * published photographs name it, and the file that would take it over.
+ */
+export function madePlaceNote(slug, title, count) {
+  return `${PLACE_NOTE} made ${slug} ("${title}") — ${photographsCount(count)}; src/content/places/${slug}.md would take it over`;
+}
+
+/**
+ * The published photographs that name no place. `photographs` is
+ * `{ id, at, entryAt }[]` — every published photograph, its sidecar's
+ * `at:` and its journal entry's, as written. A photograph names no
+ * place when its own line is blank and, in a journal folder, its
+ * entry's is blank too. `none` is not blank on either line: it says no
+ * place on purpose, and is left off — which is why the entry's line is
+ * read here as written and not through `placeOf`, where an entry's
+ * `none` is no default. The photographs folder's are one line, a count
+ * and their ids, sorted; each journal entry's one line with a count,
+ * entries sorted by slug. Empty when there is nothing to say.
+ */
+export function noPlaceNotes(photographs) {
+  const folder = [];
+  const byEntry = new Map();
+  for (const { id, at, entryAt } of photographs) {
+    if (cleanString(at)) continue;
+    const slug = homeSlugOf(id);
+    if (slug === null) {
+      folder.push(String(id));
+      continue;
+    }
+    if (cleanString(entryAt)) continue;
+    byEntry.set(slug, (byEntry.get(slug) ?? 0) + 1);
+  }
+  const nameNoPlace = (count) => (count === 1 ? 'names no place' : 'name no place');
+  const onPurpose = `at: ${PLACE_NONE} says none on purpose`;
+  const notes = [];
+  if (folder.length > 0) {
+    notes.push(
+      `${PLACE_NOTE} ${photographsCount(folder.length)} in src/content/photographs/ ${nameNoPlace(folder.length)} — ${folder.sort(byCodeUnit).join(', ')} (at: <slug> in a sidecar names one; ${onPurpose})`,
+    );
+  }
+  for (const slug of [...byEntry.keys()].sort(byCodeUnit)) {
+    const count = byEntry.get(slug);
+    notes.push(
+      `${PLACE_NOTE} ${photographsCount(count)} in src/content/journal/${slug}/ ${nameNoPlace(count)} (at: <slug> in its index.md names one for the folder; ${onPurpose})`,
+    );
+  }
+  return notes;
+}
+
+/**
  * A place card's meta line — "2 outings · 7 frames · 2019–2026", with
  * singulars and one year when the outings share one. `outings` is what
  * `groupByPlace` returns; `dateByOuting` maps an outing key to its date
