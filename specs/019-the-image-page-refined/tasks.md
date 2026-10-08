@@ -1,6 +1,6 @@
 # Tasks: The image page, refined
 
-**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken. Phase 3c (the lexicon amendment) drafted and signed off 2026-09-29 at the top tier — one blocking finding (B1) fixed and re-reviewed, twelve second looks taken. Phase 3d (the category amendment) drafted and signed off 2026-10-01 at the top tier — nothing blocking, five second looks taken.
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken. Phase 3c (the lexicon amendment) drafted and signed off 2026-09-29 at the top tier — one blocking finding (B1) fixed and re-reviewed, twelve second looks taken. Phase 3d (the category amendment) drafted and signed off 2026-10-01 at the top tier — nothing blocking, five second looks taken. Phase 3e (the fifth amendment, a place made by naming it) drafted and signed off 2026-10-07 at the top tier — nothing blocking, ten second looks taken.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1700–T1703) — the constitution amended
 first, in its own commit; the private-file family as pure rules with
@@ -2331,7 +2331,7 @@ empty line fails the build (left as is). The Phase 3a, 3b and 3c looks
 
 ## Phase 3e — A place made by naming it (reviewer after the phase; T1755 and T1756 are `review: per-task` — the guard is all that stands between a misspelt name and a second place made in silence, and the registry change deletes the old refusal and decides every place's page, so a mistake there unpublishes a declared place, publishes one held back, or puts photographs on the wrong wall; walkthrough: on the laptop, the site built and previewed (`npm run build && npm run preview`): `/places/` shows a third card, "Top of the World", between The jetty and The headlands — its cover, its title and its line of counts, nothing marking it as different — though no file for it exists in `src/content/places/`; `/places/top-of-the-world/` shows that title, the line of counts and a wall of two photographs, with no description, no writing and nothing in their place; the photograph at `/photographs/wide-3x2-02/` names Top of the World on its label, a link to that page, and arriving from the place's wall the arrows step between its two photographs; The jetty's and The headlands' pages and cards are as they were; `sh scripts/verify.sh` now prints, under the build, one line for the place the build made — how many photographs are on it and the file that would take it over — and the photographs that name no place, the photographs folder's by name and each journal entry's as one line with a count; `AUTHORING.md`'s "Places" says all of this; and, if he wants to, on his own photograph: `at: falls-creek-falls` in its sidecar with no place file makes the page, his file made from the `place` template takes it over, a name one letter off stops the build naming both files, and `at: Falls Creek Falls` stops it showing the slug to write; as many rounds as it takes, each a sub-lettered task under T1760)
 
-**Status**: Draft (2026-10-07) — pending sign-off. Plan: "Amendment 5 (2026-10-06): a place made by naming it" and its sections.
+**Status**: Signed off (2026-10-07) at the top tier (nothing blocking; S1–S10 taken). Plan: "Amendment 5 (2026-10-06): a place made by naming it" and its sections.
 The spec's fifth amendment, asked as he sat down to write his piece,
 folded in while the 3a, 3b and 3c pauses are held open — T1729, T1735
 and T1745 stay unchecked and are not touched by this phase — and before
@@ -2417,7 +2417,12 @@ list). Task ids continue from T1753.
       `src/pages/dev/place-wall/[...candidate].astro`: the fallback
       removed, the entry required. image-meta.test.mjs: `placeRoll`'s
       cases; the four `placeProblems` cases removed with the function,
-      each named in the report. place-page.test.mjs: the absence case.
+      each named in the report with the case that succeeds it (the
+      Done note carries both lists — AC 45's "every place test that
+      stands"). place-page.test.mjs: the absence case — the template
+      holds no `!place.entry`, no comparison of it with null or
+      undefined, no `? :` on it, no `place.entry ||` and no
+      `place.entry ??`.
       This task prints no new note (T1757). _Verify:
       `sh scripts/verify.sh` green (the page count unchanged; the test
       count, with the four removed and the new ones added, both
@@ -2436,7 +2441,12 @@ list). Task ids continue from T1753.
       `dist/places/the-pier/index.html` exists and
       `grep -o '<h1[^>]*>[^<]*</h1>'` on it reads "The Pier"; to
       `at: the-jety` → BUILD EXIT 1 with the guard's line pasted
-      verbatim; `git diff --stat -- src/content` empty after the
+      verbatim; `journal/market-day-camera-low/index.md` given
+      `at: market-square` (a journal entry's default naming a slug
+      with no file) → BUILD EXIT 0, `dist/places/market-square/index.html`
+      exists, its `<h1>` reads "Market Square" and its wall links to
+      that entry's photographs (`/photographs/market-day-camera-low/…`,
+      the count given); `git diff --stat -- src/content` empty after the
       reverts (AC 40, AC 42 and AC 43 by the registry's tests; AC 45's
       "what they were")._
 
@@ -2457,10 +2467,12 @@ list). Task ids continue from T1753.
       source case. _Verify: `sh scripts/verify.sh` green, and its
       printed build section pasted whole — BUILD EXIT 0, the note group
       showing the two spec-009 notes if they print today, the
-      photographs folder's line (its count: the folder's published
-      photographs less `dock-b`) and one line each for
-      `market-day-camera-low` and `vocabulary-sampler` (8 photographs
-      each), none for `first-light-at-the-jetty` (its one photograph
+      photographs folder's line and one line each for
+      `market-day-camera-low` and `vocabulary-sampler`, the counts
+      reported as printed (the folder's set beside
+      `ls src/content/photographs/*.jpg | wc -l` less the draft and
+      `dock-b`, each entry's beside its folder's public rasters), none
+      for `first-light-at-the-jetty` (its one photograph
       names the jetty) nor `where-the-fog-lets-go` (its entry sets a
       default, and `_pano.md` says `none`), and no made line yet; any
       note printed twice is reported, not fixed
@@ -2554,6 +2566,11 @@ list). Task ids continue from T1753.
       `grep -c "Falls Creek Falls" AUTHORING.md` → at least 1 each;
       `grep -c "probable typo" AUTHORING.md` and the same on
       `README.md` → at least 1 each;
+      `grep -c "north-beach" AUTHORING.md` and
+      `grep -c "trail-1" AUTHORING.md` → at least 1 each (the one plain
+      sentence that the guard counts every character, hyphens and
+      digits included, so two real places that close are refused until
+      each has its file);
       `grep -cF "would take it over" AUTHORING.md` and
       `grep -cE "names? no place" AUTHORING.md` → at least 1 each;
       `grep -n "place.md" AUTHORING.md` → the Templates line, saying
@@ -2567,21 +2584,27 @@ list). Task ids continue from T1753.
 - [ ] **T1760** — The made place, looked at, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3e
       pause, in the person's words, as T1753's. The questions, in plain
-      language: the made place's page carrying the line of counts under
-      its title, as every place's page does — the spec's "no count" was
-      read as no count standing in for the description, so that a made
-      page is exactly a declared one that says little; is that right,
-      or should a made page be the title and the wall alone; "Top of
+      language: the made place's page carrying the line of counts and
+      years under its title, as every place's page does and as the
+      spec now says — so that a made page is exactly a declared one
+      that says little; is that how he wants it, seen; "Top of
       the World" as the title read from the name, and whether the small
       words are the right ones; the card among the other places,
       unmarked; the label's link and the arrows; the two notes as the
       command prints them — their words, and the photographs folder's
       as one line of names; a name one letter off being refused, and
       whether one letter for a name of six characters or fewer and two
-      above is where he wants it; whether `AUTHORING.md`'s "Places"
+      above is where he wants it; a slip of the word `none` itself —
+      `at: nnoe` is a name like any other, so today it quietly makes a
+      place called "Nnoe", listed only in the command's note: should a
+      name one letter off `none` be refused too (a yes is a spec
+      amendment, not a round); whether `AUTHORING.md`'s "Places"
       says it as he would look for it. Each round is one sub-lettered
       task here (`T1760a`, `b`, …): one value and the expectation
-      beside it, or a fixture's or a document's words, a round that
+      beside it, or a fixture's or a document's words — except a round
+      on the notes' grouping, which is an edit to `noPlaceNotes` and
+      its expectations, dispatched as that (plan: "The tuning envelope,
+      placed (amendment 5)") — a round that
       changes a word a document states updating it in the same task; a
       round that wants what this phase's intro sends to the ordinary
       path goes to him as a spec amendment. When he names the keeps,
@@ -2965,6 +2988,10 @@ tier if it is ever on (it is off). -->
 | T1735d Obsidian templates (2026-10-06) | implementation (`opus`, high) | ~87k | done; 835 tests; templates thin because a blank optional line fails the schema — whether blank means not-set is put to him; README's structure listing names neither `obsidian/` nor the new test (close-out) |
 | T1735e blank means not set | implementation (`opus`, high) | ~80k | done; 846 tests; one preprocess step on all four schemas; templates carry every field |
 | T1735e per-task review | implementation (`opus`, high) | ~50k | signed off, nothing blocking; six second looks — a blank `draft:` publishes (told to him), no standing test of the wiring (sweep), blank photograph-only lines in a journal sidecar pass, blank list items kept, AC 36's text, small wording |
+| Amendment 5 spec session (2026-10-06/07) | session on `claude-opus-5-5`, high (opened on Opus, not the session tier's Fable; the person raised effort and did not ask to switch) | — | three product questions answered "Go with your recommendations"; spec.md amended (Goal 12, AC 39–46), approved 2026-10-07 |
+| Amendment 5 planning (2026-10-07) | implementation (`opus`, high, no override) | ~197k | drafted plan.md's Amendment 5 and Phase 3e (T1754–T1760; T1755 and T1756 per-task); no product question; twelve readings named — the made page's line of counts (spec.md corrected to say it stays; first question of the look), the guard reads drafts too, `placeProblems`' four cases go with the refusal, verify.sh prints place notes uncapped, swap counts as one letter, short = six or fewer |
+| Amendment 5 sign-off | top (`fable`, high, override) | ~80k | signed off, nothing blocking; S1 a typo of `none` makes a place (the look), S2 AC 45's wording (spec.md corrected), S3 the entry default unpinned end to end, S4 two forms the absence case missed, S5 a stale quotation, S6 counts asserted, S7 the cover sketch, S8 grouping is not one value, S9 the dev sampler's place, S10 hyphens and digits count |
+| Amendment 5 sign-off notes (planner resumed) | implementation (`opus`, high) | ~14k | S1–S10 taken, none declined; the dev sampler keeps `the-headlands` by name; AC 40–42's built pages are read once (no test reads the real `dist/`) — the sweep re-reads `dist/places/top-of-the-world/` |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

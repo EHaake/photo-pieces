@@ -35,9 +35,9 @@ the same day, before the real piece.
 **Amended a fifth time, 2026-10-06**, as he sat down to write the real
 piece, with the 3a, 3b and 3c pauses held open: a place made by naming
 it — Goal 12 and the sections marked _(amended 2026-10-06, place)_ —
-to be re-planned as plan.md's "Amendment 5 (2026-10-06): a place made
-by naming it" and tasks.md's Phase 3e (task ids on from T1753), before
-the real piece.
+re-planned as plan.md's "Amendment 5 (2026-10-06): a place made by
+naming it" and tasks.md's Phase 3e (T1754–T1760), signed off at the
+top tier 2026-10-07, before the real piece.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
@@ -1365,8 +1365,9 @@ _Amended 2026-10-06 (place):_
       pinned by tests of the notes and the command's output, recorded
 - [ ] A declared place's page, its card, its cover and the places
       index's order are what they were, and the lexicon's scans pass
-      over the made place's pages — pinned on `dist/` and by the
-      existing place tests, unchanged and green
+      over the made place's pages — pinned on `dist/` and by every
+      place test that stands, green (the cases of the withdrawn
+      refusal go with it, each named with its successor)
 - [ ] `AUTHORING.md` and the README describe naming a place, the title
       rule, the place's file taking over, the guard and the way past
       it, the two notes and the `place` template's role — pinned by

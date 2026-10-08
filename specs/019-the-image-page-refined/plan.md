@@ -3764,7 +3764,7 @@ feed; `scripts/verify.sh` (its summary grep already prints
 
 ## Amendment 5 (2026-10-06): a place made by naming it
 
-**Status**: Draft (2026-10-07) — pending sign-off
+**Status**: Signed off (2026-10-07) by the `skeptical-reviewer` at the top tier — no blocking findings; ten second-look notes taken (a typo of `none` put to the look, AC 45's wording, the entry-default build, two more forbidden forms in the absence case, the line of counts cited as the spec now reads, counts reported not asserted, the cover's existing resolution, grouping rounds, the dev sampler's named place, hyphens and digits in `AUTHORING.md`).
 **Implements**: spec.md's sections marked _(amended 2026-10-06,
 place)_ — the preamble's fifth-amendment sentences, Goal 12, the
 Entities "A made place", "The title rule" and "A place's name", the
@@ -3910,8 +3910,10 @@ simpler shape was taken.
   that refusal; their successors are the guard's cases below, the
   first of which asserts the opposite of the first of these. Every
   other case under "places (T701, spec 009)" and "the place walls
-  (T1746, spec 019)" is unchanged and green (AC 45). Simpler shape
-  taken: delete, not keep the function behind a flag.
+  (T1746, spec 019)" is unchanged and green — AC 45 as spec.md words
+  it, "every place test that stands". T1756's Done note names the four
+  and, beside each, the case that succeeds it. Simpler shape taken:
+  delete, not keep the function behind a flag.
 
 - **Which places publish** (`src/lib/image-meta.mjs`, T1756):
 
@@ -3952,9 +3954,13 @@ simpler shape was taken.
     byte-identical and in the order they print today; 'declared' and
     'made' build the `SitePlace` in the one body — `entry` from
     `placeById` or null, the cover check run only where there is an
-    entry, `cover: entry?.data.cover ?? newest.frames[0]` (the rule a
-    declared place without a `cover` already follows), `latest` and
-    `summary` as now. The sort and `placeBySlug` are unchanged, so a
+    entry, and the cover resolved exactly as the loop resolves it
+    today (lines 678–697: a declared `cover`, once checked against the
+    place's frames, else the first frame of the most recent outing) —
+    the implementer follows that resolution and writes no second one;
+    a made place has no declared cover and so takes the fallback, the
+    rule a declared place without a `cover` already follows. `latest`
+    and `summary` as now. The sort and `placeBySlug` are unchanged, so a
     made place takes its place in the index's order and reaches
     `SiteImage.place` and the place set by the existing lines.
   - A gallery lists photographs by id and is indifferent to places. A
@@ -3990,26 +3996,32 @@ simpler shape was taken.
   of a declared place whose file is a title alone — pinned in T1758 by
   writing that file and comparing the two built pages byte for byte.
 
-  **Read narrowly, and said so:** the Design requirement's "the title,
-  then the wall … no count" is read with its own "in their stead" —
-  no count standing in for the description or the writing. The line of
-  counts every place page carries under its title stays, because the
-  same paragraph says a visitor cannot tell a made place from a
-  declared one that says little, and that a declared place's page is
-  unchanged; dropping it from made pages alone would mark them. It is
-  the first question of the look.
+  **The line of counts stays**, as the Design requirement says: "the
+  title, the line of counts and years every place page carries under
+  its title, then the wall … no line of the site's own in the stead of
+  the description or the writing". So the made page differs from a
+  declared one only in what its file would have added, and a visitor
+  cannot tell it from a declared place that says little. Not a
+  deviation; spec.md's Decided line still asks that he see it, so it
+  is the first question of the look.
 
   `src/pages/dev/place-wall/[...candidate].astro` judges the writing
   above the wall, so it needs a place with a file: the
   `?? registry.places[0]` fallback, which could now be a made place,
   goes, and the page throws naming `the-headlands` when that place or
-  its entry is missing. Dev-only; nothing ships.
+  its entry is missing. The named slug is kept, over
+  `registry.places.find((p) => p.entry?.body)`: the sampler's gate was
+  judged on that place's longer writing, and a search for any place
+  with a body would change which writing it shows as places are added,
+  without saying so. Dev-only; nothing ships.
 
   No template may print anything for the absence of a file — the
   spec's ordinary path. A standing source case in place-page.test.mjs
   pins it: the template guards the entry's presence (`place.entry?.`,
-  `place.entry &&`) and never tests its absence (`!place.entry`, a
-  comparison with null, a `? :` on it).
+  `place.entry &&`) and never tests its absence or supplies a
+  stand-in for it: no `!place.entry`, no comparison with null or
+  undefined, no `? :` on it, no `place.entry ||` and no
+  `place.entry ??`.
 
 - **Every other consumer, untouched** — named so the reviewer can
   confirm: `src/pages/places/index.astro` (title, cover, summary, url);
@@ -4086,8 +4098,9 @@ simpler shape was taken.
   `at: none`: the sampler is at no place on purpose, and the line
   takes it off the second note while changing no page. The entry-default
   and journal-sidecar ways of naming a made place are pinned in
-  image-meta.test.mjs (`placeOf`, `groupByPlace`, `placeRoll`), not by
-  a second fixture: all three reach `placeOfId` by the one line.
+  image-meta.test.mjs (`placeOf`, `groupByPlace`, `placeRoll`) and,
+  for the entry's default, by T1756's one-time build, not by a second
+  fixture: all three reach `placeOfId` by the one line.
 
 - **The documents** (T1759), hand-edited, after the fixtures so every
   quoted line is read from the build. `AUTHORING.md`: "Places"
@@ -4099,7 +4112,11 @@ simpler shape was taken.
   with the shape message; an entry's `at: none` (today's sentence says
   it "means the same as leaving the line out" — it still places
   nothing, and now also quiets the note); the guard, its message and
-  the two ways past it; the two notes, quoted; the closing paragraph's
+  the two ways past it, with one plain sentence that it counts every
+  character, hyphens and digits included, so two real places a letter
+  or two apart — `north-beach` and `south-beach`, `trail-1` and
+  `trail-2` — are refused until each has its file; the two notes,
+  quoted; the closing paragraph's
   "refuses an `at:` naming a place that does not exist" replaced. "The
   photographs folder"'s `at:` paragraph: the place need not have a
   file, and a photograph with no line is listed in the note. The
@@ -4123,9 +4140,13 @@ The envelope's place line. One place each:
 | where a short name begins             | `PLACE_SHORT_NAME` (6 — the longer name of the pair has six characters or fewer)          | by name and value; the boundary cases at six and seven                    |
 | the notes' wording and their grouping | `PLACE_NOTE`, `madePlaceNote`, `noPlaceNotes`, the same file                              | image-meta.test.mjs, exact strings; the verify.sh source case             |
 
-A round is the value and the expectation beside it; the documents
-quote the small words and the notes, so a round that changes either
-updates `AUTHORING.md` in the same task.
+A round on the first four rows, or on a note's words, is the value and
+the expectation beside it. A round that changes the notes' grouping —
+the photographs folder's as one line each, say, or the entries'
+gathered into one — is not a one-value round: it is an edit to
+`noPlaceNotes` and to its expectations, and is dispatched as that. The
+documents quote the small words and the notes, so a round that changes
+either updates `AUTHORING.md` in the same task.
 
 ### Failure messages and notes (amendment 5)
 
@@ -4166,7 +4187,7 @@ updates `AUTHORING.md` in the same task.
   `[places] note: 8 photographs in
   src/content/journal/market-day-camera-low/ name no place (at: <slug>
   in its index.md names one for the folder; at: none says none on
-  purpose)` — `1 photograph … names no place`. The folder's count is
+  purpose)` — `1 photograph … names no place`. The counts are
   illustrative; T1757 and T1758 paste the real lines.
 
 ### Testing strategy (amendment 5)
@@ -4224,7 +4245,11 @@ updates `AUTHORING.md` in the same task.
   that. One-time builds, reverted: `_dock-b.md` to `at: the-pier` →
   BUILD EXIT 0 and `dist/places/the-pier/index.html` with "The Pier"
   (the build that failed before this task now makes the place); to
-  `at: the-jety` → BUILD EXIT 1 with the guard's line.
+  `at: the-jety` → BUILD EXIT 1 with the guard's line; and
+  `journal/market-day-camera-low/index.md` given `at: market-square`
+  → BUILD EXIT 0 and `dist/places/market-square/index.html` with
+  "Market Square" and that entry's photographs on its wall — AC 40's
+  "by its journal entry's default", end to end.
 - **What the build says** — **T1757** (image-meta.test.mjs).
   `madePlaceNote`: the exact line, singular and plural.
   `noPlaceNotes`: a photographs-folder photograph with no line is
@@ -4314,17 +4339,25 @@ Untouched, named so the reviewer can confirm: `src/pages/places/index.astro`;
   tested here.
 - **The photographs folder's note is as long as the photographs it
   lists** — one line of about forty names on the fixtures.
-- **The guard measures characters**, so two real places told apart by
-  a digit (`trail-1`, `trail-2`) are refused until each has its file —
-  the spec's way past.
+- **The guard measures characters**, hyphens and digits included, so
+  two real places a letter or two apart (`north-beach` and
+  `south-beach`, `trail-1` and `trail-2`) are refused until each has
+  its file — the spec's way past. `AUTHORING.md` says so (T1759).
+- **A typo of `none` is never measured.** `at: nnoe` is a slug with no
+  file; the guard measures it against the places' names, never against
+  the word `none`, so it quietly makes a place called "Nnoe" — named
+  only in the build's made note. The rule is left as the spec has it;
+  whether a name one letter off `none` should be refused is put to the
+  person at the look (T1760), and would be a spec amendment.
 
 ### Resolved decisions (amendment 5)
 
 - **A made place is a `SitePlace` with no entry**, through the one
   loop — not a second list or a second page; no `made` flag, so
   nothing downstream can mark one.
-- **The made page keeps the line of counts** every place page has (the
-  narrow reading above); the look's first question.
+- **The made page keeps the line of counts** every place page has, as
+  the Design requirement states; the look's first question, by
+  spec.md's Decided line.
 - **The measure counts an adjacent swap as one letter**; a short name
   is one whose pair's longer name has six characters or fewer.
 - **The guard and the shape check read every `at:`, a draft's
@@ -4332,8 +4365,8 @@ Untouched, named so the reviewer can confirm: `src/pages/places/index.astro`;
 - **`at:` must hold a letter or a digit** besides matching the place
   file's shape, so no title is empty.
 - **`placeProblems` and its four cases are deleted** with the refusal
-  the spec withdraws; AC 45's "existing place tests, unchanged" is
-  read as every case of what still stands.
+  the spec withdraws; AC 45 reads "every place test that stands", and
+  the Done note names the four and their successors.
 - **The photographs folder's unplaced photographs are one line**, a
   count and the names; the grouping is the spec's tunable.
 - **`scripts/verify.sh` prints the place notes in their own group**,
@@ -4342,8 +4375,9 @@ Untouched, named so the reviewer can confirm: `src/pages/places/index.astro`;
   photographs, dated between the two declared places; and
   `vocabulary-sampler` says `at: none`. Not `falls-creek-falls`, which
   is his.
-- **The dev sampler requires `the-headlands`' file** rather than
-  falling back to whichever place sorts first.
+- **The dev sampler requires `the-headlands`' file**, by name, rather
+  than falling back to whichever place sorts first or searching for
+  any place with writing: the place it shows should not change unsaid.
 - **`review: per-task` on T1755 and T1756.** The guard is what stands
   between a misspelt name and a second place made in silence — a made
   place is unmarked on the site by design, so nothing later would show
