@@ -5,10 +5,11 @@
 // photographs, pleasant enough to judge layout by. Swap real frames into
 // the piece folders anytime; nothing references these by content.
 //
-//   node scripts/gen-placeholders.mjs            # everything
-//   node scripts/gen-placeholders.mjs pieces     # the fixture pieces only
-//   node scripts/gen-placeholders.mjs gallery    # src/content/gallery-images only
-//   node scripts/gen-placeholders.mjs fixtures   # the tests/ fixtures only
+//   node scripts/gen-placeholders.mjs             # everything
+//   node scripts/gen-placeholders.mjs journal     # the fixture pieces only
+//   node scripts/gen-placeholders.mjs photographs # src/content/photographs only
+//   node scripts/gen-placeholders.mjs frames      # the private files (camera's frames, stages, detail exports)
+//   node scripts/gen-placeholders.mjs fixtures    # the tests/ fixtures only
 //
 // Idempotent: rewrites every placeholder in place.
 import { mkdir } from 'node:fs/promises';
@@ -28,7 +29,7 @@ const PALETTE = {
 // implied, realistic exposure values varied per image, so the image
 // pages' wall labels exercise the EXIF path. GPS is absent from every
 // piece placeholder; the one content image that carries it (dock-b in
-// the gallery root) does so deliberately, as the build-level leak
+// the photographs folder) does so deliberately, as the build-level leak
 // test's subject.
 const IMAGES = [
   // [file, width, height, palette, label, exif]
@@ -92,14 +93,17 @@ const TRAFALGAR_GPS = {
 // --ar can be compared against a local one's: alpha is the virtual
 // piece that borrows, beta the piece it borrows from (with a private
 // frame and a .tif that is not a raster this site pages), and
-// tests/gallery-images the gallery root.
+// tests/photographs the photographs folder.
 const FIXTURES = [
   ['tests/fixtures/square.jpg', 200, 200, 'slate', '1:1', {}],
-  ['tests/pieces/alpha/photo.jpg', 8, 5, 'sage', '', {}],
-  ['tests/pieces/beta/photo.jpg', 8, 5, 'sage', '', {}],
-  ['tests/pieces/beta/_photo.jpg', 8, 5, 'fog', '', {}],
-  ['tests/pieces/beta/photo.tif', 8, 5, 'sage', '', {}],
-  ['tests/gallery-images/photo.jpg', 8, 5, 'slate', '', {}],
+  // A stage of the hand-made photo.jpg (spec 019), for the transform's
+  // compare cases.
+  ['tests/fixtures/_photo.tones.jpg', 8, 5, 'sage', '', {}, { tones: true }],
+  ['tests/journal/alpha/photo.jpg', 8, 5, 'sage', '', {}],
+  ['tests/journal/beta/photo.jpg', 8, 5, 'sage', '', {}],
+  ['tests/journal/beta/_photo.jpg', 8, 5, 'fog', '', {}],
+  ['tests/journal/beta/photo.tif', 8, 5, 'sage', '', {}],
+  ['tests/photographs/photo.jpg', 8, 5, 'slate', '', {}],
   [
     'tests/fixtures/gps.jpg',
     600,
@@ -115,7 +119,7 @@ const FIXTURES = [
 // to catch if the pipeline ever emits an original.
 const GALLERY_IMAGES = [
   [
-    'src/content/gallery-images/dock-a.jpg',
+    'src/content/photographs/dock-a.jpg',
     1800,
     1200,
     'fog',
@@ -123,27 +127,68 @@ const GALLERY_IMAGES = [
     exif('35', '5.6', '1/320', '200', '2026:08:29 18:12:44'),
   ],
   [
-    'src/content/gallery-images/dock-b.jpg',
+    'src/content/photographs/dock-b.jpg',
     1200,
     1800,
     'clay',
     '2:3 · GPS',
     { ...exif('50', '2.8', '1/125', '640', '2026:08:29 19:03:10'), ...TRAFALGAR_GPS },
   ],
+  // The draft fixture (spec 019): a photograph whose sidecar says
+  // `draft: true`, so it has no page, is on no list, and is named nowhere
+  // in dist/.
+  [
+    'src/content/photographs/draft-fixture.jpg',
+    1800,
+    1200,
+    'moss',
+    '3:2 · draft',
+    exif('35', '8', '1/250', '100', '2026:09:20 17:30:00'),
+  ],
 ];
 
-// Camera's frames (spec 006): a private raster `_<basename>.jpg` beside
-// its photograph, shown only on that image's page as the "before" of
-// the raw-to-finished compare. Deliberately a different crop (4:3
-// against the 3:2 photograph) so the page's letterbox path is
-// exercised, flattened to read as unprocessed, and carrying GPS so the
-// post-build scan has a real block to find if a private raster ever
-// reaches the output untouched — which it did once, at T403, when the
-// registry imported it before any page rendered it (the pruner's rule
-// changed for that; DECISIONS.md).
-const FRAMES = [
+// Private files (spec 006, widened at spec 019): rasters beside their
+// photograph, never images of the site. The camera's frame
+// `_<basename>.jpg` is the "before" of the raw-to-finished compare —
+// deliberately a different crop (4:3 against the 3:2 photograph) so the
+// page's letterbox path is exercised, flattened to read as unprocessed.
+// A stage `_<basename>.<word>.jpg` is a step between the two, half
+// processed; the loupe's export `_<basename>.detail.jpg` is the
+// photograph's field at three times its size. vocabulary-sampler's
+// land-b has a camera's frame and nothing else. Every one carries GPS
+// so the post-build scan has a real block to find if a private raster
+// ever reaches the output untouched — which it did once, at T403, when
+// the registry imported it before any page rendered it (the pruner's
+// rule changed for that; DECISIONS.md).
+const PRIVATES = [
   [
-    'src/content/pieces/where-the-fog-lets-go/_land-b.jpg',
+    'src/content/journal/where-the-fog-lets-go/_land-b.jpg',
+    1600,
+    1200,
+    'slate',
+    '4:3 · camera',
+    { ...exif('24', '11', '1/60', '200', '2026:08:28 07:02:40'), ...TRAFALGAR_GPS },
+    { flat: true },
+  ],
+  [
+    'src/content/journal/where-the-fog-lets-go/_land-b.tones.jpg',
+    1800,
+    1200,
+    'slate',
+    '3:2 · tones',
+    { ...exif('24', '11', '1/60', '200', '2026:08:28 07:02:40'), ...TRAFALGAR_GPS },
+    { tones: true },
+  ],
+  [
+    'src/content/journal/where-the-fog-lets-go/_land-b.detail.jpg',
+    5400,
+    3600,
+    'slate',
+    '3:2 · detail',
+    { ...exif('24', '11', '1/60', '200', '2026:08:28 07:02:40'), ...TRAFALGAR_GPS },
+  ],
+  [
+    'src/content/journal/vocabulary-sampler/_land-b.jpg',
     1600,
     1200,
     'slate',
@@ -153,7 +198,7 @@ const FRAMES = [
   ],
 ];
 
-// The ratio ladder (spec 004, T304A): the gallery-root set behind the
+// The ratio ladder (spec 004, T304A): the photographs-folder set behind the
 // four graded fixture galleries — every ratio the grid has to cope
 // with, each frame labelled with its ratio and its number so gallery
 // order can be read straight off the page. Exposure values cycle so
@@ -180,7 +225,7 @@ for (const [name, [w, h, ratio, count]] of Object.entries(LADDER)) {
     const hour = String(9 + Math.floor(frame / 60)).padStart(2, '0');
     const minute = String(frame % 60).padStart(2, '0');
     GALLERY_IMAGES.push([
-      `src/content/gallery-images/${name}-${nn}.jpg`,
+      `src/content/photographs/${name}-${nn}.jpg`,
       w,
       h,
       PALETTES[frame % PALETTES.length],
@@ -211,9 +256,9 @@ function exif(focal, aperture, shutter, iso, taken) {
 }
 
 const PIECES = [
-  'src/content/pieces/vocabulary-sampler',
-  'src/content/pieces/where-the-fog-lets-go',
-  'src/content/pieces/market-day-camera-low',
+  'src/content/journal/vocabulary-sampler',
+  'src/content/journal/where-the-fog-lets-go',
+  'src/content/journal/market-day-camera-low',
 ];
 
 const svgOverlay = (w, h, [, dark], label) => `
@@ -232,6 +277,10 @@ async function writePlaceholder(path, w, h, palette, label, meta, options = {}) 
   if (options.flat) {
     // The unprocessed look: colour drained, shadows lifted, no punch.
     image = image.modulate({ saturation: 0.3, brightness: 1.08 }).linear(0.75, 32);
+  } else if (options.tones) {
+    // Halfway there: half the colour drained, half the lift, half the
+    // flattening.
+    image = image.modulate({ saturation: 0.65, brightness: 1.04 }).linear(0.875, 16);
   }
   // The output format follows the extension: every placeholder is a
   // jpeg but the borrowed-non-raster fixture, which has to be a real
@@ -243,7 +292,7 @@ async function writePlaceholder(path, w, h, palette, label, meta, options = {}) 
 
 const target = process.argv[2] ?? 'all';
 
-if (target === 'all' || target === 'pieces') {
+if (target === 'all' || target === 'journal') {
   for (const dir of PIECES) {
     for (const [file, w, h, palette, label, meta] of IMAGES) {
       await writePlaceholder(`${dir}/${file}`, w, h, palette, label, meta);
@@ -252,7 +301,7 @@ if (target === 'all' || target === 'pieces') {
   }
 }
 
-if (target === 'all' || target === 'gallery') {
+if (target === 'all' || target === 'photographs') {
   for (const [path, w, h, palette, label, meta] of GALLERY_IMAGES) {
     await writePlaceholder(path, w, h, palette, label, meta);
     console.log('wrote gallery image →', path);
@@ -260,15 +309,15 @@ if (target === 'all' || target === 'gallery') {
 }
 
 if (target === 'all' || target === 'frames') {
-  for (const [path, w, h, palette, label, meta, options] of FRAMES) {
+  for (const [path, w, h, palette, label, meta, options] of PRIVATES) {
     await writePlaceholder(path, w, h, palette, label, meta, options);
-    console.log("wrote camera's frame →", path);
+    console.log('wrote private file →', path);
   }
 }
 
 if (target === 'all' || target === 'fixtures') {
-  for (const [path, w, h, palette, label, meta] of FIXTURES) {
-    await writePlaceholder(path, w, h, palette, label, meta);
+  for (const [path, w, h, palette, label, meta, options] of FIXTURES) {
+    await writePlaceholder(path, w, h, palette, label, meta, options);
     console.log('wrote fixture →', path);
   }
 }

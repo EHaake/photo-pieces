@@ -13,6 +13,21 @@ cp "$SRC/.obsidian.vimrc" "$VAULT/"
 cp "$SRC"/.obsidian/*.json "$CFG/"
 cp "$SRC"/.obsidian/snippets/*.css "$CFG/snippets/"
 
+# The templates the core Templates plugin inserts (templates.json names
+# the folder). A template changed in the vault stays as it is there:
+# copy only where the vault has no file of that name, and list the ones
+# that differ from the repo's.
+mkdir -p "$VAULT/templates"
+kept=""
+for file in "$SRC"/templates/*.md; do
+  name=$(basename "$file")
+  if [ ! -e "$VAULT/templates/$name" ]; then
+    cp "$file" "$VAULT/templates/"
+  elif ! cmp -s "$file" "$VAULT/templates/$name"; then
+    kept="$kept $name"
+  fi
+done
+
 # The site's own plugin, built from this repo.
 (cd "$REPO/obsidian-plugin" && npm install --legacy-peer-deps --silent && npm run build --silent)
 mkdir -p "$CFG/plugins/photo-pieces-blocks"
@@ -39,6 +54,9 @@ for dir in "$SRC"/.obsidian/themes/*/; do
 done
 
 echo "Restored the vault's settings into $VAULT."
+if [ -n "$kept" ]; then
+  echo "Templates changed in the vault, left as they are (not overwritten):$kept"
+fi
 if [ -n "$missing" ]; then
   echo "Install from Obsidian's store (Settings → Community plugins / Appearance → Themes):$missing"
   echo "then run this again to restore their settings."

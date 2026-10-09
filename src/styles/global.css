@@ -53,6 +53,19 @@
      wrap (two rows and the 1rem gap between them) — 62px. Retune both
      together, with the nav's 0.78rem and its query. */
   --frame-nav-h: calc(0.78rem * 1.362 + var(--baseline) * 0.5);
+  /* The stage's share (spec 019): how much of the image page's first
+     screen the photograph takes in the normal view. A landscape's width
+     is the landscape share of the stage's available width, a portrait's
+     (and, by STAGE_SQUARE, a square's) height the portrait share of its
+     available height; each is then bounded by the other axis. A share is
+     at most 1 — a portrait share over 1 makes the frame taller than
+     --avail-h and pushes the nav off the first screen, and a landscape
+     share over 1 only runs into the frame's max-width.
+     src/lib/stage-sizes.ts mirrors both as STAGE_SHARE for the `sizes`
+     hint, and matte.test.mjs pins the two against each other — retune
+     them together. */
+  --stage-share-landscape: 1; /* a landscape's width: this share of the stage's available width */
+  --stage-share-portrait: 1; /* a portrait's (and by STAGE_SQUARE a square's) height: this share of the available height */
   /* The two vertical rhythms (T504a review): the block margin every
      piece block keeps, and the paragraph gap — the UA's 1em made
      explicit. `p` reads --para-gap, and the held block's prose relies
@@ -159,6 +172,19 @@
   --arrows-slide: 1; /* the arrows: 1 slides the photograph off the screen and the next one on; 0 cross-fades in place */
   --rm-appear: 1; /* under reduced motion: 1 keeps the appearance fade's duration, 0 cuts it */
   --rm-quiet: 1; /* under reduced motion: 1 keeps the quiet view's ground fade, 0 cuts */
+  /* The compare's handle (spec 019): a disc a fingertip wide, and the
+     filmstrip's arrows drawn as it; how far each of the filmstrip's
+     neighbours shows beyond the frame's edge (T1726); and the arrows'
+     ring and stroke, lighter than the accent (tuned at T1729d); and
+     the gap between each arrow and the frame's edge, the arrows sitting
+     outside the frame in the margin (T1729e).
+     compare.test.mjs pins them — to retune, move the value here and in
+     its `TOKENS`. */
+  --compare-handle: 1.5rem;
+  --compare-handle-radius: 50%;
+  --compare-arrow-gap: 0.5rem; /* between each of the filmstrip's arrows and the frame's edge */
+  --compare-peek: 0px; /* how far each neighbour shows beyond the frame's edge */
+  --compare-arrow-color: color-mix(in oklab, var(--color-accent) 70%, var(--color-bg));
 }
 
 @media (max-width: 719.98px) {
@@ -1886,30 +1912,31 @@ a.note-row {
 }
 
 /* ---- The image page's stage (spec 006; moved here from the page's
-   scoped <style> at spec 013; refit at spec 017) ------------------------
+   scoped <style> at spec 013; refit at spec 017, spec 019) --------------
    On paper the box hugs the frame: no minimum height, one spacing above
    the frame and one below — --block-margin, the spacing a piece keeps
    between a frame and its prose (the token .piece-block reads), set as
    --stage-pad so the shared `padding` line stays the one the quiet view
    reads its own pad through. The frame, centred across the page by
-   place-items, fits the L × S box turned: in
-   `html:not([data-quiet]) .image-frame` below,
-   `--L: min(var(--avail-w), var(--avail-h))`,
-   `--S: calc(var(--L) * 2 / 3)` and
-   `width: min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)))` —
-   the two custom properties and the width are the whole of that rule —
-   so a 3:2 is L × S and a 2:3 S × L. --avail-w is the page's width less
-   its side pads, not capped at the text column; --avail-h is the first
-   screen below the sticky header (which publishes its real height as
+   place-items, takes its share (spec 019; the two rules on
+   `html:not([data-quiet]) .image-frame[data-shape]` below): a
+   photograph wider than tall is the landscape share of --avail-w wide,
+   one taller than wide (or square) the portrait share of --avail-h
+   tall, and either is then bounded by the other limit — one rule, two
+   numbers, the :root tokens --stage-share-landscape and
+   --stage-share-portrait. --avail-w is the page's width less its side
+   pads, not capped at the text column; --avail-h is the first screen
+   below the sticky header (which publishes its real height as
    --header-h; the fallback matches its usual size) less the two
    spacings and --frame-nav-h, the nav's token: that term is what keeps
    the previous / where / next line above the fold for the tallest
    frame the rule allows, script or not. The nav and the title follow
-   in flow. The quiet view keeps its viewport box by redeclaring every
-   property changed here (--stage-pad, both limits, the min-height
-   pair), and the frame's sizing is gated off it. Spec 013's max-height
-   on the image never binds here (every frame's height is at most
-   L ≤ --avail-h) and stays for the quiet view. The rules live here,
+   in flow, each one --block-margin below what precedes it. The quiet
+   view keeps its viewport box by redeclaring every property changed
+   here (--stage-pad, both limits, the min-height pair), and the
+   frame's sizing is gated off it. Spec 013's max-height on the image
+   never binds here (while each share is at most 1, every frame's
+   height is at most --avail-h) and stays for the quiet view. The rules live here,
    not on the page, for two reasons: the mat sampler must render the
    real stage and cannot reach a page-scoped stylesheet, and form V+H
    belongs with the mat's single source. The stage publishes its two
@@ -1953,17 +1980,25 @@ a.note-row {
   max-height: calc(var(--avail-h) - 2 * var(--mat));
 }
 
-/* The frame on paper fits the L × S box, turned (spec 017): a 3:2 is
-   L × S, a 2:3 S × L, a square S × S, a 3:1 L wide and shallower, a
-   4:5 S wide. Gated on the absence of data-quiet because the quiet
-   rules may not change and the quiet frame is shrink-to-fit around its
-   mat. The image's width: 100% makes the figure the sizing box rather
-   than the `sizes` hint (spec 007's trap); stageSizes() in
-   src/lib/stage-sizes.ts spells the same rule in literals for it. */
-html:not([data-quiet]) .image-frame {
-  --L: min(var(--avail-w), var(--avail-h));
-  --S: calc(var(--L) * 2 / 3);
-  width: min(calc(var(--L) * var(--q)), calc(var(--S) * var(--r)));
+/* The frame on paper takes its share (spec 019): a landscape's width is
+   the landscape share of --avail-w, bounded by --avail-h; a portrait's
+   height the portrait share of --avail-h, bounded by --avail-w. The
+   shape is the page's data-shape, written at build time by stageShape()
+   (a square follows STAGE_SQUARE), because the rule is discontinuous at
+   the square whenever the two shares differ. Gated on the absence of
+   data-quiet because the quiet rules may not change and the quiet frame
+   is shrink-to-fit around its mat. The image's width: 100% makes the
+   figure the sizing box rather than the `sizes` hint (spec 007's trap);
+   stageSizes() in src/lib/stage-sizes.ts spells the same rule in
+   literals for it. */
+html:not([data-quiet]) .image-frame[data-shape='landscape'] {
+  width: min(
+    calc(var(--avail-w) * var(--stage-share-landscape)),
+    calc(var(--avail-h) * var(--ar, 1))
+  );
+}
+html:not([data-quiet]) .image-frame[data-shape='portrait'] {
+  width: min(calc(var(--avail-h) * var(--stage-share-portrait) * var(--ar, 1)), var(--avail-w));
 }
 
 html:not([data-quiet]) .image-frame img {
@@ -2024,6 +2059,633 @@ html[data-quiet] .image-frame,
 html[data-quiet] .image-stage[data-quiet-ready] .image-frame {
   max-width: 100%;
   cursor: zoom-out;
+}
+
+/* ---- The loupe (spec 019) --------------------------------------------
+   In the quiet view a loupe-ready photograph zooms to full detail about
+   the point clicked. The page's script (createLoupe, src/lib/loupe.ts)
+   marks the stage `data-loupe-ready` and, on opening, builds `.loupe`
+   over the photograph's own box, holding `.loupe-layer`, whose
+   transform it writes, with the page's file (`.loupe-base`) and, once
+   decoded, the loupe file (`.loupe-detail`) — so the frame and the dark
+   ground are not zoomed. While the loupe is open the script marks the
+   stage `data-loupe-open` (LOUPE.mat: 'off') and the open loupe takes
+   the whole frame (T1713c): the frame drops its mat and zeroes its
+   --mat, so the image's caps, which read the frame's --mat, let the
+   photograph grow into the space the mat had, ratio kept, and the
+   loupe is built over that grown box. The rule reads no --mat; its
+   zero is the one assignment on the quiet frame besides the form. On close, once the
+   loupe is back at the fit, the attribute goes and the mat returns
+   with the photograph at its fit size. Without script none of this exists and the quiet view is
+   what it was.
+   The cursor says what a click will do: zoom-in on a ready photograph,
+   zoom-out on the loupe (a click returns to the fit), grabbing while a
+   drag pans. The photograph's cursor lives here, not in the page's
+   scoped <style>, for the reason the zoom cursor above does, and it
+   must out-specify the quiet rule's zoom-out, which reaches the image
+   by inheritance only. `touch-action: none` hands the photograph's
+   touches to the script — a pinch and a drag — instead of the page's
+   scroll and zoom.
+   Motion: a discrete zoom glides on the move duration while the script
+   writes `data-glide` (never under reduced motion; a drag, the wheel and
+   a pinch follow the hand); the detail file's arrival is an appearance
+   on the appearance duration, from opacity 0 by the animation's `both`
+   fill — it is inserted only once decoded — never a pop. Under reduced
+   motion it fades as the frames do, on --rm-appear (the block at the
+   file's end). The mat does not move: it goes at once as the loupe
+   opens, under the glide, and returns at once when it has closed. */
+html[data-quiet] .image-stage[data-loupe-ready] .image-frame img {
+  cursor: zoom-in;
+  touch-action: none;
+}
+
+/* After the quiet-ready form above: equal specificity (0,4,1), so order decides; matte (b) pins it. */
+html[data-quiet] .image-stage[data-loupe-open] .image-frame {
+  padding: 0;
+  --mat: 0px;
+}
+
+.loupe {
+  position: absolute;
+  overflow: hidden;
+  cursor: zoom-out;
+  touch-action: none;
+}
+
+.loupe[data-dragging] {
+  cursor: grabbing;
+}
+
+.loupe-layer {
+  transform-origin: 0 0;
+}
+
+.loupe[data-glide] .loupe-layer {
+  transition: transform var(--dur-move) var(--ease-move);
+}
+
+.loupe-base,
+.loupe-detail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.loupe-detail {
+  animation: motion-appear var(--dur-appear) var(--ease-appear) both;
+}
+
+/* ---- The compare (spec 019) ------------------------------------------
+   One block, two builders: the `:::compare` transform in a piece or a
+   sidecar story, and the image page's "Raw to finished" section, both
+   emitting one markup — so its rules live here, where a piece can reach
+   them, not in a page's scoped styles. The class names are
+   COMPARE_CLASSES (src/lib/image-meta.mjs), spelled a second time here
+   because CSS cannot import; compare.test.mjs pins that each has a rule.
+   What follows is the block's static form — the stages stacked as
+   figures in the column, each with its label and note — and that is the
+   page without script; the enhanced rules follow it, all under
+   `.compare[data-js]`, which only src/lib/compare.ts writes. The width
+   classes are COMPARE_WIDTHS: the column, or centred out of it the
+   `.piece-wide` way. */
+
+/* The figure's own margin cleared at zero specificity, so a piece's
+   `.piece-block` spacing and the width classes below still apply. */
+:where(.compare) {
+  margin: 0;
+}
+
+.compare-frames {
+  display: grid;
+  /* Prose spacing between the stages: the figure is unmatted (spec 015). */
+  gap: calc(var(--baseline) / 2);
+}
+
+.compare-stage {
+  margin: 0;
+}
+
+.compare-pane {
+  display: block;
+}
+
+.compare-pane img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The caption: the label in the mono eyebrow of spec 006's corner tag,
+   then the note in the caption style the blocks use
+   (`.piece-block figcaption`). */
+.compare-caption {
+  margin: calc(var(--baseline) / 3) 0 0;
+}
+
+.compare-label {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.compare-note {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+/* A muted middle dot sets the note apart from its label (T1709j), in the
+   static caption and the live note alike. */
+.compare-label + .compare-note::before {
+  content: '·';
+  margin-inline: 0.45em;
+  color: var(--color-muted);
+}
+
+.compare-w-column {
+  --w: 100%;
+  width: var(--w);
+  margin-inline: 0;
+}
+
+.compare-w-wide {
+  --w: min(var(--content-width), 96vw);
+  width: var(--w);
+  margin-inline: calc((100% - var(--w)) / 2);
+}
+
+.compare-w-stage {
+  --w: calc(100vw - 2 * var(--page-pad));
+  width: var(--w);
+  margin-inline: calc((100% - var(--w)) / 2);
+}
+
+/* Side by side, the block (spec 019 amendment, T1723): final without
+   script, so it is the static form and nothing more — the two stages in
+   two columns on the static `.compare-frames` grid and gap, each pane at
+   the photograph's ratio (the side-by-side view's rules below), each
+   caption beneath its pane; one column where two won't fit. The compare
+   script skips it. 560px is 2 × COMPARE.sideMinPx, the compare's own
+   threshold at the block's opening; from here the side's is its own. */
+.piece-side {
+  container: compare-side / inline-size;
+}
+
+.piece-side .compare-frames {
+  grid-template-columns: 1fr 1fr;
+}
+
+@container compare-side (width < 560px) {
+  .piece-side .compare-frames {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The enhanced block (T1708). The script builds the chrome — the
+   divider, the handle, the legend of stops, the method control, the live
+   note, the filmstrip's arrows — and writes the state these rules read:
+   `data-view` (slider, side, switch, filmstrip), `data-narrow`, each
+   stage's `data-part` and `--i`, `--split`, the divider's place along
+   the frame, 0–100, and `--strip-at`, the filmstrip's position in
+   stages. `--split` is registered so a snap can glide (`data-settling`);
+   the divider otherwise follows the hand directly. `--strip-at` is
+   registered so a page can slide (`data-paging`) and a settle glide
+   (`data-settling`) — a transitioned property, not native scrolling,
+   whose smooth scroll settles on the browser's curve, not the
+   grammar's; a drag or a wheel moves it directly. */
+@property --split {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 50;
+}
+
+@property --strip-at {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+/* The figure: the frame across the row, the legend and the method
+   control sharing the row beneath it (or above, per COMPARE.legend and
+   COMPARE.control), the legend's hint across the row after theirs, the
+   live note last. Positioned (T1729e) so the filmstrip's arrows, its
+   children, can sit on the frame's row outside the frame's clip. */
+.compare[data-js] {
+  position: relative;
+  --split-pct: calc(var(--split) * 1%);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 1rem;
+  align-items: baseline;
+}
+
+.compare[data-js] > :is(.compare-frames, .compare-hint, .compare-now) {
+  grid-column: 1 / -1;
+}
+
+/* The frame: one box at the photograph's ratio, the stages overlaid in
+   it, each image letterboxed (spec 006's letterbox). The letterbox, the
+   divider and the handle read --color-bg, the ground, not --color-matte:
+   the mat's white is the quiet frame's alone (spec 017; matte.test.mjs
+   (b) and (d); D1708). */
+.compare[data-js] .compare-frames {
+  position: relative;
+  display: block;
+  aspect-ratio: var(--ar);
+  overflow: hidden;
+  user-select: none;
+}
+
+.compare[data-js] .compare-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.compare[data-js] .compare-pane {
+  height: 100%;
+}
+
+.compare[data-js] .compare-pane img,
+.piece-side .compare-pane img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--color-bg);
+}
+
+/* The legend and the live note carry the captions. */
+.compare[data-js] .compare-caption {
+  display: none;
+}
+
+.compare[data-js] .compare-stage[data-part='off'] {
+  visibility: hidden;
+}
+
+/* The slider: the left side's stage left of the divider, clipped over
+   the right side's, which is clipped to the right of it — so a side left
+   empty (T1709g) is the bare ground; a vertical swipe still scrolls the
+   page. */
+.compare[data-view='slider'] .compare-frames {
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+.compare[data-view='slider'] .compare-stage[data-part='left'] {
+  z-index: 1;
+  clip-path: inset(0 calc(100% - var(--split-pct)) 0 0);
+}
+
+.compare[data-view='slider'] .compare-stage[data-part='right'] {
+  clip-path: inset(0 0 0 var(--split-pct));
+}
+
+.compare[data-js] .compare-line {
+  position: absolute;
+  inset-block: 0;
+  left: var(--split-pct);
+  z-index: 2;
+  width: 1px;
+  background: var(--color-bg);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* The handle: a small flat disc on the divider, the ground with an
+   accent hairline, no shadow; the site's focus ring. Inside it an "="
+   drawn as two accent bars, a third of the disc wide, 1px tall,
+   centred with 2px between them — no glyph font. */
+.compare[data-js] .compare-handle {
+  position: absolute;
+  top: 50%;
+  left: var(--split-pct);
+  z-index: 3;
+  box-sizing: border-box;
+  width: var(--compare-handle);
+  height: var(--compare-handle);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--compare-handle-radius);
+  background: var(--color-bg);
+  transform: translate(-50%, -50%);
+}
+
+.compare[data-js] .compare-handle::before {
+  content: '';
+  position: absolute;
+  top: calc(50% - 2px);
+  left: 50%;
+  width: calc(var(--compare-handle) / 3);
+  height: 1px;
+  background: var(--color-accent);
+  transform: translateX(-50%);
+}
+
+.compare[data-js] .compare-handle::after {
+  content: '';
+  position: absolute;
+  top: calc(50% + 1px);
+  left: 50%;
+  width: calc(var(--compare-handle) / 3);
+  height: 1px;
+  background: var(--color-accent);
+  transform: translateX(-50%);
+}
+
+.compare[data-js]:not([data-view='slider']) :is(.compare-line, .compare-handle) {
+  display: none;
+}
+
+/* Side by side: the pair in two columns, each pane at the photograph's
+   ratio; one column where two won't fit. A stage not shown sits hidden
+   in the first cell, so an empty side is the ground. */
+.compare[data-view='side'] .compare-frames {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--baseline) / 2);
+  aspect-ratio: auto;
+  overflow: visible;
+}
+
+.compare[data-view='side'][data-narrow] .compare-frames {
+  grid-template-columns: 1fr;
+}
+
+.compare[data-view='side'] .compare-stage {
+  position: relative;
+  inset: auto;
+  grid-area: 1 / 1;
+}
+
+.compare[data-view='side'] .compare-stage[data-part='right'] {
+  grid-area: 1 / 2;
+}
+
+.compare[data-view='side'][data-narrow] .compare-stage[data-part='right'] {
+  grid-area: 2 / 1;
+}
+
+.compare[data-view='side'] .compare-pane,
+.piece-side .compare-pane {
+  height: auto;
+  aspect-ratio: var(--ar);
+}
+
+/* The switch: one stage fills the frame; a click, a tap or a key advances. */
+.compare[data-view='switch'] .compare-frames {
+  cursor: pointer;
+}
+
+/* The filmstrip (T1726): the stages in one row at the frame's size,
+   stage k at k frames from the first, the row slid by --strip-at; the
+   frame shows one stage whole and each neighbour --compare-peek beyond
+   its edge; a vertical swipe still scrolls the page.
+   T1729f: the frame clips by overflow, not a clip-path — a clip-path cuts
+   what is painted but leaves the off-frame stages in the page's
+   scrollable width (2422px on a 1512px window at the first stage) — and
+   the peek is the clip's margin beyond the frame's box. Firefox and
+   Chromium honour overflow-clip-margin; Safari does not, so there the
+   peek reads 0 (at today's peek of 0 nothing differs). */
+.compare[data-view='filmstrip'] .compare-frames {
+  overflow: clip;
+  overflow-clip-margin: var(--compare-peek);
+  touch-action: pan-y;
+}
+
+.compare[data-view='filmstrip'] .compare-stage {
+  transform: translateX(calc((var(--i) - var(--strip-at)) * 100%));
+}
+
+/* The filmstrip's arrows: the handle's look — a flat disc of the ground
+   with a hairline, no shadow — at the frame's sides, vertically centred;
+   muted where there is nowhere to go and
+   COMPARE.stripEnds keeps them (aria-disabled); only in the filmstrip.
+   T1729d: ring and chevron are --compare-arrow-color, the accent
+   lightened toward the ground; the handle keeps the accent.
+   T1729a: inside, a chevron drawn as the handle draws its "=" — no glyph
+   font (JetBrains Mono's subsets carry no ← or →, so the glyph was the
+   system mono's). The button's ← / → stays in the markup at font-size 0
+   (the aria-label names it); the ::before is a square a quarter of the
+   disc, 1px of currentColor on two sides — so the muted rule mutes it —
+   turned 45° (→) or −135° (←) and slid back a quarter of its side less
+   half a stroke, which puts its ink on the disc's centre (measured).
+   The grid centres by place-content: the zero-height text is a second
+   row, and place-items would split the height between the two. A grid
+   display outranks the `hidden` attribute, so the rule after the
+   directions hands it back.
+   T1729e: outside the frame, beside it in the margin, --compare-arrow-gap
+   from its edge, so no disc covers the photograph; on a phone, where the
+   column leaves no margin to hold one, inside as before, 0.5rem in — a
+   swipe does the work there. The arrows are the figure's children, not
+   the frame's: the filmstrip's frame clips to itself (and its peek), so
+   a disc inside it would be cut off at its edge, and widening that clip
+   would show the neighbours in the margin too. grid-row: 1 / 2 makes the
+   frame's row, not the whole figure, the box they centre in: both lines
+   named, since an abspos item's auto end line is the figure's edge. */
+.compare[data-js] .compare-arrow {
+  position: absolute;
+  grid-row: 1 / 2;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  place-content: center;
+  box-sizing: border-box;
+  width: var(--compare-handle);
+  height: var(--compare-handle);
+  padding: 0;
+  border: 1px solid var(--compare-arrow-color);
+  border-radius: var(--compare-handle-radius);
+  background: var(--color-bg);
+  color: var(--compare-arrow-color);
+  font-size: 0;
+  line-height: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.compare[data-js] .compare-arrow::before {
+  content: '';
+  box-sizing: border-box;
+  width: calc(var(--compare-handle) / 4);
+  height: calc(var(--compare-handle) / 4);
+  border-block-start: 1px solid currentColor;
+  border-inline-end: 1px solid currentColor;
+  transform: rotate(45deg) translate(calc(-25% + 0.5px), calc(25% - 0.5px));
+}
+
+.compare[data-js] .compare-arrow[data-dir='back'] {
+  left: calc(-1 * (var(--compare-handle) + var(--compare-arrow-gap)));
+}
+
+.compare[data-js] .compare-arrow[data-dir='back']::before {
+  transform: rotate(-135deg) translate(calc(-25% + 0.5px), calc(25% - 0.5px));
+}
+
+.compare[data-js] .compare-arrow[data-dir='next'] {
+  right: calc(-1 * (var(--compare-handle) + var(--compare-arrow-gap)));
+}
+
+@media (max-width: 719.98px) {
+  .compare[data-js] .compare-arrow[data-dir='back'] {
+    left: 0.5rem;
+  }
+
+  .compare[data-js] .compare-arrow[data-dir='next'] {
+    right: 0.5rem;
+  }
+}
+
+.compare[data-js] .compare-arrow[hidden] {
+  display: none;
+}
+
+.compare[data-js] .compare-arrow[aria-disabled='true'] {
+  border-color: var(--color-muted);
+  color: var(--color-muted);
+  cursor: default;
+}
+
+.compare[data-js]:not([data-view='filmstrip']) .compare-arrow {
+  display: none;
+}
+
+/* The legend of stops, its hint and the method control: the label's mono
+   eyebrow, the showing stages (bold) and the chosen method in the text
+   colour. */
+.compare[data-js] .compare-legend,
+.compare[data-js] .compare-hint,
+.compare[data-js] .compare-control {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: calc(var(--baseline) / 3) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.compare[data-js] .compare-legend button,
+.compare[data-js] .compare-control button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.compare[data-js] .compare-legend [aria-current='true'],
+.compare[data-js] .compare-legend [aria-pressed='true'],
+.compare[data-js] .compare-control [aria-pressed='true'] {
+  color: var(--color-text);
+}
+
+.compare[data-js] .compare-legend [aria-pressed='true'] {
+  font-weight: 700;
+}
+
+/* A legend button is two lines (T1709g): the stage's label, and beneath
+   it the side tag's row, always there — a blank while the stage holds no
+   side — with the label's bold width reserved by a hidden copy, so a
+   pick moves nothing. */
+.compare[data-js] .compare-legend button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: start;
+}
+
+.compare[data-js] .compare-legend button::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 700;
+}
+
+/* The slider block's fixed legend (spec 019 amendment, T1725): its two
+   labels as text on the legend's row, a muted middle dot between them —
+   "Camera · Finished", T1709j's dot. */
+.piece-slider .compare-stop + .compare-stop::before {
+  content: '·';
+  margin-inline-end: 1rem;
+  color: var(--color-muted);
+}
+
+/* A picked stage's side tag, "left" or "right", quieter than its label;
+   the hint beneath the legend names the side the next pick takes. The
+   switch and the filmstrip pick no pair: their tag rows blank, and no
+   hint. */
+.compare[data-js] .compare-slot {
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+.compare[data-view='switch'] .compare-hint,
+.compare[data-view='filmstrip'] .compare-hint {
+  display: none;
+}
+
+/* The live note: the showing stage's label and note, the caption's style. */
+.compare[data-js] .compare-now {
+  margin: calc(var(--baseline) / 3) 0 0;
+}
+
+/* Spec 006's corner tags, when COMPARE.cornerTags returns them. */
+.compare[data-js] .compare-tag {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 1;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.compare[data-js] .compare-stage[data-part='right'] .compare-tag {
+  right: 0.5rem;
+  left: auto;
+}
+
+/* The compare's motion: five rules and nothing else, on spec 018's
+   durations and its appearance keyframes. The switch's arriving
+   stage fades in over the one it leaves (held beneath as "under"); a
+   mode change fades the new view in from the ground; a snap glides;
+   the filmstrip's page slides on the move duration, and its settle
+   after a drag or a wheel glides on the state duration (scoped to the
+   filmstrip, so the snap's rule stands as it was). The script writes
+   the two strip attributes only when motion is not reduced. No rule
+   here sets opacity: 0. */
+.compare[data-view='switch'] .compare-stage[data-part='in'] {
+  z-index: 1;
+  animation: motion-appear var(--dur-state) var(--ease-state) both;
+}
+
+.compare[data-fresh] .compare-pane {
+  animation: motion-appear var(--dur-state) var(--ease-state) both;
+}
+
+.compare[data-settling] {
+  transition: --split var(--dur-state) var(--ease-state);
+}
+
+.compare[data-paging] {
+  transition: --strip-at var(--dur-move) var(--ease-move);
+}
+
+.compare[data-view='filmstrip'][data-settling] {
+  transition: --strip-at var(--dur-state) var(--ease-state);
 }
 
 /* ---- Motion (spec 018) -------------------------------------------------
@@ -2208,14 +2870,16 @@ html[data-slide]::view-transition-group(site-header) {
 }
 
 /* Reduced motion (spec 018's split): movements instant, fades kept.
-   Five rules. The underline's size change and the header's slide go
+   Six rules. The underline's size change and the header's slide go
    instant; the hero goes through its flag — --hero-enter at 0 zeroes
    its duration and its delays, so it lands on its end state; the
    arrival loses its rise; every colour change and fade keeps its
-   duration, and the appearance fade keeps its own unless --rm-appear
-   cuts it. Every rule here overrides its base rule at equal specificity
-   by coming later in the file, so the block closes the file, after the
-   Motion section's appearance rules — motion.test.mjs pins it after
+   duration, and the appearance fade — the frames', and the loupe's
+   detail file's following them (spec 019) — keeps its own unless
+   --rm-appear cuts it. Every rule here overrides its base rule at
+   equal specificity by coming later in the file, so the block closes
+   the file, after the Motion section's appearance rules —
+   motion.test.mjs pins it after
    every rule it overrides (T1608a: before this, `--rm-appear: 0` was
    inert, the appearance rules coming later). `0s` is the
    one literal a duration slot may carry — a zero is the absence of
@@ -2247,6 +2911,10 @@ html[data-slide]::view-transition-group(site-header) {
 
   img[data-shown='fade'],
   img[data-shown='rise'] {
+    animation-duration: calc(var(--dur-appear) * var(--rm-appear));
+  }
+
+  .loupe-detail {
     animation-duration: calc(var(--dur-appear) * var(--rm-appear));
   }
 

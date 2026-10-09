@@ -132,6 +132,45 @@ describe('the place page renders one wall from place.frames (T1002, spec 012)', 
   });
 });
 
+describe('the place page prints nothing for a place with no file (T1756, spec 019 amendment 5)', () => {
+  // A made place has no entry. The template may guard the entry's
+  // presence (`place.entry?.`, `place.entry &&`); it never tests its
+  // absence or supplies a stand-in for it, so no line of the site's own
+  // can stand where a description or the writing would have.
+  it('guards the entry and never tests its absence: no `!place.entry`, no comparison with null or undefined, no `? :` on it, no `place.entry ||`, no `place.entry ??`', () => {
+    expect(code).toMatch(/place\.entry\?\./);
+    expect(code).not.toMatch(/!\s*place\.entry\b/);
+    expect(code).not.toMatch(/place\.entry\s*[!=]==?\s*(null|undefined)\b/);
+    expect(code).not.toMatch(/\b(null|undefined)\s*[!=]==?\s*place\.entry\b(?!\s*\??\.)/);
+    expect(code).not.toMatch(/place\.entry\s*\?(?![.?])/);
+    expect(code).not.toMatch(/place\.entry\s*\|\|/);
+    expect(code).not.toMatch(/place\.entry\s*\?\?/);
+  });
+
+  // The template reads the entry through three frontmatter locals —
+  // `description`, `hasWriting`, `Content` — so their absence is the
+  // entry's absence by another name. The frontmatter derives them (its
+  // `place.entry && hasWriting ? … : null` is the guard itself); the
+  // markup may only print one when it is there. The layout's
+  // `description ?? place.summary` prop is the page's meta description,
+  // not a line on the page, and is the one stand-in set aside.
+  it('the markup never tests the absence of the description or the writing: no `!` on `description`, `hasWriting`, `Content` or `place.entry`, no `? :` on the three locals, no `||` or `??` after them but the layout prop', () => {
+    const fences = [...code.matchAll(/^---\s*$/gm)];
+    expect(fences).toHaveLength(2);
+    const markup = code.slice(fences[1].index + fences[1][0].length);
+    expect(markup).toMatch(/\{\s*description\s*&&/);
+    expect(markup).toMatch(/\{\s*Content\s*&&/);
+
+    const layoutProp = 'description={description ?? place.summary}';
+    expect(markup.split(layoutProp)).toHaveLength(2);
+    const printed = markup.replace(layoutProp, '');
+
+    expect(printed).not.toMatch(/!\s*\(?\s*(description|hasWriting|Content|place\.entry)\b/);
+    expect(printed).not.toMatch(/\b(description|hasWriting|Content)\s*\?(?![.?])/);
+    expect(printed).not.toMatch(/\b(description|hasWriting|Content)\s*(\|\||\?\?)/);
+  });
+});
+
 describe('the writing-to-wall gap in global.css (T1002, spec 012 gate)', () => {
   it("the gate's value: :root declares --place-wall-gap at one .section padding", () => {
     const roots = top.filter((block) => selects(block.prelude, ':root'));

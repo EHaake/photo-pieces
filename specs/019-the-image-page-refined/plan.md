@@ -1,0 +1,4389 @@
+# Plan: The image page, refined
+
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log.
+**Implements**: spec.md in this directory
+
+## Shape of the change
+
+Four additions on the image registry and the image page, one block in
+the vocabulary, one post-build barrier, and the tests that make each a
+fact. The wall label looks two strings up in a hand-edited table. The
+private-file rule (`_…`) grows from one relation (the camera's frame)
+to a family of three, read once by a pure function the registry, the
+transform and the barrier share. `compare` joins the transform as the
+vocabulary's first interactive block; its static HTML is stacked
+figures, and one module, `src/lib/compare.ts`, enhances it wherever it
+appears — a piece, a sidecar story, or the image page's "Raw to
+finished", which is now the same markup built from the registry. The
+loupe lives in the quiet view alone, a script-built layer over the
+stage's photograph that never touches the stage, the frame, the mat or
+any quiet-view rule. No dependency is added.
+
+Nothing here changes at rest what spec 018 pinned: the quiet view's
+rules, the mat, the stage, `FRAME_HOSTS`, the motion grammar, the
+scanner and the motion barrier are untouched, and their tests pass
+unedited. The reduced-motion block gains one rule, deliberately — the
+detail export's fade reading `--rm-appear`, as the frames' fade does —
+and motion.test.mjs (d)'s expected rules rise from five to six with it
+(T1712). Every other new movement is a rule on the grammar's tokens or
+a script gate on `reducedMotion()`, spec 018's own split (the travel
+withholds names in script).
+
+The constitution has no "Scale" section (as at spec 018); the five
+tests from the planner brief are applied at each choice below, and
+where the simpler shape was taken it is said in one line.
+
+- **The constitution, first** (`CLAUDE.md`, T1700, its own commit on
+  this branch before any code). Four edits, exact text:
+  - The Architecture paragraph's "an optional frontmatter-only sidecar
+    (`_<basename>.md`) that overrides it" (whatever its exact wording
+    around the phrase, the phrase "frontmatter-only" goes) becomes "an
+    optional sidecar (`_<basename>.md`) whose frontmatter overrides it
+    and whose body is the photograph's story (spec 006), and from spec
+    019 whose `stages:` declare its processing" — the registry reads the
+    body (`storyHasCompare`) and the stages, so the constitution may not
+    call the sidecar frontmatter-only.
+  - The block-vocabulary clause's list becomes "as of spec 019: single,
+    fullbleed, wide, tall, inset, diptych, triptych, grid, strip, aside,
+    row, one durational block, held, and one interactive block, compare
+    (an ordered list of a photograph's stages — each an image, a label
+    and a note — looked at three ways), with captions via the container
+    form;".
+  - The sentence beginning "A `sequence` treatment is a roadmap
+    candidate" becomes: "The `sequence` reservation, carried since spec
+    003, was retired at spec 019: an ordered list of image-and-label
+    pairs for a processing narrative is what `compare` with stages is."
+    The later "a future _interactive_ block (`sequence`'s
+    carousel/slider candidates) must be built as" becomes "an
+    _interactive_ block — `compare`, and any after it — is built as",
+    and the sentence gains ", and without script its content stands as
+    plain figures".
+  - The Images paragraph gains, after "unpublished with it.": "A raster
+    whose name starts with `_` is private, never an image of the site —
+    no id, no page, never in a gallery: `_<basename>.<ext>` is that
+    photograph's camera's frame (spec 006), `_<basename>.<word>.<ext>` a
+    stage of its processing, and `_<basename>.detail.<ext>` a larger
+    export for the image page's loupe alone, fetched only when the loupe
+    opens (spec 019). A private file sits beside its photograph and may
+    be placed in a body only as a stage of a `compare` block in its own
+    folder."
+
+  On the branch, not `main`: CLAUDE.md lets a constitution amendment
+  commit straight to `main`, but its own test is "whether the change
+  implements part of some spec's `tasks.md`", and this one is T1700 —
+  it describes behaviour that exists only on this branch until the
+  merge.
+
+- **The private-file family** (`src/lib/image-meta.mjs`, T1701). The
+  underscore still marks every private file (`isPrivateRaster` is
+  unchanged: `^_`). What a private file _is_ needs its folder, so it is
+  a new pure function beside it:
+
+      privateRole(basename, publicBasenames) → { role: 'frame' | 'stage' | 'detail' | 'orphan', target, word? }
+
+  `_X` with `X` in the folder's public basenames is the camera's frame
+  of `X`; otherwise `X` split at its last dot, `T.W` with `T` public, is
+  the stage `W` of `T`, or its detail export when `W` is `detail`
+  (`DETAIL_WORD`); anything else is an orphan. Frame first, because
+  `BASENAME` allows dots: `_land.b.jpg` beside `land.b.jpg` is that
+  photograph's frame, not stage `b` of `land`. `privateTargetOf` keeps
+  its signature and widens to "strip the `_`, then a trailing
+  `.<word>`" — it now serves messages only, where a folder is not to
+  hand. `privateMessage` names the family: `"<file>" is private — a file
+  of "<target>" (its camera's frame, a stage, or the loupe's export),
+  not an image of the site: <advice>`; `validateGalleries`' private line
+  says the same. Then the two pure steps the registry runs:
+
+      attachPrivates(privates, basenamesByFolder) → { frame, detail, stages, problems }
+
+  (`privates` is `{ key, folder, basename, file }[]`; the three maps are
+  keyed by the photograph's id — `frame` and `detail` to one key,
+  `stages` to `{ file, key }[]` in file-name order; `problems` are the
+  orphan, second-frame and second-detail lines below) and
+
+      resolveStages(listed, own, where) → { stages: { key, label, note? }[], problems }
+
+  which checks a sidecar's `stages:` against the photograph's own stage
+  files — a listed `file` must be one of them, by exact name; the
+  camera's frame and the detail export fail with their own line, a name
+  listed twice fails, anything else fails as "not a stage of" — and
+  returns them in the sidecar's order. "Two or more stages of one
+  photograph" is enforced here, on the page's compare, by construction;
+  in a body the transform does not check that the stages share a
+  photograph (see Resolved decisions).
+
+  Beside them, the compare's shared shape, one spelling each, imported
+  by the transform, the image page and `compare.ts`:
+
+      export const COMPARE_MODES = Object.freeze(['slider', 'side', 'switch']);
+      export const COMPARE_CLASSES = Object.freeze({ root: 'compare', frames: 'compare-frames', stage: 'compare-stage', pane: 'compare-pane', caption: 'compare-caption', label: 'compare-label', note: 'compare-note' });
+      export const COMPARE_WIDTHS = Object.freeze(['column', 'wide', 'stage']);
+      export const COMPARE_WIDTH = Object.freeze({ piece: 'column', page: 'column' });   // tunable: the compare's width per surface
+      export function compareSizes(width) → the `sizes` hint: column '(min-width: 720px) 680px, 94vw', wide '(min-width: 1240px) 1160px, 96vw', stage '100vw'
+
+  `compareStages({ before, stages, image, processing }, { camera, finished })`
+  builds the page's list: the camera's frame first (label `camera`, no
+  note), the declared stages in order, the photograph last (label
+  `finished`, note `processing`) — the one place the `processing:`
+  fallback is written. `hasBlock(text, name)` answers "this markdown
+  writes a `:::name` container" through the existing `splitBlocks` /
+  `blockName`. `BLOCK_BODIES` gains `compare: 'stages'` (with the
+  descriptor, at T1705 — the agreement test compares the two); `passageFor`
+  treats a `stages` body as contributing no caption (it is not in
+  `CAPTION_BODIES` — the stages' notes are not the photograph's
+  caption), and `firstAltFor` skips references inside a `:::compare`
+  container, because a stage's image text is its label ("Finished"),
+  not the photograph's title. `sectionsFor` reads two new fields:
+
+      const compareShown = (Boolean(image.before) || (image.stages?.length ?? 0) > 0) && !image.storyHasCompare;
+
+  and `record` takes the processing note when `!compareShown` (today:
+  `!image.before`), so a story that writes its own compare hands the
+  note back to "How it was made".
+
+- **The registry** (`src/lib/images.ts`, `src/content.config.ts`,
+  T1702). The `imageMeta` schema gains
+
+      stages: z.array(z.object({ file: z.string(), label: z.string().min(1), note: z.string().optional() })).optional(),
+
+  Discovery keeps setting private rasters aside; the camera's-frame
+  block (today's `beforeByTarget` loop) becomes one `attachPrivates`
+  call, its problems thrown under the existing `[images]` heading.
+  `SiteImage` gains `stages: { image: ImageMetadata; label: string;
+  note?: string }[]` (from `resolveStages` over the sidecar, the keys
+  mapped through `discovered`), `detail: ImageMetadata | null`, and
+  `storyHasCompare: boolean` (`hasBlock(sidecar.body, 'compare')`);
+  `before` keeps its name and meaning. A sidecar's stage problems are
+  collected across every sidecar and thrown at once, as the orphan
+  sidecars are. Nothing private ever enters `files`, `known` or `byId`,
+  so no private file gets an id, a page, a set, a gallery slot or an
+  OG image — the existing structure, now covering the family.
+
+  Fixtures (`scripts/gen-placeholders.mjs`, its `FRAMES` list renamed
+  `PRIVATES`, target `frames` kept as an alias): beside
+  `where-the-fog-lets-go/_land-b.jpg`, `_land-b.tones.jpg` (1800×1200,
+  the same field half-processed — a new `{ tones: true }` option between
+  `flat` and none) and `_land-b.detail.jpg` (5400×3600, the photograph's
+  field at three times its size), both carrying `TRAFALGAR_GPS` like the
+  frame, so the GPS barrier proves both are stripped on `dist/` (the
+  detail fixture's byte size is recorded at T1702: a flat placeholder
+  field compresses to little, so it proves the mechanics, not the
+  loupe's cost — that is judged on the real piece); and
+  `tests/fixtures/_photo.tones.jpg` for the transform's tests; and
+  `vocabulary-sampler/_land-b.jpg` (the fog piece's frame, same
+  options), so one photograph on the site has a camera's frame and
+  nothing else — AC 5's "two stages, as today" on a real page.
+  `_land-b.md` gains one `stages:` entry (Tones, with a note). The
+  fixtures stay fixtures: `Fixture` EXIF, the sidecar's _Fixture_ prose.
+
+- **The private-files barrier** (`scripts/check-private-files.mjs`,
+  T1703; `postbuild` after the GPS scan). Three scans over `dist/`,
+  `dist/pagefind/` excluded:
+  1. Every `/images/**/index.html` stage carrying `data-loupe-detail`
+     names its loupe file in `data-loupe-src`; that file must exist
+     under `dist/` (so the pruner cannot have taken it), and its URL
+     must occur **nowhere else** in any text file in `dist/` — no
+     `src`, no `srcset`, no `og:image`, no gallery page, no `rss.xml`,
+     no stylesheet or script. One rule, name-independent (it does not
+     assume how Vite names emitted files). A loupe file over the deploy
+     target's per-file limit fails too (`MAX_BYTES`, 25 MiB — the
+     Workers static-assets limit, a claim T1703 verifies against
+     Cloudflare's documentation and records; see Known limitations).
+     _(Amendment 3: the pages are `/photographs/**/index.html` from
+     T1738.)_
+  2. No page's markup — `<script>` and `<style>` blocks removed first,
+     as `check-motion` does — carries a state only the scripts write:
+     the attributes `data-js`, `data-view`, `data-narrow`,
+     `data-settling`, `data-fresh`, `data-part`, `data-loupe-ready`, `data-glide`,
+     `data-dragging`, or a `class` naming `compare-line`,
+     `compare-handle`, `compare-legend`, `compare-stop`,
+     `compare-control`, `compare-now`, `compare-tag`, `loupe`,
+     `loupe-layer`, `loupe-base` or `loupe-detail`. This is AC 9's
+     "no page ships a loupe state", and the compare's no-script pin.
+  3. Every `.compare` in any page's markup — a piece's, a sidecar
+     story's, the image page's section — has the one shape: its
+     `compare-`-classed descendants and its `img`s (any other element,
+     such as a wrapper Astro's image pipeline or `pieceWrap` adds, is
+     transparent — its children count as its parent's; amended at the
+     Phase 0 review), read by a small tag-depth walk from the
+     figure's open tag to its matching close, form `compare-frames` >
+     two or more `compare-stage`, each `compare-pane` > `img` then
+     `compare-caption` > `compare-label` and at most one `compare-note`,
+     and nothing else. This makes "two builders, one shape" a fact of
+     every build rather than a one-time grep.
+
+  Built in the foundation, like spec 018's barrier: its temp-dir tests
+  prove it can fail from its first commit; scan 1 has a detail export to
+  read from T1710 on and scan 3 a compare in the new shape from T1706 on
+  (T1703 writes scan 3 against the shape in `COMPARE_CLASSES`, and it
+  skips spec 006's old compare — a `.compare` holding `.compare-range`
+  — until T1706 removes it; the skip is deleted at T1706. As built the
+  one skip also cuts that old compare out of scan 2, since spec 006's
+  markup ships `compare-tag` and `compare-line`; T1706 deletes both
+  uses — amended at the Phase 0 review). The summary
+  line's counts show what each scan read. The motion barrier is not edited: these
+  attributes are not motion.
+
+- **Gear names** (`src/content/gear.md`, `src/lib/gear.mjs`,
+  `formatExposure`, T1704). The table is a Markdown file in the content
+  folder, so it opens in the vault like everything the photographer
+  edits, and belongs to no collection (no loader globs the content
+  root). Shape:
+
+      # Gear names
+      (one paragraph: what the file is, the line format, that the build warns on a string it lacks)
+
+      ## Cameras
+      - `ILCE-7RM4` = Sony α7R IV
+      ## Lenses
+      - `100-400mm F5-6.3 DG DN OS | Contemporary 020` = Sigma 100-400mm f/5-6.3 DG DN OS Contemporary
+
+  The EXIF string sits in backticks, exact, so a `|` or a double space
+  in it needs no escaping; the key is the string as `cleanString`
+  leaves it (NULs dropped, trimmed). A camera is keyed by `Model` alone
+  — the table's line is the whole display name, so the make is
+  discarded when an entry exists. Seeded with the spec's Decided list
+  (four cameras, `ILCE-7M5` → `Sony α7 V` among them, and six lenses) and,
+  under a "Fixtures" comment line, `Fixture FX-1` = `Fixture FX-1` and
+  `Fixture 24-85mm f/1.8` = `Fixture 24-85mm f/1.8`, which print what
+  they print today. `parseGearTable(text, file)` returns
+  `{ cameras: Map, lenses: Map }` and throws on a malformed line, a line
+  outside the two sections, or a key listed twice in one section, naming
+  the file and line — a broken table fails the build. `formatExposure(raw, gear = EMPTY_GEAR)`
+  looks each string up (`cameras.get(Model) ?? formatCamera(Make, Model)`;
+  `lenses.get(LensModel) ?? LensModel`); `mergeOverrides` still lets a
+  sidecar's `camera:` / `lens:` win over both, unchanged.
+  `unknownGear(entries, gear)` returns one `{ kind, value, file }` per
+  distinct unknown string, the first file that carries it; the registry
+  reads the table once (`readFile(new URL(GEAR_FILE, root))`), collects
+  every published image's raw tags as it already reads them, and warns
+  each: `[gear] no display name for the lens "<value>" (first in <file>)
+  — add it to src/content/gear.md`. A new module rather than more of
+  `image-meta.mjs`: it owns a file format, and nothing else there does.
+
+- **The block** (`remark-pieces-blocks.mjs`, T1705). One descriptor:
+
+      compare: { forms: 'container', body: 'stages', structure: 'compare', count: { min: 2 },
+                 attrs: { required: [], optional: ['mode'], enums: { mode: COMPARE_MODES } },
+                 sizing: () => ({ layout: 'constrained', sizes: compareSizes(COMPARE_WIDTH.piece) }) }
+
+  The body is parsed stage by stage (`partitionStages`, beside
+  `partitionBody`): every child must be a paragraph; within each, an
+  `image` node opens a stage, its `alt` is the label (required, non-empty),
+  and the inline nodes up to the next image are its note, trimmed of the
+  line breaks between stages — so consecutive lines, or stages separated
+  by blank lines, both parse. Text before the first image, a
+  non-paragraph child, or an empty label fails. Each stage's src:
+  `checkReferenceShape` as for any block; then, if it is private, it
+  must be `local` (a private file of another folder fails, public ones
+  may be borrowed by spec 008's paths); then `checkSrcExists`. No stage
+  runs `rejectPrivateSrc`, and no stage is wrapped in a link: the
+  compare is a device, as spec 006's was, and a link would make a switch
+  click navigate. Every other block and the shorthand pass keep
+  `rejectPrivateSrc`, now with the widened message and the hint `place
+  "<target>.<ext>" here, or show it as a stage of a :::compare in this
+  folder`. Stage images carry `pieceFrame`, so the shorthand pass skips
+  them. Every stage is probed; the root carries the last stage's raw
+  `--ar` (the finished photograph's box). Output — identical, below the
+  root, to what the image page builds:
+
+      <figure class="piece-block piece-compare compare compare-w-column" style="--ar: 1.5" data-mode="switch">   (data-mode only when written)
+        <div class="compare-frames">
+          <figure class="compare-stage">
+            <span class="compare-pane"><img …></span>
+            <figcaption class="compare-caption"><span class="compare-label">Camera</span> <span class="compare-note">…note…</span></figcaption>
+          </figure>
+          …
+        </div>
+      </figure>
+
+  A stage with no note renders the label span alone — no empty note
+  span and no separating space; the stage `<img>` carries only its
+  sizing props, no `--ar` of its own (the root's is the box); the
+  page's section builds both the same way (T1705 review). The image
+  sits in a `span`, not directly in a `figure`, so no stage
+  image matches `FRAME_IMG` (`.piece-block figure > img`): the compare's
+  images stay outside the appearance hooks, as spec 018 decided of
+  spec 006's compare. The vocabulary's unknown-directive message lists
+  `compare` from `Object.keys(BLOCKS)` with no change.
+
+- **The block on the image page** (`src/pages/images/[...id].astro`,
+  `src/styles/global.css`, T1706). The section renders when
+  `shows('compare')`, from `compareStages(image, WORDING.compare)`, as
+  `<figure class="compare compare-w-{COMPARE_WIDTH.page}">` with the
+  structure above, every class through `COMPARE_CLASSES`, each stage an
+  `<Image layout="constrained" width={Math.min(w, 1400)} sizes={compareSizes(COMPARE_WIDTH.page)} alt={label}>`.
+  `WORDING.compare` becomes `{ heading: 'Raw to finished', camera:
+  'Camera', finished: 'Finished' }`; `before`, `after`, `beforeTag`,
+  `afterTag` and `reveal` leave (the tags go; the handle's words are the
+  block's own). "How it was made" drops processing when
+  `shows('compare')`. The page's scoped `.compare*` rules are deleted
+  and the block's static rules move to a new `/* ---- The compare
+  (spec 019) ---- */` section of `global.css`, before the Motion
+  section, because pieces render the block too and cannot reach a
+  page's scoped styles. Static: the stages stacked in the column with
+  prose spacing, each label in the mono eyebrow style of today's
+  `.compare-tag`, each note in the caption style of `.piece-block
+  figcaption`; the three width classes (`compare-w-column` the
+  container's width; `compare-w-wide` `min(var(--content-width), 96vw)`
+  and `compare-w-stage` `calc(100vw - 2 * var(--page-pad))`, each
+  centred out of its column with `margin-inline: calc((100% - W) / 2)`,
+  the `.piece-wide` technique). The fog piece gains, after its closing
+  fullbleed, `:::compare{mode="switch"}` with the three stages — so a
+  body compare, an authored mode, a private stage and the photograph
+  itself are all on one fixture page.
+
+  Phase 1 review (T1708a): a sidecar stage note (and the `processing`
+  fallback) is rendered as inline Markdown through the page's existing
+  `renderMarkdown`, so `_emphasis_` reads the same in both builders —
+  AC 5's "the same block"; the enhanced live note clones the note
+  span's children rather than reading `textContent`, so a note's
+  emphasis or link survives enhancement on both surfaces.
+- **The compare's state** (`src/lib/compare.ts`, T1707) — pure
+  functions and the tunables, no DOM, unit-tested:
+
+      export const COMPARE = {
+        defaultMode: 'slider',     // the method a block opens in when its author wrote none
+        remember: 'visit',         // the reader's choice: 'visit' (sessionStorage), 'always' (localStorage) or 'none'
+        restAt: 0.5,               // the slider's rest position on its track, 0–1 — which pair shows at rest
+        snap: false,               // on release the handle settles on the nearest stop
+        sliderStep: 0.02,          // an arrow key's step along the track (Page Up/Down: five steps)
+        sideMinPx: 280,            // the narrowest a stage may be shown side by side
+        sideNarrow: 'stack',       // where two won't fit: 'stack' them, or yield to 'switch'
+        switchWraps: true,         // the last stage advances to the first
+        switchOnClick: true,       // a click or a tap on the frame advances
+        switchKeys: [' ', 'Enter', 'ArrowRight'],
+        switchBackKeys: ['ArrowLeft'],
+        legend: 'below',           // 'below' or 'above' the frame
+        control: 'with-legend',    // the method control: 'with-legend' (the legend's row) or 'above'
+        cornerTags: false,         // spec 006's corner tags, returned on the showing stages
+      } as const;
+      export const COMPARE_WORDING = { modes: { slider: 'Slider', side: 'Side by side', switch: 'Switch' }, control: 'How to compare', legend: 'Stages', handle: 'Move between the stages' };
+      export const COMPARE_MODE_KEY = 'compare-mode';
+
+  `openingMode(authored, stored)` — the stored choice if remembering and
+  valid, else the author's `data-mode`, else `defaultMode`.
+  `sliderView(p, n)` — the spec's geometry: the track `p ∈ [0, 1]` is
+  the frame's width, the handle sits on the divider at `p`, the stops
+  are at `k / (n − 1)`, the frame shows the pair of the segment the
+  handle is in with the earlier stage on the left, and the segments are
+  indexed **from the right**, so the handle at the right edge shows the
+  first stage whole and at the left edge the last:
+  `{ left: i, right: i + 1, split: 100 p }` with
+  `i = n − 2 − min(⌊p (n − 1)⌋, n − 2)`. Exactly at an interior stop the
+  floor puts the handle in the segment to the stop's right (for three
+  stages, `p = 0.5` → the pair (0, 1) at 50). For two stages `i` is
+  always 0 — today's compare exactly. `snapTo(p, n)`, `sidePair(k, n)`
+  (stage `k` and the next; the last with the one before),
+  `switchNext(i, n, dir)` (wrapping per `switchWraps`), `restView(mode,
+  n)` (the slider's position and the side pair from `restAt`; the switch
+  opens on the first stage), `noteIndex(mode, view)` (slider and side:
+  the pair's later stage — the step being shown; switch: the stage), and
+  `sideFits(width)`. What the geometry leaves inherent is in Known
+  limitations; changing it is one function and its table, a round the
+  envelope allows.
+
+- **The compare, enhanced** (`src/lib/compare.ts`'s `enhanceCompare`,
+  `global.css`, T1708). Called exactly where it is called today — the
+  layout's module evaluation and `astro:before-swap` on the new
+  document, for the reason `compare.ts`'s comment gives (T1603c,
+  T1604c): before-swap is the last moment before the new snapshot and
+  the router's scroll, so the box is final when they are taken;
+  `astro:after-swap` would be too late for both, and it is used only by
+  the Verify, as the moment to read the result. It skips a figure
+  already carrying `data-js`; the module-level `resize` listener is
+  bound once, at module evaluation. Per
+  `.compare` with two or more stages it reads each stage's label and
+  note, then builds, all script-only: the method control (three
+  `button`s, `aria-pressed`), the legend (`ol.compare-legend`, one item
+  per stage; spans in the slider, which marks the showing pair; buttons
+  in side and switch, which choose), the divider `span.compare-line` and
+  the handle `span.compare-handle` (`role="slider"`, `tabindex="0"`,
+  `aria-valuenow` 0–100, `aria-valuetext` "Tones | Finished",
+  `aria-label` from `COMPARE_WORDING.handle`), the live note
+  `p.compare-now` (`aria-live="polite"`), and the corner tags when
+  `COMPARE.cornerTags`. It writes `data-js`, `data-view` on the root,
+  `data-part="left|right|on|in|under|off"` on each stage and `--split`
+  on the root. The slider: `pointerdown` on the frames captures the pointer and
+  sets `p` from its x, `pointermove` follows, `pointerup` snaps when
+  `snap`; `touch-action: pan-y` on the frames lets a vertical swipe
+  scroll the page while a horizontal one drags. The handle's keys:
+  ←/→ by `sliderStep`, Page Up/Down by five, Home/End. The switch: the
+  frames take `tabindex="0"`; a click without movement, a tap, or a
+  `switchKeys` key advances, a `switchBackKeys` key goes back. Side by
+  side: the legend's buttons choose the pair; `data-narrow` is set when
+  `!sideFits(frames width)` and `sideNarrow` is `stack`, or the view
+  yields to switch when it is `switch`, re-read by one module-level
+  `resize` listener. Every key the compare consumes stops propagating,
+  and the image page's `keydown` returns for a target inside
+  `.compare`, so an arrow on the handle never steps the set. The
+  reader's choice is written per `remember` and read by every later
+  compare in the visit. CSS, in the compare section, all under
+  `.compare[data-js]`: the frames one box at `aspect-ratio: var(--ar)`,
+  `overflow: hidden`, the stages overlaid (`position: absolute; inset:
+  0`) outside side by side, the panes' images `object-fit: contain` on
+  `--color-bg` (spec 006's letterbox, unchanged in meaning: at 006 it read
+  `--color-matte` because that was the page's white; since spec 017 the
+  page's white is the paper ground and the matte token is the quiet
+  frame's alone — matte.test.mjs (b) and (d) stay unedited, as the
+  task's Verify says; decision review D1708, 2026-09-24), the
+  static captions `display: none` (the legend and the live note carry
+  them), `[data-part='off']` `visibility: hidden` in every view (and
+  `"under"` beneath `"in"`), the slider's left stage `clip-path: inset(0 calc(100% -
+  var(--split-pct)) 0 0)` above the right, side by side a two-column
+  grid (one column under `[data-narrow]`) with each pane at the
+  photograph's ratio, the line and the handle at `left:
+  var(--split-pct)`. The handle: a disc of `--compare-handle`
+  (2.75rem, a fingertip) with `border-radius: var(--compare-handle-radius)`
+  (50%), filled `--color-bg` (the spec's 'the ground's family'), a 1px `--color-text` hairline (D1708), no
+  shadow, the focus ring the site draws. `--split` and `--split-pct`
+  move here from the page, with one `@property --split { syntax:
+  '<number>'; inherits: true; initial-value: 50; }` so the snap can
+  glide. Motion, three rules and nothing else:
+
+      .compare[data-view='switch'] .compare-stage[data-part='in'] { z-index: 1; animation: motion-appear var(--dur-state) var(--ease-state) both; }
+      .compare[data-fresh] .compare-pane { animation: motion-appear var(--dur-state) var(--ease-state) both; }
+      .compare[data-settling] { transition: --split var(--dur-state) var(--ease-state); }
+
+  The divider follows the hand directly (no transition). A stage change
+  in the switch is a cross-fade built without an `opacity: 0` rule: the
+  arriving stage is `data-part="in"` and fades in over the leaving one,
+  held beneath as `"under"`, and on `animationend` they become `"on"`
+  and `"off"` — an opaque photograph dissolving in over another is the
+  cross-fade. The stage a block opens on is `"on"`, never `"in"`, so
+  nothing fades at load. A mode change sets `data-fresh` on the root
+  until the panes' `animationend`, so the new view fades in from the
+  ground (not a flag: no envelope line asks for a cut, and one would be
+  a round deleting a line). Both reuse
+  spec 018's `motion-appear` keyframes. No new rule sets `opacity: 0`,
+  which matters twice over: motion.test.mjs (g) requires every such
+  rule to begin `html[data-motion]` _and_ finds exactly one such rule
+  (the gate), so a second one could satisfy neither. `data-settling` is
+  written for a snap only when `!reducedMotion()` (the settle is a
+  movement — spec 018's split, in script, as the travel does it); the
+  two fades are kept under reduced motion.
+
+  **Round T1709a (Phase 1 pause, 2026-09-25).** The slider is two-way:
+  it wipes between one pair of stages, never three. The pair is state
+  shared by the slider and side by side — `pair: ComparePair` — and
+  at rest it is the first and last stage (Camera | Finished), set by
+  `COMPARE.restPair: 'ends'` (the one tunable of this round; the other
+  value, `'neighbours'`, is the old rest pair). The legend chooses the
+  pair in both views by one rule, `pickPair(pair, k)`: the pair
+  remembers which member was picked longer ago; clicking a stage
+  already in the pair does nothing; clicking another replaces the
+  member picked longer ago, and the clicked stage becomes the newer;
+  the two are shown in stage order (left = earlier). At rest the first
+  stage is the older pick. Every click on a stage outside the pair
+  changes it, no two legend buttons do the same thing, and every pair
+  is reachable from rest in at most two clicks (the implementer's
+  first rule — replace the nearest member — could never reach Tones |
+  Finished from three stages; corrected 2026-09-25). `sliderView(p, pair)` returns
+  `{ left: pair.left, right: pair.right, split }` — the divider at
+  `p`, the earlier stage showing left of it; the three-or-more segment
+  geometry, `snapTo`'s stops and `restAt`'s "which pair" meaning are
+  retired: `restAt` is only the divider's rest position. The switch is
+  unchanged. The legend marks the pair in both views. Known
+  limitations' "three or more stages" paragraph is moot.
+
+  **Rounds T1709c–f (Phase 1 pause, second look, 2026-09-25).**
+  (c) Only side by side is wide: `COMPARE_WIDTH` returns to `column`
+  on both surfaces (the static markup and `sizes`), and a new
+  `COMPARE.sideWidth: 'wide'` names the width class the script swaps
+  onto the root while `data-view="side"` (`compare-w-column` off,
+  `compare-w-wide` on; back on leaving side). The stage's `sizes`
+  stays the surface's: each side pane is half the wide width, under
+  the column's hint. (d) The pair is picked in order: `pickPair`
+  becomes `pickSlot(pair, k)` over `{ left, right, next: 'left' |
+  'right' }` — a click on a stage in the pair does nothing; otherwise
+  the stage takes the `next` slot and `next` flips; at rest left is
+  the first stage, right the last, `next` is `'left'`. Left and right
+  are the picked order, not stage order, in both the slider (the left
+  stage shows left of the divider) and side by side. The legend marks
+  the picked buttons bold in `--color-text` with a small tag "left" /
+  "right" (`COMPARE_WORDING.slots`), the unpicked muted, and a hint
+  after the legend, "next pick: left" / "next pick: right"
+  (`COMPARE_WORDING.next`). (e) A finding: the Finished stage shows
+  no corner tag while the other stages do — diagnosed and fixed in
+  place if routine (every showing stage carries its tag when
+  `cornerTags` is on, or none does when off). (f) `WORDING.compare`
+  gains `cameraNote: 'The RAW file straight out of camera — no edits,
+  no adjustments'`, the camera stage's note on the page (the
+  photograph's own `processing:` stays the finished stage's).
+  _(Amendment 2026-09-26: the filmstrip's width is `COMPARE.stripWidth`, the pair blocks' `PAIR_WIDTH` — see "Amendment (2026-09-26)".)_
+
+  **Round T1709g (Phase 1 pause, third look, 2026-09-25).** A slot may
+  be empty: the state is `{ left: number | null, right: number | null,
+  next }`. `pickSlot(pair, k)`: the stage takes the `next` slot and
+  `next` flips; if the stage already held the other slot, that slot
+  becomes `null` (so a stage moves sides, and the side it left stays
+  empty until the next pick fills it); a click on the stage already in
+  the `next` slot keeps it there and flips `next` all the same (round
+  T1709h: no click is ever a no-op, so a side can be confirmed and the
+  other side picked without rearranging). An empty side shows no stage: in the
+  slider the divider wipes between the one stage and the bare ground,
+  in side by side the empty pane is the ground, the live note follows
+  the right slot and is blank when that is empty. The legend's tags sit
+  beneath their buttons: each button is a two-line block with a tag
+  row always present (a blank when unpicked, `visibility: hidden` or a
+  non-breaking space) so nothing shifts; the hint line stays beneath
+  the legend. The switch is unchanged.
+
+  **Round T1709i (2026-09-25).** The handle is small: `--compare-handle:
+  1.5rem` (24px), still a circle, its 1px border in `--color-accent`
+  on the ground, and a "=" drawn inside as two short horizontal bars
+  (`::before` and `::after`, `--color-accent`, each about a third of
+  the diameter wide and 1px tall, centred, a few px apart) — no glyph
+  font. compare.test.mjs (b) pins the token and the handle rule's body.
+
+  **Round T1709j (2026-09-25).** The label and the note are set apart:
+  wherever a `.compare-note` follows a `.compare-label` (the live note
+  and the static caption alike), a muted middle dot with space on both
+  sides stands between them — one CSS rule, `.compare-note::before`
+  scoped to the caption and the live note, `content: '·'`,
+  `margin-inline: 0.45em`, `color: var(--color-muted)` — no markup
+  change in either builder, pinned by compare.test.mjs (c) by body.
+
+- **The loupe's file** (`src/lib/loupe.ts`, the image page's
+  frontmatter, T1710). `LOUPE` holds the loupe's tunables:
+
+      export const LOUPE = {
+        withoutDetail: true,   // a photograph with no detail export still has the loupe, to its own file's full size
+        pixelRatio: 1,         // image pixels per device pixel at full detail (1: one to one)
+        minGain: 1.05,         // no loupe when full detail is less than this over the fit
+        opensOn: 'click',      // 'click', 'dblclick', or 'gesture' (only a wheel or a pinch opens it)
+        pinch: true,
+        wheelStep: 0.002,      // scale × e^(−deltaY × step)
+        keyStep: 1.5,          // + and − multiply and divide the scale
+        panStep: 0.15,         // an arrow pans this share of the view
+        dragSlop: 4,           // px a press may move and still be a click
+        zoomInKeys: ['+', '='],
+        zoomOutKeys: ['-', '_'],
+      } as const;
+
+  `loupeImageOptions(source)` in `ogImageOptions`' shape: webp at the
+  source's full size — a format change, so a real transform that strips
+  metadata — capped at WebP's 16383px edge, and one pixel less when the
+  source is already webp (the passthrough og.ts guards). No quality is
+  given, the same default the stage's `<Image>` uses, so where the full
+  size equals a stage candidate's width (a source of 2320px or less)
+  Astro can serve one file for both; the growth of `dist/_astro/` that
+  the own-file loupes cost is measured and recorded at T1710. The page:
+
+      const loupeSource = image.detail ?? (LOUPE.withoutDetail ? image.image : null);
+      const loupe = loupeSource ? await getImage(loupeImageOptions(loupeSource)) : null;
+
+  and the `.image-stage` div carries `data-loupe-src`, `data-loupe-w`,
+  `data-loupe-h` (the transform's own size) and `data-loupe-detail` when
+  the file is a detail export. A data attribute is not a resource: the
+  browser fetches nothing for it, and the stage's `<img>`, its `srcset`,
+  the OG image and the feed are untouched. The detail's emitted original
+  is named by no page, so the pruner removes it; its transform is not an
+  original, so the pruner never touches it — the barrier's scan 1 checks
+  both outcomes on every build.
+
+  T1710 finding (2026-09-25): the site-wide `image: { layout:
+  'constrained' }` makes every `getImage()` emit a responsive set, so
+  a loupe call named one file and shipped nine (+234 files, +15.7 MB
+  across the site). `loupeImageOptions` therefore returns `{ src,
+  width, format: 'webp', layout: 'none' }` — one file per loupe, the
+  URL unchanged (layout is not in the hash). `ogImageOptions` has the
+  same waste (six unnamed og candidates per page) — a sweep note, not
+  this spec's. Own-file loupes share no file with the stage (the
+  stage's fit/position enter the hash): 62 of them cost 4.84 MB; the
+  Phase 2 pause asks whether a photograph without a detail export
+  gets a loupe at all.
+
+- **The loupe's state** (`src/lib/loupe.ts`, T1711) — pure and
+  unit-tested. `fullScale({ natural, fit, dpr })` is
+  `natural / (fit × dpr × pixelRatio)`; a stage is loupe-ready when it
+  is at least `minGain`. `zoomAbout(view, point, scale, box)` keeps the
+  point under the pointer fixed (`t′ = p − (p − t) × s′ / s`, transform
+  origin top left); `clampPan(view, box)` keeps the photograph covering
+  its box. `loupeReduce(state, action, ctx)` is the state machine the
+  controller runs, returning the new view and one effect:
+  - at the fit, in the quiet view: `open(point)` by `opensOn` → full
+    detail about the point (effect `open`); a wheel or a pinch →
+    continuous from 1; a zoom-in key → `keyStep` about the centre;
+    Escape → effect `leave-quiet`; ← / → → `step-prev` / `step-next`;
+    a click on the mat or the ground → `leave-quiet`;
+  - zoomed: a drag pans; a click without movement → back to the fit
+    (effect `close`); Escape → `close`; ←/→/↑/↓ pan by `panStep`;
+    the zoom keys, the wheel and the pinch between 1 and full detail;
+    reaching 1 → `close`.
+
+  Escape always steps back one level; the arrows step the set only at
+  the fit.
+
+- **The loupe, wired** (`src/lib/loupe.ts`'s `createLoupe(stage)`, the
+  image page's script, `global.css`, T1712). The image page's `init()`
+  creates the controller when the stage carries `data-loupe-src`; it
+  marks the stage `data-loupe-ready` when `fullScale` of the stage image
+  at the quiet fit reaches `minGain`, re-read on entering the quiet view
+  and on `resize`. On `open` it builds, inside `.image-stage` (already
+  `position: relative`), `div.loupe` placed over the photograph's own
+  box from `img.getBoundingClientRect()` — so the mat, the frame and the
+  stage are untouched and not zoomed — holding `div.loupe-layer` with
+  `img.loupe-base` (the stage's `currentSrc`, already decoded: no
+  request) and, when it has decoded, `img.loupe-detail`. The loupe file
+  is requested once per page, at the first `open`: `new Image()`,
+  `src`, `decode()`, then appended — cached for the page's life, so a
+  second zoom requests nothing. The layer's `transform: translate(tx,
+  ty) scale(s)` is written by the controller. The page's click handler
+  and `keydown` ask the controller first and act on its effect
+  (`setQuiet(false)`, the arrows' `go()`); `setQuiet(false)` resets the
+  loupe at once. The wheel listener is non-passive and only prevents
+  scrolling over the photograph. CSS, a new `/* ---- The loupe
+  (spec 019) ---- */` section after the quiet rules:
+
+      html[data-quiet] .image-stage[data-loupe-ready] .image-frame img { cursor: zoom-in; touch-action: none; }
+      .loupe { position: absolute; overflow: hidden; cursor: zoom-out; touch-action: none; }
+      .loupe[data-dragging] { cursor: grabbing; }
+      .loupe-layer { transform-origin: 0 0; }
+      .loupe[data-glide] .loupe-layer { transition: transform var(--dur-move) var(--ease-move); }
+      .loupe-base, .loupe-detail { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .loupe-detail { animation: motion-appear var(--dur-appear) var(--ease-appear) both; }
+
+  and, inside the reduced-motion block at the file's end (so it wins by
+  order, as T1608a's pin requires of every rule there), a sixth rule
+  beside the frames' appearance:
+
+      .loupe-detail { animation-duration: calc(var(--dur-appear) * var(--rm-appear)); }
+
+  motion.test.mjs (d)'s `REDUCED_RULES` and its order expectation gain
+  this rule and the block's comment says six — a deliberate addition
+  the count exists to notice, not a loosened test. `data-glide` is
+  written for a discrete zoom (open, a key, close) only when
+  `!reducedMotion()`, and removed on `transitionend`; a drag, a wheel
+  and a pinch follow the hand without it. Under reduced motion the zoom
+  cuts and the detail export fades in exactly as the frames do, on
+  `--rm-appear` (spec 018's split).
+  The detail image is inserted only once decoded and its animation's
+  `both` fill starts it at opacity 0, so there is no `opacity: 0` rule.
+  Without script there is no `data-loupe-ready`, no `.loupe`, and the
+  quiet view is today's. A photograph whose gain is below `minGain`
+  keeps today's quiet view exactly: any click leaves. For a
+  loupe-ready photograph a click on the photograph opens the loupe and
+  a click on the mat or the ground leaves the quiet view — a reading of
+  Goal 4 (see Resolved decisions).
+
+  T1712 note (2026-09-25): matte.test.mjs (b)'s quiet list pins exactly
+  three `html[data-quiet] .image-…` preludes; the loupe's cursor rule
+  is a planned fourth, so that list gains it by name and "no fourth"
+  becomes "no fifth" — a deliberate addition the count exists to
+  notice, as motion (d)'s sixth rule is; the rule's text stays as
+  spelled. The loupe section sits after the quiet rules and before
+  the compare section (compare.test.mjs slices compare → Motion).
+
+  Phase 2 review (T1712a, 2026-09-25): (N1) `LOUPE.opensOn` is
+  `'click'` (a click on the photograph zooms) or `'gesture'` (a click
+  on the photograph leaves the quiet view as before; the wheel, a
+  pinch or + opens the loupe) — the reducer's `click` at the fit
+  returns `leave-quiet` under `'gesture'`, with a test; `'dblclick'`
+  is withdrawn, since the first click of a double click would leave
+  before the dblclick event arrives. (N2) Safari reports a trackpad
+  pinch as `gesturestart` / `gesturechange` / `gestureend`, not
+  ctrl+wheel: `createLoupe` feeds the ratio of successive
+  `event.scale` values into the `pinch` action and prevents the
+  default, so the page does not zoom instead. (N4) No own-file loupe
+  shares a file with its stage (fit/position enter the stage's
+  hash); the sentence in "The loupe's file" claiming it could is
+  superseded by the T1710 note.
+
+  **Rounds T1713a–b (Phase 2 pause, 2026-09-26).** (a) `LOUPE.pan:
+  'follow'` (the other value `'drag'`, the loupe as first built): when
+  zoomed, a mouse pointer's position over the box sets the pan
+  directly — the pointer at fraction (fx, fy) of the box shows the
+  view at `tx = fx · w(1 − s)`, `ty = fy · h(1 − s)`, so the pointer
+  at the centre shows the centre and at the bottom right the bottom
+  right, as if reading the unzoomed photograph — a new reducer action
+  `hover` (`pointerType` mouse only; touch and pen keep the drag);
+  a click without movement still closes; the arrows still pan and
+  the next hover overrides them; under `'drag'` nothing changes.
+  (b) `LOUPE.mat: 'off'` (the other value `'kept'`, as first built):
+  while the loupe is open the stage carries `data-loupe-open` (a state
+  attribute, on the barrier's list) and the quiet frame drops its mat
+  — `html[data-quiet] .image-stage[data-loupe-open] .image-frame
+  { padding: 0; }` (a fifth quiet rule, by name in matte (b); it reads
+  no `--mat`, so the one-matted-surface case still holds). The quiet
+  frame is shrink-to-fit around the photograph and the image's cap
+  reads the frame's `--mat`, so the frame collapses onto the
+  photograph and the dark ground shows where the mat was; the
+  photograph does not move or grow, and the overlay stays placed from
+  the image's rect. The mat shrinks under the glide: a transition on
+  the frame's padding reading `--dur-move` / `--ease-move` (the first
+  transition on `.image-frame`; a seventh reduced-motion rule beside
+  the sixth if the block's rule needs it). On close the attribute goes
+  and the mat returns. (Corrected 2026-09-26: the first draft of this
+  paragraph had the loupe filling the mat's box — measured impossible
+  without resizing the stage image.)
+
+  **Round T1713c (2026-09-26).** The mat-off round left a band: on a
+  screen where the photograph is width-bound (the DualUp), the image
+  grows when the padding goes, and the overlay placed from the old
+  rect shows the unzoomed image around it. The person: "We need the
+  zoomed in loupe view to be the full area." So, under `mat: 'off'`,
+  the open loupe takes the whole frame: the rule becomes
+  `html[data-quiet] .image-stage[data-loupe-open] .image-frame
+  { padding: 0; --mat: 0px; }` (the mat's token zeroed on that
+  surface, so the image's caps let the photograph fill the space the
+  mat had, ratio kept — the fifth quiet rule as before; if matte (b)'s
+  "no other rule applies --mat" reads an assignment as a read, the
+  case names this rule as the one allowed assignment); the padding
+  transition is removed (the mat goes at once, under the glide, and
+  returns at once on close); `createLoupe` sets `data-loupe-open`
+  first, forces layout, then reads the image's rect and builds the
+  overlay from the grown box — `fullScale` for the zoom target is of
+  that box; readiness (`data-loupe-ready`) is still judged on the fit
+  before opening. On close the overlay glides to s = 1 over the grown
+  box, then the attribute goes and the mat returns with the image at
+  its fit size. The follow rule's fractions are of the grown box.
+
+- **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, `styles.css`,
+  T1714). A second pattern beside `DIRECTIVE_PATTERN`, for the one
+  container the plugin renders: `^:::compare(\{[^}]*\})?[ \t]*\n([\s\S]*?)\n:::[ \t]*$`
+  (`gm`), its body read by `parseCompareBody(body)` → `{ src, label }[]`
+  (one `![label](src)` per stage, the note ignored), in its own
+  obsidian-free file so the suite can test it; `main.ts` replaces the
+  whole block with a `BlockWidget` showing each stage's image with its
+  label beneath (`photo-pieces-preview-compare`), unless the cursor is
+  inside it, as every leaf block does. A private stage resolves like any
+  image. The methods, the handle and the loupe are the site's.
+  _Superseded by "Amendment 2 (2026-09-26): the plugin, representative"
+  below: `DIRECTIVE_PATTERN`, `BlockWidget` and the `photo-pieces-preview*`
+  classes are deleted at T1731–T1732; every block is read by the block
+  table's scanner and drawn by one figure in both views._
+
+- **The documents** (T1715): `AUTHORING.md` — the block (the flow's
+  example, the rules: two stages, own folder for a private file,
+  `mode`), the sidecar's `stages:`, the private-file family, the detail
+  export (the name, "about 4000 px on the long edge (6000 in the first draft; 4000 kept at the Phase 2 pause)" as the starting
+  recommendation, location stripped on export, the 25 MiB ceiling), the
+  gear table (where, the line format, the warning); `README.md` — the
+  image-page paragraph, the tree (`lib/compare.ts`, `lib/loupe.ts`,
+  `lib/gear.mjs`, `content/gear.md`, `scripts/check-private-files.mjs`),
+  the spec list; `obsidian-plugin/README.md` — the table's `:::compare`
+  row and the Extending note. `ROADMAP.md` and `DECISIONS.md` at
+  close-out (T1718).
+
+- **The tuning envelope, placed.** Every item the spec's envelope names,
+  where it lives and what pins it. A round is the value, its row in the
+  named test, and one Decided line in spec.md.
+
+  | Envelope item                                                              | One place                                                                                          | Pinned by                                   |
+  | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+  | handle's size and shape                                                    | `--compare-handle`, `--compare-handle-radius` (`:root`)                                            | compare.test.mjs `TOKENS`                   |
+  | legend's placement / shape                                                 | `COMPARE.legend` / the `.compare-legend` rules                                                     | `EXPECTED` / (c) rule strings               |
+  | method control's words / placement                                         | `COMPARE_WORDING.modes` / `COMPARE.control`                                                        | `EXPECTED`                                  |
+  | corner tags' return                                                        | `COMPARE.cornerTags`                                                                               | `EXPECTED`                                  |
+  | width per surface                                                          | `COMPARE_WIDTH` (image-meta.mjs) — class and `sizes` both follow                                   | image-meta.test.mjs                         |
+  | slider: continuous or snapping / pair at rest / geometry                   | `COMPARE.snap` / `COMPARE.restAt` / `sliderView()`                                                 | `EXPECTED` / the `sliderView` table         |
+  | default method; remembered, how long                                       | `COMPARE.defaultMode`; `COMPARE.remember`                                                          | `EXPECTED`                                  |
+  | side by side where two won't fit                                           | `COMPARE.sideNarrow`, `COMPARE.sideMinPx`                                                          | `EXPECTED`                                  |
+  | switch's gestures and keys; wrapping                                       | `COMPARE.switchOnClick`, `switchKeys`, `switchBackKeys`; `switchWraps`                             | `EXPECTED`                                  |
+  | loupe's gestures, keys, zoom range, how it opens                           | `LOUPE.opensOn`, `pinch`, `zoomInKeys`, `zoomOutKeys`, `pixelRatio`, `minGain`, `wheelStep`, `keyStep`, `panStep` | loupe.test.mjs `EXPECTED`                   |
+  | the loupe without a detail export                                          | `LOUPE.withoutDetail`                                                                              | `EXPECTED`                                  |
+  | recommended detail size                                                    | the one AUTHORING.md sentence                                                                      | T1715's grep                                |
+  | each duration's token                                                      | the five motion rules (switch, mode change, settle: state; zoom: move; detail: appear)             | (c) rule strings in both tests              |
+  | reduced-motion split per movement                                          | the script gates (`data-settling`, `data-glide` on `!reducedMotion()`); the detail fade's RM rule on `--rm-appear` | the gate's unit case in each test           |
+  | the section's heading, the block's words                                   | the page's `WORDING.compare`; `COMPARE_WORDING`                                                    | compare.test.mjs (page source, `EXPECTED`)  |
+  | sidecar field names; the note's fallback to `processing:`                  | `content.config.ts`'s `stages`; `compareStages()`                                                  | image-meta.test.mjs                         |
+
+  The legend's shape is a set of rules, not a value: its round edits the
+  `.compare-legend` rules and the pinned strings beside them. The
+  slider's geometry is a function: its round edits `sliderView` and its
+  table. Both are the smallest honest unit.
+  _(Amendment 2026-09-26: the amended envelope's rows are a second table, "The tuning envelope, placed (amendment)".)_
+
+## Failure messages and notes
+
+The transform (every line through `file.fail`, naming the piece and the
+line):
+
+```
+compare takes two or more stages (one per line: ![Label](./file.jpg) then its note); got 1
+a compare's body is its stages, one per line — "Before the images" comes before the first image
+a compare's body is its stages, one per line — no lists, headings or blocks inside it
+a compare stage needs its label as the image's text: ![Camera](./_land-b.jpg)
+"../beta/_photo.jpg" is a private file of another folder — a compare may show a private file only from its own folder; a public photograph may be borrowed (../beta/photo.jpg)
+"./_land-b.tones.jpg" is private — a file of "land-b" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "land-b.jpg" here, or show it as a stage of a :::compare in this folder
+image not found: ./_land-b.tones.jpg (relative to the piece's folder)
+invalid value "carousel" for mode on compare — allowed: slider | side | switch
+```
+
+The registry, under `[images]`, all at once:
+
+```
+src/content/pieces/x/_land-b.tones.jpg has no photograph: a "_" file belongs to the photograph it names, so "land-b.<ext>" should sit beside it (its camera's frame is _land-b.<ext>, a stage _land-b.<word>.<ext>, the loupe's export _land-b.detail.<ext>)
+src/content/pieces/x/_land-b.detail.png is a second detail export for "x/land-b" — keep one
+src/content/pieces/x/_land-b.md: stages lists "_land-b.tone.jpg", which is not a stage of "land-b" — a stage is _land-b.<word>.<ext> beside the photograph
+src/content/pieces/x/_land-b.md: stages lists "_land-b.jpg", the camera's frame — it is always the first stage; leave it out
+src/content/pieces/x/_land-b.md: stages lists "_land-b.detail.jpg", the loupe's export — not a stage
+src/content/pieces/x/_land-b.md: stages lists "_land-b.tones.jpg" twice
+```
+
+The table and the warning:
+
+```
+[gear] src/content/gear.md:14 — expected "- `<EXIF string>` = <display name>" under "## Cameras" or "## Lenses"
+[gear] src/content/gear.md:21 — "ILCE-7RM4" is listed twice under Cameras
+[gear] no display name for the lens "E 70-180mm F2.8 A056" (first in src/content/pieces/x/y.jpg) — add it to src/content/gear.md
+```
+
+The barrier, green and failing:
+
+```
+[check-private-files] N loupe files on M image pages, K of them detail exports named nowhere else; C compares in one shape; no compare or loupe state in P pages.
+[check-private-files] a compare out of shape in dist/pieces/x/index.html: compare-stage > compare-caption before compare-pane
+[check-private-files] a detail export named outside its loupe in dist/galleries/fog-frames/index.html: /_astro/…webp
+[check-private-files] a loupe file missing from dist/: /_astro/…webp (dist/images/where-the-fog-lets-go/land-b/index.html)
+[check-private-files] a loupe file over 25.0 MiB: dist/_astro/…webp (31.2 MiB)
+[check-private-files] a script-only state in the markup of dist/pieces/x/index.html: data-js
+```
+
+`scripts/verify.sh` gains `\[gear\]` in its flagged-lines grep and
+`\[check-private-files\]` in its summary grep; `package.json`'s
+`postbuild` runs the barrier after `check-no-gps`. The page count moves
+by nothing; the test count rises by the new files' cases, recorded per
+task.
+
+## Testing strategy
+
+Every claim above is owned by a task and a check. "Page tests" in the
+spec's acceptance criteria are, here, two things, because the project
+has no browser test runner and this spec adds no dependency: the
+mechanics as pure functions (`sliderView`, `loupeReduce`, …) run by
+Vitest on every build, and the wiring read in the browser by the
+implementer (Firefox 156 headless via BiDi, spec 015's recipe) with the
+numbers recorded in `tasks.md`, as spec 018 recorded its motion. The
+feel is the person's at each pause.
+
+  Round T1709b (2026-09-25): `COMPARE_WIDTH` → `{ piece: 'wide', page: 'wide' }`, the value in its one place, compare.test.mjs's row updated.
+- **The private-file family** — `image-meta.test.mjs`, **T1701**:
+  `privateRole` over `_land-b` / `_land-b.tones` / `_land-b.detail` /
+  `_land.b` beside `land.b` (frame, not a stage) / `_land-b.tones` with
+  no `land-b` (orphan); `privateTargetOf('_land-b.tones') === 'land-b'`;
+  `attachPrivates` returns the frame, the detail, the stages in name
+  order, and one problem each for an orphan, a second frame, a second
+  detail; `resolveStages` keeps the sidecar's order and fails the four
+  cases above with their lines; `validateGalleries` refuses
+  `x/_land-b.detail` naming `x/land-b`; `compareStages` puts the frame
+  first, the photograph last with `processing` as its note, and omits
+  the frame when there is none; `hasBlock` finds `:::compare` and not
+  `::compare` or prose; `firstAltFor` returns the held block's alt, not
+  a compare's "Finished", for a body whose compare comes first, and
+  `undefined` when the compare is the only reference; `sectionsFor`:
+  stages alone show the compare, `storyHasCompare` suppresses it and
+  moves `processing` to the record; `COMPARE_WIDTH`'s values are in `COMPARE_WIDTHS` and
+  `compareSizes` returns the three strings. Mutations: drop the
+  frame-first rule → the `_land.b` case fails; drop the compare skip in
+  `firstAltFor` → the title case fails.
+
+- **The registry and the fixtures** — **T1702**, by build (the
+  registry is Astro-coupled, verified by build like `pieces.ts`): the
+  build is green with the new fixtures; `land-b`'s page shows the
+  compare section; each registry error fires, by temporary edit and
+  revert — a stray `_ghost.tones.jpg`, a second `_land-b.detail.png`, a
+  sidecar listing `_land-b.jpg` — the build's tail naming the file.
+
+- **The barrier can fail** — `private-files.test.mjs`, **T1703**,
+  gps-barrier.test.mjs's shape (temp dirs, `execFileSync`): a stage
+  with `data-loupe-detail` whose file is missing → exit 1 naming both;
+  the same URL also in an `<img srcset>` on a gallery page → 1; in an
+  `og:image` meta → 1; in `rss.xml` → 1; a clean dir with the URL only
+  in its attribute → 0 and the summary; a loupe file of `MAX_BYTES + 1`
+  (a sparse file) → 1; `data-js` on a figure → 1; `class="loupe"` → 1;
+  `data-js` and `.loupe` in `<script>` and `<style>` text only → 0; a
+  loupe URL without `data-loupe-detail` also in a `srcset` → 0 (the
+  own-file loupe may share a candidate, by Astro's dedupe); scan 3 — a
+  compare in the shape with two and with three stages → 0, a stage
+  without `compare-pane` → 1, a caption before its pane → 1, one stage
+  → 1, a stray element with a class inside the frames → 1, a note
+  without a label → 1, a compare holding `.compare-range` (spec 006's)
+  → 0 until T1706 deletes that skip and turns the case to 1.
+
+- **Gear names** — `gear.test.mjs`, **T1704**: the parser (the
+  committed table parses; a malformed line, a line before any section
+  that is not prose, a duplicate key each throw naming the line); the
+  lookups: `formatExposure` with the table gives `Sony α7R V` for
+  `ILCE-7RM5`, `Pentax K-1` for make `RICOH IMAGING COMPANY, LTD.` and
+  model `PENTAX K-1`, the Sigma's display name for the `|` string, and
+  every Decided row verbatim (a table in the test); without the table,
+  today's strings; `mergeOverrides` with a sidecar `camera:` still wins;
+  `unknownGear` returns one entry per distinct string with the first
+  file. **The build over the repo prints none**: every public raster
+  under `src/content/` read with `readExposure` has its `Model` and
+  `LensModel` in the table (absent strings excepted) — the failure lists
+  the string and the file. Mutation: delete the `ILCE-7RM4` line → that
+  case fails naming a file. Then the built page: `/images/…` for an
+  `ILCE-7RM5` frame reads `Sony α7R V` (grep of `dist/`, recorded), and
+  `gallery/dock-b` still reads its sidecar's names.
+
+- **The block's shape and its failures** — `remark-pieces-blocks.test.mjs`,
+  **T1705**, its render helper: three stages render as
+  `figure.piece-block.piece-compare.compare.compare-w-column` >
+  `div.compare-frames` > three `figure.compare-stage`, each
+  `span.compare-pane > img` and `figcaption.compare-caption` with its
+  label and note in order (no-script: stacked figures, AC 3); the root's
+  `--ar` is the last stage's; `data-mode` present only when written; no
+  `a.image-link` inside; a note with `_emphasis_` keeps it; stages
+  separated by blank lines parse like consecutive ones. **The borrowing
+  pair**, rendered from a piece in `tests/pieces/alpha/`, beside which
+  `tests/pieces/beta/` holds both `photo.jpg` and `_photo.jpg` on disk
+  (the implementer copies how the suite's spec-008 borrowing cases set
+  the render's path, and names the case it copied): a compare with
+  `./photo.jpg` and `../beta/photo.jpg` — a public photograph borrowed
+  by spec 008's path — renders, two stages, the borrowed image's `src`
+  resolved like any borrowed frame; the same compare with
+  `../beta/_photo.jpg` fails naming the file with the borrowed-private
+  line — the file exists, so the refusal is the rule, not a missing
+  file. Failures, each naming the piece and the line: one stage;
+  `./_missing.jpg`; the borrowed private above; `![](./photo.jpg)`; text
+  before the first image; a list inside; `mode="carousel"`;
+  `::single{src="./_photo.jpg" alt="x"}` still fails with the widened
+  message; a shorthand `![x](./_photo.jpg)` still fails; a private stage
+  inside `:::grid` fails. `image-meta.test.mjs`: the descriptor-agreement
+  case passes with `BLOCK_BODIES.compare = 'stages'`, landed with the
+  descriptor; the kinds list in "the passage by body kind" gains
+  `stages` — a deliberate addition — with a `passageFor` case that a
+  compare contributes no caption. Mutation: let the shorthand pass run over
+  stage images → the three-stage case fails.
+
+- **The page's section is the block** — **T1706**: the built
+  `land-b` page's section holds `figure.compare.compare-w-column` with
+  three stages labelled Camera, Tones, Finished and Finished's note the
+  sidecar's `processing` (grep of `dist/`, recorded); the barrier's
+  scan 3 counts every compare on the site in one shape, its old-compare
+  skip deleted and that test case turned to 1; spec 006's
+  `enhanceCompare`, still in place until T1708, finds no
+  `.compare-range` in the new markup and skips every figure (its
+  `continue`), so the stacked form shows and no script throws — read in
+  the browser console on `land-b` and the fog piece; "How it was made"
+  on that page has no Processing row; `vocabulary-sampler/land-b`'s
+  section holds two stages, Camera and Finished; `port-a` has no
+  section; the fog
+  piece's compare carries `data-mode="switch"` and three stages; a
+  temporary compare written into `_land-b.md`'s story → the automatic
+  section is absent from the built page and the story's is present,
+  reverted; compare.test.mjs (a): the page source builds every compare
+  element with `COMPARE_CLASSES` and no `class="compare` literal; every
+  `COMPARE_CLASSES` value and each width class has a rule in
+  `global.css`; the page's `<style>` holds no `.compare` rule;
+  `FRAME_HOSTS` holds no compare class (so the stage images stay outside
+  the appearance hooks). motion.test.mjs (i) green unedited (the page's
+  `<style>` declares no transition).
+
+  Phase 1 review (T1708a): compare.test.mjs also pins `WORDING.compare`
+  by page source — the heading and the two labels as literal strings —
+  so a wording round is one value, one test row, one Decided line.
+- **The compare's state** — `compare.test.mjs`, **T1707**: `EXPECTED`,
+  every `COMPARE` key and value verbatim, and `COMPARE_WORDING`;
+  `sliderView` as a table — two stages: `p` 0, 0.5, 1 → split 0, 50, 100,
+  pair (0, 1) throughout (unchanged from spec 006); three stages: 0 →
+  (1, 2) at 0 (the last stage whole); 0.25 → (1, 2) at 25; 0.5 — the
+  interior stop, which belongs to the segment on its right — → (0, 1)
+  at 50; 0.75 → (0, 1) at 75; 1 → (0, 1) at 100 (the first stage
+  whole); four stages at 0, each interior stop, and 1 (the last whole
+  at 0, the first at 1, each interior stop the pair to its right);
+  `snapTo`; `sidePair` for first, middle and last;
+  `switchNext` at the end with and without wrapping, and backwards from
+  the first; `restView` per mode; `noteIndex` per mode; `sideFits` at
+  `2 × sideMinPx` ± 1; `openingMode` for stored/authored/default and an
+  invalid stored value. Each case named for what fails it.
+
+- **The compare, enhanced** — **T1708**: compare.test.mjs (b) `TOKENS`
+  (`--compare-handle: 2.75rem`, `--compare-handle-radius: 50%`, declared
+  once, in `:root`), (c) the three motion rules by string and the
+  `@property --split` block; motion.test.mjs green unedited — (a) the
+  family untouched, (b) the source scan over the new rules, (d) the
+  five-rule reduced-motion block, (g) the `opacity: 0` walk and its one
+  gate unchanged (no new rule sets `opacity: 0`); the build's motion and
+  private-files barriers green. In the browser, at 1512×982 and
+  1280×1440, on `/images/where-the-fog-lets-go/land-b/` and the fog
+  piece: the control, legend, handle and live note exist only with
+  script; with script off (spec 017's sandboxed-iframe recipe) the
+  three stages stand stacked with labels and notes; the handle's rect is
+  centred on the divider and at least 44px; dragging (pointer events
+  synthesised at 25%, 50%, 75%) sets `--split` and the parts as
+  `sliderView` says and the live note to the later stage's; ← on the
+  handle moves `aria-valuenow` by 2 and does not navigate; the method
+  control switches `data-view`; side by side shows two panes of equal
+  width, and at a 480px-wide viewport `data-narrow` stacks them; switch:
+  a click, Space, Enter and → advance, ← goes back, the last wraps, and
+  `getAnimations()` holds a `motion-appear` animation of 180ms on the
+  arriving stage while the leaving one reads `"under"`, then `"on"` and
+  `"off"`; enhancing the block starts no animation; a mode change
+  writes `data-fresh` and removes it after 180ms; the fog piece opens in switch, the page in slider; a mode
+  chosen on the page is the mode the fog piece opens in after a
+  navigation (sessionStorage); after a swap into `land-b` from a gallery
+  the compare is enhanced at `astro:after-swap` with its box height equal
+  to a full load's (T1604c's read, repeated); inside `.compare`,
+  `querySelectorAll(FRAME_IMG)` is empty.
+
+  Phase 1 review (T1708a): (c) also pins the legend and control rule
+  (`.compare[data-js] .compare-legend, .compare[data-js] .compare-control`)
+  by exact body, as the envelope table's "Pinned by" column says.
+- **The loupe's file** — `loupe.test.mjs`, **T1710**: `EXPECTED`, every
+  `LOUPE` key and value verbatim; `loupeImageOptions` — a 5400×3600 jpg
+  → webp 5400, a 2400×1600 webp → 2399, a 20000×10000 jpg → 16383 wide,
+  a 10000×20000 → 8191 wide; then the build: `land-b`'s stage carries
+  `data-loupe-detail` and a `data-loupe-src` whose file exists, the
+  barrier's line counts one detail export, `check-no-gps` green with the
+  GPS-bearing detail fixture (and `exifr` over the emitted file reads no
+  GPS — recorded), the detail's original is absent from `dist/_astro/`
+  (the pruner's line counts it), the fog piece's `land-a`'s stage
+  carries a loupe file and no `data-loupe-detail`, and with
+  `withoutDetail: false` (temporary) it carries none; the size and file
+  count of `dist/_astro/` before and after this task (the own-file
+  loupes' cost) and how many own-file loupe URLs equal a stage `srcset`
+  candidate (Astro's dedupe, measured, not assumed).
+
+- **The loupe's state** — `loupe.test.mjs`, **T1711**: `fullScale`
+  (5400 over a 1400px fit at dpr 2 → 1.93; 1800 over 1400 at 2 → 0.64,
+  not ready); `zoomAbout` keeps the point fixed (the point's screen
+  position before and after equal); `clampPan` at each edge;
+  `loupeReduce` — every transition listed in "The loupe's state", each
+  a case, including Escape twice from zoomed (close, then leave-quiet),
+  ← at the fit (step-prev) against ← zoomed (a pan, no effect), a click
+  after a movement under `dragSlop` (a click) and over it (a drag),
+  `opensOn: 'dblclick'` ignoring a single click, the wheel reaching 1
+  (close); and (c) the loupe's CSS rules by string, the glide on
+  `--dur-move`/`--ease-move`, the detail on `--dur-appear`/`--ease-appear`.
+
+- **The loupe, wired** — **T1712**: matte.test.mjs green with one deliberate addition (the fourth quiet rule, by name) (the
+  quiet rules, the mat, the stage); motion.test.mjs green with one
+  deliberate edit — (d)'s `REDUCED_RULES` and its order expectation gain
+  `.loupe-detail { animation-duration: calc(var(--dur-appear) * var(--rm-appear)) }`
+  (`bases: 1`, `after: []`) and the "five rules" names say six — and a
+  mutation: the rule moved above its base → the order case fails; in
+  the browser,
+  at both viewports, on `land-b` in the quiet view: the stage carries
+  `data-loupe-ready`; the resource timeline holds no loupe URL before the
+  first click and exactly one after it and after a second zoom; a click
+  at a point zooms so that the image-pixel under the pointer stays under
+  it (±1px) with the layer's scale equal to `fullScale`; the loupe's rect
+  equals the stage image's (±0.5px) and the frame's padding and
+  background are unchanged while zoomed; the base shows at once and the
+  detail is appended after decode with a `motion-appear` animation of
+  950ms; a drag pans and is clamped; the wheel and a synthesised
+  two-pointer pinch change the scale continuously; +/− zoom; ← zoomed
+  pans and at the fit steps to the previous photograph; Escape zoomed →
+  fit, Escape again → the page; a click zoomed without movement → the
+  fit; during a click zoom `getAnimations()` holds a 480ms transform
+  transition, and under reduced motion none (the detail's fade still
+  950ms); the not-ready control is chosen by computation, not assumed:
+  the fog piece's `land-a` (the 1800×1200 placeholder; at the quiet fit
+  about 1,300 CSS px wide on both screens, so `fullScale` ≈ 0.7 at 2×)
+  has its `fullScale` read at both viewports and recorded, is not
+  loupe-ready, and a click leaves the quiet view as on `main`; the same
+  read is recorded for one real 2560px portrait export and one real
+  2560px landscape export (a portrait's quiet fit on the laptop is
+  narrow, so its gain can pass `minGain` — the Phase 2 walkthrough
+  quotes these numbers, and if `land-a` reads ready, the report names
+  a page this read found not ready instead); without
+  script, no `data-loupe-ready` and the quiet view as on `main`.
+
+- **Obsidian** — `obsidian-plugin.test.mjs`, **T1714**:
+  `parseCompareBody` on the flow's three lines, on stages separated by
+  blank lines, and on a body with a stray line (skipped); the photographer
+  attests Live Preview at the Phase 3 pause.
+
+- **Nothing else moves** — every task's Verify carries
+  `git diff -U0 main -- src/styles/global.css | grep '^@@'`: no hunk
+  inside `.image-stage`, `.image-frame`, `.image-frame img`, the
+  `html:not([data-quiet])` or `html[data-quiet]` rules, the Motion
+  section, the reduced-motion block (save T1712's one added rule), or
+  the `:root` motion tokens; `matte.test.mjs`, `ground.test.mjs`,
+  `galleries.test.mjs`, `place-page.test.mjs` green and unedited, and
+  `motion.test.mjs` unedited but for T1712's (d) addition.
+
+- Existing suites stay green; build with its four barriers (GPS, dev routes, motion, private files); `astro
+  check`; Prettier on every touched file.
+
+## File structure
+
+```
+CLAUDE.md                                 the block-vocabulary clause and the images paragraph (T1700, its own commit)
+src/lib/image-meta.mjs                    privateRole, privateTargetOf and privateMessage widened, attachPrivates, resolveStages, COMPARE_MODES/CLASSES/WIDTHS/WIDTH, compareSizes, compareStages, hasBlock, firstAltFor's skip, sectionsFor (T1701); formatExposure's gear argument (T1704); BLOCK_BODIES.compare (T1705)
+src/content.config.ts                     imageMeta: stages (T1702)
+src/lib/images.ts                         attachPrivates, resolveStages, stages/detail/storyHasCompare on SiteImage (T1702); the gear table read and the [gear] warnings (T1704)
+scripts/gen-placeholders.mjs              PRIVATES: the tones stage and the detail export; the tones option; tests/fixtures/_photo.tones.jpg (T1702)
+src/content/pieces/where-the-fog-lets-go/ _land-b.tones.jpg, _land-b.detail.jpg (generated); _land-b.md stages (T1702); index.md's compare (T1706)
+src/content/pieces/vocabulary-sampler/    _land-b.jpg (generated — a frame and nothing else) (T1702)
+tests/fixtures/_photo.tones.jpg           generated (T1702)
+scripts/check-private-files.mjs           new: the barrier's three scans (T1703); scan 3's spec-006 skip deleted (T1706)
+package.json, scripts/verify.sh           postbuild; the two grep additions (T1703, T1704)
+private-files.test.mjs                    new (T1703)
+src/content/gear.md                       new: the table (T1704)
+src/lib/gear.mjs                          new: parseGearTable, unknownGear, GEAR_FILE, EMPTY_GEAR (T1704)
+gear.test.mjs                             new (T1704)
+remark-pieces-blocks.mjs                  the compare descriptor, partitionStages, the stage src rule, the widened hint (T1705)
+remark-pieces-blocks.test.mjs             the compare cases (T1705)
+image-meta.test.mjs                       T1701's cases
+src/pages/images/[...id].astro            the section as the block, WORDING.compare, the record's processing, the scoped .compare rules deleted (T1706); the stage's data-loupe-* (T1710); the loupe controller in init(), the click and key routing, the .compare key guard (T1708, T1712)
+src/styles/global.css                     :root: --compare-handle, --compare-handle-radius (T1708); the compare section — static (T1706), enhanced and its three motion rules (T1708); the loupe section (T1712)
+src/lib/compare.ts                        COMPARE, COMPARE_WORDING, COMPARE_MODE_KEY and the pure state (T1707); enhanceCompare rewritten (T1708)
+compare.test.mjs                          new (T1706–T1708)
+src/lib/loupe.ts                          new: LOUPE, loupeImageOptions (T1710); fullScale, zoomAbout, clampPan, loupeReduce (T1711); createLoupe (T1712)
+loupe.test.mjs                            new (T1710–T1712)
+motion.test.mjs                           (d): the sixth reduced-motion rule, deliberately (T1712)
+obsidian-plugin/compare.ts, main.ts, styles.css   the compare widget (T1714)
+obsidian-plugin.test.mjs                  new (T1714)
+AUTHORING.md, README.md, obsidian-plugin/README.md   T1715
+src/content/pieces/<his slug>/            the photographer's piece, as supplied (T1716) — superseded: see Amendment 3's File structure
+ROADMAP.md, DECISIONS.md                  close-out (T1718)
+```
+
+Untouched, named so the reviewer can confirm the non-goals hold:
+`src/lib/exif.mjs` (the allowlist and `gps: false`); `src/lib/motion.ts`,
+`src/lib/motion-scan.mjs`, `scripts/check-motion.mjs`; the reduced-motion
+block's five existing rules and the Motion section of `global.css`; every `.image-stage`,
+`.image-frame` and quiet rule; `src/layouts/BaseLayout.astro` (it already
+calls `enhanceCompare` where it must); the galleries, the place wall, the
+front door, the piece page and its script, the sets and the arrows;
+`src/pages/og/`, `src/pages/rss.xml.ts`; `package.json`'s dependencies.
+
+## Known limitations
+
+- **What the slider's geometry leaves inherent for three or more
+  stages.** The ends are right: the handle at the right edge shows the
+  first stage whole, at the left edge the last, for every count. What no
+  arrangement with the handle on the divider can avoid: a middle stage
+  is never shown whole (it is always one half of a pair), and at each
+  interior stop both halves change at once — the pair (i, i + 1) hands
+  to (i − 1, i). Two stages are today's compare exactly. The
+  alternative — each stage whole at its stop, the next wiping in over
+  it — is continuous but takes the handle off the divider; it is one
+  function, `sliderView`, and a round inside the envelope. The pause is
+  where this is judged, as the spec says.
+- **On a 2× screen many photographs without a detail export get no
+  loupe.** Full detail is one image pixel to one device pixel. A
+  landscape 2560px export shown about 1,300 CSS px wide in the quiet
+  view is already past that at 2× (`fullScale` ≈ 0.98), so it keeps
+  today's quiet view; a 2560px-tall portrait, whose quiet fit on the
+  laptop is short and narrow, can pass `minGain` (≈ 1.5). T1712 records
+  the numbers. `LOUPE.pixelRatio` (a looser "full detail") and
+  `minGain` are the envelope's zoom range.
+- **25 MiB per file.** The deploy target's static-asset limit applies
+  to the loupe file; the barrier fails a larger one. The limit is
+  Cloudflare's documented figure as of T1703's check (recorded there);
+  if the check cannot be made, the number stays and this line says so.
+- **Repository weight.** Detail exports are committed beside their
+  photographs, as the spec's non-goal says; `ROADMAP.md`'s external
+  store entry records that the day moved closer.
+- **The loupe is reset by a resize** (to the fit), rather than
+  re-projecting the zoomed view onto the new box.
+- **The side-by-side fit is re-read on `resize` only**, not on a
+  container change without one.
+
+## Resolved decisions
+
+- **One barrier for the private files, name-independent.** It reads
+  the loupe URLs the pages declare and checks where else they appear,
+  rather than inferring private files from emitted names, which depend
+  on Vite's naming; the no-script state rides in it as spec 018's
+  no-script pin rode in its barrier. The motion barrier is not edited.
+- **The compare's shape is spelled once** (`COMPARE_CLASSES`) and
+  imported by the transform, the page and the script; the stylesheet is
+  the second spelling, pinned by the rule-per-class test — spec 018's
+  `FRAME_HOSTS` arrangement.
+- **The page builds the block's markup itself** rather than rendering a
+  generated `:::compare` through Markdown: the site's Markdown pipeline
+  optimises images only inside content collections, and the page needs
+  `<Image>`. Two builders, one shape, pinned on every build by the
+  barrier's scan 3.
+- **The chrome is script-built.** The static HTML is only the stacked
+  figures, so without script nothing dead ships and the barrier can
+  prove it; the handle is an ARIA slider on a `span`, not an invisible
+  full-area range input, so no `opacity: 0` control is needed and the
+  handle itself is the focus target the spec asks for.
+- **The stages are not linked to their pages** — the compare is a
+  device, as spec 006's was; the photograph's page is one link away in
+  the piece.
+- **The switch's cross-fade is kept under reduced motion.** Goal 5 and
+  spec 018's rule keep fades; the Design requirement's "or a cut under
+  reduced motion" is the other reading, and one reduced-motion rule if
+  the pause asks for it (which would make the block seven rules — a
+  deliberate change to motion.test.mjs (d)).
+- **A mode change moves the geometry at once and fades the new view in**
+  (`data-fresh`, always — no envelope line asks for a cut); morphing one layout into the other would need a
+  view transition for a change inside one figure, and a view transition
+  here would also cross-fade the page around it.
+- **The switch's cross-fade is a fade-in over the held stage**, not two
+  opacity transitions: it needs no `opacity: 0` rule, which
+  motion.test.mjs (g) forbids outside the one gate.
+- **The loupe zooms inside the photograph's own box**; the mat, the
+  frame and the dark ground stay as they are — the spec's "the mat is
+  not zoomed with the photograph" read as the window, not the page. A
+  loupe filling the screen is a change to `createLoupe`'s placement,
+  judged at the pause.
+- **At the fit, a click on the photograph opens the loupe and a click
+  on the mat or the ground leaves the quiet view.** Goal 4 says both "a
+  click or a tap on the photograph zooms" and "a click at the fit steps
+  back out"; they cannot both hold for the same click, so this is a
+  reading: the photograph zooms, everything around it leaves, and once
+  zoomed a click without movement returns to the fit. A photograph that
+  is not loupe-ready keeps today's "any click leaves". It is put to the
+  person at the Phase 2 pause; `LOUPE.opensOn` (`dblclick`, `gesture`)
+  is the envelope's alternative if he wants a single click to keep
+  leaving.
+- **The loupe is an overlay, not a transform of the stage image**, so
+  nothing spec 018 or the mat rule pinned moves, and removing it
+  restores the page byte for byte.
+- **The loupe file is a webp transform at full size**, for a detail
+  export and — while `withoutDetail` holds — for the photograph's own
+  file: a real transform strips metadata, the detail's original is
+  pruned, and the URL is a data attribute the browser never fetches on
+  its own. Copying the original would publish its EXIF.
+- **In a body, the transform does not check that a compare's stages are
+  one photograph's.** The spec defines a compare that way and the page
+  builds it that way; the block enforces what the authoring rules list
+  (two stages, the own-folder rule, existence). A cross-photograph check
+  would refuse two public frames compared on purpose.
+- **`detail` is reserved in the family**: a sidecar that lists it as a
+  stage fails, because by the spec's definition it is the loupe's. A
+  compare block may still show it — the private-file rule allows any
+  private file of its folder there.
+- **The gear table is Markdown in the content folder**, with backticked
+  keys: the vault opens it, the keys need no escaping, and the parser is
+  one line pattern. A new module, `gear.mjs`, owns the format.
+- **Tunables are constants in two modules and two tokens**, not a
+  settings file or a dev panel: the envelope asks for one value in one
+  place pinned by name; spec 018's panel existed because its tokens were
+  CSS and needed trying live — these are mostly script behaviour, tried
+  by editing a value and reloading `npm run dev`.
+- **No new dependency.**
+
+## Amendment (2026-09-26): the stage's share, the pair blocks, the filmstrip
+
+**Status**: Signed off (2026-09-26) by the `skeptical-reviewer` at the top tier — one blocking finding fixed and re-reviewed (the DualUp portrait's expected box, computed with the wrong available height), eight second-look notes taken; nothing open for the sweep from this sign-off.
+**Implements**: spec.md's sections marked _(amended 2026-09-26)_ —
+Goal 2's filmstrip, Goals 7–9, Entities, the flows "Looking through
+every stage", "Arriving at the photograph" and "Writing a pair", the
+Design requirements "Width", "The stage's size", "The filmstrip" and
+"The pair blocks", the Authoring requirements, the envelope's new
+bullet, and the six criteria under "_Amended 2026-09-26:_" (AC 15–20
+here, numbered on from AC 14).
+
+Three additions to a built spec, in the same arrangement as the rest:
+one CSS rule and its `sizes` mirror for the stage; two descriptors in
+the transform that reuse the compare's structure and markup; one more
+view in `enhanceCompare`. No dependency. Everything above this section
+stands except two statements this section supersedes, deliberately:
+"Nothing else moves"' ban on hunks in the paper frame's rule (T1720
+replaces `html:not([data-quiet]) .image-frame`; `.image-stage`,
+`.image-frame`, `.image-frame img`, every quiet rule and the loupe
+section stay untouched, and their pins in matte.test.mjs pass
+unedited), and the compare's "three motion rules and nothing else"
+(five, T1726). The five scale tests are applied as before; where the
+simpler shape was taken the bullet says so.
+
+### Shape of the change (amendment)
+
+- **The constitution, again** (`CLAUDE.md`, T1719, its own commit
+  before T1720, on this branch for the reason "The constitution,
+  first" gives). Three edits, exact text:
+  - The block-vocabulary list's tail "and one interactive block,
+    compare (an ordered list of a photograph's stages — each an image,
+    a label and a note — looked at three ways), with captions via the
+    container form;" becomes "and three blocks that take a
+    photograph's stages (each an image, a label and a note): compare,
+    an interactive block that looks at an ordered list of them four
+    ways, and two that hold a pair — side, the two beside each other
+    as plain figures, and slider, an interactive wipe between them —
+    with captions via the container form;".
+  - "an _interactive_ block — `compare`, and any after it — is built
+    as" becomes "an _interactive_ block — `compare` and `slider`, and
+    any after them — is built as".
+  - The Images paragraph's "may be placed in a body only as a stage of
+    a `compare` block in its own folder." becomes "may be placed in a
+    body only as a stage of a `compare`, `side` or `slider` block —
+    the three blocks that take stages — in its own folder."
+
+- **The stage's share** (`src/styles/global.css`,
+  `src/lib/stage-sizes.ts`, the image page, the mat sampler, T1720).
+  Spec 017's rule — `--L`, `--S` and `width: min(L·q, S·r)` on
+  `html:not([data-quiet]) .image-frame` — is deleted and replaced by
+  one rule per shape:
+
+      /* :root, beside --frame-nav-h; the comment above them says a share
+         is at most 1 — a portrait share over 1 makes the frame taller
+         than --avail-h and pushes the nav off the first screen, and a
+         landscape share over 1 only runs into the frame's max-width */
+      --stage-share-landscape: 1; /* a landscape's width: this share of the stage's available width */
+      --stage-share-portrait: 1; /* a portrait's (and by STAGE_SQUARE a square's) height: this share of the available height */
+
+      html:not([data-quiet]) .image-frame[data-shape='landscape'] {
+        width: min(calc(var(--avail-w) * var(--stage-share-landscape)), calc(var(--avail-h) * var(--ar, 1)));
+      }
+      html:not([data-quiet]) .image-frame[data-shape='portrait'] {
+        width: min(calc(var(--avail-h) * var(--stage-share-portrait) * var(--ar, 1)), var(--avail-w));
+      }
+
+  `--avail-w` and `--avail-h` are the stage's, unchanged (the page
+  less its side pads; the first screen below the header less the two
+  spacings and `--frame-nav-h`), so while each share is at most 1 the
+  frame's height is at most `--avail-h` in both rules — the nav line stays on the first screen
+  and spec 013's cap on the image still never binds. The shape is read
+  at build time: `stage-sizes.ts` gains
+
+      export const STAGE_SQUARE = 'portrait';   // tunable: a square is sized as a 'portrait' or a 'landscape'
+      export const STAGE_SHARE = { landscape: 1, portrait: 1 } as const;   // mirrors :root's two tokens
+      export function stageShape(ar: number): 'landscape' | 'portrait'   // ar > 1 landscape, < 1 portrait, 1 → STAGE_SQUARE
+
+  and the page's stage figure and the sampler's both write
+  `data-shape={stageShape(ar)}` beside `--ar`. Why an attribute and
+  not CSS math: the rule is discontinuous at the square whenever the
+  two shares differ (with the portrait share at 0.9, at 1512×982 a
+  1.001 frame is 782px wide by the landscape rule, a 1.0 frame 703 by
+  the portrait one — at the opening shares of 1 the two expressions
+  agree at the square, but the shares are tunables) and no
+  `min`/`max`/`clamp` expression is; `sign()`
+  could, but the square's side would then be an edit to the rule and
+  matte.test.mjs's evaluator would have to learn it — the attribute
+  keeps the square one value and each rule one line of the spec's
+  words. `stageSizes(ar)` spells the rule of `stageShape(ar)` in
+  literals, the shares from `STAGE_SHARE`: landscape
+  `min(calc(AVAIL_W * 1), calc(availH(nav) * ar))`, portrait
+  `min(calc(availH(nav) * <1·ar>), AVAIL_W)`, at both nav branches
+  as today. The token and the literal stay one by the existing
+  evaluation ("the sizes hint agrees with the rule" reads the shares
+  from `:root`) and by a pin that `STAGE_SHARE` equals the two tokens.
+  The stage section's comment (global.css ~1893–1929) is rewritten for
+  the share rule; the comments on `.image-stage` and the quiet rules
+  keep their words. The spacing needs no rule: the stage hugs the
+  frame (`--stage-pad` = `--block-margin` above and below), the nav's
+  `margin-block-end` is `--block-margin` and `.image-head` adds no top
+  padding, so the nav line sits one frame-to-prose spacing under the
+  frame and the title one under the nav — the spec's "no further",
+  read (T1720 measures it). The stage `<img>` keeps its 2320px cap:
+  the laptop's landscape at 1171.5 CSS px asks 2343 device px, 1%
+  over it.
+
+  Expected boxes at `:root`'s opening shares of 1 (header 76px, nav
+  29px, pads 32px; spec 017's rule beside them, and the boxes at nine
+  tenths, for the pause):
+
+  | Screen    | Ratio | Share rule at 1 (w × h) | Bound by        | Spec 017 (w × h) | At 0.9 (w × h) |
+  | --------- | ----- | ----------------------- | --------------- | ---------------- | -------------- |
+  | 1512×982  | 3:2   | 1171.5 × 781.0          | height          | 781.0 × 520.7    | 1171.5 × 781.0 |
+  | 1512×982  | 2:3   | 520.7 × 781.0           | portrait share  | 520.7 × 781.0    | 468.6 × 702.9  |
+  | 1280×1440 | 3:2   | 1216.0 × 810.7          | landscape share | 1216.0 × 810.7   | 1094.4 × 729.6 |
+  | 1280×1440 | 2:3   | 826.0 × 1239.0          | portrait share  | 810.7 × 1216.0   | 743.4 × 1115.1 |
+
+  (2:3 at exactly ⅔, which is what T1720's matte.test case evaluates
+  to ±0.1px; a page's written `--ar` of 0.667 reads up to 0.4px wider,
+  inside the browser read's ±1px.) At 1 the share rule differs from spec 017's
+  in two boxes of the four — the laptop's landscape grows from 781 to
+  1171.5 wide and the DualUp's portrait from 1216 to 1239 tall (spec
+  017 bound it by the width, the share rule by the height); the other
+  two stay within a pixel of what he sees today. The share is the
+  lever he asked for, tuned at the pause.
+
+- **The pair blocks in the transform, and the fourth mode**
+  (`remark-pieces-blocks.mjs`, `src/lib/image-meta.mjs`, T1721). Two
+  descriptors after `compare`, the compare's structure reused whole:
+
+      side:   { forms: 'container', body: 'stages', structure: 'compare', count: { min: 2, max: 2 },
+                attrs: { required: [], optional: [], enums: {} }, sizing: stageSizing }
+      slider: { …the same… }
+
+  `stageSizing` is the compare's existing sizing function, named once
+  and shared by the three descriptors, so every stage image in a body
+  carries `compareSizes(COMPARE_WIDTH.piece)` whatever block holds it
+  (AC 19). The count check reads `max` when present: `min === max`
+  says "takes exactly two stages". The `compare` branch builds all
+  three: root classes `piece-block piece-<name> compare
+  compare-w-<width>` with `<width>` = `PAIR_WIDTH[name] ??
+  COMPARE_WIDTH.piece`; below the root the one shape, class for class;
+  `data-mode` only on a compare that wrote one. One shape, one root
+  class, told apart by the `piece-<name>` class every block already
+  carries — no new attribute, and the barrier's scan 3 and the plugin
+  keep one rule (simpler than three root classes, which would need
+  scan 3 and `enhanceCompare` to learn a list). `rejectBorrowedPrivate`
+  takes the block's name so its line reads "a side may show…";
+  `validateAttributes`, when a block allows none, says "side takes no
+  attributes". `image-meta.mjs`: `COMPARE_MODES` gains `'filmstrip'`
+  (so the transform's `mode` enum does); `PAIR_WIDTH =
+  Object.freeze({ side: 'wide', slider: 'column' })` — the pair
+  blocks' width, one value each (side by side's and the slider's
+  kept widths; bodies are their only surface); `BLOCK_BODIES` gains
+  `side: 'stages'`, `slider: 'stages'` in the descriptors' commit;
+  `firstAltFor` skips a container whose `BLOCK_BODIES` kind is
+  `'stages'` (not only `compare`), since a stage's image text is its
+  label. `hasBlock(story, 'compare')` stays the section's suppressor:
+  the spec steps the section aside for a story's `compare` only, so a
+  story's `side` or `slider` shows beside the section — the case
+  AC 19 pins.
+
+- **The barrier: one file per stage** (`scripts/check-private-files.mjs`,
+  T1722). Scan 2's lists gain `data-paging` and the class
+  `compare-arrow` (T1726's script-only state). A fourth scan, in the
+  same pass: `compares()` keeps each pane `img`'s `srcset` and `sizes`;
+  per page, every candidate URL of every stage image maps to the
+  `srcset`+`sizes` pair it first appeared in, and a stage image whose
+  candidate is already mapped to a different pair fails. Identical
+  `srcset` and `sizes` at one viewport give the browser one choice, so
+  "one candidate list per stage file per page" is "fetched once"
+  (AC 19); keyed by URL equality alone, it stays name-independent like
+  scan 1. The summary line gains "S stage images, one candidate list
+  per file".
+
+- **The side block's static form, the fixtures, the page's stage
+  images** (`global.css`, `src/lib/compare.ts`, the fixtures, the
+  image page, T1723). `side` is final without script: the side-by-side
+  view's rules take `.piece-side` into their selector lists — the pane
+  at `aspect-ratio: var(--ar)`, the image `object-fit: contain` on
+  `--color-bg` — and the static form adds `.piece-side { container:
+  compare-side / inline-size; }`, `.piece-side .compare-frames {
+  grid-template-columns: 1fr 1fr; }` (the grid itself and its gap
+  are the static `.compare-frames` rule's — `display: grid; gap:
+  calc(var(--baseline) / 2)`, global.css ~2129, under no `data-js` —
+  so the side's two columns need only the template; the enhanced
+  `[data-view='side']` frames rule is never matched by a block without
+  script) and `@container compare-side
+  (width < 560px) { .piece-side .compare-frames {
+  grid-template-columns: 1fr; } }` (560px = 2 × `sideMinPx`, the
+  compare's own threshold at opening; the side's is its own tunable
+  from here). Each stage's caption stays shown, label · note beneath
+  its pane (T1709j's dot). `enhanceCompare` skips `.piece-side` (one
+  line), so no script touches it. The page's section builds its stage `<img>` from `getImage`, not
+  `<Image>` (D1723): under a layout, `<Image>` writes `fit: 'cover'` and
+  `position: 'center'` into every request (`components/Image.astro`,
+  `props.fit ??= imageConfig.objectFit ?? 'cover'`), both are in
+  `DEFAULT_HASH_PROPS`, the transform's Markdown images reach `getImage`
+  with neither, and `getImage` never reads `image.objectFit` — so the
+  component and the transform cannot hash alike whatever the page passes
+  (`fit="none"` is dropped by the service; `position` cannot be unset
+  through `??=`). A stage's request is spelled once:
+  `stageImageOptions(surface)` in `image-meta.mjs` returns `{ layout:
+  'constrained', sizes: compareSizes(COMPARE_WIDTH[surface]) }`; the
+  transform's `stageSizing` is `() => stageImageOptions('piece')`, and the
+  page calls `getImage({ src, alt: label, ...stageImageOptions('page') })`
+  in the `compare` map and writes `<img src={stage.src}
+  srcset={stage.srcSet.attribute} {...stage.attributes} />` in the pane —
+  attribute for attribute what Astro's Markdown pipeline writes
+  (`vite-plugin-markdown/images.js`), as the og and loupe files are
+  already built. Neither side passes `width`, so both request the
+  source's own widths. The section's `<img>` loses
+  `data-astro-image-fit="cover"`; nothing reads it
+  (`image.responsiveStyles` is off, so Astro's `[data-astro-image-fit]`
+  rules never ship; the pane's `object-fit: contain` is the site's own).
+  Scan 4 cannot see this: keyed by URL, two builders emitting disjoint URL
+  sets for one source never collide — the one-request fact is pinned at
+  the source (test (a)) and observed on the built land-b page. Fixtures: the
+  fog piece, after its compare, gains a fixture sentence, `:::side`
+  (Camera, Tones) and `:::slider` (Camera, Finished); `_land-b.md`'s
+  story gains, at its end, a fixture sentence and `:::slider` (Camera,
+  Finished) — so the land-b page holds both builders over two stages
+  on every build.
+
+- **The filmstrip's state** (`src/lib/compare.ts`, T1724). `COMPARE`
+  gains, each with its comment:
+
+      stripWraps: false,          // the filmstrip's last stage pages on to the first
+      stripEnds: 'hide',          // an arrow with nowhere to go: 'hide' it, or 'quiet' (muted, aria-disabled)
+      stripKeys: { back: ['ArrowLeft'], next: ['ArrowRight'], first: ['Home'], last: ['End'] },
+      stripWheel: true,           // a horizontal wheel or trackpad scroll moves the strip
+      stripWheelIdleMs: 150,      // a wheel's end: the strip settles after this long without one
+      stripWidth: 'surface',      // the width class the filmstrip wears: 'surface' (the block's own, as the switch) or one of COMPARE_WIDTHS
+
+  `COMPARE_WORDING.modes` gains `filmstrip: 'Filmstrip'` (the control's
+  fourth word) and `strip: { back: 'Previous stage', next: 'Next
+  stage' }` (the arrows' names). Pure: `stripAt(from, by, n)` — the
+  strip's position, clamped to `[0, n − 1]`; `stripSettle(at, n)` —
+  the nearest stage (`Math.round`, clamped); `stripEnds(stage, n,
+  wraps)` — `{ back, next }`, whether each arrow has somewhere to go.
+  Stepping reuses `switchNext(i, n, dir, COMPARE.stripWraps)` — a
+  second caller, not a second function. `restView('filmstrip', n)` is
+  `{ stage: 0 }` and `noteIndex('filmstrip', view)` the stage, as the
+  switch's. The strip and the switch show one `stage`: entering the
+  filmstrip opens on the switch's stage and back.
+
+- **The slider block, enhanced** (`compare.ts`, `global.css`, T1725).
+  `enhance()` reads `fixed = root.classList.contains('piece-slider')`:
+  the mode is `'slider'` whatever is stored or authored, nothing is
+  read from or written to the store, no method control and no hint are
+  built, and the legend is two `li.compare-stop`, each its label as
+  text — no buttons, no side tags; the pair is `restView('slider', 2)`
+  (first left, second right) and never changes; the handle, the drag,
+  the touch, the keys and the live note are the compare's, the note
+  the second stage's (`noteIndex`). CSS, one rule on the legend's
+  existing row (its 1rem gap): `.piece-slider .compare-stop +
+  .compare-stop::before { content: '·'; margin-inline-end: 1rem;
+  color: var(--color-muted); }` — "Camera · Finished", T1709j's dot;
+  the fixed legend's shape, pinned by body.
+
+- **The filmstrip, enhanced** (`compare.ts`, `global.css`, T1726). The
+  fourth view of `render()`. The script writes `--i: k` on each stage
+  and `--strip-at` (the strip's position, a number) on the root; the
+  showing stage is `stripSettle(at)`, its part `"on"`, every other
+  `"strip"` (visible, off the frame); the legend's buttons go to a
+  stage, marking the showing one; no side tags, no hint (the switch's
+  hint rule takes the filmstrip into its list); the note is the
+  showing stage's. Two `button.compare-arrow` (`data-dir="back"` /
+  `"next"`, `aria-label` from `COMPARE_WORDING.strip`, text `←` / `→`)
+  are appended to the frames, per `stripEnds` hidden (`'hide'`) or
+  `aria-disabled` (`'quiet'`). The frames take `tabindex="0"`; a
+  `stripKeys` key steps, goes first or last, and stops propagating. A
+  pointer drag (touch or mouse — one path, as the slider's) follows
+  the hand: `at = stripAt(start, −dx / width, n)`, no transition; on
+  release `stripSettle`. A `wheel` listener on the frames (non-passive,
+  its `deltaMode` converted as the loupe's is) acts only in the
+  filmstrip, with `stripWheel`, and when `|deltaX| > |deltaY|`:
+  `preventDefault`, `at = stripAt(at, deltaX / width, n)`, and the
+  settle after `stripWheelIdleMs` with no wheel. A click on the frame
+  does nothing (the spec lists arrows, keys, swipe, scroll and legend).
+  The width class swaps per `stripWidth` as side by side's does per
+  `sideWidth`. Movement: a page (arrow, key, legend) writes
+  `data-paging`, the settle after a drag or a wheel writes
+  `data-settling` — each only when `!reducedMotion()`, so under reduced
+  motion both cut, and each only when the target differs from the
+  current `at` (the slider's settle guard, `if (to === p) return`,
+  T1708): a key or a legend click at an end of a strip that does not
+  wrap, or a settle already on a stage, writes neither, since no
+  transition would run to clear it and the next drag would lag the
+  hand — and `transitionend` on `--strip-at` clears both; a drag's
+  `pointerdown` clears both too.
+  CSS:
+
+      :root { --compare-peek: 0px; }   /* how far each neighbour shows beyond the frame's edge */
+      @property --strip-at { syntax: '<number>'; inherits: true; initial-value: 0; }
+      .compare[data-view='filmstrip'] .compare-frames { overflow: clip; overflow-clip-margin: var(--compare-peek); touch-action: pan-y; }   /* T1729f: was overflow: visible + clip-path, which left the off-frame stages in the page's width */
+      .compare[data-view='filmstrip'] .compare-stage { transform: translateX(calc((var(--i) - var(--strip-at)) * 100%)); }
+      .compare[data-paging] { transition: --strip-at var(--dur-move) var(--ease-move); }
+      .compare[data-view='filmstrip'][data-settling] { transition: --strip-at var(--dur-state) var(--ease-state); }
+
+  plus the arrows' rules — the handle's look: a `--compare-handle`
+  disc, 1px `--color-accent` border, `--color-bg` fill, accent glyph in
+  the mono face, no shadow; at the frame's sides, 0.5rem in, vertically
+  centred; muted when `aria-disabled`; `display: none` outside the
+  filmstrip. The strip is a transitioned registered property, not
+  native scrolling: a smooth scroll or `scroll-snap` settles on the
+  browser's curve and cannot read `--dur-move`. The settle rule is
+  scoped to the filmstrip so the slider's pinned `.compare[data-settling]`
+  stays byte for byte. No rule sets `opacity: 0`; no reduced-motion
+  rule is added (the gates are in script, spec 018's split).
+  _As built (T1726):_ the wheel clears `data-paging` and `data-settling`
+  before it moves the strip (else the strip lags a running slide); the
+  wheel's idle settle fires only while the block is still in the
+  filmstrip and no drag is in progress; the strip keys work from anything
+  inside the frames (a focused arrow too); a `pointerdown` on an arrow
+  does not start a drag (capture would swallow the click); the arrows'
+  small literals (0.75rem, line-height 1, no padding, pointer; muted as
+  `--color-muted` border and colour with a default cursor) are pinned in
+  (e); `--strip-at` is written rounded to 1e6 as `slide()` does. The
+  frames rule's `clip-path` clips the frames' own focus ring at peek 0 —
+  put to the person at the pause.
+
+- **Obsidian** (`obsidian-plugin/compare.ts`, `main.ts`, T1727).
+  `COMPARE_PATTERN` becomes `STAGES_PATTERN`,
+  `^:::(?:compare|side|slider)(\{[^}]*\})?[ \t]*\n([\s\S]*?)\n:::[ \t]*$`
+  — the group numbers unchanged, `:::sidebar` not matched; `main.ts`
+  imports it under the new name and renders all three with the
+  compare's widget and class; comments say "the three blocks that take
+  stages".
+  _Superseded by "Amendment 2 (2026-09-26): the plugin, representative"
+  below: `STAGES_PATTERN` is deleted at T1732 and every block is read by
+  the block table's scanner._
+
+- **The documents, again** (T1728): `AUTHORING.md` — "A compare in a
+  piece" gains `mode="filmstrip"` and what it does; a new "A pair: side
+  and slider" section after it (the flow's example verbatim, exactly
+  two stages, no attributes, a private file from its own folder, the
+  same files fetched once however many blocks show them); the private
+  files' text names the three blocks. `README.md` — the image page's
+  stage sentence (~149) states the share rule; the vocabulary table
+  gains `side` and `slider`, the compare's `mode` list `filmstrip`.
+  `obsidian-plugin/README.md` — the table's rows for `:::side` and
+  `:::slider`, shown as a compare is. `ROADMAP.md` and `DECISIONS.md`
+  at close-out (T1718, amended).
+
+### The tuning envelope, placed (amendment)
+
+The envelope's amended bullet, row by row; a round is the value, its
+row in the named test, and one Decided line in spec.md, as above.
+
+| Envelope item                                        | One place                                                                                           | Pinned by                                                           |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| the stage's two shares                               | `--stage-share-landscape`, `--stage-share-portrait` (`:root`); `STAGE_SHARE` mirrors them            | matte.test.mjs "the stage's shares", "the sizes hint agrees with the rule" |
+| a square as a portrait or a landscape                | `STAGE_SQUARE` (stage-sizes.ts)                                                                     | matte.test.mjs "stageShape"                                         |
+| the filmstrip's arrows: place and shape              | the `.compare[data-js] .compare-arrow` rules                                                        | compare.test.mjs (e) rule bodies                                    |
+| the arrows at the ends; wrapping                     | `COMPARE.stripEnds`; `COMPARE.stripWraps`                                                           | `EXPECTED`                                                          |
+| the filmstrip's keys; how a wheel moves it           | `COMPARE.stripKeys`; `COMPARE.stripWheel` (`false` / `'follow'` / `'page'`, T1729b), `stripWheelStepPx`, `stripWheelIdleMs` | `EXPECTED`; compare.test.mjs (d) `stripWheelStep` table            |
+| the neighbours' sliver                               | `--compare-peek` (`:root`)                                                                          | compare.test.mjs `TOKENS`                                           |
+| the filmstrip's width                                | `COMPARE.stripWidth`                                                                                | `EXPECTED`                                                          |
+| each pair block's width                              | `PAIR_WIDTH` (image-meta.mjs)                                                                       | image-meta.test.mjs; the transform's side/slider shape cases        |
+| the `slider` block's fixed legend's shape            | the `.piece-slider .compare-stop + .compare-stop::before` rule                                      | compare.test.mjs (e) rule body                                      |
+| where a `side` stacks                                | the `@container compare-side (width < 560px)` literal                                               | compare.test.mjs (e) by string                                      |
+| the filmstrip's durations                            | the two strip motion rules (page: move; settle: state)                                              | compare.test.mjs (c) rule strings                                   |
+
+`stripWheelIdleMs` is not an envelope item; it sits in `COMPARE` so no
+constant hides outside it (the Phase 1 review's note on
+`CLICK_SLOP_PX`).
+
+### Failure messages (amendment)
+
+The transform, through `file.fail`, naming the piece and the line:
+
+```
+side takes exactly two stages (one per line: ![Label](./file.jpg) then its note); got 3
+slider takes exactly two stages (one per line: ![Label](./file.jpg) then its note); got 1
+unknown attribute "mode" on side — side takes no attributes
+"../beta/_photo.jpg" is a private file of another folder — a slider may show a private file only from its own folder; a public photograph may be borrowed (../beta/photo.jpg)
+invalid value "carousel" for mode on compare — allowed: slider | side | switch | filmstrip
+```
+
+The barrier:
+
+```
+[check-private-files] one stage, two candidate lists in dist/images/where-the-fog-lets-go/land-b/index.html: /_astro/…webp (its srcset or sizes differ)
+[check-private-files] a script-only state in the markup of dist/pieces/x/index.html: data-paging
+[check-private-files] N loupe files on M image pages, K of them detail exports named nowhere else; C compares in one shape; S stage images, one candidate list per file; no compare or loupe state in P pages.
+```
+
+The refusal of a private file in any other block keeps its hint ("…or
+show it as a stage of a :::compare in this folder"): still true
+advice, and its pins stay unedited.
+
+### Testing strategy (amendment)
+
+- **The constitution** — **T1719**: the three edits greped verbatim;
+  the commit touches `CLAUDE.md` alone and precedes T1720's.
+
+- **The stage's share** — matte.test.mjs, **T1720**. (b): the two
+  shape rules' declarations exactly (the `--L`/`--S` pin goes with the
+  rule it pinned); the two tokens declared once, on `:root`, at `1`;
+  `STAGE_SHARE` equal to them; `.image-stage`, `.image-frame`,
+  `.image-frame img` and the quiet list unedited. (c): "one rectangle,
+  turned" is replaced — its rule is the one the spec removes, so this
+  is a retargeted test, not a weakened one — by "the stage's share":
+  over the grid, the evaluated width equals the share rule computed in
+  the test from the stage's limits and `:root`'s shares for
+  `stageShape(ratio)`, the frame fits both limits and touches its
+  share or the other bound, the cap never binds; and the table above
+  at the fallback header (76px), 3:2 and 2:3 at 1512×982 and
+  1280×1440, to ±0.1px. "stageShape": 1.5 landscape, 0.667 portrait,
+  and 1 → the literal `'portrait'` in the test's row — not the
+  imported `STAGE_SQUARE`, which would move both sides of the
+  assertion (a square round edits this row, as every envelope row is
+  edited); the page's and the sampler's source write
+  `data-shape={stageShape(`. The `paperEnv` helper (matte.test.mjs
+  ~777–799) is retargeted with the case: it now picks the
+  `${PAPER_FRAME}[data-shape='…']` rule by `stageShape(ratio)` and
+  drops `--L`/`--S` from its env (the evaluator already honours
+  `var(--ar, 1)` and reads the shares from `:root`), and the
+  sizes-hint case then runs unchanged over it. Mutations: a share
+  moved in `:root` alone → the token pin and "sizes = width" fail;
+  `STAGE_SQUARE` flipped → "stageShape" fails. In the browser (BiDi)
+  at both screens on a 3:2 and a 2:3 page: the frame's rect against the
+  table (±1px, the real header measured), frame bottom → nav top and
+  nav bottom → head top (each `--block-margin`, 48px ± 1), the stage
+  image's `currentSrc` width; the quiet view's frame rect equal to
+  `main`'s at the same viewport.
+
+- **The pair blocks' shape and failures** —
+  remark-pieces-blocks.test.mjs, **T1721**, the compare cases'
+  helper and fixtures: `:::side` with two stages →
+  `figure.piece-block.piece-side.compare.compare-w-wide` > frames > two
+  stages, labels and notes in order, no `data-mode`, no link;
+  `:::slider` the same with `piece-slider` and `compare-w-column`; each
+  stage `img`'s `sizes` equal to a compare's; one and three stages each
+  fail naming the count; `mode="slider"` on `side` fails with the
+  no-attributes line; an own-folder private stage renders; the
+  borrowed private fails naming the block though the file exists, the
+  borrowed public renders; `:::compare{mode="filmstrip"}` renders with
+  `data-mode="filmstrip"`, `mode="carousel"`'s line lists four.
+  image-meta.test.mjs: the agreement case with the two new bodies;
+  `PAIR_WIDTH`'s values in `COMPARE_WIDTHS`; `firstAltFor` skipping a
+  `side` that comes first; `passageFor` giving no caption for a
+  `slider`. remark-pieces-vocabulary.test.mjs: the known-blocks list
+  ends `…held, compare, side, slider`. Mutation: the `max` check
+  dropped → the three-stage case fails.
+
+- **One file per stage** — private-files.test.mjs, **T1722**, T1703's
+  temp-dir shape: two compares whose stage images share URLs with
+  identical `srcset` and `sizes` → 0 and the summary's count; the same
+  URL in two stage images with different `sizes` → 1; with different
+  `srcset` → 1, both naming the page and the URL; a URL shared by a
+  stage image and a non-stage `img` → 0; `data-paging` and
+  `class="compare-arrow"` in markup → 1 each, and in `<script>` text
+  only → 0.
+
+- **The side's static form; one file on a built page** — **T1723**:
+  the build's barrier line counts the three new blocks among its
+  compares (before and after recorded) and the stage images; greped from `dist/`: the fog piece's side and slider (their
+  root classes, two stages each) and every `_land-b.jpg` stage image
+  on the fog piece and on land-b carrying one `srcset` string
+  (quoted); mutation: `width: 1400` added to the page's `getImage` call → test
+  (a)'s failing line pasted, reverted (D1723: scan 4 cannot see it); the
+  story slider's and the section's panes for `_land-b.jpg` quoted with
+  one identical `srcset` string, the section `<img>`'s attribute list
+  equal to the story's. compare.test.mjs (a): the section's stage
+  `<Image>` passes no `width`; `enhanceCompare` skips `.piece-side`. In
+  the browser at 1512×982: the side's two panes at equal widths and one
+  top, captions shown, no `data-js`, script on or off; at 480px
+  stacked; the resource timeline on the fog piece and on land-b holds
+  one request per stage file.
+
+- **The filmstrip's state** — compare.test.mjs (d), **T1724**:
+  `EXPECTED` with the six keys and the words; `stripAt` (adds, clamps
+  both ends), `stripSettle` (0.49 → 0, 0.5 → 1, clamps), `stripEnds`
+  at first, middle, last, and wrapping; `switchNext` with `stripWraps`
+  at both ends; `restView` and `noteIndex` for the filmstrip; the
+  control's modes equal `COMPARE_MODES` in order. Mutations:
+  `stripWraps` flipped → `EXPECTED` fails by name; `stripSettle` by
+  `Math.floor` → the 0.5 case fails.
+
+- **The slider block** — **T1725**: compare.test.mjs (e): the fixed
+  legend's rule by exact body. In the browser at both screens on
+  the fog piece's slider: `data-js`, `data-view="slider"`, no
+  `.compare-control`, no `.compare-hint`, no `button` in the legend,
+  legend text "Camera", "Finished"; split 50 at rest, drags at
+  25/50/75 set it and the parts (Camera left), ← moves `aria-valuenow`
+  by 2; the note Finished's; `sessionStorage`'s `compare-mode` unchanged
+  by it, and a stored `side` does not change it; no script: stacked.
+
+- **The filmstrip, enhanced** — **T1726**: compare.test.mjs (b)
+  `TOKENS` gains `--compare-peek: 0px`, read by the frames rule; (c)
+  `MOTION` gains the two rules and "the five are all its motion", the
+  `@property --strip-at` block, and `data-paging` and `data-settling`
+  written only behind `!reducedMotion()`; (e) the arrows' rules by
+  body. motion.test.mjs green unedited. In the browser at both screens
+  on land-b's section: Filmstrip → `data-view`, `--strip-at` 0, stage
+  k's rect at `k × w` from the frame's left, back arrow hidden; next →
+  `data-paging` and a 480ms transition on `--strip-at`, then 1, note
+  Tones; →, End, Home; at the last, next hidden; a legend click slides
+  back; a synthesised pointer drag of −0.6w → 0.6 while held, settling
+  to 1 on release with `data-settling` and 180ms; a synthesised wheel
+  of `deltaX` 0.4w → +0.4, settling after the idle; a vertical wheel
+  moves nothing; under reduced motion (the `ui.prefersReducedMotion`
+  pref) no `data-paging`, no transition, the cut; `--compare-peek`
+  set to 2rem inline → the neighbours' 32px showing beyond each edge
+  (rects), reverted; no script: stacked.
+
+- **Obsidian** — obsidian-plugin.test.mjs, **T1727**: the pattern
+  matches `:::side` and `:::slider` blocks whole and not `:::sidebar`;
+  the compare cases unchanged.
+
+- **The documents** — **T1728**: greps and Prettier, as T1715.
+
+### File structure (amendment)
+
+```
+CLAUDE.md                                 the vocabulary clause, the interactive sentence, the images paragraph (T1719, its own commit)
+src/styles/global.css                     :root: the two stage shares (T1720), --compare-peek (T1726); the stage's paper rule and its comment (T1720); the side's static rules (T1723); the slider block's legend (T1725); the filmstrip, its arrows, @property --strip-at, two motion rules (T1726)
+src/lib/stage-sizes.ts                    STAGE_SQUARE, STAGE_SHARE, stageShape, stageSizes retuned (T1720)
+src/pages/images/[...id].astro            data-shape on the stage figure (T1720); the section's stage <Image> without width (T1723)
+src/pages/dev/matte/[...surface].astro    data-shape on the sampler's stage figure (T1720)
+matte.test.mjs                            (b) the shape rules and the shares; (c) "the stage's share" in place of "one rectangle, turned" (T1720)
+src/lib/image-meta.mjs                    COMPARE_MODES + filmstrip, PAIR_WIDTH, BLOCK_BODIES side/slider, firstAltFor's skip by kind (T1721)
+remark-pieces-blocks.mjs                  side and slider, stageSizing, the count's max, the borrowed line's block name, the no-attributes line (T1721)
+remark-pieces-blocks.test.mjs, image-meta.test.mjs, remark-pieces-vocabulary.test.mjs   T1721's cases
+scripts/check-private-files.mjs           scan 2's two names, scan 4 (T1722)
+private-files.test.mjs                    T1722's cases
+src/content/pieces/where-the-fog-lets-go/ index.md's side and slider; _land-b.md's story slider (T1723)
+src/lib/compare.ts                        the side skip (T1723); COMPARE's strip keys, the words, stripAt/stripSettle/stripEnds (T1724); the fixed slider (T1725); the filmstrip view (T1726)
+compare.test.mjs                          (a) T1723; (d) T1724; (e) new, T1725–T1726; (b), (c) T1726
+obsidian-plugin/compare.ts, main.ts       STAGES_PATTERN (T1727)
+obsidian-plugin.test.mjs                  T1727's cases
+AUTHORING.md, README.md, obsidian-plugin/README.md   T1728
+```
+
+Untouched, as above, and now also: the quiet rules, `.image-stage`,
+`.image-frame`, `.image-frame img` and the loupe section of
+`global.css`; `src/lib/loupe.ts`; `motion.test.mjs`; the reduced-motion
+block; `content.config.ts`; `src/lib/images.ts`.
+
+### Known limitations (amendment)
+
+- **A share below 1 shrinks boxes he knows** (the table above): at
+  nine tenths the laptop's portrait (703 tall against 781) and both
+  on the DualUp (a 3:2 1094 wide against 1216, a 2:3 1115 tall
+  against 1216) are smaller than under spec 017, and a phone's
+  landscape narrows (322px on a 390px phone against 358). The spec
+  opens both shares at 1 for that reason (Decided, 2026-09-26), where
+  the laptop's landscape and the DualUp's portrait grow and nothing
+  shrinks; the Phase 3a look puts the
+  numbers to him before any share is lowered.
+- **The first screen weighs more on the laptop**: a larger landscape
+  picks a larger candidate (the 2320px one where 1668 served).
+- **`sizes` follows `COMPARE_WIDTH` per surface.** A round that sets
+  the piece's and the page's widths apart makes land-b's story slider
+  and its section two candidate lists of one stage; scan 4 then fails
+  naming the page, and that round sets one hint for both.
+- **Scan 4 is blind to disjoint URL sets from one source** (D1723).
+  Keyed by URL and reading no names, it cannot tell that two hashed
+  files are one photograph, so a builder that requests a different
+  transform (a `fit`, `quality`, `width` or `position`) passes it. The
+  source pin (test (a)) holds that line for the two builders that exist.
+  Should a third builder of stage images appear, the key to add is a
+  declared identity both builders write (the stage file's basename as a
+  data attribute, required by scan 3) — not Astro's file-name shape.
+- **`<Image>` and `getImage` never share a file under a layout.**
+  `Image.astro` adds `fit: 'cover'` and `position: 'center'` to every
+  request; both are hashed; `getImage` adds neither and ignores
+  `image.objectFit` (that option changes only the component's defaults
+  and an unshipped stylesheet). Anywhere the site needs two `<img>`s of
+  one file to share transforms, both must be built from `getImage` —
+  the loupe (T1710) and the stage section (D1723) are the two cases so
+  far.
+- **The side's stacking is CSS, the compare's side by side script**:
+  both open at 560px and are separate tunables from here.
+- **A settle is by position**: the nearest stage on release, no
+  flick; a wheel's end is inferred from `stripWheelIdleMs` of quiet
+  (browsers send no end event). A wrapping strip, if a round turns it
+  on, slides back across every stage.
+- **A real trackpad's horizontal scroll and a real swipe** are
+  synthesised in the headless reads; the person attests them.
+
+### Resolved decisions (amendment)
+
+- **The stage's shape is read at build time** (`data-shape` from
+  `stageShape`), because the share rule is discontinuous at the square;
+  see the bullet.
+- **The shares are `:root` tokens, mirrored in `stage-sizes.ts`** and
+  held to them by evaluation, the arrangement `stageSizes` already has
+  with five tokens.
+- **The pair blocks are the compare's markup**, one root class and one
+  shape, told apart by `piece-side` / `piece-slider`; scan 3 and the
+  plugin keep one rule, and the image page builds neither.
+- **`side` has no script at all**; its stacking is a container query.
+- **"Fetched once" is pinned two ways** (D1723). Scan 4 pins one
+  candidate list per stage URL per page — a stage the builders emit at
+  one URL cannot carry two lists. That the builders emit one URL at all
+  is pinned at the source: the stage request is spelled once
+  (`stageImageOptions`), both builders reach `getImage` with it, and
+  test (a) holds the page to that call. The earlier claim that scan 4
+  fails on a restored width cap was wrong — scan 4 reads no names, so
+  two builders with disjoint URL sets pass it. The story's `side` or
+  `slider` does not suppress the section, as the spec says only a
+  `compare` does.
+- **The filmstrip moves a registered property on the tokens**, not the
+  browser's scroll; the switch and the filmstrip share one showing
+  stage; a click on its frame does nothing; a mouse drags it as a
+  finger does (one pointer path).
+- **The filmstrip's settle reuses `data-settling`** in a rule of its
+  own, so the slider's pinned rule is unedited.
+- **The slider block's note is the live note of its second stage** — a
+  reading: the spec says "the pair's note" (Goal 9, Entities), "the
+  live note" (Design requirements) and "the note following" (AC 17);
+  the compare's live note, following the right side, satisfies all
+  three with no new markup. Showing both stages' notes is the
+  alternative, put to him at the Phase 3a look.
+- **No new dependency.**
+
+## Amendment 2 (2026-09-26): the plugin, representative
+
+**Status**: Signed off (2026-09-26) by the `skeptical-reviewer` at the top tier — one blocking finding fixed and re-reviewed (the T1714 Obsidian bullet claimed standing while T1731–T1732 delete what it describes), nine second-look notes taken; nothing open for the sweep from this sign-off.
+**Implements**: spec.md's sections marked _(amended 2026-09-26, plugin)_
+— Goal 10, the two Non-goals, the Entities "The plugin's block table"
+and "The two renderers", the flow "Reading a draft through in
+Obsidian", the Design requirements "The plugin's figures", "The
+plugin's rules win" and "Both views, one markup", the Authoring
+requirement "The plugin's README", the envelope's plugin bullet and
+ordinary-path line, and the six criteria under "_Amended 2026-09-26
+(plugin):_" (AC 21–26 here, numbered on from AC 20).
+
+The plugin only; nothing the site builds or serves changes. Today's
+plugin reads seven leaf blocks by a line regex and the three stage
+blocks by a second one, draws one widget in Live Preview, and has one
+unguarded layout rule. It becomes: one table of every block, one
+scanner that claims each block's lines, one figure built from a parsed
+block, two renderers that call it (the existing CodeMirror field and a
+Reading view post-processor), and one stylesheet whose every
+declaration is `!important` and whose every share is a custom
+property. No dependency; the plugin still never imports the transform
+(a test reads both). Everything above this section stands except the
+two "Obsidian" bullets (T1714's and the first amendment's), superseded
+as their pointers say, and T1728's plugin-README sentence, which
+T1734's rewrite replaces.
+
+### Shape of the change (amendment 2)
+
+- **The block table** (`obsidian-plugin/blocks.ts`, new, no `obsidian`
+  import — compare.ts's rule, so the suite reads it; T1730). One entry
+  per block, in the transform's order:
+
+  ```ts
+  export type Width = 'column' | 'wide' | 'full' | 'tall' | 'inset' | 'side' | 'held';
+  export type Layout = 'frame' | 'pair' | 'grid' | 'strip' | 'beside' | 'stages';
+  export type PluginBlock = {
+    forms: 'container' | 'both'; // = BLOCKS[name].forms
+    body: 'caption' | 'prose' | 'images+caption' | 'stages'; // = BLOCKS[name].body
+    layout: Layout;
+    width?: Width; // frame: fixed; beside: the floated frame's share
+    slots?: readonly (readonly [src: string, alt: string])[]; // attribute images, in order
+    method?: string; // side and slider: the fixed method line
+  };
+  export const PLUGIN_BLOCKS: Record<string, PluginBlock>;
+  export const METHOD_WORDS = { slider: 'Slider', side: 'Side by side', switch: 'Switch', filmstrip: 'Filmstrip' };
+  export const DEFAULT_MODE = 'slider';
+  ```
+
+  | block                                  | forms     | body           | layout  | width / slots                                                    |
+  | -------------------------------------- | --------- | -------------- | ------- | ---------------------------------------------------------------- |
+  | single, fullbleed, wide, tall, inset   | both      | caption        | frame   | column, full, wide, tall, inset; `[['src','alt']]`               |
+  | diptych, triptych                      | both      | caption        | pair    | `left/leftAlt, right/rightAlt` (+ `center/centerAlt`)            |
+  | grid, strip                            | container | images+caption | grid, strip | —                                                            |
+  | aside, row                             | container | prose          | beside  | side; `[['src','alt']]`                                          |
+  | held                                   | container | prose          | beside  | held; `[['src','alt']]`                                          |
+  | compare                                | container | stages         | stages  | method from `mode` (`METHOD_WORDS`, else `DEFAULT_MODE`)         |
+  | side, slider                           | container | stages         | stages  | `method: 'side'`, `'slider'` — the block's own name as written   |
+
+  Attributes the plugin draws, because CSS alone draws them: `wide`'s
+  `bleed`, the pairs' `width` (`wide` → wide, `fullbleed` → full) and
+  `diptych`'s `weight`, the beside blocks' `side` (`right`, else left —
+  held's default, and what an aside or row missing it shows; the build
+  judges). `match="height"` is drawn from the images' natural ratios once loaded (T1735c);
+  flags (`{bleed}`) and the `{#id .class}` shorthand are ignored, as
+  `parseAttrs` does today. A slot's `src` missing → the block stays raw,
+  as today; `alt` defaults to `''`.
+
+- **The scanner** (`blocks.ts`, T1730). A line scanner that claims
+  spans, not a Markdown parser: the transform's grammar for our blocks
+  is two line shapes, and a parser would be a dependency or a second
+  micromark. `parseBlocks(text: string): ParsedBlock[]` walks the lines
+  once:
+
+  ```ts
+  export type Image = { src: string; alt: string; label?: string };
+  export type ParsedBlock = {
+    name: string;
+    from: number; to: number;           // offsets: opener line's start, closer line's end
+    startLine: number; endLine: number; // 0-based, inclusive
+    attrs: Record<string, string>;
+    images: Image[];                    // slots, body images, or stages (label set)
+    caption: string;                    // Markdown, '' when none
+    prose: string;                      // Markdown, '' unless body is 'prose'
+    method: string | null;
+  };
+  ```
+
+  - A line matching `^::([a-z]+)(\{[^}]*\})?[ \t]*$` whose name is in the
+    table with `forms: 'both'` is a leaf block of one line. A
+    container-only name in leaf form (`::grid{}`) is not a block.
+  - A line matching `^:::([a-z]+)(\{[^}]*\})?[ \t]*$` whose name is in the
+    table claims the lines up to the first later `^:::[ \t]*$`; the body
+    between is not scanned for blocks (the transform refuses nesting).
+    `:::sidebar` is name `sidebar`, not in the table, not claimed. A
+    known opener with no closer is not a block — the plugin never
+    swallows the rest of a note.
+  - Lines inside a ` ``` ` or `~~~` fence outside any claimed span are
+    skipped (the site shows them as code).
+  - A directive with text before it on its line is not matched — the
+    "mid-paragraph" case; it stays raw in both views.
+  - Bodies, by the transform's rules: `caption` → the body trimmed;
+    `images+caption` → the paragraphs (blank-line separated) made only
+    of images are the images, the rest joined is the caption; `prose` →
+    the body; `stages` → `parseCompareBody` (compare.ts, unchanged,
+    labels as today). One image regex, exported from compare.ts, read
+    by both.
+  - A container that yields no image (an empty grid, a compare with no
+    stages) is not a block, but its span stays claimed, so no line
+    inside it is read as a leaf — today's compare rule, for every
+    container.
+
+  `parseAttrs` and `resolveRelative` move here from `main.ts`,
+  unchanged, so the suite can test them.
+
+- **The figure** (`obsidian-plugin/figure.ts`, new, no `obsidian`
+  import; T1731). One builder, two callers:
+  `figureTree(block: ParsedBlock, resolve: (src: string) => string | null): FigureNode`
+  returns a plain tree (`{ tag, classes, attrs?, children }`,
+  `{ text }`, `{ markdown }`), and `toDom(node, renderMarkdown)` turns
+  it into elements, handing each `{ markdown }` node to the caller's
+  Markdown renderer. The tree, not DOM, is the output so both views
+  share it and the suite tests it without a DOM library (a dependency
+  this project would otherwise need). The shape:
+
+  ```
+  div.photo-pieces-block.photo-pieces-<layout>.photo-pieces-w-<width>
+      [.photo-pieces-side-left|right][.photo-pieces-bleed-left|right][.photo-pieces-weight-left|right]
+      data-block=<name>
+    div.photo-pieces-frames
+      img (src from resolve, alt) | div.photo-pieces-missing "[<name>: image not found — <src>]"
+      — for stages: div.photo-pieces-stage > (img | missing), div.photo-pieces-stage-label <label>
+    div.photo-pieces-caption {markdown}   when the caption is not ''
+    div.photo-pieces-method <words>        stage blocks
+    div.photo-pieces-prose {markdown}      beside blocks
+  ```
+
+  Width per layout: `frame` its table width; `pair` from `width`
+  (column by default); `grid` and `stages` column; `strip` full;
+  `beside` the root at column with the frames floated at `side` or
+  `held`. The breakout sits on `.photo-pieces-frames`, never the root,
+  so a caption and the method line stay at the text's width beneath a
+  wide or full frame, as the site returns a fullbleed's caption to the
+  column. A beside block's prose is inside the figure, rendered by the
+  caller: the float is contained in one element (`display: flow-root`),
+  so CodeMirror's height map sees one block and Reading view needs no
+  float across sections. The old `photo-pieces-preview*` classes go;
+  `-stage`, `-stage-label`, `-missing` and the missing box's text stay.
+
+- **The stylesheet** (`obsidian-plugin/styles.css`, rewritten; T1731).
+  **Every declaration except a custom property carries `!important`**
+  — the strategy for "the plugin's rules win". An important author
+  declaration outranks every normal one whatever its specificity, which
+  is the fix proven in his vault: no normal-priority rule of Obsidian's
+  can outrank it. Against another `!important` rule specificity decides
+  again (CodeMirror's base theme has one on `.cm-scroller`, none on a
+  widget's descendants), so the console check at the pause stays the
+  judge. A cascade layer would do the opposite
+  (layered rules lose to Obsidian's unlayered ones), and out-specifying
+  selectors we cannot see is a guess. Applying it to every declaration
+  rather than a list of "layout" properties leaves the test nothing to
+  keep in step. Its reach is bounded by the selectors: every rule is
+  scoped to a `.photo-pieces-` class except three, pinned by the test —
+  `body` (the tokens, custom properties only) and the two pane hosts
+  below. The layout itself sits on elements inside the widget root
+  (`.photo-pieces-frames` and its children), not on the root Obsidian's
+  `.cm-content > *` rules can reach. The root sets `white-space: normal
+  !important`: CodeMirror puts `pre-wrap` on `.cm-content` and it
+  inherits into a widget, where it would keep a caption's or a held
+  paragraph's source line breaks. No at-rules.
+
+  **The pane as a container.** `wide` and `full` must reach past the
+  text column to the pane, which CSS can only measure from a query
+  container: `.markdown-source-view.mod-cm6 .cm-scroller` and
+  `.markdown-preview-view` (Live Preview's and Reading view's scroll
+  hosts) get `container: photo-pieces-pane / inline-size !important`.
+  Then, as the site's `.piece-wide` and `.piece-fullbleed` do with
+  `vw`: `full` frames are `width: calc(var(--photo-pieces-full) * 100cqi);
+  margin-inline: calc(50% - var(--photo-pieces-full) * 50cqi)`; `wide`
+  sets `--w: min(calc(var(--photo-pieces-wide) * 100%),
+  calc(var(--photo-pieces-wide-cap) * 100cqi))` and
+  `margin-inline: calc((100% - var(--w)) / 2)`; `bleed-left` runs
+  from the pane's left edge to the column's right (`width: calc(50% +
+  50cqi)`, `margin-left: calc(50% - 50cqi)`), `bleed-right` mirrored.
+  `tall` caps the image at `calc(var(--photo-pieces-tall) * 100vh)`,
+  centred — the window's height, because the pane's cannot be queried
+  without size containment on Obsidian's scroller. `inset`, `side` and
+  `held` are shares of the column (`%`). `pair`: frames `display: flex`,
+  items `flex: 1 1 0; min-width: 0`, `align-items: center`, the weighted
+  one `flex-grow: 2`. `grid`: `display: grid;
+  grid-template-columns: repeat(var(--photo-pieces-grid-columns),
+  minmax(0, 1fr))`. `strip`: one row, `overflow-x: auto`, images at
+  `height: var(--photo-pieces-strip-height); width: auto; max-width:
+  none; flex: none`. `beside`: root `display: flow-root`, frames
+  `float` on its side with a gap on the prose side. `stages`: today's
+  wrapping row, `flex: 1 1 var(--photo-pieces-stage-min)`. Captions and
+  the method line: `font-size: var(--photo-pieces-caption-size); color:
+  var(--photo-pieces-caption-color)`, a caption's `p` unmargined; the
+  method line `display: var(--photo-pieces-method-display)`.
+  `.photo-pieces-hidden { display: none !important }` for Reading
+  view's continuation sections. Every value's opening number is in the
+  envelope table below.
+
+- **Live Preview** (`main.ts`, T1732). `buildDecorations` becomes one
+  pass over `parseBlocks(doc)`: each block the cursor is not inside
+  (`r.from <= to && r.to >= from`, as today) is
+  `Decoration.replace({ widget: new FigureWidget(block, sourcePath,
+  plugin), block: true })` over `[from, to]`. `FigureWidget.toDOM(view)`
+  builds `toDom(figureTree(block, resolver(app, sourcePath)), md)`,
+  where `md` is `MarkdownRenderer.render(app, markdown, el, sourcePath,
+  component)` on a `Component` the widget loads and unloads in
+  `destroy()`, then `view.requestMeasure()` once the render resolves
+  (its height changes after layout). `eq` compares the block's content
+  (name, attrs, images, caption, prose, method) and the path, so a
+  selection change does not rebuild images. `resolver(app, sourcePath)`
+  is today's lookup (`resolveRelative`, then `getFirstLinkpathDest` or
+  `getAbstractFileByPath`, then `getResourcePath`), shared with Reading
+  view. The StateField, its `docChanged || selection` rule and the
+  strict-Source-mode check stay. `LEAF_BLOCKS`, `DIRECTIVE_PATTERN`,
+  `BlockWidget` and `STAGES_PATTERN` (compare.ts) are deleted. The
+  header comment is rewritten: every block, both views, representative;
+  what stays raw (a mid-line directive, a block with a missing required
+  src, an unclosed container, an unknown name). No quoted `'pause'`
+  anywhere — the vocabulary walk reads `main.ts`.
+
+- **Reading view** (`main.ts`, and two pure helpers in `blocks.ts`;
+  T1733). `this.registerMarkdownPostProcessor((el, ctx) => …)`.
+  Obsidian hands it one rendered section at a time — a paragraph, a
+  list, a heading, split at blank lines — never the source, so a
+  block's text is recovered from `ctx.getSectionInfo(el)`: `{ text,
+  lineStart, lineEnd }`, `text` the whole note. `null` (a transclusion,
+  a hover preview, an export) → leave the section as Obsidian drew it.
+  Otherwise `parseBlocks(text)` (cached on the last text) and
+  `sectionPieces(blocks, lineStart, lineEnd)`:
+
+  ```ts
+  type Piece = { kind: 'markdown'; startLine: number; endLine: number } | { kind: 'figure'; block: ParsedBlock };
+  export function sectionPieces(blocks: ParsedBlock[], lineStart: number, lineEnd: number):
+    Piece[] | null; // null: the section touches no block — leave it
+  ```
+
+  Lines of the section outside every block are `markdown` runs; a block
+  that begins in the section is a `figure` (drawn from its whole
+  source, whatever sections it spans); lines of a block that began
+  earlier are dropped. The section is emptied and rebuilt from the
+  pieces — a run through `MarkdownRenderer.render` on a
+  `MarkdownRenderChild(el)` given to `ctx.addChild`, a figure through
+  the same `toDom(figureTree(…))`; no pieces → `el` gets
+  `photo-pieces-hidden`, and a run that yields pieces removes it, in
+  case Obsidian hands back an element it hid before. There is no cursor
+  in Reading view: every block always renders.
+
+  **Keeping a multi-section block fresh.** Obsidian re-runs
+  post-processors only for sections whose text changed, so editing a
+  held's third paragraph re-runs that (hidden) section and not the
+  first, which drew the figure; typing a fence above an existing image
+  paragraph, or deleting a closer, changes a block around sections that
+  do not re-run at all. So the plugin keeps, per `ctx.sourcePath`,
+  `blockSignature(blocks, text)` (the blocks' source slices joined) as
+  last seen, computed on every call that has section info — a section
+  touching no block included; a call whose signature differs from the
+  stored one schedules, once per tick,
+  `leaf.view.previewMode.rerender(true)` for every Markdown leaf on that
+  file in `'preview'` mode. Every call stores the signature, so the full
+  re-render that follows sees it equal and does not loop; the first
+  render of a note stores it without comparing. The cost: any edit that
+  touches a block costs one full re-render of that note's Reading view,
+  including an edit a section would have redrawn on its own — the
+  simpler rule, taken over one that guesses which edits are safe.
+
+- **The plugin's own files** (T1732): `manifest.json` and
+  `package.json` to `0.3.0`; `package.json`'s description (it still says
+  "fullbleed directive") and the manifest's say "every block of the
+  site's vocabulary, in Live Preview and Reading view". `minAppVersion`
+  stays at 1.4.0: `MarkdownRenderer.render`, `MarkdownPreviewView.rerender`
+  and `getSectionInfo` are present in obsidian@1.4.0's typings.
+
+- **The documents** (T1734): `obsidian-plugin/README.md` rewritten for
+  Goal 10 — a table of every block with what Live Preview and Reading
+  view show (the same figure; Live Preview returns the text when the
+  cursor enters); nothing "raw by design" but a directive with text
+  before it on its line; the path paragraph kept; install and rebuild
+  kept; "How to check it": open the sampler piece, every block a
+  figure, both views; "Extending": a block added to the transform is a
+  line in `PLUGIN_BLOCKS`, which the equality test demands; the
+  stylesheet's `!important` rule and its test. `AUTHORING.md`'s
+  "Obsidian settings that matter" bullet: every block a representative
+  figure in both views, the check (the sampler), Readable line length
+  on for the widths to read as the site's; the "Live Preview only —
+  Reading view is intentionally out of scope" sentence goes. `DECISIONS.md`
+  and `ROADMAP.md` at close-out (T1718, amended).
+
+### The tuning envelope, placed (amendment 2)
+
+The envelope's plugin bullet. One place each, all in
+`obsidian-plugin/styles.css`'s `body` rule; pinned by name and value in
+obsidian-plugin.test.mjs's `PLUGIN_TOKENS` table. Widths are shares:
+of the text column (`%`), of the pane (`cqi`) or of the window's height
+(`vh`) — representative, not the site's pixels. The opening values
+mirror the site's proportions (inset 440 / 680, wide 1160 / 680 capped
+at 96vw, aside 300 / 680, row 340 / 680, grid two columns).
+
+| Envelope item                         | One place (opening value)                                                   | Pinned by                                     |
+| ------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------- |
+| `inset`'s width                       | `--photo-pieces-inset: 0.65` (of the column)                                | `PLUGIN_TOKENS`                               |
+| `wide`'s width                        | `--photo-pieces-wide: 1.7` (of the column), `--photo-pieces-wide-cap: 0.96` (of the pane) | `PLUGIN_TOKENS`                 |
+| `full`'s width                        | `--photo-pieces-full: 1` (of the pane)                                      | `PLUGIN_TOKENS`                               |
+| the side frames                       | `--photo-pieces-side: 0.45` (aside, row), `--photo-pieces-held: 0.5` (of the column) | `PLUGIN_TOKENS`                      |
+| the `tall` height cap                 | `--photo-pieces-tall: 0.8` (of the window's height)                         | `PLUGIN_TOKENS`                               |
+| the grid's columns                    | `--photo-pieces-grid-columns: 2`                                            | `PLUGIN_TOKENS`                               |
+| the gaps                              | `--photo-pieces-gap: 0.5em`                                                 | `PLUGIN_TOKENS`                               |
+| the strip's height; the stage row's wrap | `--photo-pieces-strip-height: 14em`; `--photo-pieces-stage-min: 12em`    | `PLUGIN_TOKENS`                               |
+| the caption's face                    | `--photo-pieces-caption-size: 0.85em`, `--photo-pieces-caption-color: var(--text-muted)` | `PLUGIN_TOKENS`                  |
+| whether the method line shows         | `--photo-pieces-method-display: block` (`none` hides it)                    | `PLUGIN_TOKENS`                               |
+| the method line's words               | `METHOD_WORDS` / `DEFAULT_MODE` (compare), the table's `method` (side, slider) | the equality case (the site's words); the figure cases |
+
+`--photo-pieces-tall` is 0.8 where the site's cap is 85svh: Obsidian's
+tab header and status bar take roughly the difference from the window.
+
+### Failure messages (amendment 2)
+
+None new. The plugin refuses nothing (spec: the build stays the
+judge); what it cannot draw stays raw. Its one message is today's
+missing box, unchanged: `[<block>: image not found — <src>]`.
+
+### Testing strategy (amendment 2)
+
+All in `obsidian-plugin.test.mjs`, which imports the plugin's `.ts`
+files directly (none imports `obsidian`). The renderers themselves run
+only inside Obsidian; the photographer attests them at the pause.
+
+- **The table equals the vocabulary** — **T1730**. Imports `BLOCKS`
+  from `remark-pieces-blocks.mjs` (exported today; the vocabulary test's
+  known-blocks list is its `Object.keys`): `Object.keys(PLUGIN_BLOCKS)`
+  equals `Object.keys(BLOCKS)` in order; per name, `forms` and `body`
+  equal the descriptor's; every slot's attribute names are in the
+  descriptor's `attrs.required`. `Object.keys(METHOD_WORDS)` equals
+  `COMPARE_MODES` (image-meta.mjs), `METHOD_WORDS` equals
+  `COMPARE_WORDING.modes` and `DEFAULT_MODE` equals
+  `COMPARE.defaultMode` (src/lib/compare.ts). Mutations: a `mystery`
+  entry added to `PLUGIN_BLOCKS` → fails naming it, reverted; `held`'s
+  forms set to `'both'` → the forms case fails, reverted.
+
+- **The scanner** — **T1730**. Over the real files, read whole
+  (frontmatter included — the scanner must pass over it):
+  - **Against the transform.** The sampler's and the fog piece's
+    bodies (frontmatter stripped) rendered through the vocabulary
+    test's harness (`createMarkdownProcessor` with `remarkDirective`,
+    `remarkPiecesBlocks`, `fileURL` the piece's `index.md`); the names
+    from `class="piece-block piece-([a-z]+)` in order equal
+    `parseBlocks(file).map((b) => b.name)` — 33 on the sampler, 8 on
+    the fog piece. This is "finds every block" pinned against the
+    judge, not against a hand list. The images too: with the
+    shorthand image lines (those starting `![` outside every claimed
+    span) removed from the rendered body, the harness's
+    `imageMarkers(code)` srcs in order (the vocabulary test's helper,
+    ~67, copied) equal `parseBlocks(file).flatMap((b) =>
+    b.images.map((i) => i.src))` — stages included, since the
+    transform emits them as image nodes too.
+  - **What it read**, by a hand-written table per file: each block's
+    `images` srcs (and stage labels), `caption`, `side`/`bleed`/
+    `width`/`weight` where written, `method` for the three stage blocks
+    (`Switch`, `side`, `slider`), `prose`'s first words for beside
+    blocks; the sampler's two shorthand images and the fog piece's one
+    are not blocks.
+  - **Edge cases**: `Text ::single{src="./a.jpg" alt="x"} more.` → none;
+    the same line inside a ` ``` ` fence → none; `:::sidebar … :::` →
+    none and a leaf inside it is a block; `:::side` and `:::slider` with
+    the flow's two stages claimed whole with their bodies (the three
+    `STAGES_PATTERN` cases, retargeted here before T1732 deletes the
+    pattern — the guarantees move, none is dropped); `:::compare` whose
+    stages are blank-line separated; a container with no closer → none;
+    `::grid{}` → none; `:::grid` with no images → none and its inner
+    `::single{…}` line not a block; `:::single{…}` with a two-paragraph
+    caption → both paragraphs; `::single{alt="x"}` → none;
+    `:::compare{mode="nope"}` → method `Slider`; and `Text\n::single{src="./photo.jpg" alt="x"}`
+    (a leaf directly under a paragraph line) → one block, and the same
+    string through the harness (`tests/fixtures/piece.md`) renders
+    `piece-single` — both micromark directive tokenizers interrupt a
+    paragraph, so this is the site's behaviour pinned beside the
+    plugin's, not assumed. Mutation: the fence skip removed → the fence
+    case fails, reverted.
+  - **`resolveRelative`**: `./a.jpg` → name; `../beta/a.jpg` from
+    `src/content/pieces/alpha/index.md` → `src/content/pieces/beta/a.jpg`;
+    `../../gallery-images/a.jpg` → `src/content/gallery-images/a.jpg`;
+    a climb past the root → unreachable. _(Amendment 3: the folders'
+    new names from T1737 — `../../photographs/a.jpg`.)_
+
+- **The figure** — **T1731**. `figureTree` over parsed fixtures with a
+  `resolve` that maps every src to `app://<src>` except one: per
+  layout, the root's classes exactly (a wide pair, a weighted diptych,
+  a bleed-left wide, a right aside, a held with no side → left), the
+  children in order (frames, then caption / method / prose); an
+  unresolved src → the missing node with the exact text; no caption
+  node for `''`; a compare with no mode → method `Slider`, `side` →
+  `side`; stage nodes carry their labels.
+
+- **The stylesheet** — **T1731**. Read with `blocks(uncomment(css))`
+  (src/lib/ground.ts, as compare.test.mjs does):
+  - every declaration not beginning `--` ends in `!important`, the
+    failure naming selector and property;
+  - every selector contains `.photo-pieces-` or is one of `body`
+    (declaring custom properties only) and the two pane hosts
+    (declaring `container` only);
+  - no at-rule;
+  - `PLUGIN_TOKENS`: each token declared once, in `body`, at the table's
+    value; every `var(--photo-pieces-…)` used is declared;
+  - every class the stylesheet names is one `figureTree` emits over the
+    sampler's and the fog piece's parsed blocks plus one missing image,
+    or `photo-pieces-hidden` (Reading view's).
+  Mutations: one `!important` removed → fails naming it; a token's value
+  changed → `PLUGIN_TOKENS` fails; a selector's class misspelt → the
+  class case fails; each reverted.
+
+- **Reading view's sections** — **T1733**. `sectionPieces` over the
+  sampler's parse: the held's first section (its opener and first
+  paragraph) → one figure; its third paragraph → no pieces; its last
+  (paragraph and `:::`) → none; a section of plain prose → `null`; a
+  synthetic paragraph line followed by a leaf on the next line → a
+  markdown run, then the figure; a section with the grid's caption →
+  none. `blockSignature`: equal for two texts differing outside
+  blocks; different for one differing inside a held's third paragraph,
+  for one with a closer deleted, and for one with fences typed around
+  an existing image paragraph. Mutation: the `startLine >= lineStart`
+  check dropped (so a later section redraws a block begun above it) →
+  the third-paragraph case fails, reverted.
+
+- **The vocabulary walk reaches the new files** — **T1732**: the
+  "nothing … knows the word" walk in `remark-pieces-vocabulary.test.mjs`
+  (~974–979) lists `obsidian-plugin/blocks.ts` and
+  `obsidian-plugin/figure.ts` beside `main.ts` — a one-line extension
+  of the plugin's own pin, authorized at sign-off; nothing in it is
+  loosened.
+
+- **Unchanged and green**: `parseCompareBody`'s three cases; the whole suite;
+  `sh scripts/verify.sh` (its `astro check` covers the plugin's `.ts`
+  through the root `tsconfig.json`'s `**/*`); in `obsidian-plugin/`,
+  `npm run build` exit 0 (`node_modules` is present).
+
+- **In Obsidian, by the photographer** (the Phase 3b pause): both
+  views on the laptop and the DualUp over the sampler and the fog
+  piece; the cursor returning a block's text; the console check —
+  `getComputedStyle(document.querySelector('[data-block="diptych"]
+  .photo-pieces-frames')).display` → `flex`, the grid's → `grid`, and a
+  fullbleed's frames `getBoundingClientRect().width` against its
+  scroll host's `clientWidth`; a held's third paragraph edited in Live
+  Preview then Reading view showing the edit.
+
+### File structure (amendment 2)
+
+```
+obsidian-plugin/blocks.ts        new: PLUGIN_BLOCKS, METHOD_WORDS, DEFAULT_MODE, parseAttrs and resolveRelative (moved), parseBlocks (T1730); sectionPieces, blockSignature (T1733)
+obsidian-plugin/compare.ts       the image regex exported (T1730); STAGES_PATTERN deleted (T1732)
+obsidian-plugin/figure.ts        new: FigureNode, figureTree, toDom (T1731)
+obsidian-plugin/styles.css       rewritten: tokens, pane hosts, every layout (T1731)
+obsidian-plugin/main.ts          imports moved (T1730); the Live Preview field over parseBlocks, FigureWidget, resolver (T1732); the Reading view post-processor and its re-render (T1733)
+obsidian-plugin/manifest.json, package.json   0.3.0, descriptions (T1732)
+obsidian-plugin.test.mjs         T1730, T1731, T1733's cases; the STAGES_PATTERN block deleted (T1732, retargeted at T1730)
+remark-pieces-vocabulary.test.mjs   the walk's file list gains blocks.ts and figure.ts (T1732)
+obsidian-plugin/README.md, AUTHORING.md       T1734
+DECISIONS.md, ROADMAP.md         close-out (T1718, amended)
+```
+
+Untouched: everything the site builds — `remark-pieces-blocks.mjs`,
+`src/`, `scripts/`, every other test file (the walk's list aside); `esbuild.config.mjs`,
+`tsconfig.json` and the plugin's dependencies.
+
+### Known limitations (amendment 2)
+
+- **Obsidian clips and flattens every editor widget** (T1735a):
+  `.cm-content > [contenteditable=false] { contain: paint !important }`
+  and `.cm-content > * { margin: 0 !important }` in app.css 1.8.7. The
+  widget root's own rule outranks both by specificity; a later Obsidian
+  that raises the specificity of those rules would clip again, and the
+  fix is the same selector made longer. `full` reaches the hosts'
+  content box, 32px inside the pane's edge (`--file-margins`).
+- **The scanner's fence check is looser than CommonMark** (T1730
+  review): a prose line beginning with three backticks is read as a
+  fence opener, hiding blocks until the next such line, and a `:::`
+  inside a fenced body still closes a container; both rare in a piece,
+  and the site's transform would read them the same way as far as a
+  piece can be built.
+- **The pane as a container is an assumption about Obsidian's DOM.**
+  The two host selectors are Obsidian's current class names, and
+  `container-type` adds layout containment to them (a containing block
+  for fixed-position descendants; CodeMirror's scroller is already a
+  positioned stacking context). If a nearer Obsidian element is itself
+  a container, `cqi` measures it instead. The pause's console check and
+  his ordinary use of the editor (hover previews, menus, scrolling)
+  judge it; the fallback, if either fails, is a `ResizeObserver` in
+  each renderer writing the pane's width to a custom property — named
+  here, not built.
+- **`full` is the scroll host's content box**, inside Obsidian's file
+  margins, not the window's edge; with Readable line length off the
+  column is the pane, so `wide` and `full` read alike.
+- **`tall` is a share of the window's height**, not the pane's the
+  spec names — a reading put to him at the look (T1735), so his answer
+  lands as a Decided line that settles the spec's sentence. The honest
+  fallback, if he wants the pane: `container-type: size` on the two
+  hosts and `cqb` in place of `vh` — size containment on Obsidian's
+  scroll hosts, riskier than the inline-size already taken; named, not
+  built.
+- **`match="height"` was drawn as equal widths** until T1735c, which sizes each pane from its image's natural ratio once loaded (a pair with a missing or unloaded image stays at equal widths); stage notes are not
+  shown (labels only, as today); a `side` or `slider` with the wrong
+  count is drawn; text before a compare's first stage is skipped.
+- **Reading view draws nothing where `getSectionInfo` returns `null`**
+  (a note embedded in another, a hover preview, a PDF export): those
+  stay as Obsidian draws them.
+- **A section rebuilt around a block loses Markdown context** that
+  spans the cut (a list continued across it) — only in sections that
+  touch a block.
+- **The freshness re-render is a full re-render** of that note's
+  Reading view, once per edit that touches a block; whether Obsidian
+  keeps the scroll position through it is his to see.
+
+### Resolved decisions (amendment 2)
+
+- **A line scanner that claims spans**, not a Markdown parser: two line
+  shapes are the whole grammar the plugin needs, and a parser is a
+  dependency or a second micromark.
+- **One figure tree, turned into DOM by each caller** — two real
+  callers, and a tree the suite can test with no DOM library.
+- **`!important` on every declaration, scoped by selector**, over
+  specificity or layers (above); pinned by the stylesheet test.
+- **A beside block's prose is inside its figure** in both views, so the
+  float never crosses CodeMirror lines or Reading view sections.
+- **Reading view rewrites only sections that touch a block**; the
+  block's first section draws it whole, later ones hide, and a stored
+  signature of the note's blocks triggers one re-render whenever it
+  changes.
+- **The method words are the site's**, pinned equal; `side` and
+  `slider` show their own names as written. Put to him at the look.
+- **`STAGES_PATTERN` is deleted**, its three guarantees retargeted to
+  the scanner's cases before it goes.
+- **No new dependency; `minAppVersion` unchanged** (1.4.0 carries
+  every API used).
+- **The constitution needs no amendment**: its "mirrors … by
+  convention (see `DECISIONS.md` on the accepted approximation)" is
+  not contradicted by a mirror a test now pins.
+
+## Amendment 3 (2026-09-29): the lexicon, the photograph's home
+
+**Status**: Signed off (2026-09-29) by the `skeptical-reviewer` at the top tier — one blocking finding fixed and re-reviewed (the words scan failed on the fixtures' folded descriptions), twelve second-look notes taken; four non-blocking lines in tasks.md's tier log.
+**Implements**: spec.md's sections marked _(amended 2026-09-29, lexicon)_
+— Goal 11, the two Non-goals, the Entities "The lexicon", "The
+photographs folder", "The journal folder" and "A photograph's draft and
+date", the flow "Publishing a photograph", the Design requirement "The
+words on the site", the Authoring requirements "The constitution, a
+third time", "The folders, moved" and "The documents", the envelope's
+lexicon bullet and ordinary-path line, AC 13 as amended (T1716), and the
+eight criteria under "_Amended 2026-09-29 (lexicon):_" (AC 27–34 here,
+numbered on from AC 26: the constitution 27, the addresses 28, the
+draft 29, the front door 30, the words 31, the photographs index 32, the
+place pages 33, the documents 34). Planning's question on the nav is
+answered in the spec (Goal 11's last sentences, "The words on the
+site", the Decided section's last bullet): the nav carries three words,
+the photographs index is reached from the footer, and a place's page
+admits the photographs folder.
+
+Seven changes on a built spec, in one order so the suite is green at
+every commit: the homes move (`git mv`, the collection renamed), then
+the addresses, then the id rule, then the draft and date, then what
+reads them (the front door, the place walls, the photographs index, the
+words), and a post-build barrier that makes the result a fact of every
+build. No dependency. No internal name
+changes: module files (`remark-pieces-blocks.mjs`, `src/lib/pieces.ts`,
+`PieceList.astro`), the `piece-*` CSS classes, `SetKind`'s `'piece'`
+and the `data-set="piece:<slug>"` values, `WORDING`'s keys, the
+plugin's id and the repository's name are code — the spec's rule is
+about pages and addresses.
+
+Everything above this section stands except three statements it makes
+false, each given a one-line pointer to here: the private-files
+barrier's scan 1 path (`/images/**/index.html`, now
+`/photographs/**/index.html`, T1738); File structure's
+`src/content/pieces/<his slug>/` line (T1716, amended); and Amendment
+2's `resolveRelative` case `../../gallery-images/a.jpg` (now
+`../../photographs/a.jpg`, T1737). Spec 009's own-folder rule for a
+place's wall is widened here (T1746); it is not stated as design
+anywhere above in this plan. Every other mention of `pieces/`,
+`gallery-images/`, `/pieces/` or `/images/` above is the record of what
+was built when, and stays as written.
+
+The constitution has no "Scale" section; the five tests are applied as
+before, and each bullet says where the simpler shape was taken.
+
+### Shape of the change (amendment 3)
+
+- **The constitution, a third time** (`CLAUDE.md`, T1736, its own
+  commit before T1737, on this branch for the reason "The constitution,
+  first" gives). Three edits, exact text:
+  - **"What this project is"**: the whole paragraph (from "A personal
+    photography website, spanning" to "no CMS or backend service for
+    v1.") becomes:
+
+    > A personal photography website. Its centre is landscape and
+    > nature work; street, portrait and event photographs are the same
+    > kind of piece with less around them, told apart by their
+    > category, not by a form of their own.
+    >
+    > The site is made of **pieces**: pages that carry writing and the
+    > site's treatments, so the context travels with the work — as a
+    > physical gallery carries its own through the space, the people in
+    > it, and the writing the artist places around the work, and as a
+    > static, context-less virtual gallery does not. A piece takes one
+    > of three forms:
+    >
+    > - a **photograph** — one image: its page, its writing, its
+    >   making, its loupe;
+    > - a **journal** entry — the photographer's thoughts moving
+    >   through several photographs: an outing, gear notes, an
+    >   announcement (the form will evolve);
+    > - a **place** — a tour through somewhere the photographer keeps
+    >   going back to, the photographs and the writing along it.
+    >
+    > A **gallery** is a curated, ordered set of photographs, kept and
+    > deliberately secondary. "Piece" is the structural word: it is
+    > never an address or a label on the site. Code names keep it as
+    > that structural term — `remark-pieces-blocks`, `PieceList`, the
+    > `piece-*` classes, the plugin's id — and are not site words. The
+    > site also carries a
+    > simple About page and a Contact page. It's meant to be authored
+    > continuously for years, with Obsidian as the writing tool and no
+    > CMS or backend service for v1.
+
+    (The `>` marks quotation here only; the constitution carries the
+    text unquoted, the list as a list.)
+  - **The Content model clause**, six replacements:
+    - "a single `pieces` content collection is the primary data
+      source." → "the `journal` content collection
+      (`src/content/journal/<slug>/index.md`) and the photographs
+      folder (`src/content/photographs/`) are the primary data
+      sources."
+    - the next sentence's "Beside it sits the **image registry**" →
+      "Beside them sits the **image registry**".
+    - "over every accepted raster in a published piece's folder and in
+      `src/content/gallery-images/`, giving each image a stable id
+      (`<folder>/<basename>`), a page at `/images/<id>/`," → "over
+      every accepted raster in a published journal entry's folder and
+      in `src/content/photographs/`, giving each photograph a stable id
+      (`<slug>/<basename>` in a journal entry's folder, the bare
+      `<basename>` in the photographs folder), a page at
+      `/photographs/<id>/`,"
+    - "and from spec 019 whose `stages:` declare its processing." →
+      "and from spec 019 whose `stages:` declare its processing — and,
+      in the photographs folder only, whose `draft: true` holds the
+      photograph unpublished and whose `published:` date puts it on the
+      front door beside journal entries (a journal entry's photographs
+      are published and dated by their entry; a sidecar there that
+      writes either field fails the build)."
+    - "An image belongs to at most one piece, by folder; galleries
+      reference images, not pieces, and the page for an image links
+      back to its piece where one exists." → "A photograph has one
+      home — a journal entry's folder or the photographs folder; a
+      journal entry places others by borrowing them, galleries
+      reference photographs by id, and a photograph's page links back
+      to the journal entry it lives in, if any, and to every entry that
+      places it."
+    - In the Places sentences: "a piece may set one default for its
+      folder" → "a journal entry may set one default for its folder";
+      and "A place's page shows its published frames as one wall,
+      outings oldest first, own-folder frames only, naming no piece;"
+      → "A place's page shows its published frames as one wall,
+      outings oldest first — a journal entry's own-folder frames at the
+      place as one outing, dated by the entry, and each photograph of
+      the photographs folder that names the place as an outing of its
+      own, dated by its capture — naming no journal entry; its cover is
+      one of those frames;".
+  - **The Images paragraph**, two replacements:
+    - "local and co-located with each piece for initial development
+      (`src/content/pieces/<slug>/`), plus one flat
+      `src/content/gallery-images/` root for images that belong to no
+      piece (spec 004)," → "local and co-located with each journal
+      entry (`src/content/journal/<slug>/`), plus one flat
+      `src/content/photographs/` folder for the photographs that belong
+      to no journal entry (spec 004, renamed at spec 019), each a piece
+      of its own,"
+    - "A piece's folder is public territory: every accepted image in it
+      gets a page, referenced by the body or not, and images under a
+      `draft: true` piece are unpublished with it." → "A journal
+      entry's folder is public territory: every accepted image in it
+      gets a page, referenced by the body or not, and images under a
+      `draft: true` entry are unpublished with it; a photograph in the
+      photographs folder is unpublished by its own sidecar's `draft:
+      true`."
+
+  Other uses of "piece" in the constitution (a piece's body, a piece
+  that writes a withdrawn block) are the structural word used as the
+  lexicon defines it, and stay.
+
+- **The homes, moved** (T1737 — large and mechanical, its Verify
+  mechanical). `git mv src/content/pieces src/content/journal`, `git mv
+  src/content/gallery-images src/content/photographs`, `git mv
+  tests/pieces tests/journal`, `git mv tests/gallery-images
+  tests/photographs`; no other file is moved and no moved content file
+  is edited except the two samplers' borrowed srcs below. Then every
+  reader of those paths, in the same commit:
+  - `src/content.config.ts`: the collection `pieces` → `journal`, base
+    `./src/content/journal`; `imageMeta`'s pattern
+    `{journal,photographs}/**/_*.md`; the comments. `collections`
+    exports `journal`.
+  - Every `getCollection('pieces')`, `getEntry('pieces', …)` and
+    `CollectionEntry<'pieces'>` → `'journal'` (`src/lib/pieces.ts`,
+    `src/lib/images.ts`, `src/components/PieceList.astro`,
+    `src/pages/dev/matte/[...surface].astro`); `astro check` finds any
+    left.
+  - `src/lib/images.ts`: the glob
+    `/src/content/{journal,photographs}/**/*.{…}`; the unowned-folder
+    warning's path.
+  - `src/lib/image-meta.mjs`: `GALLERY_ROOT` renamed
+    `PHOTOGRAPHS_ROOT = 'photographs'`; a new `JOURNAL_ROOT =
+    'journal'` read by `classifyContentImage` in place of the literal
+    `'pieces'`; `sidecarImageId`'s pattern
+    `^(?:journal\/([^/]+)|photographs)\/_([^/]+)$`; every message and
+    comment that names the folders. `GALLERY_FOLDER = 'gallery'` stays
+    — ids do not change in this task (`gallery/<name>` until T1739).
+    `parseReference`'s invalid message becomes "… a piece places its
+    own images as ./<file>, a journal entry's as ../<slug>/<file>, and
+    a photograph from the photographs folder as
+    ../../photographs/<file>".
+  - `remark-pieces-blocks.mjs`: `imagePageUrl`'s flat-root check reads
+    `/src/content/journal` and says "a journal entry lives in its own
+    folder (journal/<slug>/index.md)"; the comments.
+  - `scripts/gen-placeholders.mjs`: every path; the targets `pieces` →
+    `journal`, `gallery` → `photographs` (the header's usage lines
+    too).
+  - Content: `src/content/journal/matte-sampler/index.md` and
+    `vocabulary-sampler/index.md` — every `../../gallery-images/` →
+    `../../photographs/` (the sampler's prose line that shows the path
+    too). Both are the session's fixtures.
+  - Tests: every string that names the folders — image-meta.test.mjs,
+    galleries.test.mjs (`sidecarImageId`'s inputs), gear.test.mjs,
+    remark-pieces-vocabulary.test.mjs (`tests/journal/alpha`, the
+    borrowed `../../photographs/photo.jpg`, the wrong-depth
+    `../photographs/photo.jpg`, the expected invalid-path message, the
+    flat `src/content/journal/flat.md`), remark-pieces-blocks.test.mjs,
+    obsidian-plugin.test.mjs (the `pieces(slug)` helper's path, and the
+    `resolveRelative` cases: note `src/content/journal/alpha/index.md`,
+    `../beta/a.jpg` → `src/content/journal/beta/a.jpg`,
+    `../../photographs/a.jpg` → `src/content/photographs/a.jpg`). The
+    ids and URLs these tests expect do not change here.
+
+  The plugin needs no code change: `resolveRelative` is path arithmetic
+  from the note's folder and names no folder (Amendment 2), so the
+  moved samples resolve as before — which the retargeted cases pin, and
+  the person sees at the pause (spec: "the plugin's borrowed-path
+  resolution reads `../../photographs/`").
+
+- **The addresses, moved** (T1738, mechanical). `git mv
+  src/pages/pieces src/pages/journal`, `git mv src/pages/images
+  src/pages/photographs`, `git mv src/pages/og/pieces
+  src/pages/og/journal`. Then: `imageUrlFor` → `/photographs/${id}/`
+  (still the one place the photograph URL shape lives); the set URLs in
+  `images.ts` → `/journal/${…}/`; `PieceList`'s href; `rss.xml.ts`'s
+  link; `categories.ts`' "All" href; the categories page's and the
+  front door's `/pieces/` links; `NAV_ITEMS`' href (its label stays
+  "Pieces" until T1742); the photograph page's three journal links; the
+  journal page's OG path `/og/journal/<slug>.png`; the layout's
+  `IMAGES_PATH` → `/photographs/`; `image-set.ts`'
+  `setKeyFromPath` pattern `(galleries|journal|places)` and `KINDS` key
+  `journal: 'piece'` (the stored value keeps its kind name, `piece:` —
+  code); `check-private-files.mjs`' `join(root, 'photographs')` and its
+  header; the comments in `url.ts`, `og-card.mjs`, `image-meta.mjs`
+  (`/photographs/<id>/`). Tests: every expected URL and every source
+  path read from disk — image-meta.test.mjs (`imageUrlFor`),
+  image-set.test.mjs, categories.test.mjs, motion.test.mjs, matte.test.mjs,
+  compare.test.mjs (`PAGE`), private-files.test.mjs (its temp tree's
+  `photographs/`), remark-pieces-vocabulary.test.mjs (every `href` →
+  `/photographs/…`, the `src/pages/journal/[slug].astro` read). After
+  this task a photographs-folder photograph is at
+  `/photographs/gallery/<name>/` — T1739 moves it; no pause falls
+  between.
+
+- **The id rule** (`src/lib/image-meta.mjs`, `src/lib/images.ts`,
+  `src/content/galleries/*.md`, T1739, `review: per-task`). A
+  photograph in the photographs folder has no folder segment in its id:
+
+  ```js
+  export const PHOTOGRAPHS_FOLDER = ''; // the photographs folder's id segment: none
+  export function imageIdOf(folder, basename) {
+    return folder === PHOTOGRAPHS_FOLDER ? basename : `${folder}/${basename}`;
+  }
+  ```
+
+  `GALLERY_FOLDER` is deleted; every id is built by `imageIdOf` —
+  `parseImagePath` (`folder = parent === PHOTOGRAPHS_ROOT ?
+  PHOTOGRAPHS_FOLDER : parent`, and its `SLUG.test(folder)` check runs
+  only on the other branch — the empty segment is no slug and would
+  fail it), `attachPrivates`, `frameIdFor`,
+  `crossReferences`, `pieceFrames` — so no copy of the rule remains.
+  `homeSlugOf(id)` reads the slash: the text before the first `/`, or
+  null when there is none. `sidecarImageId` returns `imageIdOf(m[1] ??
+  PHOTOGRAPHS_FOLDER, m[2])`. `parseReference`'s kind `'gallery'` is
+  renamed `'photographs'` (its folder `PHOTOGRAPHS_FOLDER`), with its
+  callers in the transform (`checkReferenceShape`'s comment) and
+  `frameIdFor`/`crossReferences`. The empty string is chosen over a
+  sentinel word because it cannot be a slug (`SLUG` needs one
+  character) and it is what the id literally has. Its one hazard is a
+  truthiness test on a folder, which would read the photographs
+  folder as "no folder"; T1739's grep for one (`if (folder)`, `!folder`,
+  `folder ||`, `folder ??`, with any `file.`/`info.`/`shape.` prefix)
+  finds none after the task, each hit before it listed and rewritten
+  through `imageIdOf` or an explicit comparison.
+
+  The photographs rule stays parent-only, as the gallery root's was: a
+  file whose parent folder is `photographs` has a bare id. So the test
+  harness's `tests/photographs/photo.jpg` mirrors the site
+  (`/photographs/photo/`), and the one way to fool it — a journal entry
+  folder named `photographs` — is refused: `classifyContentImage`
+  throws for a journal image whose slug is `PHOTOGRAPHS_ROOT` (message
+  below).
+
+  Three new pure rules, each with one caller or two:
+  - `nameCollisions(names, slugs)` → messages. `names` is `{ name,
+    file }[]` (the photographs folder's public basenames), `slugs` is
+    `{ slug, where }[]` (every journal entry's id, draft or not, and
+    every journal folder holding images). A name equal to a slug,
+    compared lowercased, fails naming both: `/photographs/bank/` would
+    read as the page above `/photographs/bank/<name>/`, and the
+    barrier's draft scan (below) reads `/photographs/<name>/` as one
+    photograph's address. Lowercased because the two addresses would
+    differ only in case, which reads as one address. The registry
+    calls it after discovery and throws all at once.
+  - `oldIdHint(id, known)` → the bare id, or null: when `id` begins
+    `gallery/`, is not itself known (a journal entry may be named
+    `gallery`), and the rest is. `validateGalleries` uses it before
+    `nearestHint` (today's did-you-mean already finds the bare id by
+    basename; the explicit line says why the id changed).
+  - `placeCoverProblem(cover, frames, file, known)` → message or null
+    — the place-cover check lifted out of `images.ts` so it is
+    testable, today's line unchanged unless `oldIdHint` answers. (From
+    T1746 a photographs-folder photograph at the place is one of its
+    frames, so the bare id the line names can be a valid cover.)
+
+  In `images.ts`: `nameCollisions` after discovery; the place-cover
+  loop calls `placeCoverProblem`. `SiteImage`'s doc comments name the two id shapes and
+  `/photographs/<id>/`. Content: every `gallery/<name>` in
+  `src/content/galleries/*.md` → `<name>` (five files).
+
+- **A photograph's draft and date** (`src/content.config.ts`,
+  `src/lib/image-meta.mjs`, `src/lib/images.ts`, fixtures, T1740). The
+  `imageMeta` schema gains
+
+  ```ts
+  draft: z.boolean().optional(),      // photographs folder only
+  published: z.coerce.date().optional(), // photographs folder only
+  ```
+
+  `.optional()`, not `.default(false)`: the refusal in a journal folder
+  must see a written `draft: false` too. `published` is a new field,
+  not `date` — `date` stays the capture date's override (spec 004).
+  In `image-meta.mjs`:
+
+  ```js
+  export const PHOTOGRAPH_FIELDS = Object.freeze({ draft: 'draft', published: 'published' }); // tunable: the names
+  export function photographOnlyProblems(entries) → string[]
+  ```
+
+  (`entries` is `{ file, inJournal, data }[]`; one line per written
+  field of a journal-folder sidecar, `data[name] !== undefined`.) The
+  registry's order changes so status can read a sidecar: discovery and
+  the id checks; then the sidecars are read and mapped by image id (an
+  orphan is one whose id is not among the discovered files — the same
+  test, against the file ids rather than `known`);
+  `photographOnlyProblems` thrown all at once; then status — a journal
+  folder's by its entry, as today; a photographs-folder photograph
+  `'draft'` when its sidecar says `draft: true`, else `'published'`;
+  then the private family and each sidecar's `stages:` (moved after
+  status, unchanged). `SiteImage` gains `published: Date | null` — the
+  sidecar's field for a photographs-folder photograph, null in a
+  journal folder.
+
+  What a draft means, consumer by consumer — every one already keys on
+  `known` being `'published'`, so none gains a branch beyond its words:
+  no page (`images` holds only published ids); a gallery that names it
+  fails (`validateGalleries`' draft reason, reworded for a bare id); a
+  journal entry that places it, in its body or as its cover, fails
+  (`referenceProblems`' draft line, reworded for a bare id, since
+  `homeSlugOf` is null); a place's cover cannot name it (a draft is on
+  no wall — `placeOfId` holds published files only, T1746); the feed lists journal entries only; its OG image and its
+  search-index entry are its page's, and it has none; the front door
+  reads `registry.images`. A draft with `published:` stays off the
+  front door.
+
+  Fixtures: `src/content/photographs/_dock-b.md` gains `published:` —
+  a date between the two newest published journal entries' dates (read
+  at the task and recorded), so the front door's merge shows an
+  interleave; its story's "gallery-root image" becomes "a photograph in
+  the photographs folder". A new draft fixture:
+  `src/content/photographs/draft-fixture.jpg` (generated — a 3:2
+  placeholder in `gen-placeholders.mjs`' photographs list, `Fixture`
+  EXIF) and `_draft-fixture.md` (`title: Draft fixture`, `draft:
+  true`, a `published:` newer than every entry — so a draft rule that
+  failed would put it first on the front door — and a one-line
+  _Fixture_ body).
+
+- **The front door's list** (`src/lib/front-door.mjs`, new;
+  `src/components/PieceList.astro`; `src/pages/index.astro`;
+  `src/pages/journal/index.astro`; `src/pages/categories/[category].astro`;
+  T1741). A pure module the suite can load (the page's own code runs
+  only inside Astro):
+
+  ```js
+  export const FRONT_DOOR = Object.freeze({ latest: 3 }); // tunable: the list's length (today's)
+  // journal, photographs: { id, date }[] → { kind: 'journal' | 'photograph', id, date }[]
+  export function mergeLatest(journal, photographs, length = FRONT_DOOR.latest)
+  ```
+
+  Newest first by date; a tie puts the journal entry first, then by id
+  (the journal's own tie rule, `byNewestPublished`); cut to `length`.
+  A new module rather than more of `pieces.ts`, which imports
+  `astro:content` and cannot load under Vitest.
+
+  `PieceList` keeps its one row treatment ("one copy, so the URL shape
+  and meta line can't drift") and takes `items` in place of `pieces`:
+
+  ```ts
+  type ListItem =
+    | { kind: 'journal'; entry: CollectionEntry<'journal'> }
+    | { kind: 'photograph'; image: SiteImage };
+  ```
+
+  A journal row renders as today. A photograph row: the link to
+  `imageUrlFor(image.id)` through `withBase`, the frame in the same
+  `.note-cover` box at the same size (`<Image src={image.image} alt=""
+  width={320} height={220} loading="lazy" />`), the meta line the date
+  alone (`formatDate(image.published, 'short')` — it has no
+  categories), and the title in the `h3`; no description line (the
+  spec: "its frame and its title"). The journal index and the category
+  page pass `entries.map((entry) => ({ kind: 'journal', entry }))`. The
+  front door reads `getPublishedPieces()` and `getImageRegistry()`,
+  merges the journal's `{ id, date: publishDate }` with every
+  `registry.images` entry whose `published` is set, and maps each
+  result back to its item. A photograph without `published:` is never
+  in the list, because the list is built only from those that have one.
+
+- **The place walls admit the photographs folder** (`src/lib/image-meta.mjs`,
+  `src/lib/images.ts`, fixtures, T1746). Spec 009's own-folder rule is
+  widened: a published photograph of the photographs folder whose
+  sidecar names a place (`at: <slug>`; the folder has no entry to give a
+  default) stands on that place's wall and may be its cover; one that
+  names none, says `at: none`, is a draft, or names a draft place does
+  not. The note "gallery-root photographs are not grouped under a place
+  — the line is ignored" and its branch are deleted; such a frame's
+  `placeOfId` is `placeOf(sidecar?.data.at, undefined)`, a draft place
+  resolving to null as for any frame.
+
+  **How it groups: an outing of its own, dated by its capture.** A
+  journal outing is dated by its entry's `publishDate`; a
+  photographs-folder frame has no entry, and its date is its capture
+  date — `mergeOverrides(formatExposure(raw), sidecar).date`, the wall
+  label's own date (a sidecar `date:` wins over EXIF). Merging it into
+  a same-day journal outing would compare a capture date with a publish
+  date — two clocks — and join visits that have nothing to do with each
+  other; and the wall shows no outing boundaries (no headings, no
+  dates), so a separate outing changes only the order and the summary's
+  count. One pure function orders both kinds:
+
+  ```js
+  // journal: { key: slug, date: publishDate }[]; photographs: { key: id, date: captureDate }[]
+  // → keys, oldest first; a tie puts the journal outing first, then by key
+  export function outingOrder(journal, photographs)
+  ```
+
+  `groupByPlace(framesByOuting, placeOfId, order)` keeps its shape: a
+  photograph outing's frames are `[id]`, and the own-folder test
+  becomes `(homeSlugOf(id) ?? id) !== key` — a frame's outing key is
+  its journal slug, or itself in the photographs folder — so a borrowed
+  frame is still never counted under a borrower. Its outings become `{
+  key, frames }`; `placeSummary(outings, dateByOuting)` reads
+  `outing.key` (a photograph outing counts as an outing, and its year
+  in the span). `SitePlace.outings` becomes `{ key: string; piece:
+  CollectionEntry<'journal'> | null; frames: string[] }[]` (no page
+  reads `piece`), and `latest` is `dateByOuting.get(newest.key)`, so a
+  recently made photograph can move its place up the places index; the
+  default cover is the newest outing's first frame, whichever kind.
+
+  A photographs-folder frame at a place with no capture date (no EXIF
+  date, no sidecar `date:`) fails the build rather than being put at
+  an end by a guess: `undatedAtPlace(entries)` (`{ file, slug, date
+  }[]` → messages, pure, in `image-meta.mjs`), thrown all at once. For the date to be known when the outings are
+  ordered, the registry's EXIF read moves ahead of the places: one
+  `readExposure` per published file into `rawByKey`, the image loop
+  reading the map instead of the file (the same reads, once each).
+
+  Fixtures: `_dock-b.md` gains `at: the-jetty` (its `date: 2026-08-29`
+  is its capture date); `_draft-fixture.md` gains `at: the-jetty`, so a
+  broken draft rule would put it on the wall (scan 3 refuses any link
+  to it). The jetty's declared cover stays; a photographs-folder cover
+  is pinned by the unit case and one build edit.
+
+- **The photographs index** (`src/pages/photographs/index.astro`, new;
+  `src/lib/gallery-layout.ts`; `src/consts.ts`;
+  `src/layouts/BaseLayout.astro`; T1747). `/photographs/`: every
+  published photograph of both folders — `registry.images`, which holds
+  each published id once and no draft — as small frames in one packed
+  grid, in title order, each linking to its page; an `h1` and nothing
+  else written. It reuses the gallery flow as the related strip does,
+  at a fixed small short side: the `.gallery-flow` rows pack by ratio
+  and stretch within the cap, so a fixed `--gallery-short` gives a
+  dense, even grid of mixed ratios with no new CSS. The short side
+  clamps between the two knobs on the viewport's width, as
+  `relatedFlowStyle` does (72px at a phone's width, 88px from about
+  800px up), so both constants are real; `galleryCell`'s `sizes`
+  reads the same two. In
+  `gallery-layout.ts`, beside the related strip's knobs (the one module
+  that holds the walls' knobs):
+
+  ```ts
+  export const INDEX_SHORT_PX = 88;        // tunable: the frame size — the short side's ceiling, CSS px
+  export const INDEX_NARROW_SHORT_PX = 72; // tunable: its floor, reached on a narrow screen
+  export const indexFlowStyle = `--gallery-short: clamp(${INDEX_NARROW_SHORT_PX}px, 11vw, ${INDEX_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}; --gallery-width: ${GALLERY_WIDTH}; --gallery-gap: calc(var(--baseline) / 3)`;
+  export function byIndexOrder(a: { id: string; title: string }, b: { id: string; title: string }): number; // tunable: the order
+  ```
+
+  `byIndexOrder`: `a.title.localeCompare(b.title, 'en', { sensitivity:
+  'base', numeric: true }) || a.id.localeCompare(b.id)`. The page:
+  `<ul class="gallery-flow gallery-wide related-flow photographs-index"
+  style={indexFlowStyle} data-pagefind-ignore>`, one `<li
+  style="--ar: …">` per photograph with an `image-link` anchor and
+  `<Image … layout="constrained" loading="lazy">` sized by
+  `galleryCell(image.image, INDEX_SHORT_PX, INDEX_NARROW_SHORT_PX)`,
+  `alt` its title. `related-flow` is reused for its one rule — below
+  the collapse a small-short-side flow keeps its cap rather than going
+  one frame per row — which is the index's case exactly; no stylesheet
+  edit. The heading: `h1` "Photographs", title "Photographs".
+  `setKeyFromPath('/photographs/')` is null, so a frame opened from the
+  index shows its page's default set.
+
+  The index sits at exactly the prefix the layout's script reads as "a
+  photograph's page" (`IMAGES_PATH`, `/photographs/` from T1738), so
+  without a change it would be one: leaving it would run the image
+  page's `out` cross-fade, a traverse from it to a photograph a `step`,
+  and the footer link would pass the set-key click handler. One pure
+  predicate in `src/lib/image-set.ts` (where the script's other path
+  rule, `setKeyFromPath`, already lives and is tested):
+
+  ```ts
+  /** A photograph's page (`/photographs/<id>/`, base allowed) — not the index at `/photographs/` itself. */
+  export function isPhotographPath(pathname: string, base: string): boolean
+  ```
+
+  `BaseLayout`'s `isImagePage` and its click handler's
+  `startsWith(IMAGES_PATH)` both call it; `IMAGES_PATH` goes.
+  image-set.test.mjs pins it: `/photographs/` → false,
+  `/photographs/dock-a/` and `/photographs/fog/land-b/` → true,
+  `/journal/fog/` → false, and the same with a `/sub/` base.
+
+  The footer link: `src/consts.ts` gains `FOOTER_LINKS` — `[{ href:
+  '/contact/', label: 'Contact' }, { href: '/photographs/', label:
+  'Index of photographs' }]` — the link's word and its place (its
+  position among the footer's links) in one array; `BaseLayout`'s
+  `.footer-links` renders it in place of its one hard-coded Contact
+  link. `NAV_ITEMS` carries no `/photographs/` entry.
+
+- **The words** (T1742). Opening values, each in the one place the page
+  already keeps its words; all the envelope's to change at the look:
+  - `src/consts.ts`: `NAV_ITEMS` in the AC's order — Home, Journal
+    (`/journal/`), Places, Galleries, About, Search. The order moves
+    Places before Galleries, as AC 31 lists them and as "deliberately
+    secondary" reads.
+    `SITE.description` → "Photography by Erik Haake — landscape and
+    nature first, with street, portrait and event work, and the writing
+    that goes with it." (it prints on the front door); `rssDescription`
+    → "The journal of Erik Haake Photography." Both stay interim
+    (spec 005's T114).
+  - `src/pages/index.astro`: the hero link "Read the journal"; the
+    list's heading "Journal and photographs" under the eyebrow
+    "Latest".
+  - `src/pages/journal/index.astro`: title and `h1` "Journal";
+    description "Every journal entry, newest first."; the section's
+    `aria-label` "All journal entries".
+  - `src/pages/categories/[category].astro`: the link "Journal";
+    description "`${label}` galleries and journal entries."
+  - `src/pages/search.astro`: `h1` "Search the journal, the
+    photographs and the places."; description to match.
+  - The photograph page's `WORDING`: `fromPiece` "From the journal
+    entry", `passage.heading` "In the journal"; the description's
+    fallback "From the journal entry “…”." `alsoIn` stays "Also in".
+  - `src/pages/about/index.astro`: its interim text (session-written,
+    spec 005's T113 still open) says "pieces" three times; rewritten in
+    the lexicon, same facts, same length — the only page outside the
+    spec's list, and on it because AC 31 covers every page.
+
+  Attributes, ids and class names (`id="latest-pieces"`,
+  `.note-row`) are code and stay.
+
+- **The lexicon barrier** (`scripts/check-lexicon.mjs`, new;
+  `postbuild` after `check-private-files`; T1743). `node
+  scripts/check-lexicon.mjs [dist] [content]`, defaults `dist` and
+  `src/content`; `<dist>/pagefind/` excluded. Five scans:
+  1. **Old addresses.** No `<dist>/pieces/`, `<dist>/images/` or
+     `<dist>/og/pieces/`; in every `.html` and `.xml` file, no
+     attribute value and no element text that is a URL — root-relative,
+     or absolute on the site's own origin (`site` in `astro.config.mjs`,
+     `https://erikhaakephoto.com`, read by the script from that file's
+     `site:` line) — whose path begins `/pieces/` or `/images/`
+     (`(?:="|>)(?:<origin>)?/(?:pieces|images)/`; the site's base is
+     `/`, as `url.ts` states). An authored link to another host's
+     `/images/…` is not the site's address and passes.
+  2. **The words.** Per `.html` page: the `<title>` text and the
+     `<body>` markup; `<script>`, `<style>`, `<template>`, `<svg>` and
+     comments removed; then the **authored regions** removed by a
+     tag-depth walk (check-private-files' scan 3 walk, copied):
+     `figcaption` and `blockquote` elements, and any element whose
+     class list holds `prose` (a journal entry's body, a place's
+     writing, a photograph's story), `image-caption` or
+     `compare-note`; then the values of three attributes a reader
+     meets — `aria-label`, `title` and `placeholder` — collected from
+     what remains, and every tag stripped, so every other attribute
+     value, class name, id and URL is never read; entities decoded;
+     whitespace collapsed; then every **authored string** removed from
+     both the text and the collected attribute values — harvested from
+     `<content>/{journal,photographs,galleries,places}/**/*.md`: each
+     frontmatter scalar that contains the word — a `key: value` or `-
+     key: value` line's value, quotes stripped, and a block or
+     continued scalar (`key: >`, `>-`, `|`, `|-`, or a plain value
+     continued on deeper-indented lines) read as its lines joined by
+     single spaces — and each body alt text (`![…]`, any `…alt="…"` /
+     `…Alt="…"`) that contains it; harvested strings and page text are
+     compared after the same whitespace collapse. Only strings that
+     contain the word are kept, since only those could excuse a hit.
+     What remains must not match `/\bpieces?\b/i`; each hit fails with
+     the page and thirty characters either side. "Masterpiece" does
+     not match. (Five fixture descriptions today are `>-` block
+     scalars holding the word — editors-picks, fog-frames, the
+     headlands, first light at the jetty, the vocabulary sampler — and
+     print in `p.lead` and list rows, outside every region; the block
+     reading is what excuses them.)
+  3. **Drafts.** For each `<content>/photographs/_<name>.md` whose
+     frontmatter holds `draft: true` (`PHOTOGRAPH_FIELDS.draft`,
+     imported as check-private-files imports `COMPARE_CLASSES`): no
+     `<dist>/photographs/<name>/`, and no `.html` or `.xml` file
+     contains `/photographs/<name>/` — so no page, no link, no feed or
+     sitemap line. (A journal slug cannot equal `<name>`:
+     `nameCollisions`.) Pagefind indexes built pages only, so no page
+     means no index entry; the scan cannot read pagefind's compressed
+     fragments and does not try.
+  4. **The front door.** In `<dist>/index.html`, inside the
+     `.index-feed` section: every link to a one-segment
+     `/photographs/<name>/` names a sidecar
+     `<content>/photographs/_<name>.md` with a `published:` line and no
+     `draft: true`.
+  5. **The photographs index.** `<dist>/photographs/index.html`
+     exists; the photograph pages are every
+     `<dist>/photographs/**/index.html` but that one, each read as its
+     id (the path between `photographs/` and `/index.html`); the links
+     inside the index's `.photographs-index` list name exactly that set
+     of ids, each once — so every published photograph of both folders
+     is on it, and nothing without a page (no draft) is. On every page,
+     the `footer.site-footer` (the layout's; a `<footer>` inside
+     authored content is not it) holds exactly one link to
+     `/photographs/` and the header's `<nav>` none. The order is not read here (the titles are
+     in `alt` attributes); `byIndexOrder`'s cases and T1747's read pin
+     it.
+
+  The summary line: `[check-lexicon] <n> pages read, <r> authored
+  regions set aside, <s> authored strings excused; 0 old addresses;
+  <d> draft photographs, none published; <f> front-door photographs,
+  each dated; the index lists <p> photographs, each once`. `scripts/verify.sh` adds `\[check-lexicon\]` to its
+  summary grep. The motion and private-files barriers are not edited
+  here.
+
+- **The documents** (T1744). `AUTHORING.md` and `README.md` in the
+  lexicon: the vault layout (`src/content/journal/<slug>/`,
+  `src/content/photographs/`), "A piece folder is public territory" as
+  "A journal folder is public territory", a section on the photographs
+  folder — a photograph's home, its sidecar as its writing, the private
+  family beside it, `draft: true` and `published:`, the bare id and
+  `/photographs/<name>/`, a gallery naming it by that name, `at:`
+  putting it on a place's wall as an outing of its own by its capture
+  date (and a place's cover able to be it), the index at
+  `/photographs/` behind the footer's link — the borrowing paths (`../<slug>/<file>`, `../../photographs/<file>`), and
+  the photograph's page described as the piece it is. Every address in
+  both. `obsidian-plugin/README.md`: its path paragraph's
+  `../../photographs/x.jpg`, the vault-root note, and "How to check it"
+  at `src/content/journal/vocabulary-sampler/index.md`. `DECISIONS.md`
+  and `ROADMAP.md` at close-out (T1718, amended).
+
+### The tuning envelope, placed (amendment 3)
+
+The envelope's lexicon bullet. One place each:
+
+| Envelope item                  | One place (opening value)                                                                  | Pinned by                                                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| the nav's three words          | `NAV_ITEMS`' labels, `src/consts.ts` (Journal, Places, Galleries)                          | lexicon.test.mjs's consts case; the barrier's words scan                 |
+| the index's frame size         | `INDEX_SHORT_PX` (88, ceiling), `INDEX_NARROW_SHORT_PX` (72, floor) of `indexFlowStyle`'s clamp, `src/lib/gallery-layout.ts` | lexicon.test.mjs, by name and value                                      |
+| the index's order              | `byIndexOrder`, `src/lib/gallery-layout.ts` (title, then id)                               | lexicon.test.mjs's order cases                                           |
+| the index link's word and place | `FOOTER_LINKS`, `src/consts.ts` ("Index of photographs", after Contact)                   | lexicon.test.mjs's consts case; the barrier's scan 5                     |
+| the front door's headings      | `src/pages/index.astro`: "Read the journal"; "Journal and photographs" under "Latest"     | the words scan (no "piece"); the look                                    |
+| "Also in" and the page's words | the photograph page's `WORDING`: `alsoIn`, `fromPiece`, `passage.heading`                  | the words scan; the look                                                 |
+| the front door's list length   | `FRONT_DOOR.latest`, `src/lib/front-door.mjs` (3)                                          | front-door.test.mjs, by name and value                                   |
+| the sidecar fields' names      | `PHOTOGRAPH_FIELDS`, `src/lib/image-meta.mjs`, and the two keys in `content.config.ts`'s `imageMeta` (three from T1749) | image-meta.test.mjs: each value is an `imageMeta` key in the source |
+
+A field renamed is both places; the barrier imports the constant.
+
+### Failure messages (amendment 3)
+
+- A journal slug named for the folder: `"<key>" is in a journal entry
+  named "photographs" — that name is the photographs folder's; rename
+  the entry's folder`.
+- A name shared: `[images] "bank" is both a photograph
+  (src/content/photographs/bank.jpg) and a journal entry
+  (src/content/journal/bank/) — /photographs/bank/ would read as the
+  page above /photographs/bank/<name>/; rename one`.
+- A gallery naming an old id: `<file>:<line> — gallery "<id>":
+  "gallery/dock-a" is an old id — the photograph in
+  src/content/photographs/ is "dock-a" now`.
+- A place cover naming an old id: `[places] <file>: cover
+  "gallery/dock-a" is an old id — the photograph in
+  src/content/photographs/ is "dock-a" now (a place's cover must be one
+  of its frames)`.
+- A photographs-folder frame at a place with no capture date:
+  `[places] <file>: names the place "<slug>" but has no capture date,
+  which orders it on the wall — add a date: line to the sidecar`.
+- A journal-folder sidecar writing a photograph's field: `[images]
+  <file>: "draft" is for a photograph in src/content/photographs/ — a
+  journal entry's photographs are published and dated by their entry;
+  remove the line` (and the same for `"published"`).
+- A gallery naming a draft photograph: `"dock-b" is a draft (its
+  sidecar says draft: true) — publish it or drop it from the gallery`.
+- A journal entry placing one: `[images] <slug> places bank, which is a
+  draft (its sidecar says draft: true) — publish it first, or place a
+  photograph that has a page`.
+- `classifyContentImage` outside the two homes: `… — images live in
+  journal/<slug>/ or photographs/`.
+- The barrier: `[check-lexicon] <page>: "Pieces" in the page's words —
+  "…context…"`; `[check-lexicon] dist/pieces/ exists — the journal is
+  at /journal/`; `[check-lexicon] <file>: links to /images/… — a
+  photograph is at /photographs/…`; `[check-lexicon] draft photograph
+  "<name>" has a page` / `is named in <file>`; `[check-lexicon] the
+  front door lists "<name>", which has no published: date` (or `is a
+  draft`); `[check-lexicon] the photographs index misses "<id>"` / `lists
+  "<id>" twice` / `lists "<id>", which has no page`; `[check-lexicon]
+  <page>: the footer has <n> links to /photographs/ (one expected)` /
+  `the nav links to /photographs/`.
+
+### Testing strategy (amendment 3)
+
+- **The homes** — **T1737**. Nothing new: every existing case green
+  on the moved tree with only paths changed (the retargeted strings
+  listed in the shape). Counts before and after; the build's page
+  count unchanged.
+- **The addresses** — **T1738**. Every existing case green with only
+  URLs and page paths changed; on `dist/`, `journal/`, `photographs/`
+  and `og/journal/` present, `pieces/`, `images/`, `og/pieces/` absent.
+- **The id rule** — **T1739** (image-meta.test.mjs, galleries.test.mjs,
+  remark-pieces-vocabulary.test.mjs):
+  - `imageIdOf('', 'bank')` → `bank`; `imageIdOf('fog', 'land-b')` →
+    `fog/land-b`. `parseImagePath('/src/content/photographs/bank.jpg')`
+    → id `bank`, folder `''`; a journal path unchanged.
+    `homeSlugOf('bank')` → null, `homeSlugOf('fog/land-b')` → `fog`.
+    `sidecarImageId('photographs/_dock-b')` → `dock-b`.
+  - `parseReference('../../photographs/x.jpg')` → kind `photographs`,
+    folder `''`; `crossReferences` over a body borrowing it → `['x']`;
+    `pieceFrames` places it at its reference.
+  - `attachPrivates` in the photographs folder (`_bank.jpg`,
+    `_bank.tones.jpg`, `_bank.detail.jpg` beside `bank.jpg`) → keyed
+    `bank` — the spec's publishing flow's family.
+  - `classifyContentImage('/src/content/journal/photographs/x.jpg')`
+    throws the slug line.
+  - `nameCollisions`: `bank` vs `bank` → one line naming both files;
+    `Bank` vs `bank` → one line; `bank` vs `banks` → none.
+  - `validateGalleries` with `gallery/dock-a` and `dock-a` known → the
+    old-id line; with a journal entry `gallery` whose `gallery/dock-a`
+    is known → no problem. `placeCoverProblem`: a frame → null; a
+    stranger → today's line; `gallery/dock-a` with `dock-a` known → the
+    old-id line.
+  - The transform harness: the borrowed `../../photographs/photo.jpg`
+    links `/photographs/photo/`; the wrong-depth
+    `../photographs/photo.jpg` fails as before.
+  - **Mutation**: `imageIdOf` returning `${folder}/${basename}` always
+    → the `imageIdOf`, `parseImagePath` and harness-link cases fail,
+    reverted, lines pasted.
+  - One-time build edits, each reverted, failing line pasted: a gallery
+    id back to `gallery/dock-a`; `the-jetty.md`'s cover to
+    `gallery/dock-a`; a temporary `src/content/journal/dock-a/index.md`
+    (the collision).
+- **The draft and the date** — **T1740** (image-meta.test.mjs,
+  galleries.test.mjs): `photographOnlyProblems` — a journal sidecar
+  with `draft: false` → one line naming `draft`; with both fields → two;
+  a photographs-folder sidecar with both → none. `validateGalleries`
+  with a draft bare id → the draft-photograph reason;
+  `referenceProblems` with one → its line, not "from null". The
+  fields' names: each `PHOTOGRAPH_FIELDS` value appears as a key in
+  `content.config.ts`'s `imageMeta` block (source read). One-time build
+  edits, reverted, lines pasted: `draft-fixture` added to a gallery;
+  `draft: true` then `published: 2026-10-01` in
+  `journal/where-the-fog-lets-go/_land-b.md`; the draft line removed
+  from the fixture → its page builds (count +1), restored.
+- **The front door** — **T1741** (front-door.test.mjs, new):
+  `FRONT_DOOR.latest` is 3; no photographs → the first three journal
+  entries, in today's order; a photograph newer than all → first; one
+  between two entries → between them; a tie → the entry first; a list
+  longer than `length` → cut. **Mutation**: the tie order swapped → the
+  tie case fails, reverted.
+- **The place walls** — **T1746** (image-meta.test.mjs): `outingOrder`
+  — a photograph dated between two entries → between them; on an
+  entry's date → after it; two photographs on one date → by id.
+  `groupByPlace` with a photograph outing `[id]` at the place → its
+  own outing, in order; a journal entry that borrows that photograph
+  does not count it (the own-folder test); a photograph whose place is
+  null → absent. `placeSummary` counts it as an outing and its year in
+  the span. `placeCoverProblem` with a photographs-folder frame among
+  the frames → null. The existing `groupByPlace` and `placeSummary`
+  cases, with `piece` renamed `key`, unchanged otherwise. **Mutation**:
+  the `?? id` dropped from the own-folder test → the photograph-outing
+  case fails, reverted. One-time build edits, reverted, lines pasted:
+  `the-jetty.md`'s cover set to `dock-b` → builds, the places index's
+  jetty card showing it. `undatedAtPlace`: an entry with a date and a
+  place → none; with a place and no date → the line naming the file
+  and the slug; with no place → none.
+- **The photographs index** — **T1747** (lexicon.test.mjs):
+  `INDEX_SHORT_PX` 88 and `INDEX_NARROW_SHORT_PX` 72 by name;
+  `byIndexOrder` — "bank" before "Dock, late" (case ignored), "Frame 2"
+  before "Frame 10" (numeric), equal titles by id; `FOOTER_LINKS` holds
+  exactly one `/photographs/` link, labelled "Index of photographs", and
+  `NAV_ITEMS` none. image-set.test.mjs: `isPhotographPath` as the shape
+  lists. **Mutations**: `numeric: true` dropped → the "Frame 10" case
+  fails; the index exclusion dropped from `isPhotographPath` → the
+  `/photographs/` case fails; each reverted.
+- **The words** — **T1742** (lexicon.test.mjs): imports `NAV_ITEMS`
+  and `SITE` from `src/consts.ts`; the section labels in order equal
+  Journal, Places, Galleries, with their hrefs; no `\bpieces?\b` in
+  any label, `SITE.description` or `SITE.rssDescription`.
+- **The barrier** — **T1743** (lexicon.test.mjs, private-files.test's
+  temp-tree shape): each scan passes on a clean tree and fails on its
+  case — a `dist/images/` folder; an `href="/pieces/x/"`; a
+  `<loc>https://erikhaakephoto.com/images/a/</loc>`; "Pieces" in a
+  nav's text; "Piece" in a chrome `<title>`; `aria-label="All pieces"`
+  on a chrome element; and passes with an authored
+  `href="https://example.com/images/x.jpg"`, and with the word in
+  `.prose`, `figcaption`, `blockquote`, `.image-caption`, a harvested
+  title, a harvested folded description (`description: >-` over two
+  lines) printed in a `p.lead`, a harvested alt, a class name, an
+  `href`, a `<script>`, and in "masterpiece"; a draft sidecar with a page, and with its URL in
+  `rss.xml`; a front-door link to an undated photograph, and to a
+  draft; an index missing a photograph page's id, listing one twice,
+  and listing an id with no page; a footer without the link, with two,
+  and a nav with it; a `<footer>` inside `.prose` does not count as the
+  site's. **Mutations**: the authored-region list emptied → the
+  `.prose` case fails; the harvest disabled → the title case fails;
+  block-scalar reading disabled → the folded-description case fails;
+  each reverted.
+- **Unchanged and green**: the whole suite; the four existing barriers
+  and the fifth; `astro check`; in `obsidian-plugin/`, `npm run build`.
+- **At the pause, by the person**: the nav, the footer's link and the
+  index, the jetty's wall with "Dock, late" on it, the addresses, the
+  front door, the words on each page, and the moved samples in
+  Obsidian.
+
+### File structure (amendment 3)
+
+```
+CLAUDE.md                                        the lexicon; the Content model and Images clauses (T1736, its own commit)
+src/content/pieces/ → src/content/journal/      git mv; the matte and vocabulary samplers' borrowed srcs (T1737)
+src/content/gallery-images/ → src/content/photographs/   git mv (T1737); _dock-b.md's published: and story line, draft-fixture.jpg and _draft-fixture.md new (T1740); both sidecars' at: the-jetty (T1746)
+tests/pieces/ → tests/journal/, tests/gallery-images/ → tests/photographs/   git mv (T1737)
+src/content.config.ts                            the journal collection, imageMeta's pattern (T1737); draft, published (T1740)
+src/lib/image-meta.mjs                           PHOTOGRAPHS_ROOT, JOURNAL_ROOT, sidecarImageId's pattern, messages (T1737); a comment (T1738); PHOTOGRAPHS_FOLDER, imageIdOf, homeSlugOf, the reference kind, oldIdHint, placeCoverProblem, nameCollisions, the slug guard (T1739); PHOTOGRAPH_FIELDS, photographOnlyProblems, the draft reasons (T1740); outingOrder, undatedAtPlace, groupByPlace's key and own-folder test, placeSummary's key (T1746)
+src/lib/images.ts                                the glob, the collection, a message (T1737); set URLs (T1738); collisions, place covers (T1739); the sidecar-first order, status, published (T1740); the EXIF read hoisted, photographs-folder outings, the places note deleted, SitePlace.outings, latest (T1746)
+src/lib/pieces.ts                                the collection (T1737)
+src/components/PieceList.astro                   the collection (T1737); href (T1738); items, the photograph row (T1741)
+remark-pieces-blocks.mjs                         the flat-root check (T1737); a comment (T1739)
+src/pages/dev/matte/[...surface].astro, src/pages/dev/**   the collection; comments (T1737)
+scripts/gen-placeholders.mjs                     paths, targets (T1737); the draft fixture (T1740)
+src/pages/pieces/ → src/pages/journal/           git mv; the OG path (T1738); the index's items (T1741); words (T1742)
+src/pages/images/ → src/pages/photographs/       git mv; links (T1738); WORDING (T1742)
+src/pages/og/pieces/ → src/pages/og/journal/     git mv (T1738)
+src/pages/index.astro                            href (T1738); the merged list (T1741); words (T1742)
+src/pages/categories/[category].astro            href (T1738); items (T1741); words (T1742)
+src/pages/search.astro, src/pages/about/index.astro   words (T1742)
+src/pages/rss.xml.ts, src/lib/categories.ts, src/lib/image-set.ts, src/layouts/BaseLayout.astro, src/lib/url.ts, src/lib/og-card.mjs   addresses (T1738)
+src/layouts/BaseLayout.astro, src/lib/image-set.ts   the footer from FOOTER_LINKS; isPhotographPath in place of IMAGES_PATH (T1747)
+src/pages/photographs/index.astro                new: the photographs index (T1747)
+src/lib/gallery-layout.ts                        INDEX_SHORT_PX, INDEX_NARROW_SHORT_PX, indexFlowStyle, byIndexOrder (T1747)
+src/consts.ts                                    nav href (T1738); FOOTER_LINKS (T1747); nav words, SITE strings (T1742)
+scripts/check-private-files.mjs                  the photograph pages' folder (T1738)
+src/content/galleries/*.md                       bare ids (T1739)
+src/lib/front-door.mjs                           new: FRONT_DOOR, mergeLatest (T1741)
+scripts/check-lexicon.mjs                        new (T1743)
+package.json, scripts/verify.sh                  postbuild; the summary grep (T1743)
+image-meta, galleries, gear, remark-pieces-vocabulary, remark-pieces-blocks, obsidian-plugin .test.mjs   paths (T1737)
+image-meta, image-set, categories, motion, matte, compare, private-files, remark-pieces-vocabulary .test.mjs   addresses (T1738)
+image-meta, galleries, remark-pieces-vocabulary .test.mjs   the id rule (T1739); image-meta, galleries (T1740); image-meta (T1746); image-set (T1747)
+front-door.test.mjs                              new (T1741)
+lexicon.test.mjs                                 new: the index's knobs and order, the footer case (T1747); the consts case (T1742); the barrier's cases (T1743)
+AUTHORING.md, README.md, obsidian-plugin/README.md   T1744
+src/content/photographs/ or src/content/journal/<his slug>/   his piece, as supplied (T1716, amended)
+ROADMAP.md, DECISIONS.md                         close-out (T1718, amended)
+```
+
+Untouched, named so the reviewer can confirm: the plugin's code
+(`obsidian-plugin/*.ts`, `styles.css`, its manifest); every stylesheet;
+`src/lib/motion.ts`, `compare.ts`, `loupe.ts`, `stage-sizes.ts`,
+`gear.mjs`, `exif.mjs`; `scripts/check-motion.mjs`,
+`check-no-gps.mjs`, `check-no-dev-routes.mjs`; the places pages and
+the galleries pages (they read ids, URLs, frames and covers through
+the registry); `package.json`'s dependencies.
+
+### Known limitations (amendment 3)
+
+- **A place's wall orders by two clocks.** A journal outing sorts by its
+  entry's publish date, a photographs-folder photograph by its capture
+  date; an entry published months after its outing sorts later than a
+  photograph made the same day. The wall shows no dates, so this is
+  order only; the place tour's spec may date outings by capture.
+- **The photographs index is one page with no paging.** Each cell is an
+  `<li>` of about half a kilobyte of markup and an `<Image>` whose
+  `srcset` tops at `galleryCell`'s ceiling for an 88 px short side
+  (a 3:2 frame: 88 × 1.5 × 1.35 × 2 ≈ 356 px wide), so each photograph
+  adds one or two small webp transforms to the build (Astro's
+  constrained candidates at or under that width, reused across pages
+  only where the transform is identical) and a few tens of kilobytes
+  when it scrolls into view — every cell is `loading="lazy"`. At
+  hundreds of photographs the page is a few hundred kilobytes of HTML
+  and the build a few hundred more transforms; at thousands, paging or
+  a lighter cell is the change, named here, not built.
+- **It carries no category of its own.** Its eyebrow is its galleries'
+  categories, as the gallery root's was; the category pages list
+  galleries and journal entries only. The spec adds `draft` and
+  `published`, nothing else; whether a sidecar should carry
+  `category:` is put to him at T1745, not decided here.
+  _Superseded by "Amendment 4 (2026-10-01): the photograph's categories"
+  below: a photographs-folder sidecar may write `categories:`, shown in
+  its page's eyebrow (T1749–T1750)._
+- **The feed lists journal entries only**; a dated photograph stands on
+  the front door, not in `rss.xml` (the spec: "The front door only
+  learns to list a dated photograph"), so AC 29's "absent from the
+  feed" holds for every photograph, draft or not. Put to him at T1745.
+- **A photograph's story places its own folder's photographs only**
+  (`./<file>`): `../journal/<slug>/<file>` is not a shape the site
+  accepts, as it was not from the gallery root.
+- **The words scan excuses authored text by region and by harvest.** A
+  page whose title falls back to a file name holding the word ("Piece
+  of coast" from `piece-of-coast.jpg`) fails — a `title:` fixes it;
+  the failure line names the page and the text. The harvest's removal
+  is global on a page: an authored string that happened to equal a
+  chrome phrase holding the word would excuse that chrome too.
+- **The search index is not scanned.** "A draft is absent from the
+  search index" rests on pagefind indexing built pages only, and a
+  draft having none; the scan cannot read pagefind's compressed
+  fragments. The walkthrough's search for "Draft fixture" is the one
+  direct check.
+- **A journal entry named `journal`, `places` or `galleries`** would
+  make `setKeyFromPath` read `/photographs/<slug>/<name>/` as a set's
+  page (its pattern matches the path's tail) — the same kind of
+  misreading an entry named `galleries` could cause before this
+  amendment; not guarded here.
+- **Meta descriptions and the feed's channel text are not in the
+  scan** (not printed on a page); the consts case and T1742's grep pin
+  the chrome strings that reach them.
+- **The internals keep "piece"**: module files, CSS classes,
+  `SetKind`'s `'piece'` and `data-set="piece:<slug>"`, `WORDING`'s
+  keys, build messages' structural use of the word, the plugin's id,
+  the repository.
+- **The old addresses answer 404** (spec: no redirects; nothing is
+  deployed).
+
+### Resolved decisions (amendment 3)
+
+- **Three commits for the move** — homes, addresses, ids — each green,
+  so a failure points at one kind of change; the first two mechanical,
+  the third reviewed on its own.
+- **The bare id is an empty folder segment built by one function**
+  (`imageIdOf`), not a sentinel word; `homeSlugOf` reads the slash.
+- **The photographs rule stays parent-only** and the journal slug
+  `photographs` is refused, rather than reading the grandparent — the
+  harness under `tests/` keeps mirroring the site with one rule.
+- **A name shared by a photograph and a journal entry fails**,
+  compared lowercased, both named.
+- **The old `gallery/` id gets its own line** where it is not itself
+  a known id; `nearestHint` would find the bare id anyway, but not say
+  why it changed.
+- **`draft` and `published` are optional, not defaulted**, so a written
+  `false` in a journal folder is refused; `published` is not `date`.
+- **The registry reads sidecars before status**; every consumer already
+  keys on `'published'`, so a draft needs words, not branches.
+- **The front door's merge is a pure function in a module of its own**,
+  ties to the journal entry; `PieceList` takes items so one row
+  treatment serves both kinds; a photograph row is its frame, its date
+  and its title.
+- **A photographs-folder frame at a place is an outing of its own,
+  dated by its capture**, ordered with the journal outings by one pure
+  function; not merged into a same-day outing (two clocks), and an
+  undated one refused rather than placed by guess.
+- **The photographs index reuses the gallery flow** at a fixed small
+  short side and the related strip's narrow rule by its class — no new
+  CSS; its knobs sit beside the walls' in `gallery-layout.ts`, and the
+  footer's links become one array so the link's word and place are one
+  edit.
+- **One new barrier** for the addresses, the words, the drafts, the
+  front door and the index, name-independent where it can be; authored
+  text excused by region and by harvested strings, never by class name
+  or URL; the existing barriers keep their scopes.
+- **The nav follows AC 31's order** — Journal, Places, Galleries.
+- **The About page's interim text is rewritten** — not his words, and
+  AC 31 covers every page.
+- **No internal rename, no new dependency.**
+
+## Amendment 4 (2026-10-01): the photograph's categories
+
+**Status**: Signed off (2026-10-01) by the `skeptical-reviewer` at the top tier — no blocking findings; five second-look notes taken (scan 6 over the whole category page, the one-time eyebrow read as a known limitation the tier log carries to the sweep, the vacuous-case wording, the envelope row and the `PHOTOGRAPH_FIELDS` comment, the README change accepted).
+**Implements**: spec.md's sections marked _(amended 2026-10-01,
+category)_ — the preamble's fourth-amendment sentences, Goal 11's
+sentence on a photograph naming its categories, the Entity "A
+photograph's categories", the flow "Publishing a photograph" (its
+`categories:` and the eyebrow on publishing), the Design requirement
+"The eyebrow on a photograph's page", the Authoring requirement "The
+constitution, a fourth time", the envelope's ordinary-path line, the
+Decided section's last bullet, and the four criteria under "_Amended
+2026-10-01 (category):_" (AC 35–38 here, numbered on from AC 34: the
+constitution 35, the eyebrow and the refusals 36, the category pages
+37, the document 38).
+
+One optional sidecar line, read in two places: Astro's schema accepts
+it in either folder and refuses a bad word, and the registry refuses it
+in a journal folder, as it refuses `draft` and `published`; the
+photograph page's eyebrow reads it before the galleries' categories.
+No dependency, no new module, no change to `SiteImage`,
+`src/lib/images.ts`, the category pages, the photographs index, the
+front door, a place's wall, the feed or the search index. A sixth scan
+in the existing barrier pins the category pages; the rest is unit tests
+and one-time reads of the built pages.
+
+Everything above this section stands except one statement it makes
+false, given a one-line pointer to here: Amendment 3's Known limitation
+"It carries no category of its own". Amendment 3's envelope table row
+for the sidecar fields' names says "the two keys"; it carries a
+parenthetical "(three from T1749)" — the one other line touched above.
+
+The constitution has no "Scale" section; the five tests are applied as
+before, and each bullet says where the simpler shape was taken.
+
+### Shape of the change (amendment 4)
+
+- **The constitution, a fourth time** (`CLAUDE.md`, T1748, its own
+  commit before T1749, on this branch: the clause names a field only
+  this branch's schema accepts — the rule Amendment 3's constitution
+  bullet followed). One replacement in the Content model clause, exact
+  text. From:
+
+  > whose `draft: true` holds the photograph unpublished and whose
+  > `published:` date puts it on the front door beside journal entries
+  > (a journal entry's photographs are published and dated by their
+  > entry; a sidecar there that writes either field fails the build).
+
+  to:
+
+  > whose `draft: true` holds the photograph unpublished, whose
+  > `published:` date puts it on the front door beside journal entries,
+  > and whose `categories:` name the photograph's categories in its
+  > page's eyebrow, in place of the categories of the galleries that
+  > hold it (a journal entry's photographs are published, dated and
+  > categorised by their entry; a sidecar there that writes any of the
+  > three fails the build).
+
+  (Unquoted in the constitution.) Rewrapped by hand so that "whose
+  `categories:` name" and "writes any of the three fails the build"
+  each sit whole on one line — T1736's lesson: the greps are
+  line-based. Nothing else in the file.
+
+- **The line** (`src/content.config.ts`, T1749). The `imageMeta`
+  schema gains, after `published`:
+
+  ```ts
+  categories: z.array(z.enum(CATEGORIES)).min(1).optional(), // photographs folder only
+  ```
+
+  — the journal schema's line (`content.config.ts:25`) with
+  `.optional()`; `CATEGORIES` is already imported. A word outside the
+  four (a capitalised `Street` included), an empty list and a bare
+  `categories:` (YAML null) all fail at Astro's schema during content
+  sync, before the registry runs (messages below). Optional, not
+  defaulted, as `draft` and `published` are, so the journal-folder
+  refusal sees any written line. The order is kept as written; a
+  repeated word is not refused — the journal schema refuses neither,
+  and the spec's line is "as a journal entry's frontmatter writes it".
+  The comment above `draft`/`published` names the third field.
+
+- **The refusal in a journal folder** (`src/lib/image-meta.mjs`,
+  T1749). `PHOTOGRAPH_FIELDS` gains `categories`; the message's tail
+  comes from a frozen map beside it, so the two existing lines stay
+  byte-identical:
+
+  ```js
+  export const PHOTOGRAPH_FIELDS = Object.freeze({
+    draft: 'draft',
+    published: 'published',
+    categories: 'categories',
+  }); // tunable: the names draft and published (categories is the journal's word, not a tunable)
+  const FROM_THE_ENTRY = Object.freeze({
+    draft: 'are published and dated by their entry',
+    published: 'are published and dated by their entry',
+    categories: "take their entry's categories",
+  });
+  ```
+
+  `photographOnlyProblems` iterates `Object.entries(PHOTOGRAPH_FIELDS)`
+  and writes `… — a journal entry's photographs ${FROM_THE_ENTRY[key]};
+  remove the line`; lines come in the object's order (draft, published,
+  categories). The registry's call (`images.ts` lines 420–431) is
+  unchanged — it already passes every sidecar's `data` and throws all
+  the lines at once. Simpler shape taken: one more field in the
+  existing check, not a second check.
+
+- **The eyebrow** (`src/lib/categories.ts`,
+  `src/pages/photographs/[...id].astro`, T1750). A pure function
+  beside `categoryRow`, there for `categoryRow`'s reason — the rule is
+  pinned in a test rather than in a component:
+
+  ```ts
+  /**
+   * The eyebrow on a photograph's page (spec 019, amendment 4): its
+   * journal entry's categories; else its sidecar's `categories:`, whole —
+   * the galleries' are not merged in; else the categories of the
+   * galleries that hold it, first seen first; else none.
+   */
+  export const eyebrowCategories = ({
+    entry,
+    own,
+    galleries,
+  }: {
+    entry: readonly Category[] | null;
+    own: readonly Category[] | undefined;
+    galleries: readonly Category[];
+  }): Category[] =>
+    entry ? [...entry] : own && own.length > 0 ? [...own] : [...new Set(galleries)];
+  ```
+
+  The page's lines 98–102 become one call:
+
+  ```ts
+  // The eyebrow (eyebrowCategories): the entry's, the sidecar's, or the galleries'.
+  const categories = eyebrowCategories({
+    entry: piece?.data.categories ?? null,
+    own: image.sidecar?.data.categories,
+    galleries: galleries.map((gallery) => gallery.data.category),
+  });
+  ```
+
+  The markup (lines 332–348) is unchanged. In page terms: a journal
+  folder's photograph shows its entry's categories (as today); a
+  photographs-folder photograph whose sidecar writes the line shows
+  those words, in the line's order, and nothing else; without the line,
+  the categories of the galleries that hold it (as today — `galleries`
+  is the registry's newest-first list, so this is today's expression);
+  in no gallery, no eyebrow (the `<p class="eyebrow">` is not
+  rendered, as today). Each word links to `/categories/<word>/`. One
+  caller: the function earns its place as the test seam, as
+  `categoryRow` did, not by reuse. Not a `SiteImage` field — nothing
+  else reads a photograph's categories.
+
+- **The fixture** (`src/content/photographs/_dock-b.md`, T1750):
+  `categories: [street]` after `published:`. Chosen to discriminate:
+  Editor's picks (`category: landscape`) holds both `dock-b` and
+  `dock-a`, so `dock-b` reads "Street" only if the line wins whole — a
+  merge would read "Street / Landscape" or the reverse, a missed line
+  "Landscape" — while `dock-a`, with no sidecar, keeps "Landscape", and
+  `cozy-brook` (no sidecar, in no gallery, borrowed by the matte
+  sampler) keeps no eyebrow. No new fixture.
+
+- **The category pages, pinned** (`scripts/check-lexicon.mjs`, T1751).
+  `src/pages/categories/[category].astro` is not touched. A sixth scan
+  in the spec-019 barrier, which already reads the photographs' surfaces
+  (scans 3–5) and has the helpers: in the one pass over `<dist>`, on
+  every `.html` under `<dist>/categories/`, the whole page body (the
+  loop's `body`, scripts, styles and comments already removed) holds no
+  href matching `PHOTOGRAPH_LINK` — a photograph page of either folder.
+  Whole body, not the `.category-group` sections: a future section
+  under another class would otherwise pass. This is safe because
+  `PHOTOGRAPH_LINK` (`^(?:<origin>)?/photographs/(.+)/$`) needs at least
+  one character and a slash after `/photographs/`, so it does not match
+  the footer's bare `/photographs/` index link — the one link to that
+  folder in a category page's chrome (the header's nav has none, by
+  scan 5). If there is no `.html` under `<dist>/categories/` at all,
+  the scan fails rather than passing on nothing (scan 4's guard). The
+  summary line gains `; <n> category pages, no photograph listed`; the
+  header comment gains "Sixth scan, the category pages". Simpler shape
+  taken: a deny on photograph links — the AC's words — not an
+  allowlist; and a scan in the existing barrier, not a new script that
+  would copy the walk, the arguments and the summary.
+
+- **The documents** (T1752), hand-edited. `AUTHORING.md`: the sidecar
+  skeleton's note (lines 115–118, "takes two more, `draft:` and
+  `published:`") becomes three, naming `categories:`; "The photographs
+  folder"'s field block (lines 252–281): "Two sidecar fields are this
+  folder's alone" becomes three; the YAML example gains
+  `categories: [landscape] # the eyebrow above the title`; a third
+  bullet, **`categories:`** — one or more of the four, as a journal
+  entry writes them, shown above the title and linking to their
+  category pages, the line whole when present; then the fallback in one
+  sentence: "Without the line the eyebrow shows the categories of the
+  galleries that hold the photograph, and nothing when no gallery
+  does."; category pages list galleries and journal entries, not
+  photographs; and the refusal paragraph's "either line" becomes "any
+  of the three", the categories message quoted beneath the draft one.
+  `README.md` — not named by the spec; changed because it would
+  otherwise be false: "Two sidecar fields are this folder's alone"
+  (line 231) becomes three with one clause for the line, "Either field"
+  (line 237) becomes "Any of the three", and the sidecar example (lines
+  278–279) gains
+  `categories: [street] # the photographs folder only: the eyebrow, in place of its galleries'`.
+
+### The tuning envelope, placed (amendment 4)
+
+Nothing tunable is added. The spec's envelope gains only an
+ordinary-path line, and the line's name is the journal frontmatter's
+word, not an envelope item; `PHOTOGRAPH_FIELDS.categories` sits beside
+the two tunable names because the refusal and the source test read it
+there.
+
+### Failure messages (amendment 4)
+
+- A journal-folder sidecar writing the line (the registry's, with any
+  `draft`/`published` lines, all at once): `[images]
+  src/content/journal/where-the-fog-lets-go/_land-b.md: "categories" is
+  for a photograph in src/content/photographs/ — a journal entry's
+  photographs take their entry's categories; remove the line`.
+- A word outside the four — **Astro's schema error fires, not the
+  registry's**, during content sync. Expected text, read from Astro
+  7.2.2's `InvalidContentEntryDataError` and Zod 4.4.3's English locale
+  in `node_modules` — not yet run, so T1749 pastes the real lines and
+  the orchestrator corrects this quotation if they differ:
+
+  ```
+  **imageMeta → photographs/_dock-b** data does not match collection schema.
+
+    **categories.0**: Invalid option: expected one of "landscape"|"street"|"portrait"|"event"
+  ```
+
+  with the error's location the sidecar's path (the terminal may print
+  the `**` as bold). It names the file — the entry id is the path, by
+  `imageMeta`'s `generateId`, and the location — and the field,
+  `categories.0` being the index of the bad word.
+- An empty list, `categories: []`: the same header, then
+  `**categories**: Too small: expected array to have >=1 items`.
+- A bare `categories:` (YAML null): the same header, then — read at
+  T1749 (Astro 7.2.2) —
+  ``categories**: **categories: Expected type `"array"`, received `"object"` ``:
+  the path printed twice, the bold markers unbalanced so a literal `**`
+  shows, and null reported as `"object"`. The file is still named by
+  the error's header and location. _Superseded at T1735e
+  (2026-10-06): a blank line, an empty string and an empty list are
+  read as no line, so a bare `categories:` and `categories: []` are
+  unset and the eyebrow falls back; a word outside the four still
+  fails as above._
+- The barrier: `[check-lexicon] <file>: a category page lists a
+  photograph (<href>) — category pages list galleries and journal
+  entries`; `[check-lexicon] no page under <dist>/categories/ — the
+  category pages are where scan 6 reads`.
+
+### Testing strategy (amendment 4)
+
+- **The constitution** — **T1748**: greps only.
+- **The line and the refusal** — **T1749** (image-meta.test.mjs):
+  `photographOnlyProblems` — a journal sidecar with
+  `categories: ['landscape']` → exactly the categories line above; with
+  all three fields → three lines, draft, published, categories; a
+  photographs-folder sidecar with all three → none. The existing draft
+  and both-fields cases unchanged and green (their messages
+  byte-identical). The existing "each PHOTOGRAPH_FIELDS name is a key"
+  case runs over `categories` too, but is not counted as evidence for
+  it: a `categories:` key elsewhere in the config (the journal schema
+  has one) is too near a vacuous pass to rest on. The evidence is a new
+  exact-string source case: the `imageMeta` block (from
+  `const imageMeta` to `const places`) holds
+  `categories: z.array(z.enum(CATEGORIES)).min(1).optional()` — a
+  missing line, a dropped `.min(1)` or a loosened `z.string()` fails it
+  by name. (The
+  schema cannot run under Vitest: `content.config.ts` imports
+  `astro:content`.) **Mutation**: `categories` removed from
+  `PHOTOGRAPH_FIELDS` → the journal-categories case fails; reverted.
+  One-time build edits, each reverted, the failing lines pasted:
+  `categories: [nature]` in `_dock-b.md`; `categories: []`; a bare
+  `categories:`; `categories: [landscape]` in
+  `journal/where-the-fog-lets-go/_land-b.md`.
+- **The eyebrow** — **T1750** (categories.test.mjs):
+  `eyebrowCategories` — the entry's list wins over a line and
+  galleries; a line `['street']` with galleries `['landscape']` →
+  `['street']`; a line's order kept (`['street', 'landscape']`); no
+  line → the galleries' deduplicated, first seen first
+  (`['landscape', 'street', 'landscape']` → `['landscape', 'street']`);
+  an empty `own` → the galleries' (the schema refuses it; the function
+  does not rely on that); nothing → `[]`. **Mutation**: the line merged
+  with the galleries' (`[...new Set([...own, ...galleries])]`) → the
+  `['street']` case fails; reverted. On `dist/`, one-time reads of the
+  eyebrow's links (the header from `class="page-head section
+  image-head` to its `</h1>`): `dock-b` → `/categories/street/` alone;
+  `dock-a` → `/categories/landscape/`; `cozy-brook` → none;
+  `where-the-fog-lets-go/land-b` → its entry's `categories:` in order.
+  "Nothing else, and no other page, changes with the line": `dist/`
+  built with T1750's code and without the fixture line, then with it,
+  `diff -rq` excluding `pagefind/` → `photographs/dock-b/index.html`
+  alone (the page's indexed text changes with the eyebrow, so pagefind's
+  fragments do too).
+- **The category pages** — **T1751** (lexicon.test.mjs): the clean
+  tree gains `categories/landscape/index.html` with two
+  `category-group` sections (a gallery card's link to `/galleries/fog/`,
+  a journal row's to `/journal/fog/`), so every expectation quoting the
+  clean tree's summary line follows it (6 pages read, the new clause) —
+  the expectation following an added page, not a loosened check; no
+  other expectation changes. Cases: a group holding a link to
+  `/photographs/dock-b/` fails, naming the file; one to
+  `/photographs/fog/land-a/` too; a link to `/photographs/dock-b/` in a
+  section of another class on the category page fails too (the whole
+  body is read); the footer's bare `/photographs/` passes (it is in
+  the clean tree's every page); the category page deleted → the guard
+  line. **Mutation**: the scan's href check skipped → the
+  `dock-b` case fails; reverted. One-time real build: a photograph item
+  added to the category page's `PieceList` items → BUILD EXIT 1 with
+  the scan 6 line, reverted. AC 37's "what they listed before": the
+  four category pages' link hrefs hashed before T1749's first edit and
+  after T1751 — equal.
+- **The documents** — **T1752**: greps.
+- **Unchanged and green**: the whole suite; the five barriers;
+  `astro check`.
+- **At the pause, by the person**: the three photographs-folder pages
+  and a journal photograph's, the category pages, `AUTHORING.md`'s
+  lines.
+
+### File structure (amendment 4)
+
+```
+CLAUDE.md                                  the Content model clause's sidecar sentence (T1748, its own commit)
+src/content.config.ts                      imageMeta's categories line, the comment (T1749)
+src/lib/image-meta.mjs                     PHOTOGRAPH_FIELDS.categories, FROM_THE_ENTRY, photographOnlyProblems' tail (T1749)
+image-meta.test.mjs                        the refusal cases, the schema line's source case (T1749)
+src/lib/categories.ts                      eyebrowCategories (T1750)
+categories.test.mjs                        its cases (T1750)
+src/pages/photographs/[...id].astro        the eyebrow's computation, its comment (T1750)
+src/content/photographs/_dock-b.md         categories: [street] (T1750)
+scripts/check-lexicon.mjs                  scan 6, the header comment, the summary (T1751)
+lexicon.test.mjs                           the clean tree's category page, scan 6's cases (T1751)
+AUTHORING.md, README.md                    T1752
+```
+
+Untouched, named so the reviewer can confirm: `src/lib/images.ts`;
+`src/pages/categories/[category].astro`; `src/components/*`; the
+photographs index, the front door, the place and gallery pages, the
+feed; `scripts/verify.sh` (its summary grep already prints
+`[check-lexicon]`); `package.json`.
+
+### Known limitations (amendment 4)
+
+- **A photograph's categories reach its own page only.** The category
+  pages, the photographs index, the galleries and search's filters do
+  not read the line (the spec's ordinary path). The eyebrow's words are
+  part of the page's indexed text, as the galleries' categories were.
+- **The bad-line failures are the build's.** Under `npm run dev`
+  Astro's glob loader catches a reload's error and logs `Failed to
+  reload <file>: …` (`onChange` in
+  `astro/dist/content/loaders/glob.js`), so the server keeps the last
+  good data; `npm run build` refuses the line. Read from Astro's
+  source, not tested here.
+- **A repeated word is not refused** (`[street, street]` prints twice),
+  as in a journal entry's frontmatter.
+- **The eyebrow's wiring is checked once, not per build.** The rule is
+  pinned on every run by categories.test.mjs; that the page calls it,
+  by T1750's reads of `dist/`. No test in the suite reads the real
+  `dist/` (lexicon.test.mjs, private-files.test.mjs and
+  gps-barrier.test.mjs run their barriers on temporary trees), so there
+  is no existing case to add it to, and a per-build scan would need a
+  second YAML reader in the barrier for one line of page code. The tier
+  log records that AC 36's built page was read once, so the pre-merge
+  sweep knows to re-read it.
+
+### Resolved decisions (amendment 4)
+
+- **The line is whole when present** — the spec's call; the function
+  returns it, never merged.
+- **The schema refuses a bad word, not the registry** — the journal
+  schema's own line plus `.optional()`, so the two cannot disagree, and
+  Astro's message names the file and the field.
+- **One more photograph-only field, not a second check**; its own tail
+  in the message, the other two lines unchanged.
+- **The rule sits beside `categoryRow` and is tested there**; not a
+  `SiteImage` field.
+- **`dock-b` carries the line, as `street`**, so a merge or a missed
+  line reads differently from what passes.
+- **AC 37 by a sixth scan in `check-lexicon.mjs`** — a deny on
+  photograph links across each category page's whole body (the bare
+  index link does not match `PHOTOGRAPH_LINK`), guarded against reading
+  nothing — plus a one-time before-and-after hash.
+- **`README.md` follows `AUTHORING.md`**: it states the folder's fields
+  and would otherwise be false.
+- **No `review: per-task`**: one schema line, one more name in an
+  existing check, one call on the page; nothing re-addresses or
+  unpublishes a page if wrong. **No new dependency.**
+
+## Amendment 5 (2026-10-06): a place made by naming it
+
+**Status**: Signed off (2026-10-07) by the `skeptical-reviewer` at the top tier — no blocking findings; ten second-look notes taken (a typo of `none` put to the look, AC 45's wording, the entry-default build, two more forbidden forms in the absence case, the line of counts cited as the spec now reads, counts reported not asserted, the cover's existing resolution, grouping rounds, the dev sampler's named place, hyphens and digits in `AUTHORING.md`).
+**Implements**: spec.md's sections marked _(amended 2026-10-06,
+place)_ — the preamble's fifth-amendment sentences, Goal 12, the
+Entities "A made place", "The title rule" and "A place's name", the
+flow "Naming a new place", the Design requirement "A made place's page
+and card", the Authoring requirements "The constitution, a fifth
+time", "The near-miss guard", "What the build says" and "The documents
+and the template", the envelope's line and the ordinary-path line, the
+Decided section's last bullet, and the eight criteria under "_Amended
+2026-10-06 (place):_" (AC 39–46 here, numbered on from AC 38: the
+constitution 39, the made page and the title rule 40, the card, the
+label and the arrows 41, the file taking over, the draft and the
+unpublished name 42, the guard and the name's shape 43, the two notes
+44, the declared places unchanged 45, the documents 46).
+
+The refusal "no place named …" goes, and three things stand where it
+stood: a check of the name's shape, a guard against a near miss, and a
+roll of which places publish — every declared one as before, then
+every name the registry grouped frames under that has no file. A made
+place is a `SitePlace` whose `entry` is `null` and whose title is read
+from its slug; it leaves the registry in the same list, by the same
+loop, as a declared one, so the places index, the cover, the Open
+Graph image, the label's link, the place set and its arrows, the
+sitemap and search get it with no change of their own. The one
+template that reads a place's file, the place page (and the dev
+sampler built on it), guards the read. Two notes are added to the
+registry's `console.warn` lines and `scripts/verify.sh` prints every
+place note in a group of its own, outside the thirty-line cap. No
+dependency, no schema change, no new module, no change to the card,
+the photograph page, the wall's layout, the plugin or the templates.
+
+Everything above this section stands; no earlier section of this plan
+states the withdrawn refusal. The constitution has no "Scale" section;
+the five tests are applied as before, and each bullet says where the
+simpler shape was taken.
+
+### Shape of the change (amendment 5)
+
+- **The constitution, a fifth time** (`CLAUDE.md`, T1754, its own
+  commit before T1755, on this branch: the clause describes a rule only
+  this branch's registry follows). One replacement in the Content model
+  clause, exact text. From:
+
+  > **Places** (spec 009) are a third kind: a `places` collection of
+  > files _declared_ once (a title, a description, an optional cover,
+  > the writing), then _grown_ by the registry — a photograph names its
+  > place in its sidecar (`at: <slug>`, or `at: none`), a journal entry
+  > may set one default for its folder with the same line, and the build
+  > refuses a slug with no file, listing the places that exist.
+
+  to:
+
+  > **Places** (spec 009) are a third kind. A place is _made_ by being
+  > named and _grown_ by the registry: a photograph names its place in
+  > its sidecar (`at: <slug>`, or `at: none`), a journal entry may set
+  > one default for its folder with the same line, and a published
+  > photograph naming a slug is enough for the place's page, its title
+  > read from the slug (spec 019). Its file in the `places` collection,
+  > when there is one, _declares_ its title, description, cover and
+  > writing and takes the made page over at the same address, and a
+  > file with `draft: true` holds the place back. The build refuses a
+  > name that is not a slug, or that is a near miss of another place's,
+  > and lists the places it made and the photographs that name none.
+
+  (Unquoted in the constitution; the sentence that follows, "A place's
+  page shows its published frames as one wall …", and the clause's
+  close — never inferred from camera metadata, nor from the sidecar's
+  free-text `place` — stand as written.) Two phrases are drawn from
+  the spec's Entities rather than from "The constitution, a fifth
+  time": the draft file holding a place back, and the second note. The
+  text opens mid-line in the file ("it. **Places** …"); rewrapped by
+  hand so that `is _made_ by being`, `_declares_ its title` and
+  `near miss of another place's` each sit whole on one line — the
+  greps are line-based (T1736's lesson). Nothing else in the file.
+
+- **A place's name** (`src/lib/image-meta.mjs`, T1755) — pure, beside
+  `placeOf`, with the four tunables as named values above them:
+
+  ```js
+  export const PLACE_TITLE_SMALL_WORDS = Object.freeze([
+    'a', 'an', 'and', 'at', 'by', 'for', 'in', 'of', 'on', 'the', 'to',
+  ]); // tunable: lower case after the first word of a made place's title
+  export const PLACE_NEAR_MISS = 2; // tunable: letters off that read as a typo
+  export const PLACE_NEAR_MISS_SHORT = 1; // tunable: the same, for a short name
+  export const PLACE_SHORT_NAME = 6; // tunable: a name this long or shorter is short
+  ```
+
+  - `placeTitle(slug)` — the title rule: split on `-`, empty words
+    dropped (`a--b` is a legal file name), each word given a capital
+    except a small word after the first, joined by spaces. Digits pass
+    through (`highway-101` → "Highway 101").
+  - `placeAtProblems(refs)` — the shape, checked where the name is
+    written. `refs` is `{ file, slug }[]`, every `at:` on any journal
+    entry or sidecar, draft or not, trimmed (the list the old rule
+    took). A value passes when it is blank, `none`, or matches the
+    existing `SLUG` and holds at least one letter or digit; anything
+    else is one message naming the file and the value and showing the
+    slug it should be, all at once. The suggestion is
+    `slugSuggestion(value)`, not exported: NFKD, combining marks
+    removed, lower case, every run outside `a-z0-9` one hyphen, hyphens
+    trimmed from the ends — `Falls Creek Falls` → `falls-creek-falls`,
+    `None` → `none`; when nothing is left the message carries no
+    suggestion. "At least one letter or digit" is one step tighter than
+    a place file's name: `SLUG` alone admits `--`, whose title would be
+    empty.
+  - `lettersOff(a, b)` — the measure for "one or two letters off":
+    the fewest single-character insertions, deletions and
+    substitutions, with a swap of two adjacent characters counted as
+    one (optimal string alignment; about twenty lines, no dependency).
+    The swap is counted as one because it is the commonest slip of the
+    hand and would otherwise be two, slipping past the short-name
+    allowance (`jtety` for `jetty`). Hyphens and digits count as
+    letters.
+  - `nearMissProblems(refs, declared)` — the guard. `refs` as above;
+    `declared` is `{ slug, file }[]`, every place file, drafts
+    included. The names with no file are the distinct `refs` slugs
+    that are not blank, not `none` and not in `declared`, each with
+    the files that write it, in order of first writing. Each is
+    measured against every declared slug, and against every other name
+    with no file, once per pair. A pair is refused when
+    `lettersOff(a, b) <= allowance`, the allowance being
+    `PLACE_NEAR_MISS_SHORT` when the longer of the two names has
+    `PLACE_SHORT_NAME` characters or fewer, else `PLACE_NEAR_MISS`
+    (the longer name, so the definition is the same whichever of the
+    two is the typo; names within two of each other differ in length
+    by at most two). Two declared slugs are never measured against
+    each other. One message per pair, pairs sorted by name; all at
+    once.
+
+  The guard reads every `at:`, a draft's included — the scope the
+  withdrawn rule had ("a typo in a draft is still a typo") — so a
+  misspelling stops the build while the photograph is still a draft
+  rather than on the day it is published. This is one step wider than
+  the spec's "another made place's" where the other name is written
+  only by unpublished photographs; taken because the alternative lets
+  a typo sit unseen until publishing.
+
+  `placeProblems` and its four cases in image-meta.test.mjs are
+  removed in T1756 with the rule they pin — "an unknown slug names the
+  file and lists the declared places, sorted", "with no place declared
+  at all, the message says how to declare one", "a known slug and
+  `none` are no problem, on a piece or on a sidecar", "every problem
+  comes back at once, in the order the refs came". The spec withdraws
+  that refusal; their successors are the guard's cases below, the
+  first of which asserts the opposite of the first of these. Every
+  other case under "places (T701, spec 009)" and "the place walls
+  (T1746, spec 019)" is unchanged and green — AC 45 as spec.md words
+  it, "every place test that stands". T1756's Done note names the four
+  and, beside each, the case that succeeds it. Simpler shape taken:
+  delete, not keep the function behind a flag.
+
+- **Which places publish** (`src/lib/image-meta.mjs`, T1756):
+
+  ```js
+  /**
+   * The roll of places (spec 019, amendment 5). `declared` is
+   * `{ slug, draft }[]`, the place files in their order; `grouped` is
+   * `groupByPlace`'s map. Every declared place, in order — 'draft',
+   * 'declared' (it has frames) or 'empty' — then every grouped name
+   * with no file, sorted: 'made'.
+   */
+  export function placeRoll(declared, grouped) // → { slug, status }[]
+  ```
+
+  One caller; it earns its place as the test seam for AC 40 and AC 42
+  ("the registry's tests"), since `images.ts` imports `astro:content`
+  and cannot run under Vitest. That a name whose photographs are all
+  unpublished makes nothing needs no rule of its own: `placeOfId` is
+  filled from published files only, so no group forms; that a draft
+  file's frames show no place is the existing line
+  (`slug && !placeById.get(slug)?.data.draft ? slug : null`),
+  untouched.
+
+- **The registry** (`src/lib/images.ts`, T1756).
+  - `SitePlace.entry` becomes `CollectionEntry<'places'> | null` —
+    null for a made place; `title` is the file's, else
+    `placeTitle(slug)`. No `made` flag and no flattened `description`:
+    the card, the label and the set are handed nothing that could mark
+    a made place, and the one reader of a description is the place
+    page, which has the entry. The interface's comments say so.
+  - The slug-rule block (lines 506–524) keeps its `refs` and runs
+    `placeAtProblems(refs)`, throwing its lines, then
+    `nearMissProblems(refs, placeEntries.map(…))` over every place
+    file, throwing its lines — shape first, since a value that is not
+    a name is not measured.
+  - The loop over `placeEntries` (lines 659–701) becomes a loop over
+    `placeRoll(…)`: 'draft' and 'empty' print the two existing notes,
+    byte-identical and in the order they print today; 'declared' and
+    'made' build the `SitePlace` in the one body — `entry` from
+    `placeById` or null, the cover check run only where there is an
+    entry, and the cover resolved exactly as the loop resolves it
+    today (lines 678–697: a declared `cover`, once checked against the
+    place's frames, else the first frame of the most recent outing) —
+    the implementer follows that resolution and writes no second one;
+    a made place has no declared cover and so takes the fallback, the
+    rule a declared place without a `cover` already follows. `latest`
+    and `summary` as now. The sort and `placeBySlug` are unchanged, so a
+    made place takes its place in the index's order and reaches
+    `SiteImage.place` and the place set by the existing lines.
+  - A gallery lists photographs by id and is indifferent to places. A
+    declared place's `cover` must be one of that place's own frames,
+    so one naming a made place's frame is refused by
+    `placeCoverProblem` as any stranger's frame is. Neither changes.
+  - `src/content.config.ts`: comments only — the two `at` comments
+    ("a declared place's slug, which the image registry checks") and
+    the places collection's header say a place's name, checked for
+    shape and near misses, with or without a file. `at` stays
+    `z.string().optional()`: the registry's message shows the slug it
+    should be, which a schema `regex` could not.
+  - **`at:` left blank** is no line (T1735e's `blankIsUnset` drops it
+    before the schema): it names no place and does not say `none`, so
+    a journal frame takes its entry's default and a photographs-folder
+    photograph — the `photograph` template as it comes — is listed in
+    the second note until the line is filled or reads `none`.
+
+- **The place page and the dev sampler** (T1756, with the type change
+  that forces them). `src/pages/places/[slug].astro`:
+
+  ```ts
+  const description = place.entry?.data.description;
+  // A made place has no file; a place file may be a title and a cover.
+  const hasWriting = (place.entry?.body ?? '').trim().length > 0;
+  const Content = place.entry && hasWriting ? (await render(place.entry)).Content : null;
+  ```
+
+  The layout's `description` is `description ?? place.summary`, the
+  lead renders on `description`, the writing on `Content`. The markup
+  is otherwise untouched: the eyebrow, the title, the line of counts,
+  the wall. So a made place's page is, element for element, the page
+  of a declared place whose file is a title alone — pinned in T1758 by
+  writing that file and comparing the two built pages byte for byte.
+
+  **The line of counts stays**, as the Design requirement says: "the
+  title, the line of counts and years every place page carries under
+  its title, then the wall … no line of the site's own in the stead of
+  the description or the writing". So the made page differs from a
+  declared one only in what its file would have added, and a visitor
+  cannot tell it from a declared place that says little. Not a
+  deviation; spec.md's Decided line still asks that he see it, so it
+  is the first question of the look.
+
+  `src/pages/dev/place-wall/[...candidate].astro` judges the writing
+  above the wall, so it needs a place with a file: the
+  `?? registry.places[0]` fallback, which could now be a made place,
+  goes, and the page throws naming `the-headlands` when that place or
+  its entry is missing. The named slug is kept, over
+  `registry.places.find((p) => p.entry?.body)`: the sampler's gate was
+  judged on that place's longer writing, and a search for any place
+  with a body would change which writing it shows as places are added,
+  without saying so. Dev-only; nothing ships.
+
+  No template may print anything for the absence of a file — the
+  spec's ordinary path. A standing source case in place-page.test.mjs
+  pins it: the template guards the entry's presence (`place.entry?.`,
+  `place.entry &&`) and never tests its absence or supplies a
+  stand-in for it: no `!place.entry`, no comparison with null or
+  undefined, no `? :` on it, no `place.entry ||` and no
+  `place.entry ??`.
+
+- **Every other consumer, untouched** — named so the reviewer can
+  confirm: `src/pages/places/index.astro` (title, cover, summary, url);
+  `CoverCards.astro` (it has never shown a description, so there is
+  nothing to leave out); `src/pages/photographs/[...id].astro` (the
+  label's `image.place.title` and `.url`, the place set);
+  `src/lib/image-set.ts`; `src/pages/search.astro` (Pagefind indexes
+  the made page as it does every page with `data-pagefind-body`);
+  `scripts/check-lexicon.mjs` (its scans read the made page as any
+  page; no seventh scan — see Known limitations).
+
+- **What the build says** (`src/lib/image-meta.mjs`, `images.ts`,
+  `scripts/verify.sh`, T1757).
+
+  ```js
+  export const PLACE_NOTE = '[places] note:';
+  export function madePlaceNote(slug, title, count) // → one line
+  export function noPlaceNotes(photographs) // → lines
+  ```
+
+  `noPlaceNotes` takes every published photograph as
+  `{ id, at, entryAt }` — its sidecar's `at:` and its journal entry's,
+  as written. A photograph names no place when its own line is blank
+  and, in a journal folder, its entry's is blank too. `none` is not
+  blank on either line, which is the whole of an entry's `at: none`
+  gaining its one meaning: `placeOf` still reads it as no default, and
+  this function leaves the entry off. The photographs folder's are one
+  line — a count, then their ids, sorted — and each journal entry's
+  one line with a count, entries sorted by slug. The folder is grouped
+  on one line (the spec's grouping is a tunable) because most fixture
+  photographs name no place, and one line per photograph would be
+  about forty; in his own folder the line is as long as the list of
+  photographs he has not placed. `images.ts` prints, after the two
+  existing notes: one `madePlaceNote` per made place in the roll's
+  order, then `noPlaceNotes`' lines — `console.warn`, as the
+  registry's other notes are; none throws.
+
+  `scripts/verify.sh` already catches `[places]` lines, in a list
+  capped at thirty with every other flagged line. The capped list now
+  leaves out lines matching `\[places\] note:`, and a line after it
+  prints all of them from `build.log`, uncapped — the two spec-009
+  notes move there with the two new ones. A change to the verification
+  command's printing only; the EXIT lines and what is green are
+  untouched.
+
+- **The fixtures** (T1758). One made place on the built site,
+  `top-of-the-world`, named by two new sidecars in the photographs
+  folder — placeholder photographs, so no real photograph is given an
+  invented place:
+
+  ```yaml
+  # src/content/photographs/_wide-3x2-01.md
+  date: 2026-08-27
+  at: top-of-the-world
+
+  # src/content/photographs/_wide-3x2-02.md
+  date: 2026-08-29
+  at: top-of-the-world
+  ```
+
+  Chosen to discriminate. The name reads "Top of the World" — a rule
+  that capitalised every word, or lowered the first, reads otherwise
+  on the page. Two photographs are two outings, so the arrows have
+  somewhere to step; the cover, the first frame of the most recent
+  outing, is `wide-3x2-02`, not the wall's first frame. Its latest
+  outing (2026-08-29) falls between the jetty's (2026-08-30) and the
+  headlands' (2026-08-28), so the index reads The jetty, Top of the
+  World, The headlands — a made place appended last, or put first,
+  reads differently. Neither sidecar writes a title, so the
+  photographs index's order does not move. The name is far from
+  `the-jetty` and `the-headlands`, the only other names any fixture
+  writes, so the guard passes the repo as committed.
+  And `src/content/journal/vocabulary-sampler/index.md` gains
+  `at: none`: the sampler is at no place on purpose, and the line
+  takes it off the second note while changing no page. The entry-default
+  and journal-sidecar ways of naming a made place are pinned in
+  image-meta.test.mjs (`placeOf`, `groupByPlace`, `placeRoll`) and,
+  for the entry's default, by T1756's one-time build, not by a second
+  fixture: all three reach `placeOfId` by the one line.
+
+- **The documents** (T1759), hand-edited, after the fixtures so every
+  quoted line is read from the build. `AUTHORING.md`: "Places"
+  rewritten around naming — a place is made by naming it; how its
+  title is read, with the three examples and the small words; the
+  place's file taking over at the same address, `draft: true` in it
+  holding the place back, and the `place` template as what he reaches
+  for when he has something to say about a place; what `at:` may hold,
+  with the shape message; an entry's `at: none` (today's sentence says
+  it "means the same as leaving the line out" — it still places
+  nothing, and now also quiets the note); the guard, its message and
+  the two ways past it, with one plain sentence that it counts every
+  character, hyphens and digits included, so two real places a letter
+  or two apart — `north-beach` and `south-beach`, `trail-1` and
+  `trail-2` — are refused until each has its file; the two notes,
+  quoted; the closing paragraph's
+  "refuses an `at:` naming a place that does not exist" replaced. "The
+  photographs folder"'s `at:` paragraph: the place need not have a
+  file, and a photograph with no line is listed in the note. The
+  Templates list's `place.md` line and the three "slug of a declared
+  place" phrases (the templates paragraph, the sidecar example's
+  comment, the `place`/`at` paragraph). `README.md`: the **Place**
+  paragraph's rule and its closing sentence, the photographs folder's
+  `at:` clause, the sidecar example's comment, "the declared place's
+  title" in the label's description. The `place` template and the
+  plugin are not touched.
+
+### The tuning envelope, placed (amendment 5)
+
+The envelope's place line. One place each:
+
+| Envelope item                         | One place (opening value)                                                                 | Pinned by                                                                 |
+| ------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| the title rule's small words          | `PLACE_TITLE_SMALL_WORDS`, `src/lib/image-meta.mjs` (the spec's eleven)                   | image-meta.test.mjs, by name and value; the title cases                   |
+| the guard's allowance                 | `PLACE_NEAR_MISS` (2), the same file                                                      | by name and value; the two-letters and three-letters cases                |
+| the short-name allowance              | `PLACE_NEAR_MISS_SHORT` (1)                                                               | by name and value; the short-pair cases                                   |
+| where a short name begins             | `PLACE_SHORT_NAME` (6 — the longer name of the pair has six characters or fewer)          | by name and value; the boundary cases at six and seven                    |
+| the notes' wording and their grouping | `PLACE_NOTE`, `madePlaceNote`, `noPlaceNotes`, the same file                              | image-meta.test.mjs, exact strings; the verify.sh source case             |
+
+A round on the first four rows, or on a note's words, is the value and
+the expectation beside it. A round that changes the notes' grouping —
+the photographs folder's as one line each, say, or the entries'
+gathered into one — is not a one-value round: it is an edit to
+`noPlaceNotes` and to its expectations, and is dispatched as that. The
+documents quote the small words and the notes, so a round that changes
+either updates `AUTHORING.md` in the same task.
+
+### Failure messages and notes (amendment 5)
+
+- An `at:` that is not a name (the registry's, all at once):
+  `[places] src/content/photographs/_falls.md: at: "Falls Creek Falls"
+  is not a place's name — lowercase letters, digits and hyphens only,
+  or none for no place: write at: falls-creek-falls`. With nothing to
+  suggest, the line ends at `or none for no place`.
+- A name with no file near a place that has one (declared or draft):
+  `[places] "the-jety" (src/content/photographs/_b.md) is 1 letter off
+  the place "the-jetty" (src/content/places/the-jetty.md) — a probable
+  typo. Correct the spelling; or, if they really are two places, add
+  src/content/places/the-jety.md`.
+- Two names with no file near each other:
+  `[places] "falls-creek-falls" (src/content/photographs/_a.md) is 1
+  letter off "falls-creek-fals" (src/content/photographs/_b.md), and
+  neither has a place file — one is a probable typo. Correct the
+  spelling; or, if they really are two places, add
+  src/content/places/falls-creek-falls.md and
+  src/content/places/falls-creek-fals.md`. The names come in sorted
+  order; the build does not guess which is wrong.
+- In both, `2 letters off` at two, and a name written by several files
+  names the first: `(src/content/photographs/_a.md and 2 more)`.
+- Withdrawn: `no place named "<slug>" — the places are: …` and
+  `… — none is declared yet: add …`.
+- Unchanged: the cover lines, the place file's name lines, the
+  capture-date line; the notes `[places] note: <slug> is a draft — no
+  page, and its frames show no place` and `[places] note: <slug> has
+  no published frame yet — no page until a photograph names it`.
+- The made place, one line each:
+  `[places] note: made top-of-the-world ("Top of the World") — 2
+  photographs; src/content/places/top-of-the-world.md would take it
+  over` (`1 photograph`).
+- The photographs that name no place:
+  `[places] note: 37 photographs in src/content/photographs/ name no
+  place — cozy-brook, dock-a, … (at: <slug> in a sidecar names one;
+  at: none says none on purpose)` and
+  `[places] note: 8 photographs in
+  src/content/journal/market-day-camera-low/ name no place (at: <slug>
+  in its index.md names one for the folder; at: none says none on
+  purpose)` — `1 photograph … names no place`. The counts are
+  illustrative; T1757 and T1758 paste the real lines.
+
+### Testing strategy (amendment 5)
+
+- **The constitution** — **T1754**: greps only.
+- **A place's name** — **T1755** (image-meta.test.mjs, a new
+  `describe`). The four constants, each by name and value.
+  `placeTitle`: the spec's three (`falls-creek-falls`,
+  `top-of-the-world`, `the-jetty`); a small word first takes its
+  capital (`of-mice` → "Of Mice"); digits; a doubled hyphen.
+  `placeAtProblems`: `Falls Creek Falls` → the exact line, on an
+  entry's file and on a sidecar's; `None` suggests `none`;
+  `falls_creek` → `falls-creek`; `--` refused with no suggestion; a
+  slug, `none` and a blank → none; two bad lines → two messages, in
+  order. `lettersOff`: 0 for the same name; 1 for a substitution, an
+  insertion, a deletion and an adjacent swap (`jetty`/`jtety`); 2 for
+  two edits; 3 for three. `nearMissProblems`, each case named for its
+  reason: one letter off a declared place → the exact line; one letter
+  off a place passed as a draft's file → refused the same; two letters
+  off a long name → refused, three → none
+  (`falls-creek-falls`/`falls-creek-pools`); two names with no file →
+  one line naming both files and both files to add; a short pair two
+  letters off → none (`cove`/`dome`), one letter off → refused
+  (`cove`/`cave`); the boundary — a pair whose longer name has six
+  characters, two letters off → none (`harbor`/`harper`); seven →
+  refused (`the-bay`/`the-bog`); two declared places one letter apart,
+  both named → none; a name far from every place → none (the case
+  that replaces the old refusal's first); a name written by three
+  files → the first and "and 2 more"; `none` and blanks never
+  measured. **Mutations**, each failing by name and reverted: the
+  first-word exception dropped from `placeTitle`; `<=` made `<` in the
+  guard; the short allowance ignored; declared slugs measured against
+  each other; the swap dropped from `lettersOff`.
+- **Which places publish, and the registry** — **T1756**.
+  image-meta.test.mjs: `placeRoll` — a grouped name with no file is
+  'made'; the same name with a file is 'declared' and nothing is
+  'made' (the file takes over); with a draft file it is 'draft' even
+  when handed a group; a file with no group is 'empty'; a name with no
+  file and no group is absent (all its photographs unpublished);
+  declared first in file order, made after, sorted. The four
+  `placeProblems` cases removed, listed in the Done note.
+  place-page.test.mjs: the absence case above; the existing cases
+  unchanged. **Mutations**: 'made' dropped from the roll → fails by
+  name; `{!place.entry && <p>Writing to come</p>}` in the template →
+  the absence case fails by name; an unguarded
+  `place.entry.data.description` → `astro check` fails (**needs
+  verification** — that strict null checks reach `.astro` frontmatter
+  here is read from `tsconfig.json`'s `astro/tsconfigs/strict`, not
+  yet run). On `dist/`: built before the first edit and after the last
+  with no fixture changed, `diff -rq -x pagefind` is empty — no
+  fixture names a place without a file, so nothing may move (AC 45).
+  Astro's scoped-style hash for the place page may change with its
+  source (**needs verification**); a difference that is only a
+  `data-astro-cid-*` value or an `_astro/` file's name is recorded as
+  that. One-time builds, reverted: `_dock-b.md` to `at: the-pier` →
+  BUILD EXIT 0 and `dist/places/the-pier/index.html` with "The Pier"
+  (the build that failed before this task now makes the place); to
+  `at: the-jety` → BUILD EXIT 1 with the guard's line; and
+  `journal/market-day-camera-low/index.md` given `at: market-square`
+  → BUILD EXIT 0 and `dist/places/market-square/index.html` with
+  "Market Square" and that entry's photographs on its wall — AC 40's
+  "by its journal entry's default", end to end.
+- **What the build says** — **T1757** (image-meta.test.mjs).
+  `madePlaceNote`: the exact line, singular and plural.
+  `noPlaceNotes`: a photographs-folder photograph with no line is
+  listed, one with `at: none` is not, one naming a place is not; a
+  journal entry with no line and three such frames is one line with
+  3; a frame there with its own `at:` or `at: none` is not counted; an
+  entry whose line reads `none` gives no line; an entry with a default
+  gives none; the folder first, entries sorted; nothing to say → `[]`.
+  The verify.sh source case: `scripts/verify.sh` holds a line that
+  greps `build.log` for `PLACE_NOTE`'s text with no `head` on it, and
+  the capped list's `grep -vE` excludes the same text. **Mutations**:
+  the entry's line read through `placeOf` (so `none` is blank) → the
+  `none` case fails by name; `| head -n 30` put on the notes line →
+  the source case fails by name. The command's output, pasted: BUILD
+  EXIT 0 with the note lines (AC 44's "neither fails the build").
+- **The fixtures and the built pages** — **T1758**: reads of `dist/`
+  and one-time builds, listed in the task — the made page, the card
+  and its order, the label's link, the place set's arrows, the cover
+  and the Open Graph image; the title-only file → the page byte for
+  byte the made one, and the made note gone; the file with a title, a
+  description, a cover and writing → each on the page; the same with
+  `draft: true` → no page, no link, the draft note; a near miss of the
+  draft file's name → refused; the draft fixture photograph naming
+  `nowhere-yet` → no page, no card, no note (the two new sidecars
+  cannot be drafts: galleries list their photographs);
+  `at: top-of-the-wold` on one → the two-names line;
+  `at: Top of the World` → the shape line. The declared places' two
+  pages compared with the build before the fixtures: identical.
+  `[check-lexicon]` passing with one page more.
+- **The documents** — **T1759**: greps.
+- **Unchanged and green**: the rest of the suite; the five barriers;
+  `astro check`.
+- **At the pause, by the person**: the made place's page and card, the
+  label's link and the arrows, what the command prints, the documents'
+  words.
+
+### File structure (amendment 5)
+
+```
+CLAUDE.md                                        the Content model clause's Places sentences (T1754, its own commit)
+src/lib/image-meta.mjs                           the four tunables, placeTitle, placeAtProblems, lettersOff, nearMissProblems (T1755);
+                                                 placeRoll, placeProblems removed (T1756); PLACE_NOTE, madePlaceNote, noPlaceNotes (T1757)
+image-meta.test.mjs                              their cases; the four placeProblems cases removed (T1756); the verify.sh source case (T1757)
+src/lib/images.ts                                SitePlace.entry nullable, the two checks, the roll's loop (T1756); the notes printed (T1757)
+src/content.config.ts                            comments only (T1756)
+src/pages/places/[slug].astro                    the entry guarded (T1756)
+src/pages/dev/place-wall/[...candidate].astro    the fallback removed, the entry required (T1756)
+place-page.test.mjs                              the absence case (T1756), widened to the markup's locals (T1759a)
+obsidian-plugin.test.mjs                         the sampler's two pinned line numbers, down one with its new frontmatter line (T1758)
+scripts/verify.sh                                the place notes' own group (T1757)
+src/content/photographs/_wide-3x2-01.md          new (T1758)
+src/content/photographs/_wide-3x2-02.md          new (T1758)
+src/content/journal/vocabulary-sampler/index.md  at: none (T1758)
+AUTHORING.md, README.md                          T1759
+```
+
+Untouched, named so the reviewer can confirm: `src/pages/places/index.astro`;
+`src/components/*`; `src/pages/photographs/[...id].astro`;
+`src/pages/search.astro`; `src/lib/image-set.ts`; `src/styles/global.css`;
+`scripts/check-lexicon.mjs` and the other barriers;
+`src/content/places/*`; `obsidian/` and `obsidian-plugin/`;
+`package.json`.
+
+### Known limitations (amendment 5)
+
+- **The built pages are read once, not per build**, as amendment 4's
+  were: no test in the suite reads the real `dist/`. The rules are
+  pinned on every run by image-meta.test.mjs and place-page.test.mjs;
+  that the registry and the page use them, by T1756's and T1758's
+  reads. No seventh scan in `check-lexicon.mjs` for "a made page says
+  nothing of its own": the template has no branch for a made place to
+  go wrong in, and the source case fails if one is added. The tier log
+  records that AC 40–42's pages were read once, so the pre-merge sweep
+  re-reads them.
+- **A made place whose name holds "piece"** (`centre-piece`) would
+  fail the lexicon barrier's words scan: its title is read from the
+  slug, not harvested as an authored string. The line names the page;
+  the place's file, with its title, is the way past. Not handled —
+  no such name exists.
+- **A name YAML reads as a number** (`at: 101`) fails at Astro's
+  schema, naming the file and the field, not with the registry's
+  line; quoted (`at: "101"`) it is a name.
+- **The title rule knows no abbreviations or apostrophes** (`mt-hood`
+  → "Mt Hood"); the place's file is the correction, as the spec says.
+- **Under `npm run dev` a newly named place appears after a restart**:
+  the registry is cached for the life of the module (its own header
+  comment), as for any change of an `at:` line today. Read, not
+  tested here.
+- **The photographs folder's note is as long as the photographs it
+  lists** — one line of about forty names on the fixtures.
+- **The guard measures characters**, hyphens and digits included, so
+  two real places a letter or two apart (`north-beach` and
+  `south-beach`, `trail-1` and `trail-2`) are refused until each has
+  its file — the spec's way past. `AUTHORING.md` says so (T1759).
+- **A typo of `none` is never measured.** `at: nnoe` is a slug with no
+  file; the guard measures it against the places' names, never against
+  the word `none`, so it quietly makes a place called "Nnoe" — named
+  only in the build's made note. The rule is left as the spec has it;
+  whether a name one letter off `none` should be refused is put to the
+  person at the look (T1760), and would be a spec amendment.
+
+### Resolved decisions (amendment 5)
+
+- **A made place is a `SitePlace` with no entry**, through the one
+  loop — not a second list or a second page; no `made` flag, so
+  nothing downstream can mark one.
+- **The made page keeps the line of counts** every place page has, as
+  the Design requirement states; the look's first question, by
+  spec.md's Decided line.
+- **The measure counts an adjacent swap as one letter**; a short name
+  is one whose pair's longer name has six characters or fewer.
+- **The guard and the shape check read every `at:`, a draft's
+  included**, as the withdrawn rule did.
+- **`at:` must hold a letter or a digit** besides matching the place
+  file's shape, so no title is empty.
+- **`placeProblems` and its four cases are deleted** with the refusal
+  the spec withdraws; AC 45 reads "every place test that stands", and
+  the Done note names the four and their successors.
+- **The photographs folder's unplaced photographs are one line**, a
+  count and the names; the grouping is the spec's tunable.
+- **`scripts/verify.sh` prints the place notes in their own group**,
+  outside the cap, the two spec-009 notes with them.
+- **The fixture is `top-of-the-world`**, on two placeholder
+  photographs, dated between the two declared places; and
+  `vocabulary-sampler` says `at: none`. Not `falls-creek-falls`, which
+  is his.
+- **The dev sampler requires `the-headlands`' file**, by name, rather
+  than falling back to whichever place sorts first or searching for
+  any place with writing: the place it shows should not change unsaid.
+- **`review: per-task` on T1755 and T1756.** The guard is what stands
+  between a misspelt name and a second place made in silence — a made
+  place is unmarked on the site by design, so nothing later would show
+  the mistake. The registry change is where the refusal is deleted and
+  where every place page is decided: wrong, it unpublishes a declared
+  place, publishes one held back as a draft, or puts frames on the
+  wrong wall. The notes, the fixtures and the documents re-address
+  nothing and are reviewed with the phase. **No new dependency.**
