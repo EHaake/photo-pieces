@@ -3185,9 +3185,12 @@ tier if it is ever on (it is off). -->
 | T1762 the guard measures `none` | implementation (`opus`, high) | ~62k | done; 905 tests; the fixed-allowance mutation also trips T1755's `dome`/`cove` case — a second pin, not a regression |
 | T1763 the refusal in a real build | implementation (`opus`, high) | ~30k | done; six builds as quoted; `nome` beside a place `home` has no real-build case (no fixture place is a letter off `nome`) — T1762's unit case only |
 | T1764 the documents | implementation (`opus`, high) | ~30k | done; greps as asked; "Write at: none" only in the fenced line |
-_(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
+| Phase 3f review | implementation (`opus`, high) | ~39k | signed off, nothing blocking; the guard matches the plan character for character, one letter for `none` follows from the short rule, every AC 43 `none` clause pinned; four second looks carried to the sweep; no re-review needed |
+_(Session-tier allowance draw noted at each pause.)_ Phase 3f pause reached 2026-10-22 (four implementer dispatches, one phase review, no re-review needed). Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
+
+- (Phase 3f) `nearMissProblems`' JSDoc opens with "one or two letters off another place's name" and names `none` only further down. README's guard sentence gives the way past as "correcting the spelling", not the message's "Write at: none" (AUTHORING.md has it). README's rewrap leaves a short line ("place `cover` that is not"). The mutation runs and restored files rest on the implementer's output; no task was per-task.
 
 - (Amendment 6 sign-off, S7) That a draft's and a journal entry's `at:` reach the guard has no unit test — only T1758's and T1763(b)(c)'s one-time builds; accepted at Amendment 5's sign-off, carried not new.
 
