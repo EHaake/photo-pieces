@@ -380,8 +380,9 @@ photographs are published; `/places/` lists
 the places as cards and is in the nav between Journal and Galleries. An `at:` that is
 not a slug or `none` fails the build, naming the file and the value, as
 does a name with no file one or two letters off another place's name
-(one, for a short name) — a probable typo, passed by correcting the
-spelling or by writing the place's file — a place `cover` that is not
+(one, for a short name) or one letter off `none` — a probable typo,
+passed by correcting the spelling or by writing the place's file — a
+place `cover` that is not
 one of its frames once the place publishes, and a photographs-folder
 photograph at a place with no capture date; a draft or still-empty
 place file is a note and builds no page, and the build notes each

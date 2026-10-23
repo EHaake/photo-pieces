@@ -2744,7 +2744,7 @@ the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
       orchestrator corrects it (AC 43's `none` clause in a real build)._
       Done: (a) BUILD EXIT 1, the `nnoe` line character for character the plan's; (b) BUILD EXIT 1, naming `src/content/photographs/_draft-fixture.md`; (c) BUILD EXIT 1, naming `src/content/journal/vocabulary-sampler/index.md`; (d) BUILD EXIT 1, the `nome` line; (e) with `nome.md` holding `title: Nome` alone, BUILD EXIT 0, no `none` line, the `<h1>` "Nome"; (f) BUILD EXIT 0, `made noon ("Noon") — 1 photograph; src/content/places/noon.md would take it over`. Every file restored by `cmp`; `git status --short -- src/content` empty; verify.sh green, 89 pages, 905 tests. No line differs from a quotation.
 
-- [ ] **T1764** — The documents. Pattern: T1759 (its hand-editing rule;
+- [x] **T1764** — The documents. Pattern: T1759 (its hand-editing rule;
       each document's own voice). Plan: "The documents" (amendment 6).
       `AUTHORING.md`'s "Places", the guard's paragraphs: the `none`
       case, its line from T1763 (a) in a fence of its own, the two ways
@@ -2767,6 +2767,7 @@ the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
       `npx prettier --check AUTHORING.md README.md` clean;
       `sh scripts/verify.sh` green (AC 43's documents, under AC 46's
       kind)._
+      Done: `AUTHORING.md`'s "Places" gains two paragraphs after the guard's "two ways past" — `none` guarded the same way, T1763 (a)'s `nnoe` line in its own fence, the two ways past, Nome refused until its file is written, `noon` two letters off a name; `README.md`'s guard sentence gains "or one letter off `none`". Greps: the fenced phrase 1, "Write at: none" 1, "nome" 2, "noon" 1, README's 1, "probable typo" 4; no `>`/`+` line starts; prettier clean; verify.sh green, 89 pages, 905 tests.
 
 - [ ] **T1765** — The typo of `none`, looked at, and the rounds. Not an
       implementation task: the orchestrator's record of the Phase 3f
@@ -3183,6 +3184,7 @@ tier if it is ever on (it is off). -->
 | T1761 constitution, a sixth time | implementation (`opus`, high) | ~24k | done; committed alone `da5f38c` |
 | T1762 the guard measures `none` | implementation (`opus`, high) | ~62k | done; 905 tests; the fixed-allowance mutation also trips T1755's `dome`/`cove` case — a second pin, not a regression |
 | T1763 the refusal in a real build | implementation (`opus`, high) | ~30k | done; six builds as quoted; `nome` beside a place `home` has no real-build case (no fixture place is a letter off `nome`) — T1762's unit case only |
+| T1764 the documents | implementation (`opus`, high) | ~30k | done; greps as asked; "Write at: none" only in the fenced line |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

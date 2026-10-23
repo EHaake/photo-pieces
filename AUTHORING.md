@@ -825,6 +825,21 @@ included, and measures a name against every place file, a draft one
 too; two places that each have a file are never measured against each
 other.
 
+**`none` is guarded the same way.** It is the word for no place, so a
+name with no file one letter off it is refused, as a typo of `none`
+rather than a new place:
+
+```
+[places] "nnoe" (src/content/photographs/_wide-3x2-01.md) is 1 letter off none, the word for no place — a probable typo. Write at: none; or, if it really is a place, add src/content/places/nnoe.md
+```
+
+The two ways past are the message's: write `at: none`, or, if it
+really is a place, write its file. A name with a file is never
+measured, so Nome, a real place one letter off `none`, is refused
+until `src/content/places/nome.md` is written — a file holding its
+title alone is enough. It is one letter only: `noon`, two letters
+off, is a name like any other and makes a place.
+
 **The build says which places it made**, one line each, with the count
 of published photographs that name the place and the file that would
 take it over:
