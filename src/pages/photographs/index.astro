@@ -1,0 +1,60 @@
+---
+// The photographs index (spec 019): every published photograph of both
+// folders — the registry's `images`, each published id once, no draft —
+// as small frames in one packed grid, in title order, each linking to
+// its page. It reuses the gallery flow as the related strip does, at the
+// index's fixed small short side (src/lib/gallery-layout.ts); the
+// related strip's class keeps its narrow rule, so below the collapse
+// the frames keep their cap rather than going one per row. No new CSS.
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  INDEX_NARROW_SHORT_PX,
+  INDEX_SHORT_PX,
+  byIndexOrder,
+  galleryCell,
+  indexFlowStyle,
+} from '../../lib/gallery-layout';
+import { getImageRegistry } from '../../lib/images';
+import { withBase } from '../../lib/url';
+
+const registry = await getImageRegistry();
+
+// Each cell hands its ratio to the CSS (--ar) and sizes its srcset from
+// the same knobs the CSS gets, as the place wall does.
+const cells = [...registry.images].sort(byIndexOrder).map((image) => ({
+  image,
+  ...galleryCell(image.image, INDEX_SHORT_PX, INDEX_NARROW_SHORT_PX),
+}));
+---
+
+<BaseLayout title="Photographs">
+  <section class="page-head section">
+    <h1>Photographs</h1>
+  </section>
+
+  <div class="section">
+    <ul
+      class="gallery-flow gallery-wide related-flow photographs-index"
+      style={indexFlowStyle}
+      data-pagefind-ignore
+    >
+      {
+        cells.map(({ image, ar, width, sizes }) => (
+          <li style={`--ar: ${ar}`}>
+            <a href={withBase(image.url)} class="image-link">
+              <Image
+                src={image.image}
+                alt={image.title}
+                layout="constrained"
+                width={width}
+                sizes={sizes}
+                loading="lazy"
+              />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>

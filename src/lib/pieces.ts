@@ -14,7 +14,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
  * consumer's output).
  */
 export async function getPublishedPieces() {
-  return (await getCollection('pieces', isPublished)).sort(byNewestPublished);
+  return (await getCollection('journal', isPublished)).sort(byNewestPublished);
 }
 
 /** The one piece ordering — newest first by publishDate, ties settled by
@@ -22,8 +22,8 @@ export async function getPublishedPieces() {
  *  (spec 008), whose sets and appearances must agree with the site's
  *  order by construction rather than by a second copy of this rule. */
 export const byNewestPublished = (
-  a: CollectionEntry<'pieces'>,
-  b: CollectionEntry<'pieces'>,
+  a: CollectionEntry<'journal'>,
+  b: CollectionEntry<'journal'>,
 ): number =>
   b.data.publishDate.valueOf() - a.data.publishDate.valueOf() || a.id.localeCompare(b.id);
 
@@ -31,13 +31,13 @@ export const byNewestPublished = (
  *  id — kept beside it so the two cannot disagree. A place's outings read
  *  oldest first (spec 009). */
 export const byOldestPublished = (
-  a: CollectionEntry<'pieces'>,
-  b: CollectionEntry<'pieces'>,
+  a: CollectionEntry<'journal'>,
+  b: CollectionEntry<'journal'>,
 ): number =>
   a.data.publishDate.valueOf() - b.data.publishDate.valueOf() || a.id.localeCompare(b.id);
 
 /** The one definition of "published" — shared with the image registry,
  *  which unpublishes a piece's images by the same rule (spec 004). */
-export function isPublished(piece: CollectionEntry<'pieces'>): boolean {
+export function isPublished(piece: CollectionEntry<'journal'>): boolean {
   return !piece.data.draft;
 }

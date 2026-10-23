@@ -1,0 +1,25 @@
+---
+title:
+caption:
+date:
+camera:
+lens:
+focalLength:
+aperture:
+shutter:
+iso:
+place:
+time:
+at:
+format:
+filters:
+support:
+processing:
+stages:
+edition:
+sizes:
+paper:
+draft: true
+published: {{date:YYYY-MM-DD}}
+categories: []
+---

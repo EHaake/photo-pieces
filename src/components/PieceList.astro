@@ -1,40 +1,64 @@
 ---
 // The piece list-row treatment shared by the homepage feed and the
-// /pieces/ index — one copy, so the URL shape and meta line can't drift
-// between them (extracted at 002's pre-merge review).
+// /journal/ index — one copy, so the URL shape and meta line can't drift
+// between them (extracted at 002's pre-merge review). Since spec 019 a
+// row is a journal entry or, on the front door, a photograph with a
+// `published:` date — its frame, its date and its title.
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import type { SiteImage } from '../lib/images';
+import { imageUrlFor } from '../lib/image-meta.mjs';
 import { withBase } from '../lib/url';
 import { formatDate } from '../i18n';
 
+type ListItem =
+  { kind: 'journal'; entry: CollectionEntry<'journal'> } | { kind: 'photograph'; image: SiteImage };
+
 interface Props {
-  pieces: CollectionEntry<'pieces'>[];
+  items: ListItem[];
 }
 
-const { pieces } = Astro.props;
+const { items } = Astro.props;
 ---
 
 {
-  pieces.length > 0 ? (
+  items.length > 0 ? (
     <div class="note-list">
-      {pieces.map((piece) => (
-        <a class="note-row" href={withBase(`/pieces/${piece.id}/`)}>
-          {piece.data.cover && (
-            // The cover's own box, the waiting fill's host (spec 018);
-            // the image's rule is unchanged.
-            <span class="note-cover">
-              <Image src={piece.data.cover} alt="" width={320} height={220} loading="lazy" />
-            </span>
-          )}
-          <div>
-            <p class="meta">
-              {formatDate(piece.data.publishDate, 'short')} · {piece.data.categories.join(' / ')}
-            </p>
-            <h3>{piece.data.title}</h3>
-            <p>{piece.data.description}</p>
-          </div>
-        </a>
-      ))}
+      {items.map((item) => {
+        if (item.kind === 'photograph') {
+          const { image } = item;
+          return (
+            <a class="note-row" href={withBase(imageUrlFor(image.id))}>
+              <span class="note-cover">
+                <Image src={image.image} alt="" width={320} height={220} loading="lazy" />
+              </span>
+              <div>
+                <p class="meta">{image.published && formatDate(image.published, 'short')}</p>
+                <h3>{image.title}</h3>
+              </div>
+            </a>
+          );
+        }
+        const piece = item.entry;
+        return (
+          <a class="note-row" href={withBase(`/journal/${piece.id}/`)}>
+            {piece.data.cover && (
+              // The cover's own box, the waiting fill's host (spec 018);
+              // the image's rule is unchanged.
+              <span class="note-cover">
+                <Image src={piece.data.cover} alt="" width={320} height={220} loading="lazy" />
+              </span>
+            )}
+            <div>
+              <p class="meta">
+                {formatDate(piece.data.publishDate, 'short')} · {piece.data.categories.join(' / ')}
+              </p>
+              <h3>{piece.data.title}</h3>
+              <p>{piece.data.description}</p>
+            </div>
+          </a>
+        );
+      })}
     </div>
   ) : (
     <div class="empty-state compact">

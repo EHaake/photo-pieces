@@ -53,7 +53,7 @@ export async function getStaticPaths() {
 const { candidate, candidates } = Astro.props;
 
 // The sampler's set is the REAL photographs, not the whole mixed root.
-// src/content/gallery-images/ now holds both the real exports (T900) and
+// src/content/photographs/ now holds both the real exports (T900) and
 // the synthetic placeholder fixtures — and the gate exists to judge real
 // photographs, not grey rectangles (spec Goal 4). There is no registry
 // flag separating them, but the synthetic fixtures carry a camera name
@@ -61,7 +61,7 @@ const { candidate, candidates } = Astro.props;
 // sidecar override, 'Fixture FX-2 (override)' on dock-b), while the real
 // exports carry real camera models (ILCE-7RM4, ILCE-7RM5, PENTAX K-1).
 // Filter on that; if too few real exports exist yet, fall back to the
-// whole gallery root so the sampler still has something to pack.
+// whole photographs folder so the sampler still has something to pack.
 const registry = await getImageRegistry();
 const REAL = (img: (typeof registry.images)[number]) =>
   img.piece === null && !!img.label?.camera && !/^Fixture/i.test(img.label.camera);

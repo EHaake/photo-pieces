@@ -1,150 +1,132 @@
-import { Plugin, TFile, editorInfoField, editorLivePreviewField } from 'obsidian';
+import {
+  Component,
+  MarkdownRenderChild,
+  MarkdownRenderer,
+  MarkdownView,
+  Plugin,
+  TFile,
+  editorInfoField,
+  editorLivePreviewField,
+} from 'obsidian';
+import type { App } from 'obsidian';
 import { EditorView, Decoration, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { StateField, EditorState, RangeSetBuilder } from '@codemirror/state';
+import { blockSignature, parseBlocks, resolveRelative, sectionPieces } from './blocks';
+import type { ParsedBlock } from './blocks';
+import { figureTree, matchHeights, toDom } from './figure';
 
-// Live Preview rendering for the LEAF form of the site's standalone image
-// blocks: while writing, `::single{src="./a.jpg" alt="…"}` shows the image
-// instead of raw directive text. Deliberately approximate — not styled to
-// match the site (see DECISIONS.md at the repo root).
+// Draws every block of the site's vocabulary (remark-pieces-blocks.mjs) as
+// its figure while writing: the block's lines are replaced by the figure
+// while the cursor is outside them, and come back as text when it enters.
+// Both views draw a block as the same figure — the tree built in figure.ts
+// from what the scanner in blocks.ts reads — styled by styles.css.
 //
-// Mirrors the vocabulary in remark-pieces-blocks.mjs by convention. What
-// stays raw text on purpose: the `:::name … :::` container forms (captions),
-// grid, strip, aside, row, held — multi-line bodies are out of scope for this
-// plugin's regex approach. Raw text is honest: the site build is the
-// source of truth for what those render as.
+// Reading view has no cursor: every block always renders. Obsidian hands
+// the post-processor one section at a time (split at blank lines), so a
+// block is read from the whole note and drawn by the section it begins
+// in; that section is rebuilt around it, its other lines rendered as
+// Markdown, and the block's later sections are hidden. A section that
+// touches no block is left as Obsidian drew it, and so is a section with
+// no source to read (a note embedded in another, a hover preview, an
+// export). Since Obsidian re-runs only the sections whose text changed,
+// any edit that changes a note's blocks re-renders its Reading view whole.
 //
-// The regex is anchored to a whole line (`m` flag): a directive typed
-// mid-paragraph does NOT render here, because the real pipeline does not
-// treat it as a block either.
+// Representative, not the site: frames at the site's widths, rows, grids,
+// strips, a frame beside its prose, stages with their labels and method
+// named; not the site's methods, handle, loupe or hold (see DECISIONS.md at
+// the repo root on the accepted approximation). The site build is the
+// judge, and what the scanner cannot read stays raw text: a directive with
+// text before it on its line (the site does not treat it as a block
+// either), a block with a required src missing, a container with no
+// closer, and a name that is not in the vocabulary.
 //
 // A `src` with a folder in it is resolved from the note's own folder,
 // exactly as the site build resolves it, with no name-based fallback: a
 // wrong path shows "image not found" here too, rather than a same-named
 // file from some other folder.
 
-type Image = { src: string; alt: string };
-type Extract = (attrs: Record<string, string>) => Image[] | null;
-
-type Resolved =
-  | { kind: 'name' } // bare name: Obsidian's own linkpath lookup
-  | { kind: 'path'; path: string } // vault-relative path, resolved here
-  | { kind: 'unreachable' }; // climbs above the vault root: nothing can match
-
-/** Where a `src` points, seen from the note at `sourcePath`. A src with a
- *  folder in it is resolved the way the site build resolves it — never by
- *  name — so a wrong path is not found rather than found elsewhere. */
-export function resolveRelative(src: string, sourcePath: string): Resolved {
-  const rest = src.replace(/^\.\//, '');
-  if (!rest.includes('/')) return { kind: 'name' };
-
-  const lastSlash = sourcePath.lastIndexOf('/');
-  const folder = lastSlash === -1 ? '' : sourcePath.slice(0, lastSlash);
-
-  const out: string[] = [];
-  for (const segment of (folder ? `${folder}/${rest}` : rest).split('/')) {
-    if (segment === '' || segment === '.') continue;
-    if (segment === '..') {
-      if (out.length === 0) return { kind: 'unreachable' };
-      out.pop();
-      continue;
-    }
-    out.push(segment);
-  }
-  if (out.length === 0) return { kind: 'unreachable' };
-  return { kind: 'path', path: out.join('/') };
+/** A block's image src, seen from the note at `sourcePath`, as a URL the
+ *  view can load, or `null` when it names no file. */
+function resolver(app: App, sourcePath: string): (src: string) => string | null {
+  return (src) => {
+    const resolved = resolveRelative(src, sourcePath);
+    const file =
+      resolved.kind === 'name'
+        ? app.metadataCache.getFirstLinkpathDest(src.replace(/^\.\//, ''), sourcePath)
+        : resolved.kind === 'path'
+          ? app.vault.getAbstractFileByPath(resolved.path)
+          : null;
+    return file instanceof TFile ? app.vault.getResourcePath(file) : null;
+  };
 }
 
-const one: Extract = (a) => (a.src ? [{ src: a.src, alt: a.alt ?? '' }] : null);
+// The Component that owns a figure's rendered Markdown, by the figure's
+// element: CodeMirror keeps an equal widget's DOM and destroys it through
+// the newer widget, so the element, not the widget, carries it.
+const components = new WeakMap<HTMLElement, Component>();
 
-const LEAF_BLOCKS: Record<string, Extract> = {
-  single: one,
-  fullbleed: one,
-  wide: one,
-  tall: one,
-  inset: one,
-  diptych: (a) =>
-    a.left && a.right
-      ? [
-          { src: a.left, alt: a.leftAlt ?? '' },
-          { src: a.right, alt: a.rightAlt ?? '' },
-        ]
-      : null,
-  triptych: (a) =>
-    a.left && a.center && a.right
-      ? [
-          { src: a.left, alt: a.leftAlt ?? '' },
-          { src: a.center, alt: a.centerAlt ?? '' },
-          { src: a.right, alt: a.rightAlt ?? '' },
-        ]
-      : null,
+const sameBlock = (a: ParsedBlock, b: ParsedBlock) => {
+  const keys = Object.keys(a.attrs);
+  return (
+    a.name === b.name &&
+    keys.length === Object.keys(b.attrs).length &&
+    keys.every((key) => a.attrs[key] === b.attrs[key]) &&
+    a.images.length === b.images.length &&
+    a.images.every(
+      (img, i) =>
+        img.src === b.images[i].src &&
+        img.alt === b.images[i].alt &&
+        img.label === b.images[i].label,
+    ) &&
+    a.caption === b.caption &&
+    a.prose === b.prose &&
+    a.method === b.method
+  );
 };
 
-const DIRECTIVE_PATTERN = `^::(${Object.keys(LEAF_BLOCKS).join('|')})\\{([^}]*)\\}[ \\t]*$`;
-
-function parseAttrs(raw: string): Record<string, string> {
-  // Quoted or unquoted values, as remark-directive accepts both.
-  const attrs: Record<string, string> = {};
-  const attrRe = /(\w+)=(?:"([^"]*)"|(\S+))/g;
-  let m: RegExpExecArray | null;
-  while ((m = attrRe.exec(raw))) {
-    attrs[m[1]] = m[2] ?? m[3];
-  }
-  return attrs;
-}
-
-class BlockWidget extends WidgetType {
+class FigureWidget extends WidgetType {
   constructor(
-    private block: string,
-    private images: Image[],
+    private block: ParsedBlock,
     private sourcePath: string,
     private plugin: Plugin,
   ) {
     super();
   }
 
-  eq(other: BlockWidget) {
-    return (
-      other.block === this.block &&
-      other.images.length === this.images.length &&
-      other.images.every(
-        (img, i) => img.src === this.images[i].src && img.alt === this.images[i].alt,
-      )
-    );
+  // By content and path, not offsets, so a selection change or an edit
+  // elsewhere in the note does not rebuild the images.
+  eq(other: FigureWidget) {
+    return other.sourcePath === this.sourcePath && sameBlock(other.block, this.block);
   }
 
-  toDOM() {
-    const wrapper = document.createElement('div');
-    wrapper.addClass('photo-pieces-preview');
-    wrapper.dataset.block = this.block;
-    if (this.images.length > 1) wrapper.addClass('photo-pieces-preview-row');
+  toDOM(view: EditorView) {
+    const { app } = this.plugin;
+    const component = new Component();
+    component.load();
+    const rendering: Promise<void>[] = [];
+    const figure = toDom(
+      figureTree(this.block, resolver(app, this.sourcePath)),
+      (markdown, into) => {
+        rendering.push(MarkdownRenderer.render(app, markdown, into, this.sourcePath, component));
+      },
+    );
+    matchHeights(figure);
+    components.set(figure, component);
+    // The rendered caption and prose change the figure's height after
+    // layout; CodeMirror measures it again once they are in.
+    // A render that fails leaves its caption or prose empty; say so once
+    // rather than leaving the rejection unhandled (T1734a).
+    if (rendering.length > 0)
+      Promise.all(rendering)
+        .then(() => view.requestMeasure())
+        .catch((error) => console.error('photo-pieces: a caption or prose did not render', error));
+    return figure;
+  }
 
-    for (const { src, alt } of this.images) {
-      const resolved = resolveRelative(src, this.sourcePath);
-      const file =
-        resolved.kind === 'name'
-          ? this.plugin.app.metadataCache.getFirstLinkpathDest(
-              src.replace(/^\.\//, ''),
-              this.sourcePath,
-            )
-          : resolved.kind === 'path'
-            ? this.plugin.app.vault.getAbstractFileByPath(resolved.path)
-            : null;
-      if (!(file instanceof TFile)) {
-        const missing = document.createElement('div');
-        missing.addClass('photo-pieces-missing');
-        missing.setText(`[${this.block}: image not found — ${src}]`);
-        wrapper.appendChild(missing);
-        continue;
-      }
-      const img = document.createElement('img');
-      img.src = this.plugin.app.vault.getResourcePath(file);
-      // alt is accessibility text, not a caption — captions live in the
-      // container form, which this plugin leaves as raw text.
-      img.alt = alt;
-      wrapper.appendChild(img);
-    }
-    return wrapper;
+  destroy(dom: HTMLElement) {
+    components.get(dom)?.unload();
+    components.delete(dom);
   }
 
   ignoreEvent() {
@@ -162,31 +144,18 @@ function buildDecorations(state: EditorState, plugin: Plugin): DecorationSet {
   const info = state.field(editorInfoField, false);
   const sourcePath = info?.file?.path ?? '';
 
-  const builder = new RangeSetBuilder<Decoration>();
-  const text = state.doc.toString(); // whole doc — fine at piece scale
-  const re = new RegExp(DIRECTIVE_PATTERN, 'gm');
   const sel = state.selection.ranges;
-
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text))) {
-    const start = m.index;
-    const end = start + m[0].length;
-
+  const builder = new RangeSetBuilder<Decoration>();
+  // One pass, in order: the scanner returns the note's blocks as they
+  // stand, and the builder needs its ranges in order.
+  for (const block of parseBlocks(state.doc.toString())) {
     // Leave raw syntax visible and editable while the cursor is on it —
     // same convention Obsidian's own live preview uses for embeds.
-    const cursorInside = sel.some((r) => r.from <= end && r.to >= start);
-    if (cursorInside) continue;
-
-    const images = LEAF_BLOCKS[m[1]](parseAttrs(m[2]));
-    if (!images) continue; // required attributes missing: stay raw
-
+    if (sel.some((r) => r.from <= block.to && r.to >= block.from)) continue;
     builder.add(
-      start,
-      end,
-      Decoration.replace({
-        widget: new BlockWidget(m[1], images, sourcePath, plugin),
-        block: true,
-      }),
+      block.from,
+      block.to,
+      Decoration.replace({ widget: new FigureWidget(block, sourcePath, plugin), block: true }),
     );
   }
   return builder.finish();
@@ -212,7 +181,89 @@ function directiveField(plugin: Plugin) {
 }
 
 export default class PhotoPiecesBlocksPlugin extends Plugin {
+  // The last note parsed: Reading view calls once per section, each with
+  // the whole note's text.
+  private parsed: { text: string; blocks: ParsedBlock[] } | null = null;
+  // Each document's blocks as last seen, by docId and path, and the notes
+  // (by path) whose Reading view is due a full re-render this tick.
+  private signatures = new Map<string, string>();
+  private rerendering = new Set<string>();
+
   async onload() {
     this.registerEditorExtension(directiveField(this));
+    this.registerMarkdownPostProcessor((el, ctx) => {
+      const info = ctx.getSectionInfo(el);
+      if (!info) return; // no source to read: leave it as Obsidian drew it
+
+      const blocks = this.parse(info.text);
+      this.noteSignature(ctx.docId, ctx.sourcePath, blockSignature(blocks, info.text));
+
+      const pieces = sectionPieces(blocks, info.lineStart, info.lineEnd);
+      if (!pieces) return;
+      el.empty();
+      if (pieces.length === 0) {
+        el.addClass('photo-pieces-hidden'); // drawn whole by its first section
+        return;
+      }
+      el.removeClass('photo-pieces-hidden');
+
+      const { app } = this;
+      const child = new MarkdownRenderChild(el);
+      ctx.addChild(child);
+      const md = (markdown: string, into: HTMLElement) => {
+        void MarkdownRenderer.render(app, markdown, into, ctx.sourcePath, child);
+      };
+      const lines = info.text.split('\n');
+      for (const piece of pieces) {
+        if (piece.kind === 'markdown') {
+          // Its own element, so a render that finishes later keeps its place.
+          md(lines.slice(piece.startLine, piece.endLine + 1).join('\n'), el.createDiv());
+        } else {
+          const figure = toDom(figureTree(piece.block, resolver(app, ctx.sourcePath)), md);
+          matchHeights(figure);
+          el.appendChild(figure);
+        }
+      }
+    });
+  }
+
+  private parse(text: string): ParsedBlock[] {
+    if (this.parsed?.text !== text) this.parsed = { text, blocks: parseBlocks(text) };
+    return this.parsed.blocks;
+  }
+
+  // Stored on every call, so the re-render it schedules sees it equal and
+  // does not loop; the first render of a document stores it without
+  // comparing.
+  //
+  // Keyed by the document, not the path alone (T1734a): the plugin's own
+  // MarkdownRenderer.render calls (captions, prose, Reading view's runs)
+  // run this post-processor again with the note's sourcePath, and if their
+  // section info holds the fragment, not the note, the fragment's
+  // signature would differ from the note's and re-render it, again and
+  // again. A sub-render is another document, with its own docId, so it
+  // only ever compares against itself. The typings give docId on every
+  // context; the other guard — accept a call only when the info's text is
+  // the note's whole text — has no synchronous source for that text in
+  // them (the vault's read is async).
+  private noteSignature(docId: string, path: string, signature: string) {
+    const key = `${docId}\u0000${path}`;
+    const previous = this.signatures.get(key);
+    this.signatures.set(key, signature);
+    if (previous === undefined || previous === signature || this.rerendering.has(path)) return;
+    this.rerendering.add(path);
+    window.setTimeout(() => {
+      this.rerendering.delete(path);
+      for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
+        const view = leaf.view;
+        if (
+          view instanceof MarkdownView &&
+          view.file?.path === path &&
+          view.getMode() === 'preview'
+        ) {
+          view.previewMode.rerender(true);
+        }
+      }
+    }, 0);
   }
 }

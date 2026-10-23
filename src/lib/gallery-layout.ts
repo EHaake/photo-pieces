@@ -39,6 +39,14 @@ export const GALLERY_GAP = 'calc(var(--baseline))';
 export const RELATED_SHORT_PX = 120;
 export const RELATED_NARROW_SHORT_PX = 96;
 
+/** The photographs index (spec 019): the same packing rule at a fixed
+ *  small short side, so every photograph reads as one dense, even grid
+ *  of mixed ratios. The short side clamps between the two on the
+ *  viewport's width, as the related strip's does; `galleryCell` reads
+ *  the same two for the srcset and `sizes`. */
+export const INDEX_SHORT_PX = 88; // tunable: the frame size — the short side's ceiling, CSS px
+export const INDEX_NARROW_SHORT_PX = 72; // tunable: its floor, reached on a narrow screen
+
 /** Inline style for the `.gallery-flow` container. The short side is
  *  format-aware (spec 011 gate): `vmin` sizes off the smaller viewport
  *  dimension, so a tall/square screen (e.g. the 16:18 LG DualUp) sizes up
@@ -48,6 +56,23 @@ export const galleryFlowStyle = `--gallery-short: clamp(${GALLERY_SHORT_MIN_PX}p
 /** Inline style for a related strip: a `.gallery-flow` at the smaller
  *  short side, the same stretch cap. */
 export const relatedFlowStyle = `--gallery-short: clamp(${RELATED_NARROW_SHORT_PX}px, 13vw, ${RELATED_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}`;
+
+/** Inline style for the photographs index: a `.gallery-flow` at the
+ *  index's short side, the galleries' stretch and width, a tighter gap. */
+export const indexFlowStyle = `--gallery-short: clamp(${INDEX_NARROW_SHORT_PX}px, 11vw, ${INDEX_SHORT_PX}px); --gallery-stretch: ${GALLERY_STRETCH}; --gallery-width: ${GALLERY_WIDTH}; --gallery-gap: calc(var(--baseline) / 3)`;
+
+/** The photographs index's order: by title, case ignored and numbers
+ *  read as numbers ("Frame 2" before "Frame 10"), then by id. */
+export function byIndexOrder(
+  a: { id: string; title: string },
+  b: { id: string; title: string },
+): number {
+  // tunable: the order
+  return (
+    a.title.localeCompare(b.title, 'en', { sensitivity: 'base', numeric: true }) ||
+    a.id.localeCompare(b.id)
+  );
+}
 
 /** Per-cell data: the ratio the CSS needs, and image sizing that
  *  matches the widest the cell can grow to, at 2× density. `short` is

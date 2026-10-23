@@ -39,26 +39,23 @@ const cells = place.frames.map((id) => {
 const cover = registry.byId.get(place.cover)!;
 const og = await getImage(ogImageOptions(cover.image));
 
-// The writing is optional — a place file may be a title and a cover.
-const hasWriting = (place.entry.body ?? '').trim().length > 0;
-const { Content } = await render(place.entry);
+const description = place.entry?.data.description;
+// A made place has no file; a place file may be a title and a cover.
+const hasWriting = (place.entry?.body ?? '').trim().length > 0;
+const Content = place.entry && hasWriting ? (await render(place.entry)).Content : null;
 ---
 
-<BaseLayout
-  title={place.title}
-  description={place.entry.data.description ?? place.summary}
-  image={og.src}
->
+<BaseLayout title={place.title} description={description ?? place.summary} image={og.src}>
   <article data-pagefind-body>
     <header class="page-head section reading-head">
       <p class="eyebrow">Place</p>
       <h1>{place.title}</h1>
-      {place.entry.data.description && <p class="lead">{place.entry.data.description}</p>}
+      {description && <p class="lead">{description}</p>}
       <div class="entry-meta">{place.summary}</div>
     </header>
 
     {
-      hasWriting && (
+      Content && (
         <div class="section place-writing">
           <div class="prose">
             <Content />

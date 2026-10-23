@@ -530,10 +530,10 @@ describe('image links (T310, spec 004)', () => {
   it('a block image is wrapped in a link to its page, derived from the piece folder', async () => {
     const { code } = await render('::single{src="./photo.jpg" alt="A photo"}');
     // T1100: every frame carries its raw ratio — 8x5 = 1.6 here.
-    expect(links(code)).toEqual([{ href: '/images/fixtures/photo/', style: '--ar: 1.6' }]);
+    expect(links(code)).toEqual([{ href: '/photographs/fixtures/photo/', style: '--ar: 1.6' }]);
     // The image inside is still the optimizer's — the marker is intact.
     expect(code).toMatch(
-      /<a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
+      /<a href="\/photographs\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
     );
   });
 
@@ -542,8 +542,8 @@ describe('image links (T310, spec 004)', () => {
       '::diptych{left="./photo.jpg" right="./portrait.jpg" leftAlt="l" rightAlt="r"}',
     );
     expect(links(pair.code).map((l) => l.href)).toEqual([
-      '/images/fixtures/photo/',
-      '/images/fixtures/portrait/',
+      '/photographs/fixtures/photo/',
+      '/photographs/fixtures/portrait/',
     ]);
     const grid = await render(
       ':::grid\n![a](./photo.jpg)\n![b](./portrait.jpg)\n![c](./rotated.jpg)\n:::',
@@ -551,7 +551,7 @@ describe('image links (T310, spec 004)', () => {
     expect(links(grid.code)).toHaveLength(3);
     const strip = await render(':::strip\n![a](./photo.jpg)\n![b](./portrait.jpg)\n:::');
     expect(strip.code).toMatch(
-      /<div class="piece-strip-scroll" tabindex="0"><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6">/,
+      /<div class="piece-strip-scroll" tabindex="0"><a href="\/photographs\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6">/,
     );
     expect(links(strip.code)).toHaveLength(2);
   });
@@ -559,7 +559,7 @@ describe('image links (T310, spec 004)', () => {
   it('the shorthand image in prose is wrapped too', async () => {
     const { code } = await render('Text.\n\n![A photo](./photo.jpg)\n');
     expect(code).toMatch(
-      /<p><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
+      /<p><a href="\/photographs\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
     );
   });
 
@@ -622,7 +622,7 @@ describe('image links (T310, spec 004)', () => {
     await expect(
       renderExpectingFailure('::single{src="./_photo.jpg" alt="The raw frame"}'),
     ).rejects.toThrow(
-      /"\.\/_photo\.jpg" is private — the camera's frame of "photo", not an image of the site: place "photo\.jpg" here/,
+      `"./_photo.jpg" is private — a file of "photo" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "photo.jpg" here, or show it as a stage of a :::compare in this folder`,
     );
     await expect(renderExpectingFailure('![x](./_photo.jpg)')).rejects.toThrow(/is private/);
     // alt="" would skip the link (no page to link to) — the private rule
@@ -635,12 +635,12 @@ describe('image links (T310, spec 004)', () => {
     ).rejects.toThrow(/is private/);
   });
 
-  it('an image beside a flat pieces/foo.md fails — the registry would never make its page', async () => {
-    const flat = new URL('./src/content/pieces/flat.md', import.meta.url);
+  it('an image beside a flat journal/foo.md fails — the registry would never make its page', async () => {
+    const flat = new URL('./src/content/journal/flat.md', import.meta.url);
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       await expect(processor.render('![x](./photo.jpg)', { fileURL: flat })).rejects.toThrow(
-        /sits directly in src\/content\/pieces\/ — a piece lives in its own folder/,
+        /sits directly in src\/content\/journal\/ — a journal entry lives in its own folder/,
       );
     } finally {
       spy.mockRestore();
@@ -660,7 +660,7 @@ describe('held: the durational block (T501, spec 007)', () => {
     // The figure's anchor to the image page carries the same raw ratio
     // (not normalized to 1 — a single frame normalized says nothing).
     expect(code).toMatch(
-      /<figure><a href="\/images\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
+      /<figure><a href="\/photographs\/fixtures\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
     );
     expect(code).toMatch(
       /<div class="piece-held-prose"><p>First paragraph beside the frame\.<\/p>\n?<p>Second paragraph\.<\/p><\/div>/,
@@ -793,12 +793,12 @@ describe('held: the durational block (T501, spec 007)', () => {
 });
 
 describe('cross-piece references (T602, spec 008)', () => {
-  // A second virtual piece: tests/pieces/alpha/index.md, beside the real
+  // A second virtual piece: tests/journal/alpha/index.md, beside the real
   // 8 x 5 fixtures alpha/photo.jpg, beta/photo.jpg (with beta's private
-  // frame and a .tif), and tests/gallery-images/photo.jpg. alpha's own
+  // frame and a .tif), and tests/photographs/photo.jpg. alpha's own
   // frame is the same shape as beta's, so a borrowed frame's sizing can
   // be compared against a local one's directly.
-  const alphaURL = new URL('./tests/pieces/alpha/index.md', import.meta.url);
+  const alphaURL = new URL('./tests/journal/alpha/index.md', import.meta.url);
   const render = (content) => processor.render(content, { fileURL: alphaURL });
   const renderExpectingFailure = async (content) => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -818,20 +818,20 @@ describe('cross-piece references (T602, spec 008)', () => {
 
   // The one message the parser gives every wrong shape.
   const shapeMessage = (src) =>
-    `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, another piece's as ../<slug>/<file>, and a gallery-root image as ../../gallery-images/<file>`;
+    `image src "${src}" is not a path this site accepts — a piece places its own images as ./<file>, a journal entry's as ../<slug>/<file>, and a photograph from the photographs folder as ../../photographs/<file>`;
 
   it("a borrowed src in single links to the other piece's page, sized as a local one", async () => {
     const borrowed = await render('::single{src="../beta/photo.jpg" alt="dawn"}');
     const local = await render('::single{src="./photo.jpg" alt="dawn"}');
     // T1100: both carry their raw ratio — the borrowed file is measured
     // where it lives, like the local one (both 8x5).
-    expect(links(borrowed.code)).toEqual([{ href: '/images/beta/photo/', style: '--ar: 1.6' }]);
-    expect(links(local.code)).toEqual([{ href: '/images/alpha/photo/', style: '--ar: 1.6' }]);
+    expect(links(borrowed.code)).toEqual([{ href: '/photographs/beta/photo/', style: '--ar: 1.6' }]);
+    expect(links(local.code)).toEqual([{ href: '/photographs/alpha/photo/', style: '--ar: 1.6' }]);
     expect(sizesOf(borrowed.code)[0]).toContain('680px');
     expect(sizesOf(borrowed.code)).toEqual(sizesOf(local.code));
     // The image inside is still the optimizer's, borrowed path and all.
     expect(borrowed.code).toMatch(
-      /<a href="\/images\/beta\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
+      /<a href="\/photographs\/beta\/photo\/" class="image-link" style="--ar: 1\.6"><img[^>]*__ASTRO_IMAGE_/,
     );
     expect(imageMarkers(borrowed.code)[0].src).toBe('../beta/photo.jpg');
   });
@@ -844,8 +844,8 @@ describe('cross-piece references (T602, spec 008)', () => {
       '::diptych{left="./photo.jpg" right="./photo.jpg" leftAlt="l" rightAlt="r"}',
     );
     expect(links(pair.code).map((l) => l.href)).toEqual([
-      '/images/beta/photo/',
-      '/images/alpha/photo/',
+      '/photographs/beta/photo/',
+      '/photographs/alpha/photo/',
     ]);
     expect(sizesOf(pair.code)[0]).toContain('vw');
     expect(sizesOf(pair.code)).toEqual(sizesOf(localPair.code));
@@ -853,8 +853,8 @@ describe('cross-piece references (T602, spec 008)', () => {
     const grid = await render(':::grid\n![a](../beta/photo.jpg)\n![b](./photo.jpg)\n:::');
     const localGrid = await render(':::grid\n![a](./photo.jpg)\n![b](./photo.jpg)\n:::');
     expect(links(grid.code).map((l) => l.href)).toEqual([
-      '/images/beta/photo/',
-      '/images/alpha/photo/',
+      '/photographs/beta/photo/',
+      '/photographs/alpha/photo/',
     ]);
     expect(sizesOf(grid.code)[0]).toContain('340px');
     expect(sizesOf(grid.code)).toEqual(sizesOf(localGrid.code));
@@ -863,7 +863,7 @@ describe('cross-piece references (T602, spec 008)', () => {
   it('a borrowed held keeps the local --ar and sizes', async () => {
     const held = await render(':::held{src="../beta/photo.jpg" alt="ridge"}\nText.\n:::');
     const localHeld = await render(':::held{src="./photo.jpg" alt="ridge"}\nText.\n:::');
-    expect(links(held.code)).toEqual([{ href: '/images/beta/photo/', style: '--ar: 1.6' }]);
+    expect(links(held.code)).toEqual([{ href: '/photographs/beta/photo/', style: '--ar: 1.6' }]);
     expect(held.code).toContain(
       '<div class="piece-block piece-held side-left frame-landscape" style="--ar: 1.6">',
     );
@@ -872,10 +872,10 @@ describe('cross-piece references (T602, spec 008)', () => {
     expect(anchorStyles(held.code)).toEqual(anchorStyles(localHeld.code));
   });
 
-  it('the shorthand borrows from the gallery root', async () => {
-    const { code } = await render('Text.\n\n![x](../../gallery-images/photo.jpg)\n');
+  it('the shorthand borrows from the photographs folder', async () => {
+    const { code } = await render('Text.\n\n![x](../../photographs/photo.jpg)\n');
     expect(code).toMatch(
-      /<p><a href="\/images\/gallery\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
+      /<p><a href="\/photographs\/photo\/" class="image-link" style="--ar: 1\.6"><img/,
     );
   });
 
@@ -883,7 +883,7 @@ describe('cross-piece references (T602, spec 008)', () => {
     for (const src of [
       './sub/photo.jpg',
       '../../../photo.jpg',
-      '../gallery-images/photo.jpg',
+      '../photographs/photo.jpg',
       '../beta/sub/photo.jpg',
     ]) {
       await expect(renderExpectingFailure(`::single{src="${src}" alt="x"}`)).rejects.toThrow(
@@ -905,7 +905,7 @@ describe('cross-piece references (T602, spec 008)', () => {
   });
 
   it('a borrowed non-photograph fails — it would mint the id of the raster beside it', async () => {
-    // tests/pieces/beta/photo.tif is a real TIFF on disk, so the failure
+    // tests/journal/beta/photo.tif is a real TIFF on disk, so the failure
     // is the borrowing rule, not the missing-file check.
     await expect(
       renderExpectingFailure('::single{src="../beta/photo.tif" alt="x"}'),
@@ -921,7 +921,7 @@ describe('cross-piece references (T602, spec 008)', () => {
 
   it("a borrowed private frame fails even where the private rule stands alone (alt='')", async () => {
     await expect(renderExpectingFailure('![](../beta/_photo.jpg)')).rejects.toThrow(
-      `"../beta/_photo.jpg" is private — the camera's frame of "photo", not an image of the site: place "photo.jpg" here and the frame shows on its page`,
+      `"../beta/_photo.jpg" is private — a file of "photo" (its camera's frame, a stage, or the loupe's export), not an image of the site: place "photo.jpg" here, or show it as a stage of a :::compare in this folder`,
     );
   });
 
@@ -933,7 +933,7 @@ describe('cross-piece references (T602, spec 008)', () => {
 
 describe('the closed vocabulary (T1501, spec 017)', () => {
   const unknown =
-    /unknown block directive "pause" — the block vocabulary is closed; known blocks: single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip, aside, row, held/;
+    /unknown block directive "pause" — the block vocabulary is closed; known blocks: single, fullbleed, wide, tall, inset, diptych, triptych, grid, strip, aside, row, held, compare, side, slider$/;
 
   // The thrown VFileMessage, so its file and line can be pinned too.
   const failureOf = async (content) => {
@@ -975,6 +975,9 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
       ...walk('src'),
       'remark-pieces-blocks.mjs',
       'obsidian-plugin/main.ts',
+      'obsidian-plugin/blocks.ts',
+      'obsidian-plugin/figure.ts',
+      'obsidian-plugin/compare.ts',
       ...rootTests,
     ];
     const hits = [];
@@ -995,7 +998,7 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     // the plugin, not an empty list.
     expect(read).toBeGreaterThan(40);
     expect(files).toContain(join('src', 'styles', 'global.css'));
-    expect(files).toContain(join('src', 'pages', 'pieces', '[slug].astro'));
+    expect(files).toContain(join('src', 'pages', 'journal', '[slug].astro'));
     expect(hits).toEqual([]);
 
     // The two spellings of the one attribute, pinned together: the
@@ -1003,7 +1006,7 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     expect(readFileSync('src/styles/global.css', 'utf8')).toContain(
       'html[data-held-active] .site-header',
     );
-    expect(readFileSync('src/pages/pieces/[slug].astro', 'utf8')).toContain(
+    expect(readFileSync('src/pages/journal/[slug].astro', 'utf8')).toContain(
       "toggleAttribute('data-held-active'",
     );
   });
@@ -1030,7 +1033,7 @@ describe('the closed vocabulary (T1501, spec 017)', () => {
     });
     // The four names are pinned on purpose: a fifth collection must be
     // added here, so it cannot arrive without the option.
-    expect(globs.map((one) => one.name)).toEqual(['pieces', 'galleries', 'imageMeta', 'places']);
+    expect(globs.map((one) => one.name)).toEqual(['journal', 'galleries', 'imageMeta', 'places']);
     expect(config.match(/glob\(\{/g)).toHaveLength(4);
     expect(globs.filter((one) => !one.found || !one.deferred).map((one) => one.name)).toEqual([]);
   });

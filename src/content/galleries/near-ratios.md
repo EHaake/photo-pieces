@@ -8,13 +8,13 @@ description: >-
   placeholder images labelled with their ratio and order.
 date: 2026-06-20
 images:
-  - gallery/tall-2x3-01
-  - gallery/tall-4x5-01
-  - gallery/tall-5x8-01
-  - gallery/tall-2x3-02
-  - gallery/tall-4x5-02
-  - gallery/tall-5x8-02
-  - gallery/tall-2x3-03
-  - gallery/tall-4x5-03
-  - gallery/tall-5x8-03
+  - tall-2x3-01
+  - tall-4x5-01
+  - tall-5x8-01
+  - tall-2x3-02
+  - tall-4x5-02
+  - tall-5x8-02
+  - tall-2x3-03
+  - tall-4x5-03
+  - tall-5x8-03
 ---

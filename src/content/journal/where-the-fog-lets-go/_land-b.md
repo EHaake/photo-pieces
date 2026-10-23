@@ -15,6 +15,10 @@ processing: >-
 edition: Open edition, signed on the back
 sizes: 12 × 18, 16 × 24, and 24 × 36 inches
 paper: Hahnemühle Photo Rag Baryta
+stages:
+  - file: _land-b.tones.jpg
+    label: Tones
+    note: Shadows lifted on the ridge, the fog's highlights held. _Fixture stage._
 ---
 
 I had been standing in the same place for an hour when the far bank
@@ -30,3 +34,12 @@ let the second thing happen.
 It is the frame the whole morning was waiting for, and the one I would
 print from that day. _Fixture story — invented prose standing in for
 the photographer's own, never adopted as content._
+
+From the camera to the print in one wipe. _Fixture prose — the slider
+below is invented, a test of the pair block beside the page's own
+section, over the same files._
+
+:::slider
+![Camera](./_land-b.jpg) Straight out of the camera, flat profile. _Fixture note._
+![Finished](./land-b.jpg) A touch of warmth over the whole frame. _Fixture note._
+:::

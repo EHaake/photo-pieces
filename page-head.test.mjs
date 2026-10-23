@@ -97,8 +97,8 @@ describe('the dev-route barrier (T807, spec 010)', () => {
       join(withMotionMarker, 'index.html'),
       '<!doctype html>\n<script data-dev-motion>localStorage.getItem("dev-motion")</script>\n',
     );
-    mkdirSync(join(clean, 'pieces'), { recursive: true });
-    writeFileSync(join(clean, 'pieces', 'index.html'), '<!doctype html>\n');
+    mkdirSync(join(clean, 'journal'), { recursive: true });
+    writeFileSync(join(clean, 'journal', 'index.html'), '<!doctype html>\n');
   });
 
   afterAll(() => {
