@@ -1,6 +1,6 @@
 # Plan: The image page, refined
 
-**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Amendment 6 (2026-10-22, a typo of none): Draft — pending sign-off.
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Amendment 6 (2026-10-22, a typo of none): drafted and signed off 2026-10-22 at the top tier — nothing blocking, seven second looks (six taken, one carried to the sweep).
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -4393,7 +4393,7 @@ Untouched, named so the reviewer can confirm: `src/pages/places/index.astro`;
 
 ## Amendment 6 (2026-10-22): a typo of none
 
-**Status**: Draft — pending sign-off
+**Status**: Drafted and signed off 2026-10-22 at the top tier — nothing blocking, seven second looks (six taken, one carried to the sweep)
 **Implements**: spec.md's sections marked _(amended 2026-10-22, none)_
 — the head note's sixth-amendment sentence, Goal 12's clause, the
 Authoring requirements "The constitution, a sixth time" and "A typo of
@@ -4517,8 +4517,9 @@ round on them updates `AUTHORING.md` in the same task.
   Several writers name the first: `(src/content/photographs/_a.md and
   2 more)`, as today.
 - A name that is a near miss of a place and of `none` (`nome` beside a
-  place `home`) gets both lines, sorted by the second name: the
-  place's, then `none`'s. All at once, in the one throw, as today.
+  place `home`) gets both lines, sorted by the second name — for
+  `home`, the place's first (a place `note` or `tone` would print
+  `none`'s first). All at once, in the one throw, as today.
 - Unchanged: every line of amendment 5's list, and the notes.
 
 ### Testing strategy (amendment 6)
@@ -4530,7 +4531,10 @@ round on them updates `AUTHORING.md` in the same task.
   - `nnoe` (an adjacent swap) → the exact line, the spec's words.
   - one letter off by each kind of slip — `nome` (one changed), `one`
     (one dropped), `nonne` (one added) — passed together → three
-    lines, `nome`, `nonne`, `one` in that order.
+    lines, `nome`, `nonne`, `one` in that order. Three, not more,
+    because the three are not near each other: each pair is 2 off and
+    short, so unrefused — a trio such as `bone`/`gone` (1 off each
+    other) would add a fourth line.
   - two letters off → none, at four characters and at six: `noon` and
     `nonage` (the second is the pair at `PLACE_SHORT_NAME`, so it
     fails if the short rule's boundary moves).
@@ -4549,7 +4553,9 @@ round on them updates `AUTHORING.md` in the same task.
   measure run over every distinct `at:`, names with files included →
   the name-with-a-file case; the `PLACE_NONE` skip dropped from the
   `writers` loop → the existing "never measured" case (`none` would be
-  0 letters off itself).
+  0 letters off itself) — a pin for "`none` is never refused" that
+  already fails before this amendment, so it exercises no line T1762
+  adds; the first three are the ones that prove the new measure.
 - **The refusal in a real build** — **T1763**: one-time builds, each
   reverted, as T1758's were — the line verbatim against the quotation
   above; a draft photograph's `at:` and a journal entry's refused the

@@ -1,6 +1,6 @@
 # Tasks: The image page, refined
 
-**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken. Phase 3c (the lexicon amendment) drafted and signed off 2026-09-29 at the top tier — one blocking finding (B1) fixed and re-reviewed, twelve second looks taken. Phase 3d (the category amendment) drafted and signed off 2026-10-01 at the top tier — nothing blocking, five second looks taken. Phase 3e (the fifth amendment, a place made by naming it) drafted and signed off 2026-10-07 at the top tier — nothing blocking, ten second looks taken. Phase 3f (the sixth amendment, a typo of none) drafted 2026-10-22 — Draft — pending sign-off.
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken. Phase 3c (the lexicon amendment) drafted and signed off 2026-09-29 at the top tier — one blocking finding (B1) fixed and re-reviewed, twelve second looks taken. Phase 3d (the category amendment) drafted and signed off 2026-10-01 at the top tier — nothing blocking, five second looks taken. Phase 3e (the fifth amendment, a place made by naming it) drafted and signed off 2026-10-07 at the top tier — nothing blocking, ten second looks taken. Phase 3f (the sixth amendment, a typo of none) drafted and signed off 2026-10-22 at the top tier — nothing blocking, seven second looks (six taken, one carried to the sweep).
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1700–T1703) — the constitution amended
 first, in its own commit; the private-file family as pure rules with
@@ -2647,13 +2647,14 @@ guard's one letter at six characters or fewer and two above; the
 
 One change, and it is a spec amendment, not a round: a name one letter
 off `none` is to be refused as a probable typo ("Ok, yes then", after
-asking why typos are refused at all). Brief for the spec session:
-`amendment-6-brief.md`. T1760 stays open until that amendment's phase
-is built and looked at.
+asking why typos are refused at all). Settled in the spec session of
+2026-10-22 and planned as Phase 3f (T1761–T1765); the brief it was
+carried in is deleted. T1760 stays open until that phase is built and
+looked at.
 
 ## Phase 3f — A typo of none (reviewer after the phase; no task is `review: per-task` — the change is one more measure inside the guard Phase 3e built and reviewed, nothing later builds on it, and the phase review follows two tasks after it; walkthrough: on the laptop, in a terminal: in `src/content/photographs/_wide-3x2-01.md`, `at: top-of-the-world` changed to `at: nnoe` — `sh scripts/verify.sh` stops the build with the line `[places] "nnoe" (src/content/photographs/_wide-3x2-01.md) is 1 letter off none, the word for no place — a probable typo. Write at: none; or, if it really is a place, add src/content/places/nnoe.md`; `at: nome` stops it the same way; `src/content/places/nome.md` written holding `title: Nome` alone (no `draft: true` line) and the build passes, `/places/nome/` a page called Nome; that file deleted and `at: noon` — two letters off — builds and makes a place called Noon, named in the build's made-place note; `at: none` builds, the photograph at no place; the line put back to `at: top-of-the-world` and the site as it was, Top of the World with its two photographs; `AUTHORING.md`'s "Places" says all of this, Nome included; as many rounds as it takes, each a sub-lettered task under T1765)
 
-**Status**: Draft — pending sign-off. Plan: "Amendment 6 (2026-10-22): a typo of none" and its sections.
+**Status**: Drafted and signed off 2026-10-22 at the top tier — nothing blocking, seven second looks (six taken, one carried to the sweep). Plan: "Amendment 6 (2026-10-22): a typo of none" and its sections.
 The spec's sixth amendment, decided at the Phase 3e look, folded in
 while the 3a, 3b, 3c and 3e pauses are held open — T1729, T1735, T1745
 and T1760 stay unchecked and are not touched by this phase — and before
@@ -2676,9 +2677,10 @@ the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
       hand-wrapped so that ``near miss of another place's or of `none` ``
       sits whole on one line and `A place's` stays at the end of the
       third line; the rest of the file untouched. _Verify:
-      `git diff --stat` → `CLAUDE.md` alone (the stray, pre-existing
-      `obsidian-plugin/package-lock.json` change left unstaged);
-      `git diff -U0 CLAUDE.md` → two lines out, two in;
+      `git diff --stat -- CLAUDE.md` → `CLAUDE.md` alone, and
+      `git status --short` → `CLAUDE.md` and nothing else but the stray,
+      pre-existing `obsidian-plugin/package-lock.json` change, left
+      unstaged; `git diff -U0 CLAUDE.md` → two lines out, two in;
       ``grep -c "near miss of another place's or of \`none\`" CLAUDE.md``
       → 1 (the backslashes are the shell's, inside double quotes); `grep -c "is _made_ by being" CLAUDE.md`,
       `grep -c "_declares_ its title" CLAUDE.md` and
@@ -2703,9 +2705,11 @@ the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
       green (the page count unchanged at 89; the test count up by the
       new cases, none removed, both numbers given); the four mutations
       of the plan's testing bullet, each failing by name (the failing
-      test's name pasted) and reverted; `git diff --stat` →
+      test's name pasted) and reverted;
+      `git diff --stat -- src image-meta.test.mjs` →
       `src/lib/image-meta.mjs`, `src/lib/images.ts` and
-      image-meta.test.mjs alone, and `git diff src/lib/images.ts`
+      image-meta.test.mjs alone, `git status --short` showing nothing
+      else but the stray `obsidian-plugin/package-lock.json`, and `git diff src/lib/images.ts`
       showing comment lines only; the `nnoe` line as the test expects
       it pasted, for the orchestrator to set beside the plan's (AC 43's
       `none` clause)._
@@ -2734,8 +2738,8 @@ the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
       builds' lines pasted as listed; after the last revert
       `git status --short -- src/content` → empty and
       `sh scripts/verify.sh` green, its counts T1762's; any line that
-      differs from the plan's quotation reported so the orchestrator
-      corrects the plan (AC 43's `none` clause in a real build)._
+      differs from the plan's or this task's quotation reported so the
+      orchestrator corrects it (AC 43's `none` clause in a real build)._
 
 - [ ] **T1764** — The documents. Pattern: T1759 (its hand-editing rule;
       each document's own voice). Plan: "The documents" (amendment 6).
@@ -2746,14 +2750,17 @@ the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
       the prose (never script-rewrap; grep for lines beginning with a
       `>` or `+` before any format run). _Verify:
       `grep -cF "the word for no place — a probable typo" AUTHORING.md`
-      → 1 (the example line); `grep -cF "Write at: none" AUTHORING.md`
+      → 1, the fenced line alone (the prose around it must not repeat
+      that phrasing verbatim); `grep -cF "Write at: none" AUTHORING.md`
       → at least 1; `grep -ci "nome" AUTHORING.md` → at least 1 (a real
       place a letter off `none` needs its file first);
       `grep -c "noon" AUTHORING.md` → at least 1 (two letters off is a
       name); ``grep -cF 'off `none`' README.md`` → at least 1;
       `grep -c "probable typo" AUTHORING.md` → at least 4 (T1759's 3
       and the new line);
-      `git diff --stat` → `AUTHORING.md` and `README.md` alone;
+      `git diff --stat -- AUTHORING.md README.md` → both, and
+      `git status --short` showing nothing else but the stray
+      `obsidian-plugin/package-lock.json`;
       `npx prettier --check AUTHORING.md README.md` clean;
       `sh scripts/verify.sh` green (AC 43's documents, under AC 46's
       kind)._
@@ -3165,9 +3172,15 @@ tier if it is ever on (it is off). -->
 | T1759 the documents | implementation (`opus`, high) | ~108k | done; greps as asked; the `place` template's `draft: true` unpublishes a made place when its file is first written (put to him at the look) |
 | T1759a the absence case widened | implementation (`opus`, high) | ~42k | done; 899 tests; eight mutations fail by name |
 | Phase 3e review | implementation (`opus`, high) | ~122k | signed off, nothing blocking; AC 39–46 each met by something named; fix-now taken — the absence case widened (T1759a), the walkthrough's template step reworded and the `draft: true` question added to T1760, plan.md's file structure names `obsidian-plugin.test.mjs`; verify.sh has no `set -e` (its bare notes grep cannot hide a failed build); no re-review needed |
+| Amendment 6 spec session (2026-10-22) | session on `claude-fable-5-1`, high (raised for the session) | — | the brief's four open points settled with the person ("yes to all"); spec.md amended (AC 43, Goal 12, the guard, a sixth constitution paragraph, a Decided entry) |
+| Amendment 6 planning (2026-10-22) | implementation (`opus`, high, no override) | ~105k | drafted plan.md's Amendment 6 and Phase 3f (T1761–T1765; none per-task); no product question; design choice: no special case and no new tunable — a name within two letters of `none` is short by the existing rule, so one letter falls out; the envelope's two pins (`noon`, `nonage`) make a tuning round surface `none` rather than move it |
+| Amendment 6 sign-off | top (`fable`, high, override) | ~40k | signed off, nothing blocking; S1 the second-name sort stated as a guarantee; S2 bare `git diff --stat` cannot show the task's files alone (the stray package-lock); S3 the fourth mutation exercises no new line; S4 T1763(f)'s made-note line outside the Verify's path; S5 the three-slips case's reasoning unstated; S6 the AUTHORING grep count's constraint unstated; S7 draft and journal `at:` reaching the guard still has no unit test (carried, as at Amendment 5); opened `src/content.config.ts` 159–171 |
+| Amendment 6 sign-off notes (planner resumed) | implementation (`opus`, high) | ~12k | S1–S6 taken, none declined; S7 to the sweep |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
+
+- (Amendment 6 sign-off, S7) That a draft's and a journal entry's `at:` reach the guard has no unit test — only T1758's and T1763(b)(c)'s one-time builds; accepted at Amendment 5's sign-off, carried not new.
 
 - (Phase 3e) No standing test covers the registry's wiring of places — drafts reaching the guard, a draft place file holding its place back, an unpublished name making nothing, the entry's `at:` passed as written: all rest on T1758's one-time builds; source-read cases like the spec-009 notes' would be cheap. `placeRoll`'s "absent" case cannot fail for its parenthetical. AC 40's "in either folder": a journal-folder sidecar naming a made place was never built — add it to the re-read of `dist/places/top-of-the-world/`. A new frontmatter local derived from `place.entry` would pass both absence cases; only a read of the built made page closes it. `slugSuggestion`'s accent-stripping untested; the near-miss pairs' second sort key unpinned. Three lines still read "one file per place" (AUTHORING.md's vault layout and "a place needs its `title`", README's structure listing); README's Place paragraph names neither the `place` template nor the small words. The dev sampler now throws without `the-headlands` — confirm it never runs in a production build. AUTHORING.md's first guard example cites `src/content/places/top-of-the-world.md` though the section presents that place as having no file (a real line, from the draft-file build). "Indexed" rising by three is stated, not shown.
 - (Phase 3d, from sign-off) AC 36's built-page eyebrow is read once at T1750, not per build (no test reads the real `dist/`) — the sweep re-reads `dist/photographs/dock-b/` for `/categories/street/` alone.
