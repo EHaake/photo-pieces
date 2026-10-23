@@ -120,8 +120,8 @@ backend service for v1.
   one, _declares_ its title, description, cover and writing and takes
   the made page over at the same address, and a file with `draft: true`
   holds the place back. The build refuses a name that is not a slug, or
-  that is a near miss of another place's, and lists the places it made
-  and the photographs that name none. A place's
+  that is a near miss of another place's or of `none`, and lists the
+  places it made and the photographs that name none. A place's
   page shows its published frames as one wall, outings oldest first — a
   journal entry's own-folder frames at the place as one outing, dated
   by the entry, and each photograph of the photographs folder that
