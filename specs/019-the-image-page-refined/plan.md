@@ -1,6 +1,6 @@
 # Plan: The image page, refined
 
-**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log.
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Amendment 6 (2026-10-22, a typo of none): Draft — pending sign-off.
 **Implements**: spec.md in this directory
 
 ## Shape of the change
@@ -4350,6 +4350,9 @@ Untouched, named so the reviewer can confirm: `src/pages/places/index.astro`;
   only in the build's made note. The rule is left as the spec has it;
   whether a name one letter off `none` should be refused is put to the
   person at the look (T1760), and would be a spec amendment.
+  _Withdrawn by "Amendment 6 (2026-10-22): a typo of none" below: he
+  said yes at the look, and a name with no file one letter off `none`
+  is refused as a probable typo (T1762)._
 
 ### Resolved decisions (amendment 5)
 
@@ -4387,3 +4390,221 @@ Untouched, named so the reviewer can confirm: `src/pages/places/index.astro`;
   place, publishes one held back as a draft, or puts frames on the
   wrong wall. The notes, the fixtures and the documents re-address
   nothing and are reviewed with the phase. **No new dependency.**
+
+## Amendment 6 (2026-10-22): a typo of none
+
+**Status**: Draft — pending sign-off
+**Implements**: spec.md's sections marked _(amended 2026-10-22, none)_
+— the head note's sixth-amendment sentence, Goal 12's clause, the
+Authoring requirements "The constitution, a sixth time" and "A typo of
+`none`", AC 43's clause, and the Decided section's last bullet. No new
+criterion number: the case is AC 43's, and the constitution's sentence
+is a second commit under AC 39's kind.
+
+The guard (amendment 5) measures every name with no file against one
+more word, `none`, with its own message. One measure inside
+`nearMissProblems`, its cases, a sentence of the constitution, two
+documents. No change to the registry's wiring, the notes, the
+fixtures, `scripts/verify.sh`, the templates or the plugin. Everything
+above stands except the one Known-limitations line marked withdrawn.
+
+### Shape of the change (amendment 6)
+
+- **The constitution, a sixth time** (`CLAUDE.md`, T1761, its own
+  commit before T1762, on this branch — the sentence states a refusal
+  only this branch's guard makes). The Content model clause, lines
+  122–124 as they stand. From:
+
+  ```
+    holds the place back. The build refuses a name that is not a slug, or
+    that is a near miss of another place's, and lists the places it made
+    and the photographs that name none. A place's
+  ```
+
+  to:
+
+  ```
+    holds the place back. The build refuses a name that is not a slug, or
+    that is a near miss of another place's or of `none`, and lists the
+    places it made and the photographs that name none. A place's
+  ```
+
+  Two lines change; ``near miss of another place's or of `none` `` sits
+  whole on one line (the greps are line-based), and `A place's` stays at
+  the end of the third so the sentence after is out of the diff.
+  Nothing else in the file.
+
+- **The guard measures `none`** (`src/lib/image-meta.mjs`, T1762). In
+  `nearMissProblems`' loop over the names with no file, between the
+  measure against the place files and the measure against the other
+  names:
+
+  ```js
+  const noneOff = near(name, PLACE_NONE);
+  if (noneOff !== null) {
+    pairs.push({
+      first: name,
+      second: PLACE_NONE,
+      message: `[places] ${written(name)} is ${noneOff} ${PLACE_NONE}, the word for no place — a probable typo. Write at: ${PLACE_NONE}; or, if it really is a place, add ${toAdd(name)}`,
+    });
+  }
+  ```
+
+  The same `near` a place's name is measured by — the spec's "as
+  against a place's name". `none` has four characters, so any name
+  within two letters of it has six or fewer and the pair is short by
+  the existing `PLACE_SHORT_NAME`: the allowance is
+  `PLACE_NEAR_MISS_SHORT`, one — the spec's one letter, with no new
+  tunable and no second allowance rule. (Simpler shape taken: no
+  special case; see the envelope for what a round on the short rule
+  would do to it.) The pair's second name is `none`, so the line sorts
+  among the name's other lines by the rule that sorts them today.
+
+  What does not change, and why each holds by the code as it stands:
+  a name with a file never reaches the loop (`writers` skips declared
+  slugs), so `nome` with `src/content/places/nome.md` builds, a draft
+  file included; `none` itself is skipped before it can be a name (the
+  `PLACE_NONE` test in the `writers` loop); a place file's own name is
+  never measured against `none` (only names with no file are; a file
+  named `none.md` is `placeNameProblem`'s already); a draft's `at:` is
+  measured because `refs` carries every `at:`, drafts and journal
+  entries included (`images.ts` 528–537), untouched. The function's
+  JSDoc gains the sentence; `images.ts`' comment above the call (lines
+  520–527) gains "or of `none`" — a comment, no code.
+
+  For the reader, which names the rule catches. One letter off, refused
+  until a file is written: `nnoe`, `noen` (a swap), `nome`, `nine`,
+  `nope`, `bone`, `gone` (one changed), `one`, `non` (one dropped),
+  `nnone`, `nonce`, `nones` (one added). Two letters off, a name as
+  before: `noon`, `no`, `nook`, `stone`, `nonage`. Each is
+  `lettersOff`'s, not hand-counted alone: T1762's cases assert the ones
+  they use.
+
+- **The documents** (T1764), after T1763 so the quoted line is read
+  from a build. `AUTHORING.md`'s "Places", the guard's paragraphs
+  (lines 801–826): the `none` case — `none` is the word for no place,
+  so a name one letter off it is refused as a probable typo of it; the
+  example line in its own fence; the two ways past (`at: none`, or the
+  place's file — a name with a file is never measured, so `nome` with
+  its file builds); one letter only, so `noon` is a name like any
+  other. The closing paragraph's "a name that is a probable typo"
+  (line 851) stands. `README.md`'s Place paragraph (lines 380–384): the
+  guard's sentence gains "or one letter off `none`". Nothing else.
+
+### The tuning envelope, placed (amendment 6)
+
+No row is added. `none`'s one letter is not a tunable — the spec fixes
+it ("one letter, not two") — and it rides two that are:
+
+| Envelope item (amendment 5's) | What a round on it does to `none`                                              | Pinned by                                     |
+| ----------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| `PLACE_NEAR_MISS_SHORT` (1)   | raised to 2, `none` would refuse two letters off                               | the `noon` case fails by name                 |
+| `PLACE_SHORT_NAME` (6)        | lowered below 6, a six-character name two letters off `none` would be refused | the `nonage` case fails by name               |
+
+So a round on either short tunable surfaces `none` instead of moving it
+silently, and whether `none` moves with it is the person's (it is the
+spec's number). If he says no, `none`'s one letter becomes a named
+value of its own in that round — the second caller that earns it. The
+message's words are settled in the spec and pinned by exact string; a
+round on them updates `AUTHORING.md` in the same task.
+
+### Failure messages and notes (amendment 6)
+
+- A name with no file one letter off `none` (the spec's words):
+  `[places] "nnoe" (src/content/photographs/_wide-3x2-01.md) is 1
+  letter off none, the word for no place — a probable typo. Write at:
+  none; or, if it really is a place, add src/content/places/nnoe.md`.
+  Several writers name the first: `(src/content/photographs/_a.md and
+  2 more)`, as today.
+- A name that is a near miss of a place and of `none` (`nome` beside a
+  place `home`) gets both lines, sorted by the second name: the
+  place's, then `none`'s. All at once, in the one throw, as today.
+- Unchanged: every line of amendment 5's list, and the notes.
+
+### Testing strategy (amendment 6)
+
+- **The constitution** — **T1761**: greps only.
+- **The guard measures `none`** — **T1762** (image-meta.test.mjs, a new
+  `describe` after T1755's, its `sidecar` and `place` helpers). Each
+  case named for its reason:
+  - `nnoe` (an adjacent swap) → the exact line, the spec's words.
+  - one letter off by each kind of slip — `nome` (one changed), `one`
+    (one dropped), `nonne` (one added) — passed together → three
+    lines, `nome`, `nonne`, `one` in that order.
+  - two letters off → none, at four characters and at six: `noon` and
+    `nonage` (the second is the pair at `PLACE_SHORT_NAME`, so it
+    fails if the short rule's boundary moves).
+  - a name with a file one letter off `none` → none: `nome` with
+    `place('nome')`, and with `{ ...place('nome'), draft: true }`.
+  - written by three files → the first and "and 2 more".
+  - a near miss of a place and of `none` → two lines, the place's
+    first (`nome` with `place('home')`).
+  - `none` itself: the existing case "`none` and blanks are never
+    measured" (its declared `nine` is one letter off `none`, and stays
+    `[]` — a place file's name is not measured), unchanged.
+
+  **Mutations**, each failing by name and reverted: the `none` measure
+  removed → the `nnoe` and three-slips cases; the measure given
+  `PLACE_NEAR_MISS` as a fixed allowance → the two-letters case; the
+  measure run over every distinct `at:`, names with files included →
+  the name-with-a-file case; the `PLACE_NONE` skip dropped from the
+  `writers` loop → the existing "never measured" case (`none` would be
+  0 letters off itself).
+- **The refusal in a real build** — **T1763**: one-time builds, each
+  reverted, as T1758's were — the line verbatim against the quotation
+  above; a draft photograph's `at:` and a journal entry's refused the
+  same (the wiring, end to end); `nome` refused, then built with its
+  file; `noon` built and made. No `dist/` diff: the guard only returns
+  lines the registry throws and renders nothing, so with no fixture
+  changed the claim "no page moves" is the green build itself; T1762's
+  full run is also what shows no fixture's `at:` is a letter off
+  `none` (none is: `the-jetty`, `the-headlands`, `top-of-the-world`,
+  `none`).
+- **The documents** — **T1764**: greps.
+- **Unchanged and green**: the rest of the suite, the five barriers,
+  `astro check`.
+- **At the pause, by the person**: the line as the command prints it,
+  the ways past, the documents' words.
+
+### File structure (amendment 6)
+
+```
+CLAUDE.md               the Places sentence gains "or of `none`" (T1761, its own commit)
+src/lib/image-meta.mjs  nearMissProblems measures `none`, its JSDoc (T1762)
+src/lib/images.ts       the comment above the guard's call, no code (T1762)
+image-meta.test.mjs     the new describe (T1762)
+AUTHORING.md, README.md T1764
+```
+
+Untouched, named so the reviewer can confirm: `scripts/verify.sh`;
+`src/content/` (every edit in T1763 reverted); `src/content.config.ts`;
+`src/pages/`; `obsidian/` and `obsidian-plugin/`; `package.json`.
+
+### Known limitations (amendment 6)
+
+- **A real place one letter off `none`** (Nome) is refused until its
+  file is written — the cost the spec names and he accepted.
+  `AUTHORING.md` says so (T1764).
+- **`none`'s one letter rides the short rule**, not a value of its own;
+  the envelope says what a round on it surfaces.
+- **A name two letters off `none`** (`noon`, `no`) makes a place as any
+  name does, shown only in the made note — the spec's "a name two
+  letters off it builds as before".
+- **The wiring is read once**, not per build: that drafts' and entries'
+  `at:` reach the guard rests on T1758's and T1763's one-time builds,
+  as the Phase 3e sweep note already carries.
+
+### Resolved decisions (amendment 6)
+
+- **`none` is measured by the guard's own `near`**, so its allowance is
+  the short one by its length — no special case, no new tunable;
+  pinned at both short tunables by the two-letters case.
+- **The `none` line is a pair whose second name is `none`**, sorted
+  with the name's other lines.
+- **No `dist/` diff**: the guard renders nothing.
+- **The walkthrough uses `_wide-3x2-01.md`**, one of the made place's
+  two sidecars: a fixture already naming a place, so its line put back
+  restores the site exactly.
+- **No `review: per-task`.** One measure inside a guard Phase 3e built
+  and reviewed; nothing later builds on it, and the phase review comes
+  two tasks after it. **No new dependency.**

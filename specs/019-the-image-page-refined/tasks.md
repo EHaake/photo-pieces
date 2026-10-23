@@ -1,6 +1,6 @@
 # Tasks: The image page, refined
 
-**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken. Phase 3c (the lexicon amendment) drafted and signed off 2026-09-29 at the top tier — one blocking finding (B1) fixed and re-reviewed, twelve second looks taken. Phase 3d (the category amendment) drafted and signed off 2026-10-01 at the top tier — nothing blocking, five second looks taken. Phase 3e (the fifth amendment, a place made by naming it) drafted and signed off 2026-10-07 at the top tier — nothing blocking, ten second looks taken.
+**Status**: Signed off (2026-09-24) by the `skeptical-reviewer` at the top tier — three blocking findings fixed and re-reviewed (the slider's segments indexed from the right, the borrowed-stage rule tested both ways, the sidecar clause corrected in the amendment), nine notes folded in; the re-review's non-blocking lines are in tasks.md's tier log. Phase 3a (the 2026-09-26 amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, eight second looks taken. Phase 3b (the plugin amendment) drafted and signed off 2026-09-26 at the top tier — one blocking finding (B1) fixed and re-reviewed, nine second looks taken. Phase 3c (the lexicon amendment) drafted and signed off 2026-09-29 at the top tier — one blocking finding (B1) fixed and re-reviewed, twelve second looks taken. Phase 3d (the category amendment) drafted and signed off 2026-10-01 at the top tier — nothing blocking, five second looks taken. Phase 3e (the fifth amendment, a place made by naming it) drafted and signed off 2026-10-07 at the top tier — nothing blocking, ten second looks taken. Phase 3f (the sixth amendment, a typo of none) drafted 2026-10-22 — Draft — pending sign-off.
 **Implements**: plan.md in this directory
 **Foundational phases**: 0 (T1700–T1703) — the constitution amended
 first, in its own commit; the private-file family as pure rules with
@@ -2650,6 +2650,133 @@ off `none` is to be refused as a probable typo ("Ok, yes then", after
 asking why typos are refused at all). Brief for the spec session:
 `amendment-6-brief.md`. T1760 stays open until that amendment's phase
 is built and looked at.
+
+## Phase 3f — A typo of none (reviewer after the phase; no task is `review: per-task` — the change is one more measure inside the guard Phase 3e built and reviewed, nothing later builds on it, and the phase review follows two tasks after it; walkthrough: on the laptop, in a terminal: in `src/content/photographs/_wide-3x2-01.md`, `at: top-of-the-world` changed to `at: nnoe` — `sh scripts/verify.sh` stops the build with the line `[places] "nnoe" (src/content/photographs/_wide-3x2-01.md) is 1 letter off none, the word for no place — a probable typo. Write at: none; or, if it really is a place, add src/content/places/nnoe.md`; `at: nome` stops it the same way; `src/content/places/nome.md` written holding `title: Nome` alone (no `draft: true` line) and the build passes, `/places/nome/` a page called Nome; that file deleted and `at: noon` — two letters off — builds and makes a place called Noon, named in the build's made-place note; `at: none` builds, the photograph at no place; the line put back to `at: top-of-the-world` and the site as it was, Top of the World with its two photographs; `AUTHORING.md`'s "Places" says all of this, Nome included; as many rounds as it takes, each a sub-lettered task under T1765)
+
+**Status**: Draft — pending sign-off. Plan: "Amendment 6 (2026-10-22): a typo of none" and its sections.
+The spec's sixth amendment, decided at the Phase 3e look, folded in
+while the 3a, 3b, 3c and 3e pauses are held open — T1729, T1735, T1745
+and T1760 stay unchecked and are not touched by this phase — and before
+Phase 4. Foundational within the phase, and ordered first: T1761 (the
+constitution, its own commit) and T1762 (the guard measuring `none`, a
+pure rule). Then the refusal in a real build, the documents, the look.
+The implementer runs no browser: every check is the suite, one-time
+builds and the command's printed lines. Nothing here is a tunable of
+its own (plan: "The tuning envelope, placed (amendment 6)"): a round on
+the message's words is one task; a round that wants `none`'s one letter
+moved, a name with a file measured, or `none` itself treated as a name
+goes to the person as a spec amendment. The pause after this phase is
+the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
+
+- [ ] **T1761** — The constitution, a sixth time. Not code; its own
+      commit, before T1762. Pattern: T1754 (the constitution, a fifth
+      time). Plan: "Shape of the change (amendment 6)", its first
+      bullet. `CLAUDE.md` only: the Content model clause's lines
+      122–124 replaced exactly as the plan writes them, unquoted,
+      hand-wrapped so that ``near miss of another place's or of `none` ``
+      sits whole on one line and `A place's` stays at the end of the
+      third line; the rest of the file untouched. _Verify:
+      `git diff --stat` → `CLAUDE.md` alone (the stray, pre-existing
+      `obsidian-plugin/package-lock.json` change left unstaged);
+      `git diff -U0 CLAUDE.md` → two lines out, two in;
+      ``grep -c "near miss of another place's or of \`none\`" CLAUDE.md``
+      → 1 (the backslashes are the shell's, inside double quotes); `grep -c "is _made_ by being" CLAUDE.md`,
+      `grep -c "_declares_ its title" CLAUDE.md` and
+      `grep -c "never inferred from camera metadata" CLAUDE.md` → 1
+      each, as before; `npx prettier --check CLAUDE.md` clean; the
+      commit's hash recorded here, before T1762's._
+
+- [ ] **T1762** — The guard measures `none`. Pattern: the measure
+      against the place files inside `nearMissProblems`
+      (`src/lib/image-meta.mjs` 1345–1353) and the `nearMissProblems`
+      cases in image-meta.test.mjs's "a place's name (T1755, spec 019)"
+      describe (its `sidecar` and `place` helpers). Plan: "The guard
+      measures `none`", "Failure messages and notes (amendment 6)" and
+      the testing bullet "The guard measures `none`". `image-meta.mjs`:
+      the one measure, by the existing `near`, between the place-file
+      measure and the other-names measure; the JSDoc's sentence. No new
+      export, no new constant. `src/lib/images.ts`: the comment above
+      the call gains "or of `none`" — no code line. image-meta.test.mjs:
+      a new describe, "a typo of none (T1762, spec 019)", after T1755's,
+      the cases as the plan lists them, each named for the reason it can
+      fail; the existing cases unchanged. _Verify: `sh scripts/verify.sh`
+      green (the page count unchanged at 89; the test count up by the
+      new cases, none removed, both numbers given); the four mutations
+      of the plan's testing bullet, each failing by name (the failing
+      test's name pasted) and reverted; `git diff --stat` →
+      `src/lib/image-meta.mjs`, `src/lib/images.ts` and
+      image-meta.test.mjs alone, and `git diff src/lib/images.ts`
+      showing comment lines only; the `nnoe` line as the test expects
+      it pasted, for the orchestrator to set beside the plan's (AC 43's
+      `none` clause)._
+
+- [ ] **T1763** — The refusal in a real build. Not a code change.
+      Pattern: T1758's one-time builds (each edit reverted before the
+      next, each build's lines pasted). Plan: "Failure messages and
+      notes (amendment 6)" and the testing bullet "The refusal in a
+      real build". Each step a build (`npm run build`, its `[places]`
+      lines and exit pasted), each reverted before the next:
+      (a) `src/content/photographs/_wide-3x2-01.md` to `at: nnoe` →
+      BUILD EXIT 1 with the `nnoe` line, character for character the
+      plan's; (b) that restored, `_draft-fixture.md` — a draft
+      photograph — to `at: nnoe` → BUILD EXIT 1, the line naming
+      `src/content/photographs/_draft-fixture.md` (a draft's `at:` is
+      measured); (c) that restored,
+      `src/content/journal/vocabulary-sampler/index.md` from `at: none`
+      to `at: nnoe` → BUILD EXIT 1, the line naming that `index.md` (an
+      entry's `at:` is measured); (d) that restored, `_wide-3x2-01.md`
+      to `at: nome` → BUILD EXIT 1 with the `nome` line; (e) the same,
+      and `src/content/places/nome.md` holding `title: Nome` alone →
+      BUILD EXIT 0, `grep -o '<h1[^>]*>[^<]*</h1>' dist/places/nome/index.html`
+      → "Nome", and no `none` line; (f) that file deleted and
+      `_wide-3x2-01.md` to `at: noon` → BUILD EXIT 0 and the made note
+      `made noon ("Noon") — 1 photograph; …` printed. _Verify: the six
+      builds' lines pasted as listed; after the last revert
+      `git status --short -- src/content` → empty and
+      `sh scripts/verify.sh` green, its counts T1762's; any line that
+      differs from the plan's quotation reported so the orchestrator
+      corrects the plan (AC 43's `none` clause in a real build)._
+
+- [ ] **T1764** — The documents. Pattern: T1759 (its hand-editing rule;
+      each document's own voice). Plan: "The documents" (amendment 6).
+      `AUTHORING.md`'s "Places", the guard's paragraphs: the `none`
+      case, its line from T1763 (a) in a fence of its own, the two ways
+      past, one letter only, Nome with its file; `README.md`'s Place
+      paragraph's guard sentence, "or one letter off `none`". Hand-edit
+      the prose (never script-rewrap; grep for lines beginning with a
+      `>` or `+` before any format run). _Verify:
+      `grep -cF "the word for no place — a probable typo" AUTHORING.md`
+      → 1 (the example line); `grep -cF "Write at: none" AUTHORING.md`
+      → at least 1; `grep -ci "nome" AUTHORING.md` → at least 1 (a real
+      place a letter off `none` needs its file first);
+      `grep -c "noon" AUTHORING.md` → at least 1 (two letters off is a
+      name); ``grep -cF 'off `none`' README.md`` → at least 1;
+      `grep -c "probable typo" AUTHORING.md` → at least 4 (T1759's 3
+      and the new line);
+      `git diff --stat` → `AUTHORING.md` and `README.md` alone;
+      `npx prettier --check AUTHORING.md README.md` clean;
+      `sh scripts/verify.sh` green (AC 43's documents, under AC 46's
+      kind)._
+
+- [ ] **T1765** — The typo of `none`, looked at, and the rounds. Not an
+      implementation task: the orchestrator's record of the Phase 3f
+      pause, in the person's words, as T1760's. The questions, in plain
+      language: the line the build stops with — its words, and the two
+      ways past it; that `one`, `nine` and `nome` are refused until a
+      place file is written, and `noon` and `no` make a place as any
+      name does; whether `AUTHORING.md` says it as he would look for
+      it. Each round is one sub-lettered task here (`T1765a`, `b`, …):
+      the message's words, or a document's, the expectation and the
+      document updated in the same task; a round that wants what this
+      phase's intro sends to the person goes to him as a spec
+      amendment. When he names the keeps, they are recorded here, and
+      T1760 is checked with this task. _Verify: every sub-lettered task
+      green; the documents agree with what was kept (a `grep` of each,
+      listed); the Phase 3f record below filled in._
+
+### Phase 3f record (the person's walkthrough)
+
+_To be filled in at the Phase 3f look._
 
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — a photograph piece's page with his story (from the photographs folder, on the front door once he dates it), or a journal entry's page with his writing and his compare as he wrote it and then his photograph's page; on his photograph's page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
