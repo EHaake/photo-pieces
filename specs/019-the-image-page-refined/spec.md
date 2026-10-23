@@ -38,6 +38,11 @@ it — Goal 12 and the sections marked _(amended 2026-10-06, place)_ —
 re-planned as plan.md's "Amendment 5 (2026-10-06): a place made by
 naming it" and tasks.md's Phase 3e (T1754–T1760), signed off at the
 top tier 2026-10-07, before the real piece.
+**Amended a sixth time, 2026-10-22**, at the Phase 3e look, with that
+pause and the 3a, 3b and 3c pauses held open: a name one letter off
+`none` refused as a probable typo — the sections marked _(amended
+2026-10-22, none)_ — re-planned as plan.md's "Amendment 6
+(2026-10-22): a typo of none" and tasks.md's Phase 3f.
 **Depends on**: 004 (the image registry, the wall label from EXIF, the
 sidecar), 006 (the rich image page: the story, "How it was made", the
 compare against the camera's frame, the quiet view, the sets and
@@ -348,8 +353,9 @@ which photographs name no place at all.
     description, his cover and his writing. The build says which
     places it made this way and which photographs name no place at
     all, and refuses a new name one or two letters off an existing
-    place as a probable typo. Nothing is inferred: a place comes from
-    a name he wrote, never from camera metadata.
+    place — or one letter off `none`, the word for no place _(amended
+    2026-10-22, none)_ — as a probable typo. Nothing is inferred: a
+    place comes from a name he wrote, never from camera metadata.
     **How it serves the purpose** (`VISION.md`, and the constitution's
     test). A place is one of the ways onward from a photograph —
     "Pieces should lead into the next, always inviting the viewer to
@@ -989,6 +995,13 @@ output.
   place is never inferred from camera metadata, nor from the sidecar's
   free-text `place`, stands as written. The exact text is the
   planner's to draft from these sentences and the task's to write.
+- **The constitution, a sixth time** _(amended 2026-10-22, none)_, in
+  its own commit before the phase's first code: the same clause's
+  sentence on what the build refuses gains `none` — "a name that is
+  not a slug, or that is a near miss of another place's or of `none`"
+  — since `none` is not a place and the sentence as written would be
+  wrong about what the build rejects. Nothing else in the clause
+  changes.
 - **The near-miss guard** _(amended 2026-10-06, place)_. A name with
   no file that is one or two letters off another place's name — a
   declared place's, a draft place's, or another made place's — fails
@@ -1001,6 +1014,19 @@ output.
   typo. For a short name two letters is most of the word, so the
   allowance there is one; where short begins is the plan's to set, and
   both numbers are tunables.
+- **A typo of `none`** _(amended 2026-10-22, none)_. `none` is the
+  word for no place, typed on more sidecars than any place's name, and
+  the guard measures a name with no file against it as against a
+  place's name: one letter off `none` fails the build as a probable
+  typo of `none` — one letter, not two, because `none` is short and
+  two would start refusing real words. The message says `none` is the
+  word for no place and gives the two ways past it: write `at: none`,
+  or, if it really is a place, write the place's file — a name with a
+  file is never measured, so a real place a letter off `none` is its
+  file, written first, as any place that close to another is. A
+  draft's `at:` is measured as every `at:` is. Nothing else about the
+  guard changes: `none` itself is never a name, never a place, never
+  refused.
 - **What the build says** _(amended 2026-10-06, place)_. Two notes, in
   the summary `sh scripts/verify.sh` prints, neither ever failing the
   build. First, one line for each place the build made, with how many
@@ -1353,9 +1379,15 @@ _Amended 2026-10-06 (place):_
       — declared, draft or made — fails the build naming both files
       and both spellings and the two ways past it; a short name is
       refused at one letter only; two declared places that close build
-      as before; an `at:` value that is not a slug or `none` fails the
-      build naming the file and the value — pinned by the registry's
-      tests, each case able to fail for the reason its name gives
+      as before; a name with no file one letter off `none` fails the
+      build naming the file and the spelling, saying `none` is the
+      word for no place, and giving the two ways past it — `at: none`,
+      or the place's file — while `none` itself, a name with a file
+      one letter off it, and a name two letters off it build as before
+      _(amended 2026-10-22, none)_; an `at:` value that is not a slug
+      or `none` fails the build naming the file and the value — pinned
+      by the registry's tests, each case able to fail for the reason
+      its name gives
 - [ ] The build prints one line for each place it made, with its count
       of photographs and the file that would take it over, and the
       published photographs that name no place — a journal entry's as
@@ -1725,3 +1757,21 @@ _Amended 2026-10-06 (place):_
   constitution's rule, untouched. Folded in before his piece: he makes
   `falls-creek-falls` from the `place` template in the meantime, and
   that file simply stays the place's own once this lands.
+- **The sixth amendment (2026-10-22): a typo of `none`.** Put to him
+  at the Phase 3e look as the gap the fifth amendment left open on
+  purpose: `none` is the word for no place, so the guard never
+  measured a name against it, and `at: nnoe` quietly made a place
+  called "Nnoe". He asked first why typos are refused at all (a name
+  now makes a place, so a misspelt one would make a second place in
+  silence), then: "Ok, yes then" — the cost named, a real place a
+  letter off `none` (Nome) refused until its file is written. In the
+  spec session four points were put, each with a recommendation, and
+  he took them all ("yes to all"): the message's words — `is 1 letter
+  off none, the word for no place — a probable typo. Write at: none;
+  or, if it really is a place, add src/content/places/<name>.md`; one
+  letter only, since `none` is four characters and the short-name
+  rule already gives one, and two would refuse real words; a draft's
+  `at:` measured as every `at:` is; and the constitution's Places
+  clause gaining "or of `none`", riding the branch as the amendment's
+  first commit. Nothing else at the look changed — the Phase 3e record
+  in tasks.md has what was kept.
