@@ -1834,6 +1834,60 @@ describe("a place's name (T1755, spec 019)", () => {
   });
 });
 
+describe('a typo of none (T1762, spec 019)', () => {
+  const place = (slug) => ({ slug, file: `src/content/places/${slug}.md` });
+  const sidecar = (name, slug) => ({ file: `src/content/photographs/_${name}.md`, slug });
+
+  it("nearMissProblems: `nnoe`, an adjacent swap of `none`, with no file → the exact line, the spec's words", () => {
+    expect(lettersOff('nnoe', 'none')).toBe(1);
+    expect(nearMissProblems([sidecar('wide-3x2-01', 'nnoe')], [])).toEqual([
+      '[places] "nnoe" (src/content/photographs/_wide-3x2-01.md) is 1 letter off none, the word for no place — a probable typo. Write at: none; or, if it really is a place, add src/content/places/nnoe.md',
+    ]);
+  });
+
+  it('nearMissProblems: one letter off `none` by each kind of slip — one changed, one dropped, one added → a line each, sorted by name', () => {
+    expect(lettersOff('nome', 'none')).toBe(1);
+    expect(lettersOff('one', 'none')).toBe(1);
+    expect(lettersOff('nonne', 'none')).toBe(1);
+    expect(
+      nearMissProblems([sidecar('a', 'one'), sidecar('b', 'nonne'), sidecar('c', 'nome')], []),
+    ).toEqual([
+      '[places] "nome" (src/content/photographs/_c.md) is 1 letter off none, the word for no place — a probable typo. Write at: none; or, if it really is a place, add src/content/places/nome.md',
+      '[places] "nonne" (src/content/photographs/_b.md) is 1 letter off none, the word for no place — a probable typo. Write at: none; or, if it really is a place, add src/content/places/nonne.md',
+      '[places] "one" (src/content/photographs/_a.md) is 1 letter off none, the word for no place — a probable typo. Write at: none; or, if it really is a place, add src/content/places/one.md',
+    ]);
+  });
+
+  it('nearMissProblems: two letters off `none` → none, at four characters (`noon`) and at six (`nonage`, short by PLACE_SHORT_NAME)', () => {
+    expect(lettersOff('noon', 'none')).toBe(2);
+    expect(lettersOff('nonage', 'none')).toBe(2);
+    expect(nearMissProblems([sidecar('a', 'noon')], [])).toEqual([]);
+    expect(nearMissProblems([sidecar('a', 'nonage')], [])).toEqual([]);
+  });
+
+  it('nearMissProblems: a name with a file one letter off `none` → none, the file a draft or not', () => {
+    expect(nearMissProblems([sidecar('a', 'nome')], [place('nome')])).toEqual([]);
+    expect(nearMissProblems([sidecar('a', 'nome')], [{ ...place('nome'), draft: true }])).toEqual(
+      [],
+    );
+  });
+
+  it('nearMissProblems: one letter off `none`, written by three files → names the first and "and 2 more"', () => {
+    expect(
+      nearMissProblems([sidecar('a', 'nnoe'), sidecar('b', 'nnoe'), sidecar('c', 'nnoe')], []),
+    ).toEqual([
+      '[places] "nnoe" (src/content/photographs/_a.md and 2 more) is 1 letter off none, the word for no place — a probable typo. Write at: none; or, if it really is a place, add src/content/places/nnoe.md',
+    ]);
+  });
+
+  it("nearMissProblems: a near miss of a place and of `none` → both lines, the place's first by the second name", () => {
+    expect(nearMissProblems([sidecar('a', 'nome')], [place('home')])).toEqual([
+      '[places] "nome" (src/content/photographs/_a.md) is 1 letter off the place "home" (src/content/places/home.md) — a probable typo. Correct the spelling; or, if they really are two places, add src/content/places/nome.md',
+      '[places] "nome" (src/content/photographs/_a.md) is 1 letter off none, the word for no place — a probable typo. Write at: none; or, if it really is a place, add src/content/places/nome.md',
+    ]);
+  });
+});
+
 describe('what the build says (T1757, spec 019)', () => {
   const HOW_IN_FOLDER = '(at: <slug> in a sidecar names one; at: none says none on purpose)';
   const HOW_IN_ENTRY =

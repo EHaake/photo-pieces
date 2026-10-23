@@ -1312,11 +1312,13 @@ const byCodeUnit = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
  * The names with no file are the distinct slugs of `refs` that are not
  * blank, not `none` and not declared; each is measured against every
  * declared slug and against every other name with no file, once per
- * pair. A pair is refused within `PLACE_NEAR_MISS` letters —
- * `PLACE_NEAR_MISS_SHORT` when the longer of the two names has
- * `PLACE_SHORT_NAME` characters or fewer. Two declared slugs are never
- * measured against each other. Returns one message per pair, pairs
- * sorted by name, empty when there are none.
+ * pair, and against `none` itself — the word for no place, so a name
+ * near it is a probable typo of it (amendment 6). A pair is refused
+ * within `PLACE_NEAR_MISS` letters — `PLACE_NEAR_MISS_SHORT` when the
+ * longer of the two names has `PLACE_SHORT_NAME` characters or fewer.
+ * Two declared slugs are never measured against each other. Returns
+ * one message per pair, pairs sorted by name, empty when there are
+ * none.
  */
 export function nearMissProblems(refs, declared) {
   const placeFiles = new Map(declared.map(({ slug, file }) => [slug, file]));
@@ -1349,6 +1351,14 @@ export function nearMissProblems(refs, declared) {
         first: name,
         second: place,
         message: `[places] ${written(name)} is ${off} the place "${place}" (${file}) — a probable typo. ${ways} ${toAdd(name)}`,
+      });
+    }
+    const noneOff = near(name, PLACE_NONE);
+    if (noneOff !== null) {
+      pairs.push({
+        first: name,
+        second: PLACE_NONE,
+        message: `[places] ${written(name)} is ${noneOff} ${PLACE_NONE}, the word for no place — a probable typo. Write at: ${PLACE_NONE}; or, if it really is a place, add ${toAdd(name)}`,
       });
     }
     for (const other of names.slice(index + 1)) {

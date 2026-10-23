@@ -2689,7 +2689,7 @@ the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
       commit's hash recorded here, before T1762's._
       Done: committed alone as `da5f38c`, before T1762's. `git diff -U0 CLAUDE.md` → lines 123–124 out and in (line 122, context in the plan's from/to, unchanged); the new phrase counts 1 and sits whole on one line; the three standing phrases 1 each; prettier clean; `git status --short` → `CLAUDE.md` and the stray package-lock; verify.sh green (89 pages, 899 tests).
 
-- [ ] **T1762** — The guard measures `none`. Pattern: the measure
+- [x] **T1762** — The guard measures `none`. Pattern: the measure
       against the place files inside `nearMissProblems`
       (`src/lib/image-meta.mjs` 1345–1353) and the `nearMissProblems`
       cases in image-meta.test.mjs's "a place's name (T1755, spec 019)"
@@ -2714,6 +2714,7 @@ the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
       showing comment lines only; the `nnoe` line as the test expects
       it pasted, for the orchestrator to set beside the plan's (AC 43's
       `none` clause)._
+      Done: the one measure and its JSDoc sentence; the `images.ts` comment only; a describe "a typo of none (T1762, spec 019)" of six cases (the helpers redefined in it — T1755's are scoped to its own describe — the existing cases unchanged). verify.sh green: 89 pages, 905 tests (899 + 6, none removed). Mutations fail by name: measure removed → 4 (`nnoe`, three slips, three writers, place-and-`none`); fixed `PLACE_NEAR_MISS` → the two-letters case, and T1755's short-pair case too (`dome` is 2 off `none`); names with files measured → the name-with-a-file case; the `writers` skip dropped → T1755's "never measured". The `nnoe` line matches the plan's quotation character for character.
 
 - [ ] **T1763** — The refusal in a real build. Not a code change.
       Pattern: T1758's one-time builds (each edit reverted before the
@@ -3179,6 +3180,7 @@ tier if it is ever on (it is off). -->
 | Amendment 6 sign-off notes (planner resumed) | implementation (`opus`, high) | ~12k | S1–S6 taken, none declined; S7 to the sweep |
 | Phase 3f implementation session (2026-10-22) | session on `claude-opus-5-5`, medium (opened on Opus, not the session tier's Fable; asked, the person said stay on Opus) | — | orchestration from T1761 |
 | T1761 constitution, a sixth time | implementation (`opus`, high) | ~24k | done; committed alone `da5f38c` |
+| T1762 the guard measures `none` | implementation (`opus`, high) | ~62k | done; 905 tests; the fixed-allowance mutation also trips T1755's `dome`/`cove` case — a second pin, not a regression |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**

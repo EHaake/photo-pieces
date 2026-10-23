@@ -523,8 +523,8 @@ async function buildRegistry(): Promise<ImageRegistry> {
   // place file: a name with no file makes the place. It must be a name —
   // the shape, thrown first, since a value that is not a name is not
   // measured — and, with no file, not a near miss of another place's
-  // name, measured against every place file, draft or not. Each all at
-  // once.
+  // name or of `none`, measured against every place file, draft or
+  // not. Each all at once.
   const refs = [
     ...pieces.map((piece) => ({
       file: piece.filePath ?? piece.id,
