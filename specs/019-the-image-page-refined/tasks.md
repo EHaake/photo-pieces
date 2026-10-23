@@ -2669,7 +2669,7 @@ moved, a name with a file measured, or `none` itself treated as a name
 goes to the person as a spec amendment. The pause after this phase is
 the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
 
-- [ ] **T1761** — The constitution, a sixth time. Not code; its own
+- [x] **T1761** — The constitution, a sixth time. Not code; its own
       commit, before T1762. Pattern: T1754 (the constitution, a fifth
       time). Plan: "Shape of the change (amendment 6)", its first
       bullet. `CLAUDE.md` only: the Content model clause's lines
@@ -2687,6 +2687,7 @@ the Phase 3f look; T1760 closes with it. Task ids continue from T1760.
       `grep -c "never inferred from camera metadata" CLAUDE.md` → 1
       each, as before; `npx prettier --check CLAUDE.md` clean; the
       commit's hash recorded here, before T1762's._
+      Done: committed alone as `da5f38c`, before T1762's. `git diff -U0 CLAUDE.md` → lines 123–124 out and in (line 122, context in the plan's from/to, unchanged); the new phrase counts 1 and sits whole on one line; the three standing phrases 1 each; prettier clean; `git status --short` → `CLAUDE.md` and the stray package-lock; verify.sh green (89 pages, 899 tests).
 
 - [ ] **T1762** — The guard measures `none`. Pattern: the measure
       against the place files inside `nearMissProblems`
@@ -3176,6 +3177,8 @@ tier if it is ever on (it is off). -->
 | Amendment 6 planning (2026-10-22) | implementation (`opus`, high, no override) | ~105k | drafted plan.md's Amendment 6 and Phase 3f (T1761–T1765; none per-task); no product question; design choice: no special case and no new tunable — a name within two letters of `none` is short by the existing rule, so one letter falls out; the envelope's two pins (`noon`, `nonage`) make a tuning round surface `none` rather than move it |
 | Amendment 6 sign-off | top (`fable`, high, override) | ~40k | signed off, nothing blocking; S1 the second-name sort stated as a guarantee; S2 bare `git diff --stat` cannot show the task's files alone (the stray package-lock); S3 the fourth mutation exercises no new line; S4 T1763(f)'s made-note line outside the Verify's path; S5 the three-slips case's reasoning unstated; S6 the AUTHORING grep count's constraint unstated; S7 draft and journal `at:` reaching the guard still has no unit test (carried, as at Amendment 5); opened `src/content.config.ts` 159–171 |
 | Amendment 6 sign-off notes (planner resumed) | implementation (`opus`, high) | ~12k | S1–S6 taken, none declined; S7 to the sweep |
+| Phase 3f implementation session (2026-10-22) | session on `claude-opus-5-5`, medium (opened on Opus, not the session tier's Fable; asked, the person said stay on Opus) | — | orchestration from T1761 |
+| T1761 constitution, a sixth time | implementation (`opus`, high) | ~24k | done; committed alone `da5f38c` |
 _(Session-tier allowance draw noted at each pause.)_ Phase 3c pause reached 2026-09-29 (ten implementer dispatches, one per-task review, one phase review, no re-review needed). Phase 3b pause reached 2026-09-27 (five implementer dispatches, one fix-now, one per-task review, one phase review with re-review). Phase 3a pause reached 2026-09-26; the session tier's draw for T1719–T1728a plus D1723 and the two reviews: eleven implementer dispatches, one decision review, one per-task review, one phase review with re-review.
 
 **Open non-blocking notes carried to the pre-merge sweep:**
