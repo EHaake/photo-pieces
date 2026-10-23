@@ -2634,7 +2634,22 @@ list). Task ids continue from T1753.
 
 ### Phase 3e record (the person's walkthrough)
 
-_Filled in at the pause._
+Reached 2026-10-07; his look 2026-10-22 ("Everything is good"). No
+rounds. Kept as built: the made page's line of counts under its title
+("Yes" — asked first whether "2026" meant the wall is split by year; it
+is not: the wall is one scroll, oldest first, and the year is the span
+of the visits); "Top of the World" and the small words; the card among
+the other places, unmarked; the label's link and the arrows; the two
+notes' words, and the photographs folder's as one line of names; the
+guard's one letter at six characters or fewer and two above; the
+`place` template starting `draft: true` ("That's fine");
+`AUTHORING.md`'s "Places" ("All yes").
+
+One change, and it is a spec amendment, not a round: a name one letter
+off `none` is to be refused as a probable typo ("Ok, yes then", after
+asking why typos are refused at all). Brief for the spec session:
+`amendment-6-brief.md`. T1760 stays open until that amendment's phase
+is built and looked at.
 
 ## Phase 4 — The first real piece (reviewer after the phase; walkthrough: the photographer's own piece, on both screens with a mouse and a trackpad, and on a phone — a photograph piece's page with his story (from the photographs folder, on the front door once he dates it), or a journal entry's page with his writing and his compare as he wrote it and then his photograph's page; on his photograph's page: the wall label's camera and lens by the names he knows, "Raw to finished" with his camera's frame, his stages and the finished photograph in each of the three ways, the story's own compare instead if he wrote one there; the quiet view's loupe on his larger export, to full detail and around it; every tuning question from the two earlier looks open again here, now on a real photograph; as many rounds as it takes, each a sub-lettered task under T1717)
 
